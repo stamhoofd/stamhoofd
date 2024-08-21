@@ -1,7 +1,7 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
 import { LimitedFilteredRequest } from "@stamhoofd/structures";
-import { FetchAllOptions, ObjectFetcher } from ".";
+import { fetchAll, ObjectFetcher } from ".";
 import { Toast } from "../../..";
 
 export interface TableActionSelection<T extends {id: string}> {
@@ -130,41 +130,8 @@ export class InMemoryTableAction<T extends {id: string}> extends TableAction<T> 
     }
 
     async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions) {
-        // todo: check if we have all or nearly all already.
-        let next: LimitedFilteredRequest|null = initialRequest
-
-        let totalFilteredCount: number | null = null;
-        if (options?.onProgress) {
-            totalFilteredCount = await objectFetcher.fetchCount(initialRequest)
-        }
-
-        const results: T[] = []
-
-        while (next) {
-            // Override filter
-            // Because the filter could have been changed by the object fetcher, and we don't want to reapply any custom filters
-            // on the already custom filter that we got from the server
-            next.filter = initialRequest.filter;
-
-            // Same for sorting
-            next.sort = [];
-            
-            const data = await objectFetcher.fetch(next)
-            next = data.next ?? null;
-            results.push(...data.results)
-
-            if (data.results.length === 0) {
-                next = null;
-            }
-
-            if (options?.onProgress) {
-                options.onProgress(results.length, totalFilteredCount ?? results.length)
-            }
-        }
-
-        return results;
+        return await fetchAll(initialRequest, objectFetcher, options)
     }
-
 
     async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions) {
         if (selection.cachedAllValues) {

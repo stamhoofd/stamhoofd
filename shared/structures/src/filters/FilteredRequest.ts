@@ -1,15 +1,19 @@
-import { AutoEncoder, Data, Decoder, Encodeable, EncodeContext, field,IntegerDecoder, PlainObject, StringDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, Data, DateDecoder, Decoder, Encodeable, EncodeContext, field, IntegerDecoder, PlainObject, StringDecoder } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 
-import { encodeSortList,SortList, SortListDecoder } from "./SortList";
-import { StamhoofdFilter } from "./StamhoofdFilter";
+import { encodeSortList, SortList, SortListDecoder } from "./SortList";
+import { StamhoofdCompareValue, StamhoofdFilter } from "./StamhoofdFilter";
 
 export class StamhoofdFilterJSONDecoder {
+    static encode(context: EncodeContext, filter: StamhoofdFilter): string {
+        return JSON.stringify(StamhoofdFilterDecoder.encode(context, filter));
+    }
+
     static decode(data: Data): StamhoofdFilter {
         const str = data.string;
         try {
             const decoded = JSON.parse(str);
-            return decoded;
+            return StamhoofdFilterDecoder.decode(data.clone({data: decoded, field: data.currentField, context: data.context}));
         } catch (e) {
             throw new SimpleError({
                 code: "invalid_field",
@@ -21,15 +25,82 @@ export class StamhoofdFilterJSONDecoder {
 }
 
 export class StamhoofdFilterDecoder {
+    static encode(context: EncodeContext, filter: StamhoofdFilter<StamhoofdCompareValue>): PlainObject {
+        // We need to convert all Date objects to something recornizable so we can decode them as Dates too
+        // We'll use magic objects for this: { $: '$date', value: unixtimeinms }
+        if (filter instanceof Date) {
+            return { $: '$date', value: filter.encode(context) };
+        }
+
+        if (filter === null) {
+            return null;
+        }
+
+        if (Array.isArray(filter)) {
+            return filter.map(f => this.encode(context, f));
+        }
+
+        if (typeof filter === 'object') {
+            // Loop and replace all keys
+            const c = {} as Record<string, PlainObject>;
+            for (const [key, value] of Object.entries(filter)) {
+                c[key] = this.encode(context, value);
+            }
+            return c;
+        }
+
+        return filter;
+    }
+
     static decode(data: Data): StamhoofdFilter {
-        if (typeof data.value === 'object' && data.value !== null) {
-            return data.value as StamhoofdFilter;
+        const value = data.value;
+
+        if (value === null) {
+            return null;
+        }
+
+        if (Array.isArray(value)) {
+            return value.map((v, index) => this.decode(
+                data.clone({
+                    data: v, 
+                    field: data.addToCurrentField(index), 
+                    context: data.context
+                })
+            ));
+        }
+
+        if (typeof value === 'object') {
+            // Check if it's a date
+            if (value.$ === '$date') {
+                return DateDecoder.decode(
+                    data.clone({
+                        data: value.value, 
+                        field: data.addToCurrentField('value'), 
+                        context: data.context
+                    })
+                );
+            }
+
+            // Loop and replace all keys
+            const c = {} as Record<string, StamhoofdFilter>;
+            for (const [key, v] of Object.entries(value)) {
+                c[key] = this.decode(data.clone({
+                    data: v, 
+                    field: data.addToCurrentField(key), 
+                    context: data.context
+                }));
+            }
+            return c;
+        }
+
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+            return value;
         }
         
         throw new SimpleError({
             code: "invalid_field",
-            message: `Expected filter object at ${data.currentField}`,
-            field: data.currentField,
+            message: `Invalid filter at ${data.currentField}`,
+            field: data.currentField
         });
     }
 }
@@ -98,8 +169,8 @@ export class LimitedFilteredRequest implements Encodeable {
 
     encode(context: EncodeContext): PlainObject {
         return {
-            filter: this.filter ? JSON.stringify(this.filter) : undefined,
-            pageFilter: this.pageFilter ? JSON.stringify(this.pageFilter) : undefined,
+            filter: this.filter ? StamhoofdFilterJSONDecoder.encode(context, this.filter) : undefined,
+            pageFilter: this.pageFilter ? StamhoofdFilterJSONDecoder.encode(context, this.pageFilter) : undefined,
             sort: encodeSortList(this.sort),
             limit: this.limit,
             search: this.search ?? undefined

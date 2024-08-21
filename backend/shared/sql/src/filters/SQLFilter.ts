@@ -1,5 +1,5 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { StamhoofdFilter } from "@stamhoofd/structures";
+import { StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
 import { SQL } from "../SQL";
 import { SQLExpression } from "../SQLExpression";
 import { SQLArray, SQLCast, SQLColumnExpression, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from "../SQLExpressions";
@@ -25,17 +25,72 @@ export function notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilter
     return new SQLWhereNot(andRunner)
 }
 
+function guardFilterCompareValue(val: any): StamhoofdCompareValue {
+    if (val instanceof Date) {
+        return val
+    }
+
+    if (typeof val === 'string') {
+        return val
+    }
+
+    if (typeof val === 'number') {
+        return val
+    }
+
+    if (typeof val === 'boolean') {
+        return val;
+    }
+
+    if (val === null) {
+        return null;
+    }
+
+    if (typeof val === 'object' && "$" in val) {
+        if (val["$"] === '$now') {
+            return val;
+        }
+    }
+
+    throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.')
+}
+
+function doNormalizeValue(val: StamhoofdCompareValue): string|number|Date|null {
+    if (val instanceof Date) {
+        return val
+    }
+
+    if (typeof val === 'string') {
+        return val.toLocaleLowerCase()
+    }
+
+    if (typeof val === 'boolean') {
+        return val === true ? 1 : 0;
+    }
+
+    if (val === null) {
+        return null;
+    }
+
+    if (typeof val === 'object' && "$" in val) {
+        const specialValue = val["$"];
+
+        switch (specialValue) {
+            case '$now':
+                return doNormalizeValue(new Date())
+            default:
+                throw new Error('Unsupported magic value ' + specialValue)
+        }
+    }
+
+    return val;
+}
+
 function guardScalar(s: any): asserts s is SQLScalarValue|null  {
     if (typeof s !== 'string' && typeof s !== 'number' && typeof s !== 'boolean' && !(s instanceof Date) && s !== null) {
         throw new Error('Invalid scalar value')
     }
 
-}
-
-function guardNotNullScalar(s: any): asserts s is SQLScalarValue  {
-    if (typeof s !== 'string' && typeof s !== 'number' && typeof s !== 'boolean' && !(s instanceof Date)) {
-        throw new Error('Invalid scalar value')
-    }
 }
 
 function guardString(s: any): asserts s is string  {
@@ -68,7 +123,11 @@ export function createSQLFilterNamespace(definitions: SQLFilterDefinitions): SQL
 type SQLExpressionFilterOptions = {normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null, isJSONValue?: boolean, isJSONObject?: boolean, nullable?: boolean}
 
 export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, {normalizeValue, isJSONObject = false, isJSONValue = false, nullable = false}: SQLExpressionFilterOptions = {}): SQLFilterCompiler {
-    const norm = normalizeValue ?? ((v) => v);
+    normalizeValue = normalizeValue ?? ((v) => v);
+    const norm = (val: any) => {
+        const n = doNormalizeValue(guardFilterCompareValue(val));
+        return normalizeValue(n);
+    }
     const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression
 
     return (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => {
@@ -83,11 +142,9 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         }
 
         
-        const f = filter as any;
+        const f = filter;
 
         if ('$eq' in f) {
-            guardScalar(f.$eq);
-
             if (isJSONObject) {
                 const v = norm(f.$eq);
 
@@ -153,14 +210,12 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                     new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLArray(remaining))
                 ]);
             }
-            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLArray(v));
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLArray(v as SQLScalarValue[]));
         }
 
         if ('$neq' in f) {
-            guardScalar(f.$neq);
-
             if (isJSONObject) {
-                const v = norm(f.$eq);
+                const v = norm(f.$neq);
 
                 return new SQLWhereNot(
                     new SQLJsonContains(
@@ -173,8 +228,6 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         }
 
         if ('$gt' in f) {
-            guardScalar(f.$gt);
-
             if (isJSONObject) {
                 throw new Error('Greater than is not supported in this place')
             }
@@ -189,8 +242,6 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         }
 
         if ('$gte' in f) {
-            guardScalar(f.$gte);
-
             if (isJSONObject) {
                 throw new Error('Greater than is not supported in this place')
             }
@@ -203,8 +254,6 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         }
 
         if ('$lte' in f) {
-            guardScalar(f.$lte);
-
             if (isJSONObject) {
                 throw new Error('Greater than is not supported in this place')
             }
@@ -229,8 +278,6 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
 
 
         if ('$lt' in f) {
-            guardScalar(f.$lt);
-
             if (isJSONObject) {
                 throw new Error('Less than is not supported in this place')
             }
@@ -254,7 +301,11 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         }
 
         if ('$contains' in f) {
-            guardString(f.$contains);
+            const needle = norm(f.$contains);
+
+            if (typeof needle !== 'string') {
+                throw new Error('Invalid needle for contains filter')
+            }
 
             if (isJSONObject) {
                 return new SQLWhereEqual(
@@ -262,7 +313,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                         sqlExpression, 
                         'one',
                         convertToExpression(
-                            '%'+SQLWhereLike.escape(f.$contains)+'%'
+                            '%'+SQLWhereLike.escape(needle)+'%'
                         )
                     ), 
                     SQLWhereSign.NotEqual, 
@@ -275,7 +326,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 return new SQLWhereLike(
                     new SQLCast(new SQLJsonUnquote(sqlExpression), 'CHAR'), 
                     convertToExpression(
-                        '%'+SQLWhereLike.escape(f.$contains)+'%'
+                        '%'+SQLWhereLike.escape(needle)+'%'
                     )
                 );
             }
@@ -283,7 +334,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             return new SQLWhereLike(
                 sqlExpression, 
                 convertToExpression(
-                    '%'+SQLWhereLike.escape(f.$contains)+'%'
+                    '%'+SQLWhereLike.escape(needle)+'%'
                 )
             );
         }

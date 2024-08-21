@@ -6,9 +6,7 @@
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
-                <div class="style-bubble current-color" v-if="item.enabledCount > 0">
-                    <span>{{ item.enabledCount }}</span>
-                </div>
+                <span class="icon disabled small" v-if="item.enabledCount === 0" v-tooltip="'Dit werkblad wordt niet mee geëxporteerd'" />
             </template>
         </ScrollableSegmentedControl>
 

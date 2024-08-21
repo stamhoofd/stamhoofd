@@ -175,6 +175,12 @@ function guardFilterCompareValue(val: any): StamhoofdCompareValue {
         return null;
     }
 
+    if (typeof val === 'object' && "$" in val) {
+        if (val["$"] === '$now') {
+            return val;
+        }
+    }
+
     throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.')
 }
 
@@ -193,6 +199,17 @@ function normalizeValue(val: StamhoofdCompareValue): string|number|null {
 
     if (val === null) {
         return null;
+    }
+
+    if (typeof val === 'object' && "$" in val) {
+        const specialValue = val["$"];
+
+        switch (specialValue) {
+            case '$now':
+                return normalizeValue(new Date())
+            default:
+                throw new Error('Unsupported magic value ' + specialValue)
+        }
     }
 
     return val;

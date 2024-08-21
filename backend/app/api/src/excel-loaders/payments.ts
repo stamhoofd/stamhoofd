@@ -1,4 +1,4 @@
-import { XlsxBuiltInNumberFormat, XlsxTransformerColumn } from "@stamhoofd/excel-writer";
+import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from "@stamhoofd/excel-writer";
 import { StripeAccount as StripeAccountStruct, BalanceItemPaymentDetailed, BalanceItemRelationType, CountryHelper, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, PaginatedResponse, PaymentProvider } from "@stamhoofd/structures";
 import { ExportToExcelEndpoint } from "../endpoints/global/files/ExportToExcelEndpoint";
 import { GetPaymentsEndpoint } from "../endpoints/organization/dashboard/payments/GetPaymentsEndpoint";
@@ -52,12 +52,44 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
         {
             id: 'balanceItemPayments',
             name: 'Betaallijnen',
-            transform: (data: PaymentGeneral) => data.balanceItemPayments.map(p => ({
+            transform: (data: PaymentGeneral): PaymentWithItem[] => data.balanceItemPayments.map(p => ({
                 payment: data,
                 balanceItemPayment: p
             })),
             columns: [
-                ...getBalanceItemColumns()
+                ...getBalanceItemColumns(),
+
+                // Repeating columns need to de-transform again
+                ...[
+                    ...getGeneralColumns(),
+                    ...getInvoiceColumns(),
+                ].map(c => {
+                    if ('match' in c) {
+                        return {
+                            ...c,
+                            match: (id: string) => {
+                                const result = c.match(id)
+                                if (!result) {
+                                    return result;
+                                }
+
+                                return result.map(cc => ({
+                                    ...cc,
+                                    getValue: (object: PaymentWithItem) => {
+                                        return cc.getValue(object.payment)
+                                    },
+                                }))
+                            },
+                        }
+                    }
+
+                    return {
+                        ...c,
+                        getValue: (object: PaymentWithItem) => {
+                            return c.getValue(object.payment)
+                        },
+                    }
+                })
             ]
         }
     ]
@@ -164,7 +196,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
 }
 
 
-function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
+function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
     return [
         {
             id: 'id',

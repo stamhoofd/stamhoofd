@@ -99,7 +99,22 @@ $checkbox-border-radius: 5px;
                 stroke: $color-background;
                 transition: stroke-dashoffset 0.4s 0.1s;
             }
+           
+            ~ div {
+                margin-left: 15px;
+                
+                @extend .style-title-list;
 
+                &:empty {
+                    margin: 0;
+                    min-height: auto;
+                }
+            }
+        }
+    }
+
+    > input[type="checkbox"] + div {
+        > div:first-child {
             &:after {
                 // For indeterminate state
                 content: "";
@@ -113,17 +128,6 @@ $checkbox-border-radius: 5px;
                 background: $color-background;
                 border-radius: 2px;
                 transition: opacity 0.2s 0s;
-            }
-
-            ~ div {
-                margin-left: 15px;
-                
-                @extend .style-title-list;
-
-                &:empty {
-                    margin: 0;
-                    min-height: auto;
-                }
             }
         }
     }
@@ -155,7 +159,7 @@ $checkbox-border-radius: 5px;
         }
     }
 
-    > input:indeterminate + div {
+    > input[type="checkbox"]:indeterminate + div {
         > div:first-child {
             border: $border-width solid $color-primary;
             background: $color-primary;
