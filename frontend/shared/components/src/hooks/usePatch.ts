@@ -7,7 +7,8 @@ export function usePatch<T extends AutoEncoder>(obj: T|Ref<T>): {
     patched: Ref<T>, 
     patch: Ref<AutoEncoderPatchType<T>>,
     addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void,
-    hasChanges: Ref<boolean>
+    hasChanges: Ref<boolean>,
+    reset: () => void
 } {
     const initialValue = unref(obj)
     if (!initialValue) {
@@ -15,11 +16,13 @@ export function usePatch<T extends AutoEncoder>(obj: T|Ref<T>): {
     }
     const patch = ref("id" in initialValue ? initialValue.static.patch({id: initialValue.id}) : initialValue.static.patch({})) as Ref<AutoEncoderPatchType<T>>;
 
+    const createPatch = () => {
+        const iv = unref(obj)
+        return ("id" in iv ? iv.static.patch({id: iv.id}) : iv.static.patch({})) as AutoEncoderPatchType<T>;
+    }
+
     return {
-        createPatch: () => {
-            const iv = unref(obj)
-            return ("id" in iv ? iv.static.patch({id: iv.id}) : iv.static.patch({})) as AutoEncoderPatchType<T>;
-        },
+        createPatch,
         patch,
         patched: computed(() => {
             return unref(obj).patch(patch.value)
@@ -29,6 +32,9 @@ export function usePatch<T extends AutoEncoder>(obj: T|Ref<T>): {
         },
         hasChanges: computed(() => {
             return patchContainsChanges(patch.value as PatchType<T>, unref(obj), { version: Version })
-        })
+        }),
+        reset: () => {
+            patch.value = createPatch()
+        }
     }
 }

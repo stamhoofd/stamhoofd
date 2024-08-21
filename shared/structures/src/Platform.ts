@@ -260,6 +260,12 @@ export class Platform extends AutoEncoder {
     period: RegistrationPeriod = RegistrationPeriod.create({})
 
     /**
+     * The organization that represents the platform for collection of platform memberships payments
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    membershipOrganizationId: string|null = null
+
+    /**
      * Keep admins accessible and in memory
      */
     admins?:  UserWithMembers[]|null
