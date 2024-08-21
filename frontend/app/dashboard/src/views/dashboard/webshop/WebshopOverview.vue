@@ -130,7 +130,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)" v-if="getFeatureFlag('webshop-discounts')">
+                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/discount.svg">
                         <h2 class="style-title-list">
                             Kortingen

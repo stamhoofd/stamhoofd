@@ -60,13 +60,6 @@
             Hou er rekening mee dat de tarieven van Mollie hoger liggen dan degene die Stamhoofd bij Stripe aanbiedt. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
         </p>
 
-        <Checkbox :checked="getFeatureFlag('webshop-discounts')" @change="setFeatureFlag('webshop-discounts', !!$event)">
-            Kortingen en kortingscodes in webshops
-        </Checkbox>
-        <p class="style-description-small">
-            Volg de ontwikkeling van kortingen op webshops via <a href="https://feedback.stamhoofd.app/48" class="inline-link" target="_blank">de feedback tool</a>
-        </p>
-
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr>
             <h2>
