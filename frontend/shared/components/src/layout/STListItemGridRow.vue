@@ -13,7 +13,12 @@
 
 <script lang="ts" setup>
 
-defineProps<{label?: string, value?: string, labelClass?: string, valueClass?: string}>();
+defineProps<{
+    label?: string,
+    value?: string,
+    labelClass?: string,
+    valueClass?: string
+}>();
 </script>
 
 <style lang="scss" scoped>

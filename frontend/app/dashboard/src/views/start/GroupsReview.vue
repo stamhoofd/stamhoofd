@@ -10,7 +10,7 @@
             Alle leeftijdstGroepen zijn gesloten.
         </p>
 
-        <div v-for="category in tree.categories" :key="category.id" class="container">
+        <div v-for="category in tree.categories" :key="category.id">
             <hr>
             <h2>{{ category.settings.name }}</h2>
             <STList class="info">

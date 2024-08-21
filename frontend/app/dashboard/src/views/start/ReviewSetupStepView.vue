@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" save-text="Stap voltooien" save-icon="success" @save="markReviewed">
-        <slot/>
+        <slot />
     </SaveView>
 </template>
 
@@ -15,7 +15,7 @@ const pop = usePop();
 
 async function markReviewed () {
     const isSuccess =  await review.markReviewed(props.type);
-    if(isSuccess) {
+    if (isSuccess) {
         await pop();
     }
 }

@@ -45,7 +45,7 @@ const $saving = ref(false);
 
 enum Routes {
     Premises = 'gebouwen',
-    Groups = 'leeftijdstGroepen'
+    Groups = 'leeftijds-groepen'
 }
 
 defineRoutes([

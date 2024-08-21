@@ -5,7 +5,6 @@ import {
     OrganizationRegistrationPeriod,
     SetupStepType,
 } from "@stamhoofd/structures";
-import { readonly } from "vue";
 
 export function useReview() {
     const organizationManager = useOrganizationManager();
@@ -50,7 +49,7 @@ export function useReview() {
     };
 
     return {
-        markReviewed: readonly(markReviewed),
-        updateReviewedAt: readonly(updateReviewedAt)
+        markReviewed,
+        updateReviewedAt
     }
 }
