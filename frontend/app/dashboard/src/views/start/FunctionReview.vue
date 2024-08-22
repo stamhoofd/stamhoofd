@@ -1,95 +1,81 @@
 <template>
     <STListItem>
-        <h3 class="style-title-list">
-            {{ responsibility.name }}
-        </h3>
-        <p class="style-description-small">
-            {{ memberNames }}
-        </p>
+        <div v-if="data.responsibility.defaultAgeGroupIds">
+            <h3 class="style-title-list">
+                {{ name }} per standaard leeftijdsgroep
+            </h3>
+            <p class="style-description-small">
+                Enkele de standaard leeftijdsgroepen die gekoppeld zijn aan deze functie worden weergegeven.
+            </p>
+
+            <STListItemGrid>
+                <STListItemGridRow v-for="group of getGroups()" :key="group.id" :label="group.settings.name" :value="getMembersForGroup(group)" />
+            </STListItemGrid>
+        </div>
+        <div v-else>
+            <h3 class="style-title-list">
+                {{ name }}
+            </h3>
+            <p class="style-description-small">
+                {{ membersToString(data.membersWithGroups.map(x => x.platformMember)) }}
+            </p>
+        </div>
     </STListItem>
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
-import { useContext, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useRequestOwner } from '@stamhoofd/networking';
-import { LimitedFilteredRequest, MemberResponsibility, MembersBlob, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SortItemDirection } from '@stamhoofd/structures';
-import { computed, Ref, ref, watch } from 'vue';
+import { STListItemGrid, STListItemGridRow } from '@stamhoofd/components';
+import { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-const props = defineProps<{responsibility: MemberResponsibility}>();
-const context = useContext();
-const owner = useRequestOwner();
-const $platform = usePlatform();
-const $organization = useOrganization();
+const props = defineProps<{data: {responsibility: MemberResponsibility, allGroups: Group[], membersWithGroups: {platformMember: PlatformMember, groups?: (Group | null)[]}[]}}>();
 
-const $members = ref(null) as Ref<PlatformMember[] | null>;
+const name = computed(() => props.data.responsibility.name);
 
-const memberNames = computed(() => {
-    if (!$members.value?.length) return 'Geen';
+function getGroups(): Group[] {
+    const defaultAgeGroupIds = props.data.responsibility.defaultAgeGroupIds;
+    if (!defaultAgeGroupIds) return [];
 
-    return $members.value.map(m => {
-        const member = m.member;
-        return member.name;
-    }).join(', ')
-});
+    const allGroups = props.data.allGroups;
 
-watch(() => props.responsibility, async (responsibility) => {
+    const groups = defaultAgeGroupIds
+        .flatMap(id => allGroups
+            .filter(g => g.defaultAgeGroupId === id)
+        )
+        .filter(g => !!g)
+        .sort((a, b) => {
+            const minA = a.settings.minAge === null ? 999 : a.settings.minAge;
+            const minB = b.settings.minAge === null ? 999 : b.settings.minAge;
 
-    const organization = $organization.value;
-
-    if(!organization) return;
-
-    responsibility.clone();
-
-    const query = new LimitedFilteredRequest({
-        filter: {
-            responsibilities: {
-                $elemMatch: {
-                    organizationId: organization.id,
-                    responsibilityId: responsibility.id,
-                    $and: [
-                        {
-                            $or: [{
-                                endDate: {
-                                    $gt: { $: '$now' },
-                                }
-                            }, { endDate: { $eq: null } }]
-                        },
-                        {
-                            $or: [
-                                {
-                                    startDate: {
-                                        $lte: { $: '$now' },
-                                    }
-                                }, {
-                                    startDate: { $eq: null }
-                                }
-                            ]
-                        }
-                    ]
-                }
+            if(minA === minB) {
+                return a.settings.name.localeCompare(b.settings.name);
             }
-        },
-        sort: [{ key: 'firstName', order: SortItemDirection.ASC }, { key: 'lastName', order: SortItemDirection.ASC }, { key: 'id', order: SortItemDirection.ASC }],
-        limit: 100
-    });
 
-    const response = await context.value.authenticatedServer.request({
-        method: "GET",
-        path: "/members",
-        decoder: new PaginatedResponseDecoder(MembersBlob as Decoder<MembersBlob>, LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-        query,
-        shouldRetry: false,
-        owner
-    });
+            return minA - minB;
+        });
 
-    const blob = response.data.results;
+    return groups;
+}
 
-    const results: PlatformMember[] = PlatformFamily.createSingles(blob, {
-        contextOrganization: context.value.organization,
-        platform: $platform.value
-    });
+function getMembersForGroup(group: Group) {
+    const id = group.id;
+    const members = props.data.membersWithGroups.filter(x => x.groups?.some(g => g?.id === id)).map(x => x.platformMember);
 
-    $members.value = results;
-}, { immediate: true });
+    return membersToString(members);
+}
+
+function getGroupName(id: string) {
+    return props.data.allGroups.find(g => g.defaultAgeGroupId === id)?.settings.name || 'Onbekend';
+}
+
+function getMembersStringForDefaultAgeGroup(id: string) {
+    const members = props.data.membersWithGroups.filter(x => x.groups?.some(g => g?.defaultAgeGroupId === id)).map(x => x.platformMember);
+
+    return membersToString(members);
+}
+
+function membersToString(members: PlatformMember[]): string {
+    if (!members.length) return 'Geen';
+    return members.map((platformMember) => platformMember.member.name).join(', ')
+}
 </script>
