@@ -1,119 +1,60 @@
 <template>
     <STListItem>
         <template #left>
-            <div v-if="progressData">
-                <span v-if="progressData.total === undefined" class="icon success primary"/> 
-                <ProgressRing v-else :radius="14" :progress="calculateProgress(progressData)" :stroke="3" />
+            <div v-if="progress">
+                <span v-if="progress.total === null" class="icon success primary"/> 
+                <ProgressRing v-else :radius="14" :progress="calculateProgress(progress)" :stroke="3" />
             </div>
         </template>
         <h3 class="style-title-list">
             {{ name }}
         </h3>
-        <div v-if="data.responsibility.defaultAgeGroupIds">
+        <div>
             <p class="style-description-small">
-                Enkele de standaard leeftijdsgroepen die gekoppeld zijn aan deze functie worden weergegeven.
-            </p>
-
-            <div class="extra-margin">
-                <STListItemGrid>
-                    <STListItemGridRow v-for="group of getGroups()" :key="group.id" :label="group.settings.name" :value="getMembersForGroup(group)" :emphasize-label="true" />
-                </STListItemGrid>
-            </div>
-        </div>
-        <div v-else>
-            <p class="style-description-small">
-                {{ membersToString(data.membersWithGroups.map(x => x.platformMember)) }}
+                {{ membersAsString }}
             </p>
         </div>
         <template #right>
-            <div v-if="progressData">
-                <p v-if="progressData.total !== undefined" class="style-description-small">{{ progressData.count }} / {{ progressData.total }}</p>
-                <p v-else class="style-description-small">{{ progressData.count }}</p>
+            <div v-if="progress">
+                <p v-if="progress.total !== null" class="style-description-small">{{ progress.count }} / {{ progress.total }}</p>
+                <p v-else class="style-description-small">{{ progress.count }}</p>
             </div>
         </template>
     </STListItem>
 </template>
 
 <script lang="ts" setup>
-import { STListItemGrid, STListItemGridRow } from '@stamhoofd/components';
 import { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ProgressRing from './ProgressRing.vue';
 
-const props = defineProps<{data: {responsibility: MemberResponsibility, allGroups: Group[], membersWithGroups: {platformMember: PlatformMember, groups?: (Group | null)[]}[]}}>();
+const props = defineProps<{
+    responsibility: MemberResponsibility,
+    group: Group | null,
+    members: PlatformMember[],
+    progress: {count: number, total: number | null} | null
+}>();
 
-const name = computed(() => props.data.responsibility.name);
-
-const progressData = computed(() => {
-    const responsibility = props.data.responsibility;
-    const { minimumMembers, maximumMembers } = responsibility;
-
-    if (minimumMembers === null && maximumMembers === null) {
-        return null;
+const name = computed(() => {
+    const name = props.responsibility.name;
+    const group = props.group;
+    if(group) {
+        return `${name} van ${group.settings.name}`;
     }
 
-    const count = props.data.membersWithGroups.length;
-
-    // count will be lower
-    if (minimumMembers !== null && count < minimumMembers) {
-        return {
-            count,
-            total: minimumMembers
-        }
-    }
-
-    // count will exceed
-    if (maximumMembers !== null && count > maximumMembers) {
-        return {
-            count,
-            total: maximumMembers
-        }
-    }
-
-    // other cases: show only count
-    return {count}
+    return name;
 });
 
-function calculateProgress({count, total}: {count: number, total?: number}) {
-    if(!total) return 1;
-    return count / total;
-}
+const membersAsString = computed(() => {
+    const members = props.members;
 
-function getGroups(): Group[] {
-    const defaultAgeGroupIds = props.data.responsibility.defaultAgeGroupIds;
-    if (!defaultAgeGroupIds) return [];
-
-    const allGroups = props.data.allGroups;
-
-    const groups = defaultAgeGroupIds
-        .flatMap(id => allGroups
-            .filter(g => g.defaultAgeGroupId === id)
-        )
-        .filter(g => !!g)
-        .sort((a, b) => {
-            const minA = a.settings.minAge === null ? 999 : a.settings.minAge;
-            const minB = b.settings.minAge === null ? 999 : b.settings.minAge;
-
-            if(minA === minB) {
-                return a.settings.name.localeCompare(b.settings.name);
-            }
-
-            return minA - minB;
-        });
-
-    return groups;
-}
-
-function getMembersForGroup(group: Group) {
-    const id = group.id;
-    const members = props.data.membersWithGroups.filter(x => x.groups?.some(g => g?.id === id)).map(x => x.platformMember);
-
-    return membersToString(members);
-}
-
-function membersToString(members: PlatformMember[]): string {
     if (!members.length) return 'Geen';
     return members.map((platformMember) => platformMember.member.name).join(', ')
+})
+
+function calculateProgress({count, total}: {count: number, total: number | null}) {
+    if(!total) return 1;
+    return count / total;
 }
 </script>
 

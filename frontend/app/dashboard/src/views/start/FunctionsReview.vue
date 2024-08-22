@@ -6,7 +6,9 @@
 
         <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen ga je naar het tabblad "Leden". Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen. </p>
 
-        <p class="info-box" v-if="!responsibilities.length">Er zijn geen ingebouwde functies.</p>
+        <p v-if="!responsibilities.length" class="info-box">
+            Er zijn geen ingebouwde functies.
+        </p>
 
         <SpinnerWithTransition :is-loading="isLoading">
             <div v-if="rowCategories" class="container">
@@ -14,7 +16,14 @@
                     <hr>
                     <h2>Verplichte functies</h2>
                     <STList class="info">
-                        <FunctionReview v-for="row in rowCategories.requiredRows" :key="row.responsibility.id" :data="row" />
+                        <FunctionReview
+                            v-for="row in rowCategories.requiredRows"
+                            :key="row.responsibility.id"
+                            :responsibility="row.responsibility"
+                            :group="row.group"
+                            :members="row.members"
+                            :progress="row.progress"
+                        />
                     </STList>
                 </div>
             
@@ -22,7 +31,14 @@
                     <hr>
                     <h2>Optionele functies</h2>
                     <STList class="info">
-                        <FunctionReview v-for="row in rowCategories.optionalAndAssignedRows" :key="row.responsibility.id" :data="row" />
+                        <FunctionReview
+                            v-for="row in rowCategories.optionalAndAssignedRows"
+                            :key="row.responsibility.id"
+                            :responsibility="row.responsibility"
+                            :group="row.group"
+                            :members="row.members"
+                            :progress="row.progress"
+                        />
                     </STList>
                 </div>
 
@@ -30,7 +46,14 @@
                     <hr>
                     <h2>Niet-toegekende functies</h2>
                     <STList class="info">
-                        <FunctionReview v-for="row in rowCategories.nonAssignedRows" :key="row.responsibility.id" :data="row" />
+                        <FunctionReview
+                            v-for="row in rowCategories.nonAssignedRows"
+                            :key="row.responsibility.id"
+                            :responsibility="row.responsibility"
+                            :group="row.group"
+                            :members="row.members"
+                            :progress="row.progress"
+                        />
                     </STList>
                 </div>
             </div>
@@ -72,7 +95,7 @@ const rowCategories = computed(() => {
 
         if(isRequired) {
             requiredRows.push(row);
-        } else if(row.membersWithGroups.length > 0) {
+        } else if(row.members.length > 0) {
             optionalAndAssignedRows.push(row);
         } else {
             nonAssignedRows.push(row);
@@ -89,13 +112,13 @@ const rowCategories = computed(() => {
 const isLoading = computed(() => rowCategories.value === null);
 const responsibilities = computed(() => $platform.value.config.responsibilities);
 
+type RowProgress = {count: number, total: number | null};
+
 type RowData = {
     responsibility: MemberResponsibility,
-    allGroups: Group[],
-    membersWithGroups: {
-        platformMember: PlatformMember,
-        groups?: (Group | null)[]
-    }[]
+    group: Group | null,
+    members: PlatformMember[],
+    progress: RowProgress | null
 }
 
 watch(responsibilities, async (responsibilities) => {
@@ -103,7 +126,9 @@ watch(responsibilities, async (responsibilities) => {
     if(!organization) return;
     const allMembers = await getAllMembersWithResponsibilities(responsibilities);
     const groups = getAllGroups(organization);
-    const rows = responsibilities.map(r => getRowData(r, allMembers, organization, groups));
+    const rows = responsibilities
+        .flatMap(r => getRowData(r, allMembers, organization, groups))
+        .sort((a, b) => getPriority(b.progress) - getPriority(a.progress));
     allRows.value = rows;
 }, {immediate: true});
 
@@ -183,45 +208,98 @@ function getAllGroups(organization: Organization) {
     }).getAllGroups();
 }
 
-function getRowData(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): RowData {
+function getRowData(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): RowData[] {
+    return getRowDataWithoutProgress(responsibility, allMembersWithResponsibilities, organization, allGroups)
+        .map(row => {
+            const progress = getProgress(row.responsibility, row.members);
+            return {
+                ...row,
+                progress
+            };
+        });
+}
+
+function getPriority(progress: RowProgress | null) {
+    if(progress === null) return 0;
+    if(progress.total === null) return 1;
+    return 2;
+}
+
+function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): Omit<RowData, 'progress'>[] {
     const responsibilityId = responsibility.id;
     const organizationId = organization.id;
-
     // todo: how to be sure this date is the same as the backend?
     const now = new Date();
 
-    const membersWithGroups: {platformMember: PlatformMember, groups?: (Group | null)[]}[] = [];
+    const defaultAgeGroupIds = responsibility.defaultAgeGroupIds;
 
-    for(const platformMember of allMembersWithResponsibilities) {
-        const responsibilities = platformMember.member.responsibilities;
+    if(defaultAgeGroupIds !== null) {
 
-        const responsibilitiesOfThisType = responsibilities.filter(responsibility => responsibility.responsibilityId === responsibilityId
-                && responsibility.organizationId === organizationId
-                && (responsibility.endDate === null || responsibility.endDate > now)
-                && (responsibility.startDate === null || responsibility.startDate <= now));
+        const rows: Omit<RowData, 'progress'>[] = [];
 
-        if(responsibilitiesOfThisType.length) {
-            const groups: (Group | null)[] = [];
+        for(const group of allGroups) {
+            const groupId = group.id;
 
-            for(const r of responsibilitiesOfThisType) {
-                const groupId = r.groupId;
-                if(!groupId) continue;
+            const members = allMembersWithResponsibilities.filter(platformMember => platformMember.member.responsibilities
+                .some(r => r.responsibilityId === responsibilityId
+                        && r.organizationId === organizationId
+                        && r.groupId === groupId
+                        && (r.endDate === null || r.endDate > now)
+                        && (r.startDate === null || r.startDate <= now)
+                )
+            );
 
-                const group = allGroups.find(g => g.id === groupId);
-                groups.push(group ?? null);
-            }
+            rows.push({
+                responsibility,
+                members,
+                group
+            });
+        }
 
-            membersWithGroups.push({
-                platformMember,
-                groups
-            })
+        return rows;
+    }
+
+    const members = allMembersWithResponsibilities.filter(platformMember => platformMember.member.responsibilities
+        .some(r => r.responsibilityId === responsibilityId
+                && r.organizationId === organizationId
+                && (r.endDate === null || r.endDate > now)
+                && (r.startDate === null || r.startDate <= now)
+        )
+    );
+
+    return [{
+        responsibility,
+        members,
+        group: null
+    }];
+}
+
+function getProgress(responsibility: MemberResponsibility, members: PlatformMember[]): RowProgress | null {
+    const { minimumMembers, maximumMembers } = responsibility;
+
+    if (minimumMembers === null && maximumMembers === null) {
+        return null;
+    }
+
+    const count = members.length;
+
+    // count will be lower
+    if (minimumMembers !== null && count < minimumMembers) {
+        return {
+            count,
+            total: minimumMembers
         }
     }
 
-    return {
-        responsibility,
-        allGroups,
-        membersWithGroups
-    };
+    // count will exceed
+    if (maximumMembers !== null && count > maximumMembers) {
+        return {
+            count,
+            total: maximumMembers
+        }
+    }
+
+    // other cases: show only count
+    return {count, total: null}
 }
 </script>

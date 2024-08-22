@@ -7,7 +7,7 @@
         <p>Kijk na of alle instellingen van de groepen correct zijn. Klik op een groep om deze te bewerken.</p>
 
         <p v-if="areAllGroupsClosed" class="warning-box">
-            Alle leeftijdstGroepen zijn gesloten.
+            Alle groepen zijn gesloten.
         </p>
 
         <div v-for="category in tree.categories" :key="category.id" class="container">
