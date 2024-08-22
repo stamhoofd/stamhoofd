@@ -888,6 +888,70 @@
     @extend .style-illustration-img;
 }
 
+.style-icon-with-progress {
+    position: relative;
+    margin-right: 5px;
+    color: $color-dark;
+
+    &.complete {
+        color: $color-primary-dark;
+        figure {
+            background: $color-primary-background;
+        }
+
+        > aside {
+            color: $color-primary;
+        }
+    }
+
+    .primary-icon-container {
+        width: var(--block-width, 40px);
+        height: var(--block-width, 40px);
+
+        @media (max-width: 400px) {
+            margin-right: 0px;
+        }
+    }
+
+    figure {
+        width: var(--block-width, 40px);
+        height: var(--block-width, 40px);
+        border-radius: $border-radius;
+        text-align: center;
+        background: $color-background-shade-original;
+        text-transform: uppercase;
+        line-height: var(--block-width, 40px);
+        font-size: 14px;
+        font-weight: $font-weight-bold;
+
+        @media (max-width: 400px) {
+            margin-right: 0px;
+        }
+
+        > span {
+            opacity: 0.8;
+            vertical-align: middle;
+            margin-right: -3px; // visual correction
+        }
+    }
+
+    > aside {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: $color-background;
+        border-radius: 40px;
+        transform: translate(40%, 40%);
+        line-height: 1;
+        display: block;
+        color: $color-gray-4;
+
+        > * {
+            display: block;
+        }
+    }
+}
+
 .style-image-with-icon {
     position: relative;
     margin-right: 5px;
