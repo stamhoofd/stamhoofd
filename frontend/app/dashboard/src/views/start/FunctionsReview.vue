@@ -26,15 +26,12 @@
                     </STList>
                 </div>
 
-                <div v-if="rowCategories.notAssignedNames.length" class="container">
+                <div v-if="rowCategories.nonAssignedRows.length" class="container">
                     <hr>
                     <h2>Niet-toegekende functies</h2>
-                    <p class="style-description not-assigned-names">
-                        <span v-for="(name, i) in rowCategories.notAssignedNames" :key="name">
-                            <span>{{ name }}</span>
-                            <span v-if="i < rowCategories.notAssignedNames.length - 1" class="separator">-</span>
-                        </span>
-                    </p>
+                    <STList class="info">
+                        <FunctionReview v-for="row in rowCategories.nonAssignedRows" :key="row.responsibility.id" :data="row" />
+                    </STList>
                 </div>
             </div>
         </SpinnerWithTransition>
@@ -67,7 +64,7 @@ const rowCategories = computed(() => {
 
     const requiredRows: RowData[] = [];
     const optionalAndAssignedRows: RowData[] = [];
-    const notAssignedNames: string[] = [];
+    const nonAssignedRows: RowData[] = [];
 
     for(const row of allRows.value) {
         const responsibility = row.responsibility;
@@ -78,14 +75,14 @@ const rowCategories = computed(() => {
         } else if(row.membersWithGroups.length > 0) {
             optionalAndAssignedRows.push(row);
         } else {
-            notAssignedNames.push(responsibility.name);
+            nonAssignedRows.push(row);
         }
     }
 
     return {
         requiredRows,
         optionalAndAssignedRows,
-        notAssignedNames
+        nonAssignedRows
     }
 });
 
@@ -228,21 +225,3 @@ function getRowData(responsibility: MemberResponsibility, allMembersWithResponsi
     };
 }
 </script>
-
-<style lang="scss" scoped>
-.not-assigned-names {
-    line-height: 1.5;
-}
-
-.separator {
-    // color: var(--color-primary);
-    opacity: 0.3;
-    margin-left: 0.5ch;
-    margin-right: 0.5ch;
-    // transform: scaleY(1.1);
-    // display: inline-block;
-    // margin-left: 5px;
-    // margin-right: 5px;
-    // font-weight: bold
-}
-</style>

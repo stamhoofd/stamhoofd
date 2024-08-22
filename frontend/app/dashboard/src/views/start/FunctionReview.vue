@@ -4,7 +4,6 @@
             <div v-if="progressData">
                 <span v-if="progressData.total === undefined" class="icon success primary"/> 
                 <ProgressRing v-else :radius="14" :progress="calculateProgress(progressData)" :stroke="3" />
-                
             </div>
         </template>
         <h3 class="style-title-list">
