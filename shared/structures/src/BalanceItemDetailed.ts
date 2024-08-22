@@ -56,6 +56,7 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
             case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
             case BalanceItemType.Order: return 'Bestelling'
             case BalanceItemType.Other: return 'Andere'
+            case BalanceItemType.PlatformMembership: return "Aansluiting"
         }
     }
 
@@ -78,6 +79,7 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
             case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
             case BalanceItemType.Order: return this.balanceItem.relations.get(BalanceItemRelationType.Webshop)?.name || 'Onbekende webshop'
             case BalanceItemType.Other: return this.balanceItem.description
+            case BalanceItemType.PlatformMembership: return "Aansluiting"
         }
     }
 

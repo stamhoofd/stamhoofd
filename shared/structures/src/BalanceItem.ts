@@ -26,6 +26,7 @@ export enum BalanceItemType {
     "FreeContribution" = "FreeContribution",
     "Order" = "Order", 
     "Other" = "Other", 
+    "PlatformMembership" = "PlatformMembership"
 }
 
 export function getBalanceItemTypeName(type: BalanceItemType): string {
@@ -35,6 +36,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.FreeContribution: return "Vrije bijdrage"
         case BalanceItemType.Order: return "Webshopbestelling"
         case BalanceItemType.Other: return "Andere"
+        case BalanceItemType.PlatformMembership: return "Aansluiting"
     }
 }
 
@@ -45,6 +47,7 @@ export enum BalanceItemRelationType {
     "GroupOptionMenu" = "GroupOptionMenu", // Contains the option menu that was chosen for the group
     "GroupOption" = "GroupOption", // Contains the option that was chosen for the group
     "Member" = "Member", // Contains the name of the member you registered
+    "MembershipType" = "MembershipType"
 }
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
@@ -55,6 +58,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.GroupOptionMenu: return "Keuzemenu"
         case BalanceItemRelationType.GroupOption: return "Keuze"
         case BalanceItemRelationType.Member: return "Lid"
+        case BalanceItemRelationType.MembershipType: return "Aansluitingstype"
     }
 }
 
@@ -66,6 +70,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.GroupOptionMenu: return "Naam van het keuzemenu waaruit gekozen werd"
         case BalanceItemRelationType.GroupOption: return "De gekozen optie van het keuzemenu waarvoor betaald werd. Als er meerdere keuzes gekozen werden, dan wordt er per keuze een apart item aangemaakt."
         case BalanceItemRelationType.Member: return "Naam van het lid geassocieerd aan dit item"
+        case BalanceItemRelationType.MembershipType: return "Naam van het aansluitingstype geassocieerd aan dit item"
     }
 }
 
@@ -148,6 +153,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.FreeContribution: return 'vrije bijdrage'
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? 'webshop'
             case BalanceItemType.Other: return 'andere'
+            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? 'aansluitingen'
         }
     }
 
@@ -164,6 +170,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
             case BalanceItemType.Order: return 'Bestelling'
             case BalanceItemType.Other: return 'Andere'
+            case BalanceItemType.PlatformMembership: return "Aansluiting"
         }
     }
 
@@ -183,6 +190,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || 'Onbekende webshop'
             case BalanceItemType.Other: return this.description
+            case BalanceItemType.PlatformMembership: return  this.relations.get(BalanceItemRelationType.MembershipType)?.name || 'Onbekend aansluitingstype'
         }
     }
 

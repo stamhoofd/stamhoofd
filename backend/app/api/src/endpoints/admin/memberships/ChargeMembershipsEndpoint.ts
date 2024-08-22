@@ -2,6 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { QueueHandler } from '@stamhoofd/queues';
 import { sleep } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context';
+import { MembershipCharger } from '../../../helpers/MembershipCharger';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 
 type Params = Record<string, never>;
@@ -30,9 +32,16 @@ export class ChargeMembershipsEndpoint extends Endpoint<Params, Query, Body, Res
             throw Context.auth.error()
         }
 
+        if (QueueHandler.isRunning('charge-memberships')) {
+            throw new SimpleError({
+                code: 'charge_pending',
+                message: 'Charge already pending',
+                human: 'Er is al een aanrekening bezig, even geduld.'
+            })
+        }
+
         QueueHandler.schedule('charge-memberships', async () => {
-            // todo
-            await sleep(15 * 1000)
+            await MembershipCharger.charge()
         }).catch(console.error);
        
         return new Response(undefined);
