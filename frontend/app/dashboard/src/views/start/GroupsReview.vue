@@ -1,7 +1,7 @@
 <template>
     <ReviewSetupStepView :title="title" :type="SetupStepType.Groups">
         <h1 class="style-navigation-title">
-            Kijk even na
+            {{ title }}
         </h1>
 
         <p>Kijk na of alle instellingen van de groepen correct zijn. Klik op een groep om deze te bewerken.</p>
@@ -30,7 +30,7 @@ import { computed } from 'vue';
 import GroupReview from './GroupReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
 
-const title = 'Kijk de groepen na';
+const title = 'Groepen nakijken';
 
 const auth = useAuth();
 const $organization = useOrganization();

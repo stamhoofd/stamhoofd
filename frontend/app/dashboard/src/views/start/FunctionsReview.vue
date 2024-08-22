@@ -1,29 +1,43 @@
 <template>
     <ReviewSetupStepView :title="title" :type="SetupStepType.Groups">
         <h1 class="style-navigation-title">
-            Kijk even na
+            {{ title }}
         </h1>
 
-        <p>Kijk na of alle instellingen van de groepen correct zijn. Klik op een groep om deze te bewerken.</p>
+        <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen ga je naar het tabblad "Leden". Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen. </p>
 
-        <hr>
-        <h2>Verplichte functies</h2>
-        <SpinnerWithTransition :is-loading="isLoading">
-            <STList v-if="allMembersWithResponsibilities !== null" class="info">
-                <FunctionReview v-for="responsibility in requiredResponsibilities" :key="responsibility.id" :responsibility="responsibility" :data="getRowData(responsibility)" />
-            </STList>
-        </SpinnerWithTransition>
-        
-        <hr>
-        <h2>Andere functies</h2>
-        <SpinnerWithTransition :is-loading="isLoading">
-            <STList v-if="allMembersWithResponsibilities !== null" class="info">
-                <FunctionReview v-for="responsibility in optionalResponsibilities" :key="responsibility.id" :responsibility="responsibility" :data="getRowData(responsibility)" />
-            </STList>
-        </SpinnerWithTransition>
+        <p class="info-box" v-if="!responsibilities.length">Er zijn geen ingebouwde functies.</p>
 
-        <hr>
-        <h2>Niet toegekende functies</h2>
+        <SpinnerWithTransition :is-loading="isLoading">
+            <div v-if="rowCategories" class="container">
+                <div v-if="rowCategories.requiredRows.length" class="container">
+                    <hr>
+                    <h2>Verplichte functies</h2>
+                    <STList class="info">
+                        <FunctionReview v-for="row in rowCategories.requiredRows" :key="row.responsibility.id" :data="row" />
+                    </STList>
+                </div>
+            
+                <div v-if="rowCategories.optionalAndAssignedRows.length" class="container">
+                    <hr>
+                    <h2>Optionele functies</h2>
+                    <STList class="info">
+                        <FunctionReview v-for="row in rowCategories.optionalAndAssignedRows" :key="row.responsibility.id" :data="row" />
+                    </STList>
+                </div>
+
+                <div v-if="rowCategories.notAssignedNames.length" class="container">
+                    <hr>
+                    <h2>Niet-toegekende functies</h2>
+                    <p class="style-description not-assigned-names">
+                        <span v-for="(name, i) in rowCategories.notAssignedNames" :key="name">
+                            <span>{{ name }}</span>
+                            <span v-if="i < rowCategories.notAssignedNames.length - 1" class="separator">-</span>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </SpinnerWithTransition>
     </ReviewSetupStepView>
 </template>
 
@@ -36,7 +50,7 @@ import { computed, Ref, ref, watch } from 'vue';
 import FunctionReview from './FunctionReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
 
-const title = 'Kijk de functies na';
+const title = 'Functies nakijken';
 
 const $organization = useOrganization();
 const $platform = usePlatform();
@@ -44,11 +58,39 @@ const context = useContext();
 const owner = useRequestOwner();
 const auth = useAuth();
 
-const allMembersWithResponsibilities = ref(null) as Ref<PlatformMember[] | null>;
-const isLoading = computed(() => allMembersWithResponsibilities.value === null);
+const allRows = ref(null) as Ref<RowData[] | null>;
+
+const rowCategories = computed(() => {
+    if(allRows.value === null) {
+        return null;
+    }
+
+    const requiredRows: RowData[] = [];
+    const optionalAndAssignedRows: RowData[] = [];
+    const notAssignedNames: string[] = [];
+
+    for(const row of allRows.value) {
+        const responsibility = row.responsibility;
+        const isRequired = responsibility.minimumMembers !== null;
+
+        if(isRequired) {
+            requiredRows.push(row);
+        } else if(row.membersWithGroups.length > 0) {
+            optionalAndAssignedRows.push(row);
+        } else {
+            notAssignedNames.push(responsibility.name);
+        }
+    }
+
+    return {
+        requiredRows,
+        optionalAndAssignedRows,
+        notAssignedNames
+    }
+});
+
+const isLoading = computed(() => rowCategories.value === null);
 const responsibilities = computed(() => $platform.value.config.responsibilities);
-const requiredResponsibilities = computed(() => responsibilities.value.filter(r => r.minimumMembers !== null));
-const optionalResponsibilities = computed(() => responsibilities.value.filter(r => r.minimumMembers === null));
 
 type RowData = {
     responsibility: MemberResponsibility,
@@ -60,7 +102,12 @@ type RowData = {
 }
 
 watch(responsibilities, async (responsibilities) => {
-    allMembersWithResponsibilities.value = await getAllMembersWithResponsibilities(responsibilities);
+    const organization = $organization.value;
+    if(!organization) return;
+    const allMembers = await getAllMembersWithResponsibilities(responsibilities);
+    const groups = getAllGroups(organization);
+    const rows = responsibilities.map(r => getRowData(r, allMembers, organization, groups));
+    allRows.value = rows;
 }, {immediate: true});
 
 async function getAllMembersWithResponsibilities(responsibilities: MemberResponsibility[]): Promise<PlatformMember[]> {
@@ -130,48 +177,25 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
     return results;
 }
 
-let allGroupsCache: Group[] | null = null;
-
-function getAllGroupsCached(organization: Organization) {
-    if(allGroupsCache !== null) return allGroupsCache;
-
-    allGroupsCache = organization.period.getCategoryTree({
+function getAllGroups(organization: Organization) {
+    return organization.period.getCategoryTree({
         permissions: auth.permissions,
         organization,
         maxDepth: 1,
         smartCombine: true
     }).getAllGroups();
-
-    return allGroupsCache;
 }
 
-function getEmptyRow(responsibility: MemberResponsibility): RowData {
-    return {
-        responsibility,
-        allGroups: [],
-        membersWithGroups: []
-    }
-}
-
-function getRowData(responsibility: MemberResponsibility): RowData {
-    const allMembers = allMembersWithResponsibilities.value;
-    if(allMembers === null) return getEmptyRow(responsibility);
-
-    const organization = $organization.value;
-    if(!organization) return getEmptyRow(responsibility);
-
+function getRowData(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): RowData {
     const responsibilityId = responsibility.id;
     const organizationId = organization.id;
 
     // todo: how to be sure this date is the same as the backend?
     const now = new Date();
 
-    const allGroups = getAllGroupsCached(organization);
-
-    console.warn(JSON.stringify(allGroups))
     const membersWithGroups: {platformMember: PlatformMember, groups?: (Group | null)[]}[] = [];
 
-    for(const platformMember of allMembers) {
+    for(const platformMember of allMembersWithResponsibilities) {
         const responsibilities = platformMember.member.responsibilities;
 
         const responsibilitiesOfThisType = responsibilities.filter(responsibility => responsibility.responsibilityId === responsibilityId
@@ -204,3 +228,21 @@ function getRowData(responsibility: MemberResponsibility): RowData {
     };
 }
 </script>
+
+<style lang="scss" scoped>
+.not-assigned-names {
+    line-height: 1.5;
+}
+
+.separator {
+    // color: var(--color-primary);
+    opacity: 0.3;
+    margin-left: 0.5ch;
+    margin-right: 0.5ch;
+    // transform: scaleY(1.1);
+    // display: inline-block;
+    // margin-left: 5px;
+    // margin-right: 5px;
+    // font-weight: bold
+}
+</style>
