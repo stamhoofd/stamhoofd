@@ -32,6 +32,7 @@ import { CenteredMessage, STListItem, SpinnerWithTransition } from '@stamhoofd/c
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
+import FunctionsReview from './FunctionsReview.vue';
 import GroupsReview from './GroupsReview.vue';
 import ProgressRing from './ProgressRing.vue';
 
@@ -45,7 +46,8 @@ const $saving = ref(false);
 
 enum Routes {
     Premises = 'gebouwen',
-    Groups = 'leeftijds-groepen'
+    Groups = 'leeftijdsgroepen',
+    Functions = 'functies'
 }
 
 defineRoutes([
@@ -58,6 +60,11 @@ defineRoutes([
         url: Routes.Groups,
         present: 'popup',
         component: GroupsReview as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.Functions,
+        present: 'popup',
+        component: FunctionsReview as unknown as ComponentOptions,
     }
 ]);
 
@@ -89,6 +96,10 @@ async function onClick() {
         }
         case SetupStepType.Groups: {
             await $navigate(Routes.Groups);
+            break;
+        }
+        case SetupStepType.Functions: {
+            await $navigate(Routes.Functions);
             break;
         }
     }

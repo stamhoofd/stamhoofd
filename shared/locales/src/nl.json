@@ -183,6 +183,26 @@
                 "title": "Kijk de leeftijdgroepen na",
                 "description": "Kijk of de prijzen, de leeftijd en de beschrijving correct zijn ingesteld."
             }
+        },
+        "Functions": {
+            "review": {
+                "title": "Kijk de functies na",
+                "description": "Kijk de toegansrechten en functies na."
+            },
+            "todo": {
+                "title": "Voeg functies toe",
+                "description": "Voeg een hoofdbeheerder toe."
+            }
+        },
+        "Companies": {
+            "review": {
+                "title": "Kijk de facturatiegegevens na",
+                "description": "Kijk na of de facturatiegegevens correct zijn."
+            },
+            "todo": {
+                "title": "Voeg facturatiegegevens toe",
+                "description": "Voeg minstens één juridische entiteit toe."
+            }
         }
     },
     "shared.address": "Adres",
