@@ -1,9 +1,10 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, field } from "@simonbackx/simple-encoding";
 
 export enum SetupStepType {
-    Premises = 'Premises',
-    Groups = 'Groups'
-
+    Functions = "Functions",
+    Companies = "Companies",
+    Groups = "Groups",
+    Premises = "Premises",
 }
 
 export class SetupStep extends AutoEncoder {

@@ -1,30 +1,33 @@
 import {
     Organization,
     OrganizationRegistrationPeriod,
-    Platform,
+    Platform
 } from "@stamhoofd/models";
 import { QueueHandler } from "@stamhoofd/queues";
 import {
+    MemberResponsibility,
     PlatformPremiseType,
     Platform as PlatformStruct,
     SetupStepType,
     SetupSteps,
 } from "@stamhoofd/structures";
 
-type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void;
+type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
 export class SetupStepUpdater {
     private static readonly STEP_TYPE_OPERATIONS: Record<
         SetupStepType,
         SetupStepOperation
     > = {
+        [SetupStepType.Functions]: this.updateStepFunctions,
+        [SetupStepType.Companies]: this.updateStepCompanies,
         [SetupStepType.Groups]: this.updateStepGroups,
         [SetupStepType.Premises]: this.updateStepPremises,
     };
 
     static async updateSetupStepsForAllOrganizationsInCurrentPeriod({
-        batchSize, premiseTypes
-    }: { batchSize?: number, premiseTypes?: PlatformPremiseType[] } = {}) {
+        batchSize, premiseTypes, responsibilities
+    }: { batchSize?: number, premiseTypes?: PlatformPremiseType[], responsibilities?: MemberResponsibility[] } = {}) {
         const tag = "updateSetupStepsForAllOrganizationsInCurrentPeriod";
         QueueHandler.cancel(tag);
 
@@ -32,6 +35,9 @@ export class SetupStepUpdater {
             const platform = (await Platform.getSharedPrivateStruct()).clone();
             if(premiseTypes) {
                 platform.config.premiseTypes = premiseTypes;
+            }
+            if(responsibilities) {
+                platform.config.responsibilities = responsibilities;
             }
             const periodId = platform.period.id;
 
@@ -147,7 +153,7 @@ export class SetupStepUpdater {
         for (const stepType of Object.values(SetupStepType)) {
             console.log(`[STEP TYPE] ${stepType}`);
             const operation = this.STEP_TYPE_OPERATIONS[stepType];
-            operation(setupSteps, organization, platform);
+            await operation(setupSteps, organization, platform);
         }
 
         await organizationRegistrationPeriod.save();
@@ -205,6 +211,75 @@ export class SetupStepUpdater {
         setupSteps.update(SetupStepType.Groups, {
             totalSteps: 0,
             finishedSteps: 0,
+        });
+    }
+
+    static updateStepCompanies(
+        setupSteps: SetupSteps,
+        _organization: Organization,
+        _platform: PlatformStruct
+    ) {
+        setupSteps.update(SetupStepType.Companies, {
+            totalSteps: 0,
+            finishedSteps: 0,
+        });
+    }
+
+    static async updateStepFunctions(
+        setupSteps: SetupSteps,
+        organization: Organization,
+        platform: PlatformStruct
+    ) {
+        const admins = await organization.getAdmins();
+
+        let totalSteps = 1;
+        let finishedSteps = 0;
+
+        const hasFullAdmin = admins.some(a => a.permissions && a.permissions.forOrganization(organization)?.hasFullAccess());
+
+        if(hasFullAdmin) {
+            finishedSteps++;
+        }
+
+        for(const responsibility of platform.config.responsibilities.filter(r => r.organizationBased)) {
+            const { minimumMembers: min, maximumMembers: max } = responsibility;
+
+            if (min === null && max === null) {
+                continue;
+            }
+
+            totalSteps++;
+
+            const responsibilityId = responsibility.id;
+            let totalAdminsWithThisResponsibility = 0;
+
+            for (const admin of admins) {
+                if (admin.permissions?.organizationPermissions.has(responsibilityId)) {
+                    totalAdminsWithThisResponsibility++;
+                }
+            }
+
+            if (max !== null && totalAdminsWithThisResponsibility > max) {
+                continue;
+            }
+
+            if (min !== null && totalAdminsWithThisResponsibility < min) {
+                continue;
+            }
+
+            finishedSteps++;
+        }
+        // const query = SQL.select()
+        // .from(SQL.table('member_responsibility_records'))
+        // .where(SQL.column('organizationId'), _organization.id);
+
+        // const result = await query.count();
+
+        // const test = await MemberResponsibilityRecord.where({organizationId: _organization.id});
+
+        setupSteps.update(SetupStepType.Functions, {
+            totalSteps,
+            finishedSteps,
         });
     }
 }
