@@ -5,10 +5,7 @@
         <main>
             <h1>Betalingen</h1>
 
-            <hr>
-            <h2>Openstaand</h2>
-
-            <OutstandingBalanceTable :items="item.balanceItems" />
+            <OutstandingBalanceTable :item="item" />
 
             <template v-if="pendingPayments.length > 0">
                 <hr>
@@ -18,7 +15,16 @@
                 <STList>
                     <STListItem v-for="payment of pendingPayments" :key="payment.id" :selectable="true" class="right-stack" @click="openPayment(payment)">
                         <template #left>
-                            <span class="icon clock" />
+                            <figure class="style-image-with-icon gray">
+                                <figure>
+                                    <img v-if="payment.method === PaymentMethod.Bancontact" src="@stamhoofd/assets/images/partners/icons/bancontact.svg">
+                                    <img v-else-if="payment.method === PaymentMethod.iDEAL" src="@stamhoofd/assets/images/partners/icons/ideal.svg">
+                                    <span v-else class="icon bank" />
+                                </figure>
+                                <aside>
+                                    <span class="icon clock small gray" />
+                                </aside>
+                            </figure>
                         </template>
 
                         <h3 class="style-title-list">
@@ -47,7 +53,16 @@
             <STList>
                 <STListItem v-for="payment of succeededPayments" :key="payment.id" :selectable="true" class="right-stack" @click="openPayment(payment)">
                     <template #left>
-                        <span class="icon success" />
+                        <figure class="style-image-with-icon gray">
+                            <figure>
+                                <img v-if="payment.method === PaymentMethod.Bancontact" src="@stamhoofd/assets/images/partners/icons/bancontact.svg">
+                                <img v-else-if="payment.method === PaymentMethod.iDEAL" src="@stamhoofd/assets/images/partners/icons/ideal.svg">
+                                <span v-else class="icon bank" />
+                            </figure>
+                            <aside>
+                            </aside>
+                        </figure>
+
                     </template>
 
                     <h3 class="style-title-list">
@@ -77,13 +92,13 @@
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { PaymentView } from '@stamhoofd/components';
-import { DetailedBillingStatusItem, PaymentGeneral, PaymentMethodHelper } from '@stamhoofd/structures';
+import { OrganizationDetailedBillingStatusItem, PaymentGeneral, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OutstandingBalanceTable from "./OutstandingBalanceTable.vue";
 
 const props = defineProps<{
-    item: DetailedBillingStatusItem
+    item: OrganizationDetailedBillingStatusItem
 }>();
 
 const present = usePresent()

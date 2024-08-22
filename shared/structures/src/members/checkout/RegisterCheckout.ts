@@ -12,6 +12,7 @@ import { PlatformMember } from "../PlatformMember";
 import { RegistrationWithMember } from "../RegistrationWithMember";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
 import { RegisterItem } from "./RegisterItem";
+import { BalanceItemCartItem } from "./BalanceItemCartItem";
 
 export type RegisterContext = {
     members: PlatformMember[],
@@ -148,6 +149,14 @@ export class RegisterCheckout{
 
     unremoveRegistration(registration: RegistrationWithMember, options?: {calculate?: boolean}) {
         this.cart.unremoveRegistration(registration)
+        if (options?.calculate !== false) {
+            this.updatePrices()
+        }
+    }
+
+    addBalanceItem(item: BalanceItemCartItem, options?: {calculate?: boolean}) {
+        this.cart.addBalanceItem(item);
+
         if (options?.calculate !== false) {
             this.updatePrices()
         }

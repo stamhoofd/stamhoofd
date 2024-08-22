@@ -19,13 +19,7 @@ export class OrganizationBillingStatus extends AutoEncoder {
     organizations: OrganizationBillingStatusItem[] = []
 }
 
-export interface DetailedBillingStatusItem {
-    balanceItems: BalanceItemWithPayments[]
-    payments: PaymentGeneral[]
-}
-
-
-export class OrganizationDetailedBillingStatusItem extends AutoEncoder implements DetailedBillingStatusItem {
+export class OrganizationDetailedBillingStatusItem extends AutoEncoder {
     @field({ decoder: Organization })
     organization: Organization
 

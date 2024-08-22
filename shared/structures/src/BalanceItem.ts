@@ -158,6 +158,41 @@ export class BalanceItem extends AutoEncoder {
     }
 
     get groupPrefix(): string {
+        return this.itemPrefix
+    }
+
+    get groupTitle(): string {
+        return this.itemTitle
+    }
+
+    get groupDescription() {
+        return null
+    }
+
+
+    /**
+     * Unique identifier whithing a reporting group
+     */
+    get groupCode() {
+        if (this.type === BalanceItemType.Other) {
+            return 'type-'+this.type
+                + '-unit-price-'+this.unitPrice 
+                + '-description-'+this.description;
+        }
+
+        return 'type-'+this.type
+            + '-unit-price-'+this.unitPrice 
+            + '-relations' + Array.from(this.relations.entries())
+                .filter(([key]) => !shouldAggregateOnRelationType(key, this.relations))
+                .map(([key, value]) => key + '-' + value.id)
+                .join('-');
+    }
+
+
+    /**
+     * When displayed as a single item
+     */
+    get itemPrefix(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 if (this.relations.get(BalanceItemRelationType.GroupOption)) {
@@ -174,7 +209,10 @@ export class BalanceItem extends AutoEncoder {
         }
     }
 
-    get groupTitle(): string {
+    /**
+     * When displayed as a single item
+     */
+    get itemTitle(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
@@ -194,26 +232,26 @@ export class BalanceItem extends AutoEncoder {
         }
     }
 
-    get groupDescription() {
-        return null
-    }
-
     /**
-     * Unique identifier whithing a reporting group
+     * When displayed as a single item
      */
-    get groupCode() {
-        if (this.type === BalanceItemType.Other) {
-            return 'type-'+this.type
-                + '-unit-price-'+this.unitPrice 
-                + '-description-'+this.description;
+    get itemDescription() {
+        switch (this.type) {
+            case BalanceItemType.Registration: {
+                const member = this.relations.get(BalanceItemRelationType.Member);
+                if (member) {
+                    return member.name;
+                }
+                return null;
+            }
+            case BalanceItemType.PlatformMembership: {
+                const member = this.relations.get(BalanceItemRelationType.Member);
+                if (member) {
+                    return member.name;
+                }
+            }
         }
-
-        return 'type-'+this.type
-            + '-unit-price-'+this.unitPrice 
-            + '-relations' + Array.from(this.relations.entries())
-                .filter(([key]) => !shouldAggregateOnRelationType(key, this.relations))
-                .map(([key, value]) => key + '-' + value.id)
-                .join('-');
+        return null;
     }
 }
 
@@ -250,15 +288,21 @@ export class BalanceItemWithPayments extends BalanceItem {
         return !!this.payments.find(p => p.payment.isPending)
     }
 
+    get pendingPrice() {
+        // Never return more than the total amount to pay (that means we have multiple payments for the same item - which isn't a huge problem and will be detected/signaled if multiple of those are marked as paid)
+        const toPay = this.price - this.pricePaid;
+        const pending = this.payments.filter(p => p.payment.isPending).map(p => Math.max(0, p.price)).reduce((t, total) => total + t, 0)
+
+        return Math.min(toPay, pending);
+    }
+
+    get openPrice() {
+        return this.price - this.pricePaid - this.pendingPrice
+    } 
+
     static getOutstandingBalance(items: BalanceItemWithPayments[]) {
         // Get sum of balance payments
-        const totalPending = items.map(p => {
-            // Never return more than the total amount to pay (that means we have multiple payments for the same item - which isn't a huge problem and will be detected/signaled if multiple of those are marked as paid)
-            const toPay = p.price - p.pricePaid;
-            const pending = p.payments.filter(p => p.payment.isPending).map(p => Math.max(0, p.price)).reduce((t, total) => total + t, 0)
-
-            return Math.min(toPay, pending);
-        }).reduce((t, total) => total + t, 0)
+        const totalPending = items.map(p => p.pendingPrice).reduce((t, total) => total + t, 0)
         
         const total = items.map(p => p.price - p.pricePaid).reduce((t, total) => total + t, 0)
         const totalOpen = total - totalPending;

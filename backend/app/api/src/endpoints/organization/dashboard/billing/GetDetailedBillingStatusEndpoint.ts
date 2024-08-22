@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentMethod } from "@stamhoofd/structures";
+import { OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
 
 import { BalanceItem, Organization, Payment } from "@stamhoofd/models";
 import { SQL } from "@stamhoofd/sql";
@@ -41,8 +41,7 @@ export class GetDetailedBillingStatusEndpoint extends Endpoint<Params, Query, Bo
         const paymentModels = await Payment.select()
             .where('payingOrganizationId', organization.id)
             .andWhere(
-                SQL.whereNot('paidAt', null)
-                    .or('method', [PaymentMethod.Transfer, PaymentMethod.DirectDebit, PaymentMethod.PointOfSale, PaymentMethod.Unknown])
+                SQL.whereNot('status', PaymentStatus.Failed)
             )
             .fetch()
 

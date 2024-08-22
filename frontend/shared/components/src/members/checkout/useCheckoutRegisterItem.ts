@@ -6,7 +6,7 @@ import { ChooseGroupForMemberView } from "..";
 import { useAppContext } from "../../context/appContext";
 import { GlobalEventBus } from "../../EventBus";
 import { useContext } from "../../hooks";
-import { Toast, ToastButton } from "../../overlays/Toast";
+import { Toast } from "../../overlays/Toast";
 import { DisplayOptions, NavigationActions, runDisplayOptions, useNavigationActions } from "../../types/NavigationActions";
 import ChooseFamilyMembersForGroupView from "../ChooseFamilyMembersForGroupView.vue";
 import ChooseOrganizationMembersForGroupView from "../ChooseOrganizationMembersForGroupView.vue";
@@ -254,6 +254,55 @@ export function useChooseFamilyMembersForGroup() {
 
 // ----------------------------
 // --------- Flow 3 -----------
+export async function openOrganizationCart({organization, checkout, context, navigate, group, members}: {
+    organization: Organization,
+    checkout?: RegisterCheckout
+    context: SessionContext,
+    navigate: NavigationActions,
+    group?: Group, // Optional: add a button to search for members to register in this group
+    members?: PlatformMember[], // Automatically add default items for these members to the checkout if group is also provided
+}) {
+    const groupOrganization = organization
+
+    // Create a new shared checkout for these members
+    if (!checkout) {
+        checkout = new RegisterCheckout()
+    }
+    checkout.defaultOrganization = groupOrganization;
+
+    if (!context.organization) {
+        // Administration panel: register as organizing organization
+        checkout.asOrganizationId = groupOrganization.id
+    } else {
+        checkout.asOrganizationId = context.organization.id
+    }
+
+    checkout.updatePrices()
+
+    await navigate.present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(ChooseOrganizationMembersForGroupView, {
+                    groupOrganization,
+                    checkout,
+                    group,
+                    members
+                })
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
+
+}
+
+export function useOrganizationCart() {
+    const navigate = useNavigationActions();
+    const context = useContext();
+
+    return async ({members, group, organization, checkout}: {members?: PlatformMember[], group?: Group, organization: Organization, checkout: RegisterCheckout}) => {
+        return await openOrganizationCart({members, group, organization, checkout, navigate, context: context.value});
+    }
+}
 
 export async function chooseOrganizationMembersForGroup({members, group, organization, items, context, navigate, owner, deleteRegistrations}: {
     members?: PlatformMember[], // Automatically add default items for these members to the checkout if group is also provided
@@ -273,14 +322,6 @@ export async function chooseOrganizationMembersForGroup({members, group, organiz
 
     // Create a new shared checkout for these members
     const checkout = new RegisterCheckout();
-    checkout.defaultOrganization = groupOrganization;
-
-    if (!context.organization) {
-        // Administration panel: register as organizing organization
-        checkout.asOrganizationId = groupOrganization.id
-    } else {
-        checkout.asOrganizationId = context.organization.id
-    }
 
     if (members) {
         for (const member of members) {
@@ -308,22 +349,14 @@ export async function chooseOrganizationMembersForGroup({members, group, organiz
         }
     }
 
-    checkout.updatePrices()
-
-    await navigate.present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(ChooseOrganizationMembersForGroupView, {
-                    group,
-                    members, // Makes sure we update the editing members after checkout (mainly needed for delete registrations where we don't have a reference to the platform member)
-                    groupOrganization,
-                    checkout
-                })
-            })
-        ],
-        modalDisplayStyle: 'popup'
+    await openOrganizationCart({
+        organization: groupOrganization,
+        members,
+        group,
+        checkout,
+        navigate,
+        context
     })
-
 }
 
 export function useChooseOrganizationMembersForGroup() {

@@ -44,58 +44,21 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
      * When displayed as a single item
      */
     get itemPrefix(): string {
-        switch (this.balanceItem.type) {
-            case BalanceItemType.Registration: {
-                if (this.balanceItem.relations.get(BalanceItemRelationType.GroupOption)) {
-                    const group = this.balanceItem.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
-                    return 'Inschrijving voor ' + group;
-                }
-                return 'Inschrijving'
-            }
-            case BalanceItemType.AdministrationFee: return 'Administratiekosten'
-            case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
-            case BalanceItemType.Order: return 'Bestelling'
-            case BalanceItemType.Other: return 'Andere'
-            case BalanceItemType.PlatformMembership: return "Aansluiting"
-        }
+        return this.balanceItem.itemPrefix
     }
 
     /**
      * When displayed as a single item
      */
     get itemTitle(): string {
-        switch (this.balanceItem.type) {
-            case BalanceItemType.Registration: {
-                const option = this.balanceItem.relations.get(BalanceItemRelationType.GroupOption);
-                if (option) {
-                    const optionMenu = this.balanceItem.relations.get(BalanceItemRelationType.GroupOptionMenu)
-                    return (optionMenu?.name ?? 'Onbekend') + ': ' + option.name;
-                }
-                const group = this.balanceItem.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
-                const price = this.balanceItem.relations.get(BalanceItemRelationType.GroupPrice)?.name;
-                return group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
-            }
-            case BalanceItemType.AdministrationFee: return 'Administratiekosten'
-            case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
-            case BalanceItemType.Order: return this.balanceItem.relations.get(BalanceItemRelationType.Webshop)?.name || 'Onbekende webshop'
-            case BalanceItemType.Other: return this.balanceItem.description
-            case BalanceItemType.PlatformMembership: return "Aansluiting"
-        }
+        return this.balanceItem.itemTitle
     }
 
     /**
      * When displayed as a single item
      */
     get itemDescription() {
-        switch (this.balanceItem.type) {
-            case BalanceItemType.Registration: {
-                const member = this.balanceItem.relations.get(BalanceItemRelationType.Member);
-                if (member) {
-                    return member.name;
-                }
-            }
-        }
-        return null;
+        return this.balanceItem.itemDescription
     }
 
     toString() {
