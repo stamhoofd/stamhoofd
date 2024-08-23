@@ -24,7 +24,7 @@
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, TransitionFade } from '@stamhoofd/components';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
-import { Formatter, sleep } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useReview } from './useReview';
 
@@ -46,10 +46,9 @@ async function markReviewed () {
 
     if(isConfirm) {
         isSaving.value = true;
-        await sleep(2000);
         const isSuccess =  await review.updateReviewedAt({type: props.type, isReviewed});
         if (isSuccess && isReviewed) {
-            // await pop();
+            await pop();
         }
         isSaving.value = false;
     }

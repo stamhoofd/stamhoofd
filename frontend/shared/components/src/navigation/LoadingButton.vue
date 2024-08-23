@@ -67,8 +67,8 @@ export default class LoadingButton extends Vue {
         opacity: 0;
         top: 50%;
         left: 50%;
-        width: 30px;
-        height: 30px;
+        width: 24px;
+        height: 24px;
         transition: opacity 0.3s;
         contain: strict;
         transform: translate(-50%, -50%);
