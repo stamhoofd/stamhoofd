@@ -3,6 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import jwt from 'jsonwebtoken';
 
 import { Context } from '../../../../helpers/Context';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -39,7 +40,7 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
         if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }
-
+        
         // Create token
         const payload = {
             // The ID that you use in your app for this user

@@ -126,7 +126,7 @@ declare global {
         readonly LATEST_ANDROID_VERSION: number
  
          // Nolt
-        readonly NOLT_SSO_SECRET_KEY: string
+        readonly NOLT_SSO_SECRET_KEY?: string
 
         // Stripe
         readonly STRIPE_SECRET_KEY: string
@@ -149,7 +149,7 @@ declare global {
      */
     type FrontendSpecificEnvironment = {
         readonly VERSION: string
-        readonly NOLT_URL: string
+        readonly NOLT_URL?: string
         readonly MOLLIE_CLIENT_ID: string
         readonly APP_UPDATE_SERVER_URL: string
     }
