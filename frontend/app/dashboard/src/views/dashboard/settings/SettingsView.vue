@@ -303,14 +303,6 @@
                         </template>
                     </STListItem>
                 </STList>
-
-                <template v-if="!isPlatform">
-                    <hr>
-                    <h2>Functies gratis uitproberen</h2>
-                    <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
-
-                    <ModuleSettingsBox />
-                </template>
             </template>
         </main>
     </div>
@@ -326,19 +318,16 @@ import { useOrganizationManager, useRequestOwner } from "@stamhoofd/networking";
 import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from "@stamhoofd/structures";
 import { ComponentOptions, Ref, computed, ref } from "vue";
 import LabsView from "./LabsView.vue";
-import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import PaymentSettingsView from "./PaymentSettingsView.vue";
 import PersonalizeSettingsView from "./PersonalizeSettingsView.vue";
 import PremisesView from "./PremisesView.vue";
 import PrivacySettingsView from "./PrivacySettingsView.vue";
-import ReferralView from "./ReferralView.vue";
 import RegistrationPageSettingsView from "./RegistrationPageSettingsView.vue";
 import RegistrationPaymentSettingsView from "./RegistrationPaymentSettingsView.vue";
 import SSOSettingsView from "./SSOSettingsView.vue";
 import { buildManageGroupsComponent } from "./buildManageGroupsComponent";
 import FreeContributionSettingsView from "./modules/members/FreeContributionSettingsView.vue";
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import PackageSettingsView from "./packages/PackageSettingsView.vue";
 
 enum Routes {
     General = 'algemeen',
@@ -456,16 +445,6 @@ defineRoutes([
         url: Routes.SingleSignOn,
         present: 'popup',
         component: SSOSettingsView as unknown as ComponentOptions,
-    },
-    {
-        url: Routes.Packages,
-        present: 'popup',
-        component: PackageSettingsView as unknown as ComponentOptions,
-    },
-    {
-        url: Routes.Referrals,
-        present: 'popup',
-        component: ReferralView as unknown as ComponentOptions,
     },
     {
         url: Routes.Labs,
