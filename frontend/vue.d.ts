@@ -46,6 +46,7 @@ declare module 'vue' {
         readonly LoadingView: typeof import('@stamhoofd/components').LoadingView,
         readonly LoadingButton: typeof import('@stamhoofd/components').LoadingButton,
         readonly STToolbar: typeof import('@stamhoofd/components').STToolbar,
+        readonly STAMHOOFD: FrontendEnvironment,
 
         // Formatters
         formatPrice: typeof Formatter.price,

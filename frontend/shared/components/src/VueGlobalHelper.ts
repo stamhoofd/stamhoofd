@@ -94,6 +94,7 @@ export class VueGlobalHelper {
         app.config.globalProperties.$isAndroid = app.config.globalProperties.$OS === "android"
         app.config.globalProperties.$isIOS = app.config.globalProperties.$OS === "iOS"
         app.config.globalProperties.$isMac = app.config.globalProperties.$OS === "macOS"
+        app.config.globalProperties.STAMHOOFD = STAMHOOFD
 
         app.config.globalProperties.pluralText = function(num: number, singular: string, plural: string) {
             return Formatter.pluralText(num, singular, plural)

@@ -7,6 +7,8 @@
             </h1>
 
             <p>{{ $t('dashboard.start.title-description') }}</p>
+
+            <p class="info-box" v-if="STAMHOOFD.environment !== 'production'">Dit is een testomgeving</p>
             
             <SetupStepsView/>
         </main>
