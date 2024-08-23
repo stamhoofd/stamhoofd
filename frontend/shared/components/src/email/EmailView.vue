@@ -1,5 +1,5 @@
 <template>
-    <LoadingView v-if="creatingEmail || !email" />
+    <LoadingView v-if="creatingEmail || !email" :error-box="errors.errorBox" />
     <EditorView v-else ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="send">
         <h1 class="style-navigation-title">
             Nieuwe e-mail
@@ -101,18 +101,19 @@
 import { AutoEncoderPatchType, Decoder, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Email, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, OrganizationEmail, Version } from '@stamhoofd/structures';
+import { Email, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, OrganizationEmail } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
+import { EditEmailTemplatesView } from '.';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
 import { useErrors } from '../errors/useErrors';
 import { useAuth, useContext, useInterval, useIsMobile, useOrganization, usePlatform } from '../hooks';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import { EditEmailTemplatesView } from '.';
-import { CenteredMessage } from '../overlays/CenteredMessage';
 import EmailSettingsView from './EmailSettingsView.vue';
+import { ErrorBox } from '../errors/ErrorBox';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string,
@@ -268,33 +269,39 @@ useInterval(async () => {
 }, 1000)
 
 async function createEmail() {
-    const response = await context.value.authenticatedServer.request({
-        method: 'POST',
-        path: '/email',
-        body: Email.create({
-            recipientFilter: recipientFilter.value,
-            fromAddress: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).email : null,
-            fromName: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).name : null,
-            status: EmailStatus.Draft,
-            subject: props.defaultSubject
-        }),
-        decoder: EmailPreview as Decoder<EmailPreview>,
-        owner,
-        shouldRetry: false
-    })
+    try {
+        
+        const response = await context.value.authenticatedServer.request({
+            method: 'POST',
+            path: '/email',
+            body: Email.create({
+                recipientFilter: recipientFilter.value,
+                fromAddress: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).email : null,
+                fromName: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).name : null,
+                status: EmailStatus.Draft,
+                subject: props.defaultSubject
+            }),
+            decoder: EmailPreview as Decoder<EmailPreview>,
+            owner,
+            shouldRetry: false
+        })
 
-    email.value = response.data
-    creatingEmail.value = false
-    groupByEmail.value = response.data.recipientFilter.groupByEmail
+        email.value = response.data
+        creatingEmail.value = false
+        groupByEmail.value = response.data.recipientFilter.groupByEmail
 
-    if (response.data.subject) {
-        subject.value = response.data.subject
-    }
+        if (response.data.subject) {
+            subject.value = response.data.subject
+        }
 
-    await nextTick();
+        await nextTick();
 
-    if (response.data.json) {
-        editor.value?.commands.setContent(response.data.json)
+        if (response.data.json) {
+            editor.value?.commands.setContent(response.data.json)
+        }
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e);
+        return;
     }
 }
 
