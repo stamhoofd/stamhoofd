@@ -264,16 +264,24 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                 root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {})
             })
         }),
-        new TabBarItem({
-            icon: 'gift',
-            name: 'Wat is er nieuw?',
-            badge: whatsNewBadge,
-            action: async function () {
-                window.open('https://'+this.$t('shared.domains.marketing')+'/changelog', '_blank')
-                whatsNewBadge.value = '';
-                localStorage.setItem("what-is-new", WhatsNewCount.toString());
-            }
-        }),
+    ];
+
+    if (STAMHOOFD.CHANGELOG_URL) {
+        sharedMoreItems.push(
+            new TabBarItem({
+                icon: 'gift',
+                name: 'Wat is er nieuw?',
+                badge: whatsNewBadge,
+                action: async function () {
+                    window.open(STAMHOOFD.CHANGELOG_URL![STAMHOOFD.fixedCountry ?? session.organization?.address?.country ?? ''] ?? STAMHOOFD.CHANGELOG_URL![''], '_blank')
+                    whatsNewBadge.value = '';
+                    localStorage.setItem("what-is-new", WhatsNewCount.toString());
+                }
+            })
+        )
+    }
+
+    sharedMoreItems.push(
         new TabBarItem({
             icon: 'book',
             name: 'Documentatie',
@@ -281,7 +289,8 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                 window.open('https://'+this.$t('shared.domains.marketing')+'/docs', '_blank')
             }
         })
-    ]
+    )
+
 
     if (STAMHOOFD.NOLT_URL) {
         sharedMoreItems.push(

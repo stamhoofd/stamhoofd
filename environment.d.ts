@@ -27,12 +27,14 @@ declare enum Country {
  * always suggest the possible keys.
  */
 declare global {
-    type LocalizedDomain = {
-        readonly [k in Country]?: string;
+    type Localized<T> = {
+        readonly [k in Country]?: T;
     } & {
         /// default is reserved, so we need to use something else (an empty string)
-        readonly "": string;
+        readonly "": T;
     };
+
+    type LocalizedDomain = Localized<string>;
 
     type StamhoofdDomains = {
         dashboard: string,                      // requires both www + non-www DNS record
@@ -152,6 +154,8 @@ declare global {
         readonly NOLT_URL?: string
         readonly MOLLIE_CLIENT_ID: string
         readonly APP_UPDATE_SERVER_URL: string
+
+        readonly CHANGELOG_URL?: Localized<`https://${string}`>
     }
 
     /** 
