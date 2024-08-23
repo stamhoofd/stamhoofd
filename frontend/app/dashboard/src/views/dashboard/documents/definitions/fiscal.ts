@@ -254,7 +254,7 @@ export const fiscal = DocumentTemplateDefinition.create({
     exportFieldCategories: [
         RecordCategory.create({
             name: "Exporteren naar XML voor Belcotax",
-            description: "De XML-export is complex, en je moet zorvuldig de documentatie (https://www.stamhoofd.be/docs/fiscaal-attest-kinderopvang/) doorlezen voor je hier aan begint.",
+            description: "De XML-export is complex, en je moet zorvuldig de documentatie doorlezen voor je hier aan begint.",
             records: [
                 RecordSettings.create({
                     id: "confirmation",
