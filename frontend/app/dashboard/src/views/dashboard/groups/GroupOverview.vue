@@ -62,6 +62,10 @@
                     <h2 class="style-title-list">
                         {{ responsibility.name }}
                     </h2>
+                    <p class="style-description">
+                        Bekijk, beheer, exporteer of e-mail leden met deze functie.
+                    </p>
+
                     <template #right>
                         <MemberCountSpan :filter="getResponsibilityFilter(responsibility)" class="style-description-small" />
                         <span class="icon arrow-right-small gray" />
