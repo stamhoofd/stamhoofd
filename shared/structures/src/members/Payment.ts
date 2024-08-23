@@ -53,7 +53,7 @@ export class Payment extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date()
 
-    @field({ decoder: StringDecoder, version: 324 })
+    @field({ decoder: StringDecoder, nullable: true, version: 324 })
     organizationId: string | null = null
 
     get isPending() {
