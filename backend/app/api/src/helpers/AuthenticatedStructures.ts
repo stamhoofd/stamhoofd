@@ -238,7 +238,7 @@ export class AuthenticatedStructures {
                     }
                 }
             }
-            member.registrations = member.registrations.filter(r => member.organizationId === Context.auth.organization?.id || (organizations.get(r.organizationId)?.active ?? false))
+            member.registrations = member.registrations.filter(r => (Context.auth.organization && Context.auth.organization.active && r.organizationId === Context.auth.organization.id) || (organizations.get(r.organizationId)?.active ?? false))
             const blob = member.getStructureWithRegistrations()
             memberBlobs.push(
                 await Context.auth.filterMemberData(member, blob)
