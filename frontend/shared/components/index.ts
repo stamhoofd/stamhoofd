@@ -71,7 +71,6 @@ export * from "./src/context"
 
 export { default as GroupAvatar } from "./src/GroupAvatar.vue"
 export { default as Spinner } from "./src/Spinner.vue"
-export { default as SpinnerWithTransition } from "./src/SpinnerWithTransition.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
 
 // Icons

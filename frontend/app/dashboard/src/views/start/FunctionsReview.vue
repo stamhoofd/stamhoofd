@@ -1,5 +1,6 @@
 <template>
-    <ReviewSetupStepView :type="SetupStepType.Functions" :step="step">
+    <LoadingView v-if="isLoading" />
+    <ReviewSetupStepView v-else :type="SetupStepType.Functions" :step="step">
         <template #top>
             <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen ga je naar het tabblad "Leden". Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen. </p>
         </template>
@@ -8,45 +9,43 @@
             Er zijn geen ingebouwde functies.
         </p>
 
-        <SpinnerWithTransition :is-loading="isLoading">
-            <div v-if="rowCategories" class="container">
-                <div v-if="rowCategories.requiredRows.length" class="container">
-                    <hr>
-                    <h2>Verplichte functies</h2>
-                    <STList class="info">
-                        <FunctionReview
-                            v-for="row in rowCategories.requiredRows"
-                            :key="row.responsibility.id"
-                            :responsibility="row.responsibility"
-                            :group="row.group"
-                            :members="row.members"
-                            :progress="row.progress"
-                        />
-                    </STList>
-                </div>
-            
-                <div v-if="rowCategories.optionalRows.length" class="container">
-                    <hr>
-                    <h2>Optionele functies</h2>
-                    <STList class="info">
-                        <FunctionReview
-                            v-for="row in rowCategories.optionalRows"
-                            :key="row.responsibility.id"
-                            :responsibility="row.responsibility"
-                            :group="row.group"
-                            :members="row.members"
-                            :progress="row.progress"
-                        />
-                    </STList>
-                </div>
+        <div v-if="rowCategories" class="container">
+            <div v-if="rowCategories.requiredRows.length" class="container">
+                <hr>
+                <h2>Verplichte functies</h2>
+                <STList class="info">
+                    <FunctionReview
+                        v-for="row in rowCategories.requiredRows"
+                        :key="row.responsibility.id"
+                        :responsibility="row.responsibility"
+                        :group="row.group"
+                        :members="row.members"
+                        :progress="row.progress"
+                    />
+                </STList>
             </div>
-        </SpinnerWithTransition>
+            
+            <div v-if="rowCategories.optionalRows.length" class="container">
+                <hr>
+                <h2>Optionele functies</h2>
+                <STList class="info">
+                    <FunctionReview
+                        v-for="row in rowCategories.optionalRows"
+                        :key="row.responsibility.id"
+                        :responsibility="row.responsibility"
+                        :group="row.group"
+                        :members="row.members"
+                        :progress="row.progress"
+                    />
+                </STList>
+            </div>
+        </div>
     </ReviewSetupStepView>
 </template>
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { SpinnerWithTransition, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
+import { useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Group, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStep, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
 import { computed, Ref, ref, watch } from 'vue';

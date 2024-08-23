@@ -60,20 +60,20 @@ export default class LoadingButton extends Vue {
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        transform: translate(0px, 0px);
     }
 
     > div:last-child {
         position: absolute;
         opacity: 0;
         top: 50%;
-        right: 0;
+        left: 50%;
         width: 30px;
         height: 30px;
-        transform: translate(30px, -50%);
-        transition: transform 0.3s, opacity 0.3s;
+        transition: opacity 0.3s;
         contain: strict;
+        transform: translate(-50%, -50%);
 
+        pointer-events: none;
         display: flex;
         align-items: center;
         justify-content: flex-end;
@@ -81,11 +81,10 @@ export default class LoadingButton extends Vue {
 
     &.loading {
         > div:first-child {
-            transform: translate(-39px, 0);
+            opacity: 0.2;
         }
         > div:last-child {
             opacity: 1;
-            transform: translate(0px, -50%);
         }
     }
 }

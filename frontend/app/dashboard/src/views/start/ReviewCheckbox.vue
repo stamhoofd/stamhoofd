@@ -1,11 +1,11 @@
 <template>
     <STList v-if="$isDone">
-        <STListItem class="left-center right-stack">
+        <STListItem class="left-center right-stack" :selectable="true" element-name="label">
             <template #left>
                 <div class="progress-container">
-                    <SpinnerWithTransition :is-loading="isSaving">
+                    <LoadingButton :loading="isSaving">
                         <Checkbox :model-value="$isReviewed" :disabled="isSaving" @click.stop.prevent="markReviewed" />
-                    </SpinnerWithTransition>
+                    </LoadingButton>
                 </div>
             </template>
             <h2 class="style-title-list">
@@ -22,9 +22,9 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, SpinnerWithTransition, TransitionFade } from '@stamhoofd/components';
+import { CenteredMessage, TransitionFade } from '@stamhoofd/components';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, sleep } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useReview } from './useReview';
 
@@ -46,9 +46,10 @@ async function markReviewed () {
 
     if(isConfirm) {
         isSaving.value = true;
+        await sleep(2000);
         const isSuccess =  await review.updateReviewedAt({type: props.type, isReviewed});
         if (isSuccess && isReviewed) {
-            await pop();
+            // await pop();
         }
         isSaving.value = false;
     }
