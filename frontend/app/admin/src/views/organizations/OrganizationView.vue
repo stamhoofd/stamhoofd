@@ -13,6 +13,10 @@
                 {{ title }}
             </h1>
 
+            <p v-if="!organization.active" class="error-box">
+                Deze groep is inactief. Deze kan niet meer gebruikt worden en bestaat enkel nog voor archiveringsdoeleinden.
+            </p>
+
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">

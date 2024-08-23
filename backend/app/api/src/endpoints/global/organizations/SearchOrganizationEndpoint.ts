@@ -45,7 +45,7 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         };
 
         // We had to add an order by in the query to fix the limit. MySQL doesn't want to limit the results correctly if we don't explicitly sort the results on their relevance
-        const organizations = await Organization.where({ searchIndex: match }, {
+        const organizations = await Organization.where({ searchIndex: match, active: 1 }, {
             limit: 15,
             sort: [
                 {

@@ -2,7 +2,7 @@
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
     <div>
         <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
-        <LoadingView v-else key="promiseLoadingView" />
+        <LoadingView v-else key="promiseLoadingView" :error-box="errorBox" />
     </div>
 </template>
 
@@ -10,6 +10,7 @@
 import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { ErrorBox } from "../errors/ErrorBox";
 import LoadingView from "./LoadingView.vue";
 
 @Component({
@@ -24,6 +25,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
 
     root: ComponentWithProperties | null = null
     passRoutes = false;
+    errorBox: ErrorBox | null = null;
 
     mounted() {
         this.run()
@@ -34,6 +36,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
     }
     
     run() {
+        this.errorBox = null;
         this.promise.call(this).then((value) => {
             if(!value) {
                 console.error("Promise view did not return a component.")
@@ -49,7 +52,12 @@ export default class PromiseView extends Mixins(NavigationMixin) {
         }).catch(e => {
             console.error(e)
             console.error("Promise error not caught, defaulting to dismiss behaviour in PromiseView")
-            this.dismiss({ force: true });
+
+            if (this.canDismiss) {
+                this.dismiss({ force: true });
+            } else {
+                this.errorBox = new ErrorBox(e)
+            }
         })
     }
 

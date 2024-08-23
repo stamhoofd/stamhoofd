@@ -238,11 +238,12 @@ export class AuthenticatedStructures {
                     }
                 }
             }
-
+            member.registrations = member.registrations.filter(r => member.organizationId === Context.auth.organization?.id || (organizations.get(r.organizationId)?.active ?? false))
             const blob = member.getStructureWithRegistrations()
             memberBlobs.push(
                 await Context.auth.filterMemberData(member, blob)
             )
+
         }
 
         // Load responsibilities
@@ -268,7 +269,7 @@ export class AuthenticatedStructures {
 
         return MembersBlob.create({
             members: memberBlobs,
-            organizations: await Promise.all([...organizations.values()].map(o => this.organization(o)))
+            organizations: await Promise.all([...organizations.values()].filter(o => o.active).map(o => this.organization(o)))
         })
     }
 

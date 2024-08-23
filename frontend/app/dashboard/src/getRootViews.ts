@@ -38,11 +38,12 @@ export async function loadSessionFromUrl() {
             })
             const organization = response.data
 
-            session = reactive(new SessionContext(organization)) as SessionContext;
+            session = reactive(new SessionContext(organization) as any) as SessionContext;
             await session.loadFromStorage()
             await SessionManager.prepareSessionForUsage(session, false);
         } catch (e) {
             console.error('Failed to load organization from uri', uri);
+            session = null;
         }
     }
 

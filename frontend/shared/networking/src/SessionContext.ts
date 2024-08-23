@@ -1,5 +1,5 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
 import { LoginProviderType, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures'
@@ -32,6 +32,7 @@ export class SessionContext implements RequestMiddleware {
      */
     organization: Organization | null = null
     user: UserWithMembers | null = null
+    loadingError: Error|null = null
 
     /** 
      * Manually mark the session as incomplete by setting this to true
@@ -588,7 +589,11 @@ export class SessionContext implements RequestMiddleware {
             console.error('Missing privateMeta in authenticated organization response');
 
             // Critical issue: log out
-            this.temporaryLogout()
+            this.setLoadingError(new SimpleError({
+                code: 'failed',
+                message: 'Something went wrong',
+                human: 'Er ging iets mis. Je hebt geen toegang tot deze vereniging.'
+            }))
             throw new Error("Missing privateMeta in authenticated organization response")
         }
 
@@ -654,6 +659,13 @@ export class SessionContext implements RequestMiddleware {
             this.callListeners("token")
         }
         this.user = null;
+        this.callListeners("user")
+    }
+
+    // Logout without clearing this token
+    setLoadingError(error: Error|null) {
+        this.loadingError = error;
+        this.callListeners("token")
         this.callListeners("user")
     }
 
@@ -726,7 +738,7 @@ export class SessionContext implements RequestMiddleware {
         if (error.hasCode("invalid_organization") && this.organization) {
             // Clear from session storage
             await SessionManager.removeOrganizationFromStorage(this.organization.id)
-            this.temporaryLogout()
+            this.setLoadingError(error)
             window.location.reload();
             return false;
         }
@@ -756,7 +768,7 @@ export class SessionContext implements RequestMiddleware {
                 if (isSimpleError(e) || isSimpleErrors(e)) { 
                     if (e.hasCode("invalid_refresh_token")) {
                         console.log("Refresh token is invalid, logout")
-                        this.temporaryLogout();
+                        this.setLoadingError(e)
                         Toast.fromError(e).show()
                         return false;
                     }
@@ -767,7 +779,7 @@ export class SessionContext implements RequestMiddleware {
                 }
                 
                 // Something went wrong
-                this.temporaryLogout()
+                this.setLoadingError(e)
                 return false;
             }
             return true
@@ -779,7 +791,7 @@ export class SessionContext implements RequestMiddleware {
                 if (error.hasCode("invalid_access_token")) {
                     await this.logout();
                 } else {
-                    await this.temporaryLogout();
+                    this.setLoadingError(error);
                 }
             }
         }

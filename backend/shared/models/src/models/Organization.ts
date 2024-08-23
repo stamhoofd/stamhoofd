@@ -220,6 +220,14 @@ export class Organization extends Model {
                 message: "No organization known for host " + host,
             });
         }
+
+        if (!organization.active) {
+            throw new SimpleError({
+                code: "archived",
+                message: "This organization is archived",
+                human: 'Deze groep is gearchiveerd'
+            });
+        }
         return organization;
     }
 

@@ -359,11 +359,11 @@ export class Member extends Model {
             .from(Member.table)
             .join(
                 SQL
-                .leftJoin('_members_users')
-                .where(
-                    SQL.column('_members_users', 'membersId'),
-                    SQL.column(Member.table, 'id'),
-                )
+                    .leftJoin('_members_users')
+                    .where(
+                        SQL.column('_members_users', 'membersId'),
+                        SQL.column(Member.table, 'id'),
+                    )
             ).where(
                 SQL.column('_members_users', 'usersId'),
                 user.id,

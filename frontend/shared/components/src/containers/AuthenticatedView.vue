@@ -3,7 +3,7 @@
     <div>
         <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
         <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
-        <LoadingView v-else-if="hasToken" key="loadingView" />
+        <LoadingView v-else-if="hasToken" key="loadingView" :error-box="errorBox" />
         <ComponentWithPropertiesInstance v-else :key="loginRoot.key" :component="loginRoot" />
     </div>
 </template>
@@ -13,6 +13,7 @@ import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simon
 import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 import LoadingView from "./LoadingView.vue";
+import { ErrorBox } from "../errors/ErrorBox";
 
 @Component({
     components: {
@@ -38,6 +39,7 @@ export default class AuthenticatedView extends VueComponent {
     hasToken = false
     showPermissionsRoot = false
     lastOrganizationFetch = new Date()
+    errorBox: ErrorBox | null = null
 
     created() {
         // We need to check data already before loading any component!
@@ -57,11 +59,13 @@ export default class AuthenticatedView extends VueComponent {
             this.hasToken = this.$context.hasToken() ?? false
             this.showPermissionsRoot = this.$context.isComplete() ?? false
             this.userId = this.$context.user?.id ?? null
+            this.errorBox = this.$context.loadingError ? new ErrorBox(this.$context.loadingError) : null
         } else {
             this.loggedIn = this.$context.isComplete() ?? false
             this.hasToken = this.$context.hasToken() ?? false
             this.showPermissionsRoot = false
             this.userId = this.$context.user?.id ?? null
+            this.errorBox = this.$context.loadingError ? new ErrorBox(this.$context.loadingError) : null
         }
     }
 

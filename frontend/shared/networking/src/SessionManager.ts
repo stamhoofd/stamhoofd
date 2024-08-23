@@ -140,7 +140,7 @@ export class SessionManagerStatic {
                 }
 
                 // still set the current session, but logout that session
-                session.temporaryLogout()
+                throw e;
             }
         } else {
             if (session.canGetCompleted()) {
