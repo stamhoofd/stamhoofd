@@ -10,14 +10,14 @@ export function useAppContext(): AppType|'auto' {
 
 export const getAppName = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return 'Beheerdersportaal';
-        case 'registration': return 'Ledenportaal';
+        case 'dashboard': return 'Mijn groep';
+        case 'registration': return 'Mijn account';
         case 'admin': return 'Administratieportaal'
     }
 }
 
 export const getAppTitle = (app: AppType|'auto', organization: Organization|undefined|null) => {
-    if (app === 'auto') {
+    if (app === 'auto' || app === 'dashboard') {
         if (!organization) {
             return 'Onbekend'
         }
@@ -33,6 +33,11 @@ export const getAppDescription = (app: AppType|'auto', organization: Organizatio
         }
         return null;
     }
+
+    if (app === 'dashboard') {
+        return getAppName(app)
+    }
+    
     if (!organization) {
         switch (app) {
             case 'registration': return 'Jouw gegevens en inschrijvingen';

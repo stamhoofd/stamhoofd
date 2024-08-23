@@ -1,9 +1,9 @@
 <template>
     <section class="st-view">
-        <STNavigationBar title="Ledenportaal" />
+        <STNavigationBar title="Mijn account" />
         <main class="center">
             <h1>
-                Ledenportaal
+                Mijn account
             </h1>
 
             <p>{{ $t('Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.') }}</p>
