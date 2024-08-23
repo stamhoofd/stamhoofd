@@ -16,6 +16,10 @@
                 Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
             </p>
 
+            <p class="info-box">
+                Deze functie komt binnenkort beschikbaar!
+            </p>
+
             <STList>
                 <STListItem v-for="template of templates" :key="template.id" :selectable="true" class="right-stack" @click="openTemplate(template)">
                     <h2 class="style-title-list">
@@ -30,7 +34,7 @@
                 </STListItem>
             </STList>
 
-            <p class="style-button-bar">
+            <p class="style-button-bar" v-if="false">
                 <button type="button" class="button text" @click="addDocument">
                     <span class="icon add" />
                     <span class="text">Nieuw document</span>
