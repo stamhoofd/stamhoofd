@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, field } from "@simonbackx/simple-encoding";
+import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 
 export enum SetupStepType {
     Functions = "Functions",
@@ -7,12 +7,23 @@ export enum SetupStepType {
     Premises = "Premises",
 }
 
+export class SetupStepReview extends AutoEncoder {
+    @field({ decoder: DateDecoder })
+    date: Date;
+
+    @field({ decoder: StringDecoder})
+    userName: string;
+
+    @field({ decoder: StringDecoder})
+    userId: string;
+}
+
 export class SetupStep extends AutoEncoder {
     /**
      * When the item was marked as reviewed.
      */
-    @field({ decoder: DateDecoder, nullable: true })
-    reviewedAt: Date | null = null
+    @field({ decoder: SetupStepReview, nullable: true, ...NextVersion })
+    review: SetupStepReview | null = null
 
     /**
      * When the finished and total steps last have been updated.
@@ -31,7 +42,7 @@ export class SetupStep extends AutoEncoder {
     }
 
     get shouldBeReviewed() {
-        return this.reviewedAt === null;
+        return this.review === null;
     }
 
     get progress() {
@@ -57,15 +68,19 @@ export class SetupStep extends AutoEncoder {
         return 3;
     }
 
-    markReviewed() {
+    markReviewed({userId, userName}: {userId: string, userName: string}) {
         const now = new Date();
-        if(this.reviewedAt === null || (now.getTime() > this.reviewedAt.getTime())) {
-            this.reviewedAt = now;
+        if(this.review === null || (now.getTime() > this.review.date.getTime())) {
+            this.review = SetupStepReview.create({
+                date: now,
+                userName,
+                userId
+            });
         }
     }
 
     resetReviewed() {
-        this.reviewedAt = null;
+        this.review = null;
     }
 
     update(finishedSteps: number, totalSteps: number) {
@@ -91,6 +106,10 @@ export class SetupStep extends AutoEncoder {
 export class SetupSteps extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(SetupStepType), SetupStep), version: 324 })
     steps: Map<SetupStepType, SetupStep> = new Map()
+
+    get(type: SetupStepType) {
+        return this.steps.get(type);
+    }
 
     getAll(): {type: SetupStepType, step: SetupStep}[] {
         const result: {type: SetupStepType, step: SetupStep}[] = [];
@@ -125,10 +144,10 @@ export class SetupSteps extends AutoEncoder {
         return result;
     }
 
-    markReviewed(stepType: SetupStepType) {
+    markReviewed(stepType: SetupStepType, by: {userId: string, userName: string}) {
         const step = this.steps.get(stepType);
         if(step) {
-            step.markReviewed();
+            step.markReviewed(by);
         }
     }
 

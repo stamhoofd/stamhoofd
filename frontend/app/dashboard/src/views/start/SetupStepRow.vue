@@ -55,21 +55,30 @@ const icons: Record<SetupStepType, string> = {
 
 const icon = computed(() => icons[props.type]);
 
+const paramsToProps = () => {
+    return {
+        step: props.step
+    }
+};
+
 defineRoutes([
     {
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
+        paramsToProps
     },
     {
         url: Routes.Groups,
         present: 'popup',
         component: GroupsReview as unknown as ComponentOptions,
+        paramsToProps
     },
     {
         url: Routes.Functions,
         present: 'popup',
         component: FunctionsReview as unknown as ComponentOptions,
+        paramsToProps
     }
 ]);
 

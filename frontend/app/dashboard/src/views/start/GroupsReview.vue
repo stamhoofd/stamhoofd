@@ -1,10 +1,8 @@
 <template>
-    <ReviewSetupStepView :title="title" :type="SetupStepType.Groups">
-        <h1 class="style-navigation-title">
-            {{ title }}
-        </h1>
-
-        <p>Kijk na of alle instellingen van de groepen correct zijn. Klik op een groep om deze te bewerken.</p>
+    <ReviewSetupStepView :type="SetupStepType.Groups" :step="step">
+        <template #top>
+            <p>Kijk na of alle instellingen van de groepen correct zijn. Klik op een groep om deze te bewerken.</p>
+        </template>
 
         <p v-if="areAllGroupsClosed" class="warning-box">
             Alle groepen zijn gesloten.
@@ -25,12 +23,12 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditGroupView, PromiseView, Toast, useAuth, useOrganization } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
-import { Group, GroupStatus, OrganizationRegistrationPeriod, SetupStepType } from '@stamhoofd/structures';
+import { Group, GroupStatus, OrganizationRegistrationPeriod, SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupReview from './GroupReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
 
-const title = 'Groepen nakijken';
+defineProps<{step: SetupStep}>();
 
 const auth = useAuth();
 const $organization = useOrganization();
