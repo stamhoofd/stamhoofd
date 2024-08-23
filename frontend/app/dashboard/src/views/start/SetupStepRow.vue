@@ -1,16 +1,12 @@
 <template>
     <STListItem class="left-center right-stack" :selectable="true" @click="onClick">
         <template #left>
-            <div class="progress-container">
-                <div v-if="$isDone">
-                    <SpinnerWithTransition :is-loading="$saving">
-                        <Checkbox :model-value="$isReviewed" :manual="true" :disabled="$saving" @click.stop.prevent="markReviewed" />
-                    </SpinnerWithTransition>
-                </div>
-                <div v-else>
-                    <ProgressRing :radius="14" :progress="step.progress" :stroke="3" />
-                </div>
-            </div>
+            <IconWithProgress
+                :icon="icon" :is-reviewed="$isReviewed" :progress="{
+                    count: step.finishedSteps,
+                    total: step.totalSteps
+                }"
+            />
         </template>
         <h2 class="style-title-list">
             {{ $isDone ? $t(`setup.${props.type}.review.title`) : $t(`setup.${props.type}.todo.title`) }}
@@ -28,12 +24,13 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, STListItem, SpinnerWithTransition } from '@stamhoofd/components';
+import { CenteredMessage, STListItem } from '@stamhoofd/components';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
+import FunctionsReview from './FunctionsReview.vue';
 import GroupsReview from './GroupsReview.vue';
-import ProgressRing from './ProgressRing.vue';
+import IconWithProgress from './IconWithProgress.vue';
 
 const props = defineProps<{type: SetupStepType, step: SetupStep, saveHandler: (payload: {type: SetupStepType, isReviewed: boolean}) => Promise<void>}>();
 
@@ -45,8 +42,18 @@ const $saving = ref(false);
 
 enum Routes {
     Premises = 'gebouwen',
-    Groups = 'leeftijds-groepen'
+    Groups = 'leeftijdsgroepen',
+    Functions = 'functies'
 }
+
+const icons: Record<SetupStepType, string> = {
+    [SetupStepType.Premises]: 'home',
+    [SetupStepType.Groups]: 'group',
+    [SetupStepType.Functions]: 'star',
+    [SetupStepType.Companies]: 'file-filled',
+}
+
+const icon = computed(() => icons[props.type]);
 
 defineRoutes([
     {
@@ -58,6 +65,11 @@ defineRoutes([
         url: Routes.Groups,
         present: 'popup',
         component: GroupsReview as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.Functions,
+        present: 'popup',
+        component: FunctionsReview as unknown as ComponentOptions,
     }
 ]);
 
@@ -89,6 +101,10 @@ async function onClick() {
         }
         case SetupStepType.Groups: {
             await $navigate(Routes.Groups);
+            break;
+        }
+        case SetupStepType.Functions: {
+            await $navigate(Routes.Functions);
             break;
         }
     }

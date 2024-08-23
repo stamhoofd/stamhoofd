@@ -2,6 +2,7 @@
     <svg
         :height="radius * 2"
         :width="radius * 2"
+        :style="`border-width: ${borderWidth}px`"
     >
         <circle
             stroke="black"
@@ -28,7 +29,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const props = defineProps<{radius: number, progress: number, stroke: number}>();
+const props = withDefaults(defineProps<{radius: number, progress: number, stroke: number, borderWidth?: number}>(), {
+    borderWidth: 0
+});
 
 const normalizedRadius = computed(() => props.radius - props.stroke);
 const circumference = computed(() => normalizedRadius.value * 2 * Math.PI);
@@ -36,6 +39,10 @@ const strokeDashoffset = computed(() => circumference.value - (props.progress * 
 </script>
 
 <style lang="scss" scoped>
+
+svg {
+    border: 0px solid transparent;
+}
 
 circle {
           transition: stroke-dashoffset 0.35s;

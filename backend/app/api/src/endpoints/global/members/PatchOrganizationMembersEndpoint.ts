@@ -9,6 +9,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
+import { SetupStepUpdater } from '../../../helpers/SetupStepsUpdater';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -150,6 +151,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await MemberUserSyncer.onChangeMember(member)
         }
 
+        let shouldUpdateSetupSteps = false;
+
         // Loop all members one by one
         for (let patch of request.body.getPatches()) {
             const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id)
@@ -223,6 +226,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 await responsibilityRecord.save()
+                shouldUpdateSetupSteps = true;
             }
 
             // Create responsibilities
@@ -323,6 +327,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 model.startDate = put.startDate
 
                 await model.save()
+                shouldUpdateSetupSteps = true;
             }
 
             // Auto link users based on data
@@ -443,7 +448,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 updateMembershipMemberIds.add(member.id)
             }
 
-
             if (!members.find(m => m.id === member.id)) {
                 members.push(member)
             }
@@ -460,6 +464,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await User.deleteForDeletedMember(member.id)
             await BalanceItem.deleteForDeletedMember(member.id)
             await member.delete()
+            shouldUpdateSetupSteps = true
 
             // Update occupancy of this member because we removed registrations
             const groupIds = member.registrations.flatMap(r => r.groupId)
@@ -496,6 +501,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (updateMembershipMemberIds.has(member.id)) {
                 await member.updateMemberships()
             }
+        }
+
+        if(shouldUpdateSetupSteps && organization) {
+            SetupStepUpdater.updateForOrganization(organization).catch(console.error);
         }
 
         return new Response(

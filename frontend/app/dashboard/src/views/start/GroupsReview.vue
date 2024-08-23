@@ -1,16 +1,16 @@
 <template>
     <ReviewSetupStepView :title="title" :type="SetupStepType.Groups">
         <h1 class="style-navigation-title">
-            Kijk even na
+            {{ title }}
         </h1>
 
         <p>Kijk na of alle instellingen van de groepen correct zijn. Klik op een groep om deze te bewerken.</p>
 
         <p v-if="areAllGroupsClosed" class="warning-box">
-            Alle leeftijdstGroepen zijn gesloten.
+            Alle groepen zijn gesloten.
         </p>
 
-        <div v-for="category in tree.categories" :key="category.id">
+        <div v-for="category in tree.categories" :key="category.id" class="container">
             <hr>
             <h2>{{ category.settings.name }}</h2>
             <STList class="info">
@@ -30,7 +30,7 @@ import { computed } from 'vue';
 import GroupReview from './GroupReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
 
-const title = 'Kijk de groepen na';
+const title = 'Groepen nakijken';
 
 const auth = useAuth();
 const $organization = useOrganization();

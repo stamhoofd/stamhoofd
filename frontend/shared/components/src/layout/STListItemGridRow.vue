@@ -1,9 +1,9 @@
 <template>
-    <div v-if="label" :class="labelClass">
+    <div v-if="label" :class="[labelClass, {'style-dark': emphasizeLabel}]">
         {{ label }}
     </div>
-    <div class="style-dark" :class="{'no-label': label === undefined}">
-        <div v-if="value !== undefined">
+    <div :class="{'no-label': label === undefined, 'style-dark': !emphasizeLabel}">
+        <div v-if="value !== undefined" :class="valueClass">
             {{ value }}
         </div>
         <slot v-else />
@@ -17,7 +17,8 @@ defineProps<{
     label?: string,
     value?: string,
     labelClass?: string,
-    valueClass?: string
+    valueClass?: string,
+    emphasizeLabel?: boolean
 }>();
 </script>
 

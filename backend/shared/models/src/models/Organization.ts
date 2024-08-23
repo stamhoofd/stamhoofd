@@ -800,13 +800,17 @@ export class Organization extends Model {
         return await this.getAdminToEmails()
     }
 
+    async getAdmins() {
+        // Circular reference fix
+        const User = (await import('./User')).User;
+        return await User.getAdmins([this.id], {verified: true});
+    }
+
     /**
      * These email addresess are private
      */
     async getFullAdmins() {
-        // Circular reference fix
-        const User = (await import('./User')).User;
-        const admins = await User.getAdmins([this.id], {verified: true})
+        const admins = await this.getAdmins();
 
         // Only full access
         return admins.filter(a => a.permissions && a.permissions.forOrganization(this)?.hasFullAccess())

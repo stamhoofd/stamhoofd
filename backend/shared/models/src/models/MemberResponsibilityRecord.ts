@@ -1,6 +1,7 @@
-import { column, Model } from '@simonbackx/simple-database';
-import { v4 as uuidv4 } from "uuid";
+import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { SQL, SQLSelect } from '@stamhoofd/sql';
 import { MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from "uuid";
 
 export class MemberResponsibilityRecord extends Model {
     static table = "member_responsibility_records"
@@ -42,5 +43,23 @@ export class MemberResponsibilityRecord extends Model {
 
     getStructure() {
         return MemberResponsibilityRecordStruct.create(this)
+    }
+
+    /**
+     * Experimental: needs to move to library
+     */
+    static select() {
+        const transformer = (row: SQLResultNamespacedRow): MemberResponsibilityRecord => {
+            const d = (this as typeof MemberResponsibilityRecord & typeof Model).fromRow(row[this.table] as any) as MemberResponsibilityRecord|undefined
+    
+            if (!d) {
+                throw new Error("MemberResponsibilityRecord not found")
+            }
+
+            return d;
+        }
+        
+        const select = new SQLSelect(transformer, SQL.wildcard())
+        return select.from(SQL.table(this.table))
     }
 }
