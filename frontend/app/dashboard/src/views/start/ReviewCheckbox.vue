@@ -9,7 +9,7 @@
                 </div>
             </template>
             <h2 class="style-title-list">
-                Ik heb alle functies nagekeken en deze zijn volledig
+                {{ $t(`setup.${props.type}.review.checkbox`) }}
             </h2>
             <TransitionFade>
                 <p v-if="$review" class="style-description-small">
