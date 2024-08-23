@@ -1,21 +1,12 @@
 <template>
     <STListItem class="left-center right-stack" :selectable="true" @click="onClick">
         <template #left>
-            <IconWithProgress :icon="icon" :is-reviewed="$isReviewed" :progress="{
-                count: step.finishedSteps,
-                total: step.totalSteps
-            }"/>
-            <!-- <div class="progress-container">
-                <IconWithProgress icon="success" :progress="step.progress"/>
-                <div v-if="$isDone">
-                    <SpinnerWithTransition :is-loading="$saving">
-                        <Checkbox :model-value="$isReviewed" :manual="true" :disabled="$saving" @click.stop.prevent="markReviewed" />
-                    </SpinnerWithTransition>
-                </div>
-                <div v-else>
-                    <ProgressRing :radius="14" :progress="step.progress" :stroke="3" />
-                </div>
-            </div> -->
+            <IconWithProgress
+                :icon="icon" :is-reviewed="$isReviewed" :progress="{
+                    count: step.finishedSteps,
+                    total: step.totalSteps
+                }"
+            />
         </template>
         <h2 class="style-title-list">
             {{ $isDone ? $t(`setup.${props.type}.review.title`) : $t(`setup.${props.type}.todo.title`) }}
@@ -59,7 +50,7 @@ const icons: Record<SetupStepType, string> = {
     [SetupStepType.Premises]: 'home',
     [SetupStepType.Groups]: 'group',
     [SetupStepType.Functions]: 'star',
-    [SetupStepType.Companies]: 'invoice',
+    [SetupStepType.Companies]: 'file-filled',
 }
 
 const icon = computed(() => icons[props.type]);

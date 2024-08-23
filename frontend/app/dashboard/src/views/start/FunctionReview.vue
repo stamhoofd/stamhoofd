@@ -1,10 +1,7 @@
 <template>
     <STListItem>
         <template #left>
-            <div v-if="progress">
-                <span v-if="progress.total === null" class="icon success primary"/> 
-                <ProgressRing v-else :radius="14" :progress="calculateProgress(progress)" :stroke="3" />
-            </div>
+            <IconWithProgress icon="group" :progress="progress" :is-optional="isOptional" :has-warning="!isOptional && progress.count === 0" />
         </template>
         <h3 class="style-title-list">
             {{ name }}
@@ -26,14 +23,16 @@
 <script lang="ts" setup>
 import { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import ProgressRing from './ProgressRing.vue';
+import IconWithProgress from './IconWithProgress.vue';
 
 const props = defineProps<{
     responsibility: MemberResponsibility,
     group: Group | null,
     members: PlatformMember[],
-    progress: {count: number, total: number | null} | null
+    progress: {count: number, total: number | null}
 }>();
+
+const isOptional = computed(() => !props.responsibility.minimumMembers);
 
 const name = computed(() => {
     const name = props.responsibility.name;
@@ -48,14 +47,14 @@ const name = computed(() => {
 const membersAsString = computed(() => {
     const members = props.members;
 
-    if (!members.length) return 'Geen';
+    if (!members.length) {
+        if(isOptional.value) {
+            return 'Geen';
+        }
+        return 'Deze functie moet nog worden toegekend';
+    }
     return members.map((platformMember) => platformMember.member.name).join(', ')
-})
-
-function calculateProgress({count, total}: {count: number, total: number | null}) {
-    if(!total) return 1;
-    return count / total;
-}
+});
 </script>
 
 <style lang="scss" scoped>

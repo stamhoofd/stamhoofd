@@ -6,7 +6,7 @@
 
         <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen ga je naar het tabblad "Leden". Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen. </p>
 
-        <p v-if="!responsibilities.length" class="info-box">
+        <p v-if="!organizationBasedResponsibilities.length" class="info-box">
             Er zijn geen ingebouwde functies.
         </p>
 
@@ -27,27 +27,12 @@
                     </STList>
                 </div>
             
-                <div v-if="rowCategories.optionalAndAssignedRows.length" class="container">
+                <div v-if="rowCategories.optionalRows.length" class="container">
                     <hr>
                     <h2>Optionele functies</h2>
                     <STList class="info">
                         <FunctionReview
-                            v-for="row in rowCategories.optionalAndAssignedRows"
-                            :key="row.responsibility.id"
-                            :responsibility="row.responsibility"
-                            :group="row.group"
-                            :members="row.members"
-                            :progress="row.progress"
-                        />
-                    </STList>
-                </div>
-
-                <div v-if="rowCategories.nonAssignedRows.length" class="container">
-                    <hr>
-                    <h2>Niet-toegekende functies</h2>
-                    <STList class="info">
-                        <FunctionReview
-                            v-for="row in rowCategories.nonAssignedRows"
+                            v-for="row in rowCategories.optionalRows"
                             :key="row.responsibility.id"
                             :responsibility="row.responsibility"
                             :group="row.group"
@@ -86,31 +71,28 @@ const rowCategories = computed(() => {
     }
 
     const requiredRows: RowData[] = [];
-    const optionalAndAssignedRows: RowData[] = [];
-    const nonAssignedRows: RowData[] = [];
+    const optionalRows: RowData[] = [];
 
     for(const row of allRows.value) {
         const responsibility = row.responsibility;
-        const isRequired = responsibility.minimumMembers !== null;
+        const minimumMembers = responsibility.minimumMembers;
+        const isRequired = !!minimumMembers;
 
         if(isRequired) {
             requiredRows.push(row);
-        } else if(row.members.length > 0) {
-            optionalAndAssignedRows.push(row);
         } else {
-            nonAssignedRows.push(row);
+            optionalRows.push(row);
         }
     }
 
     return {
         requiredRows,
-        optionalAndAssignedRows,
-        nonAssignedRows
+        optionalRows,
     }
 });
 
 const isLoading = computed(() => rowCategories.value === null);
-const responsibilities = computed(() => $platform.value.config.responsibilities);
+const organizationBasedResponsibilities = computed(() => $platform.value.config.responsibilities.filter(r => r.organizationBased));
 
 type RowProgress = {count: number, total: number | null};
 
@@ -118,10 +100,10 @@ type RowData = {
     responsibility: MemberResponsibility,
     group: Group | null,
     members: PlatformMember[],
-    progress: RowProgress | null
+    progress: RowProgress
 }
 
-watch(responsibilities, async (responsibilities) => {
+watch(organizationBasedResponsibilities, async (responsibilities) => {
     const organization = $organization.value;
     if(!organization) return;
     const allMembers = await getAllMembersWithResponsibilities(responsibilities);
@@ -219,10 +201,9 @@ function getRowData(responsibility: MemberResponsibility, allMembersWithResponsi
         });
 }
 
-function getPriority(progress: RowProgress | null) {
-    if(progress === null) return 0;
-    if(progress.total === null) return 1;
-    return 2;
+function getPriority(progress: RowProgress) {
+    if(progress.total === null) return 0;
+    return 1;
 }
 
 function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): Omit<RowData, 'progress'>[] {
@@ -274,11 +255,11 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
     }];
 }
 
-function getProgress(responsibility: MemberResponsibility, members: PlatformMember[]): RowProgress | null {
+function getProgress(responsibility: MemberResponsibility, members: PlatformMember[]): RowProgress {
     const { minimumMembers, maximumMembers } = responsibility;
 
     if (minimumMembers === null && maximumMembers === null) {
-        return null;
+        return {count: members.length, total: null};
     }
 
     const count = members.length;
