@@ -240,6 +240,7 @@ export class PatchPlatformEndpoint extends Endpoint<
 
             // if responsibility is not new
             if (oldVersion) {
+                // if restrictions changed
                 if (
                     oldVersion.minimumMembers !==
                         responsibility.minimumMembers ||
@@ -264,6 +265,7 @@ export class PatchPlatformEndpoint extends Endpoint<
 
             // if responsibility is removed
             if (!newResponsibilities.some((x) => x.id === id)) {
+                // if responsibility had restrictions
                 if (
                     oldResponsibility.minimumMembers ||
                     oldResponsibility.maximumMembers

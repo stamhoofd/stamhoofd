@@ -174,6 +174,8 @@ export class SetupStepUpdater {
 
         for (const premiseType of premiseTypes) {
             const { min, max } = premiseType;
+
+            // only add step if premise type has restrictions
             if (min === null && max === null) {
                 continue;
             }
