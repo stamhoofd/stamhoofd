@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
-import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
+import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from "@stamhoofd/models"
 import { AccessRight, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
 
@@ -73,6 +73,11 @@ export class AdminPermissionChecker {
         const result = await promise;
         this.organizationGroupsCache.set(id, result)
         return result;
+    }
+
+    async getOrganizationCurrentPeriod(id: string|Organization): Promise<OrganizationRegistrationPeriod> {
+        const organization = await this.getOrganization(id); 
+        return await organization.getPeriod()
     }
 
     error(message?: string): SimpleError {
@@ -171,7 +176,8 @@ export class AdminPermissionChecker {
         }
 
         // Check parent categories
-        const parentCategories = group.getParentCategories(organization.meta.categories)
+        const organizationPeriod = await this.getOrganizationCurrentPeriod(organization)
+        const parentCategories = group.getParentCategories(organizationPeriod.settings.categories)
         for (const category of parentCategories) {
             if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
                 return true
@@ -677,11 +683,22 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, category.id, AccessRight.OrganizationCreateGroups)) {
-            return false;
+        if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, category.id, AccessRight.OrganizationCreateGroups)) {
+            return true;
         }
 
-        return true;
+        // Check parents
+        const organization = await this.getOrganization(organizationId)
+        const organizationPeriod = await this.getOrganizationCurrentPeriod(organization)
+        const parentCategories = category.getParentCategories(organizationPeriod.settings.categories)
+
+        for (const parentCategory of parentCategories) {
+            if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, parentCategory.id, AccessRight.OrganizationCreateGroups)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     canUpload() {

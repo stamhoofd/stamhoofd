@@ -114,7 +114,6 @@ export class AccessRightHelper {
     static autoGrantRightForLevel(right: AccessRight): PermissionLevel|null {
         switch (right) {
             case AccessRight.WebshopScanTickets: return PermissionLevel.Write
-            case AccessRight.OrganizationCreateGroups: return null; // Not included in full access
         }
         return PermissionLevel.Full
     }

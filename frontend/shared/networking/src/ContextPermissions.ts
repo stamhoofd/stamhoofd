@@ -1,4 +1,4 @@
-import { AccessRight, Group, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User, UserWithMembers } from "@stamhoofd/structures";
+import { AccessRight, Group, GroupCategory, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User, UserWithMembers } from "@stamhoofd/structures";
 import { Ref, unref } from "vue";
 
 export class ContextPermissions {
@@ -90,6 +90,14 @@ export class ContextPermissions {
         }
 
         return group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel)
+    }
+
+    canCreateGroupInCategory(category: GroupCategory) {
+        if (!this.organization) {
+            return this.hasFullPlatformAccess()
+        }
+
+        return category.canCreate(this.permissions, this.organization.period.settings.categories)
     }
 
     canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {

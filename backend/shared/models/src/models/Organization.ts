@@ -264,7 +264,13 @@ export class Organization extends Model {
         return this.id+"." + defaultDomain;
     }
 
+    private _cachedPeriod?: OrganizationRegistrationPeriod
+
     async getPeriod() {
+        if (this._cachedPeriod) {
+            return this._cachedPeriod;
+        }
+
         const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, {limit: 1})
         
         let oPeriod: OrganizationRegistrationPeriod;
@@ -289,6 +295,7 @@ export class Organization extends Model {
             oPeriod = oPeriods[0];
         }
 
+        this._cachedPeriod = oPeriod
         return oPeriod
     }
 

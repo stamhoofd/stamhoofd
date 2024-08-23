@@ -107,11 +107,8 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, ContextMenu, ContextMenuItem, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, ContextMenu, ContextMenuItem, EditGroupView, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
-
-
-import EditGroupGeneralView from "./edit/EditGroupGeneralView.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import GroupOverview from "./GroupOverview.vue";
 
@@ -230,7 +227,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get canCreate() {
-        return this.$organizationManager.user.permissions ? this.category.canCreate(this.$context.auth.permissions, this.organization.period.settings.categories) : false
+        return this.$context.auth.canCreateGroupInCategory(this.category)
     }
 
     get groups() {
@@ -284,19 +281,16 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         const me = GroupCategory.patch({ id: this.category.id })
         me.groupIds.addPut(group.id)
         settings.categories.addPatch(me)
-
-        const p = OrganizationRegistrationPeriod.patch({
-            id: this.period.id,
-            settings
-        })
-        p.groups.addPut(group)
         
-        this.present(new ComponentWithProperties(EditGroupGeneralView, { 
+        this.present(new ComponentWithProperties(EditGroupView, { 
             group, 
-            organization: this.organization.patch(p), 
-            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                const merged = p.patch(patch)
-                await this.$organizationManager.patchPeriod(merged)
+            saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
+                const p = OrganizationRegistrationPeriod.patch({
+                    id: this.period.id,
+                    settings
+                })
+                p.groups.addPut(group.patch(patch))
+                await this.$organizationManager.patchPeriod(p)
             }
         }).setDisplayStyle("popup"))
     }

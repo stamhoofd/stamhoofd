@@ -106,7 +106,6 @@ import { computed, getCurrentInstance, ref } from 'vue';
 import GroupCategoryRow from "./GroupCategoryRow.vue";
 import GroupRow from "./GroupRow.vue";
 import GroupTrashView from './GroupTrashView.vue';
-import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 
 // Self reference
 const instance = getCurrentInstance()
