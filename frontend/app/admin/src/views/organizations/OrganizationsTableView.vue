@@ -7,6 +7,7 @@
         :column-configuration-id="configurationId" 
         :actions="actions"
         :all-columns="allColumns" 
+        :prefix-column="allColumns[0]"
         @click="showOrganization"
     >
         <template #empty>
@@ -74,13 +75,15 @@ const objectFetcher = useOrganizationsObjectFetcher({
 const tableObjectFetcher = useTableObjectFetcher<Organization>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
-    new Column<ObjectType, string>({
+    new Column<ObjectType, Organization>({
         id: 'uri',
-        name: "Groepsnummer", 
-        getValue: (organization) => organization.uri,
-        minimumWidth: 100,
-        recommendedWidth: 200,
-        grow: true
+        name: "#", 
+        getValue: (organization) => organization,
+        format: (organization) => organization.uri,
+        getStyle: (organization) => organization.active ? 'info' : 'error',
+        minimumWidth: 60,
+        recommendedWidth: 100,
+        index: 0
     }),
 
     new Column<ObjectType, string>({
@@ -91,6 +94,20 @@ const allColumns: Column<ObjectType, any>[] = [
         recommendedWidth: 200,
         grow: true
     }),
+
+    new Column<ObjectType, string>({
+        id: 'status',
+        name: "Status", 
+        getValue: (organization) => organization.active,
+        format: (active) => active ? 'Actief' : 'Inactief',
+        getStyle: (active) => active ? 'success' : 'error',
+        minimumWidth: 100,
+        recommendedWidth: 200,
+        grow: true,
+        allowSorting: false,
+        enabled: false
+    }),
+
     new Column<ObjectType, string>({
         id: 'city',
         name: "Gemeente", 

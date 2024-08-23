@@ -302,6 +302,7 @@ export class Organization extends Model {
     getBaseStructure(): OrganizationStruct {
         return OrganizationStruct.create({
             id: this.id,
+            active: this.active,
             name: this.name,
             meta: this.meta,
             address: this.address,

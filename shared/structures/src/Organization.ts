@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './addresses/Address';
@@ -20,6 +20,9 @@ export class Organization extends AutoEncoder {
      */
     @field({ decoder: StringDecoder })
     name = ""
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    active = true
 
     @field({ decoder: StringDecoder, nullable: true, version: 3, upgrade: () => null })
     website: string | null = null;
