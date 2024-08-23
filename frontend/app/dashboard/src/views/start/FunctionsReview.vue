@@ -138,17 +138,6 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
                                     $gt: { $: '$now' },
                                 }
                             }, { endDate: { $eq: null } }]
-                        },
-                        {
-                            $or: [
-                                {
-                                    startDate: {
-                                        $lte: { $: '$now' },
-                                    }
-                                }, {
-                                    startDate: { $eq: null }
-                                }
-                            ]
                         }
                     ]
                 }
@@ -226,7 +215,6 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
                         && r.organizationId === organizationId
                         && r.groupId === groupId
                         && (r.endDate === null || r.endDate > now)
-                        && (r.startDate === null || r.startDate <= now)
                 )
             );
 
@@ -244,7 +232,6 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
         .some(r => r.responsibilityId === responsibilityId
                 && r.organizationId === organizationId
                 && (r.endDate === null || r.endDate > now)
-                && (r.startDate === null || r.startDate <= now)
         )
     );
 

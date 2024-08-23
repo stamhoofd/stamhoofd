@@ -7,7 +7,7 @@
             </h1>
 
             <p>{{ $t('dashboard.start.title-description') }}</p>
-
+            
             <SetupStepsView/>
         </main>
     </section>

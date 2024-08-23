@@ -1,9 +1,12 @@
 import {
+    Group,
+    MemberResponsibilityRecord,
     Organization,
     OrganizationRegistrationPeriod,
     Platform
 } from "@stamhoofd/models";
 import { QueueHandler } from "@stamhoofd/queues";
+import { SQL, SQLWhereSign } from "@stamhoofd/sql";
 import {
     MemberResponsibility,
     PlatformPremiseType,
@@ -142,7 +145,7 @@ export class SetupStepUpdater {
         );
     }
 
-    static async updateFor(
+    private static async updateFor(
         organizationRegistrationPeriod: OrganizationRegistrationPeriod,
         platform: PlatformStruct,
         organization: Organization
@@ -159,7 +162,7 @@ export class SetupStepUpdater {
         await organizationRegistrationPeriod.save();
     }
 
-    static updateStepPremises(
+    private static updateStepPremises(
         setupSteps: SetupSteps,
         organization: Organization,
         platform: PlatformStruct
@@ -203,7 +206,7 @@ export class SetupStepUpdater {
         });
     }
 
-    static updateStepGroups(
+    private static updateStepGroups(
         setupSteps: SetupSteps,
         _organization: Organization,
         _platform: PlatformStruct
@@ -214,7 +217,7 @@ export class SetupStepUpdater {
         });
     }
 
-    static updateStepCompanies(
+    private static updateStepCompanies(
         setupSteps: SetupSteps,
         _organization: Organization,
         _platform: PlatformStruct
@@ -225,23 +228,50 @@ export class SetupStepUpdater {
         });
     }
 
-    static async updateStepFunctions(
+    private static async updateStepFunctions(
         setupSteps: SetupSteps,
         organization: Organization,
         platform: PlatformStruct
     ) {
-        const admins = await organization.getAdmins();
+        const now = new Date();
+        const organizationBasedResponsibilitiesWithRestriction = platform.config.responsibilities
+        .filter(r => r.organizationBased && (r.minimumMembers || r.maximumMembers));
 
-        let totalSteps = 1;
+        const responsibilityIds = organizationBasedResponsibilitiesWithRestriction.map(r => r.id);
+
+        const records = await MemberResponsibilityRecord.select()
+            .where('responsibilityId', responsibilityIds)
+            .where('organizationId', organization.id)
+            .where(SQL.where('endDate', SQLWhereSign.Greater, now).or('endDate', null))
+            .fetch();
+
+        let totalSteps = 0;
         let finishedSteps = 0;
 
-        const hasFullAdmin = admins.some(a => a.permissions && a.permissions.forOrganization(organization)?.hasFullAccess());
+        const groups = await Group.getAll(organization.id, organization.periodId);
 
-        if(hasFullAdmin) {
-            finishedSteps++;
-        }
+        const flatResponsibilities: {responsibility: MemberResponsibility, group: Group | null}[] = organizationBasedResponsibilitiesWithRestriction
+        .flatMap(responsibility => {
+            const defaultAgeGroupIds = responsibility.defaultAgeGroupIds;
+            if(defaultAgeGroupIds === null) {
+                const item: {responsibility: MemberResponsibility, group: Group | null} = {
+                    responsibility,
+                    group: null
+                }
+                return [item];
+            }
 
-        for(const responsibility of platform.config.responsibilities.filter(r => r.organizationBased)) {
+            return groups
+                .filter(g => g.defaultAgeGroupId !== null && defaultAgeGroupIds.includes(g.defaultAgeGroupId))
+                .map(group => {
+                    return {
+                        responsibility,
+                        group
+                    }
+                });
+        });
+
+        for(const {responsibility, group} of flatResponsibilities) {
             const { minimumMembers: min, maximumMembers: max } = responsibility;
 
             if (min === null && max === null) {
@@ -251,31 +281,32 @@ export class SetupStepUpdater {
             totalSteps++;
 
             const responsibilityId = responsibility.id;
-            let totalAdminsWithThisResponsibility = 0;
+            let totalRecordsWithThisResponsibility = 0;
 
-            for (const admin of admins) {
-                if (admin.permissions?.organizationPermissions.has(responsibilityId)) {
-                    totalAdminsWithThisResponsibility++;
+            if(group === null) {
+                for (const record of records) {
+                    if (record.responsibilityId === responsibilityId) {
+                        totalRecordsWithThisResponsibility++;
+                    }
+                }
+            } else {
+                for (const record of records) {
+                    if (record.responsibilityId === responsibilityId && record.groupId === group.id) {
+                        totalRecordsWithThisResponsibility++;
+                    }
                 }
             }
 
-            if (max !== null && totalAdminsWithThisResponsibility > max) {
+            if (max !== null && totalRecordsWithThisResponsibility > max) {
                 continue;
             }
 
-            if (min !== null && totalAdminsWithThisResponsibility < min) {
+            if (min !== null && totalRecordsWithThisResponsibility < min) {
                 continue;
             }
 
             finishedSteps++;
         }
-        // const query = SQL.select()
-        // .from(SQL.table('member_responsibility_records'))
-        // .where(SQL.column('organizationId'), _organization.id);
-
-        // const result = await query.count();
-
-        // const test = await MemberResponsibilityRecord.where({organizationId: _organization.id});
 
         setupSteps.update(SetupStepType.Functions, {
             totalSteps,
