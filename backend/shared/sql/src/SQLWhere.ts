@@ -20,92 +20,75 @@ function assertWhereable(o: any): any {
 
 export function Whereable<Sup extends Constructor<{}>>(Base: Sup) {
     return class extends Base {
-        _where: SQLWhere|null = null
+        _where: SQLWhere | null = null
 
-        parseWhere(...[whereOrColumn, signOrValue, value]: ParseWhereArguments): SQLWhere {
-            if (signOrValue === undefined) {
-                return whereOrColumn as SQLWhere;
-            }
-
-            if (value !== undefined) {
-                return new SQLWhereEqual(
-                    typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn, 
-                    signOrValue as SQLWhereSign, 
-                    readDynamicSQLExpression(value)
-                )
-            }
-            return new SQLWhereEqual(
-                typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn, 
-                SQLWhereSign.Equal,
-                readDynamicSQLExpression(signOrValue)
-            )
+        get __where() {
+            return this._where ?? new SQLEmptyWhere();
         }
-
 
         where<T>(this: T, ...args: ParseWhereArguments): T {
             const me = assertWhereable(this)
-
-            const w = me.parseWhere(...args);
-            if (!me._where) {
-                me._where = w;
-                return me;
-            }
-            me._where = me._where.and(w);
+            me._where = me.__where.and(...args)
             return me;
         }
 
         andWhere<T>(this: T, ...args: ParseWhereArguments): T {
             const me = assertWhereable(this)
-            return me.where(...args)
+            me._where = me.__where.and(...args)
+            return me;
         }
 
         orWhere<T>(this: T, ...args: ParseWhereArguments): T {
             const me = assertWhereable(this)
-            const w = me.parseWhere(...args);
-            if (!me._where) {
-                me._where = w;
-                return this;
-            }
-            me._where = me._where.or(w);
-            return this;
+            me._where = me.__where.or(...args)
+            return me;
         }
 
         whereNot<T>(this: T, ...args: ParseWhereArguments): T {
             const me = assertWhereable(this)
-            const w = new SQLWhereNot(me.parseWhere(...args));
-            if (!me._where) {
-                me._where = w;
-                return this;
-            }
-            me._where = me._where.and(w);
-            return this;
+            me._where = me.__where.andNot(...args)
+            return me;
         }
 
         andWhereNot<T>(this: T, ...args: ParseWhereArguments): T {
             const me = assertWhereable(this)
-            return me.whereNot(...args)
+            me._where = me.__where.andNot(...args)
+            return me;
         }
 
         orWhereNot<T>(this: T, ...args: ParseWhereArguments): T {
             const me = assertWhereable(this)
-            const w = new SQLWhereNot(me.parseWhere(...args));
-            if (!me._where) {
-                me._where = w;
-                return this;
-            }
-            me._where = me._where.or(w);
-            return this;
+            me._where = me.__where.orNot(...args)
+            return me;
         }
     }
 }
 
 export abstract class SQLWhere implements SQLExpression {
-    and(...where: SQLWhere[]): SQLWhere {
-        return new SQLWhereAnd([this, ...where]);
+    and(...args: ParseWhereArguments): SQLWhere {
+        return new SQLWhereAnd([this, SQLWhereEqual.parseWhere(...args)]);
     }
 
-    or(...where: SQLWhere[]): SQLWhere {
-        return new SQLWhereOr([this, ...where]);
+    or(...args: ParseWhereArguments): SQLWhere {
+        return new SQLWhereOr([this, SQLWhereEqual.parseWhere(...args)]);
+    }
+
+    andNot(...args: ParseWhereArguments): SQLWhere {
+        return new SQLWhereAnd([
+            this, 
+            new SQLWhereNot(
+                SQLWhereEqual.parseWhere(...args)
+            )
+        ]);
+    }
+
+    orNot(...args: ParseWhereArguments): SQLWhere {
+        return new SQLWhereOr([
+            this, 
+            new SQLWhereNot(
+                SQLWhereEqual.parseWhere(...args)
+            )
+        ]);
     }
 
     get isSingle(): boolean {
@@ -114,6 +97,33 @@ export abstract class SQLWhere implements SQLExpression {
 
     abstract getSQL(options?: SQLExpressionOptions): SQLQuery
 }
+
+export class SQLEmptyWhere extends SQLWhere {
+    and(...args: ParseWhereArguments): SQLWhere {
+        return SQLWhereEqual.parseWhere(...args)
+    }
+
+    or(...args: ParseWhereArguments): SQLWhere {
+        return SQLWhereEqual.parseWhere(...args)
+    }
+
+    andNot(...args: ParseWhereArguments): SQLWhere {
+        return new SQLWhereNot(
+            SQLWhereEqual.parseWhere(...args)
+        )
+    }
+
+    orNot(...args: ParseWhereArguments): SQLWhere {
+        return new SQLWhereNot(
+            SQLWhereEqual.parseWhere(...args)
+        )
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        throw new Error('Empty where')
+    }
+}
+
 
 export enum SQLWhereSign {
     Equal = '=',
@@ -128,6 +138,25 @@ export class SQLWhereEqual extends SQLWhere {
     column: SQLExpression;
     sign = SQLWhereSign.Equal
     value: SQLExpression;
+
+    static parseWhere(...[whereOrColumn, signOrValue, value]: ParseWhereArguments): SQLWhere {
+        if (signOrValue === undefined) {
+            return whereOrColumn as SQLWhere;
+        }
+
+        if (value !== undefined) {
+            return new SQLWhereEqual(
+                typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn, 
+                signOrValue as SQLWhereSign, 
+                readDynamicSQLExpression(value)
+            )
+        }
+        return new SQLWhereEqual(
+            typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn, 
+            SQLWhereSign.Equal,
+            readDynamicSQLExpression(signOrValue)
+        )
+    }
     
     constructor (column: SQLExpression, sign: SQLWhereSign, value: SQLExpression)
     constructor (column: SQLExpression, value: SQLExpression)

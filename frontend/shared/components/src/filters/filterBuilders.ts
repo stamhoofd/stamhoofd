@@ -425,22 +425,6 @@ organizationsUIFilterBuilders.unshift(
     })
 )
 
-export const invoicesUIFilterBuilders: UIFilterBuilders = [
-    new NumberFilterBuilder({
-        name: 'Nummer',
-        key: 'number'
-    }),
-];
-
-// Recursive: self referencing groups
-invoicesUIFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: invoicesUIFilterBuilders
-    })
-)
-
-
-
 // Events
 export function getEventUIFilterBuilders(platform: Platform, organizations: Organization[]) {
     const all: UIFilterBuilder<UIFilter>[]  = []

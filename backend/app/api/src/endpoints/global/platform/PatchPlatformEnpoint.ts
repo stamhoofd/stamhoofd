@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder, patchObject } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Platform, RegistrationPeriod } from "@stamhoofd/models";
+import { Organization, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct } from "@stamhoofd/structures";
 
 import { SimpleError } from "@simonbackx/simple-errors";
@@ -111,6 +111,44 @@ export class PatchPlatformEndpoint extends Endpoint<
                 });
             }
             platform.periodId = period.id;
+        }
+
+        if (request.body.membershipOrganizationId !== undefined) {
+            if (!Context.auth.hasPlatformFullAccess()) {
+                throw Context.auth.error()
+            }
+
+            if (request.body.membershipOrganizationId) {
+                const organization = await Organization.getByID(request.body.membershipOrganizationId)
+                if (!organization) {
+                    throw new SimpleError({
+                        code: "invalid_organization",
+                        message: "Invalid organization"
+                    })
+                }
+                platform.membershipOrganizationId = organization.id
+            } else {
+                platform.membershipOrganizationId = null
+            }
+        }
+
+        if (request.body.membershipOrganizationId !== undefined) {
+            if (!Context.auth.hasPlatformFullAccess()) {
+                throw Context.auth.error()
+            }
+
+            if (request.body.membershipOrganizationId) {
+                const organization = await Organization.getByID(request.body.membershipOrganizationId)
+                if (!organization) {
+                    throw new SimpleError({
+                        code: "invalid_organization",
+                        message: "Invalid organization"
+                    })
+                }
+                platform.membershipOrganizationId = organization.id
+            } else {
+                platform.membershipOrganizationId = null
+            }
         }
 
         await platform.save();

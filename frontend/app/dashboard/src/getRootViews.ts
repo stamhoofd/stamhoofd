@@ -280,16 +280,21 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
             action: async function () {
                 window.open('https://'+this.$t('shared.domains.marketing')+'/docs', '_blank')
             }
-        }),
-        new TabBarItem({
-            icon: 'feedback',
-            name: 'Feedback',
-            action: async function () {
-                const NoltHelper = (await import('./classes/NoltHelper'))
-                await NoltHelper.openNolt(reactiveSession, false)
-            }
         })
     ]
+
+    if (STAMHOOFD.NOLT_URL) {
+        sharedMoreItems.push(
+            new TabBarItem({
+                icon: 'feedback',
+                name: 'Feedback',
+                action: async function () {
+                    const NoltHelper = (await import('./classes/NoltHelper'))
+                    await NoltHelper.openNolt(reactiveSession, false)
+                }
+            })
+        )
+    }
 
     // todo: accept terms view
     // if (this.fullAccess && !this.$organization.meta.didAcceptLatestTerms) {

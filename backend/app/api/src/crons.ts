@@ -1,21 +1,14 @@
 import { Database } from '@simonbackx/simple-database';
 import { logger, StyledText } from "@simonbackx/simple-logging";
 import { I18n } from '@stamhoofd/backend-i18n';
-import { Email } from '@stamhoofd/email';
-import { EmailAddress } from '@stamhoofd/email';
-import { Group, STPackage, Webshop } from '@stamhoofd/models';
-import { Organization } from '@stamhoofd/models';
-import { Payment } from '@stamhoofd/models';
-import { Registration } from '@stamhoofd/models';
-import { STInvoice } from '@stamhoofd/models';
-import { STPendingInvoice } from '@stamhoofd/models';
+import { Email, EmailAddress } from '@stamhoofd/email';
+import { Group, Organization, Payment, Registration, STPackage, STPendingInvoice, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
 
-import { ExchangeSTPaymentEndpoint } from './endpoints/global/payments/ExchangeSTPaymentEndpoint';
 import { ExchangePaymentEndpoint } from './endpoints/organization/shared/ExchangePaymentEndpoint';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
@@ -471,12 +464,7 @@ async function checkPayments() {
                     continue;
                 }
             } else {
-                // Try stamhoofd payment
-                const invoices = await STInvoice.where({ paymentId: payment.id })
-                if (invoices.length === 1) {
-                    await ExchangeSTPaymentEndpoint.pollStatus(payment, invoices[0])
-                    continue
-                }
+                // deprecated
             }
 
             // Check expired
@@ -599,52 +587,6 @@ async function checkReservedUntil() {
     }
 }
 
-
-// Wait for midnight before checking billing
-let lastBillingCheck: Date | null = new Date()
-let lastBillingId = ""
-async function checkBilling() {
-    if (STAMHOOFD.environment === "development") {
-        return
-    }
-
-    console.log("[BILLING] Checking billing...")
-
-    // Wait for the next day before doing a new check
-    if (lastBillingCheck && Formatter.dateIso(lastBillingCheck) === Formatter.dateIso(new Date())) {
-        console.log("[BILLING] Billing check done for today")
-        return
-    }
-    
-    const organizations = await Organization.where({ id: { sign: '>', value: lastBillingId } }, {
-        limit: 10,
-        sort: ["id"]
-    })
-
-    if (organizations.length == 0) {
-        // Wait again until next day
-        lastBillingId = ""
-        lastBillingCheck = new Date()
-        return
-    }
-
-    for (const organization of organizations) {
-        console.log("[BILLING] Checking billing for "+organization.name)
-
-        try {
-            await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
-                await STPendingInvoice.addAutomaticItems(organization)
-            });
-        } catch (e) {
-            console.error(e)
-        }
-        
-    }
-
-    lastBillingId = organizations[organizations.length - 1].id
-    
-}
-
 let lastDripCheck: Date | null = null
 let lastDripId = ""
 async function checkDrips() {
@@ -720,12 +662,6 @@ registeredCronJobs.push({
 registeredCronJobs.push({
     name: 'checkPostmarkBounces',
     method: checkPostmarkBounces,
-    running: false
-});
-
-registeredCronJobs.push({
-    name: 'checkBilling',
-    method: checkBilling,
     running: false
 });
 

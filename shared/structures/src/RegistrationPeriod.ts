@@ -67,7 +67,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Group) })
     groups: Group[] = []
 
-    @field({ decoder: SetupSteps, ...NextVersion })
+    @field({ decoder: SetupSteps, version: 324 })
     setupSteps = SetupSteps.create({})
 
     /**

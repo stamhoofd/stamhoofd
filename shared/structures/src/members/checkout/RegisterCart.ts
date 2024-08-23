@@ -164,6 +164,31 @@ export class RegisterCart {
         }
     }
 
+    canAddBalanceItem(item: BalanceItemCartItem) {
+        if (this.singleOrganization) {
+            if (item.item.organizationId !== this.singleOrganization?.id) {
+                return false;
+            }
+        }
+
+        // Check duplicate
+        for (const i of this.balanceItems) {
+            if (i.item.id === item.item.id) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    addBalanceItem(item: BalanceItemCartItem) {
+        if (!this.canAddBalanceItem(item)) {
+            return;
+        }
+
+        this.balanceItems.push(item)
+    }
+
     get isEmpty() {
         return this.count === 0
     }

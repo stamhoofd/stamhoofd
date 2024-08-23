@@ -70,4 +70,8 @@ export class PaymentGeneral extends Payment {
         
         return str+"</tbody></table>";
     }
+
+    getShortDescription() {
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(Formatter.uniqueArray(this.balanceItemPayments.map(p => p.balanceItem.paymentShortDescription).filter(p => p !== null)), ", ", " en "))
+    }
 }

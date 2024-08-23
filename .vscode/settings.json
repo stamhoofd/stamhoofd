@@ -86,6 +86,7 @@
         "**/node_modules": true,
         "**/yarn-error.log": true,
         ".yarn/releases": true,
+        "**/.cache": true,
         "LICENSE": true
     },
     "search.useIgnoreFiles": false,

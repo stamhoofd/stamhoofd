@@ -18,15 +18,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, CountResponse, ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelSheetFilter, ExcelWorkbookFilter, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import { ExcelExportType, LimitedFilteredRequest, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref } from 'vue';
-import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
 
 const props = withDefaults(
     defineProps<{
@@ -66,8 +65,11 @@ defineRoutes([
             )
 
             if (payments.results.length === 1) {
+                const table = modernTableView.value
                 return {
-                    initialPayment: payments.results[0]
+                    payment: payments.results[0],
+                    getNext: table?.getNext,
+                    getPrevious: table?.getPrevious,
                 }
             }
             Toast.error('Betaling niet gevonden').show()
@@ -75,10 +77,10 @@ defineRoutes([
         },
 
         propsToParams(props) {
-            if (!("initialPayment" in props) || typeof props.initialPayment !== 'object' || props.initialPayment === null || !(props.initialPayment instanceof PaymentGeneral)) {
+            if (!("payment" in props) || typeof props.payment !== 'object' || props.payment === null || !(props.payment instanceof PaymentGeneral)) {
                 throw new Error('Missing payment')
             }
-            const payment = props.initialPayment;
+            const payment = props.payment;
 
             return {
                 params: {
@@ -93,7 +95,6 @@ const configurationId = computed(() => {
     return 'payments-' + (props.methods?.join('-') ?? '')
 })
 
-const context = useContext();
 const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 const filterBuilders = paymentsUIFilterBuilders
@@ -237,7 +238,11 @@ const allColumns: Column<ObjectType, any>[] = [
 ];
 
 async function showPayment(payment: PaymentGeneral) {
-    await $navigate(Routes.Payment, {properties: {initialPayment: payment}})
+    await $navigate(Routes.Payment, {properties: {
+        payment,
+        getNext: modernTableView.value?.getNext,
+        getPrevious: modernTableView.value?.getPrevious
+    }})
 }
 
 const actions: TableAction<ObjectType>[] = [

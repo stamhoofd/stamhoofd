@@ -208,7 +208,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
-import EditGroupRestrictionsView from './edit/EditGroupRestrictionsView.vue';
 
 const props = defineProps<{
     group: Group;
@@ -407,10 +406,6 @@ async function editGeneral(animated = true) {
             displayedComponent
         ]
     });
-}
-
-async function editRestrictions(animated = true) {
-    await displayEditComponent(EditGroupRestrictionsView, animated)
 }
 
 async function editPermissions(animated = true) {

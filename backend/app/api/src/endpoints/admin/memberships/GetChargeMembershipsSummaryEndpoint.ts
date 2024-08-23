@@ -2,6 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SQL, SQLAlias, SQLCount, SQLDistinct, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context';
+import { QueueHandler } from '@stamhoofd/queues';
 
 
 type Params = Record<string, never>;
@@ -28,6 +29,14 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
 
         if (!Context.auth.hasPlatformFullAccess()) {
             throw Context.auth.error()
+        }
+
+        if (QueueHandler.isRunning('charge-memberships')) {
+            return new Response(
+                ChargeMembershipsSummary.create({
+                    running: true
+                })
+            );
         }
         
         const query = SQL
@@ -63,12 +72,8 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                     new SQLAlias('data__price')
                 )
             )
-            .from(
-                SQL.table('member_platform_memberships')
-            )
-            .where(SQL.column('invoiceId'), null)
-            .andWhere(SQL.column('invoiceItemDetailId'), null);
-
+            .from('member_platform_memberships')
+            .where('balanceItemId', null);
 
         const result = await query.fetch();
         const members = result[0]['data']['members'] as number;
@@ -78,6 +83,7 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
 
         return new Response(
             ChargeMembershipsSummary.create({
+                running: false,
                 memberships: memberships ?? 0,
                 members: members ?? 0,
                 price: price ?? 0,
@@ -122,17 +128,13 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                     new SQLAlias('data__price')
                 )
             )
-            .from(
-                SQL.table('member_platform_memberships')
+            .from('member_platform_memberships')
+            .where('balanceItemId', null)
+            .groupBy(
+                SQL.column('member_platform_memberships', 'membershipTypeId')
             );
-        query.where(SQL.column('invoiceId'), null)
-        query.andWhere(SQL.column('invoiceItemDetailId'), null)
-        query.groupBy(SQL.column('member_platform_memberships', 'membershipTypeId'));
-
 
         const result = await query.fetch();
-        console.log(result);
-
         const membershipsPerType = new Map<string, ChargeMembershipsTypeSummary>();
 
         for (const row of result) {

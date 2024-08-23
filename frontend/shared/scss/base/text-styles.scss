@@ -984,15 +984,30 @@
         line-height: var(--block-width, 40px);
         font-size: 14px;
         font-weight: $font-weight-bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         @media (max-width: 400px) {
             margin-right: 0px;
         }
 
         > span {
+            display: block;
             opacity: 0.8;
             vertical-align: middle;
             margin-right: -3px; // visual correction
+        }
+
+        > img {
+            display: block;
+        }
+    }
+
+    &.gray {
+        figure {
+            background: $color-background-shade;
+            color: $color-dark;
         }
     }
 

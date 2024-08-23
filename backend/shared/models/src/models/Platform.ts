@@ -20,6 +20,9 @@ export class Platform extends Model {
 
     @column({ type: "string" })
     periodId: string
+    
+    @column({ type: "string", nullable: true })
+    membershipOrganizationId: string | null = null
 
     @column({ type: "json", decoder: PlatformPrivateConfig })
     privateConfig: PlatformPrivateConfig = PlatformPrivateConfig.create({})

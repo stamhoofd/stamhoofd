@@ -1,10 +1,11 @@
 
-import { column, Model } from "@simonbackx/simple-database";
+import { column, Model, SQLResultNamespacedRow } from "@simonbackx/simple-database";
 import { v4 as uuidv4 } from "uuid";
 import { Platform } from "./Platform";
 import { PlatformMembershipTypeBehaviour } from "@stamhoofd/structures";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Formatter } from "@stamhoofd/utility";
+import { SQL, SQLSelect } from "@stamhoofd/sql";
 
 export class MemberPlatformMembership extends Model {
     static table = "member_platform_memberships";
@@ -39,10 +40,7 @@ export class MemberPlatformMembership extends Model {
     expireDate: Date | null = null;
 
     @column({ type: "string", nullable: true })
-    invoiceItemDetailId: string | null = null;
-
-    @column({ type: "string", nullable: true })
-    invoiceId: string | null = null;
+    balanceItemId: string | null = null;
 
     @column({ type: "integer" })
     price = 0;
@@ -81,7 +79,7 @@ export class MemberPlatformMembership extends Model {
     updatedAt: Date
 
     canDelete() {
-        if (this.invoiceId || this.invoiceItemDetailId) {
+        if (this.balanceItemId) {
             return false;
         }
         return true;
@@ -92,7 +90,7 @@ export class MemberPlatformMembership extends Model {
     }
 
     async calculatePrice() {
-        if (this.invoiceId || this.invoiceItemDetailId) {
+        if (this.balanceItemId) {
             return;
         }
 
@@ -119,7 +117,6 @@ export class MemberPlatformMembership extends Model {
 
         const priceConfig = periodConfig.getPriceForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? this.startDate : (this.createdAt ?? new Date()));
         
-
         if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
             // Make sure time is equal between start and end date
             let startBrussels = Formatter.luxon(this.startDate);
@@ -139,5 +136,23 @@ export class MemberPlatformMembership extends Model {
             this.endDate = periodConfig.endDate;
             this.expireDate = periodConfig.expireDate;
         }
+    }
+
+    /**
+     * Experimental: needs to move to library
+     */
+    static select() {
+        const transformer = (row: SQLResultNamespacedRow): MemberPlatformMembership => {
+            const d = (this as typeof MemberPlatformMembership & typeof Model).fromRow(row[this.table] as any) as MemberPlatformMembership|undefined
+
+            if (!d) {
+                throw new Error("MemberPlatformMembership not found")
+            }
+
+            return d;
+        }
+        
+        const select = new SQLSelect(transformer, SQL.wildcard())
+        return select.from(SQL.table(this.table))
     }
 }

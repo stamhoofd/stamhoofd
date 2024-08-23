@@ -19,6 +19,7 @@
         <STList>
             <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.id" class="right-stack" :registration="registration" :checkout="checkout" />
             <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
+            <BalanceItemCartItemRow v-for="item in checkout.cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
         </STList>
         
         <p v-if="checkout.cart.isEmpty" class="info-box">
@@ -53,6 +54,7 @@ import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue'
 import RegisterItemRow from './components/group/RegisterItemRow.vue';
 import SearchOrganizationMembersForGroupView from './SearchOrganizationMembersForGroupView.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
 
 const props = defineProps<{
     checkout: RegisterCheckout, // we should auto assign this checkout to all search results and newly created members
