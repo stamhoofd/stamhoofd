@@ -86,7 +86,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                     platform.config = patchObject(platform.config, newConfig);
                     const currentConfig = platform.config;
 
-                    await this.updateSetupSteps(
+                    this.updateSetupSteps(
                         currentConfig,
                         newConfig,
                         oldConfig
@@ -117,7 +117,7 @@ export class PatchPlatformEndpoint extends Endpoint<
         return new Response(await Platform.getSharedPrivateStruct());
     }
 
-    private async updateSetupSteps(
+    private updateSetupSteps(
         currentConfig: PlatformConfig,
         newConfig: PlatformConfig | AutoEncoderPatchType<PlatformConfig>,
         oldConfig: PlatformConfig
@@ -149,9 +149,9 @@ export class PatchPlatformEndpoint extends Endpoint<
         }
 
         if (shouldUpdate) {
-            await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod(
+            SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod(
                 { premiseTypes, responsibilities }
-            );
+            ).catch(console.error);
         }
     }
 
