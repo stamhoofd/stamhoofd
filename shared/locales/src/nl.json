@@ -167,44 +167,20 @@
             "structured": "Gestructureerde mededeling"
         }
     },
-    "setup": {
-        "Premises": {
-            "review": {
-                "title": "Kijk de gebouwen na",
-                "description": "Kijk de adressen van de gebouwen na."
-            },
-            "todo": {
-                "title": "Voeg gebouwen toe",
-                "description": "Voeg gebouwen toe of verwijder gebouwen."
-            }
-        },
-        "Groups": {
-            "review": {
-                "title": "Kijk de groepen na",
-                "description": "Kijk of de prijzen, de leeftijd en de beschrijving correct zijn ingesteld."
-            }
-        },
-        "Functions": {
-            "review": {
-                "title": "Kijk de functies na",
-                "description": "Kijk de toegansrechten en functies na."
-            },
-            "todo": {
-                "title": "Voeg functies toe",
-                "description": "Voeg een hoofdbeheerder toe."
-            }
-        },
-        "Companies": {
-            "review": {
-                "title": "Kijk de facturatiegegevens na",
-                "description": "Kijk na of de facturatiegegevens correct zijn."
-            },
-            "todo": {
-                "title": "Voeg facturatiegegevens toe",
-                "description": "Voeg minstens één juridische entiteit toe."
-            }
-        }
-    },
+    "setup.Premises.review.title": "Kijk de gebouwen na",
+    "setup.Premises.review.description": "Kijk de adressen van de gebouwen na.",
+    "setup.Premises.todo.title": "Voeg gebouwen toe",
+    "setup.Premises.todo.description": "Voeg gebouwen toe of verwijder gebouwen.",
+    "setup.Groups.review.title": "Kijk de groepen na",
+    "setup.Groups.review.description": "Kijk of de prijzen, de leeftijd en de beschrijving correct zijn ingesteld.",
+    "setup.Functions.review.title": "Kijk de functies na",
+    "setup.Functions.review.description": "Kijk de toegangsrechten en functies na.",
+    "setup.Functions.todo.title": "Voeg functies toe",
+    "setup.Functions.todo.description": "Voeg alle verplichte functies toe.",
+    "setup.Companies.review.title": "Kijk de facturatiegegevens na",
+    "setup.Companies.review.description": "Kijk na of de facturatiegegevens correct zijn.",
+    "setup.Companies.todo.title": "Voeg facturatiegegevens toe",
+    "setup.Companies.todo.description": "Voeg minstens één juridische entiteit toe.",
     "shared.address": "Adres",
     "shared.confirmDelete": "Ja, verwijderen",
     "Verwijderen": "Verwijderen",
