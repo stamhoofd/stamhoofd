@@ -72,6 +72,8 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
         }
 
+        let doUpdateSetupSteps: (() => any) | null = null;
+
         if (request.body.config) {
             if (!Context.auth.hasPlatformFullAccess()) {
                 throw Context.auth.error();
@@ -86,7 +88,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                     platform.config = patchObject(platform.config, newConfig);
                     const currentConfig = platform.config;
 
-                    this.updateSetupSteps(
+                    doUpdateSetupSteps = this.updateSetupSteps(
                         currentConfig,
                         newConfig,
                         oldConfig
@@ -152,6 +154,11 @@ export class PatchPlatformEndpoint extends Endpoint<
         }
 
         await platform.save();
+
+        if(doUpdateSetupSteps) {
+            doUpdateSetupSteps();
+        }
+        
         return new Response(await Platform.getSharedPrivateStruct());
     }
 
@@ -159,7 +166,7 @@ export class PatchPlatformEndpoint extends Endpoint<
         currentConfig: PlatformConfig,
         newConfig: PlatformConfig | AutoEncoderPatchType<PlatformConfig>,
         oldConfig: PlatformConfig
-    ) {
+    ): (() => any) | null {
         let shouldUpdate = false;
         const premiseTypes: PlatformPremiseType[] = currentConfig.premiseTypes;
         const responsibilities: MemberResponsibility[] =
@@ -187,10 +194,12 @@ export class PatchPlatformEndpoint extends Endpoint<
         }
 
         if (shouldUpdate) {
-            SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod(
+            return () => SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod(
                 { premiseTypes, responsibilities }
             ).catch(console.error);
         }
+
+        return null;
     }
 
     private shouldUpdateSetupStepPremise(
