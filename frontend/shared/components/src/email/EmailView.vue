@@ -453,7 +453,7 @@ async function showToMenu(event: MouseEvent) {
                 ])
             })
         }),
-        [
+        /*[
             new ContextMenuItem({
                 name: groupByEmail.value ? "Eén e-mail per e-mailadres" : "Aparte e-mails per lid (aanbevolen)",
                 childMenu: new ContextMenu([
@@ -477,7 +477,7 @@ async function showToMenu(event: MouseEvent) {
                     ]
                 ])
             })
-        ]
+        ]*/
     ])
 
     menu.show({ button: event.currentTarget }).catch(console.error)
