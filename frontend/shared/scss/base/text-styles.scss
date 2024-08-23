@@ -908,6 +908,10 @@
         width: var(--block-width, 40px);
         height: var(--block-width, 40px);
 
+        img {
+            border-radius: $border-radius;
+        }
+
         @media (max-width: 400px) {
             margin-right: 0px;
         }

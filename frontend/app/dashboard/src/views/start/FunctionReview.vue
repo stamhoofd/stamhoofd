@@ -1,7 +1,7 @@
 <template>
     <STListItem>
         <template #left>
-            <IconWithProgress icon="group" :progress="progress" :is-optional="isOptional" :has-warning="!isOptional && progress.count === 0" />
+            <IconWithProgress icon="group" :progress="progress" :is-optional="isOptional" :has-warning="!isOptional && progress.count === 0" :group="group" />
         </template>
         <h3 class="style-title-list">
             {{ name }}
