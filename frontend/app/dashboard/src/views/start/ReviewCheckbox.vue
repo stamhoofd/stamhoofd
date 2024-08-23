@@ -1,5 +1,5 @@
 <template>
-    <STList v-if="$isDone">
+    <STList v-if="step && $isDone">
         <STListItem class="left-center right-stack" :selectable="true" element-name="label">
             <template #left>
                 <div class="progress-container">
@@ -22,20 +22,23 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, TransitionFade } from '@stamhoofd/components';
-import { SetupStep, SetupStepType } from '@stamhoofd/structures';
+import { CenteredMessage, TransitionFade, useOrganization } from '@stamhoofd/components';
+import { SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useReview } from './useReview';
 
-const props = defineProps<{step: SetupStep, type: SetupStepType}>();
+const props = defineProps<{type: SetupStepType}>();
 const review = useReview();
 const pop = usePop();
 const isSaving = ref(false);
 
-const $review = computed(() => props.step.review);
+const organization$ = useOrganization();
+const step = computed(() => organization$.value?.period.setupSteps.get(props.type));
+
+const $review = computed(() => step.value?.review);
 const $isReviewed = computed(() => $review.value !== null);
-const $isDone = computed(() => props.step.isDone);
+const $isDone = computed(() => step.value?.isDone);
 
 async function markReviewed () {
     

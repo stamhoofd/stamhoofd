@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="isLoading" />
-    <ReviewSetupStepView v-else :type="SetupStepType.Functions" :step="step">
+    <ReviewSetupStepView v-else :type="SetupStepType.Functions">
         <template #top>
             <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen ga je naar het tabblad "Leden". Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen. </p>
         </template>
@@ -47,12 +47,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Group, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStep, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
+import { Group, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
 import { computed, Ref, ref, watch } from 'vue';
 import FunctionReview from './FunctionReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
-
-defineProps<{step: SetupStep}>();
 
 const $organization = useOrganization();
 const $platform = usePlatform();

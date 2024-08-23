@@ -24,9 +24,9 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, STListItem } from '@stamhoofd/components';
+import { STListItem } from '@stamhoofd/components';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
-import { ComponentOptions, computed, ref } from 'vue';
+import { ComponentOptions, computed } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
 import FunctionsReview from './FunctionsReview.vue';
 import GroupsReview from './GroupsReview.vue';
@@ -37,8 +37,6 @@ const props = defineProps<{type: SetupStepType, step: SetupStep, saveHandler: (p
 const $isReviewed = computed(() => !props.step.shouldBeReviewed);
 const $isDone = computed(() => props.step.isDone);
 const $navigate = useNavigate();
-
-const $saving = ref(false);
 
 enum Routes {
     Premises = 'gebouwen',
@@ -55,52 +53,28 @@ const icons: Record<SetupStepType, string> = {
 
 const icon = computed(() => icons[props.type]);
 
-const paramsToProps = () => {
-    return {
-        step: props.step
-    }
-};
-
 defineRoutes([
     {
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
-        paramsToProps
+        paramsToProps: () => {
+            return {
+                isReview: $isDone.value
+            }
+        }
     },
     {
         url: Routes.Groups,
         present: 'popup',
-        component: GroupsReview as unknown as ComponentOptions,
-        paramsToProps
+        component: GroupsReview as unknown as ComponentOptions
     },
     {
         url: Routes.Functions,
         present: 'popup',
         component: FunctionsReview as unknown as ComponentOptions,
-        paramsToProps
     }
 ]);
-
-async function markReviewed() {
-    if ($saving.value) {
-        return;
-    }
-
-    // todo: translate
-    const isReviewed = $isReviewed.value;
-    const isConfirm = isReviewed ? true : await CenteredMessage.confirm("Ben je zeker dat je deze stap wilt voltooien?", "Voltooi");
-
-    if(isConfirm) {
-        $saving.value = true;
-        try {
-            await props.saveHandler({type: props.type, isReviewed: !isReviewed});
-        } catch (e) {
-            console.error(e);
-        }
-        $saving.value = false;
-    }
-}
 
 async function onClick() {
     switch(props.type) {

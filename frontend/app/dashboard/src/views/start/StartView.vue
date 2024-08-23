@@ -8,7 +8,7 @@
 
             <p>{{ $t('dashboard.start.title-description') }}</p>
             
-            <SetupStepsView/>
+            <SetupStepsView />
         </main>
     </section>
 </template>

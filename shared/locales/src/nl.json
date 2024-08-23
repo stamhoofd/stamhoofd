@@ -169,6 +169,7 @@
     },
     "setup.Premises.review.title": "Kijk de gebouwen na",
     "setup.Premises.review.description": "Kijk de adressen van de gebouwen na.",
+    "setup.Premises.review.checkbox": "Ik heb alle gebouwen nagekeken",
     "setup.Premises.todo.title": "Voeg gebouwen toe",
     "setup.Premises.todo.description": "Voeg gebouwen toe of verwijder gebouwen.",
     "setup.Groups.review.title": "Kijk de groepen na",
