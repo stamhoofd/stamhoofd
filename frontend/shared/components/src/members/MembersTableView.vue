@@ -137,7 +137,7 @@ const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'memberNumber',
-        name: "Lidnummer", 
+        name: "#", 
         getValue: (member) => member.member.details.memberNumber ?? '',
         getStyle: (val) => val ? '' : 'gray',
         format: (val) => val ? val : 'Geen',
