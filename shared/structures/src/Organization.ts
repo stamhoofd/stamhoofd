@@ -21,7 +21,7 @@ export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 325 })
     active = true
 
     @field({ decoder: StringDecoder, nullable: true, version: 3, upgrade: () => null })
