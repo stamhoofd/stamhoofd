@@ -2,18 +2,14 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, STPendingInvoice } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
+import { PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus } from "@stamhoofd/structures";
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
-
-function calculateFee(totalPrice: number, fixed: number, percentageTimes100: number) {
-    return Math.round(fixed + Math.max(1, totalPrice * percentageTimes100 / 100 / 100)); // € 0,21 + 0,2%
-}
 
 type Params = {id: string};
 class Query extends AutoEncoder {
@@ -77,7 +73,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         if (payment.status === status) {
             return;
         }
-        const wasPaid = payment.paidAt !== null
+        // const wasPaid = payment.paidAt !== null
         if (status === PaymentStatus.Succeeded) {
             payment.status = PaymentStatus.Succeeded
             payment.paidAt = new Date()
@@ -97,31 +93,31 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem), organization.id)
             })
 
-            if (!wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
-                // Charge transaction fees
-                let fee = 0
-
-                if (payment.method === PaymentMethod.iDEAL) {
-                    fee = calculateFee(payment.price, 21, 20); // € 0,21 + 0,2%
-                } else if (payment.method === PaymentMethod.Bancontact || payment.method === PaymentMethod.Payconiq) {
-                    fee = calculateFee(payment.price, 24, 20); // € 0,24 + 0,2%
-                } else {
-                    fee = calculateFee(payment.price, 25, 150); // € 0,25 + 1,5%
-                }
-
-                const name = "Transactiekosten voor "+PaymentMethodHelper.getName(payment.method)
-                const item = STInvoiceItem.create({
-                    name,
-                    description: "Via Buckaroo",
-                    amount: 1,
-                    unitPrice: fee,
-                    canUseCredits: false
-                })
-                console.log("Scheduling transaction fee charge for ", payment.id, item)
-                await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
-                    await STPendingInvoice.addItems(organization, [item])
-                });
-            }
+            //if (!wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
+            //    // Charge transaction fees
+            //    let fee = 0
+            //
+            //    if (payment.method === PaymentMethod.iDEAL) {
+            //        fee = calculateFee(payment.price, 21, 20); // € 0,21 + 0,2%
+            //    } else if (payment.method === PaymentMethod.Bancontact || payment.method === PaymentMethod.Payconiq) {
+            //        fee = calculateFee(payment.price, 24, 20); // € 0,24 + 0,2%
+            //    } else {
+            //        fee = calculateFee(payment.price, 25, 150); // € 0,25 + 1,5%
+            //    }
+            //
+            //    const name = "Transactiekosten voor "+PaymentMethodHelper.getName(payment.method)
+            //    const item = STInvoiceItem.create({
+            //        name,
+            //        description: "Via Buckaroo",
+            //        amount: 1,
+            //        unitPrice: fee,
+            //        canUseCredits: false
+            //    })
+            //    console.log("Scheduling transaction fee charge for ", payment.id, item)
+            //    await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
+            //        await STPendingInvoice.addItems(organization, [item])
+            //    });
+            //}
             return;
         }
 

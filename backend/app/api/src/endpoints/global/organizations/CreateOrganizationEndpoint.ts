@@ -1,9 +1,7 @@
-import { Model } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email, EmailInterfaceBase } from '@stamhoofd/email';
-import { EmailVerificationCode, Organization, RegisterCode, User } from '@stamhoofd/models';
+import { EmailVerificationCode, Organization, User } from '@stamhoofd/models';
 import { CreateOrganization, PermissionLevel, Permissions, SignupResponse, UserPermissions } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
@@ -83,14 +81,14 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.name = request.body.organization.name;
 
         // Delay save until after organization is saved, but do validations before the organization is saved
-        let registerCodeModels: Model[] = []
-        let delayEmails: EmailInterfaceBase[] = []
+        // let registerCodeModels: Model[] = []
+        // let delayEmails: EmailInterfaceBase[] = []
 
-        if (request.body.registerCode) {
-            const applied = await RegisterCode.applyRegisterCode(organization, request.body.registerCode)
-            registerCodeModels = applied.models
-            delayEmails = applied.emails
-        }
+        //if (request.body.registerCode) {
+        //    const applied = await RegisterCode.applyRegisterCode(organization, request.body.registerCode)
+        //    registerCodeModels = applied.models
+        //    delayEmails = applied.emails
+        //}
 
         organization.uri = uri;
         organization.meta = request.body.organization.meta
@@ -126,16 +124,16 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         user.permissions.organizationPermissions.set(organization.id, Permissions.create({ level: PermissionLevel.Full }))
         await user.save()
 
-        for (const model of registerCodeModels) {
-            await model.save()
-        }
+        // for (const model of registerCodeModels) {
+        //     await model.save()
+        // }
 
         const code = await EmailVerificationCode.createFor(user, user.email)
         code.send(user, organization, request.i18n)
 
-        for (const email of delayEmails) {
-            Email.sendInternal(email, organization.i18n)
-        }
+        // for (const email of delayEmails) {
+        //     Email.sendInternal(email, organization.i18n)
+        // }
 
         return new Response(SignupResponse.create({
             token: code.token
