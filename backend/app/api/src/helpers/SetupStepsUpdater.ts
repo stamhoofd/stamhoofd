@@ -9,10 +9,9 @@ import { QueueHandler } from "@stamhoofd/queues";
 import { SQL, SQLWhereSign } from "@stamhoofd/sql";
 import {
     MemberResponsibility,
-    PlatformPremiseType,
     Platform as PlatformStruct,
     SetupStepType,
-    SetupSteps,
+    SetupSteps
 } from "@stamhoofd/structures";
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
@@ -29,19 +28,14 @@ export class SetupStepUpdater {
     };
 
     static async updateSetupStepsForAllOrganizationsInCurrentPeriod({
-        batchSize, premiseTypes, responsibilities
-    }: { batchSize?: number, premiseTypes?: PlatformPremiseType[], responsibilities?: MemberResponsibility[] } = {}) {
+        batchSize
+    }: { batchSize?: number } = {}) {
         const tag = "updateSetupStepsForAllOrganizationsInCurrentPeriod";
         QueueHandler.cancel(tag);
 
         await QueueHandler.schedule(tag, async () => {
             const platform = (await Platform.getSharedPrivateStruct()).clone();
-            if(premiseTypes) {
-                platform.config.premiseTypes = premiseTypes;
-            }
-            if(responsibilities) {
-                platform.config.responsibilities = responsibilities;
-            }
+            
             const periodId = platform.period.id;
 
             let lastId = "";

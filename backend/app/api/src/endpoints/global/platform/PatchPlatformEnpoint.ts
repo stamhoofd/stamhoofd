@@ -72,7 +72,7 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
         }
 
-        let doUpdateSetupSteps: (() => any) | null = null;
+        let shouldUpdateSetupSteps = false;
 
         if (request.body.config) {
             if (!Context.auth.hasPlatformFullAccess()) {
@@ -88,7 +88,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                     platform.config = patchObject(platform.config, newConfig);
                     const currentConfig = platform.config;
 
-                    doUpdateSetupSteps = this.updateSetupSteps(
+                    shouldUpdateSetupSteps = this.shouldUpdateSetupSteps(
                         currentConfig,
                         newConfig,
                         oldConfig
@@ -155,18 +155,18 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         await platform.save();
 
-        if(doUpdateSetupSteps) {
-            doUpdateSetupSteps();
+        if(shouldUpdateSetupSteps) {
+            SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod().catch(console.error);
         }
-        
+
         return new Response(await Platform.getSharedPrivateStruct());
     }
 
-    private updateSetupSteps(
+    private shouldUpdateSetupSteps(
         currentConfig: PlatformConfig,
         newConfig: PlatformConfig | AutoEncoderPatchType<PlatformConfig>,
         oldConfig: PlatformConfig
-    ): (() => any) | null {
+    ): boolean {
         let shouldUpdate = false;
         const premiseTypes: PlatformPremiseType[] = currentConfig.premiseTypes;
         const responsibilities: MemberResponsibility[] =
@@ -193,13 +193,7 @@ export class PatchPlatformEndpoint extends Endpoint<
             shouldUpdate = true;
         }
 
-        if (shouldUpdate) {
-            return () => SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod(
-                { premiseTypes, responsibilities }
-            ).catch(console.error);
-        }
-
-        return null;
+        return shouldUpdate;
     }
 
     private shouldUpdateSetupStepPremise(
