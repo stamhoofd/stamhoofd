@@ -96,6 +96,14 @@ export class SessionManagerStatic {
         if (!isReactive(session)) {
             console.error('Passing around a non-reactive session can cause issues. Prevent using a session that is not reactive.')
         }
+
+        // WARNING: currently there is a bug that for the first session is loaded before
+        // the platform is loaded
+        // -> responsibilities not loaded
+        // -> thinks you don't have permission for the current organization
+        // -> the session is complete because privateMeta is not a requirement
+        // -> later, the platform is loaded
+        // -> suddenly you have permissions and the session is no longer considered complete
         if (session.canGetCompleted() && !session.isComplete()) {
             // Always request a new user (the organization is not needed)
             // session.user = null
@@ -149,7 +157,12 @@ export class SessionManagerStatic {
                 // = we don't need to block the UI for this ;)
                 session.updateData(true, false).catch(e => {
                     // Ignore network errors
-                    console.error(e)
+                    console.error("Background fetch session error", e, session)
+                    session.callListeners("preventComplete")
+
+                    if (!session.isComplete()) {
+                        session.setLoadingError(e)
+                    }
                 })
             } else {
                 // Update organization
