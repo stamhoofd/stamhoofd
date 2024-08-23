@@ -57,31 +57,31 @@ class StaticSQL {
         return new SQLDelete()
     }
 
-    leftJoin(namespace: string, table: string);
-    leftJoin(table: string);
-    leftJoin(expression: SQLExpression);
-    leftJoin(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string) {
+    leftJoin(namespace: string, table: string): SQLJoin;
+    leftJoin(table: string): SQLJoin;
+    leftJoin(expression: SQLExpression): SQLJoin;
+    leftJoin(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string): SQLJoin {
         return new SQLJoin(SQLJoinType.Left, parseTable(tableOrExpressiongOrNamespace, table))
     }
 
-    rightJoin(namespace: string, table: string);
-    rightJoin(table: string);
-    rightJoin(expression: SQLExpression);
-    rightJoin(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string) {
+    rightJoin(namespace: string, table: string): SQLJoin;
+    rightJoin(table: string): SQLJoin;
+    rightJoin(expression: SQLExpression): SQLJoin;
+    rightJoin(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string): SQLJoin {
         return new SQLJoin(SQLJoinType.Right, parseTable(tableOrExpressiongOrNamespace, table))
     }
 
-    innerJoin(namespace: string, table: string);
-    innerJoin(table: string);
-    innerJoin(expression: SQLExpression);
-    innerJoin(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string) {
+    innerJoin(namespace: string, table: string): SQLJoin;
+    innerJoin(table: string): SQLJoin;
+    innerJoin(expression: SQLExpression): SQLJoin;
+    innerJoin(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string): SQLJoin {
         return new SQLJoin(SQLJoinType.Inner, parseTable(tableOrExpressiongOrNamespace, table))
     }
 
-    join(namespace: string, table: string);
-    join(table: string);
-    join(expression: SQLExpression);
-    join(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string) {
+    join(namespace: string, table: string): SQLJoin;
+    join(table: string): SQLJoin;
+    join(expression: SQLExpression): SQLJoin;
+    join(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string): SQLJoin {
         return new SQLJoin(SQLJoinType.Inner, parseTable(tableOrExpressiongOrNamespace, table))
     }
 }
