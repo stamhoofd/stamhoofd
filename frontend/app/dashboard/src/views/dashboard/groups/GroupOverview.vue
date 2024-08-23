@@ -60,7 +60,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ responsibility.name }}
+                        {{ responsibility.name }} van {{ group.settings.name }}
                     </h2>
                     <p class="style-description">
                         Bekijk, beheer, exporteer of e-mail leden met deze functie.
