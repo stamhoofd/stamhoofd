@@ -30,7 +30,7 @@ export class Platform extends Model {
     static sharedStruct: PlatformStruct | null = null;
 
     static async getSharedStruct(): Promise<PlatformStruct> {
-        const struct = await this.getSharedPrivateStruct();
+        const struct: PlatformStruct = await this.getSharedPrivateStruct();
         const clone = struct.clone();
         clone.privateConfig = null;
         clone.setShared();
@@ -38,9 +38,9 @@ export class Platform extends Model {
         return clone;
     }
 
-    static async getSharedPrivateStruct(): Promise<PlatformStruct> {
+    static async getSharedPrivateStruct(): Promise<PlatformStruct & {privateConfig: PlatformPrivateConfig}> {
         if (this.sharedStruct && this.sharedStruct.privateConfig) {
-            return this.sharedStruct;
+            return this.sharedStruct as any;
         }
 
         return await QueueHandler.schedule('Platform.getSharedStruct', async () => {
@@ -52,7 +52,7 @@ export class Platform extends Model {
             });
             this.sharedStruct = struct;
 
-            return struct;
+            return struct as any;
         });
     }
 

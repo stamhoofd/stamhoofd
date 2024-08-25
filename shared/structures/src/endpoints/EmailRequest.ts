@@ -64,6 +64,23 @@ export class Recipient extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
     types: string[] = []
 
+    getDefaultReplacements() {
+        return [
+            Replacement.create({
+                token: 'firstName',
+                value: this.firstName ?? ''
+            }),
+            Replacement.create({
+                token: 'lastName',
+                value: this.lastName ?? ''
+            }),
+            Replacement.create({
+                token: 'email',
+                value: this.email
+            }),
+        ]
+    }
+
     merge(recipient: Recipient) {
         this.firstName = this.firstName !== null && this.firstName.length > 0 ? this.firstName : recipient.firstName
         this.lastName = this.lastName !== null && this.lastName.length > 0 ? this.lastName : recipient.lastName

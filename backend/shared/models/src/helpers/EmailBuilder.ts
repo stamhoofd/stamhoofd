@@ -1,14 +1,14 @@
-import { EmailAddress, EmailBuilder } from "@stamhoofd/email";
-import { EmailTemplateType, Recipient, Replacement } from "@stamhoofd/structures";
+import { Email, EmailAddress, EmailBuilder } from "@stamhoofd/email";
+import { EmailTemplateType, OrganizationEmail, Recipient, Replacement } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EmailTemplate, Organization, Platform, User } from "../models";
+import { EmailTemplate, Group, Organization, Platform, User, Webshop } from "../models";
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType,
-    webshopId?: string | null,
-    groupId?: string | null,
+    webshop?: Webshop | null,
+    group?: Group | null,
     organizationId?: string | null
 }
 
@@ -17,22 +17,22 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
     const q = EmailTemplate.select()
         .where('type', data.type)
 
-    if (data.groupId) {
-        q.where('groupId', data.groupId)
+    if (data.group) {
+        q.where('groupId', data.group.id)
     }
 
     if (data.organizationId) {
         q.where('organizationId', data.organizationId)
     }
 
-    if (data.webshopId) {
-        q.where('webshopId', data.webshopId)
+    if (data.webshop) {
+        q.where('webshopId', data.webshop.id)
     }
 
     let templates = await q.limit(1).fetch()
     
     // Specific for organization
-    if (templates.length == 0 && (data.groupId || data.webshopId) && data.organizationId) {
+    if (templates.length == 0 && (data.group?.id || data.webshop?.id) && data.organizationId) {
         templates = await EmailTemplate.select()
             .where('type', data.type)
             .where('organizationId', data.organizationId)
@@ -43,7 +43,7 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
     }
 
     // Default for platform
-    if (templates.length == 0 && (data.groupId || data.webshopId || data.organizationId)) {
+    if (templates.length == 0 && (data.group?.id || data.webshop?.id || data.organizationId)) {
         templates = await EmailTemplate.select()
             .where('type', data.type)
             .where('organizationId', null)
@@ -61,6 +61,105 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
     return templates[0]
 }
 
+export async function getDefaultEmailFrom(organization: Organization|null, options: Pick<EmailBuilderOptions, "type"> & { template: Omit<EmailTemplateOptions, "organizationId"> }) {
+    // When choosing sending domain, prefer using the one with the highest reputation
+    const preferStrong = options.type === 'transactional'
+
+    let preferEmailId: string | null = null;
+
+    if (options.template.group) {
+        preferEmailId = options.template.group.privateSettings.defaultEmailId
+    }
+
+    if (options.template.webshop) {
+        preferEmailId = options.template.webshop.privateMeta.defaultEmailId
+    }
+    
+    if (organization) {
+        // Send confirmation e-mail
+        let from = preferStrong ? organization.getStrongEmail(organization.i18n, false) : organization.uri+"@stamhoofd.email";
+        const sender: OrganizationEmail | undefined = (preferEmailId ? organization.privateMeta.emails.find(e => e.id === preferEmailId) : null) ?? organization.privateMeta.emails.find(e => e.default) ?? organization.privateMeta.emails[0];
+        let replyTo: string | undefined = undefined
+
+        if (sender) {
+            replyTo = sender.email
+
+            // Can we send from this e-mail or reply-to?
+            if (replyTo && organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && sender.email.endsWith("@"+organization.privateMeta.mailDomain)) {
+                from = sender.email
+                replyTo = undefined
+            }
+
+            // Include name in form field
+            if (sender.name) {
+                from = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
+            }  else {
+                from = '"'+organization.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
+            }
+
+            if (replyTo) {
+                if (sender.name) {
+                    replyTo = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
+                }  else {
+                    replyTo = '"'+organization.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
+                }
+            }
+        } else {
+            from = '"'+organization.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
+        }
+
+        return {
+            from, replyTo
+        }
+    }
+
+    const platform = await Platform.getSharedPrivateStruct()
+
+    // Platform
+    // TODO: read from config
+    let from = 'hallo@stamhoofd.be'
+    const sender: OrganizationEmail | undefined = (preferEmailId ? platform.privateConfig.emails.find(e => e.id === preferEmailId) : null) ?? platform.privateConfig.emails.find(e => e.default) ?? platform.privateConfig.emails[0];
+    let replyTo: string | undefined = undefined
+
+    if (sender) {
+        replyTo = sender.email
+
+        // Include name in form field
+        if (sender.name) {
+            from = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
+        }  else {
+            from = '"'+platform.config.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
+        }
+
+        if (replyTo) {
+            if (sender.name) {
+                replyTo = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
+            }  else {
+                replyTo = '"'+platform.config.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
+            }
+        }
+    } else {
+        from = '"'+platform.config.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
+    }
+
+    return {
+        from, replyTo
+    }
+}
+
+
+export async function sendEmailTemplate(organization: Organization|null, options: Omit<EmailBuilderOptions, "subject" | "html" | "from" | "replyTo"> & { template: Omit<EmailTemplateOptions, "organizationId"> }) {
+    if (options.template.webshop) {
+        options.defaultReplacements = [...(options.defaultReplacements ?? []), ...options.template.webshop.meta.getEmailReplacements()]
+    }
+    const builder = await getEmailBuilderForTemplate(organization, {
+        ...options,
+        ...(await getDefaultEmailFrom(organization, options))
+    });
+    if (builder) {
+        Email.schedule(builder)
+    }
+}
 
 export async function getEmailBuilderForTemplate(organization: Organization|null, options: Omit<EmailBuilderOptions, "subject" | "html"> & { template: Omit<EmailTemplateOptions, "organizationId"> }) {
     const template = await getEmailTemplate({
@@ -161,6 +260,8 @@ export async function getEmailBuilder(organization: Organization|null, email: Em
         if (email.defaultReplacements) {
             recipient.replacements.push(...email.defaultReplacements)
         }
+
+        recipient.replacements.push(...recipient.getDefaultReplacements())
 
         if (organization) {
             const extra = organization.meta.getEmailReplacements()

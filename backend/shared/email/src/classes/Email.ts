@@ -332,6 +332,7 @@ class EmailStatic {
         }
 
         try {
+            // todo: read from environment
             if (!data.from.includes('@stamhoofd.be') && !data.from.includes('@stamhoofd.nl')) {
                 // Not supported
                 data.type = 'broadcast'
@@ -384,6 +385,7 @@ class EmailStatic {
     }
 
     getInternalEmailFor(i18n: I18n) {
+        // todo: use default email in platform settings
         return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <'+ (i18n.$t("shared.emails.general")) +'>'
     }
 

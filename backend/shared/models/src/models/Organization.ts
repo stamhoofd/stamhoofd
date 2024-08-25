@@ -863,18 +863,6 @@ export class Organization extends Model {
                 email: f.email,
                 replacements: [
                     Replacement.create({
-                        token: "firstName",
-                        value: f.firstName ?? ""
-                    }),
-                    Replacement.create({
-                        token: "lastName",
-                        value: f.lastName ?? ""
-                    }),
-                    Replacement.create({
-                        token: "email",
-                        value: f.email
-                    }),
-                    Replacement.create({
                         token: "organizationName",
                         value: this.name
                     })

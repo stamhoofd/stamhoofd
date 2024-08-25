@@ -1,11 +1,10 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Email } from "@stamhoofd/email";
 import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { getEmailBuilderForTemplate } from "../helpers/EmailBuilder";
+import { sendEmailTemplate } from "../helpers/EmailBuilder";
 import { GroupBuilder } from "../helpers/GroupBuilder";
 import { Organization } from "./";
 
@@ -272,10 +271,6 @@ export class STPackage extends Model {
                 email: admin.email,
                 replacements: [
                     Replacement.create({
-                        token: "firstName",
-                        value: admin.firstName ?? ""
-                    }),
-                    Replacement.create({
                         token: "organizationName",
                         value: organization.name
                     }),
@@ -300,17 +295,11 @@ export class STPackage extends Model {
         );
         
         // Create e-mail builder
-        const builder = await getEmailBuilderForTemplate(organization, {
+        await sendEmailTemplate(null, {
             template: {
                 type: data.type
             },
-            recipients,
-            from: Email.getInternalEmailFor(organization.i18n),
-            replyTo: data.replyTo
+            recipients
         })
-
-        if (builder) {
-            Email.schedule(builder)
-        }
     }
 }

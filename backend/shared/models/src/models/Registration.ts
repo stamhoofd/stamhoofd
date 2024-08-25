@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
-import { getEmailBuilderForTemplate } from '../helpers/EmailBuilder';
+import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { Document, Group, Organization, User } from './';
 
 export class Registration extends Model {
@@ -252,6 +252,14 @@ export class Registration extends Model {
                     value: member.details.lastName,
                 }),
                 Replacement.create({
+                    token: "firstNameMember",
+                    value: member.details.firstName,
+                }),
+                Replacement.create({
+                    token: "lastNameMember",
+                    value: member.details.lastName,
+                }),
+                Replacement.create({
                     token: "email",
                     value: user.email
                 }),
@@ -293,29 +301,18 @@ export class Registration extends Model {
 
         const recipients = await this.getRecipients(organization, group)
 
-        const {from, replyTo} = organization.getGroupEmail(group)
-
         // Create e-mail builder
-        const builder = await getEmailBuilderForTemplate(organization, {
+        await sendEmailTemplate(organization, {
             template: {
                 type: data.type, 
-                groupId: this.groupId
+                group
             },
             recipients,
-            from,
             type: "transactional",
-            replyTo
         })
-
-        if (builder) {
-            Email.schedule(builder)
-        }
     }
 
     static async sendTransferEmail(user: User, organization: Organization, payment: import('./').Payment) {
-        const data = {
-            type: EmailTemplateType.RegistrationTransferDetails
-        };
         const paymentGeneral = await payment.getGeneralStructure();
         const groupIds = paymentGeneral.groupIds;
 
@@ -386,31 +383,21 @@ export class Registration extends Model {
             })
         ];
 
-        let {from, replyTo} = organization.getDefaultEmail()
+        let group: Group|undefined|null = null;
 
         if (groupIds.length == 1) {
             const Group = (await import('./')).Group
-            const group = await Group.getByID(groupIds[0]);
-            if (group) {
-                const groupEmail = organization.getGroupEmail(group)
-                from = groupEmail.from
-                replyTo = groupEmail.replyTo
-            }
+            group = await Group.getByID(groupIds[0]);
         }
 
         // Create e-mail builder
-        const builder = await getEmailBuilderForTemplate(organization, {
+        await sendEmailTemplate(organization, {
             template: {
-                type: EmailTemplateType.RegistrationTransferDetails
+                type: EmailTemplateType.RegistrationTransferDetails,
+                group
             },
-            recipients,
-            from,
-            replyTo
+            recipients
         })
-
-        if (builder) {
-            Email.schedule(builder)
-        }
     }
 
     shouldIncludeStock() {

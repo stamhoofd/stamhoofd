@@ -82,18 +82,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     lastName: this.details.lastName,
                     email: this.details.email,
                     replacements: [
-                        Replacement.create({
-                            token: "firstName",
-                            value: this.details.firstName
-                        }),
-                        Replacement.create({
-                            token: "lastName",
-                            value: this.details.lastName
-                        }),
-                        Replacement.create({
-                            token: "email",
-                            value: this.details.email
-                        }),
                         createLoginDetailsReplacement(this.details.email),
                         ...shared
                     ]
@@ -110,18 +98,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                             lastName: parent.lastName,
                             email: parent.email,
                             replacements: [
-                                Replacement.create({
-                                    token: "firstName",
-                                    value: parent.firstName
-                                }),
-                                Replacement.create({
-                                    token: "lastName",
-                                    value: parent.lastName
-                                }),
-                                Replacement.create({
-                                    token: "email",
-                                    value: parent.email.toLowerCase()
-                                }),
                                 createLoginDetailsReplacement(parent.email),
                                 ...shared
                             ]
@@ -137,14 +113,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     EmailRecipient.create({
                         email: unverifiedEmail,
                         replacements: [
-                            Replacement.create({
-                                token: "firstName",
-                                value: this.details.firstName
-                            }),
-                            Replacement.create({
-                                token: "lastName",
-                                value: this.details.lastName
-                            }),
                             Replacement.create({
                                 token: "email",
                                 value: unverifiedEmail.toLowerCase()

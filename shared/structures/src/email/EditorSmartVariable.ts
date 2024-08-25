@@ -158,6 +158,11 @@ export class EditorSmartVariable extends AutoEncoder {
                 example: "https://inschrijven.mijnvereniging.be", 
             }),
             EditorSmartVariable.create({
+                id: "resetUrl", 
+                name: "Voluit link om wachtwoord te herstellen", 
+                example: "https://www.voorbeeld.com/heel-lange-code-waarmee-de-link-beveiligd-wordt", 
+            }),
+            EditorSmartVariable.create({
                 id: "loginDetails", 
                 name: "Inloggegevens", 
                 example: "",
@@ -431,7 +436,7 @@ function fillSmartVariables(variables: EditorSmartVariable[]) {
             name: "Demowinkel"
         })
     }))
-    for (const replacement of recipient.replacements) {
+    for (const replacement of [...recipient.replacements, ...recipient.getDefaultReplacements()]) {
         const variable = variables.find(v => v.id === replacement.token)
         if (variable) {
             if (replacement.html && (variable.html === undefined || variable.html.length == 0)) {
