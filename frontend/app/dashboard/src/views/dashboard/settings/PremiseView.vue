@@ -72,11 +72,10 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { AddressInput, SaveView, useErrors, usePlatform } from "@stamhoofd/components";
+import { AddressInput, SaveView, useEditPopup, useErrors, usePlatform } from "@stamhoofd/components";
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformPremiseType, Premise } from "@stamhoofd/structures";
 import { computed, ref } from 'vue';
-import { useEditPopup } from '../../../../../../shared/composables/editPopup';
 
 const props = withDefaults(
     defineProps<{

@@ -24,15 +24,17 @@
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { GeneralSettingsView, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
+import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
 import FunctionsReview from './FunctionsReview.vue';
 import GroupsReview from './GroupsReview.vue';
 
-const props = defineProps<{type: SetupStepType, step: SetupStep, saveHandler: (payload: {type: SetupStepType, isReviewed: boolean}) => Promise<void>}>();
+const props = defineProps<{type: SetupStepType, step: SetupStep}>();
 
 const $navigate = useNavigate();
+const organizationManager = useOrganizationManager();
 const $isDone = computed(() => props.step.isDone);
 const $progress = computed(() => {
     // do not show progress if step is done
@@ -69,40 +71,56 @@ const icons: Record<SetupStepType, string> = {
 
 const icon = computed(() => icons[props.type]);
 
+function paramToPropsFactory(record: Record<string, unknown> = {}): () => Promise<Record<string, unknown>> {
+    return async () => {
+        await forceUpdateOrganization();
+        return record;
+    }
+}
+
 defineRoutes([
     {
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
-        paramsToProps: () => {
-            return {
-                isReview: $isDone.value
-            }
-        }
+        paramsToProps: paramToPropsFactory({isReview: true})
     },
     {
         url: Routes.Companies,
         present: 'popup',
         component: GeneralSettingsView as unknown as ComponentOptions,
-        paramsToProps: () => {
-            return {
-                isReview: $isDone.value
-            }
-        }
+        paramsToProps: paramToPropsFactory({isReview: true})
     },
     {
         url: Routes.Groups,
         present: 'popup',
-        component: GroupsReview as unknown as ComponentOptions
+        component: GroupsReview as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory()
     },
     {
         url: Routes.Functions,
         present: 'popup',
         component: FunctionsReview as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory()
     }
 ]);
 
+let shouldUpdateOrganization = false;
+
+async function forceUpdateOrganization() {
+    if (shouldUpdateOrganization) {
+        try {
+            await organizationManager.value.forceUpdate();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    shouldUpdateOrganization = false;
+}
+
 async function onClick() {
+    shouldUpdateOrganization = true;
+
     switch(props.type) {
         case SetupStepType.Premises: {
             await $navigate(Routes.Premises);

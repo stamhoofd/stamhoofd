@@ -1,15 +1,13 @@
 <template>
-    <STList v-if="step && $isDone">
+    <STList v-if="data.step && props.data.isDone.value">
         <STListItem class="left-center right-stack" :selectable="true" element-name="label">
             <template #left>
                 <div class="progress-container">
-                    <LoadingButton :loading="isSaving">
-                        <Checkbox :model-value="$isReviewed" :disabled="isSaving" @click.stop.prevent="markReviewed" />
-                    </LoadingButton>
+                    <Checkbox v-model="value" />
                 </div>
             </template>
             <h2 class="style-title-list">
-                {{ $t(`setup.${props.type}.review.checkbox`) }}
+                {{ $t(`setup.${props.data.type}.review.checkbox`) }}
             </h2>
             <TransitionFade>
                 <p v-if="$review" class="style-description-small">
@@ -21,39 +19,16 @@
 </template>
 
 <script lang="ts" setup>
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, TransitionFade, useOrganization } from '@stamhoofd/components';
-import { SetupStepType } from '@stamhoofd/structures';
+import { TransitionFade } from '@stamhoofd/components';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
-import { useReview } from './useReview';
+import { computed } from 'vue';
+import { UseReview } from './useReview';
 
-const props = defineProps<{type: SetupStepType}>();
-const review = useReview();
-const pop = usePop();
-const isSaving = ref(false);
+const props = defineProps<{data: UseReview}>();
+const $review = computed(() => props.data.step.value?.review);
 
-const organization$ = useOrganization();
-const step = computed(() => organization$.value?.period.setupSteps.get(props.type));
-
-const $review = computed(() => step.value?.review);
-const $isReviewed = computed(() => $review.value !== null);
-const $isDone = computed(() => step.value?.isDone);
-
-async function markReviewed () {
-    
-    const isReviewed = !$isReviewed.value;
-
-    const isConfirm = isReviewed ? await CenteredMessage.confirm("Ben je zeker dat je deze stap wilt voltooien?", "Voltooi") : 
-        await CenteredMessage.confirm("Ben je zeker dat je het voltooien van deze stap ongedaan wil maken?", "Ja");
-
-    if(isConfirm) {
-        isSaving.value = true;
-        const isSuccess =  await review.updateReviewedAt({type: props.type, isReviewed});
-        if (isSuccess && isReviewed) {
-            await pop();
-        }
-        isSaving.value = false;
-    }
-}
+const value = computed({
+    get: () => props.data.checkboxValue.value,
+    set: value => props.data.setValue(value)
+})
 </script>

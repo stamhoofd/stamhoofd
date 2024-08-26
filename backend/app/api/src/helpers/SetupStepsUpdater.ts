@@ -218,9 +218,16 @@ export class SetupStepUpdater {
         _organization: Organization,
         _platform: PlatformStruct
     ) {
+        const totalSteps = 1;
+        let finishedSteps = 0;
+
+        if(_organization.meta.companies.length) {
+            finishedSteps = 1;
+        }
+
         setupSteps.update(SetupStepType.Companies, {
-            totalSteps: 0,
-            finishedSteps: 0,
+            totalSteps,
+            finishedSteps,
         });
     }
 

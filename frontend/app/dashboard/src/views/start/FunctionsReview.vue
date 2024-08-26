@@ -93,7 +93,7 @@ const rowCategories = computed(() => {
 const isLoading = computed(() => rowCategories.value === null);
 const organizationBasedResponsibilities = computed(() => $platform.value.config.responsibilities.filter(r => r.organizationBased));
 
-// type RowProgress = {count: number, total: number | null};
+const stepProgress = computed(() => $organization.value?.period.setupSteps.get(SetupStepType.Functions)?.progress);
 
 type RowData = {
     responsibility: MemberResponsibility,
@@ -105,6 +105,15 @@ type RowData = {
 }
 
 watch(organizationBasedResponsibilities, async (responsibilities) => {
+    await loadRows(responsibilities);
+}, {immediate: true});
+
+watch(stepProgress, async () => {
+    // reload the rows if the progress has changed
+    await loadRows(organizationBasedResponsibilities.value);
+})
+
+async function loadRows(responsibilities: MemberResponsibility[]) {
     const organization = $organization.value;
     if(!organization) return;
     const allMembers = await getAllMembersWithResponsibilities(responsibilities);
@@ -113,7 +122,7 @@ watch(organizationBasedResponsibilities, async (responsibilities) => {
         .flatMap(r => getRowData(r, allMembers, organization, groups))
         .sort((a, b) => getPriority(b) - getPriority(a));
     allRows.value = rows;
-}, {immediate: true});
+}
 
 async function getAllMembersWithResponsibilities(responsibilities: MemberResponsibility[]): Promise<PlatformMember[]> {
     const organization = $organization.value;
