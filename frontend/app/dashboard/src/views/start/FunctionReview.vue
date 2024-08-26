@@ -2,7 +2,7 @@
     <STListItem>
         <template #left>
             <IconContainer :class="color" :icon="'group'">
-                <GroupIcon v-if="group" :group="group" :organization="organization" />
+                <GroupIcon v-if="group" :group="group" />
                 <template #aside>
                     <ProgressIcon :icon="$icon" :count="count" :progress="progress" />
                 </template>
@@ -31,13 +31,12 @@
 
 <script lang="ts" setup>
 import { GroupIcon, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
-import { Group, MemberResponsibility, Organization, PlatformMember } from '@stamhoofd/structures';
+import { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
     responsibility: MemberResponsibility,
     group: Group | null,
-    organization?: Organization,
     members: PlatformMember[],
     count?: number,
     progress?: number,
@@ -48,7 +47,7 @@ const color = computed(() => {
     const icon = $icon.value;
     if(icon ==='success') return 'blue';
     return 'gray';
-})
+});
 
 const $icon = computed<'help' | 'success' | 'error' | undefined>(() => {
     const isOptional = $isOptional.value;

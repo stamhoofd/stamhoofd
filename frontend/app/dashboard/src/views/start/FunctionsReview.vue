@@ -23,7 +23,6 @@
                         :count="row.count"
                         :progress="row.progress"
                         :total="row.total"
-                        :organization="$organization"
                     />
                 </STList>
             </div>
@@ -41,7 +40,6 @@
                         :count="row.count"
                         :progress="row.progress"
                         :total="row.total"
-                        :organization="$organization"
                     />
                 </STList>
             </div>
