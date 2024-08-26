@@ -262,7 +262,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     }
                 }
 
-                if (request.body.meta?.tags) {
+                if (request.body.meta?.tags && (Array.isArray(request.body.meta?.tags) || request.body.meta?.tags.changes.length > 0)) {
                     if (!Context.auth.hasPlatformFullAccess()) {
                         throw Context.auth.error()
                     }
