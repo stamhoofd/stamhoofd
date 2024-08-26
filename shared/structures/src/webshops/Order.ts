@@ -340,18 +340,6 @@ export class Order extends AutoEncoder {
             email,
             replacements: [
                 Replacement.create({
-                    token: "firstName",
-                    value: order.data.customer.firstName ?? ""
-                }),
-                Replacement.create({
-                    token: "lastName",
-                    value: order.data.customer.lastName ?? ""
-                }),
-                Replacement.create({
-                    token: "email",
-                    value: email
-                }),
-                Replacement.create({
                     token: "orderUrl",
                     value: "https://"+webshop?.getUrl(organization)+"/order/"+(order.id)
                 }),

@@ -97,14 +97,6 @@ export class MemberSummary extends AutoEncoder {
                     types: ['parent'],
                     replacements: [
                         Replacement.create({
-                            token: "firstName",
-                            value: parent.firstName
-                        }),
-                        Replacement.create({
-                            token: "lastName",
-                            value: parent.lastName
-                        }),
-                        Replacement.create({
                             token: "organization",
                             value: this.organizationName
                         }),
@@ -120,14 +112,6 @@ export class MemberSummary extends AutoEncoder {
                 email: this.email,
                 types: ['member'],
                 replacements: [
-                    Replacement.create({
-                        token: "firstName",
-                        value: this.firstName
-                    }),
-                    Replacement.create({
-                        token: "lastName",
-                        value: this.lastName
-                    }),
                     Replacement.create({
                         token: "organization",
                         value: this.organizationName

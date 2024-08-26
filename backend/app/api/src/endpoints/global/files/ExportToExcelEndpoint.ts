@@ -4,7 +4,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { ArchiverWriterAdapter, exportToExcel, XlsxTransformerSheet, XlsxWriter } from '@stamhoofd/excel-writer';
-import { getEmailBuilderForTemplate, Platform, RateLimiter } from '@stamhoofd/models';
+import { getEmailBuilderForTemplate, Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
 import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 import { Context } from '../../../helpers/Context';
@@ -90,7 +90,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         const result = await Promise.race([
             this.job(loader, request.body, request.params.type).then(async (url: string) => {
                 if (sendEmail) {
-                    const builder = await getEmailBuilderForTemplate(organization, {
+                    await sendEmailTemplate(null, {
                         template: {
                             type: EmailTemplateType.ExcelExportSucceeded
                         },
@@ -99,13 +99,8 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                                 token: 'downloadUrl',
                                 value: url
                             }))
-                        ],
-                        from: Email.getInternalEmailFor(Context.i18n)
+                        ]
                     })
-            
-                    if (builder) {
-                        Email.schedule(builder)
-                    }
 
                 }
 

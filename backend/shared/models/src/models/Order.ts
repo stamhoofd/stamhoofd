@@ -6,7 +6,7 @@ import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, Ba
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { getEmailBuilderForTemplate } from "../helpers/EmailBuilder";
+import { getEmailBuilderForTemplate, sendEmailTemplate } from "../helpers/EmailBuilder";
 import { WebshopCounter } from '../helpers/WebshopCounter';
 import { BalanceItem, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
 
@@ -875,22 +875,14 @@ export class Order extends Model {
         }
 
         // Create e-mail builder
-        const builder = await getEmailBuilderForTemplate(this.webshop.organization, {
+        await sendEmailTemplate(this.webshop.organization, {
             recipients: [recipient],
             template: {
                 type: data.type,
-                webshopId: this.id
+                webshop: this.webshop
             },
-            // text: template.text,
-            from: data.from,
-            replyTo: data.replyTo,
             type: 'transactional',
-            defaultReplacements: this.webshop.meta.getEmailReplacements()
         })
-
-        if (builder) {
-            Email.schedule(builder)
-        }
     }
 
     /**

@@ -435,7 +435,26 @@ export class SessionContext implements RequestMiddleware {
     }
 
     isComplete(): boolean {
-        return !!this.token && !!this.user && !this.preventComplete && (!this.organization || !this.organizationPermissions || !!this.organization.privateMeta)
+        if (!this.token) {
+            return false;
+        }
+
+        if (!this.user) {
+            return false;
+        }
+
+        if (this.preventComplete) {
+            return false;
+        }
+
+        if (this.organization) {
+            if (this.auth.permissions && !this.organization.privateMeta) {
+                // Private meta is missing while we have permissions for this organization: requires a refetch
+                return false;
+            }
+        }
+
+        return true
     }
 
     static serverForOrganization(organizationId: string|null|undefined) {

@@ -47,6 +47,13 @@ export class EditorSmartButton extends AutoEncoder {
         }))
 
         buttons.push(EditorSmartButton.create({
+            id: "resetUrl",
+            name: "Knop om wachtwoord opnieuw in te stellen",
+            text: "Wachtwoord opnieuw instellen",
+            hint: "Knop waarmee gebruikers hun wachtwoord kunnen herstellen"
+        }))
+
+        buttons.push(EditorSmartButton.create({
             id: "signInUrl",
             name: "Knop om in te loggen",
             text: "Open ledenportaal",

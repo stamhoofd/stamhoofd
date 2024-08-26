@@ -74,7 +74,13 @@ export enum EmailTemplateType {
      * Exports
      */
     ExcelExportSucceeded = "ExcelExportSucceeded",
-    ExcelExportFailed = "ExcelExportFailed"
+    ExcelExportFailed = "ExcelExportFailed",
+
+    /**
+     * User emails
+     */
+    ForgotPasswordButNoAccount = "ForgotPasswordButNoAccount",
+    ForgotPassword = "ForgotPassword",
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -182,6 +188,9 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.ExcelExportSucceeded: return 'Export: Excel export geslaagd'
             case EmailTemplateType.ExcelExportFailed: return 'Export: Excel export mislukt'
+
+            case EmailTemplateType.ForgotPasswordButNoAccount: return 'Wachtwoord vergeten: geen account'
+            case EmailTemplateType.ForgotPassword: return 'Wachtwoord vergeten'
         }
     }
 
@@ -230,6 +239,9 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.ExcelExportSucceeded: return 'Bij lange Excel exports ontvang je een e-mail om jouw bestand te downloaden'
             case EmailTemplateType.ExcelExportFailed: return 'Als een lange Excel export toch mislukt, ontvang je een e-mail dat het mis ging'
 
+            case EmailTemplateType.ForgotPasswordButNoAccount: return 'Als iemand een wachtwoord probeert te resetten, maar er geen account is met dat e-mailadres'
+            case EmailTemplateType.ForgotPassword: return 'De e-mail met een link om je wachtwoord opnieuw in te stellen als je die bent vergeten'
+
         }
 
         return null
@@ -259,6 +271,21 @@ export class EmailTemplate extends AutoEncoder {
     }
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
+        if (type === EmailTemplateType.ForgotPasswordButNoAccount) {
+            return [
+                "email"
+            ];
+        }
+
+        if (type === EmailTemplateType.ForgotPassword) {
+            return [
+                "firstName",
+                "lastName",
+                "email",
+                "resetUrl"
+            ];
+        }
+
         if (type === EmailTemplateType.ExcelExportSucceeded) {
             return [
                 "firstName",
@@ -278,6 +305,8 @@ export class EmailTemplate extends AutoEncoder {
             return [
                 "firstName",
                 "lastName",
+                "firstNameMember",
+                "lastNameMember",
                 "email",
                 "registerUrl",
                 "organizationName",

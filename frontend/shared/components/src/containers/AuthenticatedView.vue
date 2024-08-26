@@ -1,6 +1,6 @@
 <template>
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
-    <div>
+    <div class="authenticated-view">
         <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
         <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
         <LoadingView v-else-if="hasToken" key="loadingView" :error-box="errorBox" />
@@ -55,7 +55,7 @@ export default class AuthenticatedView extends VueComponent {
 
     changed() {
         if (this.noPermissionsRoot) {
-            this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && !!this.$context.auth.permissions && !this.$context.auth.permissions.isEmpty
+            this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.auth.permissions && !this.$context.auth.permissions.isEmpty
             this.hasToken = this.$context.hasToken() ?? false
             this.showPermissionsRoot = this.$context.isComplete() ?? false
             this.userId = this.$context.user?.id ?? null

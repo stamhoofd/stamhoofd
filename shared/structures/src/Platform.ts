@@ -179,6 +179,9 @@ export class PlatformEventType extends AutoEncoder {
 }
 
 export class PlatformConfig extends AutoEncoder {
+    @field({ decoder: StringDecoder, ...NextVersion})
+    name = "Stamhoofd"
+    
     /**
      * Cotnains the text and settings for when financial support is enabled - not whether it is enabled
      */

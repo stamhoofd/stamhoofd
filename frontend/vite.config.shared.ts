@@ -101,7 +101,7 @@ export function buildConfig(options: {port: number, clientFiles?: string[]}): Us
                 buildDelay: 1000
             }
         } : {
-
+            sourcemap: true
         }
     }
 }

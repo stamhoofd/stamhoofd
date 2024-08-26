@@ -45,6 +45,14 @@ export class GetOrganizationFromUriEndpoint extends Endpoint<Params, Query, Body
                 statusCode: 404
             })
         }
+
+        if (!organization.active) {
+            throw new SimpleError({
+                code: "archived_organization",
+                message: "This organization has been archived",
+                statusCode: 404
+            })
+        }
         return new Response(await AuthenticatedStructures.organization(organization));
     }
 }
