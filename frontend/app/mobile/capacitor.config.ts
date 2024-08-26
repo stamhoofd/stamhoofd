@@ -21,7 +21,7 @@ const config: CapacitorConfig = {
     },
     // Uncomment to enable live reload
     server: {
-        url: "https://dashboard.stamhoofd.dev",
+        url: "https://dashboard.stamhoofd",
         cleartext: true
     }
 };

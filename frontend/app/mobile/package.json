@@ -6,34 +6,36 @@
   "scripts": {
     "serve": "NODE_ENV=development ENV_FILE=../../.env.json vite",
     "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
-    "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build",
+    "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=development vite build",
     "sync": "cap sync",
-    "sync:production": "mv -n capacitor.config.ts capacitor.config.development.ts && mv -n capacitor.config.production.ts capacitor.config.ts; cap sync; mv -n capacitor.config.ts capacitor.config.production.ts && mv -n capacitor.config.development.ts capacitor.config.ts ",
+    "trapeze": "trapeze run config.yaml -y",
+    "sync:production": "mv -n capacitor.config.ts capacitor.config.development.ts; yarn -s trapeze; cap sync; mv -n capacitor.config.development.ts capacitor.config.ts ",
     "ios": "cap open ios",
     "android": "cap open android"
   },
   "dependencies": {
     "@capacitor-community/http": "1.4.1",
-    "@capacitor/android": "5.7.0",
-    "@capacitor/app": "5.0.7",
-    "@capacitor/app-launcher": "5.0.7",
-    "@capacitor/cli": "^5.4.1",
-    "@capacitor/core": "^5.7.0",
-    "@capacitor/filesystem": "5.1.4",
-    "@capacitor/haptics": "5.0.7",
-    "@capacitor/ios": "^5.7.0",
-    "@capacitor/keyboard": "5.0.7",
-    "@capacitor/preferences": "5.0.7",
-    "@capacitor/share": "5.0.7",
-    "@capacitor/status-bar": "5.0.7",
-    "@capgo/capacitor-updater": "5.3.57",
+    "@capacitor/android": "6.1.2",
+    "@capacitor/app": "6.0.1",
+    "@capacitor/app-launcher": "6.0.2",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/core": "6.1.2",
+    "@capacitor/filesystem": "6.0.1",
+    "@capacitor/haptics": "6.0.1",
+    "@capacitor/ios": "6.1.2",
+    "@capacitor/keyboard": "6.0.2",
+    "@capacitor/preferences": "6.0.2",
+    "@capacitor/share": "6.0.2",
+    "@capacitor/status-bar": "6.0.1",
+    "@capgo/capacitor-updater": "6.1.0",
     "@stamhoofd/assets": "1.0.0",
     "@stamhoofd/components": "1.0.0",
     "@stamhoofd/scss": "1.0.0",
-    "capacitor-rate-app": "4.0.3",
-    "@stamhoofd/structures": "*"
+    "@stamhoofd/structures": "*",
+    "capacitor-rate-app": "4.0.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "5.7.0"
+    "@capacitor/cli": "^6.0.0",
+    "@trapezedev/configure": "^7.0.10"
   }
 }
