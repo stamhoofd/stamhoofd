@@ -102,6 +102,7 @@ export function buildConfig(options: {port: number, clientFiles?: string[]}): Us
             }
         } : {
             sourcemap: true
-        }
+        },
+        publicDir: resolve(__dirname, './public')
     }
 }
