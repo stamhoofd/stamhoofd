@@ -1,7 +1,7 @@
 <template>
     <STListItem :selectable="true">
         <template #left>
-            <GroupIcon :group="group" :icon="willChangeToWaitingList ? 'clock' : ''" />
+            <GroupIconWithWaitingList :group="group" :icon="willChangeToWaitingList ? 'clock' : ''" />
         </template>
 
         <h4 class="style-title-list ">
@@ -21,8 +21,8 @@
 <script setup lang="ts">
 import { Group, Organization, PlatformMember } from '@stamhoofd/structures';
 
-import GroupIcon from './GroupIcon.vue';
 import { computed } from 'vue';
+import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 
 const props = defineProps<{
     group: Group;

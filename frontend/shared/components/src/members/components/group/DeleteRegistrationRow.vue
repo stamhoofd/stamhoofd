@@ -1,7 +1,7 @@
 <template>
     <STListItem class="right-stack">
         <template #left>
-            <GroupIcon :group="registration.group" icon="canceled" />
+            <GroupIconWithWaitingList :group="registration.group" icon="canceled" />
         </template>
 
         <h3 class="style-title-list">
@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
-import GroupIcon from './GroupIcon.vue';
+import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 
 const props = withDefaults(
     defineProps<{

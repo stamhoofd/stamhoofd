@@ -1,26 +1,25 @@
 <template>
-    <SaveView :title="title" :loading="isLoading" save-text="Stap voltooien" save-icon="success" @save="markReviewed">
-        <slot />
-    </SaveView>
+    <div class="st-view">
+        <STNavigationBar :title="title" />
+        <main class="center">
+            <h1 class="style-navigation-title">
+                {{ title }}
+            </h1>
+            <slot name="top" />
+            <ReviewCheckbox :type="type" />
+            <slot />
+        </main>
+    </div>
 </template>
 
 <script lang="ts" setup>
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SetupStepType } from '@stamhoofd/structures';
-import { ref } from 'vue';
-import { useReview } from './useReview';
+import { computed } from 'vue';
+import ReviewCheckbox from './ReviewCheckbox.vue';
 
-const props = defineProps<{title: string, type: SetupStepType}>();
-const review = useReview();
-const pop = usePop();
-const isLoading = ref(false);
+const props = defineProps<{type: SetupStepType}>();
 
-async function markReviewed () {
-    isLoading.value = true;
-    const isSuccess =  await review.markReviewed(props.type);
-    if (isSuccess) {
-        await pop();
-    }
-    isLoading.value = false;
-}
+const $t = useTranslate();
+const title = computed(() => $t(`setup.${props.type}.review.title`));
 </script>

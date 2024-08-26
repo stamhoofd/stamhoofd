@@ -42,7 +42,7 @@ export class SetupStepReviewEndpoint extends Endpoint<Params, Query, Body, Respo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        const { user } = await Context.authenticate()
 
         if (!await Context.auth.hasFullAccess(organization.id)) {
             throw Context.auth.error()
@@ -64,7 +64,10 @@ export class SetupStepReviewEndpoint extends Endpoint<Params, Query, Body, Respo
         const setupSteps = organizationPeriod.setupSteps;
 
         if(isReviewed) {
-            setupSteps.markReviewed(stepType);
+            setupSteps.markReviewed(stepType, {
+                userId: user.id,
+                userName: user.name ?? '?'
+            });
         } else {
             setupSteps.resetReviewed(stepType);
         } 

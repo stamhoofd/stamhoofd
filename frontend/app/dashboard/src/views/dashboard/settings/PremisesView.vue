@@ -4,8 +4,13 @@
             Gebouwen
         </h1>
         <p class="style-description-block">
-            Hier kan je een overzicht van de gebouwen van de groep bijhouden.
+            {{ isReview ? 'Kijk alle gebouwen na. Klik op een gebouw om deze te bewerken.' : 'Hier kan je een overzicht van de gebouwen van de groep bijhouden.' }}
         </p>
+
+        <div v-if="isReview" class="container">
+            <ReviewCheckbox :type="SetupStepType.Premises" />
+            <hr>
+        </div>
         
         <STErrorsDefault :error-box="errorBox" />
 
@@ -36,13 +41,15 @@ import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app
 import { CenteredMessage, ErrorBox, STErrorsDefault, SaveView, Toast, useCountry, useDraggableArray, useErrors, usePatchArray, usePlatform } from "@stamhoofd/components";
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
-import { Organization, OrganizationPrivateMetaData, PlatformPremiseType, Premise } from "@stamhoofd/structures";
+import { Organization, OrganizationPrivateMetaData, PlatformPremiseType, Premise, SetupStepType } from "@stamhoofd/structures";
 import { computed, ref } from 'vue';
+import ReviewCheckbox from '../../start/ReviewCheckbox.vue';
 import PremiseRow from './PremiseRow.vue';
 import PremiseView from './PremiseView.vue';
 
 type PremiseLimitationWarning = {id: string, message: string}
 
+defineProps<{isReview?: boolean}>();
 const errorBox: ErrorBox | null = null
 const errors = useErrors();
 const saving = ref(false);

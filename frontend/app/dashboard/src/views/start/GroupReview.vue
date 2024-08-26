@@ -1,7 +1,7 @@
 <template>
     <STListItem :selectable="true">
         <template #left>
-            <GroupIcon :group="group" :icon="groupIcon" />
+            <GroupIconWithWaitingList :group="group" :icon="groupIcon" />
         </template>
 
         <h3 class="style-title-list">
@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupIcon, STListItemGrid, STListItemGridRow, usePlatform } from '@stamhoofd/components';
+import { GroupIconWithWaitingList, STListItemGrid, STListItemGridRow, usePlatform } from '@stamhoofd/components';
 import { Group, GroupGenderType, GroupStatus } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

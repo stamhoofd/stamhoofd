@@ -10,7 +10,7 @@
 
             <p class="info-box" v-if="STAMHOOFD.environment !== 'production'">Dit is een testomgeving</p>
             
-            <SetupStepsView/>
+            <SetupStepsView />
         </main>
     </section>
 </template>

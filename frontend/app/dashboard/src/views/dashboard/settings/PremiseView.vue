@@ -2,6 +2,8 @@
     <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <div class="container">
             <h1>{{ title }}</h1>
+
+            <STErrorsDefault :error-box="errors.errorBox" />
             
             <STInputBox :title="$t('shared.name')" error-fields="name" :error-box="errors.errorBox">
                 <input
@@ -13,6 +15,7 @@
                     autocomplete=""
                 >
             </STInputBox>
+
             <STInputBox :title="$t('shared.description')" error-fields="description" :error-box="errors.errorBox" class="max">
                 <textarea
                     id="premise-description"
@@ -23,7 +26,8 @@
                     autocomplete=""
                 />
             </STInputBox>
-            <AddressInput v-model="address" :title="$t('shared.address')" :validator="errors.validator" :link-country-to-locale="true" />
+            
+            <AddressInput v-model="address" :title="$t('shared.address')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
         
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
                 <hr>
