@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "NODE_ENV=development ENV_FILE=../../.env.json vite",
     "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
-    "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=development vite build",
+    "build:production": "NODE_ENV=production vite build",
     "sync": "cap sync",
     "trapeze": "trapeze run config.yaml -y",
     "sync:production": "mv -n capacitor.config.ts capacitor.config.development.ts; yarn -s trapeze; cap sync; mv -n capacitor.config.development.ts capacitor.config.ts ",
