@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
+import { GeneralSettingsView, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
@@ -56,7 +56,8 @@ const color = computed(() => {
 enum Routes {
     Premises = 'gebouwen',
     Groups = 'leeftijdsgroepen',
-    Functions = 'functies'
+    Functions = 'functies',
+    Companies = 'companies'
 }
 
 const icons: Record<SetupStepType, string> = {
@@ -73,6 +74,16 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
+        paramsToProps: () => {
+            return {
+                isReview: $isDone.value
+            }
+        }
+    },
+    {
+        url: Routes.Companies,
+        present: 'popup',
+        component: GeneralSettingsView as unknown as ComponentOptions,
         paramsToProps: () => {
             return {
                 isReview: $isDone.value
@@ -103,6 +114,10 @@ async function onClick() {
         }
         case SetupStepType.Functions: {
             await $navigate(Routes.Functions);
+            break;
+        }
+        case SetupStepType.Companies: {
+            await $navigate(Routes.Companies);
             break;
         }
     }

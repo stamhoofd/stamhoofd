@@ -13,10 +13,10 @@
 </template>
 
 <script lang="ts" setup>
+import { ReviewCheckbox } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import ReviewCheckbox from './ReviewCheckbox.vue';
 
 const props = defineProps<{type: SetupStepType}>();
 

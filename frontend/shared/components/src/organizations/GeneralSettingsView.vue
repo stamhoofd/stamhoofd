@@ -1,12 +1,16 @@
 <template>
     <SaveView :loading="saving" title="Algemeen" :disabled="!hasChanges" @save="save">
         <h1>
-            Algemene instellingen
+            {{ title }}
         </h1>
         
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <div class="split-inputs">
+        <div v-if="isReview" class="container">
+            <ReviewCheckbox :type="SetupStepType.Companies" />
+        </div>
+
+        <div v-else class="split-inputs">
             <div>
                 <STInputBox title="Naam van je vereniging (kort)" error-fields="name" :error-box="errors.errorBox">
                     <input
@@ -95,10 +99,14 @@ import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app
 import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { useOrganizationManager } from "@stamhoofd/networking";
-import { Company, OrganizationMetaData } from "@stamhoofd/structures";
+import { Company, OrganizationMetaData, SetupStepType } from "@stamhoofd/structures";
 import { computed, ref } from "vue";
+import ReviewCheckbox from "../ReviewCheckbox.vue";
 import EditCompanyView from "./components/EditCompanyView.vue";
 
+const props = defineProps<{isReview?: boolean}>();
+
+const title = computed(() => props.isReview ? $t('setup.Companies.review.title') : 'Algemene instellingen');
 const organizationManager = useOrganizationManager();
 const errors = useErrors();
 const saving = ref(false);

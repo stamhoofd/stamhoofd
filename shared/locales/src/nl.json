@@ -182,6 +182,7 @@
     "setup.Functions.todo.description": "Voeg alle verplichte functies toe.",
     "setup.Companies.review.title": "Kijk de facturatiegegevens na",
     "setup.Companies.review.description": "Kijk na of de facturatiegegevens correct zijn.",
+    "setup.Companies.review.checkbox": "Ik heb alle facturatiegegevens nagekeken",
     "setup.Companies.todo.title": "Voeg facturatiegegevens toe",
     "setup.Companies.todo.description": "Voeg minstens één juridische entiteit toe.",
     "shared.address": "Adres",

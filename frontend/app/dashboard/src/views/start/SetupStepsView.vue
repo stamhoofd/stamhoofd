@@ -10,12 +10,10 @@
 
 
 <script setup lang="ts">
-import { useOrganization } from '@stamhoofd/components';
+import { useOrganization, useReview } from '@stamhoofd/components';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import SetupStepRow from './SetupStepRow.vue';
-import { useReview } from './useReview';
-
 const review = useReview();
 const organization$ = useOrganization();
 
