@@ -1,5 +1,5 @@
 <template>
-    <figure class="style-icon-container">
+    <figure class="style-image-with-icon">
         <slot>
             <!-- fallback content -->
             <figure v-if="icon">

@@ -1,7 +1,7 @@
 <template>
     <STListItem class="left-center right-stack" :selectable="true" @click="onClick">
         <template #left>
-            <IconContainer :class="{blue: $secondaryIcon === 'success'}" :icon="icon">
+            <IconContainer :class="color" :icon="icon">
                 <template #aside>
                     <ProgressIcon v-if="$secondaryIcon || $progress" :icon="$secondaryIcon" :progress="$progress" />
                 </template>
@@ -45,6 +45,12 @@ const $secondaryIcon = computed(() => {
         return 'success';
     }
     return undefined;
+})
+
+const color = computed(() => {
+    const icon = $secondaryIcon.value;
+    if(icon ==='success') return 'blue';
+    return 'gray';
 })
 
 enum Routes {

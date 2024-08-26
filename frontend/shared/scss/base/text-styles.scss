@@ -888,10 +888,9 @@
     @extend .style-illustration-img;
 }
 
-.style-icon-container {
+.style-image-with-icon {
     position: relative;
     margin-right: 5px;
-    color: $color-dark;
 
     &.blue {
         color: $color-primary-dark;
@@ -903,62 +902,6 @@
             color: $color-primary;
         }
     }
-
-    figure {
-        width: var(--block-width, 40px);
-        height: var(--block-width, 40px);
-        border-radius: $border-radius;
-        text-align: center;
-        background: $color-background-shade-original;
-        text-transform: uppercase;
-        line-height: var(--block-width, 40px);
-        font-size: 14px;
-        font-weight: $font-weight-bold;
-
-        @media (max-width: 400px) {
-            margin-right: 0px;
-        }
-
-        > span {
-            opacity: 0.8;
-            vertical-align: middle;
-            margin-right: -3px; // visual correction
-        }
-
-        figure, .image-component {
-            width: var(--block-width, 40px);
-            height: var(--block-width, 40px);
-    
-            img {
-                border-radius: $border-radius;
-            }
-    
-            @media (max-width: 400px) {
-                margin-right: 0px;
-            }
-        }
-    }
-
-    > aside {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        background: $color-background;
-        border-radius: 40px;
-        transform: translate(40%, 40%);
-        line-height: 1;
-        display: block;
-        color: $color-gray-4;
-
-        > * {
-            display: block;
-        }
-    }
-}
-
-.style-image-with-icon {
-    position: relative;
-    margin-right: 5px;
 
     .image-component {
         width: var(--block-width, 40px);
@@ -1005,9 +948,10 @@
     }
 
     &.gray {
+        color: $color-dark;
         figure {
-            background: $color-background-shade;
-            color: $color-dark;
+            background: $color-background-shade-original;
+            
         }
     }
 

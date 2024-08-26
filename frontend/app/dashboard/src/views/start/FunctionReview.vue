@@ -1,7 +1,7 @@
 <template>
     <STListItem>
         <template #left>
-            <IconContainer :class="{blue: $icon === 'success'}" :icon="'group'">
+            <IconContainer :class="color" :icon="'group'">
                 <GroupIcon v-if="group" :group="group" :organization="organization" />
                 <template #aside>
                     <ProgressIcon :icon="$icon" :count="count" :progress="progress" />
@@ -43,6 +43,12 @@ const props = defineProps<{
     progress?: number,
     total?: number
 }>();
+
+const color = computed(() => {
+    const icon = $icon.value;
+    if(icon ==='success') return 'blue';
+    return 'gray';
+})
 
 const $icon = computed<'help' | 'success' | 'error' | undefined>(() => {
     const isOptional = $isOptional.value;
