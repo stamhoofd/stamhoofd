@@ -892,7 +892,7 @@
     position: relative;
     margin-right: 5px;
 
-    &.blue {
+    &.primary {
         color: $color-primary-dark;
         figure {
             background: $color-primary-background;
@@ -950,7 +950,7 @@
     &.gray {
         color: $color-dark;
         figure {
-            background: $color-background-shade-original;
+            background: $color-background-shade;
             color: $color-dark;
             
         }
