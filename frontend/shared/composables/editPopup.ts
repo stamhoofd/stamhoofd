@@ -16,6 +16,13 @@ export function useEditPopup<T extends AutoEncoder>({errors, saveHandler, delete
             return;
         }
         saving.value = true;
+        const isValid = await errors.validator.validate();
+        
+        if(!isValid) {
+            saving.value = false;
+            return;
+        }
+
         try {
             await saveHandler(patch.value)
             await pop({ force: true }) 
@@ -57,12 +64,12 @@ export function useEditPopup<T extends AutoEncoder>({errors, saveHandler, delete
     return {
         saving: readonly(saving),
         deleting: readonly(deleting),
-        save: readonly(save),
-        doDelete: readonly(doDelete),
-        shouldNavigateAway: readonly(shouldNavigateAway),
+        save,
+        doDelete,
+        shouldNavigateAway,
         hasChanges: readonly(hasChanges),
         patched: patched,
-        addPatch: readonly(addPatch),
+        addPatch,
         patch: readonly(patch)
     }
 }
