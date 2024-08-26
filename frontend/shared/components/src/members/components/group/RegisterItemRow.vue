@@ -1,7 +1,7 @@
 <template>
     <STListItem class="right-stack" :selectable="canEdit" @click="canEdit ? editMe() : undefined">
         <template v-if="showGroup" #left>
-            <GroupIcon :group="item.group" :icon="item.replaceRegistrations.length ? 'sync' : ''" />
+            <GroupIconWithWaitingList :group="item.group" :icon="item.replaceRegistrations.length ? 'sync' : ''" />
         </template>
         <template v-else #left>
             <MemberIcon :member="item.member" :icon="item.group.type === GroupType.WaitingList ? 'clock' : (item.replaceRegistrations.length ? 'sync' : '')" />
@@ -62,7 +62,7 @@ import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from '../../checkout';
 import MemberIcon from '../MemberIcon.vue';
-import GroupIcon from './GroupIcon.vue';
+import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 
 const props = withDefaults(
     defineProps<{

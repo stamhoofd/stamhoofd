@@ -1,12 +1,11 @@
 <template>
     <STListItem class="left-center right-stack" :selectable="true" @click="onClick">
         <template #left>
-            <IconWithProgress
-                :icon="icon" :is-reviewed="$isReviewed" :progress="{
-                    count: step.finishedSteps,
-                    total: step.totalSteps
-                }"
-            />
+            <IconContainer :class="{blue: $secondaryIcon === 'success'}" :icon="icon">
+                <template #aside>
+                    <ProgressIcon v-if="$secondaryIcon || $progress" :icon="$secondaryIcon" :progress="$progress" />
+                </template>
+            </IconContainer>
         </template>
         <h2 class="style-title-list">
             {{ $isDone ? $t(`setup.${props.type}.review.title`) : $t(`setup.${props.type}.todo.title`) }}
@@ -24,19 +23,29 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { STListItem } from '@stamhoofd/components';
+import { IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
 import FunctionsReview from './FunctionsReview.vue';
 import GroupsReview from './GroupsReview.vue';
-import IconWithProgress from './IconWithProgress.vue';
 
 const props = defineProps<{type: SetupStepType, step: SetupStep, saveHandler: (payload: {type: SetupStepType, isReviewed: boolean}) => Promise<void>}>();
 
-const $isReviewed = computed(() => !props.step.shouldBeReviewed);
-const $isDone = computed(() => props.step.isDone);
 const $navigate = useNavigate();
+const $isDone = computed(() => props.step.isDone);
+const $progress = computed(() => {
+    // do not show progress if step is done
+    if($isDone.value) return undefined;
+    return props.step.progress;
+});
+
+const $secondaryIcon = computed(() => {
+    if(props.step.isComplete) {
+        return 'success';
+    }
+    return undefined;
+})
 
 enum Routes {
     Premises = 'gebouwen',

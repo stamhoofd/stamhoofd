@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="editRegistration" v-color="registrationOrganization ? registrationOrganization.meta.color : null" :selectable="isEditable" class="hover-box" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
         <template #left>
-            <GroupIcon :group="group" :icon="registration.deactivatedAt ? 'canceled' : ''" :organization="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id) ? registrationOrganization : null" />
+            <GroupIconWithWaitingList :group="group" :icon="registration.deactivatedAt ? 'canceled' : ''" :organization="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id) ? registrationOrganization : null" />
         </template>
         <p v-if="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id)" class="style-title-prefix-list">
             {{ registrationOrganization.name }}
@@ -31,9 +31,9 @@
 <script lang="ts" setup>
 import { PlatformMember, Registration } from '@stamhoofd/structures';
 import { computed, getCurrentInstance } from 'vue';
-import { useOrganization } from '../../../hooks';
-import GroupIcon from '../group/GroupIcon.vue';
 import { useAppContext } from '../../../context/appContext';
+import { useOrganization } from '../../../hooks';
+import GroupIconWithWaitingList from '../group/GroupIconWithWaitingList.vue';
 
 const props = defineProps<{
     registration: Registration;

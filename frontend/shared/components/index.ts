@@ -77,6 +77,9 @@ export { default as Steps } from "./src/steps/Steps.vue"
 export { default as Logo } from "./src/icons/Logo.vue"
 export { default as STGradientBackground } from "./src/icons/STGradientBackground.vue"
 export { default as GroupIcon } from './src/members/components/group/GroupIcon.vue'
+export { default as GroupIconWithWaitingList } from './src/members/components/group/GroupIconWithWaitingList.vue'
+export { default as IconContainer } from './src/icons/IconContainer.vue'
+export { default as ProgressIcon } from './src/icons/ProgressIcon.vue'
 
 // Inputs (last, because they use other components from this library)
 export { default as AddressInput } from "./src/inputs/AddressInput.vue"

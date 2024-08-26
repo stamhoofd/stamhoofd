@@ -20,7 +20,10 @@
                         :responsibility="row.responsibility"
                         :group="row.group"
                         :members="row.members"
+                        :count="row.count"
                         :progress="row.progress"
+                        :total="row.total"
+                        :organization="$organization"
                     />
                 </STList>
             </div>
@@ -35,7 +38,10 @@
                         :responsibility="row.responsibility"
                         :group="row.group"
                         :members="row.members"
+                        :count="row.count"
                         :progress="row.progress"
+                        :total="row.total"
+                        :organization="$organization"
                     />
                 </STList>
             </div>
@@ -89,13 +95,15 @@ const rowCategories = computed(() => {
 const isLoading = computed(() => rowCategories.value === null);
 const organizationBasedResponsibilities = computed(() => $platform.value.config.responsibilities.filter(r => r.organizationBased));
 
-type RowProgress = {count: number, total: number | null};
+// type RowProgress = {count: number, total: number | null};
 
 type RowData = {
     responsibility: MemberResponsibility,
     group: Group | null,
     members: PlatformMember[],
-    progress: RowProgress
+    count?: number;
+    progress?: number;
+    total?: number;
 }
 
 watch(organizationBasedResponsibilities, async (responsibilities) => {
@@ -105,7 +113,7 @@ watch(organizationBasedResponsibilities, async (responsibilities) => {
     const groups = getAllGroups(organization);
     const rows = responsibilities
         .flatMap(r => getRowData(r, allMembers, organization, groups))
-        .sort((a, b) => getPriority(b.progress) - getPriority(a.progress));
+        .sort((a, b) => getPriority(b) - getPriority(a));
     allRows.value = rows;
 }, {immediate: true});
 
@@ -177,17 +185,17 @@ function getAllGroups(organization: Organization) {
 function getRowData(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): RowData[] {
     return getRowDataWithoutProgress(responsibility, allMembersWithResponsibilities, organization, allGroups)
         .map(row => {
-            const progress = getProgress(row.responsibility, row.members);
             return {
                 ...row,
-                progress
+                ...getProgress(row.responsibility, row.members)
             };
         });
 }
 
-function getPriority(progress: RowProgress) {
-    if(progress.total === null) return 0;
-    return 1;
+function getPriority(row: RowData) {
+    if(row.count === 0) return 0;
+    if(row.count !== undefined) return 1;
+    return 2;
 }
 
 function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): Omit<RowData, 'progress'>[] {
@@ -237,32 +245,30 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
     }];
 }
 
-function getProgress(responsibility: MemberResponsibility, members: PlatformMember[]): RowProgress {
+function getProgress(responsibility: MemberResponsibility, members: PlatformMember[]): {count?: number, progress?: number, total?: number} {
     const { minimumMembers, maximumMembers } = responsibility;
 
     if (minimumMembers === null && maximumMembers === null) {
-        return {count: members.length, total: null};
+        return {count: members.length};
     }
 
     const count = members.length;
+    let total: number | null = null;
 
     // count will be lower
     if (minimumMembers !== null && count < minimumMembers) {
-        return {
-            count,
-            total: minimumMembers
-        }
+        total = minimumMembers;
     }
 
     // count will exceed
-    if (maximumMembers !== null && count > maximumMembers) {
-        return {
-            count,
-            total: maximumMembers
-        }
+    else if (maximumMembers !== null && count > maximumMembers) {
+        total = maximumMembers;
+    } else {
+        // other cases: show only count
+        return {count};
     }
 
-    // other cases: show only count
-    return {count, total: null}
+    if(total === 0) return {progress: 1, total}
+    return {progress: count / total, total};
 }
 </script>

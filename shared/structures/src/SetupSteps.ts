@@ -41,17 +41,22 @@ export class SetupStep extends AutoEncoder {
         return this.finishedSteps >= this.totalSteps
     }
 
-    get shouldBeReviewed() {
-        return this.review === null;
+    get isReviewed() {
+        return this.review !== null;
+    }
+
+    get isComplete() {
+        return this.isDone && this.isReviewed;
     }
 
     get progress() {
+        if(!this.totalSteps) return 1;
         return this.finishedSteps / this.totalSteps
     }
 
     get priority() {
         const isDone = this.isDone;
-        const isReviewed = !this.shouldBeReviewed;
+        const isReviewed = this.isReviewed;
 
         if(isDone && isReviewed) {
             return 0;
@@ -133,7 +138,7 @@ export class SetupSteps extends AutoEncoder {
 
             if(step) {
                 // filter out steps that are done and reviewed
-                if(step.isDone && !step.shouldBeReviewed) {
+                if(step.isDone && step.isReviewed) {
                     continue;
                 }
 

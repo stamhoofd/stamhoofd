@@ -888,12 +888,12 @@
     @extend .style-illustration-img;
 }
 
-.style-icon-with-progress {
+.style-icon-container {
     position: relative;
     margin-right: 5px;
     color: $color-dark;
 
-    &.complete {
+    &.blue {
         color: $color-primary-dark;
         figure {
             background: $color-primary-background;
@@ -901,19 +901,6 @@
 
         > aside {
             color: $color-primary;
-        }
-    }
-
-    .primary-icon-container {
-        width: var(--block-width, 40px);
-        height: var(--block-width, 40px);
-
-        img {
-            border-radius: $border-radius;
-        }
-
-        @media (max-width: 400px) {
-            margin-right: 0px;
         }
     }
 
@@ -936,6 +923,19 @@
             opacity: 0.8;
             vertical-align: middle;
             margin-right: -3px; // visual correction
+        }
+
+        figure, .image-component {
+            width: var(--block-width, 40px);
+            height: var(--block-width, 40px);
+    
+            img {
+                border-radius: $border-radius;
+            }
+    
+            @media (max-width: 400px) {
+                margin-right: 0px;
+            }
         }
     }
 
