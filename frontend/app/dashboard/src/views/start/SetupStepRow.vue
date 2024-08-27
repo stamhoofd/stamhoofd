@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { GeneralSettingsView, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
+import { EmailSettingsView, GeneralSettingsView, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
@@ -59,7 +59,9 @@ enum Routes {
     Premises = 'gebouwen',
     Groups = 'leeftijdsgroepen',
     Responsibilities = 'functies',
-    Companies = 'companies'
+    Companies = 'companies',
+    Emails = 'emails',
+    Payment = 'payment'
 }
 
 const icons: Record<SetupStepType, string> = {
@@ -104,6 +106,12 @@ defineRoutes([
         present: 'popup',
         component: FunctionsReview as unknown as ComponentOptions,
         paramsToProps: paramToPropsFactory()
+    },
+    {
+        url: Routes.Emails,
+        present: 'popup',
+        component: EmailSettingsView as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory()
     }
 ]);
 
@@ -138,6 +146,10 @@ async function onClick() {
         }
         case SetupStepType.Companies: {
             await $navigate(Routes.Companies);
+            break;
+        }
+        case SetupStepType.Emails: {
+            await $navigate(Routes.Emails);
             break;
         }
     }
