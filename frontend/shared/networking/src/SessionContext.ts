@@ -552,11 +552,13 @@ export class SessionContext implements RequestMiddleware {
         }
 
         // Auto copy organization data from the response
-        const returnedOrganization = this.user.members.organizations.find(o => o.id == this.organization?.id)
-        if (returnedOrganization) {
-            this.updateOrganization(returnedOrganization)
-        } else {
-            console.warn('Did not find organization in user response')
+        if (this.organization) {
+            const returnedOrganization = this.user.members.organizations.find(o => o.id == this.organization?.id)
+            if (returnedOrganization) {
+                this.updateOrganization(returnedOrganization)
+            } else {
+                console.warn('Did not find organization in user response')
+            }
         }
 
         await this.saveToStorage()
