@@ -54,6 +54,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         const errors = new SimpleErrors()
+        let shouldUpdateSetupSteps = false;
 
         if (await Context.auth.hasFullAccess(organization.id)) {
             organization.name = request.body.name ?? organization.name
@@ -102,7 +103,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
                 organization.privateMeta.premises = patchObject(organization.privateMeta.premises, request.body.privateMeta.premises);
                 if(request.body.privateMeta.premises) {
-                    await SetupStepUpdater.updateForOrganization(organization);
+                    shouldUpdateSetupSteps = true;
                 }
                 organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles)
                 organization.privateMeta.responsibilities = request.body.privateMeta.responsibilities.applyTo(organization.privateMeta.responsibilities)
@@ -215,6 +216,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (request.body.meta) {
                 if (request.body.meta.companies) {
                    await this.validateCompanies(organization, request.body.meta.companies)
+                   shouldUpdateSetupSteps = true
                 }
 
                 const savedPackages = organization.meta.packages
@@ -373,6 +375,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }    
 
         errors.throwIfNotEmpty()
+
+        if(shouldUpdateSetupSteps) {
+            await SetupStepUpdater.updateForOrganization(organization);
+        }
+        
         return new Response(await AuthenticatedStructures.organization(organization));
     }
 

@@ -1,12 +1,16 @@
 <template>
-    <SaveView :loading="saving" title="Algemeen" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" title="Algemeen" :disabled="!hasSomeChanges" @save="save">
         <h1>
-            Algemene instellingen
+            {{ title }}
         </h1>
         
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <div class="split-inputs">
+        <div v-if="isReview" class="container">
+            <ReviewCheckbox :data="review" />
+        </div>
+
+        <div v-else class="split-inputs">
             <div>
                 <STInputBox title="Naam van je vereniging (kort)" error-fields="name" :error-box="errors.errorBox">
                     <input
@@ -92,13 +96,17 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch } from "@stamhoofd/components";
+import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch, useReview } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { useOrganizationManager } from "@stamhoofd/networking";
-import { Company, OrganizationMetaData } from "@stamhoofd/structures";
-import { computed, ref } from "vue";
+import { Company, OrganizationMetaData, SetupStepType } from "@stamhoofd/structures";
+import { computed, ref, watch } from "vue";
+import ReviewCheckbox from "../ReviewCheckbox.vue";
 import EditCompanyView from "./components/EditCompanyView.vue";
 
+const props = defineProps<{isReview?: boolean}>();
+
+const title = computed(() => props.isReview ? $t('setup.Companies.review.title') : 'Algemene instellingen');
 const organizationManager = useOrganizationManager();
 const errors = useErrors();
 const saving = ref(false);
@@ -106,12 +114,25 @@ const pop = usePop();
 const present = usePresent()
 const {patched, hasChanges, addPatch, patch} = usePatch(computed(() => organizationManager.value.organization));
 const $t = useTranslate();
+const review = useReview(SetupStepType.Companies);
+
+const hasSomeChanges = computed(() => {
+    if(props.isReview) {
+        return hasChanges.value || review.hasChanges.value;
+    }
+
+    return hasChanges.value;
+})
 
 const draggableCompanies = useDraggableArray<Company>(() => patched.value.meta.companies, (companies) => addPatch({
     meta: OrganizationMetaData.patch({
         companies
     })
 }));
+
+watch(draggableCompanies, companies => {
+    review.overrideIsDone.value = companies.length > 0;
+});
 
 const name = computed({
     get: () => patched.value.name,
@@ -207,12 +228,19 @@ async function save() {
 
     saving.value = true;
     try {
-        errors.errorBox = null
-        if (!await errors.validator.validate()) {
-            saving.value = false;
-            return;
+        if (hasChanges.value) {
+            errors.errorBox = null
+            if (!await errors.validator.validate()) {
+                saving.value = false;
+                return;
+            }
+            await organizationManager.value.patch(patch.value);
+        }   
+
+        if(props.isReview) {
+            await review.save();
         }
-        await organizationManager.value.patch(patch.value);
+        
         await pop({force: true})
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -223,7 +251,7 @@ async function save() {
 
 
 const shouldNavigateAway = async () => {
-    if (!hasChanges.value) {
+    if (!hasSomeChanges.value) {
         return true;
     }
     return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))

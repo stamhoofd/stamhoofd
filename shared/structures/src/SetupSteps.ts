@@ -1,7 +1,7 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 
 export enum SetupStepType {
-    Functions = "Functions",
+    Responsibilities = "Functions",
     Companies = "Companies",
     Groups = "Groups",
     Premises = "Premises",

@@ -20,20 +20,22 @@
     </STListItem>
 </template>
 
-
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
+import { GeneralSettingsView, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
+import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
-import FunctionsReview from './FunctionsReview.vue';
 import GroupsReview from './GroupsReview.vue';
+import FunctionsReview from './ResponsibilitiesReview.vue';
 
-const props = defineProps<{type: SetupStepType, step: SetupStep, saveHandler: (payload: {type: SetupStepType, isReviewed: boolean}) => Promise<void>}>();
+const props = defineProps<{type: SetupStepType, step: SetupStep}>();
 
 const $navigate = useNavigate();
+const organizationManager = useOrganizationManager();
 const $isDone = computed(() => props.step.isDone);
+
 const $progress = computed(() => {
     // do not show progress if step is done
     if($isDone.value) return undefined;
@@ -49,49 +51,76 @@ const $secondaryIcon = computed(() => {
 
 const color = computed(() => {
     const icon = $secondaryIcon.value;
-    if(icon ==='success') return 'primary';
+    if(icon ==='success') return 'success';
     return 'gray';
 })
 
 enum Routes {
     Premises = 'gebouwen',
     Groups = 'leeftijdsgroepen',
-    Functions = 'functies'
+    Responsibilities = 'functies',
+    Companies = 'companies'
 }
 
 const icons: Record<SetupStepType, string> = {
     [SetupStepType.Premises]: 'home',
     [SetupStepType.Groups]: 'group',
-    [SetupStepType.Functions]: 'star',
+    [SetupStepType.Responsibilities]: 'star',
     [SetupStepType.Companies]: 'file-filled',
 }
 
 const icon = computed(() => icons[props.type]);
+
+function paramToPropsFactory(record: Record<string, unknown> = {}): () => Promise<Record<string, unknown>> {
+    return async () => {
+        await forceUpdateOrganization();
+        return record;
+    }
+}
 
 defineRoutes([
     {
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
-        paramsToProps: () => {
-            return {
-                isReview: $isDone.value
-            }
-        }
+        paramsToProps: paramToPropsFactory({isReview: true})
+    },
+    {
+        url: Routes.Companies,
+        present: 'popup',
+        component: GeneralSettingsView as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory({isReview: true})
     },
     {
         url: Routes.Groups,
         present: 'popup',
-        component: GroupsReview as unknown as ComponentOptions
+        component: GroupsReview as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory()
     },
     {
-        url: Routes.Functions,
+        url: Routes.Responsibilities,
         present: 'popup',
         component: FunctionsReview as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory()
     }
 ]);
 
+let shouldUpdateOrganization = false;
+
+async function forceUpdateOrganization() {
+    if (shouldUpdateOrganization) {
+        try {
+            await organizationManager.value.forceUpdate();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    shouldUpdateOrganization = false;
+}
+
 async function onClick() {
+    shouldUpdateOrganization = true;
+
     switch(props.type) {
         case SetupStepType.Premises: {
             await $navigate(Routes.Premises);
@@ -101,8 +130,12 @@ async function onClick() {
             await $navigate(Routes.Groups);
             break;
         }
-        case SetupStepType.Functions: {
-            await $navigate(Routes.Functions);
+        case SetupStepType.Responsibilities: {
+            await $navigate(Routes.Responsibilities);
+            break;
+        }
+        case SetupStepType.Companies: {
+            await $navigate(Routes.Companies);
             break;
         }
     }

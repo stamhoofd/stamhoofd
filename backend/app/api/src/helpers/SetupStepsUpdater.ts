@@ -21,7 +21,7 @@ export class SetupStepUpdater {
         SetupStepType,
         SetupStepOperation
     > = {
-        [SetupStepType.Functions]: this.updateStepFunctions,
+        [SetupStepType.Responsibilities]: this.updateStepResponsibilities,
         [SetupStepType.Companies]: this.updateStepCompanies,
         [SetupStepType.Groups]: this.updateStepGroups,
         [SetupStepType.Premises]: this.updateStepPremises,
@@ -218,13 +218,20 @@ export class SetupStepUpdater {
         _organization: Organization,
         _platform: PlatformStruct
     ) {
+        const totalSteps = 1;
+        let finishedSteps = 0;
+
+        if(_organization.meta.companies.length) {
+            finishedSteps = 1;
+        }
+
         setupSteps.update(SetupStepType.Companies, {
-            totalSteps: 0,
-            finishedSteps: 0,
+            totalSteps,
+            finishedSteps,
         });
     }
 
-    private static async updateStepFunctions(
+    private static async updateStepResponsibilities(
         setupSteps: SetupSteps,
         organization: Organization,
         platform: PlatformStruct
@@ -304,7 +311,7 @@ export class SetupStepUpdater {
             finishedSteps++;
         }
 
-        setupSteps.update(SetupStepType.Functions, {
+        setupSteps.update(SetupStepType.Responsibilities, {
             totalSteps,
             finishedSteps,
         });

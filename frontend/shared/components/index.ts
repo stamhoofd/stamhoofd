@@ -67,11 +67,14 @@ export { default as STListItemGridRow } from "./src/layout/STListItemGridRow.vue
 // Other
 
 export * from "./src/context"
+export * from './src/composables'
 
 
 export { default as GroupAvatar } from "./src/GroupAvatar.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
+export { default as ReviewCheckbox } from './src/ReviewCheckbox.vue'
+export * from './src/useReview'
 
 // Icons
 export { default as Logo } from "./src/icons/Logo.vue"

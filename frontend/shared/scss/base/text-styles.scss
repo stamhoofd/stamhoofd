@@ -892,14 +892,15 @@
     position: relative;
     margin-right: 5px;
 
-    &.primary {
-        color: $color-primary-dark;
+    &.success {
+        color: $color-success-dark;
         figure {
-            background: $color-primary-background;
+            background: $color-success-background;
+            color: $color-success-dark;
         }
 
         > aside {
-            color: $color-primary;
+            color: $color-success;
         }
     }
 
@@ -950,7 +951,7 @@
     &.gray {
         color: $color-dark;
         figure {
-            background: $color-background-shade;
+            background: $color-background-shade-original;
             color: $color-dark;
             
         }

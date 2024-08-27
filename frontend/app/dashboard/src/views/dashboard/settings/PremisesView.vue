@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" title="Gebouwen" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" title="Gebouwen" :disabled="!hasSomeChanges" @save="save">
         <h1>
             Gebouwen
         </h1>
@@ -8,7 +8,7 @@
         </p>
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :type="SetupStepType.Premises" />
+            <ReviewCheckbox :data="review" />
             <hr>
         </div>
         
@@ -38,27 +38,35 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, STErrorsDefault, SaveView, Toast, useCountry, useDraggableArray, useErrors, usePatchArray, usePlatform } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, ReviewCheckbox, STErrorsDefault, SaveView, Toast, useCountry, useDraggableArray, useErrors, usePatchArray, usePlatform, useReview } from "@stamhoofd/components";
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { Organization, OrganizationPrivateMetaData, PlatformPremiseType, Premise, SetupStepType } from "@stamhoofd/structures";
 import { computed, ref } from 'vue';
-import ReviewCheckbox from '../../start/ReviewCheckbox.vue';
 import PremiseRow from './PremiseRow.vue';
 import PremiseView from './PremiseView.vue';
 
 type PremiseLimitationWarning = {id: string, message: string}
 
-defineProps<{isReview?: boolean}>();
+const props = defineProps<{isReview?: boolean}>();
 const errorBox: ErrorBox | null = null
 const errors = useErrors();
 const saving = ref(false);
 
 const platform$ = usePlatform();
 const organizationManager$ = useOrganizationManager();
+const review = useReview(SetupStepType.Premises);
 const pop = usePop();
 const originalPremises = computed(() => organizationManager$.value.organization.privateMeta?.premises ?? []);
-const {patched: premises, patch, addArrayPatch, hasChanges} = usePatchArray(originalPremises)
+const {patched: premises, patch, addArrayPatch, hasChanges} = usePatchArray(originalPremises);
+
+const hasSomeChanges = computed(() => {
+    if(props.isReview) {
+        return hasChanges.value || review.hasChanges.value;
+    }
+    return hasChanges.value;
+});
+
 const draggablePremises = useDraggableArray(() => premises.value, addArrayPatch)
 const $t = useTranslate();
 const present = usePresent();
@@ -145,6 +153,7 @@ function updatePremiseLimitationWarnings() {
     }
 
     premiseLimitationWarnings.value = warnings;
+    review.overrideIsDone.value = warnings.length === 0;
 }
 
 async function save() {
@@ -155,11 +164,18 @@ async function save() {
     saving.value = true;
 
     try {
-        await organizationManager$.value.patch(Organization.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                premises: patch.value as any
-            })
-        }));
+        if (hasChanges.value) {
+            await organizationManager$.value.patch(Organization.patch({
+                privateMeta: OrganizationPrivateMetaData.patch({
+                    premises: patch.value as any
+                })
+            }));
+        }
+
+        if (review.hasChanges.value) {
+            await review.save();
+        }
+
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()
         await pop({ force: true });
     } catch (e) {
@@ -170,7 +186,7 @@ async function save() {
 }
 
 const shouldNavigateAway = async () => {
-    if (!hasChanges.value) {
+    if (!hasSomeChanges.value) {
         return true;
     }
     return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
