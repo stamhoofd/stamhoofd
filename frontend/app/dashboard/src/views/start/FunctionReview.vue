@@ -45,7 +45,11 @@ const props = defineProps<{
 
 const color = computed(() => {
     const icon = $icon.value;
+<<<<<<< HEAD
     if(icon ==='success') return 'blue';
+=======
+    if(icon ==='success') return 'primary';
+>>>>>>> main
     return 'gray';
 });
 

@@ -59,8 +59,8 @@ export function getLoginRoot() {
     })
 }
 
-export async function getOrganizationSelectionRoot() {
-    const session = reactive(new SessionContext(null)) as SessionContext;
+export async function getOrganizationSelectionRoot(optionalSession?: SessionContext|null) {
+    const session = reactive(optionalSession ?? new SessionContext(null)) as SessionContext;
     const reactiveSession = session
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
@@ -118,7 +118,7 @@ export async function getScopedDashboardRootFromUrl() {
     const session = await loadSessionFromUrl()
         
     if (!session || !session.organization) {
-        return getOrganizationSelectionRoot()
+        return getOrganizationSelectionRoot(session)
     }
 
     return await getScopedDashboardRoot(session)
@@ -180,7 +180,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
     }
 
     // Users with permissions should always have the option to choose the member portal or the dashboard
-    return getOrganizationSelectionRoot()
+    return getOrganizationSelectionRoot(session)
 }
 
 export async function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {

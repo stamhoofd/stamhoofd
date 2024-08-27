@@ -1,0 +1,27 @@
+vars:
+  VERSION:
+  APP_ID:
+  APP_NAME:
+  HOSTNAME:
+
+platforms:
+  android:
+    versionName: $VERSION
+
+  ios:
+    targets:
+      App:
+        version: $VERSION
+        displayName: $APP_NAME
+        bundleId: $APP_ID
+        builds:
+          Debug:
+            entitlements:
+              replace: true
+              entries:
+                - com.apple.developer.associated-domains: ['webcredentials:dashboard.stamhoofd', 'webcredentials:$HOSTNAME', 'applinks:$HOSTNAME']
+          Release:
+            entitlements:
+              replace: true
+              entries:
+                - com.apple.developer.associated-domains: ['webcredentials:$HOSTNAME', 'applinks:$HOSTNAME']

@@ -1,34 +1,38 @@
 PODS:
   - Alamofire (5.4.1)
-  - Capacitor (5.7.0):
+  - Capacitor (6.1.2):
     - CapacitorCordova
-  - CapacitorApp (5.0.7):
+  - CapacitorApp (6.0.1):
     - Capacitor
-  - CapacitorAppLauncher (5.0.7):
+  - CapacitorAppLauncher (6.0.2):
     - Capacitor
   - CapacitorCommunityHttp (1.4.1):
     - Capacitor
-  - CapacitorCordova (5.7.0)
-  - CapacitorFilesystem (5.1.4):
+  - CapacitorCordova (6.1.2)
+  - CapacitorFilesystem (6.0.1):
     - Capacitor
-  - CapacitorHaptics (5.0.7):
+  - CapacitorHaptics (6.0.1):
     - Capacitor
-  - CapacitorKeyboard (5.0.7):
+  - CapacitorKeyboard (6.0.2):
     - Capacitor
-  - CapacitorPreferences (5.0.7):
+  - CapacitorPreferences (6.0.2):
     - Capacitor
-  - CapacitorRateApp (2.0.0):
+  - CapacitorRateApp (4.0.3):
     - Capacitor
-  - CapacitorShare (5.0.7):
+  - CapacitorShare (6.0.2):
     - Capacitor
-  - CapacitorStatusBar (5.0.7):
+  - CapacitorStatusBar (6.0.1):
     - Capacitor
-  - CapgoCapacitorUpdater (5.3.57):
+  - CapgoCapacitorUpdater (6.1.0):
     - Alamofire
     - Capacitor
     - SSZipArchive
+    - SwiftyRSA
     - Version
   - SSZipArchive (2.4.3)
+  - SwiftyRSA (1.7.0):
+    - SwiftyRSA/ObjC (= 1.7.0)
+  - SwiftyRSA/ObjC (1.7.0)
   - Version (0.8.0)
 
 DEPENDENCIES:
@@ -50,6 +54,7 @@ SPEC REPOS:
   trunk:
     - Alamofire
     - SSZipArchive
+    - SwiftyRSA
     - Version
 
 EXTERNAL SOURCES:
@@ -82,22 +87,23 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
-  Capacitor: fc155ee2ee45a2093d716f13cf5aa5a865e2d85a
-  CapacitorApp: 17fecd0e6cb23feafac7eb0939417389038b0979
-  CapacitorAppLauncher: 7b2705481a74cbe322441bd374f56194de59ab1a
+  Capacitor: 679f9673fdf30597493a6362a5d5bf233d46abc2
+  CapacitorApp: 0bc633b4eae40a1f32cd2834788fad3bc42da6a1
+  CapacitorAppLauncher: 9ac785e8d3936388249212b6e16cb32225960c5f
   CapacitorCommunityHttp: 7be90668527ef14ee10d08135b0e00fac9cf8247
-  CapacitorCordova: e825fce1a2e14e4b5730641c7e098dccf74397b7
-  CapacitorFilesystem: af704badfbc69f6f8623d9ed313e5490e3723dcb
-  CapacitorHaptics: 7c7c206f0c96a628fed073830c96d28c4b2e772e
-  CapacitorKeyboard: ce5e01064cf57a2c05b32565310713b7fe6cc6f9
-  CapacitorPreferences: 77ac427e98db83bace772455f8ba447430382c4c
-  CapacitorRateApp: cf686bfb12855c28aca913485fead9d3601535f8
-  CapacitorShare: c6a1ebbf0114ff9e863b966cd6052678fa25d480
-  CapacitorStatusBar: f390fbb49b82ffb754ea4b3cf71dc8b048baf3e7
-  CapgoCapacitorUpdater: 8636a221d10697643b5d29a74f7fb3e88ad2457f
+  CapacitorCordova: f48c89f96c319101cd2f0ce8a2b7449b5fb8b3dd
+  CapacitorFilesystem: 37fb3aa5c945b4539ab11c74a5c57925a302bf24
+  CapacitorHaptics: fe689ade56ef20ec9b041a753c6da70c5d8ec9a9
+  CapacitorKeyboard: 2700f9b18687be021e28b5a09b59eb151a46d5e0
+  CapacitorPreferences: e8284bf740cf8c6d3f25409af3c01df87dfeb5a1
+  CapacitorRateApp: 896df7ec6a237fea72d1955e0cb26394654b00db
+  CapacitorShare: 591ae4693d85686ceb590db8e8b44aa014ec6490
+  CapacitorStatusBar: b81d4fb5d4e0064c712018071b3ab4b810b39a63
+  CapgoCapacitorUpdater: dfe4b49cfc661f2cb78e93e953eda3663063f836
   SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
+  SwiftyRSA: 8c6dd1ea7db1b8dc4fb517a202f88bb1354bc2c6
   Version: de5907f2c5d0f3cf21708db7801d1d5401139486
 
 PODFILE CHECKSUM: 0ab19c2ff2793d13698b8066eecad7171166e79a
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2

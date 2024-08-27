@@ -41,7 +41,7 @@ import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app
 import { CenteredMessage, ErrorBox, ReviewCheckbox, STErrorsDefault, SaveView, Toast, useCountry, useDraggableArray, useErrors, usePatchArray, usePlatform, useReview } from "@stamhoofd/components";
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
-import { Organization, OrganizationPrivateMetaData, PlatformPremiseType, Premise, SetupStepType } from "@stamhoofd/structures";
+import { Organization, OrganizationPrivateMetaData, PlatformPremiseType, Premise } from "@stamhoofd/structures";
 import { computed, ref } from 'vue';
 import PremiseRow from './PremiseRow.vue';
 import PremiseView from './PremiseView.vue';

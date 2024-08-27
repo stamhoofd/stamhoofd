@@ -5,6 +5,7 @@ import { PromiseComponent } from "../../containers/AsyncComponent";
 import { useOrganization, useUser } from '../../hooks';
 import { ReplaceRootEventBus } from "../../overlays/ModalStackEventBus";
 import { AppType, useAppContext } from "../appContext";
+import { reactive } from "vue";
 
 export type Option = {
     id: string,
@@ -49,7 +50,7 @@ export function useContextOptions() {
         const opts: Option[] = [];
 
         if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
-            const context = new SessionContext(null)
+            const context = reactive(new SessionContext(null)) as unknown as SessionContext
             await context.loadFromStorage();
 
             if (context.canGetCompleted()) {
@@ -63,7 +64,7 @@ export function useContextOptions() {
         }
 
         if (STAMHOOFD.userMode === 'platform') {
-            const context = new SessionContext(null)
+            const context = reactive(new SessionContext(null)) as unknown as SessionContext
             await context.loadFromStorage();
 
             opts.push({
@@ -79,7 +80,7 @@ export function useContextOptions() {
             if (!organization || $user.value?.permissions?.forWithoutInherit(organization)?.isEmpty !== false) {
                 continue;
             }
-            const context = new SessionContext(organization)
+            const context = reactive(new SessionContext(organization)) as unknown as SessionContext
             await context.loadFromStorage();
 
             opts.push({
@@ -94,7 +95,7 @@ export function useContextOptions() {
     }
 
     const getOptionForOrganization = async (organization: Organization) => {
-        const context = new SessionContext(organization)
+        const context = reactive(new SessionContext(organization)) as unknown as SessionContext
         await context.loadFromStorage();
 
         return {

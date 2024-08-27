@@ -2,9 +2,6 @@
     "replacements": {
         "Stamhoofd": "Ravot"
     },
-    "dashboard": {
-        "organization-selection": {
-            "welcome-description": "Welkom op Ravot. Zoek hieronder jouw lokale groep om je in te schrijven of om jouw gegevens te beheren."
-        }
-    }
+    "dashboard.organization-selection.welcome-description": "Welkom op Ravot. Zoek hieronder jouw lokale groep om je in te schrijven of om jouw gegevens te beheren.",
+    "dashboard.start.title-description": "Welkom op Ravot voor jouw groep. Hier kan je jouw groep beheren, leden bekijken, en instellingen aanpassen."
 }

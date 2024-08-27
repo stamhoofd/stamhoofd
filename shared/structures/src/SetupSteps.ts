@@ -20,9 +20,16 @@ export class SetupStepReview extends AutoEncoder {
 
 export class SetupStep extends AutoEncoder {
     /**
+     * @deprecated
+     * Removed
+     */
+    @field({ decoder: DateDecoder, nullable: true, field: 'reviewedAt', optional: true })
+    __reviewedAt: Date | null = null
+
+    /**
      * When the item was marked as reviewed.
      */
-    @field({ decoder: SetupStepReview, nullable: true, ...NextVersion })
+    @field({ decoder: SetupStepReview, nullable: true, version: 326 })
     review: SetupStepReview | null = null
 
     /**

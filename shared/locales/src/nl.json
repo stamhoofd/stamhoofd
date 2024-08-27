@@ -1,4 +1,8 @@
 {
+    "Acties": "Acties",
+    "admin.admins.description": "Beheer hier alle personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten.",
+    "admin.invoices.emptyMessage": "Er zijn nog geen facturen aangemaakt",
+    "admin.invoices.title": "Facturen",
     "admin.organizations.actions.delete.title": "Verwijder deze vereniging",
     "admin.organizations.actions.members.description": "Bekijk alle leden van deze vereniging via het beheerdersportaal",
     "admin.organizations.addressLabel": "Adres van deze vereniging",
@@ -20,266 +24,187 @@
     "admin.organizations.uri.description": "De URI is een unieke en leesbare code voor deze vereniging, bestaande uit enkel kleine letters en koppeltekens. Deze wordt in de URL-balk van de browser gebruikt op enkele plaatsen, maar is anders niet zichtbaar.",
     "admin.organizations.uri.label": "URI",
     "admin.organizations.website.description": "De link naar de website van deze vereniging.",
+    "admin.roles.description": "Soms wil je personen die geen lid zijn toegang geven tot Stamhoofd. Dat kan door externe beheerdersrollen aan te maken, en die rollen vervolgens toe te kennen aan externe beheerders.",
     "admin.settings.admins.description": "Beheer de beheerders van het platform",
     "admin.settings.admins.title": "Beheerders",
     "admin.settings.defaultAgeGroups.description": "Stel de standaard leeftijdsgroepen in",
     "admin.settings.defaultAgeGroups.title": "Standaard leeftijdsgroepen",
+    "admin.settings.membershipTypes.add": "Nieuw aansluitingstype",
+    "admin.settings.membershipTypes.delete.confirmation.description": "Je kan dit niet ongedaan maken en verliest hierdoor alle bijhorende informatie.",
+    "admin.settings.membershipTypes.delete.confirmation.title": "Ben je zeker dat je dit aansluitingstype wilt verwijderen?",
     "admin.settings.membershipTypes.description": "Bepaal de beschikbare aansluitingen (o.a. verzekeringen), bijhorende kostprijs en instellingen",
+    "admin.settings.membershipTypes.edit.title": "Wijzig aansluitingstype",
+    "admin.settings.membershipTypes.expireDate.description": "De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe werkjaar.",
+    "admin.settings.membershipTypes.expireDate.placeholder": "Geen vervaldatum",
+    "admin.settings.membershipTypes.expireDate.title": "Vervaldatum",
+    "admin.settings.membershipTypes.new.period": "Instellen voor werkjaar",
+    "admin.settings.membershipTypes.new.title": "Nieuw aansluitingstype",
+    "admin.settings.membershipTypes.period.addPrice": "Prijs vanaf datum",
+    "admin.settings.membershipTypes.period.delete.confirmation.title": "Ben je zeker dat je deze instellingen wilt verwijderen?",
+    "admin.settings.membershipTypes.period.noPeriodsAvailable": "Je hebt al voor elk werkjaar instellingen toegevoegd",
+    "admin.settings.membershipTypes.period.priceDate": "Vanaf",
+    "admin.settings.membershipTypes.period.title": "Instellingen voor {periodName}",
     "admin.settings.membershipTypes.title": "Aansluitingen en verzekeringen",
     "admin.settings.records.description": "Bepaal welke gegevens van leden worden verzameld",
     "admin.settings.records.title": "Gegevens van leden",
+    "admin.settings.registrationPeriods.delete.confirmation.description": "Dit verwijdert ook alle daarbij horende gegevens, zoals inschrijvingsgroepen. Je kan dit niet ongedaan maken.",
+    "admin.settings.registrationPeriods.delete.confirmation.title": "Ben je zeker dat je dit werkjaar wilt verwijderen?",
+    "admin.settings.registrationPeriods.delete.title": "Verwijder werkjaar",
+    "admin.settings.registrationPeriods.description": "Beheer de werkjaren en start een nieuw werkjaar op",
+    "admin.settings.registrationPeriods.edit.title": "Werkjaar bewerken",
+    "admin.settings.registrationPeriods.new.button": "Nieuw werkjaar",
+    "admin.settings.registrationPeriods.new.title": "Werkjaar maken",
+    "admin.settings.registrationPeriods.title": "Werkjaren",
     "admin.settings.responsibilities.delete.confirmation.description": "Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde leden.",
     "admin.settings.responsibilities.delete.confirmation.title": "Ben je zeker dat je deze functie wilt verwijderen?",
     "admin.settings.responsibilities.delete.title": "Verwijder deze functie",
     "admin.settings.responsibilities.description": "Beheer de verantwoordelijkheden die gekoppeld kunnen worden aan leden",
     "admin.settings.responsibilities.edit.title": "Functie bewerken",
+    "admin.settings.responsibilities.inherited": "Ingebouwde functies",
     "admin.settings.responsibilities.new.title": "Nieuwe functie",
+    "admin.settings.responsibilities.ownTitle": "Groepseigenfuncties",
     "admin.settings.responsibilities.title": "Functies van leden",
-    "backend": {},
-    "dasboard": {
-        "settings": {
-            "paymentMethods": {
-                "mollie": {}
-            }
-        }
-    },
-    "dashboard": {
-        "inputs": {
-            "parentPhone": {
-                "placeholder": "Mobiel nummer van ouder"
-            },
-            "privacyUrl": {
-                "placeholder": "bv. https://www.vereniging.be/privacy"
-            },
-            "shopUrl": {
-                "placeholder": "bv. shop.domeinnaam.be/wafelbak"
-            },
-            "website": {
-                "placeholder": "bv. https://www.vereniging.be"
-            }
-        },
-        "join": "Aansluiten",
-        "organization-selection": {
-            "search-placeholder": "Zoek op naam of postcode",
-            "welcome-description": "Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.",
-            "welcome-title": "Zoek jouw vereniging"
-        },
-        "settings": {
-            "billing": {
-                "unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid"
-            },
-            "domain": {
-                "domainPlaceholder": "bv. jouwvereniging.be"
-            },
-            "email": {
-                "description": "Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen."
-            },
-            "menu": {
-                "paymentAccounts": {
-                    "description": "Sluit aan bij een online betaalprovider zodat je online geld kan ontvangen.",
-                    "title": "Betaalaccounts"
-                },
-                "paymentMethods": {
-                    "description": "Bepaal hoe leden kunnen betalen voor inschrijvingen.",
-                    "title": "Betaalmethodes voor inschrijvingen"
-                }
-            },
-            "paymentMethods": {
-                "buckaroo": {
-                    "description": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft."
-                },
-                "mollie": {
-                    "activeDescription": "Online betalingen (via o.a. Bancontact, iDEAL of kredietkaart) zijn mogelijk. Vink de betaalmethodes die je wilt activeren aan, en zorg dat ze ook in Mollie geactiveerd staan.",
-                    "description": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner."
-                }
-            },
-            "personalize": {
-                "domainDescription": "{'Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.'}",
-                "domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt."
-            },
-            "registrationPage": {
-                "linkDescription": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.be"
-            }
-        },
-        "start": {
-            "title": "Mijn groep",
-            "title-description": "Welkom op het beheerdersportaal. Hier kan je jouw vereniging beheren en instellingen aanpassen."
-        },
-        "webshop": {
-            "customDomain": {
-                "description": "Hier kan je jouw eigen domeinnaam kiezen (die moet je wel zelf al in bezit hebben), eventueel met iets na het streepje (/). Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen."
-            },
-            "deliveryMethod": {
-                "name": {
-                    "placeholder": "bv. Bpost"
-                }
-            }
-        }
-    },
-    "registration": {
-        "inputs": {
-            "parentPhone": {
-                "placeholder": "Mobiel nummer van ouder"
-            }
-        }
-    },
-    "shared": {
-        "domains": {
-            "email": "stamhoofd.be",
-            "marketing": "www.stamhoofd.be"
-        },
-        "emails": {
-            "complaints": "klachten@stamhoofd.be",
-            "general": "hallo@stamhoofd.be",
-            "personal": "simon@stamhoofd.be"
-        },
-        "exampleData": {
-            "email": "voorbeeld@gmail.com",
-            "name": "Jan Janssens",
-            "names": "Lies en Jan Janssens",
-            "phone": "+32 470 12 34 56"
-        },
-        "inputs": {
-            "companyNumber": {
-                "label": "Ondernemingsnummer"
-            },
-            "iban": {
-                "placeholder": "Bv. BE71 6316 1793 1960"
-            },
-            "mobile": {
-                "invalidMessage": "Ongeldig GSM-nummer",
-                "invalidMessageTryCountry": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31.",
-                "label": "Mobiel nummer"
-            },
-            "url": {
-                "invalidMessage": "Dit website adres is ongeldig. Kijk goed na of het geen ongeldige karakters bevat zoals spaties of speciale tekens.",
-                "labelOptional": "Website (optioneel)"
-            }
-        },
-        "login": "Inloggen",
-        "notRegistered": "Niet ingeschreven",
-        "organization": {
-            "plural": "Verenigingen",
-            "singular": "Vereniging"
-        },
-        "platformName": "Stamhoofd",
-        "transferTypes": {
-            "structured": "Gestructureerde mededeling"
-        }
-    },
-    "setup.Premises.review.title": "Kijk de gebouwen na",
-    "setup.Premises.review.description": "Kijk de adressen van de gebouwen na.",
-    "setup.Premises.review.checkbox": "Ik heb alle gebouwen nagekeken",
-    "setup.Premises.todo.title": "Voeg gebouwen toe",
-    "setup.Premises.todo.description": "Voeg gebouwen toe of verwijder gebouwen.",
-    "setup.Groups.review.title": "Kijk de groepen na",
+    "Ben je zeker dat je deze activiteit wilt verwijderen?": "Ben je zeker dat je deze activiteit wilt verwijderen?",
+    "Ben je zeker dat je deze facturatiegegevens wilt verwijderen?": "Ben je zeker dat je deze facturatiegegevens wilt verwijderen?",
+    "Ben je zeker dat je wilt sluiten zonder op te slaan?": "Ben je zeker dat je wilt sluiten zonder op te slaan?",
+    "Beschrijving": "Beschrijving",
+    "Beschrijving van het gebouw": "Optionele beschrijving van het gebouw",
+    "Bewerk inschrijvingsinstellingen": "Bewerk inschrijvingsinstellingen",
+    "dashboard.inputs.parentPhone.placeholder": "Mobiel nummer van ouder",
+    "dashboard.inputs.privacyUrl.placeholder": "bv. https://www.vereniging.be/privacy",
+    "dashboard.inputs.shopUrl.placeholder": "bv. shop.domeinnaam.be/wafelbak",
+    "dashboard.inputs.website.placeholder": "bv. https://www.vereniging.be",
+    "dashboard.join": "Aansluiten",
+    "dashboard.organization-selection.search-placeholder": "Zoek op naam of postcode",
+    "dashboard.organization-selection.welcome-description": "Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.",
+    "dashboard.organization-selection.welcome-title": "Zoek jouw vereniging",
+    "dashboard.platformMemberhip.add.description": "Het bedrag wordt achteraf door KSA Nationaal aan je groep gefactureerd.",
+    "dashboard.platformMemberhip.add.endDate": "Tot en met",
+    "dashboard.platformMemberhip.add.noOrganizations": "Dit lid is bij geen enkele KSA groep aangesloten voor het huidige werkjaar en kan daardoor niet aangesloten worden",
+    "dashboard.platformMemberhip.add.startDate": "Vanaf",
+    "dashboard.platformMemberhip.add.title": "Kies een aansluitingstype",
+    "dashboard.settings.billing.unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid",
+    "dashboard.settings.domain.domainPlaceholder": "bv. jouwvereniging.be",
+    "dashboard.settings.email.description": "Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen.",
+    "dashboard.settings.menu.paymentAccounts.description": "Sluit aan bij een online betaalprovider zodat je online geld kan ontvangen.",
+    "dashboard.settings.menu.paymentAccounts.title": "Betaalaccounts",
+    "dashboard.settings.menu.paymentMethods.description": "Bepaal hoe leden kunnen betalen voor inschrijvingen.",
+    "dashboard.settings.menu.paymentMethods.title": "Betaalmethodes voor inschrijvingen",
+    "dashboard.settings.paymentMethods.buckaroo.description": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft.",
+    "dashboard.settings.paymentMethods.mollie.activeDescription": "Online betalingen (via o.a. Bancontact, iDEAL of kredietkaart) zijn mogelijk. Vink de betaalmethodes die je wilt activeren aan, en zorg dat ze ook in Mollie geactiveerd staan.",
+    "dashboard.settings.paymentMethods.mollie.description": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner.",
+    "dashboard.settings.personalize.domainDescription": "{'Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.'}",
+    "dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
+    "dashboard.settings.registrationPage.linkDescription": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.be",
+    "dashboard.start.title": "Mijn groep",
+    "dashboard.start.title-description": "Welkom op het beheerdersportaal. Hier kan je jouw vereniging beheren en instellingen aanpassen.",
+    "dashboard.webshop.customDomain.description": "Hier kan je jouw eigen domeinnaam kiezen (die moet je wel zelf al in bezit hebben), eventueel met iets na het streepje (/). Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen.",
+    "dashboard.webshop.deliveryMethod.name.placeholder": "bv. Bpost",
+    "De activiteit is verwijderd": "De activiteit is verwijderd",
+    "Facturatiegegevens bewerken": "Facturatiegegevens bewerken",
+    "Geen": "Geen",
+    "groups.confirm.delete.eventRegistration": "Ben je zeker dat je alle inschrijvingen wilt verwijderen van deze activiteit?",
+    "groups.confirm.delete.membership": "Ben je zeker dat je deze inschrijvingsgroep en bijhorende inschrijvingen wilt verwijderen?",
+    "groups.title.edit.eventRegistration": "Bewerk inschrijvingsinstellingen",
+    "groups.title.edit.membership": "Inschrijvingsgroep bewerken",
+    "groups.title.new.eventRegistration": "Inschrijvingen voor activiteit instellen",
+    "groups.title.new.membership": "Inschrijvingsgroep maken",
+    "Inschrijven sluit op": "Inschrijven sluit op",
+    "Inschrijven start op": "Inschrijven start op",
+    "Inschrijvingen verzamelen": "Inschrijvingen verzamelen",
+    "Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.": "Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.",
+    "Kies een vereniging": "Kies een vereniging",
+    "Limieten": "Limieten",
+    "Locatie toevoegen": "Locatie toevoegen",
+    "Maximum aantal activiteiten per jaar (optioneel)": "Maximum aantal activiteiten per jaar (optioneel)",
+    "Maximum aantal dagen": "Maximum aantal dagen",
+    "Minimum aantal dagen": "Minimum aantal dagen",
+    "Naam van het gebouw": "Optionele naam van het gebouw",
+    "Niet opslaan": "Niet opslaan",
+    "Nieuwe facturatiegegevens": "Nieuwe facturatiegegevens",
+    "Omslagfoto toevoegen": "Omslagfoto toevoegen",
+    "Onbeperkt": "Onbeperkt",
+    "Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.": "Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.",
+    "registration.inputs.parentPhone.placeholder": "Mobiel nummer van ouder",
+    "setup.Companies.review.description": "Kijk na of de facturatiegegevens correct zijn en markeer het als nagekeken.",
+    "setup.Companies.review.title": "Kijk je facturatiegegevens na",
+    "setup.Companies.review.checkboxTitle": "Bevestig dat je facturatiegegevens nagekeken zijn",
+    "setup.Companies.todo.description": "Je hebt nog geen facturatiegegevens ingesteld. Vul dit aan.",
+    "setup.Companies.todo.title": "Voeg je facturatiegegevens toe",
+    "setup.Companies.todo.checkboxTitle": "Voeg je ontbrekende facturatiegegevens toe",
+    "setup.Functions.review.checkbox": "Ik heb alle functies nagekeken",
+    "setup.Functions.review.description": "Bevestig dat iedereen de juiste functies heeft gekregen.",
+    "setup.Functions.review.title": "Bevestig dat alle functies zijn toegekend",
+    "setup.Functions.review.checkboxTitle": "Bevestig dat alle functies zijn toegekend",
+    "setup.Functions.todo.description": "Geef iedereen toegang tot Ravot door ze de juiste funcites te geven.",
+    "setup.Functions.todo.title": "Ken alle verplichte functies toe",
+    "setup.Functions.todo.checkboxTitle": "Ken alle verplichte functies toe aan je leidingsploeg",
+    "setup.Groups.review.checkbox": "Ik heb alle leeftijdsgroepen nagekeken",
     "setup.Groups.review.description": "Kijk of de prijzen, de leeftijd en de beschrijving correct zijn ingesteld.",
     "setup.Groups.review.checkbox": "Ik heb alle groepen nagekeken",
-    "setup.Functions.review.title": "Kijk de functies na",
-    "setup.Functions.review.description": "Kijk de toegangsrechten en functies na.",
+    "setup.Groups.review.title": "Bevestig dat je leeftijdsgroepen in orde zijn",
+    "setup.Groups.review.checkboxTitle": "Bevestig dat je leeftijdsgroepen in orde zijn",
     "setup.Functions.review.checkbox": "Ik heb alle functies nagekeken",
-    "setup.Functions.todo.title": "Voeg functies toe",
-    "setup.Functions.todo.description": "Voeg alle verplichte functies toe.",
-    "setup.Companies.review.title": "Kijk de facturatiegegevens na",
-    "setup.Companies.review.description": "Kijk na of de facturatiegegevens correct zijn.",
+    "setup.Premises.review.checkbox": "Ik heb alle lokalen nagekeken",
+    "setup.Premises.review.description": "Voeg alle lokalen toe en kijk of de gegevens nog up-to-date zijn.",
+    "setup.Premises.review.title": "Bevestig dat je lokalen nagekeken zijn",
+    "setup.Premises.review.checkboxTitle": "Bevestig dat je lokalen nagekeken zijn",
     "setup.Companies.review.checkbox": "Ik heb alle facturatiegegevens nagekeken",
-    "setup.Companies.todo.title": "Voeg facturatiegegevens toe",
-    "setup.Companies.todo.description": "Voeg minstens één juridische entiteit toe.",
+    "setup.Premises.todo.description": "Voeg minstens één lokaal toe",
+    "setup.Premises.todo.title": "Voeg je lokalen toe",
+    "setup.Premises.todo.checkboxTitle": "Voeg je lokalen toe",
     "shared.address": "Adres",
+    "shared.allAgeGroups": "Alle leeftijdsgroepen",
+    "shared.allOrganizations": "Alle verenigingen",
+    "shared.confirmation.deleted": "Verwijderd",
+    "shared.confirmation.saved": "Wijzigingen opgeslagen",
     "shared.confirmDelete": "Ja, verwijderen",
-    "Verwijderen": "Verwijderen",
     "shared.description": "Beschrijving",
+    "shared.domains.email": "stamhoofd.be",
+    "shared.domains.marketing": "www.stamhoofd.be",
+    "shared.emails.complaints": "klachten@stamhoofd.be",
+    "shared.emails.general": "hallo@stamhoofd.be",
+    "shared.emails.personal": "simon@stamhoofd.be",
+    "shared.endDate": "Einddatum",
     "shared.errors.name.empty": "Gelieve een naam in te vullen",
+    "shared.exampleData.email": "voorbeeld@gmail.com",
+    "shared.exampleData.name": "Jan Janssens",
+    "shared.exampleData.names": "Lies en Jan Janssens",
+    "shared.exampleData.phone": "+32 470 12 34 56",
     "shared.general": "Algemeen",
+    "shared.inputs.companyNumber.label": "Ondernemingsnummer",
+    "shared.inputs.iban.placeholder": "Bv. BE71 6316 1793 1960",
+    "shared.inputs.mobile.invalidMessage": "Ongeldig GSM-nummer",
+    "shared.inputs.mobile.invalidMessageTryCountry": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31.",
+    "shared.inputs.mobile.label": "Mobiel nummer",
+    "shared.inputs.url.invalidMessage": "Dit website adres is ongeldig. Kijk goed na of het geen ongeldige karakters bevat zoals spaties of speciale tekens.",
+    "shared.inputs.url.labelOptional": "Website (optioneel)",
     "shared.invoiceAddress": "Facturatieadres",
     "shared.invoiceDetails": "Facturatiegegevens",
+    "shared.login": "Inloggen",
+    "shared.membershipExpiringWarning": "Dit lid is niet langer aangesloten bij KSA Nationaal, en de verzekering loopt binnenkort af",
     "shared.name": "Naam",
+    "shared.noMembershipWarning": "Dit lid is niet aangesloten bij KSA-Nationaal, en is daardoor ook niet verzekerd",
+    "shared.notRegistered": "Niet ingeschreven",
     "shared.optional": "Optioneel",
-    "Niet opslaan": "Niet opslaan",
-    "Ben je zeker dat je wilt sluiten zonder op te slaan?": "Ben je zeker dat je wilt sluiten zonder op te slaan?",
+    "shared.organization.plural": "Verenigingen",
+    "shared.organization.singular": "Vereniging",
+    "shared.platformName": "Stamhoofd",
+    "shared.responsibilities.searchOrganizationTitle": "Zoek een vereniging",
+    "shared.saveConfirmation": "Wijzigingen zijn opgeslagen",
+    "shared.searchMemberOrganizations.defaultTitle": "Zoek een groep waar je {firstName} wilt inschrijven",
+    "shared.searchMemberOrganizations.empty": "Geen verenigingen gevonden. Probeer te zoeken op postcode of naam.",
+    "shared.searchMemberOrganizations.smallTitle": "Zoek een groep",
+    "shared.startDate": "Startdatum",
+    "shared.transferTypes.structured": "Gestructureerde mededeling",
     "shared.website": "Website",
     "shared.website.description": "De link naar de website van jouw vereniging.",
     "shared.website.optional": "Website (optioneel)",
-    "shared.searchMemberOrganizations.empty": "Geen verenigingen gevonden. Probeer te zoeken op postcode of naam.",
-    "shared.searchMemberOrganizations.smallTitle": "Zoek een groep",
-    "shared.searchMemberOrganizations.defaultTitle": "Zoek een groep waar je {firstName} wilt inschrijven",
-    "shared.responsibilities.searchOrganizationTitle": "Zoek een vereniging",
-    "admin.settings.registrationPeriods.title": "Werkjaren",
-    "admin.settings.registrationPeriods.description": "Beheer de werkjaren en start een nieuw werkjaar op",
-    "admin.settings.registrationPeriods.new.title": "Werkjaar maken",
-    "admin.settings.registrationPeriods.edit.title": "Werkjaar bewerken",
-    "admin.settings.registrationPeriods.delete.confirmation.title": "Ben je zeker dat je dit werkjaar wilt verwijderen?",
-    "admin.settings.registrationPeriods.delete.confirmation.description": "Dit verwijdert ook alle daarbij horende gegevens, zoals inschrijvingsgroepen. Je kan dit niet ongedaan maken.",
-    "admin.settings.registrationPeriods.new.button": "Nieuw werkjaar",
-    "admin.settings.registrationPeriods.delete.title": "Verwijder werkjaar",
-    "admin.settings.membershipTypes.add": "Nieuw aansluitingstype",
-    "Acties": "Acties",
-    "admin.settings.membershipTypes.new.title": "Nieuw aansluitingstype",
-    "admin.settings.membershipTypes.edit.title": "Wijzig aansluitingstype",
-    "admin.settings.membershipTypes.delete.confirmation.title": "Ben je zeker dat je dit aansluitingstype wilt verwijderen?",
-    "admin.settings.membershipTypes.delete.confirmation.description": "Je kan dit niet ongedaan maken en verliest hierdoor alle bijhorende informatie.",
-    "admin.settings.membershipTypes.new.period": "Instellen voor werkjaar",
-    "admin.settings.membershipTypes.period.delete.confirmation.title": "Ben je zeker dat je deze instellingen wilt verwijderen?",
-    "admin.settings.membershipTypes.period.noPeriodsAvailable": "Je hebt al voor elk werkjaar instellingen toegevoegd",
-    "admin.settings.membershipTypes.period.title": "Instellingen voor {periodName}",
-    "shared.startDate": "Startdatum",
-    "shared.endDate": "Einddatum",
-    "admin.settings.membershipTypes.expireDate.title": "Vervaldatum",
-    "admin.settings.membershipTypes.expireDate.description": "De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe werkjaar.",
-    "admin.settings.membershipTypes.expireDate.placeholder": "Geen vervaldatum",
-    "admin.settings.membershipTypes.period.priceDate": "Vanaf",
-    "admin.settings.membershipTypes.period.addPrice": "Prijs vanaf datum",
-    "shared.noMembershipWarning": "Dit lid is niet aangesloten bij KSA-Nationaal, en is daardoor ook niet verzekerd",
-    "dashboard.platformMemberhip.add.title": "Kies een aansluitingstype",
-    "dashboard.platformMemberhip.add.description": "Het bedrag wordt achteraf door KSA Nationaal aan je groep gefactureerd.",
-    "dashboard.platformMemberhip.add.startDate": "Vanaf",
-    "dashboard.platformMemberhip.add.endDate": "Tot en met",
-    "dashboard.platformMemberhip.add.noOrganizations": "Dit lid is bij geen enkele KSA groep aangesloten voor het huidige werkjaar en kan daardoor niet aangesloten worden",
-    "shared.membershipExpiringWarning": "Dit lid is niet langer aangesloten bij KSA Nationaal, en de verzekering loopt binnenkort af",
-    "admin.invoices.title": "Facturen",
-    "admin.invoices.emptyMessage": "Er zijn nog geen facturen aangemaakt",
-    "shared.allOrganizations": "Alle verenigingen",
-    "shared.allAgeGroups": "Alle leeftijdsgroepen",
-    "shared.saveConfirmation": "Wijzigingen zijn opgeslagen",
-    "admin.settings.responsibilities.inherited": "Ingebouwde functies",
-    "admin.settings.responsibilities.ownTitle": "Groepseigenfuncties",
-    "admin.roles.description": "Soms wil je personen die geen lid zijn toegang geven tot Stamhoofd. Dat kan door externe beheerdersrollen aan te maken, en die rollen vervolgens toe te kennen aan externe beheerders.",
-    "admin.admins.description": "Beheer hier alle personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten.",
-    "groups.title.new.eventRegistration": "Inschrijvingen voor activiteit instellen",
-    "groups.title.edit.eventRegistration": "Bewerk inschrijvingsinstellingen",
-    "groups.title.new.membership": "Inschrijvingsgroep maken",
-    "groups.title.edit.membership": "Inschrijvingsgroep bewerken",
-    "groups.confirm.delete.eventRegistration": "Ben je zeker dat je alle inschrijvingen wilt verwijderen van deze activiteit?",
-    "groups.confirm.delete.membership": "Ben je zeker dat je deze inschrijvingsgroep en bijhorende inschrijvingen wilt verwijderen?",
-    "shared.confirmation.saved": "Wijzigingen opgeslagen",
-    "shared.confirmation.deleted": "Verwijderd",
-    "Start inschrijvingen pas na een bepaalde datum": "Start inschrijvingen pas na een bepaalde datum",
-    "Inschrijven start op": "Inschrijven start op",
-    "Inschrijven sluit op": "Inschrijven sluit op",
     "Sluit inschrijvingen automatisch na een bepaalde datum": "Sluit inschrijvingen automatisch na een bepaalde datum",
-    "Vanaf": "Vanaf",
+    "Start inschrijvingen pas na een bepaalde datum": "Start inschrijvingen pas na een bepaalde datum",
     "Tot welk tijdstip": "Tot welk tijdstip",
-    "Inschrijvingen verzamelen": "Inschrijvingen verzamelen",
-    "Omslagfoto toevoegen": "Omslagfoto toevoegen",
-    "Locatie toevoegen": "Locatie toevoegen",
-    "De activiteit is verwijderd": "De activiteit is verwijderd",
-    "Limieten": "Limieten",
-    "Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.": "Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.",
-    "Beschrijving": "Beschrijving",
-    "Maximum aantal activiteiten per jaar (optioneel)": "Maximum aantal activiteiten per jaar (optioneel)",
-    "Geen": "Geen",
-    "Minimum aantal dagen": "Minimum aantal dagen",
-    "Maximum aantal dagen": "Maximum aantal dagen",
-    "Onbeperkt": "Onbeperkt",
-    "Ben je zeker dat je deze activiteit wilt verwijderen?": "Ben je zeker dat je deze activiteit wilt verwijderen?",
-    "Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.": "Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.",
-    "Bewerk inschrijvingsinstellingen": "Bewerk inschrijvingsinstellingen",
+    "Vanaf": "Vanaf",
+    "Verwijderen": "Verwijderen",
     "Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.": "Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.",
-    "Zoek jouw vereniging": "Zoek jouw vereniging",
-    "Kies een vereniging": "Kies een vereniging",
-    "Ben je zeker dat je deze facturatiegegevens wilt verwijderen?": "Ben je zeker dat je deze facturatiegegevens wilt verwijderen?",
-    "Nieuwe facturatiegegevens": "Nieuwe facturatiegegevens",
-    "Facturatiegegevens bewerken": "Facturatiegegevens bewerken",
-    "Naam van het gebouw": "Optionele naam van het gebouw",
-    "Beschrijving van het gebouw": "Optionele beschrijving van het gebouw"
+    "Zoek jouw vereniging": "Zoek jouw vereniging"
 }

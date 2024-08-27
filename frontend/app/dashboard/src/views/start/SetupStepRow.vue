@@ -6,9 +6,14 @@
                     <ProgressIcon v-if="$secondaryIcon || $progress" :icon="$secondaryIcon" :progress="$progress" />
                 </template>
             </IconContainer>
+            <IconContainer :class="color" :icon="icon">
+                <template #aside>
+                    <ProgressIcon v-if="$secondaryIcon || $progress" :icon="$secondaryIcon" :progress="$progress" />
+                </template>
+            </IconContainer>
         </template>
         <h2 class="style-title-list">
-            {{ $isDone ? $t(`setup.${props.type}.review.title`) : $t(`setup.${props.type}.todo.title`) }}
+            {{ $isDone ? $t(`setup.${props.type}.review.checkboxTitle`) : $t(`setup.${props.type}.todo.checkboxTitle`) }}
         </h2>
         <p class="style-description">
             {{ $isDone ? $t(`setup.${props.type}.review.description`) : $t(`setup.${props.type}.todo.description`) }}
@@ -36,6 +41,11 @@ const props = defineProps<{type: SetupStepType, step: SetupStep}>();
 const $navigate = useNavigate();
 const organizationManager = useOrganizationManager();
 const $isDone = computed(() => props.step.isDone);
+const $progress = computed(() => {
+    // do not show progress if step is done
+    if($isDone.value) return undefined;
+    return props.step.progress;
+});
 const $progress = computed(() => {
     // do not show progress if step is done
     if($isDone.value) return undefined;

@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend",
-    "version": "2.20.0",
+    "version": "2.21.0",
     "main": "./dist/index.js",
     "exports": {
         ".": {
@@ -38,11 +38,11 @@
         "@simonbackx/simple-logging": "^1.0.1",
         "@stamhoofd/backend-i18n": "^2.17.0",
         "@stamhoofd/backend-middleware": "^2.17.0",
-        "@stamhoofd/email": "^2.17.0",
-        "@stamhoofd/models": "^2.20.0",
+        "@stamhoofd/email": "^2.21.0",
+        "@stamhoofd/models": "^2.21.0",
         "@stamhoofd/queues": "^2.17.3",
         "@stamhoofd/sql": "^2.20.0",
-        "@stamhoofd/structures": "^2.20.0",
+        "@stamhoofd/structures": "^2.21.0",
         "@stamhoofd/utility": "^2.17.0",
         "archiver": "^7.0.1",
         "aws-sdk": "^2.885.0",
