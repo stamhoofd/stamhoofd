@@ -7,7 +7,7 @@
                 </div>
             </template>
             <h2 class="style-title-list">
-                {{ $t(`setup.${props.data.type}.review.checkbox`) }}
+                {{ $t(`setup.${props.data.type}.review.checkboxTitle`) }}
             </h2>
             <TransitionFade>
                 <p v-if="$review" class="style-description-small">

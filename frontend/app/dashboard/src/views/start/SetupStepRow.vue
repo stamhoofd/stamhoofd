@@ -6,11 +6,6 @@
                     <ProgressIcon v-if="$secondaryIcon || $progress" :icon="$secondaryIcon" :progress="$progress" />
                 </template>
             </IconContainer>
-            <IconContainer :class="color" :icon="icon">
-                <template #aside>
-                    <ProgressIcon v-if="$secondaryIcon || $progress" :icon="$secondaryIcon" :progress="$progress" />
-                </template>
-            </IconContainer>
         </template>
         <h2 class="style-title-list">
             {{ $isDone ? $t(`setup.${props.type}.review.checkboxTitle`) : $t(`setup.${props.type}.todo.checkboxTitle`) }}
@@ -24,7 +19,6 @@
         </template>
     </STListItem>
 </template>
-
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
@@ -41,11 +35,7 @@ const props = defineProps<{type: SetupStepType, step: SetupStep}>();
 const $navigate = useNavigate();
 const organizationManager = useOrganizationManager();
 const $isDone = computed(() => props.step.isDone);
-const $progress = computed(() => {
-    // do not show progress if step is done
-    if($isDone.value) return undefined;
-    return props.step.progress;
-});
+
 const $progress = computed(() => {
     // do not show progress if step is done
     if($isDone.value) return undefined;
@@ -61,7 +51,7 @@ const $secondaryIcon = computed(() => {
 
 const color = computed(() => {
     const icon = $secondaryIcon.value;
-    if(icon ==='success') return 'blue';
+    if(icon ==='success') return 'primary';
     return 'gray';
 })
 

@@ -1,21 +1,21 @@
 <template>
-    <LoadingView v-if="isLoading" />
+    <LoadingView v-if="$isLoading" />
     <ReviewSetupStepView v-else :type="SetupStepType.Functions">
         <template #top>
             <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen ga je naar het tabblad "Leden". Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen. </p>
         </template>
 
-        <p v-if="!organizationBasedResponsibilities.length" class="info-box">
+        <p v-if="!$organizationBasedResponsibilities.length" class="info-box">
             Er zijn geen ingebouwde functies.
         </p>
 
-        <div v-if="rowCategories" class="container">
-            <div v-if="rowCategories.requiredRows.length" class="container">
+        <div v-if="$rowCategories" class="container">
+            <div v-if="$rowCategories.requiredRows.length" class="container">
                 <hr>
                 <h2>Verplichte functies</h2>
                 <STList class="info">
                     <FunctionReview
-                        v-for="row in rowCategories.requiredRows"
+                        v-for="row in $rowCategories.requiredRows"
                         :key="row.responsibility.id"
                         :responsibility="row.responsibility"
                         :group="row.group"
@@ -27,12 +27,12 @@
                 </STList>
             </div>
             
-            <div v-if="rowCategories.optionalRows.length" class="container">
+            <div v-if="$rowCategories.optionalRows.length" class="container">
                 <hr>
                 <h2>Optionele functies</h2>
                 <STList class="info">
                     <FunctionReview
-                        v-for="row in rowCategories.optionalRows"
+                        v-for="row in $rowCategories.optionalRows"
                         :key="row.responsibility.id"
                         :responsibility="row.responsibility"
                         :group="row.group"
@@ -49,30 +49,68 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
+import { useAuth, useContext, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Group, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
-import { computed, Ref, ref, watch } from 'vue';
+import { computed, onMounted, Ref, ref } from 'vue';
 import FunctionReview from './FunctionReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
 
+type RowData = {
+    responsibility: MemberResponsibility,
+    group: Group | null,
+    members: PlatformMember[],
+    count?: number;
+    progress?: number;
+    total?: number;
+}
+
 const $organization = useOrganization();
 const $platform = usePlatform();
-const context = useContext();
+const $context = useContext();
 const owner = useRequestOwner();
 const auth = useAuth();
 
-const allRows = ref(null) as Ref<RowData[] | null>;
+const $allMembers = ref(null) as Ref<PlatformMember[] | null>;
 
-const rowCategories = computed(() => {
-    if(allRows.value === null) {
+const $organizationBasedResponsibilities = computed(() => $platform.value.config.responsibilities.filter(r => r.organizationBased));
+
+const $groups = computed(() => {
+    const organization = $organization.value;
+    if(!organization) return [];
+    return organization.period.getCategoryTree({
+        permissions: auth.permissions,
+        organization,
+        maxDepth: 1,
+        smartCombine: true
+    }).getAllGroups();
+});
+
+
+const $allRows = computed(() => {
+    const organization = $organization.value;
+    if(!organization) return null;
+
+    const allMembers = $allMembers.value;
+    if(allMembers === null) return null;
+
+    const groups = $groups.value;
+    
+    const responsibilities = $organizationBasedResponsibilities.value;
+    return responsibilities
+        .flatMap(r => getRowData(r, allMembers, organization, groups))
+        .sort((a, b) => getPriority(b) - getPriority(a))
+});
+
+const $rowCategories = computed(() => {
+    if($allRows.value === null) {
         return null;
     }
 
     const requiredRows: RowData[] = [];
     const optionalRows: RowData[] = [];
 
-    for(const row of allRows.value) {
+    for(const row of $allRows.value) {
         const responsibility = row.responsibility;
         const minimumMembers = responsibility.minimumMembers;
         const isRequired = !!minimumMembers;
@@ -90,38 +128,19 @@ const rowCategories = computed(() => {
     }
 });
 
-const isLoading = computed(() => rowCategories.value === null);
-const organizationBasedResponsibilities = computed(() => $platform.value.config.responsibilities.filter(r => r.organizationBased));
+const $isLoading = computed(() => $rowCategories.value === null);
 
-const stepProgress = computed(() => $organization.value?.period.setupSteps.get(SetupStepType.Functions)?.progress);
-
-type RowData = {
-    responsibility: MemberResponsibility,
-    group: Group | null,
-    members: PlatformMember[],
-    count?: number;
-    progress?: number;
-    total?: number;
-}
-
-watch(organizationBasedResponsibilities, async (responsibilities) => {
-    await loadRows(responsibilities);
-}, {immediate: true});
-
-watch(stepProgress, async () => {
-    // reload the rows if the progress has changed
-    await loadRows(organizationBasedResponsibilities.value);
+onMounted(async () => {
+    await fetchMembers();
 })
 
-async function loadRows(responsibilities: MemberResponsibility[]) {
-    const organization = $organization.value;
-    if(!organization) return;
-    const allMembers = await getAllMembersWithResponsibilities(responsibilities);
-    const groups = getAllGroups(organization);
-    const rows = responsibilities
-        .flatMap(r => getRowData(r, allMembers, organization, groups))
-        .sort((a, b) => getPriority(b) - getPriority(a));
-    allRows.value = rows;
+useVisibilityChange(async () => {
+    await fetchMembers();
+});
+
+async function fetchMembers() {
+    const responsibilities = $organizationBasedResponsibilities.value;
+    $allMembers.value = await getAllMembersWithResponsibilities(responsibilities);
 }
 
 async function getAllMembersWithResponsibilities(responsibilities: MemberResponsibility[]): Promise<PlatformMember[]> {
@@ -161,7 +180,7 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
         limit: 999
     });
 
-    const response = await context.value.authenticatedServer.request({
+    const response = await $context.value.authenticatedServer.request({
         method: "GET",
         path: "/members",
         decoder: new PaginatedResponseDecoder(MembersBlob as Decoder<MembersBlob>, LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
@@ -173,20 +192,11 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
     const blob = response.data.results;
 
     const results: PlatformMember[] = PlatformFamily.createSingles(blob, {
-        contextOrganization: context.value.organization,
+        contextOrganization: $context.value.organization,
         platform: $platform.value
     });
 
     return results;
-}
-
-function getAllGroups(organization: Organization) {
-    return organization.period.getCategoryTree({
-        permissions: auth.permissions,
-        organization,
-        maxDepth: 1,
-        smartCombine: true
-    }).getAllGroups();
 }
 
 function getRowData(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): RowData[] {

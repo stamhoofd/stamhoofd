@@ -28,8 +28,8 @@ const stepsByPriority = computed(() => getSteps().sort((a, b) => b.step.priority
 onActivated(() => forceUpdateOrganization());
 useVisibilityChange(() => forceUpdateOrganization());
 
-function forceUpdateOrganization() {
-    organizationManager.value.forceUpdate().catch(console.error)
+async function forceUpdateOrganization() {
+    await organizationManager.value.forceUpdate();
 }
 </script>
 
