@@ -528,6 +528,9 @@ export class SessionContext implements RequestMiddleware {
         await this.onTokenChanged()
     }
 
+    _lastFetchedUser: Date|null = null;
+    _lastFetchedOrganization: Date|null = null;
+
     async fetchUser(shouldRetry = true): Promise<UserWithMembers> {
         console.log("Fetching session user...")
 
@@ -546,6 +549,7 @@ export class SessionContext implements RequestMiddleware {
         } else {
             this.user = response.data
         }
+        this._lastFetchedUser = new Date()
 
         if (!isReactive(this.user)) {
             console.error("SessionContext.user is not reactive after fetching user!")
@@ -556,6 +560,7 @@ export class SessionContext implements RequestMiddleware {
             const returnedOrganization = this.user.members.organizations.find(o => o.id == this.organization?.id)
             if (returnedOrganization) {
                 this.updateOrganization(returnedOrganization)
+                this._lastFetchedOrganization = new Date()
             } else {
                 console.warn('Did not find organization in user response')
             }
@@ -619,8 +624,13 @@ export class SessionContext implements RequestMiddleware {
         }
 
         this.updateOrganization(response.data)
+        this._lastFetchedOrganization = new Date()
         this.callListeners("organization")
         return this.organization!
+    }
+
+    isOutdated(date: Date|null) {
+        return date === null || date < new Date(new Date().getTime() - 10 * 1000)
     }
 
     /**
@@ -629,12 +639,22 @@ export class SessionContext implements RequestMiddleware {
      * @param shouldRetry Keep retrying on network or server issues
      * @param background If we don't need to update the data right away, initiate a forced background update
      */
-    async updateData(force = false, shouldRetry = true, background = false) {
+    async updateData(force = false, shouldRetry = true, background = false, skipIfNotOutdated = false) {
         if (force) {
-            console.log("SessionContext force update data")
+            console.log("SessionContext force update data, background: ", background, skipIfNotOutdated)
         } else {
-            console.log("SessionContext update data")
+            console.log("SessionContext update data, background: ", background, skipIfNotOutdated)
         }
+
+        if (skipIfNotOutdated) {
+            if (!this.isOutdated(this._lastFetchedUser) && !this.isOutdated(this._lastFetchedOrganization)) {
+                console.log("Data is not outdated, skipping update")
+                return;
+            }
+
+            console.log('Data is outdated, updating...', this._lastFetchedUser, this._lastFetchedOrganization)
+        }
+
         try {
             let fetchedUser = false
             let fetchedOrganization = false

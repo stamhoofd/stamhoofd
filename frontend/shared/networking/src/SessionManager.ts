@@ -91,6 +91,7 @@ export class SessionManagerStatic {
     }
 
     async prepareSessionForUsage(session: SessionContext, shouldRetry = true) {      
+        console.log('prepareSessionForUsage')
         session.enableStorage();
          
         if (!isReactive(session)) {
@@ -155,7 +156,7 @@ export class SessionManagerStatic {
                 // Already complete
                 // Initiate a slow background update without retry
                 // = we don't need to block the UI for this ;)
-                session.updateData(true, false).catch(e => {
+                session.updateData(true, false, false, true).catch(e => {
                     // Ignore network errors
                     console.error("Background fetch session error", e, session)
                     session.callListeners("preventComplete")
