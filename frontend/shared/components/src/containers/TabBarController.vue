@@ -421,12 +421,14 @@ defineExpose({
     --saved-vh: var(--vh, 1vh);
     --saved-keyboard-height: var(--keyboard-height, 0px);
     --saved-st-safe-area-bottom: var(--st-safe-area-bottom, 0px);
+    --saved-st-safe-area-top: var(--st-safe-area-top, 0px);
 
     > header {
         box-sizing: border-box;
-        height: var(--tab-bar-header-height);
+        height: calc(var(--tab-bar-header-height) + var(--st-safe-area-top, 0px));
         border-bottom: $border-width-thin solid $color-border;
         background: $color-background;
+        padding-top: var(--st-safe-area-top, 0px);
 
         display: grid;
         grid-template-columns: 1fr auto 1fr;
@@ -470,7 +472,7 @@ defineExpose({
         background: var(--color-current-background);
 
         &.showTopBar {
-            --vh: calc(var(--saved-vh, 1vh) - var(--tab-bar-header-height) / 100);
+            --vh: calc(var(--saved-vh, 1vh) - (var(--tab-bar-header-height) - var(--saved-st-safe-area-top, 0px)) / 100);
             --st-safe-area-top: 0px; // Handled by header
         }
 
