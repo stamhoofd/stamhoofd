@@ -1,4 +1,4 @@
-package com.stamhoofd.stamhoofd;
+package be.ksa.ravot;
 
 import android.app.Application;
 

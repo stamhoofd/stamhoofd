@@ -20,7 +20,7 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? 'Nieuw adres' : 'Adres bewerken'" :validator="internalValidator" :required="false" />
+        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? 'Nieuw adres' : 'Adres') : 'Adres bewerken'" :validator="internalValidator" :required="false" />
         <STErrorsDefault :error-box="errorBox" />
     </div>
 </template>

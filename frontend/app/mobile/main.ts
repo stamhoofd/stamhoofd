@@ -265,7 +265,7 @@ CApp.addListener('appStateChange', (state) => {
     if (state.isActive && STAMHOOFD.environment !== 'staging') {
         // (don't check on staging)
         AppManager.shared.checkUpdates({
-            checkTimeout: 5 * 1000
+            checkTimeout: 10 * 1000
         }).catch(console.error)
     }
 }).catch(console.error);

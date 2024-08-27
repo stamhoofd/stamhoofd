@@ -169,7 +169,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
                     if (AppManager.shared.isNative) {
                         new Toast("Er is een update beschikbaar. Update de app om te vermijden dat bepaalde zaken stoppen met werken. Tip: houd automatische updates ingeschakeld.", "yellow download").setHide(null).show()
                         AppManager.shared.checkUpdates({
-                            checkTimeout: 15 * 1000
+                            checkTimeout: 20 * 1000
                         }).catch(console.error)
                     } else {
                         console.info('Received latest version: ', latestVersion, 'got', Version)

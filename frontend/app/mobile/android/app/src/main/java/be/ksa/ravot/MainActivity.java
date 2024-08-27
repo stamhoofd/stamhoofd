@@ -1,4 +1,4 @@
-package com.stamhoofd.stamhoofd;
+package be.ksa.ravot;
 
 import com.getcapacitor.BridgeActivity;
 import android.content.res.Configuration;

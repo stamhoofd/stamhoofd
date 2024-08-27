@@ -54,7 +54,7 @@ export default class CheckUpdateView extends Mixins(NavigationMixin) {
     interval: NodeJS.Timeout|null = null;
     textInterval: NodeJS.Timeout|null = null;
 
-    texts = ['Je kan zelf ook ideeën insturen via onze feedback tool en daar op ideeën stemmen', 'Wist je dat je ons naast onze documentatiepagina\'s ook altijd via e-mail kan bereiken via een link onderaan de documentatie?', 'Is er iets dat niet goed werkt? Dan horen we dat altijd graag!', 'We werken voortdurend aan nieuwe functionaliteiten.']
+    texts = ['Wist je dat je ons naast onze documentatiepagina\'s ook altijd via e-mail kan bereiken via een link onderaan de documentatie?', 'Is er iets dat niet goed werkt? Dan horen we dat altijd graag!', 'We werken voortdurend aan nieuwe functionaliteiten.']
     visibleText = 0;
 
     get nextTextIndex() {

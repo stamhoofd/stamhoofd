@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:allowBackup="true"
-        android:name="com.stamhoofd.stamhoofd.MainApplication"
+        android:name="be.ksa.ravot.MainApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -10,7 +10,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
-            android:name="com.stamhoofd.stamhoofd.MainActivity"
+            android:name="be.ksa.ravot.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:windowSoftInputMode="adjustPan"
@@ -32,7 +32,7 @@
                 <data android:scheme="https" />
 
                 <!-- Include one or more domains that should be verified. -->
-                <data android:host="stamhoofd.app" />
+                <data android:host="ravot.ksa.be" />
             </intent-filter>
         </activity>
 
@@ -50,8 +50,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 </manifest>
