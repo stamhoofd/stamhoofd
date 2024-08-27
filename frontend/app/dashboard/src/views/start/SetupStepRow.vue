@@ -51,7 +51,7 @@ const $secondaryIcon = computed(() => {
 
 const color = computed(() => {
     const icon = $secondaryIcon.value;
-    if(icon ==='success') return 'primary';
+    if(icon ==='success') return 'success';
     return 'gray';
 })
 
