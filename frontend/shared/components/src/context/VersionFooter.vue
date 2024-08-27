@@ -1,6 +1,7 @@
 <template>
     <p class="style-description-small version-footer" @click="tapVersion">
-        v{{ version }} ({{ nativeVersion }}, {{ environment }})
+        v{{ version }} ({{ nativeVersion }}, {{ environment }})<br>
+        {{ STAMHOOFD.APP_UPDATE_SERVER_URL }}
     </p>
 </template>
 
