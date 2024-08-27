@@ -8,7 +8,7 @@
     "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
     "build:production": "NODE_ENV=production vite build",
     "sync": "cap sync",
-    "trapeze": "trapeze run config.yaml -y",
+    "trapeze": "trapeze run config.yaml -y && trapeze run entitlements.yaml -y",
     "sync:production": "yarn -s trapeze && cap sync",
     "ios": "cap open ios",
     "android": "cap open android"

@@ -18,16 +18,3 @@ platforms:
         displayName: $APP_NAME
         bundleId: $APP_ID
         incrementBuild: true
-
-        builds:
-          Debug:
-            entitlements:
-              replace: true
-              entries:
-                - com.apple.developer.associated-domains: ['webcredentials:dashboard.stamhoofd?mode=developer', 'webcredentials:$HOSTNAME?mode=developer', 'applinks:$HOSTNAME?mode=developer']
-
-          Release:
-            entitlements:
-              replace: true
-              entries:
-                - com.apple.developer.associated-domains: ['webcredentials:$HOSTNAME', 'applinks:$HOSTNAME']
