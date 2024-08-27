@@ -1,0 +1,11 @@
+vars:
+  VERSION:
+  APP_ID:
+  APP_NAME:
+  HOSTNAME:
+
+platforms:
+  ios:
+    targets:
+      App:
+        displayName: $APP_NAME

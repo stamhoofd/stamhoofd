@@ -15,6 +15,5 @@ platforms:
     targets:
       App:
         version: $VERSION
-        displayName: $APP_NAME
         bundleId: $APP_ID
         incrementBuild: true
