@@ -14,7 +14,7 @@
                 <hr>
                 <h2>Verplichte functies</h2>
                 <STList class="info">
-                    <FunctionReview
+                    <ResponsibilityReview
                         v-for="row in $rowCategories.requiredRows"
                         :key="row.responsibility.id"
                         :responsibility="row.responsibility"
@@ -85,7 +85,6 @@ const $groups = computed(() => {
         smartCombine: true
     }).getAllGroups();
 });
-
 
 const $allRows = computed(() => {
     const organization = $organization.value;
