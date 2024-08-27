@@ -101,6 +101,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
+                if(request.body.privateMeta.emails) {
+                    shouldUpdateSetupSteps = true;
+                }
+
                 organization.privateMeta.premises = patchObject(organization.privateMeta.premises, request.body.privateMeta.premises);
                 if(request.body.privateMeta.premises) {
                     shouldUpdateSetupSteps = true;
