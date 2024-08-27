@@ -1,7 +1,7 @@
 <template>
     <LoadingView v-if="showLoading" />
     <div v-else class="st-view check-update-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true" />
 
         <main class="flex">
             <h1 v-if="status.options.customText">
@@ -34,8 +34,8 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { LoadingView, Spinner, STNavigationBar } from '@stamhoofd/components';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { LoadingView, Spinner, STNavigationBar } from '@stamhoofd/components';
 
 import { UpdateStatus } from "./UpdateStatus";
 
