@@ -14,7 +14,7 @@
 
         <main class="center">
             <h1 v-if="!login">
-                Vul de code in uit de e-mail die we hebben gestuurd
+                Vul de code uit de e-mail in
             </h1>
             <h1 v-else>
                 Verifieer jouw e-mailadres
