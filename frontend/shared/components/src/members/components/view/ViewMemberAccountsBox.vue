@@ -51,7 +51,7 @@
                     Heeft toegang tot beheerdersportaal
                 </p>
 
-                <template v-if="hasWrite && user.hasAccount" #right>
+                <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
                     <LoadingButton :loading="isDeletingUser(user)" class="hover-show">
                         <button type="button" class="button icon trash" @click.stop="deleteUser(user)" />
                     </LoadingButton>
@@ -62,16 +62,14 @@
 </template>
 
 <script setup lang="ts">
-import { Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User, UserWithMembers } from '@stamhoofd/structures';
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import EditAdminView from '../../../admins/EditAdminView.vue';
-import { useAuth, useContext } from '../../../hooks';
+import { useAppContext } from '../../../context/appContext';
+import { useAuth } from '../../../hooks';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
-import { useAppContext } from '../../../context/appContext';
 
 defineOptions({
     inheritAttrs: false
@@ -79,13 +77,9 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember
 }>()
-const context = useContext();
-const present = usePresent();
-const editingUser = ref(new Set())
 const auth = useAuth()
 const app = useAppContext()
 const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, PermissionLevel.Write))
-const hasFullAccess = computed(() => auth.hasFullAccess())
 const deletingUsers = ref(new Set<string>())
 const platformFamilyManager = usePlatformFamilyManager()
 
