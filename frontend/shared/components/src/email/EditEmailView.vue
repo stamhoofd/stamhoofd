@@ -83,7 +83,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { usePop } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, useOrganization, usePatchArray, usePlatform } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
@@ -103,7 +103,7 @@ const webshops = ref([]) as Ref<SelectableWebshop[]>
 const organization = useOrganization()
 const platform = usePlatform()
 const originalArray = computed(() => (organization.value ? organization.value.privateMeta?.emails : platform.value.privateConfig?.emails) ?? [])
-const {patched: patchedArray, patch, hasChanges, addPatch: addAPatch, addPut} = usePatchArray(originalArray)
+const {patched: patchedArray, patch, hasChanges, addPatch: addAPatch, addPut, addArrayPatch} = usePatchArray(originalArray)
 const patched = computed(() => patchedArray.value.find(e => e.id === props.email.id) ?? props.email)
 const addPatch = (patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationEmail>>) => addAPatch(OrganizationEmail.patch({ id: props.email.id, ...patch }))
 const organizationManager = useOrganizationManager()
@@ -190,7 +190,33 @@ class SelectableWebshop {
 }
 
 async function deleteMe() {
-    // todo
+    const arr: PatchableArrayAutoEncoder<OrganizationEmail> = new PatchableArray()
+    arr.addDelete(props.email.id);
+
+    try {
+        if (organization.value) {
+            const organizationPatch = organizationManager.value.getPatch().patch({
+                privateMeta: OrganizationPrivateMetaData.patch({
+                    emails: arr
+                })
+            })
+
+            await organizationManager.value.patch(organizationPatch, {owner, shouldRetry: false})
+        } else {
+            await platformManager.value.patch(Platform.patch({
+                privateConfig: PlatformPrivateConfig.patch({
+                    emails: arr
+                })
+            }))
+        }
+
+        await pop({ force: true })
+        saving.value = false
+    } catch (e) {
+        console.error(e)
+        errors.errorBox = new ErrorBox(e)
+        saving.value = false
+    }
 }
 
 async function save() {
