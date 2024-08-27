@@ -100,7 +100,7 @@ import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STI
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { useOrganizationManager } from "@stamhoofd/networking";
 import { Company, OrganizationMetaData, SetupStepType } from "@stamhoofd/structures";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import ReviewCheckbox from "../ReviewCheckbox.vue";
 import EditCompanyView from "./components/EditCompanyView.vue";
 
@@ -129,6 +129,10 @@ const draggableCompanies = useDraggableArray<Company>(() => patched.value.meta.c
         companies
     })
 }));
+
+watch(draggableCompanies, companies => {
+    review.overrideIsDone.value = companies.length > 0;
+});
 
 const name = computed({
     get: () => patched.value.name,
