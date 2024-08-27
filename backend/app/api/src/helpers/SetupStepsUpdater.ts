@@ -25,6 +25,8 @@ export class SetupStepUpdater {
         [SetupStepType.Companies]: this.updateStepCompanies,
         [SetupStepType.Groups]: this.updateStepGroups,
         [SetupStepType.Premises]: this.updateStepPremises,
+        [SetupStepType.Emails]: this.updateStepEmails,
+        [SetupStepType.Payment]: this.updateStepPayment
     };
 
     static async updateSetupStepsForAllOrganizationsInCurrentPeriod({
@@ -315,5 +317,23 @@ export class SetupStepUpdater {
             totalSteps,
             finishedSteps,
         });
+    }
+
+    private static updateStepEmails(setupSteps: SetupSteps,
+        _organization: Organization,
+        _platform: PlatformStruct) {
+            setupSteps.update(SetupStepType.Emails, {
+                totalSteps: 0,
+                finishedSteps: 0,
+            });
+    }
+
+    private static updateStepPayment(setupSteps: SetupSteps,
+        _organization: Organization,
+        _platform: PlatformStruct) {
+            setupSteps.update(SetupStepType.Payment, {
+                totalSteps: 0,
+                finishedSteps: 0,
+            });
     }
 }

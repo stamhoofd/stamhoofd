@@ -8,7 +8,7 @@
             </IconContainer>
         </template>
         <h2 class="style-title-list">
-            {{ $isDone ? $t(`setup.${props.type}.review.checkboxTitle`) : $t(`setup.${props.type}.todo.checkboxTitle`) }}
+            {{ $isDone ? $t(`setup.${props.type}.review.title`) : $t(`setup.${props.type}.todo.title`) }}
         </h2>
         <p class="style-description">
             {{ $isDone ? $t(`setup.${props.type}.review.description`) : $t(`setup.${props.type}.todo.description`) }}
@@ -67,6 +67,8 @@ const icons: Record<SetupStepType, string> = {
     [SetupStepType.Groups]: 'group',
     [SetupStepType.Responsibilities]: 'star',
     [SetupStepType.Companies]: 'file-filled',
+    [SetupStepType.Emails]: 'email',
+    [SetupStepType.Payment]: 'bank'
 }
 
 const icon = computed(() => icons[props.type]);

@@ -3,6 +3,7 @@ import { Colors } from '@stamhoofd/utility';
 
 import { Address } from './addresses/Address';
 import { STPackageStatus, STPackageType } from './billing/STPackage';
+import { Company } from './Company';
 import { Replacement } from './endpoints/EmailRequest';
 import { File } from './files/File';
 import { Image } from './files/Image';
@@ -15,7 +16,6 @@ import { PaymentConfiguration } from './PaymentConfiguration';
 import { PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 import { TransferSettings } from './webshops/TransferSettings';
-import { Company } from './Company';
 
 export class OrganizationPackages extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })
@@ -345,7 +345,7 @@ export class OrganizationMetaData extends AutoEncoder {
             })
         },
     })
-    registrationPaymentConfiguration = PaymentConfiguration.create({paymentMethods: [PaymentMethod.Transfer]})
+    registrationPaymentConfiguration = PaymentConfiguration.create({paymentMethods: [PaymentMethod.PointOfSale]})
 
     /**
      * @deprecated

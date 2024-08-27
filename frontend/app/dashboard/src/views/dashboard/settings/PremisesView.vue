@@ -1,7 +1,7 @@
 <template>
-    <SaveView :loading="saving" title="Gebouwen" :disabled="!hasSomeChanges" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasSomeChanges" @save="save">
         <h1>
-            Gebouwen
+            {{ title }}
         </h1>
         <p class="style-description-block">
             {{ isReview ? 'Kijk alle gebouwen na. Klik op een gebouw om deze te bewerken.' : 'Hier kan je een overzicht van de gebouwen van de groep bijhouden.' }}
@@ -60,6 +60,7 @@ const pop = usePop();
 const originalPremises = computed(() => organizationManager$.value.organization.privateMeta?.premises ?? []);
 const {patched: premises, patch, addArrayPatch, hasChanges} = usePatchArray(originalPremises);
 
+const title = 'Gebouwen';
 const hasSomeChanges = computed(() => {
     if(props.isReview) {
         return hasChanges.value || review.hasChanges.value;
