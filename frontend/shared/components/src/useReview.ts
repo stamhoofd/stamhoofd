@@ -57,7 +57,6 @@ export function useReview(type: SetupStepType): UseReview {
 
             organizationManager.value.updatePeriods([updatedPeriod.data]);
         } catch (error) {
-            // todo: translate
             Toast.fromError(error).show()
             isSaving.value = false;
             return false;
