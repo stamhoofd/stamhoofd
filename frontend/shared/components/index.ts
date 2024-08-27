@@ -83,6 +83,7 @@ export { default as GroupIcon } from './src/members/components/group/GroupIcon.v
 export { default as GroupIconWithWaitingList } from './src/members/components/group/GroupIconWithWaitingList.vue'
 export { default as IconContainer } from './src/icons/IconContainer.vue'
 export { default as ProgressIcon } from './src/icons/ProgressIcon.vue'
+export { default as ProgressRing } from './src/icons/ProgressRing.vue'
 
 // Inputs (last, because they use other components from this library)
 export { default as AddressInput } from "./src/inputs/AddressInput.vue"

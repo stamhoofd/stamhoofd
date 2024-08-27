@@ -44,7 +44,3 @@ function showSteps() {
     $overrideShowSteps.value = true;
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>

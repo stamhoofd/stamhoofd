@@ -7,7 +7,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :data="review" />
+            <ReviewCheckbox :data="$reviewCheckboxData" />
         </div>
 
         <div v-else class="split-inputs">
@@ -114,11 +114,11 @@ const pop = usePop();
 const present = usePresent()
 const {patched, hasChanges, addPatch, patch} = usePatch(computed(() => organizationManager.value.organization));
 const $t = useTranslate();
-const review = useReview(SetupStepType.Companies);
+const { $overrideIsDone, $hasChanges: $hasReviewChanges, save: saveReview, $reviewCheckboxData } = useReview(SetupStepType.Companies);
 
 const hasSomeChanges = computed(() => {
     if(props.isReview) {
-        return hasChanges.value || review.hasChanges.value;
+        return hasChanges.value || $hasReviewChanges.value;
     }
 
     return hasChanges.value;
@@ -131,7 +131,7 @@ const draggableCompanies = useDraggableArray<Company>(() => patched.value.meta.c
 }));
 
 watch(draggableCompanies, companies => {
-    review.overrideIsDone.value = companies.length > 0;
+    $overrideIsDone.value = companies.length > 0;
 });
 
 const name = computed({
@@ -238,7 +238,7 @@ async function save() {
         }   
 
         if(props.isReview) {
-            await review.save();
+            await saveReview();
         }
         
         await pop({force: true})

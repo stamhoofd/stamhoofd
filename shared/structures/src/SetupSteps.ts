@@ -5,6 +5,8 @@ export enum SetupStepType {
     Companies = "Companies",
     Groups = "Groups",
     Premises = "Premises",
+    Emails = 'Emails',
+    Payment = 'Payment'
 }
 
 export class SetupStepReview extends AutoEncoder {

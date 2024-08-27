@@ -8,7 +8,7 @@
             </IconContainer>
         </template>
         <h2 class="style-title-list">
-            {{ $isDone ? $t(`setup.${props.type}.review.checkboxTitle`) : $t(`setup.${props.type}.todo.checkboxTitle`) }}
+            {{ $isDone ? $t(`setup.${props.type}.review.title`) : $t(`setup.${props.type}.todo.title`) }}
         </h2>
         <p class="style-description">
             {{ $isDone ? $t(`setup.${props.type}.review.description`) : $t(`setup.${props.type}.todo.description`) }}
@@ -22,11 +22,12 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { GeneralSettingsView, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
+import { EmailSettingsView, GeneralSettingsView, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
+import RegistrationPaymentSettingsView from '../dashboard/settings/RegistrationPaymentSettingsView.vue';
 import GroupsReview from './GroupsReview.vue';
 import FunctionsReview from './ResponsibilitiesReview.vue';
 
@@ -59,7 +60,9 @@ enum Routes {
     Premises = 'gebouwen',
     Groups = 'leeftijdsgroepen',
     Responsibilities = 'functies',
-    Companies = 'companies'
+    Companies = 'companies',
+    Emails = 'emails',
+    Payment = 'payment'
 }
 
 const icons: Record<SetupStepType, string> = {
@@ -67,6 +70,8 @@ const icons: Record<SetupStepType, string> = {
     [SetupStepType.Groups]: 'group',
     [SetupStepType.Responsibilities]: 'star',
     [SetupStepType.Companies]: 'file-filled',
+    [SetupStepType.Emails]: 'email',
+    [SetupStepType.Payment]: 'bank'
 }
 
 const icon = computed(() => icons[props.type]);
@@ -92,6 +97,12 @@ defineRoutes([
         paramsToProps: paramToPropsFactory({isReview: true})
     },
     {
+        url: Routes.Payment,
+        present: 'popup',
+        component: RegistrationPaymentSettingsView as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory({isReview: true})
+    },
+    {
         url: Routes.Groups,
         present: 'popup',
         component: GroupsReview as unknown as ComponentOptions,
@@ -101,6 +112,12 @@ defineRoutes([
         url: Routes.Responsibilities,
         present: 'popup',
         component: FunctionsReview as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory()
+    },
+    {
+        url: Routes.Emails,
+        present: 'popup',
+        component: EmailSettingsView as unknown as ComponentOptions,
         paramsToProps: paramToPropsFactory()
     }
 ]);
@@ -136,6 +153,14 @@ async function onClick() {
         }
         case SetupStepType.Companies: {
             await $navigate(Routes.Companies);
+            break;
+        }
+        case SetupStepType.Emails: {
+            await $navigate(Routes.Emails);
+            break;
+        }
+        case SetupStepType.Payment: {
+            await $navigate(Routes.Payment);
             break;
         }
     }

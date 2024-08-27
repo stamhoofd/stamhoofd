@@ -1,10 +1,15 @@
 <template>
-    <SaveView :loading="saving" title="Betaalmethodes" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasSomeChanges" @save="save">
         <h1>
-            Betaalmethodes voor inschrijvingen
+            {{ title }}
         </h1>
 
         <p>Alle informatie over de verschillen tussen elke betaalmethode vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/betaalmethodes-voor-inschrijvingen-instellen/'" target="_blank">deze pagina</a>.</p>
+
+        <div v-if="isReview" class="container">
+            <ReviewCheckbox :data="review.$reviewCheckboxData" />
+            <hr>
+        </div>
         
         <STErrorsDefault :error-box="errorBox" />
 
@@ -25,10 +30,11 @@
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, ReviewCheckbox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useReview, Validator } from "@stamhoofd/components";
+import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, SetupStepType, Version } from "@stamhoofd/structures";
 
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
 
 @Component({
@@ -43,15 +49,25 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
         STList,
         STListItem,
         Checkbox,
-        EditPaymentMethodsBox
+        EditPaymentMethodsBox,
+        ReviewCheckbox
     },
 })
 export default class RegistrationPaymentSettingsView extends Mixins(NavigationMixin) {
+    @Prop({ required: false, default: false })
+        isReview: boolean;
+    
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
     temp_organization = this.$organization
     loadingMollie = false
+    $t = useTranslate();
+
+    title: string = this.isReview ? this.$t(`setup.${SetupStepType.Payment}.review.title`) : 'Betaalmethodes voor inschrijvingen';
+
+    review = useReview(SetupStepType.Payment);
+    hasReviewChanges = this.review.$hasChanges;
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
 
@@ -127,8 +143,15 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
         this.saving = true
 
         try {
-            await this.$organizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
+            if(this.hasChanges) {
+                await this.$organizationManager.patch(this.organizationPatch)
+                this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
+            }
+
+            if(this.hasReviewChanges) {
+                await this.review.save();
+            }
+
             new Toast('De wijzigingen zijn opgeslagen', "success green").show()
             this.dismiss({ force: true })
         } catch (e) {
@@ -140,6 +163,10 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
 
     get hasChanges() {
         return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
+    }
+
+    get hasSomeChanges() {
+        return this.hasChanges || this.hasReviewChanges;
     }
 
     async shouldNavigateAway() {

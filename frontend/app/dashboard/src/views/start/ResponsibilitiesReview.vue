@@ -223,10 +223,11 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
     const defaultAgeGroupIds = responsibility.defaultAgeGroupIds;
 
     if(defaultAgeGroupIds !== null) {
-
         const rows: Omit<RowData, 'progress'>[] = [];
-
-        for(const group of allGroups) {
+        
+        const includedGroups = defaultAgeGroupIds.flatMap(id => allGroups.filter(g => g.defaultAgeGroupId === id));
+        
+        for(const group of includedGroups) {
             const groupId = group.id;
 
             const members = allMembersWithResponsibilities.filter(platformMember => platformMember.member.responsibilities

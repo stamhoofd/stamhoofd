@@ -25,6 +25,8 @@ export class SetupStepUpdater {
         [SetupStepType.Companies]: this.updateStepCompanies,
         [SetupStepType.Groups]: this.updateStepGroups,
         [SetupStepType.Premises]: this.updateStepPremises,
+        [SetupStepType.Emails]: this.updateStepEmails,
+        [SetupStepType.Payment]: this.updateStepPayment
     };
 
     static async updateSetupStepsForAllOrganizationsInCurrentPeriod({
@@ -315,5 +317,36 @@ export class SetupStepUpdater {
             totalSteps,
             finishedSteps,
         });
+    }
+
+    private static updateStepEmails(setupSteps: SetupSteps,
+        organization: Organization,
+        _platform: PlatformStruct) {
+
+            const totalSteps = 1;
+            let finishedSteps = 0;
+
+            const emails = organization.privateMeta.emails;
+
+            // organization should have 1 default email
+            if(emails.some(e => e.default)) {
+                finishedSteps = 1;
+            }
+
+            setupSteps.update(SetupStepType.Emails, {
+                totalSteps,
+                finishedSteps,
+            });
+
+            setupSteps.markReviewed(SetupStepType.Emails, {userId: 'backend', userName: 'backend'});
+    }
+
+    private static updateStepPayment(setupSteps: SetupSteps,
+        _organization: Organization,
+        _platform: PlatformStruct) {
+            setupSteps.update(SetupStepType.Payment, {
+                totalSteps: 0,
+                finishedSteps: 0,
+            });
     }
 }

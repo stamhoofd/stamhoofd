@@ -1,14 +1,14 @@
 <template>
-    <SaveView :loading="saving" title="Gebouwen" :disabled="!hasSomeChanges" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasSomeChanges" @save="save">
         <h1>
-            Gebouwen
+            {{ title }}
         </h1>
         <p class="style-description-block">
             {{ isReview ? 'Kijk alle gebouwen na. Klik op een gebouw om deze te bewerken.' : 'Hier kan je een overzicht van de gebouwen van de groep bijhouden.' }}
         </p>
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :data="review" />
+            <ReviewCheckbox :data="$reviewCheckboxData" />
             <hr>
         </div>
         
@@ -55,14 +55,15 @@ const saving = ref(false);
 
 const platform$ = usePlatform();
 const organizationManager$ = useOrganizationManager();
-const review = useReview(SetupStepType.Premises);
+const { $reviewCheckboxData, $hasChanges: $hasReviewChanges, $overrideIsDone, save: saveReview } = useReview(SetupStepType.Premises);
 const pop = usePop();
 const originalPremises = computed(() => organizationManager$.value.organization.privateMeta?.premises ?? []);
 const {patched: premises, patch, addArrayPatch, hasChanges} = usePatchArray(originalPremises);
 
+const title = 'Gebouwen';
 const hasSomeChanges = computed(() => {
     if(props.isReview) {
-        return hasChanges.value || review.hasChanges.value;
+        return hasChanges.value || $hasReviewChanges.value;
     }
     return hasChanges.value;
 });
@@ -153,7 +154,7 @@ function updatePremiseLimitationWarnings() {
     }
 
     premiseLimitationWarnings.value = warnings;
-    review.overrideIsDone.value = warnings.length === 0;
+    $overrideIsDone.value = warnings.length === 0;
 }
 
 async function save() {
@@ -172,8 +173,8 @@ async function save() {
             }));
         }
 
-        if (review.hasChanges.value) {
-            await review.save();
+        if ($hasReviewChanges.value) {
+            await saveReview();
         }
 
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()
