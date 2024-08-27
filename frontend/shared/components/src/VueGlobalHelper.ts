@@ -100,6 +100,11 @@ export class VueGlobalHelper {
             return Formatter.pluralText(num, singular, plural)
         }
 
+        app.config.warnHandler = function (msg, instance, trace) {
+            // Shorter error message because the trace is complete garbage
+            console.warn(msg, instance)
+        }
+
         // Register shared components
         app.component('STList', STList)
         app.component('STListItem', STListItem)
