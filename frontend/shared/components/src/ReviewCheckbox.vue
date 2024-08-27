@@ -1,5 +1,5 @@
 <template>
-    <STList v-if="data.step && props.data.isDone.value">
+    <STList v-if="data.step && props.data.isDone">
         <STListItem class="left-center right-stack" :selectable="true" element-name="label">
             <template #left>
                 <div class="progress-container">
@@ -22,13 +22,13 @@
 import { TransitionFade } from '@stamhoofd/components';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { UseReview } from './useReview';
+import { ReviewCheckboxData } from './useReview';
 
-const props = defineProps<{data: UseReview}>();
-const $review = computed(() => props.data.step.value?.review);
+const props = defineProps<{data: ReviewCheckboxData}>();
+const $review = computed(() => props.data.step?.review);
 
 const value = computed({
-    get: () => props.data.checkboxValue.value,
+    get: () => props.data.checkboxValue,
     set: value => props.data.setValue(value)
 })
 </script>

@@ -27,6 +27,7 @@ import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
+import RegistrationPaymentSettingsView from '../dashboard/settings/RegistrationPaymentSettingsView.vue';
 import GroupsReview from './GroupsReview.vue';
 import FunctionsReview from './ResponsibilitiesReview.vue';
 
@@ -96,6 +97,12 @@ defineRoutes([
         paramsToProps: paramToPropsFactory({isReview: true})
     },
     {
+        url: Routes.Payment,
+        present: 'popup',
+        component: RegistrationPaymentSettingsView as unknown as ComponentOptions,
+        paramsToProps: paramToPropsFactory({isReview: true})
+    },
+    {
         url: Routes.Groups,
         present: 'popup',
         component: GroupsReview as unknown as ComponentOptions,
@@ -150,6 +157,10 @@ async function onClick() {
         }
         case SetupStepType.Emails: {
             await $navigate(Routes.Emails);
+            break;
+        }
+        case SetupStepType.Payment: {
+            await $navigate(Routes.Payment);
             break;
         }
     }

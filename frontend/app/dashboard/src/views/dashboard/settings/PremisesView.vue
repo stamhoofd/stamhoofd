@@ -8,7 +8,7 @@
         </p>
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :data="review" />
+            <ReviewCheckbox :data="$reviewCheckboxData" />
             <hr>
         </div>
         
@@ -55,7 +55,7 @@ const saving = ref(false);
 
 const platform$ = usePlatform();
 const organizationManager$ = useOrganizationManager();
-const review = useReview(SetupStepType.Premises);
+const { $reviewCheckboxData, $hasChanges: $hasReviewChanges, $overrideIsDone, save: saveReview } = useReview(SetupStepType.Premises);
 const pop = usePop();
 const originalPremises = computed(() => organizationManager$.value.organization.privateMeta?.premises ?? []);
 const {patched: premises, patch, addArrayPatch, hasChanges} = usePatchArray(originalPremises);
@@ -63,7 +63,7 @@ const {patched: premises, patch, addArrayPatch, hasChanges} = usePatchArray(orig
 const title = 'Gebouwen';
 const hasSomeChanges = computed(() => {
     if(props.isReview) {
-        return hasChanges.value || review.hasChanges.value;
+        return hasChanges.value || $hasReviewChanges.value;
     }
     return hasChanges.value;
 });
@@ -154,7 +154,7 @@ function updatePremiseLimitationWarnings() {
     }
 
     premiseLimitationWarnings.value = warnings;
-    review.overrideIsDone.value = warnings.length === 0;
+    $overrideIsDone.value = warnings.length === 0;
 }
 
 async function save() {
@@ -173,8 +173,8 @@ async function save() {
             }));
         }
 
-        if (review.hasChanges.value) {
-            await review.save();
+        if ($hasReviewChanges.value) {
+            await saveReview();
         }
 
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()
