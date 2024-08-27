@@ -19,10 +19,7 @@
                     <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('dashboard.organization-selection.search-placeholder')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
                 </form>
 
-                <div v-if="showDevelopment" class="version-box">
-                    <VersionFooter />
-                </div>
-                <Spinner v-else-if="loadingResults" class="gray center" />
+                <Spinner v-if="loadingResults" class="gray center" />
                 <template v-else>
                     <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
                         <ContextLogo :organization="option.organization" :app="option.app" />
@@ -43,11 +40,11 @@
                     </button>
                 </template>
 
-                <p v-if="!loadingResults && visibleOptions.length == 0 && query && !showDevelopment" class="info-box">
+                <p v-if="!loadingResults && visibleOptions.length == 0 && query" class="info-box">
                     Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
                 </p>
 
-                <footer v-if="!showDevelopment && !isPlatform">
+                <footer v-if="!isPlatform">
                     <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
                         <span class="icon add" />
                         <span>Mijn vereniging aansluiten</span>
@@ -73,12 +70,9 @@ import { Organization } from '@stamhoofd/structures';
 import { throttle } from "@stamhoofd/utility";
 import { computed, getCurrentInstance, onMounted, reactive, Ref, ref, shallowRef, watch } from 'vue';
 
-import VersionFooter from '../dashboard/settings/VersionFooter.vue';
-
 const isNative = ref(AppManager.shared.isNative)
 const loadingDefault = ref(true)
 const loadingResults = ref(false)
-const showDevelopment = ref(false)
 const query = ref("");
 const defaultOptions: Ref<Option[]> = shallowRef([]);
 const results: Ref<Option[]> = shallowRef([]);
@@ -152,7 +146,7 @@ const updateResults = async () => {
     const q = query.value
     const cachedCount = counter
 
-    if (q.length == 0 || showDevelopment.value) {
+    if (q.length == 0) {
         await setResults(cachedCount, [])
         loadingResults.value = false
         return

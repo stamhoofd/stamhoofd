@@ -36,7 +36,7 @@ export default class VersionFooter extends Mixins(NavigationMixin) {
             modalDisplayStyle: "popup",
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: AsyncComponent(() => import(/* webpackChunkName: "DevPanelView" */ "./DevPanelView.vue"))
+                    root: AsyncComponent(() => import("./DevPanelView.vue"))
                 })
             ]
         })

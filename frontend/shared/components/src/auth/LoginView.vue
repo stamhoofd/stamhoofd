@@ -21,8 +21,9 @@
                 </template>
                 <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
             </STInputBox>
+            <VersionFooter v-if="showVersionFooter" />
 
-            <LoadingButton :loading="loading" class="block">
+            <LoadingButton v-else :loading="loading" class="block">
                 <button id="submit" class="button primary full" type="submit">
                     <span class="lock icon" />
                     <span>Inloggen</span>
@@ -45,9 +46,10 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { LoginHelper } from '@stamhoofd/networking';
-import { onMounted, ref } from 'vue';
+import { AppManager, LoginHelper } from '@stamhoofd/networking';
+import { computed, onMounted, ref } from 'vue';
 
+import VersionFooter from '../context/VersionFooter.vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useContext } from '../hooks';
@@ -104,6 +106,9 @@ const email = ref(props.initialEmail)
 const password = ref("");
 const animating = ref(true)
 const emailInput = ref<EmailInput | null>(null)
+const showVersionFooter = computed(() => {
+    return email.value.toLocaleLowerCase().trim() === 'stamhoofd@dev.dev'
+})
 
 async function submit() {
     if (loading.value) {
@@ -130,6 +135,20 @@ async function submit() {
          
     try {
         const result = await LoginHelper.login($context.value, email.value, password.value)
+
+        if (email.value.toLocaleLowerCase() === 'appreview@stamhoofd.be' && STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL) {
+            //await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
+            await AppManager.shared.checkUpdates({
+                // Always load the staging build
+                customText: 'Bezig met laden...',
+                visibleDownload: true,
+                installAutomatically: true,
+                force: true,
+                channel: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
+                checkTimeout: 15 * 1000
+            })
+            //await Storage.keyValue.removeItem('next_url_load')
+        }
  
         if (result.verificationToken) {
             await present({

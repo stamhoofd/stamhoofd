@@ -155,6 +155,11 @@ declare global {
         readonly MOLLIE_CLIENT_ID: string
         readonly APP_UPDATE_SERVER_URL: string
 
+        // Switching envs
+        readonly APP_UPDATE_PRODUCTION_SERVER_URL?: string
+        readonly APP_UPDATE_STAGING_SERVER_URL?: string
+        readonly APP_UPDATE_DEVELOPMENT_SERVER_URL?: string
+
         readonly CHANGELOG_URL?: Localized<`https://${string}`>
     }
 

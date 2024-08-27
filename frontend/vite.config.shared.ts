@@ -56,6 +56,7 @@ if (process.env.LOAD_ENV) {
 // https://vitejs.dev/config/
 export function buildConfig(options: {port: number, clientFiles?: string[]}): UserConfig {
     return {
+        mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
         resolve: {
             alias: {
                 '@stamhoofd/components': resolve(__dirname, './shared/components')
@@ -76,7 +77,7 @@ export function buildConfig(options: {port: number, clientFiles?: string[]}): Us
             }),
         ],
         define: use_env,
-        server: {
+        server: process.env.NODE_ENV !== 'production' ? {
             host: '127.0.0.1',
             port: options.port,
             strictPort: true,
@@ -87,11 +88,7 @@ export function buildConfig(options: {port: number, clientFiles?: string[]}): Us
                     resolve(__dirname, './shared') + '/**/*.ts'
                 ]
             }
-            //hmr: {
-            //    clientPort: 443
-            //}
-
-        },
+        } : undefined,
         build: process.env.NODE_ENV !== 'production' ? {
             sourcemap: 'inline',
             rollupOptions: {

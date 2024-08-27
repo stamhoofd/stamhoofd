@@ -15,7 +15,7 @@
                     {{ r.name }}
                 </h3>
                 <p class="style-description-small">
-                    {{ r.description || r.url }}
+                    {{ r.url }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label">
@@ -52,32 +52,27 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
     releaseChannel = ''
     customChannel = ''
     saving = false;
-    availableChannels: {name: string, description?: string, url: string}[] = []
+    availableChannels: {name: string, url: string}[] = []
 
-    mounted() {
+    mounted() {        
         this.availableChannels = [
             {
                 name: 'Standaard',
-                description: STAMHOOFD.APP_UPDATE_SERVER_URL,
-                url: ''
+                url: STAMHOOFD.APP_UPDATE_SERVER_URL
             },
             {
                 name: 'Production',
-                url: "https://files.stamhoofd.be/releases/app/production/latest.json"
-            },
-            {
-                name: 'Pre-release',
-                url: "https://files.stamhoofd.be/releases/app/pre-release/latest.json"
+                url: STAMHOOFD.APP_UPDATE_PRODUCTION_SERVER_URL,
             },
             {
                 name: 'Staging',
-                url: "https://files.stamhoofd.be/releases/app/staging/latest.json"
+                url: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
             },
             {
                 name: 'Development',
-                url: "https://files.stamhoofd.be/releases/app/development/latest.json"
+                url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL,
             },
-        ]
+        ].filter(c => c.url !== undefined) as any
 
         Storage.keyValue.getItem("UPDATE_SERVER").then((value) => {
             this.releaseChannel = value ?? ''
@@ -103,7 +98,7 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
             visibleCheck: 'text',
             visibleDownload: true,
             installAutomatically: true,
-            checkTimeout: 10 * 1000,
+            checkTimeout: 15 * 1000,
             force: true,
             channel: this.releaseChannel === 'custom' ? this.customChannel : this.releaseChannel
         })
