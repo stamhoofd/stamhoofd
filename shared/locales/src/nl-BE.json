@@ -1,35 +1,6 @@
 {
-  "shared": {
-    "login": "Inloggen",
-    "inputs": {
-      "mobile": {
-        "label": "GSM-nummer"
-      }
-    },
-    "domains": {
-      "email": ""
-    }
-  },
-  "backend": {},
-  "dashboard": {
-    "settings": {
-      "billing": {
-        "unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid (feitelijke vereniging)"
-      }
-    },
-    "inputs": {
-      "parentPhone": {
-        "placeholder": "GSM-nummer van ouder"
-      }
-    },
-    "webshop": {
-      "deliveryMethod": {
-        "name": {
-          "placeholder": ""
-        }
-      }
-    }
-  },
-  "webshop": {},
-  "registration": {}
+    "dashboard.inputs.parentPhone.placeholder": "GSM-nummer van ouder",
+    "dashboard.settings.billing.unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid (feitelijke vereniging)",
+    "shared.inputs.mobile.label": "GSM-nummer",
+    "shared.login": "Inloggen"
 }

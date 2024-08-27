@@ -1,7 +1,9 @@
 <template>
     <template v-if="stepsByPriority.length">
         <hr>
-        <h2>Vlagmoment</h2>
+        <h2>Breng Ravot in orde</h2>
+        <p>Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken.</p>
+
         <STList :with-animation="true">
             <SetupStepRow v-for="{step, type} in stepsByPriority" :key="type" :type="type" :step="step" :save-handler="saveHandler" />
         </STList>

@@ -1,23 +1,7 @@
 {
-  "shared": {
-    "inputs": {
-      "iban": {
-        "placeholder": "E.g. NL21 INGB 3115 4044 17"
-      },
-      "companyNumber": {
-        "label": "KvK number"
-      }
-    },
-    "domains": {
-      "marketing": "www.stamhoofd.nl"
-    },
-    "emails": {
-      "complaints": "complaints@stamhoofd.nl",
-      "general": "hello@stamhoofd.nl"
-    }
-  },
-  "backend": {},
-  "dashboard": {},
-  "webshop": {},
-  "registration": {}
+    "shared.domains.marketing": "www.stamhoofd.nl",
+    "shared.emails.complaints": "complaints@stamhoofd.nl",
+    "shared.emails.general": "hello@stamhoofd.nl",
+    "shared.inputs.companyNumber.label": "KvK number",
+    "shared.inputs.iban.placeholder": "E.g. NL21 INGB 3115 4044 17"
 }

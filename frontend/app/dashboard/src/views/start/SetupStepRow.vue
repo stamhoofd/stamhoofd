@@ -8,7 +8,7 @@
             </IconContainer>
         </template>
         <h2 class="style-title-list">
-            {{ $isDone ? $t(`setup.${props.type}.review.title`) : $t(`setup.${props.type}.todo.title`) }}
+            {{ $isDone ? $t(`setup.${props.type}.review.checkboxTitle`) : $t(`setup.${props.type}.todo.checkboxTitle`) }}
         </h2>
         <p class="style-description">
             {{ $isDone ? $t(`setup.${props.type}.review.description`) : $t(`setup.${props.type}.todo.description`) }}

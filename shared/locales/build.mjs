@@ -125,27 +125,27 @@ for (const country of countries) {
                 }
                 const fallbackLocale = fallbackLanguage+"-"+country
 
-                // Namespace base
-                if (await fileExists("./src/" + namespace + '/base.json')) {
-                    const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/base.json'))
-                    json = mergeObjects(json, specifics)
-                }
-
                 // Language
                 if (await fileExists("./src/" + fallbackLanguage + ".json")) {
                     const specifics = JSON.parse(await fs.readFile("./src/" + fallbackLanguage + ".json"))
                     json = mergeObjects(json, specifics)
                 }
 
-                // Namespace language
-                if (await fileExists("./src/" + namespace + '/' + fallbackLanguage + ".json")) {
-                    const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/' + fallbackLanguage + ".json"))
-                    json = mergeObjects(json, specifics)
-                }
-
                 // Locale
                 if (await fileExists("./src/" + fallbackLocale + ".json")) {
                     const specifics = JSON.parse(await fs.readFile("./src/" + fallbackLocale + ".json"))
+                    json = mergeObjects(json, specifics)
+                }
+
+                // Namespace base
+                if (await fileExists("./src/" + namespace + '/base.json')) {
+                    const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/base.json'))
+                    json = mergeObjects(json, specifics)
+                }
+
+                // Namespace language
+                if (await fileExists("./src/" + namespace + '/' + fallbackLanguage + ".json")) {
+                    const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/' + fallbackLanguage + ".json"))
                     json = mergeObjects(json, specifics)
                 }
 
@@ -159,27 +159,27 @@ for (const country of countries) {
                 runReplacements(json)
             }
 
-            // Namespace base
-            if (await fileExists("./src/" + namespace + '/base.json')) {
-                const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/base.json'))
-                json = mergeObjects(json, specifics)
-            }
-
             // Language
             if (await fileExists("./src/" + language + ".json")) {
                 const specifics = JSON.parse(await fs.readFile("./src/" + language + ".json"))
                 json = mergeObjects(json, specifics)
             }
 
-            // Namespace language
-            if (await fileExists("./src/" + namespace + '/' + language + ".json")) {
-                const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/' + language + ".json"))
-                json = mergeObjects(json, specifics)
-            }
-
             // Locale
             if (await fileExists("./src/" + locale + ".json")) {
                 const specifics = JSON.parse(await fs.readFile("./src/" + locale + ".json"))
+                json = mergeObjects(json, specifics)
+            }
+
+            // Namespace base
+            if (await fileExists("./src/" + namespace + '/base.json')) {
+                const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/base.json'))
+                json = mergeObjects(json, specifics)
+            }
+
+            // Namespace language
+            if (await fileExists("./src/" + namespace + '/' + language + ".json")) {
+                const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/' + language + ".json"))
                 json = mergeObjects(json, specifics)
             }
 
