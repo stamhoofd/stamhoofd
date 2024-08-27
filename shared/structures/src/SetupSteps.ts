@@ -29,7 +29,7 @@ export class SetupStep extends AutoEncoder {
     /**
      * When the item was marked as reviewed.
      */
-    @field({ decoder: SetupStepReview, nullable: true, ...NextVersion })
+    @field({ decoder: SetupStepReview, nullable: true, version: 326 })
     review: SetupStepReview | null = null
 
     /**

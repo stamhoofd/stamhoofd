@@ -179,7 +179,7 @@ export class PlatformEventType extends AutoEncoder {
 }
 
 export class PlatformConfig extends AutoEncoder {
-    @field({ decoder: StringDecoder, ...NextVersion})
+    @field({ decoder: StringDecoder, version: 326})
     name = "Stamhoofd"
     
     /**
