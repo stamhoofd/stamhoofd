@@ -9,7 +9,7 @@
     "build:production": "NODE_ENV=production vite build",
     "sync": "cap sync",
     "trapeze": "trapeze run config.yaml -y",
-    "sync:production": "mv -n capacitor.config.ts capacitor.config.development.ts; yarn -s trapeze; cap sync; mv -n capacitor.config.development.ts capacitor.config.ts ",
+    "sync:production": "yarn -s trapeze && cap sync",
     "ios": "cap open ios",
     "android": "cap open android"
   },
