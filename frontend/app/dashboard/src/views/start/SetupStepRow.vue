@@ -27,8 +27,8 @@ import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
-import FunctionsReview from './FunctionsReview.vue';
 import GroupsReview from './GroupsReview.vue';
+import FunctionsReview from './ResponsibilitiesReview.vue';
 
 const props = defineProps<{type: SetupStepType, step: SetupStep}>();
 
@@ -58,14 +58,14 @@ const color = computed(() => {
 enum Routes {
     Premises = 'gebouwen',
     Groups = 'leeftijdsgroepen',
-    Functions = 'functies',
+    Responsibilities = 'functies',
     Companies = 'companies'
 }
 
 const icons: Record<SetupStepType, string> = {
     [SetupStepType.Premises]: 'home',
     [SetupStepType.Groups]: 'group',
-    [SetupStepType.Functions]: 'star',
+    [SetupStepType.Responsibilities]: 'star',
     [SetupStepType.Companies]: 'file-filled',
 }
 
@@ -98,7 +98,7 @@ defineRoutes([
         paramsToProps: paramToPropsFactory()
     },
     {
-        url: Routes.Functions,
+        url: Routes.Responsibilities,
         present: 'popup',
         component: FunctionsReview as unknown as ComponentOptions,
         paramsToProps: paramToPropsFactory()
@@ -130,8 +130,8 @@ async function onClick() {
             await $navigate(Routes.Groups);
             break;
         }
-        case SetupStepType.Functions: {
-            await $navigate(Routes.Functions);
+        case SetupStepType.Responsibilities: {
+            await $navigate(Routes.Responsibilities);
             break;
         }
         case SetupStepType.Companies: {

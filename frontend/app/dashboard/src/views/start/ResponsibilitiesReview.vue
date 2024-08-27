@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="$isLoading" />
-    <ReviewSetupStepView v-else :type="SetupStepType.Functions">
+    <ReviewSetupStepView v-else :type="SetupStepType.Responsibilities">
         <template #top>
             <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen ga je naar het tabblad "Leden". Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen. </p>
         </template>
@@ -31,7 +31,7 @@
                 <hr>
                 <h2>Optionele functies</h2>
                 <STList class="info">
-                    <FunctionReview
+                    <ResponsibilityReview
                         v-for="row in $rowCategories.optionalRows"
                         :key="row.responsibility.id"
                         :responsibility="row.responsibility"
@@ -53,7 +53,7 @@ import { useAuth, useContext, useOrganization, usePlatform, useVisibilityChange 
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Group, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
-import FunctionReview from './FunctionReview.vue';
+import ResponsibilityReview from './ResponsibilityReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
 
 type RowData = {
