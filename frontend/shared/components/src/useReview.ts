@@ -58,10 +58,7 @@ export function useReview(type: SetupStepType): UseReview {
             organizationManager.value.updatePeriods([updatedPeriod.data]);
         } catch (error) {
             // todo: translate
-            new Toast(
-                "Het voltooien van deze stap is mislukt.",
-                "error red"
-            ).show();
+            Toast.fromError(error).show()
             isSaving.value = false;
             return false;
         }
