@@ -189,13 +189,13 @@ export class PlatformPolicy extends AutoEncoder {
     @field({ decoder: StringDecoder })
     url = ''
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 327 })
     enableAtSignup = true
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 327 })
     checkbox = true
 
-    @field({ decoder: RichText, ...NextVersion})
+    @field({ decoder: RichText, version: 327})
     richText = RichText.create({})
 }
 
@@ -262,7 +262,7 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true, version: 310 })
     expandLogo = false
 
-    @field({ decoder: PrivacySettings, ...NextVersion })
+    @field({ decoder: PrivacySettings, version: 327 })
     privacy = PrivacySettings.create({})
 
     getEmailReplacements() {
