@@ -69,7 +69,6 @@
             De beschrijving is zichtbaar als leden doorklikken om in te schrijven voor de activiteit.
         </p>
 
-
         <template v-if="patched.type === GroupType.EventRegistration && !organization && isMultiOrganization">
             <hr>
             <h2>Organisator</h2>
@@ -163,6 +162,75 @@
             </STListItem>
         </STList>
 
+        <hr>
+        <h2>Inschrijvingen via ledenportaal</h2>
+        <p>Leden kunnen zelf inschrijven via het ledenportaal als je deze optie open zet. Ze betalen het opgegeven tarief dan zelf via de betaalmethodes die je hebt ingesteld bij de instellingen van jouw groep.</p>
+
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Radio v-model="virtualOpenStatus" :value="GroupStatus.Closed" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Gesloten
+                </h3>
+                <p class="style-description-small">
+                    De inschrijvingen zijn gesloten en openen niet automatisch.
+                </p>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Radio v-model="virtualOpenStatus" value="RegistrationStartDate" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Vanaf datum
+                </h3>
+                <p class="style-description-small">
+                    De inschrijvingen openen pas vanaf een bepaalde datum.
+                </p>
+
+                <div v-if="virtualOpenStatus === 'RegistrationStartDate'" class="split-inputs option" @click.stop.prevent>
+                    <STInputBox :title="$t('Openen op')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="registrationStartDate" />
+                    </STInputBox>
+                    <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('Vanaf')" :validator="errors.validator" /> 
+                </div>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Radio v-model="virtualOpenStatus" :value="GroupStatus.Open" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Open
+                </h3>
+                <p class="style-description-small">
+                    De inschrijvingen zijn open
+                </p>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label" v-if="virtualOpenStatus !== GroupStatus.Closed">
+                <template #left>
+                    <Checkbox v-model="useRegistrationEndDate" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Sluit inschrijvingen automatisch na een bepaalde datum') }}
+                </h3>
+
+                <div v-if="useRegistrationEndDate" class="split-inputs option" @click.stop.prevent>
+                    <STInputBox :title="$t('Inschrijven sluit op')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="registrationEndDate" />
+                    </STInputBox>
+                    <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
+                </div>
+            </STListItem>
+        </STList>
+
         <div v-if="patched.type === GroupType.Membership" class="container">
             <hr>
             <h2>Restricties</h2>
@@ -219,40 +287,6 @@
                 <p class="style-description-small">
                     Een hoofdbeheerder van een groep kan meerdere leden inschrijven en schiet de betaling voor. De leden betalen vervolgens via een openstaand bedrag het geld terug aan hun groep.
                 </p>
-            </STListItem>
-
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox v-model="useRegistrationStartDate" />
-                </template>
-
-                <h3 class="style-title-list">
-                    {{ $t('Start inschrijvingen pas na een bepaalde datum') }}
-                </h3>
-
-                <div v-if="useRegistrationStartDate" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox :title="$t('Inschrijven start op')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="registrationStartDate" />
-                    </STInputBox>
-                    <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('Vanaf')" :validator="errors.validator" /> 
-                </div>
-            </STListItem>
-
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox v-model="useRegistrationEndDate" />
-                </template>
-
-                <h3 class="style-title-list">
-                    {{ $t('Sluit inschrijvingen automatisch na een bepaalde datum') }}
-                </h3>
-
-                <div v-if="useRegistrationEndDate" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox :title="$t('Inschrijven sluit op')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="registrationEndDate" />
-                    </STInputBox>
-                    <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
-                </div>
             </STListItem>
 
             <STListItem v-if="enableMaxMembers || type !== GroupType.WaitingList" :selectable="true" element-name="label">
@@ -344,9 +378,9 @@
                     </p>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="label" :for="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate || waitingListType == WaitingListType.PreRegistrations)">
+                <STListItem :selectable="true" element-name="label" :for="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate)">
                     <template #left>
-                        <Radio :id="WaitingListType.PreRegistrations" v-model="waitingListType" :value="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate || waitingListType == WaitingListType.PreRegistrations)" />
+                        <Radio :id="WaitingListType.PreRegistrations" v-model="waitingListType" :value="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate)" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -443,7 +477,7 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AgeInput, DateSelection, Dropdown, EditGroupView, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, NumberInput, OrganizationAvatar, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Country, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType, OrganizationRecordsConfiguration, WaitingListType } from '@stamhoofd/structures';
+import { Country, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, WaitingListType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -598,6 +632,65 @@ const name = computed({
                 defaultAgeGroupId.value = null
                 didSetAutomaticGroup.value = true
             }
+        }
+    }
+})
+
+const virtualOpenStatus = computed({
+    get: () => {
+        if (patched.value.status !== GroupStatus.Open) {
+            return GroupStatus.Closed
+        }
+
+        if (useRegistrationStartDate.value) {
+            if (registrationStartDate.value !== props.group.settings.registrationStartDate || (registrationStartDate.value && registrationStartDate.value > new Date())) {
+                return 'RegistrationStartDate' as const
+            }
+        }
+
+        if (patched.value.closed && props.group.closed) {
+            return GroupStatus.Closed
+        }
+
+        return GroupStatus.Open
+    },
+    set: (val) => {
+        if (val === 'RegistrationStartDate') {
+            addPatch({
+                status: GroupStatus.Open
+            })
+            useRegistrationStartDate.value = true
+
+            if (patched.value.settings.registrationEndDate && patched.value.settings.registrationEndDate.getTime() <= Date.now()) {
+                addPatch({
+                    settings: GroupSettings.patch({
+                        registrationEndDate: null
+                    })
+                })
+            }
+            return;
+        }
+
+        if (val ===  GroupStatus.Open) {
+            addPatch({
+                status: GroupStatus.Open
+            })
+            useRegistrationStartDate.value = false
+
+            if (patched.value.settings.registrationEndDate && patched.value.settings.registrationEndDate.getTime() <= Date.now()) {
+                addPatch({
+                    settings: GroupSettings.patch({
+                        registrationEndDate: null
+                    })
+                })
+            }
+            return;
+        }
+
+        if (val ===  GroupStatus.Closed) {
+            addPatch({
+                status: GroupStatus.Closed
+            })
         }
     }
 })
@@ -782,7 +875,7 @@ const useRegistrationStartDate = computed({
         } else {
             addPatch({
                 settings: GroupSettings.patch({
-                    registrationStartDate: props.group.settings.registrationStartDate ?? new Date()
+                    registrationStartDate: props.group.settings.registrationStartDate && props.group.settings.registrationStartDate > new Date() ? props.group.settings.registrationStartDate : new Date(Date.now() + 1000 * 60 * 60 * 24)
                 })
             })
         }

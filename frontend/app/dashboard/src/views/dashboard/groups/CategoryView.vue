@@ -108,7 +108,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, ContextMenu, ContextMenuItem, EditGroupView, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
+import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import GroupOverview from "./GroupOverview.vue";
 
@@ -274,7 +274,8 @@ export default class CategoryView extends Mixins(NavigationMixin) {
                 prices: [],
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
             }),
-            privateSettings: GroupPrivateSettings.create({})
+            privateSettings: GroupPrivateSettings.create({}),
+            status: GroupStatus.Closed
         })
         const settings = OrganizationRegistrationPeriodSettings.patch({})
 
@@ -284,6 +285,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         
         this.present(new ComponentWithProperties(EditGroupView, { 
             group, 
+            isNew: true,
             saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
                 const p = OrganizationRegistrationPeriod.patch({
                     id: this.period.id,

@@ -100,7 +100,7 @@
 import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, STErrorsDefault, STInputBox, STList, SaveView, useAuth, useDraggableArrayIds, useErrors, usePatch } from "@stamhoofd/components";
-import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
+import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 
 import { computed, getCurrentInstance, ref } from 'vue';
 import GroupCategoryRow from "./GroupCategoryRow.vue";
@@ -241,9 +241,10 @@ async function createGroup() {
         periodId: props.organization.period.period.id,
         settings: GroupSettings.create({
             name: "",
-            genderType: props.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
+            genderType: props.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
         }),
-        privateSettings: GroupPrivateSettings.create({})
+        privateSettings: GroupPrivateSettings.create({}),
+        status: GroupStatus.Closed
     })
 
     const settings = OrganizationRegistrationPeriodSettings.patch({})
