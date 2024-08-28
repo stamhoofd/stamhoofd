@@ -8,13 +8,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="type === GroupType.Membership">
-            <p v-if="(!defaultAgeGroupId) && defaultAgeGroups.length" class="warning-box">
-                Leden die in deze groep inschrijven zullen niet automatisch worden aangesloten bij KSA Nationaal, en zijn dus ook niet verzekerd (tenzij je manueel een verzekering aanvraagt voor het lid). Dit is normaal gezien enkel voor uitzonderingen, bijvoorbeeld voor oud-leiding, een wachtzone, kampouders of helpende handen. Kies een standaard inschrijvingsgroep om de aansluiting bij KSA Nationaal te garanderen.
-            </p>
-
-            <p v-if="defaultAgeGroup && !defaultAgeGroup.defaultMembershipTypeId" class="warning-box">
-                Leden die in deze groep inschrijven zullen niet automatisch worden aangesloten bij KSA Nationaal. Je kan wel een aansluiting op individuele basis per lid toevoegen.
-            </p>
+            <p v-if="isNew" class="info-box">Maak gebruik van de activiteitenmodule om leden in te schrijven voor activiteiten. Maak daarvoor geen inschrijvingsgroep aan.</p>
 
             <div class="split-inputs">
                 <STInputBox title="Naam" error-fields="settings.name" :error-box="errors.errorBox">
@@ -28,7 +22,7 @@
                     >
                 </STInputBox>
 
-                <STInputBox v-if="defaultAgeGroups.length" title="Aansluiting KSA-Nationaal*" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
+                <STInputBox v-if="defaultAgeGroups.length" title="Aansluiting/verzekering KSA-Nationaal*" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                     <Dropdown v-model="defaultAgeGroupId">
                         <option :value="null">
                             Geen automatische aansluiting of verzekeringen (!)
@@ -44,6 +38,7 @@
             <p v-if="defaultAgeGroups.length" class="style-description-small">
                 * Voor de aansluiting bij KSA Nationaal moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van KSA Nationaal.
             </p>
+
         </template>
 
         <template v-if="type === GroupType.WaitingList">

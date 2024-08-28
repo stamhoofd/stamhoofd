@@ -52,15 +52,15 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, useErrors, usePatch, usePlatform, UrlInput, AddressInput } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, ErrorBox, UrlInput, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Organization } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
-import SelectOrganizationTagRow from './tags/components/SelectOrganizationTagRow.vue';
-import OrganizationUriInput from './components/OrganizationUriInput.vue';
 import { Formatter } from '@stamhoofd/utility';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { computed, ref } from 'vue';
+import OrganizationUriInput from './components/OrganizationUriInput.vue';
+import SelectOrganizationTagRow from './tags/components/SelectOrganizationTagRow.vue';
 
 const platform = usePlatform();
 const errors = useErrors();
