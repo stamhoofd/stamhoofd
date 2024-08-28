@@ -1,5 +1,6 @@
 import {
     Group,
+    Member,
     MemberResponsibilityRecord,
     Organization,
     OrganizationRegistrationPeriod,
@@ -8,11 +9,13 @@ import {
 import { QueueHandler } from "@stamhoofd/queues";
 import { SQL, SQLWhereSign } from "@stamhoofd/sql";
 import {
+    GroupType,
     MemberResponsibility,
     Platform as PlatformStruct,
     SetupStepType,
     SetupSteps
 } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
@@ -244,11 +247,20 @@ export class SetupStepUpdater {
 
         const responsibilityIds = organizationBasedResponsibilitiesWithRestriction.map(r => r.id);
 
-        const records = await MemberResponsibilityRecord.select()
+        const allRecords = await MemberResponsibilityRecord.select()
             .where('responsibilityId', responsibilityIds)
             .where('organizationId', organization.id)
             .where(SQL.where('endDate', SQLWhereSign.Greater, now).or('endDate', null))
             .fetch();
+
+        // Remove invalid responsibilities: members that are not registered in the current period
+        const memberIds = Formatter.uniqueArray(allRecords.map(r => r.memberId));
+        const members = await Member.getBlobByIds(...memberIds);
+        const validMembers = members.filter(m => m.registrations.some(r => r.organizationId === organization.id && r.periodId === organization.periodId && r.group.type === GroupType.Membership && r.deactivatedAt === null && r.registeredAt !== null));
+
+        const validMembersIds = validMembers.map(m => m.id);
+
+        const records = allRecords.filter(r => validMembersIds.includes(r.memberId));
 
         let totalSteps = 0;
         let finishedSteps = 0;
@@ -279,11 +291,11 @@ export class SetupStepUpdater {
         for(const {responsibility, group} of flatResponsibilities) {
             const { minimumMembers: min, maximumMembers: max } = responsibility;
 
-            if (min === null && max === null) {
+            if (min === null) {
                 continue;
             }
 
-            totalSteps++;
+            totalSteps += min;
 
             const responsibilityId = responsibility.id;
             let totalRecordsWithThisResponsibility = 0;
@@ -303,14 +315,11 @@ export class SetupStepUpdater {
             }
 
             if (max !== null && totalRecordsWithThisResponsibility > max) {
+                // Not added
                 continue;
             }
 
-            if (min !== null && totalRecordsWithThisResponsibility < min) {
-                continue;
-            }
-
-            finishedSteps++;
+            finishedSteps += Math.min(min, totalRecordsWithThisResponsibility);
         }
 
         setupSteps.update(SetupStepType.Responsibilities, {
