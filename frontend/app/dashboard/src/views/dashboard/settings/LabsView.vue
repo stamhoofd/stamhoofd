@@ -20,7 +20,7 @@
                     API-keys
                 </h2>
                 <p class="style-description">
-                    Maak API-keys aan om toegang te krijgen tot de Stamhoofd-API.
+                    {{ $t('Maak API-keys aan om toegang te krijgen tot de Stamhoofd-API.') }}
                 </p>
                 <template #right>
                     <span class="icon arrow-right-small gray" />
@@ -66,7 +66,7 @@
         <h2>Geavanceerde instellingen</h2>
 
         <STList>
-            <STListItem :selectable="true" element-name="label" v-if="!enableBuckaroo">
+            <STListItem v-if="!enableBuckaroo && false" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="forceMollie" />
                 </template>
@@ -80,7 +80,7 @@
                 </p>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label" v-if="!enableBuckaroo">
+            <STListItem v-if="!enableBuckaroo" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)" />
                 </template>
