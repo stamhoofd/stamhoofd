@@ -153,6 +153,12 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
 
     const query = new LimitedFilteredRequest({
         filter: {
+            registrations: {
+                $elemMatch: {
+                    organizationId: organization.id,
+                    periodId: organization.period.period.id,
+                }
+            },
             responsibilities: {
                 $elemMatch: {
                     organizationId: organization.id,
@@ -174,9 +180,10 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
         sort: [
             { key: 'firstName', order: SortItemDirection.ASC },
             { key: 'lastName', order: SortItemDirection.ASC },
-            { key: 'id', order: SortItemDirection.ASC }],
+            { key: 'id', order: SortItemDirection.ASC }
+        ],
         // todo: change limit? or get all?
-        limit: 999
+        limit: 100
     });
 
     const response = await $context.value.authenticatedServer.request({
