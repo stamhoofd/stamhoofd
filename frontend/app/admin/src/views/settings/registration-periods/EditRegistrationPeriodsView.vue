@@ -4,12 +4,35 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>Gebruik je rechtermuisknop om het huidige werkjaar te wijzigingen.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id">
+            <hr>
+            <h2>Overschakelen naar {{ sortedPeriods[0].nameShort }}</h2>
+            <p>Je kan het huidig werkjaar hier wijzigen. Zorg dat je voor dit werkjaar alle aansluitingen hebt ingesteld. Ga daarvoor naar 'aansluitingen en verzekeringen' en voeg het werkjaar toe en stel de nieuwe prijzen en periodes correct in. </p>
+
+            <ul class="style-list">
+                <li>Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.</li>
+                <li>De categorieën en leeftijdsgroepen van de groepen worden gedupliceerd naar het nieuwe werkjaar.</li>
+                <li>De leden moeten zich opnieuw inschrijven voor het nieuwe werkjaar.</li>
+                <li>Alle functies van leden die gekoppeld zijn aan leeftijdsgroepen (leiding) worden beëindigd, andere blijven behouden maar moeten opnieuw nagekeken worden.</li>
+                <li>Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)</li>
+            </ul>
+
+            <p class="style-button-bar">
+                <button class="button primary" type="button" @click="setCurrent(sortedPeriods[0])">
+                    <span class="icon flag" />
+                    <span>Overschakelen naar {{ sortedPeriods[0].nameShort }}</span>
+                </button>
+            </p>
+
+            <hr>
+            <h2>Werkjaren</h2>
+        </template>
+
         <STList>
-            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :platform="patchedPlatform" @click="editPeriod(period)" @activate="setCurrent(period)" />
+            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :platform="patchedPlatform" @click="editPeriod(period)" />
         </STList>
 
         <p>
@@ -53,7 +76,7 @@ const hasChanges = computed(() => hasChangesPeriods.value || hasChangesPlatform.
 const saving = ref(false);
 
 const sortedPeriods = computed(() => {
-    return patched.value
+    return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime())
 })
 
 const title = 'Werkjaren'
@@ -62,6 +85,10 @@ async function addPeriod() {
     const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray()
     const period = platform.value.period.clone()
     period.id = RegistrationPeriod.create({}).id
+
+    period.startDate.setFullYear(period.startDate.getFullYear() + 1)
+    period.endDate.setFullYear(period.endDate.getFullYear() + 1)
+    
     arr.addPut(period)
 
     await present({
@@ -126,11 +153,18 @@ async function save() {
             })
         }
 
-        if (hasChangesPlatform.value) {
+        const changedPeriod = hasChangesPlatform.value;
+
+        if (changedPeriod) {
             await platformManager.value.patch(platformPatch.value, false)
         }
 
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+
+        if (changedPeriod) {
+            new Toast('Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.', "info").setHide(20 * 1000).show()
+        }
+
         await pop({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e)

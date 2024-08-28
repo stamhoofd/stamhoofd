@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :loading="$isSaving" :disabled="!$hasChanges" @save="save">
-        <h1 class="style-navigation-title">
+        <h1>
             {{ title }}
         </h1>
         <slot name="top" />

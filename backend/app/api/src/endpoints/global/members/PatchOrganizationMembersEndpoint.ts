@@ -3,7 +3,7 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Platform, Registration, User } from '@stamhoofd/models';
-import { MemberWithRegistrationsBlob, MembersBlob, PermissionLevel } from "@stamhoofd/structures";
+import { GroupType, MemberWithRegistrationsBlob, MembersBlob, PermissionLevel } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -264,6 +264,33 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         message: "Invalid organization",
                         human: "Deze functie kan niet worden toegewezen aan deze vereniging",
                         field: "organizationId"
+                    })
+                }
+
+                const hasRegistration = member.registrations.some(registration => {
+                    if (platformResponsibility) {
+                        if (registration.group.defaultAgeGroupId === null) {
+                            return false;
+                        }
+                    }
+
+                    if (org) {
+                        if (registration.periodId !== org.periodId) {
+                            return false;
+                        }
+                    } else {
+                        if (registration.periodId !== platform.periodId) {
+                            return false;
+                        }
+                    }
+                    return registration.deactivatedAt === null && registration.registeredAt !== null && registration.group.type === GroupType.Membership
+                })
+
+                if (!hasRegistration) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid organization",
+                        human: "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar",
                     })
                 }
 

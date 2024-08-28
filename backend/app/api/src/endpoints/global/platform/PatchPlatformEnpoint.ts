@@ -6,6 +6,7 @@ import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as 
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Context } from "../../../helpers/Context";
 import { SetupStepUpdater } from "../../../helpers/SetupStepsUpdater";
+import { PeriodHelper } from "../../../helpers/PeriodHelper";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -73,6 +74,7 @@ export class PatchPlatformEndpoint extends Endpoint<
         }
 
         let shouldUpdateSetupSteps = false;
+        let shouldMoveToPeriod: RegistrationPeriod | null = null;
 
         if (request.body.config) {
             if (!Context.auth.hasPlatformFullAccess()) {
@@ -113,6 +115,8 @@ export class PatchPlatformEndpoint extends Endpoint<
                 });
             }
             platform.periodId = period.id;
+            shouldUpdateSetupSteps = true;
+            shouldMoveToPeriod = period;
         }
 
         if (request.body.membershipOrganizationId !== undefined) {
@@ -155,7 +159,10 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         await platform.save();
 
-        if(shouldUpdateSetupSteps) {
+        if (shouldMoveToPeriod) {
+            PeriodHelper.moveAllOrganizationsToPeriod(shouldMoveToPeriod).catch(console.error)
+        } else if(shouldUpdateSetupSteps) {
+            // Do not call this right away when moving to a period, because this needs to happen AFTER moving to the period
             SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod().catch(console.error);
         }
 

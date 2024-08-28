@@ -4,9 +4,8 @@
 
         <main>
             <h1>{{ period.name }}</h1>
-            <STErrorsDefault :error-box="errors.errorBox" />
-
             <p>Hoera! Tijd voor een nieuw werkjaar. </p>
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <ul class="style-list">
                 <li>De structuur van jouw leeftijdsgroepen blijft behouden, maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.</li>
@@ -55,55 +54,8 @@ async function start() {
     loading.value = true;
 
     try {
-        // Create new groups + map old to new groups
-        const groupMap = new Map<string, string>();
-        const categoryMap = new Map<string, string>();
-
-        const newOrganizationPeriod = OrganizationRegistrationPeriod.create({
-            period: props.period,
-        })
         const currentPeriod = organization.value!.period
-
-        for (const group of currentPeriod.groups) {
-            const newGroup = Group.create({
-                ...group,
-                id: undefined,
-                periodId: props.period.id,
-                settings: group.settings.clone(),
-            });
-
-            // Increase all dates with exactly one year
-            newGroup.settings.startDate.setFullYear(newGroup.settings.startDate.getFullYear() + 1);
-            newGroup.settings.endDate.setFullYear(newGroup.settings.endDate.getFullYear() + 1);
-
-            if (newGroup.settings.registrationStartDate) {
-                newGroup.settings.registrationStartDate.setFullYear(newGroup.settings.registrationStartDate.getFullYear() + 1);
-            }
-
-            if (newGroup.settings.registrationEndDate) {
-                newGroup.settings.registrationEndDate.setFullYear(newGroup.settings.registrationEndDate.getFullYear() + 1);
-            }
-
-            groupMap.set(group.id, newGroup.id);
-            newOrganizationPeriod.groups.push(newGroup);
-        }
-
-        for (const category of currentPeriod.settings.categories) {
-            const newCategory = category.clone();
-            newCategory.id = uuidv4()
-            newCategory.groupIds = category.groupIds.map(groupId => groupMap.get(groupId)!).filter(id => id);
-
-            categoryMap.set(category.id, newCategory.id);
-            newOrganizationPeriod.settings.categories.push(newCategory);
-        }
-
-        // Update category ids
-        for (const category of newOrganizationPeriod.settings.categories) {
-            category.categoryIds = category.categoryIds.map(categoryId => categoryMap.get(categoryId)!).filter(id => id);
-        }
-
-        // Update root category id
-        newOrganizationPeriod.settings.rootCategoryId = categoryMap.get(newOrganizationPeriod.settings.rootCategoryId)!;
+        const newOrganizationPeriod = currentPeriod.duplicate(props.period)
 
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
         arr.addPut(newOrganizationPeriod);

@@ -9,6 +9,7 @@ export {default as SearchOrganizationView} from "./SearchOrganizationView.vue";
 export {default as RegisterItemView} from "./RegisterItemView.vue";
 
 export * from "./PlatformFamilyManager";
+export * from "./classes/MemberActionBuilder";
 
 export { default as EditMemberGeneralBox } from "./components/edit/EditMemberGeneralBox.vue"
 export { default as EditMemberParentsBox } from "./components/edit/EditMemberParentsBox.vue"

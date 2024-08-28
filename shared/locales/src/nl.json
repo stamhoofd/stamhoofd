@@ -34,7 +34,7 @@
     "admin.settings.membershipTypes.delete.confirmation.title": "Ben je zeker dat je dit aansluitingstype wilt verwijderen?",
     "admin.settings.membershipTypes.description": "Bepaal de beschikbare aansluitingen (o.a. verzekeringen), bijhorende kostprijs en instellingen",
     "admin.settings.membershipTypes.edit.title": "Wijzig aansluitingstype",
-    "admin.settings.membershipTypes.expireDate.description": "De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe werkjaar.",
+    "admin.settings.membershipTypes.expireDate.description": "De vervaldatum ligt tussen de start en einddatum en is optioneel. De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe werkjaar.",
     "admin.settings.membershipTypes.expireDate.placeholder": "Geen vervaldatum",
     "admin.settings.membershipTypes.expireDate.title": "Vervaldatum",
     "admin.settings.membershipTypes.new.period": "Instellen voor werkjaar",

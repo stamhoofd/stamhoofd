@@ -3,7 +3,7 @@ import { Group as GroupStruct, GroupPrivateSettings, OrganizationRegistrationPer
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { Context } from "../../../../helpers/Context";
-import { Group, Member, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
+import { Group, Member, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
 
@@ -46,32 +46,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             if (!await Context.auth.hasFullAccess(organization.id)) {
                 throw Context.auth.error()
             }
-            const period = await RegistrationPeriod.getByID(put.period.id);
-
-            if (!period) {
-                throw new SimpleError({
-                    code: "not_found",
-                    message: "Period not found",
-                    statusCode: 404
-                })
-            }
-
-            const organizationPeriod = new OrganizationRegistrationPeriod();
-            organizationPeriod.id = put.id;
-            organizationPeriod.organizationId = organization.id;
-            organizationPeriod.periodId = put.period.id;
-            organizationPeriod.settings = put.settings;
-            await organizationPeriod.save();
-
-            for (const struct of put.groups) {
-                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(struct, organization.id, organizationPeriod.periodId)
-            }
-            const groups = await Group.getAll(organization.id, organizationPeriod.periodId)
-
-            // Delete unreachable categories first
-            await organizationPeriod.cleanCategories(groups);
-            await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
-            periods.push(organizationPeriod);
+            periods.push(await PatchOrganizationRegistrationPeriodsEndpoint.createOrganizationPeriod(organization, put));
         }
 
         for (const patch of request.body.getPatches()) {
@@ -83,6 +58,26 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     statusCode: 404
                 })
             }
+
+            const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
+
+            if (!period) {
+                throw new SimpleError({
+                    code: "not_found",
+                    message: "Period not found",
+                    statusCode: 404
+                })
+            }
+
+            if (period.locked) {
+                throw new SimpleError({
+                    code: "not_found",
+                    message: "Period not found",
+                    human: 'Je kan geen wijzigingen meer aanbrengen in ' + period.getStructure().name + ' omdat deze is afgesloten',
+                    statusCode: 404
+                })
+            }
+
             let deleteUnreachable = false
             const allowedIds: string[] = []
 
@@ -172,6 +167,36 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             human: "De standaard leeftijdsgroep is ongeldig",
             statusCode: 400
         })
+    }
+
+    static async createOrganizationPeriod(organization: Organization, struct: OrganizationRegistrationPeriodStruct) {
+        const period = await RegistrationPeriod.getByID(struct.period.id);
+
+        if (!period || period.locked) {
+            throw new SimpleError({
+                code: "not_found",
+                message: "Period not found",
+                statusCode: 404
+            })
+        }
+
+        const organizationPeriod = new OrganizationRegistrationPeriod();
+        organizationPeriod.id = struct.id;
+        organizationPeriod.organizationId = organization.id;
+        organizationPeriod.periodId = struct.period.id;
+        organizationPeriod.settings = struct.settings;
+        await organizationPeriod.save();
+
+        for (const s of struct.groups) {
+            await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, organizationPeriod.periodId)
+        }
+        const groups = await Group.getAll(organization.id, organizationPeriod.periodId)
+
+        // Delete unreachable categories first
+        await organizationPeriod.cleanCategories(groups);
+        await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
+
+        return organizationPeriod
     }
 
     static async deleteGroup(id: string) {

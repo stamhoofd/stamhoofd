@@ -161,6 +161,58 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         }
         return true
     }
+
+    duplicate(newPeriod: RegistrationPeriod) {
+        // Create new groups + map old to new groups
+        const groupMap = new Map<string, string>();
+        const categoryMap = new Map<string, string>();
+
+        const newOrganizationPeriod = OrganizationRegistrationPeriod.create({
+            period: newPeriod
+        })
+
+        const yearDifference = newPeriod.startDate.getFullYear() - this.period.startDate.getFullYear();
+
+       for (const group of this.groups) {
+            const newGroup = Group.create({
+                ...group,
+                id: undefined,
+                periodId: newPeriod.id,
+                settings: group.settings.clone(),
+            });
+
+            // Increase all dates with exactly one year
+
+            if (newGroup.settings.registrationStartDate) {
+                newGroup.settings.registrationStartDate.setFullYear(newGroup.settings.registrationStartDate.getFullYear() + yearDifference);
+            }
+
+            if (newGroup.settings.registrationEndDate) {
+                newGroup.settings.registrationEndDate.setFullYear(newGroup.settings.registrationEndDate.getFullYear() + yearDifference);
+            }
+
+            groupMap.set(group.id, newGroup.id);
+            newOrganizationPeriod.groups.push(newGroup);
+        }
+
+        for (const category of this.settings.categories) {
+            const newCategory = category.clone();
+            newCategory.id = uuidv4()
+            newCategory.groupIds = category.groupIds.map(groupId => groupMap.get(groupId)!).filter(id => id);
+
+            categoryMap.set(category.id, newCategory.id);
+            newOrganizationPeriod.settings.categories.push(newCategory);
+        }
+
+        // Update category ids
+        for (const category of newOrganizationPeriod.settings.categories) {
+            category.categoryIds = category.categoryIds.map(categoryId => categoryMap.get(categoryId)!).filter(id => id);
+        }
+
+        // Update root category id
+        newOrganizationPeriod.settings.rootCategoryId = categoryMap.get(this.settings.rootCategoryId)!;
+       return newOrganizationPeriod
+   }
 }
 
 export class RegistrationPeriodList extends AutoEncoder {

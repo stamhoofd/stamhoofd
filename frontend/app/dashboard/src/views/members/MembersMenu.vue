@@ -233,7 +233,7 @@ async function switchPeriod(event: MouseEvent) {
     const organization = $organization.value!;
 
     const menu = new ContextMenu([
-        (list.periods ?? []).map(p => {
+        (list.periods.slice(0, 10) ?? []).map(p => {
             return new ContextMenuItem({
                 name: p.name,
                 selected: p.id === period.value.period.id,

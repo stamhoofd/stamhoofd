@@ -19,7 +19,7 @@
             Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.
         </p>
 
-        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('admin.settings.membershipTypes.expireDate.title')" error-fields="endDate" :error-box="errors.errorBox">
+        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('admin.settings.membershipTypes.expireDate.title')" error-fields="expireDate" :error-box="errors.errorBox">
             <DateSelection v-model="expireDate" :required="false" :placeholder="$t('admin.settings.membershipTypes.expireDate.placeholder')" />
         </STInputBox>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">
@@ -55,7 +55,7 @@
                     <PriceInput :model-value="price.pricePerDay" placeholder="Prijs per dag" @update:model-value="patchPrice(price, {pricePerDay: $event})" />
                 </STInputBox>
 
-                <STInputBox :title="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'Vaste prijs' : 'Prijs'" :error-box="errors.errorBox">
+                <STInputBox :title="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'Vaste prijs' : 'Prijs'" :error-box="errors.errorBox" error-fields="price">
                     <PriceInput :model-value="price.price" placeholder="Gratis" @update:model-value="patchPrice(price, {price: $event})" />
                 </STInputBox>
             </div>
@@ -109,12 +109,39 @@ const save = async () => {
         return;
     }
     saving.value = true;
+
     try {
+        if (! await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
+
+        const startDateInPeriod = props.period.startDate.getTime() <= patched.value.startDate.getTime() && props.period.endDate.getTime() >= patched.value.startDate.getTime()
+        const endDate = patched.value.expireDate || patched.value.endDate
+        const endDateInPeriod = props.period.startDate.getTime() <= endDate.getTime() && props.period.endDate.getTime() >= endDate.getTime()
+
+        if (!startDateInPeriod || !endDateInPeriod) {
+            throw new SimpleError({
+                code: 'invalid_date_range',
+                message: 'De aansluitingsperiode moet binnen de periode van het gekozen werkjaar liggen',
+                field: 'startDate'
+            })
+        }
+
+        if (patched.value.expireDate && (patched.value.expireDate.getTime() > patched.value.endDate.getTime() || patched.value.expireDate.getTime() < patched.value.startDate.getTime())) {
+            throw new SimpleError({
+                code: 'invalid_date_range',
+                message: 'De vervaldatum moet tussen de start- en einddatum liggen',
+                field: 'expireDate'
+            })
+        }
+        
         await props.saveHandler(patch.value)
         await pop({ force: true }) 
     } catch (e) {
         errors.errorBox = new ErrorBox(e)
     }
+
     saving.value = false;
 };
 

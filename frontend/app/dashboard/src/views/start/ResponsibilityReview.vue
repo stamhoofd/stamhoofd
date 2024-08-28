@@ -12,8 +12,12 @@
             {{ name }}
         </h3>
         <div>
-            <p class="style-description-small">
-                {{ membersAsString }}
+            <p class="style-description-small" v-if="placeholderString">
+                {{ placeholderString }}
+            </p>
+
+            <p class="style-description-small inline-link secundary" v-for="member of members" :key="member.id" @click="editMember(member)">
+                {{ member.member.name }}
             </p>
         </div>
         <template #right>
@@ -30,7 +34,8 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupIcon, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { GroupIcon, IconContainer, ProgressIcon, STListItem, useMemberActions } from '@stamhoofd/components';
 import { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -42,6 +47,8 @@ const props = defineProps<{
     progress?: number,
     total?: number
 }>();
+
+const present = usePresent()
 
 const color = computed(() => {
     const icon = $icon.value;
@@ -75,6 +82,15 @@ const name = computed(() => {
     return name;
 });
 
+const placeholderString = computed(() => {
+    if (!props.members.length) {
+        if($isOptional.value) {
+            return 'Geen';
+        }
+        return 'Deze functie moet nog worden toegekend';
+    }
+});
+
 const membersAsString = computed(() => {
     const members = props.members;
 
@@ -86,6 +102,11 @@ const membersAsString = computed(() => {
     }
     return members.map((platformMember) => platformMember.member.name).join(', ')
 });
+const actionBuilder = useMemberActions()
+
+async function editMember(member: PlatformMember) {
+    await actionBuilder().showMember(member)
+}
 </script>
 
 <style lang="scss" scoped>

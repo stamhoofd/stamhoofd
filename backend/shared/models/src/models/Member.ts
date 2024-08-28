@@ -511,7 +511,7 @@ export class Member extends Model {
 
             const periodConfig = cheapestMembership.membership.periods.get(platform.periodId)
             if (!periodConfig) {
-                throw new Error("Period config not found")
+                throw new Error("Missing membership prices for membership type "+cheapestMembership.membership.id+" and period " + platform.periodId)
             }
 
             // Can we revive an earlier deleted membership?

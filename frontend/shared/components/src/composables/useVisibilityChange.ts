@@ -1,4 +1,4 @@
-import { onBeforeUnmount } from "vue";
+import { onActivated, onBeforeUnmount, onDeactivated, onMounted } from "vue";
 
 export function useVisibilityChange(callback: () => void | Promise<void>) {
     function onVisibilityChange() {
@@ -11,9 +11,29 @@ export function useVisibilityChange(callback: () => void | Promise<void>) {
         }
     }
 
-    document.addEventListener("visibilitychange", onVisibilityChange);
+    let listener = false;
+
+    onMounted(() => {
+        if (!listener) {
+            document.addEventListener("visibilitychange", onVisibilityChange);
+            listener = true;
+        }
+    })
+
+    onActivated(() => {
+        if (!listener) {
+            document.addEventListener("visibilitychange", onVisibilityChange);
+            listener = true;
+        }
+    })
+
+    onDeactivated(() => {
+        document.removeEventListener("visibilitychange", onVisibilityChange)
+        listener = false;
+    });
 
     onBeforeUnmount(() => {
         document.removeEventListener("visibilitychange", onVisibilityChange)
+        listener = false;
     })
 }
