@@ -49,6 +49,7 @@ export async function loadSessionFromUrl() {
 
     return session;
 }
+
 export function getLoginRoot() {
     return new ComponentWithProperties(CoverImageContainer, {
         root: new ComponentWithProperties(NavigationController, {
@@ -58,6 +59,23 @@ export function getLoginRoot() {
         })
     })
 }
+
+export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+    // In platform mode, we always redirect to the 'auto' login view, so that we redirect the user to the appropriate environment after signin in
+    if (STAMHOOFD.userMode === 'platform') {
+        return new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                // Replace itself again after a successful login
+                const root = await getScopedAutoRoot(reactiveSession, options)
+                await ReplaceRootEventBus.sendEvent('replace', root);
+                return new ComponentWithProperties({}, {});
+            }
+        })
+    }
+
+    return getLoginRoot()
+}
+
 
 export async function getOrganizationSelectionRoot(optionalSession?: SessionContext|null) {
     const session = reactive(optionalSession ?? new SessionContext(null)) as SessionContext;
@@ -371,7 +389,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                         })
                     })
                 ),
-                loginRoot: wrapWithModalStack(getLoginRoot()),
+                loginRoot: wrapWithModalStack(getNonAutoLoginRoot(reactiveSession, options)),
                 noPermissionsRoot: getNoPermissionsView(),
             }), 
             options.initialPresents

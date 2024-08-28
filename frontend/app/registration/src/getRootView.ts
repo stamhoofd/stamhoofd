@@ -1,7 +1,7 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
 import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
-import { getLoginRoot } from "@stamhoofd/dashboard";
+import { getNonAutoLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, PlatformManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
@@ -9,8 +9,8 @@ import { computed, inject, markRaw, reactive } from "vue";
 
 import { MemberManager } from "./classes/MemberManager";
 import CartView from "./views/cart/CartView.vue";
-import StartView from "./views/start/StartView.vue";
 import EventsOverview from "./views/events/EventsOverview.vue";
+import StartView from "./views/start/StartView.vue";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
@@ -98,9 +98,6 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
             $context: reactiveSession,
             $memberManager,
             $platformManager: platformManager,
-            /*reactive_navigation_url: ownDomain ? "" : (
-                session.organization ? ("leden/" + session.organization.uri) : 'leden'
-            ),*/
             reactive_components: {
                 "tabbar-left": ownDomain ? new ComponentWithProperties(OrganizationLogo, {
                     organization: reactiveSession.organization
@@ -139,7 +136,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                 })
             ),
             loginRoot: wrapWithModalStack(
-                getLoginRoot()
+                getNonAutoLoginRoot(reactiveSession)
             )
         })
     });

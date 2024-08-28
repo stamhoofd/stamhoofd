@@ -1,11 +1,12 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, ManageEventsView, MembersTableView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, ManageEventsView, MembersTableView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { getNonAutoLoginRoot } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
 import { computed, markRaw, reactive } from 'vue';
-import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
+import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
@@ -143,17 +144,7 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                     })
                 ),
                 loginRoot: wrapWithModalStack(
-                    new ComponentWithProperties(TabBarController, {
-                        tabs: [
-                            new TabBarItem({
-                                icon: 'key',
-                                name: 'Inloggen',
-                                component: new ComponentWithProperties(NavigationController, {
-                                    root: new ComponentWithProperties(LoginView, {})
-                                })
-                            })
-                        ]
-                    })
+                    getNonAutoLoginRoot(reactiveSession, options)
                 ),
                 noPermissionsRoot: getNoPermissionsView()
             }), 
