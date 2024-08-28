@@ -150,7 +150,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Inschrijvingsgroepen
+                            Inschrijvingsgroepen beheren
                         </h2>
                         <p class="style-description">
                             Deel je leden op in groepen en categorieën
