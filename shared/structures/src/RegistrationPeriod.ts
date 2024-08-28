@@ -95,7 +95,10 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     get waitingLists(): Group[] {
         return (this.groups.map(g => g.waitingList).filter(g => g != null)  as Group[]).filter((value, index, self) => self.findIndex((v) => value.id === v.id) === index)
     }
-    
+
+    get rootCategory() {
+        return this.settings.categories.find(c => c.id === this.settings.rootCategoryId);
+    }    
     /**
      * Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      * 
@@ -110,7 +113,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         smartCombine?: boolean,
         admin?: boolean
     }): GroupCategoryTree {
-        const root = this.settings.categories.find(c => c.id === this.settings.rootCategoryId)
+        const root = this.rootCategory;
         if (root) {
             let tree = GroupCategoryTree.build(root, this, {
                 groups: options?.filterGroups ? this.groups.filter(options.filterGroups) : undefined,

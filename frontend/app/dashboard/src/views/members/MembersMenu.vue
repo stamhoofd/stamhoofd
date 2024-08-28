@@ -1,6 +1,10 @@
 <template>
     <div class="st-menu st-view members-menu">
-        <STNavigationBar title="Leden" />
+        <STNavigationBar title="Leden">
+            <template #right>
+                <button v-if="$canEdit" class="navigation button icon settings" type="button" @click="editMe" />
+            </template>
+        </STNavigationBar>
 
         <main>
             <h1>Leden</h1>
@@ -75,13 +79,15 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoutes, useCheckRoute, useNavigate, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
+import { ComponentOptions, computed, onActivated, Ref, ref } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
+import EditCategoryGroupsView from "../dashboard/groups/EditCategoryGroupsView.vue";
 import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
 
 const $organization = useOrganization();
@@ -113,6 +119,10 @@ const canSetDefaultPeriod = computed(() => {
     return (period.value.period.id === platform.value.period.id && $organization.value!.period.period.id !== platform.value.period.id) 
         || (period.value.period.startDate > $organization.value!.period.period.startDate && !period.value.period.locked)
 })
+
+const $rootCategory = computed(() => period.value.rootCategory);
+
+const $canEdit = computed(() => organizationManager.value.user.permissions ?  $rootCategory.value && $rootCategory.value.canEdit($context.value.auth.permissions) : false)
 
 onActivated(() => {
     urlHelpers.setTitle('Leden');
@@ -311,4 +321,18 @@ async function upgradePeriod() {
     })
 }
 
+async function editMe() {
+    if(!$rootCategory.value) return;
+    await present(new ComponentWithProperties(NavigationController, { 
+        root: new ComponentWithProperties(EditCategoryGroupsView, { 
+            category: $rootCategory.value, 
+            period: period.value,
+            organization: $organization.value, 
+            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                patch.id = period.value.id
+                await organizationManager.value.patchPeriod(patch)
+            }
+        })
+    }).setDisplayStyle("popup"))
+}
 </script>

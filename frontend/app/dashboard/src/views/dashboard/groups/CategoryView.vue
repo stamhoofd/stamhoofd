@@ -1,10 +1,6 @@
 <template>
     <div class="st-view background category-view">
-        <STNavigationBar :title="title">
-            <template #right>
-                <button v-if="canEdit" class="navigation button icon settings" type="button" @click="editMe" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar :title="title" />
 
         <main>
             <h1 class="style-navigation-title with-icons" :class="{button: !!parentCategories.length}" @click="openCategorySelector">
@@ -105,11 +101,10 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, ContextMenu, ContextMenuItem, EditGroupView, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
-import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import GroupOverview from "./GroupOverview.vue";
 
 @Component({
@@ -222,10 +217,6 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         return this.reactiveCategory.settings.name
     }
 
-    get canEdit() {
-        return this.$organizationManager.user.permissions ? this.category.canEdit(this.$context.auth.permissions) : false
-    }
-
     get canCreate() {
         return this.$context.auth.canCreateGroupInCategory(this.category)
     }
@@ -296,21 +287,6 @@ export default class CategoryView extends Mixins(NavigationMixin) {
             }
         }).setDisplayStyle("popup"))
     }
-
-    editMe() {
-        this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(EditCategoryGroupsView, { 
-                category: this.category, 
-                period: this.period,
-                organization: this.organization, 
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    patch.id = this.period.id
-                    await this.$organizationManager.patchPeriod(patch)
-                }
-            })
-        }).setDisplayStyle("popup"))
-    }
-    
 }
 </script>
 
