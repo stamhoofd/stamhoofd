@@ -14,51 +14,61 @@
         
             <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Mijn naam" error-fields="firstName,lastName" :error-box="errorBox">
-                <div class="input-group">
-                    <div>
-                        <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+            <form @submit.prevent="save">
+                <STInputBox title="Mijn naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <div class="input-group">
+                        <div>
+                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                        </div>
+                        <div>
+                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                        </div>
                     </div>
-                    <div>
-                        <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                    </div>
-                </div>
-            </STInputBox>
+                </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" />
+                <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" />
+
+                <div class="style-button-bar">
+                    <LoadingButton :loading="saving" class=" ">
+                        <button id="submit" class="button primary" type="submit">
+                            <span>Opslaan</span>
+                        </button>
+                    </LoadingButton>
+                </div>
+            </form>
 
             <hr>
 
-            <p>
-                <button class="button text" type="button" @click.prevent="openChangePassword">
-                    <span class="icon key" />
-                    <span>Wachtwoord wijzigen</span>
-                </button>
-            </p>
+            <STList>
+                <STListItem :selectable="true" @click.prevent="openChangePassword">
+                    <template #left>
+                        <span class="icon key" />
+                    </template>
 
-            <p>
-                <a v-if="privacyUrl" class="button text" type="button" :href="privacyUrl" target="_blank">
-                    <span class="icon privacy" />
-                    <span>Privacyvoorwaarden</span>
-                </a>
-            </p>
+                    <h3 class="style-title-list">
+                        Wachtwoord wijzigen
+                    </h3>
+                </STListItem>
 
-            <p>
-                <button class="button text" type="button" @click.prevent="logout">
-                    <span class="icon logout" />
-                    <span>Uitloggen</span>
-                </button>
-            </p>
-        </main>
-        <STToolbar>
-            <template #right>
-                <LoadingButton :loading="saving">
-                    <button class="button primary" type="button" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
+                <STListItem :selectable="true" @click.prevent="logout">
+                    <template #left>
+                        <span class="icon logout" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Uitloggen
+                    </h3>
+                </STListItem>
+            </STList>
+
+            <template v-if="policies.length">
+                <p class="style-button-bar">
+                    <a v-for="policy of policies" :key="policy.id" class="button text" type="button" :href="policy.url" target="_blank">
+                        <span>{{ policy.name }}</span>
+                    </a>
+                </p>
             </template>
-        </STToolbar>
+        </main>
     </div>
 </template>
 
@@ -146,6 +156,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         this.userPatch = this.userPatch.patch({
             lastName
         })
+    }
+
+    get policies() {
+        return this.$platform.config.privacy.policies
     }
 
     get privacyUrl() {

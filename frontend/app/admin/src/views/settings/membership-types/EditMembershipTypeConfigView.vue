@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges && !isNew" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -73,18 +73,6 @@
         <STInputBox title="Gratis per lokale groep" error-fields="price" :error-box="errors.errorBox">
             <NumberInput v-model="amountFree" placeholder="Geen" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" />
         </STInputBox>
-
-        <div v-if="!isNew && deleteHandler" class="container">
-            <hr>
-            <h2>
-                {{ $t('Acties') }}
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="doDelete">
-                <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
-            </button>
-        </div>
     </SaveView>
 </template>
 

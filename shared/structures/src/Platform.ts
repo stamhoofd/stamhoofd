@@ -11,6 +11,7 @@ import { PermissionRoleDetailed } from "./Permissions";
 import { RegistrationPeriod } from "./RegistrationPeriod";
 import { UserWithMembers } from "./UserWithMembers";
 import { Colors } from "@stamhoofd/utility";
+import { RichText } from "./RichText";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -178,6 +179,31 @@ export class PlatformEventType extends AutoEncoder {
     minimumDays: null | number = null
 }
 
+export class PlatformPolicy extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = ''
+
+    @field({ decoder: StringDecoder })
+    url = ''
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    enableAtSignup = true
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    checkbox = true
+
+    @field({ decoder: RichText, ...NextVersion})
+    richText = RichText.create({})
+}
+
+export class PrivacySettings extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(PlatformPolicy) })
+    policies: PlatformPolicy[] = []
+}
+
 export class PlatformConfig extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 326})
     name = "Stamhoofd"
@@ -235,6 +261,9 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, optional: true, version: 310 })
     expandLogo = false
+
+    @field({ decoder: PrivacySettings, ...NextVersion })
+    privacy = PrivacySettings.create({})
 
     getEmailReplacements() {
         return [

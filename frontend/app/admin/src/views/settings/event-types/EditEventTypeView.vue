@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -43,19 +43,6 @@
             <STInputBox :title="$t('Maximum aantal dagen')" error-fields="maximumDays" :error-box="errors.errorBox">
                 <NumberInput v-model="maximumDays" :placeholder="$t('Onbeperkt')" :required="false" />
             </STInputBox>
-        </div>
-
-
-        <div v-if="!isNew && deleteHandler" class="container">
-            <hr>
-            <h2>
-                {{ $t('Acties') }}
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="doDelete">
-                <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
-            </button>
         </div>
     </SaveView>
 </template>

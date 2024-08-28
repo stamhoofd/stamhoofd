@@ -110,7 +110,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
                 path: "/upload-file",
                 body: formData,
                 decoder: File,
-                timeout: 60*1000,
+                timeout: 5*60*1000,
                 shouldRetry: false,
                 owner: this
             })

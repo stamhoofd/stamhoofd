@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save"  v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -75,18 +75,6 @@
         <p>Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven bij deze standaard leeftijdsgroep. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
 
         <InheritedRecordsConfigurationBox :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
-
-        <div v-if="!isNew && deleteHandler" class="container">
-            <hr>
-            <h2>
-                Verwijder deze standaard leeftijdsgroep
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="doDelete">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
-            </button>
-        </div>
     </SaveView>
 </template>
 

@@ -600,7 +600,7 @@
     display: flex;
     flex-direction: row;
     gap: 15px;
-
+    margin-top: 10px;
     align-items: center;
 
     &.right-align {
@@ -1061,7 +1061,7 @@
     p:not([class]), p.is-empty {
         margin: 0;
         padding: 0;
-        font-size: 15px;
+        font-size: inherit;
         font-weight: $font-weight-default;
         line-height: 1.5;
         color: $color-dark;
@@ -1077,7 +1077,6 @@
         p:not([class]), p.is-empty {
            @extend .style-description-large;
         }
-        
     }
 
     p:empty::after {

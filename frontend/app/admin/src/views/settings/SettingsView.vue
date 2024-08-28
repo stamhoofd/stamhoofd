@@ -178,6 +178,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Terms)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Privacyvoorwaarden en andere overeenkomsten') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Wijzig de privacyvoorwaarden') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
             <hr>
@@ -231,6 +246,7 @@ import EditEventTypesView from './event-types/EditEventTypesView.vue';
 import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
+import EditPrivacyView from './privacy/EditPrivacyView.vue';
 
 enum Routes {
     Admins = 'beheerders',
@@ -246,6 +262,7 @@ enum Routes {
     Premises = 'gebouwen',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
+    Terms = 'voorwaarden'
 }
 
 const platform = usePlatform()
@@ -323,6 +340,11 @@ defineRoutes([
         url: Routes.DefaultAgeGroups,
         present: 'popup',
         component: EditDefaultAgeGroupsView as ComponentOptions,
+    },
+    {
+        url: Routes.Terms,
+        present: 'popup',
+        component: EditPrivacyView as ComponentOptions,
     },
     {
         url: Routes.Responsibilities,

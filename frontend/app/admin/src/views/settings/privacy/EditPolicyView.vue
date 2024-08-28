@@ -1,0 +1,162 @@
+<template>
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
+        <h1>
+            {{ title }}
+        </h1>
+
+        <STErrorsDefault :error-box="errors.errorBox" />
+
+        <STInputBox :title="'Naam'">
+            <input
+                v-model="name"
+                class="input"
+                type="text"
+                autocomplete=""
+                placeholder="bv. privacyvoorwaarden"
+            >
+        </STInputBox>
+
+        <STInputBox title="Volledige link" error-fields="privacyPolicyUrl" :error-box="errors.errorBox">
+            <input
+                v-model="url"
+                class="input"
+                type="url"
+                :placeholder="$t('bv. https://www.domein.be/privacy')"
+            >
+        </STInputBox>
+
+        <UploadFileButton text="Upload PDF" accept="application/pdf" @change="url = $event.getPublicPath()" />
+
+        <Checkbox v-model="enableAtSignup" class="long-text">
+            Tonen bij het registeren
+        </Checkbox>
+
+        <template v-if="enableAtSignup">
+            <Checkbox v-model="checkbox" class="long-text">
+                Verplicht aanvinkvakje
+            </Checkbox>
+            <p class="style-description-small">
+                Het aanvinkvakje moet aangevinkt worden bij het registreren als je dit aanzet. In het andere geval is het enkel een vermelding die impliciet aanvaard wordt.
+            </p>
+
+            <STInputBox title="Aanvinktekst" error-fields="meta.description" :error-box="errors.errorBox" class="max">
+                <WYSIWYGTextInput
+                    v-model="richText"
+                    placeholder="Tekst die naast het aanvinkvakje staat"
+                />
+            </STInputBox>
+            <p class="style-description-small">
+                Herhaal jouw link in deze tekst door een deel van de tekst te selecteren en op de link-knop te drukken.
+            </p>
+        </template>
+    </SaveView>
+</template>
+
+
+<script setup lang="ts">
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, ErrorBox, SaveView, UploadFileButton, useErrors, usePatch, WYSIWYGTextInput } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { PlatformPolicy } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
+
+const errors = useErrors();
+const saving = ref(false);
+const deleting = ref(false);
+
+const props = defineProps<{
+    policy: PlatformPolicy;
+    isNew: boolean;
+    saveHandler: (p: AutoEncoderPatchType<PlatformPolicy>) => Promise<void>,
+    deleteHandler: (() => Promise<void>)|null
+}>();
+const title = computed(() => props.isNew ? 'Nieuwe voorwaarden' : 'Voorwaarden bewerken');
+const pop = usePop();
+const $t = useTranslate();
+
+const {patched, addPatch, hasChanges, patch} = usePatch(props.policy);
+
+const save = async () => {
+    if (saving.value || deleting.value) {
+        return;
+    }
+    saving.value = true;
+    try {
+        if (name.value.length === 0) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Gelieve een naam in te vullen",
+                field: "name"
+            })
+        }
+
+        await props.saveHandler(patch.value)
+        await pop({ force: true }) 
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    }
+    saving.value = false;
+};
+
+const doDelete = async () => {
+    if (saving.value || deleting.value) {
+        return;
+    }
+
+    if (!props.deleteHandler) {
+        return;
+    }
+
+    if (!await CenteredMessage.confirm("Ben je zeker dat je deze voorwaarden wilt verwijderen?", "Verwijderen")) {
+        return
+    }
+        
+    deleting.value = true;
+    try {
+        await props.deleteHandler()
+        await pop({ force: true }) 
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    }
+
+    deleting.value = false;
+};
+
+const name = computed({
+    get: () => patched.value.name,
+    set: (name) => addPatch({name}),
+});
+
+const url = computed({
+    get: () => patched.value.url,
+    set: (url) => addPatch({url}),
+});
+
+const richText = computed({
+    get: () => patched.value.richText,
+    set: (richText) => addPatch({richText}),
+});
+
+const checkbox = computed({
+    get: () => patched.value.checkbox,
+    set: (checkbox) => addPatch({checkbox}),
+});
+
+const enableAtSignup = computed({
+    get: () => patched.value.enableAtSignup,
+    set: (enableAtSignup) => addPatch({enableAtSignup}),
+});
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+}
+
+defineExpose({
+    shouldNavigateAway
+})
+</script>
