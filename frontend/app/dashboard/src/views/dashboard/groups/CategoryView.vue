@@ -258,13 +258,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         const group = Group.create({
             organizationId: this.organization.id,
             periodId: this.period.period.id,
-            settings: GroupSettings.create({
-                name: "",
-                startDate: new Date(),
-                endDate: new Date(),
-                prices: [],
-                genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
-            }),
+            settings: GroupSettings.create({}),
             privateSettings: GroupPrivateSettings.create({}),
             status: GroupStatus.Closed
         })
