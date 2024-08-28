@@ -14,6 +14,6 @@ export class LocalizedDomains {
     }
 
     static getDocs(path: string) {
-        return 'https://'+this.documentation+'/'+path;
+        return 'https://'+this.documentation+'/'+path+'/';
     }
 }
