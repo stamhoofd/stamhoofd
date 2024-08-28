@@ -63,7 +63,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Privacy)">
+                <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Privacy)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
                     </template>
