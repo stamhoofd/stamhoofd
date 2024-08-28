@@ -3,5 +3,6 @@
         "Stamhoofd": "Ravot"
     },
     "dashboard.organization-selection.welcome-description": "Welkom op Ravot. Zoek hieronder jouw lokale groep om je in te schrijven of om jouw gegevens te beheren.",
-    "dashboard.start.title-description": "Welkom op Ravot voor jouw groep. Hier kan je jouw groep beheren, leden bekijken, en instellingen aanpassen."
+    "dashboard.start.title-description": "Welkom op Ravot voor jouw groep. Hier kan je jouw groep beheren, leden bekijken, en instellingen aanpassen.",
+    "administrationFee.description": "Breng een kost in rekening per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Wettelijk gezien is het niet toegestaan dat je deze laat afhangen van de gekozen betaalmethode (dat is dus niet mogelijk)."
 }

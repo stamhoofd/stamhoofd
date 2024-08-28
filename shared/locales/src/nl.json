@@ -208,5 +208,7 @@
     "Vanaf": "Vanaf",
     "Verwijderen": "Verwijderen",
     "Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.": "Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.",
-    "Zoek jouw vereniging": "Zoek jouw vereniging"
+    "Zoek jouw vereniging": "Zoek jouw vereniging",
+    "Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd": "Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd",
+    "administrationFee.description": "Breng een kost in rekening per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Hiermee kan je de kost van Stamhoofd recupereren en/of de tijd die je bezig bent met het verwerken van inschrijvingen/bestellingen. Wettelijk gezien is het niet toegestaan dat je deze laat afhangen van de gekozen betaalmethode (dat is dus niet mogelijk)."
 }

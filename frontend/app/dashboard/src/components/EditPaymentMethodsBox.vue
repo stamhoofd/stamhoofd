@@ -93,7 +93,7 @@
         <template v-if="showAdministrationFee">
             <hr>
             <h2>Administratiekosten</h2>
-            <p>Breng een kost in rekening per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Hiermee kan je de kost van Stamhoofd recupereren en/of de tijd die je bezig bent met het verwerken van inschrijvingen/bestellingen. Wettelijk gezien is het niet toegestaan dat je deze laat afhangen van de gekozen betaalmethode (dat is dus niet mogelijk).</p>
+            <p>{{ $t('administrationFee.description') }}</p>
         
             <div class="split-inputs">
                 <STInputBox title="Vaste kost" error-fields="administrationFee.fixed" :error-box="errorBox">
@@ -120,12 +120,11 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Checkbox, Dropdown, ErrorBox, IBANInput,LoadingView,PermyriadInput,PriceInput,Radio, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, Dropdown, ErrorBox, IBANInput, LoadingView, PermyriadInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { SessionManager } from "@stamhoofd/networking";
 import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {
@@ -362,7 +361,7 @@ export default class EditPaymentMethodsBox extends Vue {
         const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta) ?? PaymentProvider.Stripe
 
         switch (paymentMethod) {
-            case PaymentMethod.Transfer: return "Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd"
+            case PaymentMethod.Transfer: return this.$t("Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd")
             case PaymentMethod.Payconiq: 
                 return this.providerText(provider, {
                     [PaymentProvider.Payconiq]: "",
