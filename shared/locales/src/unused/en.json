@@ -1,0 +1,10 @@
+{
+    "dashboard.join": "Join us",
+    "dashboard.start.title": "Administrator portal",
+    "dashboard.start.title-description": "Welcome. Here you can manage your organization and manage settings.",
+    "shared.emails.general": "hello@stamhoofd.be",
+    "shared.emails.personal": "simon@stamhoofd.be",
+    "shared.inputs.companyNumber.label": "Company number",
+    "shared.inputs.iban.placeholder": "E.g. BE71 6316 1793 1960",
+    "shared.login": "Login"
+}
