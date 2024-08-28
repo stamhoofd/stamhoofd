@@ -1,9 +1,9 @@
 //i18n-setup.js
+import { HistoryManager } from "@simonbackx/vue-app-navigation"
 import { countries, languages } from "@stamhoofd/locales"
 import { SessionContext, Storage, UrlHelper } from '@stamhoofd/networking'
 import { Country } from "@stamhoofd/structures"
 import { I18n } from "./I18n"
-import { HistoryManager } from "@simonbackx/vue-app-navigation"
 
 
 export function useTranslate(): typeof I18n.prototype.$t {
@@ -390,6 +390,11 @@ export class I18nController {
         def.updateUrl()
         
         await def.loadLocale()
+    }
+
+    static getDomain(localizedDomain: LocalizedDomain) {
+        const locale = I18nController.shared.country;
+        return localizedDomain[locale] ?? localizedDomain[''];
     }
 
     // Used to make metaInfo responsive

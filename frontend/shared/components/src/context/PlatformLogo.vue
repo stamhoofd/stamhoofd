@@ -1,5 +1,5 @@
 <template>
-    <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener" class="platform-logo" :class="{expand: platform.config.expandLogo}">
+    <a alt="Stamhoofd" :href="'https://'+marketingDomain+''" rel="noopener" class="platform-logo" :class="{expand: platform.config.expandLogo}">
         <ImageComponent v-if="logo" :image="logo" :image-dark="logoDark" />
         <template v-else>
             <Logo class="responsive" />
@@ -10,9 +10,11 @@
 
 <script setup lang="ts">
 import { ImageComponent, Logo, useDeviceWidth, usePlatform } from '@stamhoofd/components';
+import { I18nController } from "@stamhoofd/frontend-i18n";
 import { computed } from 'vue';
 
-const isPlatform = STAMHOOFD.userMode === 'platform'
+const isPlatform = STAMHOOFD.userMode === 'platform';
+const marketingDomain = I18nController.getDomain(STAMHOOFD.domains.marketing);
 
 const platform = usePlatform()
 const width = useDeviceWidth()
