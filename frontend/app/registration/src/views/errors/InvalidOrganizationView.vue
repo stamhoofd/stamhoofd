@@ -16,7 +16,7 @@
                 <div>
                     <aside>
                         <a :href="'https://'+$domains.marketing" class="inline-link secundary" target="_blank">
-                            Terug naar Stamhoofd
+                            {{ $t('Terug naar Stamhoofd') }}
                         </a>
                     </aside>
                     <div>

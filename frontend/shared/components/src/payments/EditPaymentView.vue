@@ -8,7 +8,7 @@
             Kies hieronder wat er precies betaald werd. 
         </p>
         <p v-else>
-            Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd. Let op dat Stamhoofd momenteel geen automatische terugbetalingen doet voor online betalingen. Je moet dus zelf het bedrag manueel terugbetalen of storten.
+            {{ $t('shared.payments.reimburse.info') }}
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
@@ -138,20 +138,20 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableA
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { BalanceItem, BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PlatformFamily, TransferSettings, Version } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PlatformFamily, TransferSettings, Version } from '@stamhoofd/structures';
 
-import SaveView from "../navigation/SaveView.vue";
-import STInputBox from '../inputs/STInputBox.vue';
+import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
-import PriceInput from '../inputs/PriceInput.vue';
-import STListItem from '../layout/STListItem.vue';
-import STList from '../layout/STList.vue';
+import { Validator } from '../errors/Validator';
 import Checkbox from '../inputs/Checkbox.vue';
 import DateSelection from '../inputs/DateSelection.vue';
 import Dropdown from '../inputs/Dropdown.vue';
 import IBANInput from '../inputs/IBANInput.vue';
-import { Validator } from '../errors/Validator';
-import { ErrorBox } from '../errors/ErrorBox';
+import PriceInput from '../inputs/PriceInput.vue';
+import STInputBox from '../inputs/STInputBox.vue';
+import STList from '../layout/STList.vue';
+import STListItem from '../layout/STListItem.vue';
+import SaveView from "../navigation/SaveView.vue";
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
 @Component({

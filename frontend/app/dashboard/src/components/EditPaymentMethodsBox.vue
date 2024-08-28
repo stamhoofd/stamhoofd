@@ -470,7 +470,7 @@ export default class EditPaymentMethodsBox extends Vue {
             }
         }
 
-        return "Je kan "+PaymentMethodHelper.getName(paymentMethod)+" niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts."
+        return this.$t('kan niet activeren, eerst aansluiten', {paymentMethod: PaymentMethodHelper.getName(paymentMethod)});
     }
 
     // Administration cost

@@ -10,7 +10,7 @@
         <hr>
         <h2>Ingebouwde gegevens</h2>
 
-        <p>Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.</p>
+        <p>{{ $t('dashboard.webshop.edit.buildInData.description') }}</p>
 
         <STList>
             <STListItem element-name="label" :selectable="true">

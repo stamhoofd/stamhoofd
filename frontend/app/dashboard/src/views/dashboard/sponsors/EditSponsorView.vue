@@ -45,7 +45,7 @@
                 <UploadButton v-model="logo" :text="logo ? 'Vervangen' : 'Uploaden'" :resolutions="logoResolutions" />
             </div>
         </h2>
-        <p>Upload hier het logo zonder extra tekst of witruimtes. Laat leeg als je die niet hebt, en upload dan een banner. Zo kan Stamhoofd de plaatsing optimaliseren. We plaatsen het logo bij voorkeur op de afgedrukte versie van een ticket als zowel een logo als banner aanwezig is.</p>
+        <p>{{ $t('dashboard.sponsors.logo.description') }}</p>
 
         <ImageComponent v-if="logo" :image="logo" :max-height="150" :auto-height="true" />
 
@@ -57,7 +57,7 @@
                 <UploadButton v-model="banner" :text="banner ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
             </div>
         </h2>
-        <p>De ideale afmeting voor een banner van een sponsor is 1104x450px. De banner wordt maximaal 150px hoog getoond, maar een veelvoud is noodzakelijk voor een niet-pixelachtige weergave op smartphones. Upload bij voorkeur voor alle sponsors een afbeelding met dezelfde afmetingen. Vermijd het uploaden van het logo als banner, laat dan de banner weg. Als zowel een logo als banner werd geupload zal Stamhoofd de banner verkiezen op mobiele tickets, en het logo op de afgedrukte tickets.</p>
+        <p>{{ $t('dashboard.sponsors.logo.dimensions.description') }}</p>
 
         <ImageComponent v-if="banner" :image="banner" :max-height="150" :auto-height="true" />
 
@@ -78,11 +78,10 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, ImageComponent,NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton,UrlInput,Validator } from "@stamhoofd/components";
-import { Image,ResolutionRequest, Sponsor, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, Checkbox, ErrorBox, ImageComponent, NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, UrlInput, Validator } from "@stamhoofd/components";
+import { Image, ResolutionRequest, Sponsor, Version } from '@stamhoofd/structures';
 
 @Component({
     components: {

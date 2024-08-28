@@ -17,7 +17,7 @@
                         Betalingen exporteren
                     </h2>
                     <p class="style-description">
-                        Alle betalingen, transactiekosten en uitbetalingen die via Stamhoofd verliepen.
+                        {{$t("Alle betalingen, transactiekosten en uitbetalingen die via Stamhoofd verliepen.")}}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />

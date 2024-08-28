@@ -227,7 +227,7 @@
                 <p class="st-list-description">
                     <button class="button text" type="button" @click="disconnectMollie">
                         <span class="icon trash" />
-                        <span>Account loskoppelen van Stamhoofd</span>
+                        <span>{{ $t('Account loskoppelen van Stamhoofd') }}</span>
                     </button>
                 </p>
 

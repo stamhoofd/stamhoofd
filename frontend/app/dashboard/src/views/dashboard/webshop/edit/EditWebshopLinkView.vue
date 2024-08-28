@@ -10,7 +10,7 @@
         </p>
 
         <p v-if="hasOrders" class="warning-box">
-            Opgelet: als je de link naar jouw webshop aanpast, werken mogelijks sommige links in al verzonden e-mails niet meer. De enige uitzondering hierop is als je van een standaard Stamhoofd link overschakelt op een eigen domeinnaam (dan blijven oude links werken). Doe dit dus enkel in het begin van een verkoop.
+            {{ $t('dashboard.webshop.edit.link.warning') }}
         </p>
 
         <STErrorsDefault :error-box="errorBox" />

@@ -50,9 +50,7 @@
                 <h2>Koppelen: {{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
-                <p class="info-box">
-                    Deze invoervelden zijn nodig op elk document, maar je moet hier instellen welke gegevens je uit Stamhoofd daarin wilt invullen. Koppel je met meerdere gegevens uit Stamhoofd, dan gaan we de eerste beschikbare op het document invullen. Bv. als er bij het lid zelf geen adres werd ingevuld, neem dan het adres van de eerste ouder.
-                </p>
+                <p class="info-box">{{ $t('dashboard.documents.template.field.categories.info') }}</p>
                 
                 <MultiSelectInput v-for="field of category.getAllRecords()" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @update:model-value="setLinkedFields(field, $event)" />
             </div>

@@ -17,7 +17,7 @@
                     </template>
                 </p>
                 <p v-else class="warning-box">
-                    Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf dat domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Stamhoofd. Stamhoofd zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.
+                    {{ $t('dashboard.settings.domain.inactive') }}
                 </p>
 
                 <template v-if="enableMemberModule">
@@ -96,10 +96,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Organization, OrganizationDomains } from "@stamhoofd/structures"
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { Organization, OrganizationDomains } from "@stamhoofd/structures";
 
 
 import DNSRecordsView from './DNSRecordsView.vue';

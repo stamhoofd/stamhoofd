@@ -5,13 +5,13 @@
         
         <main>
             <h1>
-                Sluit jouw vereniging aan bij Stamhoofd
+                {{ $t("Sluit jouw vereniging aan bij Stamhoofd") }}
             </h1>
             <p>
-                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $domains.marketing" target="_blank" class="inline-link" v-if="validatedRegisterCode">Lees hier meer over Stamhoofd.</a>
+                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $domains.marketing" target="_blank" class="inline-link" v-if="validatedRegisterCode">{{ $t("Lees hier meer over Stamhoofd.") }}</a>
             </p>
             <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
-                Gebruikt jouw vereniging Stamhoofd al? 
+                {{ $t('Gebruikt jouw vereniging Stamhoofd al?') }} 
                 <span class="button text" type="button">
                     Log dan hier in
                 </span>
@@ -25,7 +25,7 @@
             </p>
 
             <p v-if="reuseRegisterCode" class="warning-box">
-                Je probeert een doorverwijzingslink met korting van een andere vereniging te gebruiken, maar je hebt al een vereniging geregistreerd. Een doorverwijzingslink is enkel geldig voor de eerste vereniging die je op Stamhoofd aansluit.
+                {{$t('dashboard.signup.reuseRegisterCode.warning')}}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />

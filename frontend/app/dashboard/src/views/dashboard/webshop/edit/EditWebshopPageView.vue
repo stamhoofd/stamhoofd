@@ -137,13 +137,13 @@
         </template>
 
         <hr>
-        <h2>Stamhoofd</h2>
+        <h2>{{ $t("shared.platformName") }}</h2>
         <p>
-            Stamhoofd toont op enkele plaatsen het logo van Stamhoofd op jullie webshop. Op die manier kunnen we Stamhoofd bekender maken bij andere verenigingen, waardoor we Stamhoofd ook betaalbaar kunnen houden. Je kan dit verminderen als je dit toch liever niet wilt.
+            {{ $t('dashboard.webshop.edit.reduceBranding.description') }}
         </p>
 
         <Checkbox v-model="reduceBranding">
-            Verminder de zichtbaarheid van Stamhoofd
+            {{ $t('dashboard.webshop.edit.reduceBranding.label') }}
         </Checkbox>
     </SaveView>
 </template>

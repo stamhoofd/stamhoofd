@@ -13,7 +13,7 @@
             </h1>           
 
             <p v-if="unlinkedAnswers.length" class="info-box">
-                De velden {{ unlinkedAnswersText }} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Stamhoofd.
+                {{ $t('De velden {unlinkedAnswersText} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Stamhoofd', { unlinkedAnswersText }) }}
                 <button class="button text" type="button" @click="resetDocument">
                     Reset
                 </button>
@@ -93,10 +93,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LongPressDirective,ViewRecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, TableActionsContextMenu, TooltipDirective } from "@stamhoofd/components";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ErrorBox, LongPressDirective, STErrorsDefault, STList, STListItem, STNavigationBar, TableActionsContextMenu, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
 import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { DocumentActionBuilder } from "./DocumentActionBuilder";
 

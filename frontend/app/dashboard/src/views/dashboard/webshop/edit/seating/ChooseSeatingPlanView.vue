@@ -69,7 +69,7 @@
                     Importeer zaalplan
                 </h2>
                 <p class="style-description">
-                    Importeer een zaalplan dat jij of een andere vereniging eerder uit Stamhoofd hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.
+                    {{ $t('dashboard.webshop.edit.seating.import.description') }}
                 </p>
 
                 <template #right>
@@ -83,12 +83,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, Decoder,ObjectData,patchContainsChanges, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, ObjectData, patchContainsChanges, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, LoadingButton,Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, ErrorBox, LoadingButton, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, Version, WebshopMetaData } from "@stamhoofd/structures";
 import { Sorter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditSeatingPlanView from './EditSeatingPlanView.vue';
@@ -403,7 +403,8 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
             
         } catch (e) {
             console.error(e)
-            new Toast('Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Stamhoofd afkomstig is.', 'error red')
+            const message = this.$t('dashboard.webshop.edit.seating.import.error');
+            new Toast(message, 'error red')
         } finally {
             this.importingSeatingPlan = false
         }

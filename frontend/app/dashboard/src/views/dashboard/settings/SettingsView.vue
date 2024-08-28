@@ -278,7 +278,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Vertel Stamhoofd door aan andere verenigingen
+                            {{$t("Vertel Stamhoofd door aan andere verenigingen")}}
                         </h2>
                         <p class="style-description">
                             Geef 25 euro en krijg zelf ook een tegoed

@@ -6,7 +6,7 @@
             <h1>Jullie ledenportaal</h1>
 
             <p class="style-description">
-                Leden kunnen zelfstandig inschrijven via het ledenportaal. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Stamhoofd en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.
+                {{ $t('dashboard.settings.registrationPage.description') }}
             </p>
 
             <hr>

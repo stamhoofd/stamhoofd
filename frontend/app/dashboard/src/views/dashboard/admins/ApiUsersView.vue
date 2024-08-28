@@ -10,7 +10,7 @@
     
         <main>
             <h1>API-keys</h1>
-            <p>Maak API-keys aan om toegang te krijgen tot de Stamhoofd API.</p>
+            <p>{{ $t('Maak API-keys aan om toegang te krijgen tot de Stamhoofd-API.') }}</p>
 
 
             <STList class="illustration-list">    
