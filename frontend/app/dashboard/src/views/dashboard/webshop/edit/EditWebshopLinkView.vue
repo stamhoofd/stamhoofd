@@ -2,7 +2,7 @@
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
         <p>
-            Lees zeker ook onze <a :href="'https://'+$t('shared.domains.marketing')+'/docs/webshop-link-wijzigen/'" target="_blank" class="inline-link">documentatie hierover</a> na.
+            Lees zeker ook onze <a :href="$domains.getDocs('webshop-link-wijzigen')" target="_blank" class="inline-link">documentatie hierover</a> na.
         </p>
 
         <p v-if="legacyUrl && webshop.domain === null" class="info-box">

@@ -127,7 +127,7 @@
         <template v-if="isNew">
             <hr>
             <h2>Betaalmethodes</h2>
-            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/betaalmethodes-voor-webshops-instellen/'" target="_blank">deze pagina</a>.</p>
+            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">deze pagina</a>.</p>
 
             <EditPaymentMethodsBox
                 type="webshop"
@@ -201,6 +201,7 @@ import EditWebshopMixin from './EditWebshopMixin';
     },
 })
 export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
+    
     mounted() {        
         // Auto assign roles
         if (this.isNew && this.$organizationManager.user.permissions && !this.webshop.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions)) {

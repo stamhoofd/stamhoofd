@@ -448,8 +448,8 @@ export class Organization extends Model {
 
         const replaceAll = [
             {
-                from: defaultI18n.$t("shared.domains.marketing"),
-                to: i18n.$t("shared.domains.marketing")
+                from: defaultI18n.localizedDomains.marketing(),
+                to: i18n.localizedDomains.marketing()
             },
             {
                 from: defaultI18n.$t("shared.emails.general"),

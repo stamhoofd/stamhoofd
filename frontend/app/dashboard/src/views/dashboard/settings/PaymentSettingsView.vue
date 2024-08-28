@@ -4,7 +4,7 @@
             Betaalaccounts
         </h1>
 
-        <p>Koppel betaalaccounts via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Stripe</a> of <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/betaalmethodes/'" target="_blank">Meer info</a>.</p>
+        <p>Koppel betaalaccounts via <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">Stripe</a> of <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">Meer info</a>.</p>
         
         <LoadingView v-if="loadingStripeAccounts" />
         <STErrorsDefault :error-box="errorBox" />
@@ -35,7 +35,7 @@
 
             <p v-if="account.warning" :class="account.warning.type + '-box'">
                 {{ account.warning.text }}
-                <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/documenten-stripe-afgekeurd/'" target="_blank" class="button text">
+                <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
                     Meer info
                 </a>
             </p>
@@ -123,7 +123,7 @@
                         <span>Extra Stripe account*</span>
                     </button>
                 </LoadingButton>
-                <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
+                <a class="button text" :href="$domains.getDocs('stripe')" target="_blank">
                     <span class="icon book" />
                     <span>Stripe Documentatie</span>
                 </a>
@@ -143,7 +143,7 @@
             </p>
 
             <div class="style-button-bar">
-                <a class="button primary" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
+                <a class="button primary" :href="$domains.getDocs('stripe')" target="_blank">
                     <span>Lees de gids</span>
                     <span class="icon arrow-right" />
                 </a>
@@ -319,7 +319,6 @@ import { CenteredMessage, CenteredMessageButton, Checkbox, ErrorBox, IBANInput, 
 import { AppManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPatch, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
 
 @Component({

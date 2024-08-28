@@ -38,9 +38,9 @@
                 {{ organization.meta.companyAddress || organization.address }}
             </aside>
             <div>
-                <a v-if="hasTickets" :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'">Verkoop ook tickets via <Logo /></a>
-                <a v-else-if="isWebshop" :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'">Bouw je betaalbare webshop via <Logo /></a>
-                <a v-else :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie?utm_medium=ledenportaal'">Ledenadministratie via <Logo /></a>
+                <a v-if="hasTickets" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">Verkoop ook tickets via <Logo /></a>
+                <a v-else-if="isWebshop" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">Bouw je betaalbare webshop via <Logo /></a>
+                <a v-else :href="'https://'+$domains.marketing+'/ledenadministratie?utm_medium=ledenportaal'">Ledenadministratie via <Logo /></a>
             </div>
         </div>
     </div>
@@ -48,9 +48,8 @@
 
 
 <script lang="ts">
-import { SessionManager } from "@stamhoofd/networking";
-import { Organization, Webshop, WebshopTicketType } from "@stamhoofd/structures";
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Organization, Webshop, WebshopTicketType } from "@stamhoofd/structures";
 
 import Logo from "../icons/Logo.vue";
 import { CenteredMessage } from "../overlays/CenteredMessage";

@@ -15,12 +15,12 @@
                 <hr class="style-hr">
                 <div>
                     <aside>
-                        <a :href="'https://'+$t('shared.domains.marketing')" class="inline-link secundary" target="_blank">
+                        <a :href="'https://'+$domains.marketing" class="inline-link secundary" target="_blank">
                             Terug naar Stamhoofd
                         </a>
                     </aside>
                     <div>
-                        <a :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie'">Ledenadministratie via <Logo /></a>
+                        <a :href="'https://'+$domains.marketing+'/ledenadministratie'">Ledenadministratie via <Logo /></a>
                     </div>
                 </div>
             </div>

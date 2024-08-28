@@ -16,12 +16,12 @@
                 <hr class="style-hr">
                 <div>
                     <aside>
-                        <a :href="'https://'+$t('shared.domains.marketing')" class="inline-link secundary" target="_blank">
+                        <a :href="'https://'+$domains.marketing" class="inline-link secundary" target="_blank">
                             Terug naar Stamhoofd
                         </a>
                     </aside>
                     <div>
-                        <a :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
+                        <a :href="'https://'+$domains.marketing+'/webshops'">Webshop via <Logo /></a>
                     </div>
                 </div>
             </div>
@@ -31,8 +31,8 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox,Logo, STErrorsDefault } from "@stamhoofd/components"
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ErrorBox, Logo, STErrorsDefault } from "@stamhoofd/components";
 
 @Component({
     components: {

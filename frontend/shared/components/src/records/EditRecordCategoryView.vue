@@ -5,10 +5,10 @@
         </h1>
 
         <p v-if="allowChildCategories" class="style-description">
-            Een vragenlijst bevat één of meerdere vragen, eventueel opgedeeld in categorieën. Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            Een vragenlijst bevat één of meerdere vragen, eventueel opgedeeld in categorieën. Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
         <p v-else class="style-description">
-            Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -152,19 +152,19 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from 
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { ObjectWithRecords, PatchAnswers, PropertyFilter, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { Ref, computed, getCurrentInstance, reactive, ref } from 'vue';
+import { useAppContext } from '../context/appContext';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import PropertyFilterInput from '../filters/PropertyFilterInput.vue';
+import { propertyFilterToString } from '../filters/UIFilter';
 import { useDraggableArray, usePatchArray } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { Toast } from '../overlays/Toast';
+import { NavigationActions } from '../types/NavigationActions';
 import EditRecordView from './EditRecordView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
-import { NavigationActions } from '../types/NavigationActions';
-import { propertyFilterToString } from '../filters/UIFilter';
-import { useAppContext } from '../context/appContext';
-import { Toast } from '../overlays/Toast';
 
 // Define
 const props = defineProps<{

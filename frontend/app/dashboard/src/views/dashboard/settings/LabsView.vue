@@ -76,7 +76,7 @@
                 </h3>
 
                 <p class="style-description-small">
-                    Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
+                    Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe. <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">Meer info</a>
                 </p>
             </STListItem>
 

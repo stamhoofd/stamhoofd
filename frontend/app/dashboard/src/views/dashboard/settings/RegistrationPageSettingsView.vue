@@ -30,12 +30,12 @@
             <h2>Handige links</h2>
 
             <STList>
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/'" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="$domains.getDocs('')" target="_blank">
                     <template #left><span class="icon link" /></template>
                     Documentatie
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/ledenadministratie-instellen/'" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="$domains.getDocs('tag/ledenadministratie-instellen')" target="_blank">
                     <template #left><span class="icon link" /></template>
                     Ledenadministratie instellen
                 </STListItem>
@@ -46,9 +46,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, LoadingButton, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
 import { OrganizationType } from "@stamhoofd/structures";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 
@@ -67,6 +67,7 @@ import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
     }
 })
 export default class RegistrationPageSettingsView extends Mixins(NavigationMixin) {
+    
     get organization() {
         return this.$organization
     }

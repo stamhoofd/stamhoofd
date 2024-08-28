@@ -393,8 +393,8 @@ export class I18nController {
     }
 
     static getDomain(localizedDomain: LocalizedDomain) {
-        const locale = I18nController.shared.country;
-        return localizedDomain[locale] ?? localizedDomain[''];
+        const country = I18nController.shared.country;
+        return localizedDomain[country] ?? localizedDomain[''];
     }
 
     // Used to make metaInfo responsive

@@ -8,7 +8,7 @@
                 Sluit jouw vereniging aan bij Stamhoofd
             </h1>
             <p>
-                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $t('shared.domains.marketing')" target="_blank" class="inline-link" v-if="validatedRegisterCode">Lees hier meer over Stamhoofd.</a>
+                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $domains.marketing" target="_blank" class="inline-link" v-if="validatedRegisterCode">Lees hier meer over Stamhoofd.</a>
             </p>
             <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
                 Gebruikt jouw vereniging Stamhoofd al? 

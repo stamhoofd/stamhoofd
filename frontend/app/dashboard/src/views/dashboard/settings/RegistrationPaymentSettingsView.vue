@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
 
-        <p>Alle informatie over de verschillen tussen elke betaalmethode vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/betaalmethodes-voor-inschrijvingen-instellen/'" target="_blank">deze pagina</a>.</p>
+        <p>Alle informatie over de verschillen tussen elke betaalmethode vind je op <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-inschrijvingen-instellen')" target="_blank">deze pagina</a>.</p>
 
         <div v-if="isReview" class="container">
             <ReviewCheckbox :data="review.$reviewCheckboxData" />

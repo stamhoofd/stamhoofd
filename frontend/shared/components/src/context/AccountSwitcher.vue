@@ -13,7 +13,7 @@
         </figure>
     </button>
     <template v-else-if="!isNative">
-        <a class="button text only-icon-smartphone" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
+        <a class="button text only-icon-smartphone" :href="'https://'+$domains.marketing+''" rel="noopener">
             <span class="icon external" />
             <span>Terug naar website</span>
         </a>

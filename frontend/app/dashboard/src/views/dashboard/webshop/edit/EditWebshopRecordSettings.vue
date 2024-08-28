@@ -27,7 +27,7 @@
         <h2>Vragenlijsten tijdens afrekenen</h2>
 
         <p>
-            Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens). <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">Meer info</a>
+            Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens). <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">Meer info</a>
         </p>
 
         <STList v-model="categories" :draggable="true">
@@ -64,6 +64,7 @@ import EditWebshopMixin from './EditWebshopMixin';
     },
 })
 export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) {
+    
     get categories() {
         return this.webshop.meta.recordCategories;
     }

@@ -12,7 +12,7 @@ import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
 import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { DarkMode, GetWebshopFromDomainResult } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
@@ -141,7 +141,7 @@ export default class App extends Vue {
                     } 
                     // Redirect
 
-                    const marketingWebshops = "https://"+this.$t('shared.domains.marketing')+"/webshops"
+                    const marketingWebshops = "https://"+LocalizedDomains.marketing+"/webshops"
 
                     const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 

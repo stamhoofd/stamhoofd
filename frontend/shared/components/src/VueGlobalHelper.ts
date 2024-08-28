@@ -5,14 +5,15 @@ import { CountryHelper } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { type App } from "vue";
 
+import { LocalizedDomains } from "@stamhoofd/frontend-i18n";
 import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, STToolbar, TooltipDirective, useAppContext } from "..";
 import PromiseView from "./containers/PromiseView.vue";
+import { ColorDirective } from "./directives/ColorDirective";
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
 import { useContext, useOrganization, usePlatform, useUser } from "./hooks";
 import STInputBox from "./inputs/STInputBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
-import { ColorDirective } from "./directives/ColorDirective";
 
 
 export type ComponentExposed<T> =
@@ -95,6 +96,7 @@ export class VueGlobalHelper {
         app.config.globalProperties.$isIOS = app.config.globalProperties.$OS === "iOS"
         app.config.globalProperties.$isMac = app.config.globalProperties.$OS === "macOS"
         app.config.globalProperties.STAMHOOFD = STAMHOOFD
+        app.config.globalProperties.$domains = LocalizedDomains
 
         app.config.globalProperties.pluralText = function(num: number, singular: string, plural: string) {
             return Formatter.pluralText(num, singular, plural)

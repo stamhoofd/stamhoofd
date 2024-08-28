@@ -114,7 +114,7 @@
                     <p class="style-description-small">
                         <template v-if="VATPercentage > 0">
                             Incl. {{ VATPercentage }}% BTW —
-                        </template> <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten-inhouding/'" class="inline-link" target="_blank">Meer info</a>
+                        </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">Meer info</a>
                     </p>
                 </STListItem>
             </STList>

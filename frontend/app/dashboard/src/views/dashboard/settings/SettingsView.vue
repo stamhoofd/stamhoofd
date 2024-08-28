@@ -12,7 +12,7 @@
             <p v-for="(stripeWarning, index) of stripeWarnings" :key="'stripe-warning-'+index" :class="stripeWarning.type + '-box'">
                 {{ stripeWarning.text }}
 
-                <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/documenten-stripe-afgekeurd/'" target="_blank" class="button text">
+                <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
                     Meer info
                 </a>
             </p>

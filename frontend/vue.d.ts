@@ -1,3 +1,4 @@
+import { LocalizedDomains } from "@stamhoofd/frontend-i18n";
 import { OrganizationManager, SessionContext } from "@stamhoofd/networking";
 import { CountryHelper, Organization, Platform, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -47,6 +48,7 @@ declare module 'vue' {
         readonly LoadingButton: typeof import('@stamhoofd/components').LoadingButton,
         readonly STToolbar: typeof import('@stamhoofd/components').STToolbar,
         readonly STAMHOOFD: FrontendEnvironment,
+        readonly $domains: typeof LocalizedDomains
 
         // Formatters
         formatPrice: typeof Formatter.price,

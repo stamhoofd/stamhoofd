@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/betaalmethodes-voor-webshops-instellen/'" target="_blank">deze pagina</a>.</p>
+        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">deze pagina</a>.</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -35,6 +35,7 @@ import EditWebshopMixin from './EditWebshopMixin';
     },
 })
 export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMixin) {
+    
     get viewTitle() {
         return "Betaalmethodes"
     }

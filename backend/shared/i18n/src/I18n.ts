@@ -1,9 +1,9 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { promises as fs } from "fs";
-import { countries, languages } from "@stamhoofd/locales"
+import { logger, StyledText } from "@simonbackx/simple-logging";
+import { countries, languages } from "@stamhoofd/locales";
 import { Country } from '@stamhoofd/structures';
-import path from "path"
-import {logger, StyledText} from "@simonbackx/simple-logging";
+import { promises as fs } from "fs";
+import path from "path";
 
 export class I18n {
     static loadedLocales: Map<string, Map<string, string>> = new Map()
@@ -202,5 +202,13 @@ export class I18n {
             }
         }
         return text
+    }
+
+    getDomain(localizedDomain: LocalizedDomain): string {
+        return localizedDomain[this.country] ?? localizedDomain[''];
+    }
+
+    localizedDomains = {
+        marketing: (): string => this.getDomain(STAMHOOFD.domains.marketing),
     }
 }

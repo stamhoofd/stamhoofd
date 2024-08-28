@@ -38,15 +38,15 @@
 
                 <div v-if="!hasAccount && hasPermissions" class="checkbox-box">
                     <Checkbox v-model="acceptPrivacy" class="long-text">
-                        Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/privacy'" target="_blank">het privacybeleid</a>.
+                        Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">het privacybeleid</a>.
                     </Checkbox>
 
                     <Checkbox v-model="acceptTerms" class="long-text">
-                        Ik heb <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord.
+                        Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord.
                     </Checkbox>
 
                     <Checkbox v-model="acceptDataAgreement" class="long-text">
-                        Ik heb <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord.
+                        Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord.
                     </Checkbox>
                 </div>
             </main>

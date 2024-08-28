@@ -17,7 +17,7 @@
         </STInputBox>
         <p v-if="stripeAccountObject && stripeAccountObject.warning" :class="stripeAccountObject.warning.type + '-box'">
             {{ stripeAccountObject.warning.text }}
-            <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/documenten-stripe-afgekeurd/'" target="_blank" class="button text">
+            <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
                 Meer info
             </a>
         </p>

@@ -7,7 +7,7 @@
                 v-if="!$isTouch"
                 class="button icon gray help"
                 target="_blank"
-                :href="'https://'+$t('shared.domains.marketing')+'/docs/leden-beheren-met-meerdere-ouders/'"
+                :href="$domains.getDocs('leden-beheren-met-meerdere-ouders')"
             />
         </h2>
 

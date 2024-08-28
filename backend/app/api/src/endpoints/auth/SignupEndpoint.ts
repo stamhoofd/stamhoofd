@@ -64,7 +64,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                     replyTo: undefined
                 }
                 
-                const footer = (!user.permissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+request.i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
+                const footer = (!user.permissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+request.i18n.localizedDomains.marketing()+"/ledenadministratie\n\n" : '')
 
                 const name = organization ? organization.name : 'Stamhoofd'
                 // Send email

@@ -160,7 +160,7 @@
             </p>
             <template v-else-if="payment.price > 0 && created">
                 <p v-if="isBelgium" class="hide-smartphone info-box">
-                    <span>*De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact. De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). Dit is een overschrijving, niet te verwarren met een online betaling. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/betalen-qr-code/'" target="_blank">Meer info</a></span>
+                    <span>*De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact. De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). Dit is een overschrijving, niet te verwarren met een online betaling. <a class="inline-link" :href="$domains.getDocs('betalen-qr-code')" target="_blank">Meer info</a></span>
                 </p>     
                 <p v-else class="hide-smartphone info-box">
                     De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
@@ -183,20 +183,20 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
-import { CenteredMessage } from '../overlays/CenteredMessage';
-import STNavigationBar from "../navigation/STNavigationBar.vue";
-import STToolbar from "../navigation/STToolbar.vue";
+import LoadingView from "../containers/LoadingView.vue";
+import CopyableDirective from "../directives/Copyable";
+import TooltipDirective from "../directives/Tooltip";
+import Checkbox from "../inputs/Checkbox.vue";
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
-import LoadingView from "../containers/LoadingView.vue";
-import Checkbox from "../inputs/Checkbox.vue";
 import BackButton from "../navigation/BackButton.vue";
-import TooltipDirective from "../directives/Tooltip";
-import CopyableDirective from "../directives/Copyable";
+import STNavigationBar from "../navigation/STNavigationBar.vue";
+import STToolbar from "../navigation/STToolbar.vue";
+import { CenteredMessage } from '../overlays/CenteredMessage';
 
 @Component({
     components: {

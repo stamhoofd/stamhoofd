@@ -249,8 +249,8 @@ export class EmailVerificationCode extends Model {
 
         const url = this.getEmailVerificationUrl(user, organization, i18n)
 
-        const footer = (!user.organizationPermissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
-        const footerHTML = (!user.organizationPermissions && organization ? "<br><br>—<br><br>Onze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via <a href=\"https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\">Stamhoofd</a><br><br>" : '')
+        const footer = (!user.organizationPermissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.localizedDomains.marketing()+"/ledenadministratie\n\n" : '')
+        const footerHTML = (!user.organizationPermissions && organization ? "<br><br>—<br><br>Onze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via <a href=\"https://"+i18n.localizedDomains.marketing()+"/ledenadministratie\">Stamhoofd</a><br><br>" : '')
 
         const name = organization?.name ?? 'Stamhoofd'
 
