@@ -107,13 +107,13 @@ import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
+import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useAuth, useContext, useInterval, useIsMobile, useOrganization, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
-import { ErrorBox } from '../errors/ErrorBox';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string,
@@ -405,6 +405,17 @@ async function send() {
         return
     }
 
+    const recipientCount = email.value.recipientCount;
+    let confirmText = 'Ben je zeker dat je de e-mail wilt versturen?';
+
+    if(recipientCount) {
+        confirmText = recipientCount === 1 ? `Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?` : `Ben je zeker dat je de e-mail naar ${email.value.recipientCount} ontvangers wilt versturen?`;
+    }
+
+    const isConfirm = await CenteredMessage.confirm(confirmText, 'Versturen');
+
+    if(!isConfirm) return;
+    
     sending.value = true
 
     try {
