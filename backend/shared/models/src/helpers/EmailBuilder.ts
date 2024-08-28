@@ -61,7 +61,7 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
     return templates[0]
 }
 
-export async function getDefaultEmailFrom(organization: Organization|null, options: Pick<EmailBuilderOptions, "type"> & { template: Omit<EmailTemplateOptions, "organizationId"> }) {
+export async function getDefaultEmailFrom(organization: Organization|null, options: Pick<EmailBuilderOptions, "type"> & { template: Omit<EmailTemplateOptions, "organizationId"|"type"> }) {
     // When choosing sending domain, prefer using the one with the highest reputation
     const preferStrong = options.type === 'transactional'
 

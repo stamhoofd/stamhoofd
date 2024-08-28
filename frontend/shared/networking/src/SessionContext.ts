@@ -750,6 +750,44 @@ export class SessionContext implements RequestMiddleware {
         }
     }
 
+    async deleteAccount() {
+        if (this.isLoggingOut) {
+            // Prevents loops when refreshing inside the logout endpoint
+            return;
+        }
+
+        if (this.token) {
+            this.isLoggingOut = true;
+            console.log('Logout');
+
+            // Delete first to prevent loops (could be already invalid so the deletion might fail)
+            try {
+                await this.authenticatedServer.request({
+                    method: "DELETE",
+                    path: "/user",
+                    shouldRetry: false,
+                    allowErrorRetry: true // sometimes we need to refresh a token before we can delete it
+                })
+            } catch (e) {
+                if (Request.isNetworkError(e) || Request.isAbortError(e)) {
+                    // Network access is required for a reliable logout
+                    this.isLoggingOut = false;
+                    throw e;
+                }
+                console.error('Failed to delete token. Probably already deleted?', e)
+            }
+
+            this.isLoggingOut = false;
+            this.token.onChange = () => {
+                // emtpy
+            }
+            this.token = null;
+            this.user = null; // force refetch in the future
+            await this.deleteFromStorage()
+            await this.onTokenChanged();
+        }
+    }
+
     // -- Implementation for requestMiddleware ----
 
     async onBeforeRequest(request: Request<any>): Promise<void> {

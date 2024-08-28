@@ -50,6 +50,19 @@
                     </h3>
                 </STListItem>
 
+                <STListItem :selectable="true" @click.prevent="deleteRequest">
+                    <template #left>
+                        <LoadingButton :loading="deletingAccount">
+                            <span class="icon trash" />
+                        </LoadingButton>
+                    </template>
+
+
+                    <h3 class="style-title-list">
+                        Account verwijderen
+                    </h3>
+                </STListItem>
+
                 <STListItem :selectable="true" @click.prevent="logout">
                     <template #left>
                         <span class="icon logout" />
@@ -80,6 +93,7 @@ import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, CenteredMessage, ChangePasswordView, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper } from '@stamhoofd/networking';
 import { User, Version } from "@stamhoofd/structures";
+import { sleep } from '@stamhoofd/utility';
 
 
 @Component({
@@ -106,6 +120,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     showDomainSettings = true
     
     userPatch = User.patch({})
+    deletingAccount = false;
 
     created() {
         this.userPatch.id = this.$user!.id
@@ -219,6 +234,23 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         }
 
         this.saving = false
+    }
+
+    async deleteRequest() {
+        this.deletingAccount = true;
+
+        try {
+            await sleep(2000)
+
+            if (await CenteredMessage.confirm("Ben je zeker dat je jouw account wilt verwijderen?", "Verwijderen", "Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.")) {
+                await this.$context.deleteAccount()
+
+                Toast.success("Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.").show()
+                await this.pop({force: true})
+            }
+        } finally {
+            this.deletingAccount = false
+        }
     }
 
     async shouldNavigateAway() {

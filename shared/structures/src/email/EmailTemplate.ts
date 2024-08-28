@@ -81,6 +81,8 @@ export enum EmailTemplateType {
      */
     ForgotPasswordButNoAccount = "ForgotPasswordButNoAccount",
     ForgotPassword = "ForgotPassword",
+
+    DeleteAccountConfirmation = "DeleteAccountConfirmation",
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -191,6 +193,8 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.ForgotPasswordButNoAccount: return 'Wachtwoord vergeten: geen account'
             case EmailTemplateType.ForgotPassword: return 'Wachtwoord vergeten'
+            case EmailTemplateType.DeleteAccountConfirmation: return 'Bevestiging account verwijderen'
+
         }
     }
 
@@ -241,6 +245,7 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.ForgotPasswordButNoAccount: return 'Als iemand een wachtwoord probeert te resetten, maar er geen account is met dat e-mailadres'
             case EmailTemplateType.ForgotPassword: return 'De e-mail met een link om je wachtwoord opnieuw in te stellen als je die bent vergeten'
+            case EmailTemplateType.DeleteAccountConfirmation: return 'De e-mail als bevestiging als iemand aanvraagt om hun account te verwijderen.'
 
         }
 
@@ -272,6 +277,12 @@ export class EmailTemplate extends AutoEncoder {
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
         if (type === EmailTemplateType.ForgotPasswordButNoAccount) {
+            return [
+                "email"
+            ];
+        }
+
+        if (type === EmailTemplateType.DeleteAccountConfirmation) {
             return [
                 "email"
             ];

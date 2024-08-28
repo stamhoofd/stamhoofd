@@ -7,7 +7,7 @@ type Query = undefined;
 type Body = undefined;
 type ResponseBody = undefined;
 
-export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class DeleteTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "DELETE") {
             return [false];
