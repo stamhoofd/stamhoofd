@@ -3,8 +3,9 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simon
 import { BalanceItemWithPayments } from "../../BalanceItem";
 import { RegistrationWithMember } from "../RegistrationWithMember";
 import { BalanceItemCartItem } from "./BalanceItemCartItem";
-import { RegisterContext } from "./RegisterCheckout";
+import { RegisterCheckout, RegisterContext } from "./RegisterCheckout";
 import { IDRegisterItem, RegisterItem } from "./RegisterItem";
+import { Platform } from "../../Platform";
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -219,7 +220,7 @@ export class RegisterCart {
         return this.items[0].organization
     }
 
-    validate(data?: {memberBalanceItems?: BalanceItemWithPayments[]}) {
+    validate(checkout: RegisterCheckout, data?: {memberBalanceItems?: BalanceItemWithPayments[]}) {
         const newItems: RegisterItem[] = []
         const errors = new SimpleErrors()
         for (const item of this.items) {
@@ -245,6 +246,16 @@ export class RegisterCart {
         const cleanedBalanceItems: BalanceItemCartItem[] = []
         for (const balanceItem of this.balanceItems) {
             // TODO: validate balance item organization (happens in backend anyway)
+            if (checkout.singleOrganizationId && balanceItem.item.organizationId !== checkout.singleOrganizationId) {
+                errors.addError(new SimpleError({
+                    code: 'invalid_organization',
+                    message: 'Invalid organization in balanceItems',
+                    human: 'Het is niet mogelijk om een openstaand bedrag af te rekenen voor een andere organisatie samen met andere items in je winkelmandje voor een andere organisatie, dit moet apart gebeuren.',
+                    field: 'balanceItems'
+                }))
+                continue;
+            }
+
 
             try {
                 balanceItem.validate({balanceItems: data?.memberBalanceItems})
@@ -260,8 +271,10 @@ export class RegisterCart {
         }
 
         const cleanedRegistrations: RegistrationWithMember[] = []
+        const singleOrganization = checkout.singleOrganization
+
         for (const registration of this.deleteRegistrations) {
-            if (this.singleOrganization && registration.group.organizationId !== this.singleOrganization?.id) {
+            if (checkout.singleOrganizationId && registration.group.organizationId !== checkout.singleOrganizationId) {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
                     message: 'Invalid organization in deleteRegistrations',
@@ -270,6 +283,30 @@ export class RegisterCart {
                 }))
                 continue;
             }
+
+            const platform = Platform.shared
+
+            const periodId = registration.group.periodId
+            if (periodId !== singleOrganization?.period.period.id && periodId !== platform.period.id) {
+                errors.addError(new SimpleError({
+                    code: "different_period",
+                    message: "Different period",
+                    human: `Je kan geen inschrijvingen wijzigen van ${registration.group.settings.name} omdat dat werkjaar niet actief is.`,
+                }))
+                continue;
+            }
+
+            const period = periodId === platform.period.id ? platform.period : singleOrganization?.period.period
+
+            if (period && period.locked) {
+                errors.addError(new SimpleError({
+                    code: "locked_period",
+                    message: "Locked period",
+                    human: `Je kan geen inschrijvingen wijzigen van ${registration.group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.`,
+                }))
+                continue;
+            }
+
             cleanedRegistrations.push(registration)
         }
 

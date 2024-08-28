@@ -11,7 +11,7 @@
             </div>
         </h2>
 
-        <button v-if="!member.family.checkout.cart.isEmpty" class="info-box selectable icon" type="button" @click="openCart">
+        <button v-if="!member.family.checkout.cart.isEmpty && app === 'registration'" class="info-box selectable icon" type="button" @click="openCart">
             <span>Er staan inschrijvingen klaar in je mandje. Reken ze af om ze definitief te maken.</span>
             <span class="button icon arrow-right-small" />
         </button>
@@ -82,7 +82,9 @@ const dismiss = useDismiss();
 
 platformManager.value.loadPeriods(false, true, owner).catch(console.error);
 
-const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
+const hasWrite = computed(() => {
+    return !period.value.locked && auth.canAccessPlatformMember(props.member, PermissionLevel.Write)
+})
 
 const filteredRegistrations = computed(() => {
     return props.member.patchedMember.registrations.filter(r => {

@@ -26,7 +26,7 @@
                     Vergrendel inschrijvingen
                 </h3>
                 <p v-if="locked" class="style-description-small">
-                    Lokale groepen kunnen niet langer wijzigingen aanbrengen aan inschrijvingen in dit werkjaar.
+                    Er kunnen geen wijzigingen meer aangebracht worden aan inschrijvingen in dit werkjaar.
                 </p>
             </STListItem>
         </STList>

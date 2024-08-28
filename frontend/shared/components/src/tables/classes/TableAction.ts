@@ -20,6 +20,7 @@ export interface TableActionSelection<T extends {id: string}> {
 
 export abstract class TableAction<T extends {id: string}> {
     name: string;
+    description: string = ''
     icon: string;
     tooltip = ""
     enabled = true
@@ -76,6 +77,7 @@ export abstract class TableAction<T extends {id: string}> {
 
     constructor(settings: Partial<TableAction<T>>) {
         this.name = settings.name ?? "";
+        this.description = settings.description ?? "";
         this.icon = settings.icon ?? "";
         this.priority = settings.priority ?? 0;
         this.groupIndex = settings.groupIndex ?? 0;

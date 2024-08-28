@@ -18,7 +18,7 @@ export class RegisterItemStep implements EditMemberStep {
     }
 
     isEnabled(_manager: MemberStepManager) {
-        return this.item.showItemView || this.showGroupInformation
+        return true
     }
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {

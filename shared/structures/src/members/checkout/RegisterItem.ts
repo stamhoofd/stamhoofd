@@ -622,6 +622,29 @@ export class RegisterItem {
         return this.validationError === null
     }
 
+    validatePeriod(group: Group, type: 'move' | 'register') {
+        const platform = this.family.platform
+
+        const periodId = group.periodId
+        if (periodId !== this.organization.period.period.id && periodId !== platform.period.id) {
+            throw new SimpleError({
+                code: "different_period",
+                message: "Different period",
+                human: type === 'register' ? `Je kan niet meer inschrijven voor ${group.settings.name} omdat dit werkjaar niet actief is.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dat werkjaar niet actief is.`,
+            })
+        }
+
+        const period = periodId === platform.period.id ? platform.period : this.organization.period.period
+
+        if (period.locked) {
+            throw new SimpleError({
+                code: "locked_period",
+                message: "Locked period",
+                human: type === 'register' ? `Je kan niet meer inschrijven voor ${group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.`,
+            })
+        }
+    }
+
     validate(options?: {warnings?: boolean, forWaitingList?: boolean}) {
         this.refresh(this.group)
         const checkout = this.member.family.checkout;
@@ -639,6 +662,7 @@ export class RegisterItem {
                 meta: {recoverable: true}
             })
         }
+        this.validatePeriod(this.group, 'register')
 
         if (options?.forWaitingList && !this.group.waitingList) {
             throw new SimpleError({
@@ -684,6 +708,8 @@ export class RegisterItem {
                     field: "replaceRegistrations"
                 })
             }
+
+            this.validatePeriod(registration.group, 'move')
         }
 
         // Already registered

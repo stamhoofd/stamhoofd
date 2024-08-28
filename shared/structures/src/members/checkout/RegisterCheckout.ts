@@ -82,7 +82,7 @@ export class IDRegisterCheckout extends AutoEncoder {
     }
 }
 
-export class RegisterCheckout{
+export class RegisterCheckout {
     cart = new RegisterCart()
     administrationFee = 0;
     freeContribution = 0
@@ -107,6 +107,10 @@ export class RegisterCheckout{
 
     get singleOrganization() {
         return this.cart.singleOrganization ?? this.defaultOrganization
+    }
+
+    get singleOrganizationId() {
+        return this.singleOrganization?.id ?? this.cart.deleteRegistrations[0]?.organizationId ?? this.cart.balanceItems[0]?.item.organizationId
     }
 
     setDefaultOrganization(organization: Organization|null) {
@@ -181,7 +185,7 @@ export class RegisterCheckout{
             })
         }
 
-        this.cart.validate()
+        this.cart.validate(this, data)
     }
 
     clear() {

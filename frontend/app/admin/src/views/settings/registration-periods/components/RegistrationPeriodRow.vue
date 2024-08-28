@@ -3,9 +3,13 @@
         <h2 class="style-title-list">
             {{ period.name }}
         </h2>
+        <p class="style-description-small">
+            {{ formatDate(period.startDate, true) }} - {{ formatDate(period.endDate, true) }}
+        </p>
 
         <template #right>
             <span v-if="isCurrent" class="style-tag">Huidige</span>
+            <span v-if="period.locked" class="icon lock gray" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>

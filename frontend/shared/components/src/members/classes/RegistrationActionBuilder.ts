@@ -98,7 +98,10 @@ export class RegistrationActionBuilder {
                             })
                         ]
                     }),
-                    ...this.getActionsForCategory(this.organization.period.adminCategoryTree, (group) => this.moveRegistrations(group))
+                    ...this.getActionsForCategory(this.organization.period.adminCategoryTree, (group) => this.moveRegistrations(group)).map(r => {
+                        r.description = this.organization.period.period.name
+                        return r
+                    })
                 ]
             })
         ]
@@ -201,6 +204,7 @@ export class RegistrationActionBuilder {
     async moveRegistrations(group: Group) {
         const items: RegisterItem[] = [];
         const checkout = new RegisterCheckout()
+        checkout.setDefaultOrganization(this.organization)
 
         for (const registration of this.registrations) {
             const member = this.members.find(m => m.id === registration.memberId)
@@ -256,6 +260,7 @@ export class RegistrationActionBuilder {
         const items: RegisterItem[] = [];
         const groupOrganization = this.organization
         const checkout = new RegisterCheckout()
+        checkout.setDefaultOrganization(groupOrganization)
 
         for (const registration of this.registrations) {
             const member = this.members.find(m => m.id === registration.memberId)

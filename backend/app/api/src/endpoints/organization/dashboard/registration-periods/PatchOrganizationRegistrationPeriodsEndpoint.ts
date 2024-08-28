@@ -263,6 +263,15 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         })
                     }
 
+                    if (existing.periodId !== model.periodId) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'waitingList',
+                            message: 'Waiting list group is already used in another period',
+                            human: 'Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende werkjaren'
+                        })
+                    }
+
                     model.waitingListId = existing.id
                 } else {
                     const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(

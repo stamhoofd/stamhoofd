@@ -148,7 +148,10 @@ export class MemberActionBuilder {
                     })
                 ]
             }),
-            ...this.getActionsForCategory(organization.period.adminCategoryTree, async (members, group) => await this.register(members, group))
+            ...this.getActionsForCategory(organization.period.adminCategoryTree, async (members, group) => await this.register(members, group)).map(r => {
+                r.description = organization.period.period.name
+                return r
+            })
         ]
     }
 
@@ -188,7 +191,10 @@ export class MemberActionBuilder {
                             })
                         ]
                     }),
-                    ...this.getActionsForCategory(organization.adminCategoryTree, (members, group) => this.moveRegistrations(members, group))
+                    ...this.getActionsForCategory(organization.period.adminCategoryTree, (members, group) => this.moveRegistrations(members, group)).map(r => {
+                        r.description = organization.period.period.name
+                        return r
+                    })
                 ]
             })
         ]
@@ -234,7 +240,7 @@ export class MemberActionBuilder {
     }
 
     getActionsForCategory(category: GroupCategoryTree, action: (members: PlatformMember[], group: Group) => void|Promise<void>): TableAction<PlatformMember>[] {
-        return [
+        const r = [
             ...category.categories.map(c => {
                 return new MenuTableAction({
                     name: c.settings.name,
@@ -242,7 +248,7 @@ export class MemberActionBuilder {
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     enabled: c.groups.length > 0 || c.categories.length > 0,
-                    childActions: () => this.getActionsForCategory(c, action),
+                    childActions: this.getActionsForCategory(c, action),
                 })
             }),
             ...category.groups.map(g => {
@@ -256,6 +262,15 @@ export class MemberActionBuilder {
                 })
             })
         ];
+
+        if (r.filter(rr => rr.enabled).length === 1) {
+            const rr = r.filter(rr => rr.enabled)[0]
+            if (rr instanceof MenuTableAction && Array.isArray(rr.childActions)) {
+                return rr.childActions
+            }
+        }
+
+        return r;
     }
 
     getActions(): TableAction<PlatformMember>[] {
