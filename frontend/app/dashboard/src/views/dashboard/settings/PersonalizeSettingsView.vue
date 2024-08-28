@@ -36,59 +36,61 @@
             Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.
         </p>
 
-        <hr>
-        <h2>Domeinnaam</h2>
+        <template v-if="STAMHOOFD.userMode === 'organization'">
+            <hr>
+            <h2>Domeinnaam</h2>
 
-        <p>Alle informatie over domeinnamen vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen/'" target="_blank">deze pagina</a>.</p>
+            <p>Alle informatie over domeinnamen vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen/'" target="_blank">deze pagina</a>.</p>
 
-        <template v-if="organization.privateMeta && (organization.privateMeta.mailDomain || organization.privateMeta.pendingMailDomain || organization.privateMeta.pendingRegisterDomain || organization.registerDomain)">
-            <p v-if="isMailOk" class="success-box">
-                Jouw domeinnaam is correct ingesteld voor het versturen van e-mails. <template v-if="!organization.privateMeta.mailDomainActive">
-                    Maar hij wordt momenteel nog niet gebruikt omdat het nog aan het verwerken is, dit kan enkele uren duren.
-                </template>
-            </p>
-            <p v-else class="warning-box">
-                Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf dat domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Stamhoofd. Stamhoofd zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.
-            </p>
-
-            <template v-if="enableMemberModule">
-                <p v-if="isRegisterOk" class="success-box">
-                    Jouw domeinnaam is correct ingesteld voor jouw inschrijvingsportaal (op {{ organization.registerDomain }})
+            <template v-if="organization.privateMeta && (organization.privateMeta.mailDomain || organization.privateMeta.pendingMailDomain || organization.privateMeta.pendingRegisterDomain || organization.registerDomain)">
+                <p v-if="isMailOk" class="success-box">
+                    Jouw domeinnaam is correct ingesteld voor het versturen van e-mails. <template v-if="!organization.privateMeta.mailDomainActive">
+                        Maar hij wordt momenteel nog niet gebruikt omdat het nog aan het verwerken is, dit kan enkele uren duren.
+                    </template>
                 </p>
                 <p v-else class="warning-box">
-                    Jouw domeinnaam wordt nog niet gebruikt voor jullie inschrijvingsportaal. Je kan dit instellen door onderaan op 'Domeinnaam instellen' te klikken.
+                    Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf dat domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Stamhoofd. Stamhoofd zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.
+                </p>
+
+                <template v-if="enableMemberModule">
+                    <p v-if="isRegisterOk" class="success-box">
+                        Jouw domeinnaam is correct ingesteld voor jouw inschrijvingsportaal (op {{ organization.registerDomain }})
+                    </p>
+                    <p v-else class="warning-box">
+                        Jouw domeinnaam wordt nog niet gebruikt voor jullie inschrijvingsportaal. Je kan dit instellen door onderaan op 'Domeinnaam instellen' te klikken.
+                    </p>
+                </template>
+
+                <p v-if="isMailOk && (isRegisterOk || !enableMemberModule)" class="st-list-description">
+                    <button class="button text" type="button" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Domeinnaam wijzigen</span>
+                    </button>
+                </p>
+
+                <p v-else class="st-list-description">
+                    <button class="button text" type="button" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Domeinnaam instellen</span>
+                    </button>
                 </p>
             </template>
 
-            <p v-if="isMailOk && (isRegisterOk || !enableMemberModule)" class="st-list-description">
-                <button class="button text" type="button" @click="setupDomain">
-                    <span class="icon settings" />
-                    <span>Domeinnaam wijzigen</span>
-                </button>
-            </p>
+            <template v-else>
+                <p v-if="organization.registerUrl && enableMemberModule" class="st-list-description">
+                    Jullie ledenportaal is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations') }}
+                </p>
+                <p v-else class="st-list-description">
+                    {{ $t('dashboard.settings.personalize.domainDescription') }}
+                </p>
 
-            <p v-else class="st-list-description">
-                <button class="button text" type="button" @click="setupDomain">
-                    <span class="icon settings" />
-                    <span>Domeinnaam instellen</span>
-                </button>
-            </p>
-        </template>
-
-        <template v-else>
-            <p v-if="organization.registerUrl && enableMemberModule" class="st-list-description">
-                Jullie ledenportaal is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations') }}
-            </p>
-            <p v-else class="st-list-description">
-                {{ $t('dashboard.settings.personalize.domainDescription') }}
-            </p>
-
-            <p class="st-list-description">
-                <button class="button text" type="button" @click="setupDomain">
-                    <span class="icon settings" />
-                    <span>Domeinnaam instellen</span>
-                </button>
-            </p>
+                <p class="st-list-description">
+                    <button class="button text" type="button" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Domeinnaam instellen</span>
+                    </button>
+                </p>
+            </template>
         </template>
     </SaveView>
 </template>
