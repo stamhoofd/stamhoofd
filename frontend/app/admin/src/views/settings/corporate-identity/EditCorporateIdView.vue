@@ -7,6 +7,15 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <STInputBox title="Naam van het platform" error-fields="name" :error-box="errors.errorBox">
+            <input
+                v-model="$name"
+                class="input"
+                type="text"
+                placeholder="Naam van het platform"
+            >
+        </STInputBox>
+
         <ColorInput v-model="color" title="Hoofdkleur" :validator="errors.validator" placeholder="Geen kleur" :required="false" :disallowed="['#FFFFFF']" />
 
         <hr>
@@ -40,10 +49,10 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ColorInput, ErrorBox, LogoEditor, Toast, useErrors, usePatch, usePlatform, ImageComponent, UploadButton } from '@stamhoofd/components';
+import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, LogoEditor, Toast, UploadButton, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { DarkMode, Platform, PlatformConfig, ResolutionRequest } from '@stamhoofd/structures';
+import { DarkMode, Image, Platform, PlatformConfig, ResolutionRequest } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const platformManager = usePlatformManager();
@@ -57,16 +66,20 @@ const saving = ref(false);
 
 const title = 'Huisstijl'
 
+const $name = computed({
+    get: () => patched.value.config.name,
+    set: (value: string) => addPatch(Platform.patch({config: PlatformConfig.patch({name: value})}))
+})
+
 const color = computed({
     get: () => patched.value.config.color,
-    set: (value: string) => addPatch(Platform.patch({config: PlatformConfig.patch({color: value})}))
+    set: (value: string | null) => addPatch(Platform.patch({config: PlatformConfig.patch({color: value})}))
 })
 
 const coverPhoto = computed({
     get: () => patched.value.config.coverPhoto,
-    set: (value: string | null) => addPatch(Platform.patch({config: PlatformConfig.patch({coverPhoto: value})}))
+    set: (value: Image | null) => addPatch(Platform.patch({config: PlatformConfig.patch({coverPhoto: value})}))
 })
-
 
 async function save() {
     if (saving.value) {
