@@ -58,8 +58,7 @@ class EmailStatic {
             auth: {
                 user: STAMHOOFD.SMTP_USERNAME, // generated ethereal user
                 pass: STAMHOOFD.SMTP_PASSWORD // generated ethereal password
-            },
-            headers: STAMHOOFD.SMTP_HEADERS ?? undefined
+            }
         });
         
         // create reusable transporter object using the default SMTP transport
@@ -70,8 +69,7 @@ class EmailStatic {
             auth: {
                 user: STAMHOOFD.TRANSACTIONAL_SMTP_USERNAME, // generated ethereal user
                 pass: STAMHOOFD.TRANSACTIONAL_SMTP_PASSWORD // generated ethereal password
-            },
-            headers: STAMHOOFD.TRANSACTIONAL_SMTP_HEADERS ?? undefined
+            }
         });
 
         // verify connection configuration
@@ -362,7 +360,18 @@ class EmailStatic {
 
             const transporter = (data.type === "transactional") ? this.transactionalTransporter : this.transporter
 
-            
+            if (data.type === "transactional") {
+                data.headers = {
+                    ...data.headers,
+                    ...STAMHOOFD.TRANSACTIONAL_SMTP_HEADERS
+                }
+            } else {
+                data.headers = {
+                    ...data.headers,
+                    ...STAMHOOFD.SMTP_HEADERS
+                }
+            }
+
             const info = await transporter.sendMail(mail);
             console.log("Message sent:", to, data.subject, info.messageId, data.type);
 
