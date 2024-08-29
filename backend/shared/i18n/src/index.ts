@@ -1,7 +1,8 @@
 import { DecodedRequest } from "@simonbackx/simple-endpoints/dist/src/DecodedRequest";
+import "../../../../environment.d.ts";
 import { I18n } from "./I18n";
 
-export * from "./I18n"
+export * from "./I18n";
 
 // Extend decoded request here
 declare module '@simonbackx/simple-endpoints/dist/src/DecodedRequest' {
