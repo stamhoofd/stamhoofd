@@ -33,7 +33,7 @@
     "dependencies": {
         "@mollie/api-client": "3.7.0",
         "@simonbackx/simple-database": "1.25.0",
-        "@simonbackx/simple-encoding": "2.15.0",
+        "@simonbackx/simple-encoding": "2.15.1",
         "@simonbackx/simple-endpoints": "1.14.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "@stamhoofd/backend-i18n": "2.25.1",
