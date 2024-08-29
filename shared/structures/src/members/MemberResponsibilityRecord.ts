@@ -30,6 +30,6 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
 }
 
 export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
-    @field({ decoder: Group, nullable: true, ...NextVersion })
+    @field({ decoder: Group, nullable: true, version: 328 })
     group: Group|null = null;
 }
