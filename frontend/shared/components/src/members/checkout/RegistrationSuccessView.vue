@@ -35,7 +35,7 @@
 
 <script lang="ts" setup>
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { STToolbar } from '@stamhoofd/components';
+import { STToolbar, useContext } from '@stamhoofd/components';
 import { GroupType, RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted } from 'vue';
@@ -50,9 +50,13 @@ const props = withDefaults(
     }
 );
 const dismiss = useDismiss()
+const context = useContext()
 
 onMounted(() => {
     props.checkout?.clear()
+
+    // Force reload
+    context.value.updateData(true, false, false).catch(console.error)
 })
 
 const names = Formatter.uniqueArray(props.registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.firstName ?? "?"))

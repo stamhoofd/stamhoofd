@@ -15,6 +15,7 @@ export class MemberManager {
     family: PlatformFamily;
 
     _unwatch: any;
+    _unwatchUser: any;
 
     constructor($context: SessionContext, platform: Platform) {
         this.$context = $context
@@ -25,6 +26,19 @@ export class MemberManager {
             }) as any
         ) as PlatformFamily;
         this.watchCheckout()
+    }
+
+    watchUser() {
+        if (this._unwatchUser) {
+            this._unwatchUser()
+        }
+
+        // If the user is refetched, also reload the members that we've received
+        this._unwatchUser = watch(() => this.$context.user, () => {
+            if (this.$context.user && this.$context.user.members) {
+                this.loadMembers().catch(console.error)
+            }
+        }, { deep: true });
     }
 
     watchCheckout() {
@@ -117,7 +131,7 @@ export class MemberManager {
 
     async loadMembers() {
         if (this.$context.user?.members) {
-            this.family.insertFromBlob(this.$context.user.members)
+            this.family.insertFromBlob(this.$context.user.members, true)
             return
         }
         
@@ -127,7 +141,7 @@ export class MemberManager {
             decoder: MembersBlob as Decoder<MembersBlob>
         })
         const blob = response.data
-        this.family.insertFromBlob(blob)
+        this.family.insertFromBlob(blob, true)
     }
 
     async loadDocuments() {

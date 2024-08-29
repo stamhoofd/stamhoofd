@@ -63,7 +63,7 @@ export class PlatformFamily {
         return family
     }
 
-    insertFromBlob(blob: MembersBlob) {
+    insertFromBlob(blob: MembersBlob, removeMissing = false) {
         for (const organization of blob.organizations) {
             this.insertOrganization(organization)
         }
@@ -80,6 +80,10 @@ export class PlatformFamily {
                 family: this
             })
             this.members.push(platformMember)
+        }
+
+        if (removeMissing) {
+            this.members = this.members.filter(m => blob.members.find(mb => mb.id === m.id))
         }
     }
 

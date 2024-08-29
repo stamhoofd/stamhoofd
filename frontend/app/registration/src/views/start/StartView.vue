@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { MemberIcon, Toast, useAddMember, useChooseGroupForMember, useUser } from '@stamhoofd/components';
+import { MemberIcon, Toast, useAddMember, useChooseGroupForMember, useContext, useUser, useVisibilityChange } from '@stamhoofd/components';
 import { GroupType, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
