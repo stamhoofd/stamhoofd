@@ -342,6 +342,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 organization.periodId = period.id
+                shouldUpdateSetupSteps = true;
             }
 
             // Save the organization
