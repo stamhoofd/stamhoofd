@@ -1,4 +1,4 @@
-import { EmailAddress, EmailInterfaceRecipient } from "@stamhoofd/email";
+import { Email, EmailAddress, EmailInterfaceRecipient } from "@stamhoofd/email";
 import { Organization } from "@stamhoofd/models";
 import { Formatter } from "@stamhoofd/utility";
 import { simpleParser } from "mailparser";
@@ -26,32 +26,34 @@ export class ForwardHandler {
         }
 
         // Unsubscribe email?
-        if (email && email?.startsWith("unsubscribe+") && email.endsWith('@stamhoofd.email')) {
-            // Get id
-            const id = email.substring("unsubscribe+".length, email.indexOf('@stamhoofd.email'))
-            const model = await EmailAddress.getByID(id)
-            
-            if (model) {
-                console.log('[Unsubscribe] Received an unsubscribe request for ' + model.email + ' from ' + from)
-                if (model.unsubscribedAll) {
-                    // Ignore
-                    return;
-                }
-                model.unsubscribedAll = true
-                await model.save()
-            } else {
-                console.error('[Unsubscribe] Received an unsubscribe request for unknown ID ' + id + ' from ' + from)
+        for (const domain of Object.values(STAMHOOFD.domains.defaultBroadcastEmail ?? {})) {
+            if (email && email?.startsWith("unsubscribe+") && email.endsWith('@' + domain)) {
+                // Get id
+                const id = email.substring("unsubscribe+".length, email.indexOf('@' + domain))
+                const model = await EmailAddress.getByID(id)
+                
+                if (model) {
+                    console.log('[Unsubscribe] Received an unsubscribe request for ' + model.email + ' from ' + from)
+                    if (model.unsubscribedAll) {
+                        // Ignore
+                        return;
+                    }
+                    model.unsubscribedAll = true
+                    await model.save()
+                } else {
+                    console.error('[Unsubscribe] Received an unsubscribe request for unknown ID ' + id + ' from ' + from)
 
-                // Forward
-                return {
-                    from: "unsubscribe@stamhoofd.be",
-                    to: "hallo@stamhoofd.be",
-                    subject: "E-mail unsubscribe mislukt",
-                    text: "Beste,\n\nEr werd een unsubscribe gemeld op "+email+" die niet kon worden verwerkt. Gelieve dit na te kijken.\n\nStamhoofd"
-                }
+                    // Forward
+                    return {
+                        from: Email.getWebmasterFromEmail(),
+                        to: Email.getWebmasterToEmail(),
+                        subject: "E-mail unsubscribe mislukt",
+                        text: "Beste,\n\nEr werd een unsubscribe gemeld op "+email+" die niet kon worden verwerkt. Gelieve dit na te kijken.\n\nStamhoofd"
+                    }
 
+                }
+                return;
             }
-            return;
         }
 
         if (receipt.spamVerdict.status != "PASS" || receipt.virusVerdict.status != "PASS" || !(receipt.spfVerdict.status == "PASS" || receipt.dkimVerdict.status == "PASS")) {
@@ -60,7 +62,7 @@ export class ForwardHandler {
         }
 
         // Send a new e-mail
-        let defaultEmail: EmailInterfaceRecipient[]|string = "hallo@stamhoofd.be"
+        let defaultEmail: EmailInterfaceRecipient[]|string = Email.getWebmasterToEmail()
         let organizationEmails: EmailInterfaceRecipient[] = []
         const extraDescription = "Dit bericht werd verstuurd naar "+email+", en werd automatisch doorgestuurd naar alle beheerders. Stel in Stamhoofd de e-mailadressen in om ervoor te zorgen dat antwoorden naar een specifiek e-mailadres worden verstuurd."
         
@@ -76,7 +78,7 @@ export class ForwardHandler {
 
             // Send back to receiver without including the original message to avoid spam
             return {
-                from: email ?? "unknown@stamhoofd.be",
+                from: email ?? Email.getWebmasterToEmail(),
                 to: from,
                 subject: "Ongeldig e-mailadres",
                 text: "Beste,\n\nDe vereniging die je probeert te bereiken via "+email+" is helaas niet bereikbaar via dit e-mailadres. Dit e-mailadres wordt enkel gebruikt voor het versturen van automatische e-mails in naam van een vereniging. Probeer de vereniging te contacteren via een ander e-mailadres.\n\nBedankt."
@@ -116,7 +118,7 @@ export class ForwardHandler {
         }
 
         const options = {
-            from: email ?? "unknown@stamhoofd.be",
+            from: email ?? Email.getWebmasterToEmail(),
             to: defaultEmail,
             replyTo: parsed.from?.text,
             subject: parsed.subject ?? "Doorgestuurd bericht",

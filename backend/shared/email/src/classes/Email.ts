@@ -212,6 +212,37 @@ class EmailStatic {
         return addresses
     }
 
+    private matchWhitelist(email: string, whitelist: string[]) {
+        if (!whitelist.includes('*') && !whitelist.includes('*@*')) {
+            const l = email.toLowerCase();
+            if (whitelist.includes(l)) {
+                return true;
+            }
+
+            const domainIndex = l.indexOf('@');
+            const domain = l.substring(domainIndex)
+
+            if (whitelist.includes('*' + domain)) {
+                return true;
+            }
+
+            console.warn("Filtered email to " + l + ": not whitelisted")
+            return false;
+        }
+
+        return true
+    }
+
+    private filterWhitelist(recipients: EmailInterfaceRecipient[], whitelist: string[]) {
+        if (!whitelist.includes('*') && !whitelist.includes('*@*')) {
+            return recipients.filter(mail => {
+                return this.matchWhitelist(mail.email, whitelist)
+            })
+        }
+
+        return recipients
+    }
+
     private async doSend(data: EmailInterface) {
         if (STAMHOOFD.environment === 'test') {
             // Do not send any emails
@@ -251,25 +282,7 @@ class EmailStatic {
         // Filter by environment
         if (STAMHOOFD.environment !== 'production') {
             const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? []
-
-            if (!whitelist.includes('*') && !whitelist.includes('*@*')) {
-                recipients = recipients.filter(mail => {
-                    const l = mail.email.toLowerCase();
-                    if (whitelist.includes(l)) {
-                        return true;
-                    }
-
-                    const domainIndex = l.indexOf('@');
-                    const domain = l.substring(domainIndex)
-
-                    if (whitelist.includes('*' + domain)) {
-                        return true;
-                    }
-
-                    console.warn("Filtered email to " + l + ": not whitelisted in WHITELISTED_EMAIL_DESTINATIONS")
-                    return false;
-                })
-            }
+            recipients = this.filterWhitelist(recipients, whitelist)
         }
 
         if (recipients.length === 0) {
@@ -331,11 +344,18 @@ class EmailStatic {
             }
         }
 
+        const parsedFrom = this.parseEmailStr(data.from)
+        if (parsedFrom.length !== 1) {
+            throw new Error("Invalid from email " + data.from)
+        }
+
         try {
-            // todo: read from environment
-            if (!data.from.includes('@stamhoofd.be') && !data.from.includes('@stamhoofd.nl')) {
-                // Not supported
-                data.type = 'broadcast'
+            // Can we send from the transactional email server?
+            if (STAMHOOFD.TRANSACTIONAL_WHITELIST !== undefined && data.type === 'transactional') {
+                if (!this.matchWhitelist(parsedFrom[0], STAMHOOFD.TRANSACTIONAL_WHITELIST)) {
+                    // Not supported
+                    data.type = 'broadcast'
+                }
             }
 
             const transporter = (data.type === "transactional") ? this.transactionalTransporter : this.transporter
@@ -371,33 +391,51 @@ class EmailStatic {
 
                 // Email address is not verified.
                 if (STAMHOOFD.environment !== 'development') {
-                    if (!data.from.includes("hallo@stamhoofd.be")) {
-                        this.sendInternal({
-                            to: "hallo@stamhoofd.be",
+                    if (data.from !== this.getWebmasterFromEmail()) {
+                        this.sendWebmaster({
                             subject: "E-mail kon niet worden verzonden",
                             text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd aan "+mail.to+": \n\n"+e+"\n\n"+(mail.text ?? ""),
                             type: (data.type === "transactional") ? "broadcast" : "transactional"
-                        }, new I18n("nl", "BE"))
+                        })
                     }
                 }
             }
         }
     }
 
+    /**
+     * @deprecated
+     * Please use EmailBuilder.sendEmailTemplate
+     */
     getInternalEmailFor(i18n: I18n) {
         // todo: use default email in platform settings
-        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <'+ (i18n.$t("shared.emails.general")) +'>'
+        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <hallo@'+ (i18n.localizedDomains.defaultTransactionalEmail()) +'>'
     }
 
+    getWebmasterFromEmail() {
+        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <webmaster@'+ (new I18n("nl", "BE").localizedDomains.defaultTransactionalEmail()) +'>'
+    }
+
+    getWebmasterToEmail() {
+        return 'hallo@stamhoofd.be'
+    }
+
+    /**
+     * @deprecated
+     * Please use EmailBuilder.sendEmailTemplate
+     */
     getPersonalEmailFor(i18n: I18n) {
         return '"Simon Backx" <'+ (i18n.$t("shared.emails.personal")) +'>'
     }
 
     /**
-     * Send an internal e-mail (from stamhoofd)
+     * Send an email to the webmaster
      */
-    sendInternal(data: EmailInterfaceBase, i18n: I18n) {
-        const mail = Object.assign(data, { from: this.getInternalEmailFor(i18n) })
+    sendWebmaster(data: Omit<EmailInterfaceBase, "to">) {
+        const mail = Object.assign(data, { 
+            from: this.getWebmasterFromEmail(),
+            to: this.getWebmasterToEmail()
+        })
         this.send(mail)
     }
 

@@ -51,6 +51,11 @@ declare global {
 
         // MX + SPF (both for email) + A record for registration
         registrationCname: string,
+
+
+        // Default email domain for emails sent from organizations
+        defaultTransactionalEmail?: LocalizedDomain,
+        defaultBroadcastEmail?: LocalizedDomain,
     }
 
     /** 
@@ -98,6 +103,7 @@ declare global {
         readonly TRANSACTIONAL_SMTP_USERNAME: string,
         readonly TRANSACTIONAL_SMTP_PASSWORD: string,
         readonly TRANSACTIONAL_SMTP_PORT: number,
+        readonly TRANSACTIONAL_WHITELIST?: string[] // E-mails we are allowed to send transactional e-mails from
 
         // Postmark
         // To catch email bounces

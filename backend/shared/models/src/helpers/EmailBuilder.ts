@@ -4,6 +4,7 @@ import { Formatter } from "@stamhoofd/utility";
 
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EmailTemplate, Group, Organization, Platform, User, Webshop } from "../models";
+import { I18n } from "@stamhoofd/backend-i18n";
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType,
@@ -63,8 +64,6 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
 
 export async function getDefaultEmailFrom(organization: Organization|null, options: Pick<EmailBuilderOptions, "type"> & { template: Omit<EmailTemplateOptions, "organizationId"|"type"> }) {
     // When choosing sending domain, prefer using the one with the highest reputation
-    const preferStrong = options.type === 'transactional'
-
     let preferEmailId: string | null = null;
 
     if (options.template.group) {
@@ -76,8 +75,9 @@ export async function getDefaultEmailFrom(organization: Organization|null, optio
     }
     
     if (organization) {
-        // Send confirmation e-mail
-        let from = preferStrong ? organization.getStrongEmail(organization.i18n, false) : organization.uri+"@stamhoofd.email";
+        // Default email address for the chosen email type
+        let from = organization.getDefaultFrom(organization.i18n, false, options.type ?? 'broadcast');
+
         const sender: OrganizationEmail | undefined = (preferEmailId ? organization.privateMeta.emails.find(e => e.id === preferEmailId) : null) ?? organization.privateMeta.emails.find(e => e.default) ?? organization.privateMeta.emails[0];
         let replyTo: string | undefined = undefined
 
@@ -115,14 +115,26 @@ export async function getDefaultEmailFrom(organization: Organization|null, optio
 
     const platform = await Platform.getSharedPrivateStruct()
 
+    // Default e-mail if no email addresses are configured
+    const i18n = new I18n("nl", "BE")
+    const transactionalDomain = i18n.localizedDomains.defaultTransactionalEmail()
+    const broadcastDomain = i18n.localizedDomains.defaultBroadcastEmail()
+    const domain = (options.type === 'transactional' ?transactionalDomain : broadcastDomain)
+    let from = 'hallo@' + domain
+    
     // Platform
-    // TODO: read from config
-    let from = 'hallo@stamhoofd.be'
     const sender: OrganizationEmail | undefined = (preferEmailId ? platform.privateConfig.emails.find(e => e.id === preferEmailId) : null) ?? platform.privateConfig.emails.find(e => e.default) ?? platform.privateConfig.emails[0];
     let replyTo: string | undefined = undefined
 
     if (sender) {
         replyTo = sender.email
+
+        // Are we allowed to send an e-mail from this domain?
+        if (sender.email.endsWith("@"+transactionalDomain) || sender.email.endsWith("@"+broadcastDomain)) {
+            // Allowed to send from
+            from = sender.email
+            replyTo = undefined
+        }
 
         // Include name in form field
         if (sender.name) {
@@ -222,14 +234,16 @@ export async function getEmailBuilder(organization: Organization|null, email: Em
                 }
                 continue
             }
+
+            const unsubscribeUrl = "https://"+STAMHOOFD.domains.dashboard+"/"+(organization ? (organization.i18n.locale + '/') : '')+"unsubscribe?id="+encodeURIComponent(unsubscribe.id)+"&token="+encodeURIComponent(unsubscribe.token)+"&type="+encodeURIComponent(email.unsubscribeType ?? 'all')
             recipient.replacements.push(Replacement.create({
                 token: "unsubscribeUrl",
-                value: "https://"+STAMHOOFD.domains.dashboard+"/"+(organization ? (organization.i18n.locale + '/') : '')+"unsubscribe?id="+encodeURIComponent(unsubscribe.id)+"&token="+encodeURIComponent(unsubscribe.token)+"&type="+encodeURIComponent(email.unsubscribeType ?? 'all')
+                value: unsubscribeUrl
             }))
 
             // Override headers
             recipient.headers = {
-                'List-Unsubscribe': "<mailto:unsubscribe+"+unsubscribe.id+"@stamhoofd.email>",
+                'List-Unsubscribe': `<${unsubscribeUrl}>`,
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
             }
             cleaned.push(recipient)

@@ -1,9 +1,7 @@
 import { Database } from '@simonbackx/simple-database';
 import { logger, StyledText } from "@simonbackx/simple-logging";
-import { I18n } from '@stamhoofd/backend-i18n';
 import { Email, EmailAddress } from '@stamhoofd/email';
-import { Group, Organization, Payment, Registration, STPackage, STPendingInvoice, Webshop } from '@stamhoofd/models';
-import { QueueHandler } from '@stamhoofd/queues';
+import { Group, Organization, Payment, Registration, STPackage, Webshop } from '@stamhoofd/models';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
@@ -123,9 +121,7 @@ async function checkWebshopDNS() {
     console.log("[DNS] Checking webshop DNS...")
 
     for (const webshop of webshops) {
-        if (STAMHOOFD.environment === "production" || true) {
-            console.log("[DNS] Webshop "+webshop.meta.name+" ("+webshop.id+")"+" ("+webshop.domain+")")
-        }
+        console.log("[DNS] Webshop "+webshop.meta.name+" ("+webshop.id+")"+" ("+webshop.domain+")")
         await webshop.updateDNSRecords()
     }
 
@@ -133,10 +129,10 @@ async function checkWebshopDNS() {
 }
 
 async function checkReplies() {
-    if (STAMHOOFD.environment !== "production") {
-        return;
+    if (STAMHOOFD.environment !== "production" || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
+        return
     }
-
+    
     console.log("Checking replies from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding", MaxNumberOfMessages: 10 }).promise()
@@ -261,7 +257,7 @@ async function checkPostmarkBounces() {
 }
 
 async function checkBounces() {
-    if (STAMHOOFD.environment !== "production") {
+    if (STAMHOOFD.environment !== "production" || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
         return
     }
     
@@ -343,7 +339,7 @@ async function checkBounces() {
 }
 
 async function checkComplaints() {
-    if (STAMHOOFD.environment !== "production") {
+    if (STAMHOOFD.environment !== "production" || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
         return
     }
 
@@ -396,11 +392,10 @@ async function checkComplaints() {
                                 console.error("[AWS COMPLAINTS] Received virus / fraud complaint!")
                                 console.error("[AWS COMPLAINTS]", complaint)
                                 if (STAMHOOFD.environment === "production") {
-                                    Email.sendInternal({
-                                        to: "simon@stamhoofd.be",
+                                    Email.sendWebmaster({
                                         subject: "Received a "+type+" email notification",
                                         text: "We received a "+type+" notification for an e-mail from the organization: "+organization?.name+". Please check and adjust if needed.\n"
-                                    }, new I18n("nl", "BE"))
+                                    })
                                 }
                             }
                         } else {

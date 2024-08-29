@@ -11,6 +11,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { Organization } from './Organization';
+import { I18n } from '@stamhoofd/backend-i18n';
 
 export class Email extends Model {
     static table = "emails";
@@ -139,10 +140,11 @@ export class Email extends Model {
     }
 
     getDefaultFromAddress(organization?: Organization|null): string {
-        let address = "noreply@stamhoofd.email";
+        const i18n = new I18n("nl", "BE")
+        let address = "noreply@" + i18n.localizedDomains.defaultBroadcastEmail()
 
         if (organization) {
-            address = organization.uri+"@stamhoofd.email";
+            address = organization.getDefaultFrom(organization.i18n, false, 'broadcast');
         }
 
         if (!this.fromName) {
@@ -198,7 +200,11 @@ export class Email extends Model {
                 }
             } else {
                 // Platform
-                const domains = Object.values(STAMHOOFD.domains.marketing)
+                // Is the platform allowed to send from the provided email address?
+                const domains = [
+                    ...Object.values(STAMHOOFD.domains.defaultTransactionalEmail ?? {}),
+                    ...Object.values(STAMHOOFD.domains.defaultBroadcastEmail ?? {})
+                ]
 
                 for (const domain of domains) {
                     if (upToDate.fromAddress!.endsWith("@"+domain)) {

@@ -95,11 +95,10 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         try {
             limiter.track(organization.id, request.body.recipients.length);
         } catch (e) {
-            Email.sendInternal({
-                to: "hallo@stamhoofd.be",
+            Email.sendWebmaster({
                 subject: "[Limiet] Limiet bereikt voor aantal e-mails",
                 text: "Beste, \nDe limiet werd bereikt voor het aantal e-mails per dag. \nVereniging: "+organization.id+" ("+organization.name+")" + "\n\n" + e.message + "\n\nStamhoofd"
-            }, new I18n("nl", "BE"))
+            })
 
             throw new SimpleError({
                 code: "too_many_emails_period",
@@ -178,7 +177,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             }
         })
 
-        let from = organization.uri+"@stamhoofd.email";
+        let from = organization.getDefaultFrom(request.i18n, false, 'broadcast');
         let replyTo: string | undefined = sender.email;
 
         // Can we send from this e-mail or reply-to?

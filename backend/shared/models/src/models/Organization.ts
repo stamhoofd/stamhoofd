@@ -130,27 +130,19 @@ export class Organization extends Model {
 
     // Methods
     static async getByEmail(email: string): Promise<Organization | undefined> {
-        if (["hallo@stamhoofd.be", "hallo@stamhoofd.nl"].includes(email)) {
-            return
-        }
         if (email.startsWith('noreply-')) {
             // Trim
             email = email.substring("noreply-".length)
         }
         
-        if (email.endsWith("@stamhoofd.email")) {
-            const uri = email.substring(0, email.length - "@stamhoofd.email".length)
-            return await Organization.getByURI(uri)
-        }
-
-        if (email.endsWith("@stamhoofd.be")) {
-            const uri = email.substring(0, email.length - "@stamhoofd.be".length)
-            return await Organization.getByURI(uri)
-        }
-
-        if (email.endsWith("@stamhoofd.nl")) {
-            const uri = email.substring(0, email.length - "@stamhoofd.nl".length)
-            return await Organization.getByURI(uri)
+        for (const domain of [
+            ...Object.values(STAMHOOFD.domains.defaultBroadcastEmail ?? {}),
+            ...Object.values(STAMHOOFD.domains.defaultTransactionalEmail ?? {}),
+        ]) {
+            if (email.endsWith("@" + domain)) {
+                const uri = email.substring(0, email.length - ("@" + domain).length)
+                return await Organization.getByURI(uri)
+            }
         }
 
         const at = email.indexOf("@");
@@ -872,38 +864,27 @@ export class Organization extends Model {
     }
 
     /**
-     * These email addresess are private
+     * Return default e-mail address if no email addresses are set.
      */
-    async getInvoicingToEmails() {
-        // Circular reference fix
-        const User = (await import('./User')).User;
-        const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
-        const filtered = admins.filter(a => a.permissions?.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector))
+    getDefaultFrom(i18n: I18n, withName = true, type: 'transactional' | 'broadcast' = 'broadcast') {
+        const domain = type === 'transactional' ? i18n.localizedDomains.defaultTransactionalEmail() : i18n.localizedDomains.defaultBroadcastEmail()
 
-        if (filtered.length > 0) {
-            return filtered.map(f => f.getEmailTo() ).join(", ")
-        }
-
-        return undefined
-    }
-    
-    /**
-     * Return default e-mail address for important e-mails that should have the highest deliverability
-     */
-    getStrongEmail(i18n: I18n, withName = true) {
         if (!withName) {
-            return ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email"));
+            return ('noreply-' + this.uri+"@"+domain);
         }
-        return '"'+this.name.replaceAll("\"", "\\\"")+'" <'+ ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
+        return '"'+this.name.replaceAll("\"", "\\\"")+'" <'+ ('noreply-' + this.uri+"@"+domain) +'>'
     }
 
+    /**
+     * @deprecated Switch to EmailBuilder.sendEmailTemplate
+     */
     getEmail(id: string | null, strongDefault = false): { from: string; replyTo: string | undefined } {
         if (id === null) {
             return this.getDefaultEmail(strongDefault)
         }
         
         // Send confirmation e-mail
-        let from = strongDefault ? this.getStrongEmail(this.i18n, false) : this.uri+"@stamhoofd.email";
+        let from = this.getDefaultFrom(this.i18n, false, strongDefault ? 'transactional' : 'broadcast')
         const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.id === id)
         let replyTo: string | undefined = undefined
 
@@ -935,13 +916,12 @@ export class Organization extends Model {
         return this.getDefaultEmail(strongDefault)
     }
 
-    getGroupEmail(group: Group) {
-        return this.getEmail(group.privateSettings.defaultEmailId)
-    }
-
+    /**
+     * @deprecated Switch to EmailBuilder.sendEmailTemplate
+     */
     getDefaultEmail(strongDefault = false): { from: string; replyTo: string | undefined } {
         // Send confirmation e-mail
-        let from = strongDefault ? this.getStrongEmail(this.i18n, false) : this.uri+"@stamhoofd.email";
+        let from = strongDefault ? this.getDefaultFrom(this.i18n, false) : this.uri+"@stamhoofd.email";
         const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
         let replyTo: string | undefined = undefined
 

@@ -107,19 +107,14 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 return url;
             }).catch(async (error) => {
                 if (sendEmail) {
-                    const builder = await getEmailBuilderForTemplate(organization, {
+                    await sendEmailTemplate(null, {
                         template: {
                             type: EmailTemplateType.ExcelExportFailed
                         },
                         recipients: [
                             user.createRecipient()
-                        ],
-                        from: Email.getInternalEmailFor(Context.i18n)
+                        ]
                     })
-            
-                    if (builder) {
-                        Email.schedule(builder)
-                    }
                 }
                 throw error
             }),

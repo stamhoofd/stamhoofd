@@ -96,7 +96,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await admin.save();
 
         const { from, replyTo } = {
-            from: organization ? organization.getStrongEmail(request.i18n) : Email.getInternalEmailFor(request.i18n),
+            from: organization ? organization.getDefaultFrom(request.i18n) : Email.getInternalEmailFor(request.i18n),
             replyTo: undefined
         }
 

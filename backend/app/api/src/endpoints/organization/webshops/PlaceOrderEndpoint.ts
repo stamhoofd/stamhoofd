@@ -86,11 +86,10 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 try {
                     limiter.track(organization.id, 1);
                 } catch (e) {
-                    Email.sendInternal({
-                        to: "hallo@stamhoofd.be",
+                    Email.sendWebmaster({
                         subject: "[Limiet] Limiet bereikt voor aantal bestellingen",
                         text: "Beste, \nDe limiet werd bereikt voor het aantal bestellingen per dag. \nVereniging: "+organization.id+" ("+organization.name+")" + "\n\n" + e.message + "\n\nStamhoofd"
-                    }, new I18n("nl", "BE"))
+                    })
                     
                     throw new SimpleError({
                         code: "too_many_emails_period",

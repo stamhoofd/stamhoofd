@@ -60,7 +60,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 // Send an e-mail to say you already have an account + follow password forgot flow
                 const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, organization, request.i18n)
                 const { from, replyTo } = {
-                    from: (user.permissions || !organization ? Email.getInternalEmailFor(request.i18n) : organization.getStrongEmail(request.i18n)),
+                    from: (user.permissions || !organization ? Email.getInternalEmailFor(request.i18n) : organization.getDefaultFrom(request.i18n)),
                     replyTo: undefined
                 }
                 
