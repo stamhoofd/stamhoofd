@@ -119,10 +119,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Soorten gebouwen') }}
+                        {{ $t('Soorten lokalen') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Stel in welke soorten gebouwen groepen kunnen toevoegen') }}
+                        {{ $t('Stel in welke soorten lokalen groepen kunnen toevoegen') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -259,7 +259,7 @@ enum Routes {
     EmailSettings = 'emailadressen',
     EventTypes = 'soorten-activiteiten',
     CorporateIdentity = 'huisstijl',
-    Premises = 'gebouwen',
+    Premises = 'lokalen',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
     Terms = 'voorwaarden'

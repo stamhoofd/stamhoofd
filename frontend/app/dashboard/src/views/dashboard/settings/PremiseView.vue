@@ -11,7 +11,7 @@
                     v-model="name"
                     class="input"
                     type="text"
-                    :placeholder="$t('Naam van het gebouw')"
+                    :placeholder="$t('Naam van het lokaal')"
                     autocomplete=""
                 >
             </STInputBox>
@@ -22,7 +22,7 @@
                     v-model="description"
                     class="input"
                     type="text"
-                    :placeholder="$t('Beschrijving van het gebouw')"
+                    :placeholder="$t('Beschrijving van het lokaal')"
                     autocomplete=""
                 />
             </STInputBox>
@@ -31,7 +31,7 @@
         
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
                 <hr>
-                <h2>Soort</h2>
+                <h2>Type</h2>
                 <STList>
                     <STListItem v-for="premiseType of platformPremiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
                         <template #left>
@@ -48,7 +48,7 @@
 
                         <template #right>
                             <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
-                            <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van deze soort is bereikt. Verwijder eerst een ander gebouw van deze soort om deze soort te selecteren.'" class="icon info-circle hover-show" />
+                            <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van dit type is bereikt. Verwijder eerst een ander lokaal van dit type om dit type te selecteren.'" class="icon info-circle hover-show" />
                         </template>
                     </STListItem>
                     <STListItem v-if="hasUnknownType" :selectable="true" element-name="label">
@@ -60,7 +60,7 @@
                                 Onbekend
                             </h2>
                             <p class="style-description-small">
-                                Deze soort is onbekend. Waarschijnlijk is deze soort verwijderd.
+                                Dit type lokaal is onbekend. Waarschijnlijk is deze verwijderd.
                             </p>
                         </div>
                     </STListItem>
@@ -92,7 +92,7 @@ const props = withDefaults(
 
 const $t = useTranslate();
 
-const title = computed(() => props.isNew ? $t('Nieuw gebouw') : $t('Wijzig gebouw'));
+const title = computed(() => props.isNew ? $t('Nieuw lokaal') : $t('Wijzig lokaal'));
 const errors = useErrors();
 const platform$ = usePlatform();
 
@@ -221,7 +221,7 @@ function updatePremiseTypeWarnings() {
 }
 
 async function deleteMe() {
-    await doDelete('Ben je zeker dat je dit gebouw wil verwijderen?');
+    await doDelete('Ben je zeker dat je dit lokaal wil verwijderen?');
 }
 
 defineExpose({

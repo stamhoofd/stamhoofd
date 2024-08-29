@@ -57,7 +57,7 @@ const color = computed(() => {
 })
 
 enum Routes {
-    Premises = 'gebouwen',
+    Premises = 'lokalen',
     Groups = 'leeftijdsgroepen',
     Responsibilities = 'functies',
     Companies = 'companies',

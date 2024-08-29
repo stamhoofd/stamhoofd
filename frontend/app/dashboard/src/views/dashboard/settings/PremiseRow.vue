@@ -38,7 +38,7 @@ const platformPremiseTypes = computed(() => platform.value.config.premiseTypes ?
 const premiseTypesString = computed(() => {
     const premiseTypeIds = props.premise.premiseTypeIds;
 
-    if(!premiseTypeIds.length) return 'Gebouw';
+    if(!premiseTypeIds.length) return 'Lokaal';
 
     const allTypes = platformPremiseTypes.value;
     

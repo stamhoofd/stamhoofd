@@ -22,7 +22,7 @@
                 v-model="description"
                 class="input"
                 type="text"
-                :placeholder="$t('Optioneel. Geef een beschrijving van dit soort gebouw.')"
+                :placeholder="$t('Optioneel. Geef een beschrijving van dit soort lokaal.')"
                 autocomplete=""
             />
         </STInputBox>
@@ -30,7 +30,7 @@
         <hr>
         <h2>{{ $t('Limieten') }}</h2>
 
-        <p class="style-description-small">Stel optioneel limieten voor het aantal gebouwen van deze soort per groep in.</p>
+        <p class="style-description-small">Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.</p>
 
         <div class="split-inputs">
             <STInputBox :title="$t('Minimum aantal')" error-fields="minimumDays" :error-box="errors.errorBox">
@@ -64,7 +64,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformPremiseType>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
-const title = computed(() => props.isNew ? $t('Nieuw soort gebouw') : $t('Wijzig soort gebouw'));
+const title = computed(() => props.isNew ? $t('Nieuw type lokaal') : $t('Wijzig type lokaal'));
 const pop = usePop();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
@@ -92,7 +92,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je dit soort gebouw wilt verwijderen?'), $t('Verwijderen'), $t('Dit kan nare gevolgen hebben als er al gebouwen van dit type zijn'))) {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je dit lokaaltype wilt verwijderen?'), $t('Verwijderen'), $t('Dit kan nare gevolgen hebben als er al lokalen van dit type zijn'))) {
         return
     }
         

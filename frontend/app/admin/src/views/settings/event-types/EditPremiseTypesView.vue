@@ -15,7 +15,7 @@
         <p>
             <button class="button text" type="button" @click="addType">
                 <span class="icon add" />
-                <span>{{ $t('Nieuw soort gebouw') }}</span>
+                <span>{{ $t('Nieuw soort lokaal') }}</span>
             </button>
         </p>
     </SaveView>
@@ -45,7 +45,7 @@ const draggableTypes = useDraggableArray(() => types.value, addArrayPatch)
 
 const saving = ref(false);
 
-const title = $t('Soorten gebouwen')
+const title = $t('Soorten lokalen')
 
 async function addType() {
     const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray()

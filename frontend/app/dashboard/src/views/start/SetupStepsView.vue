@@ -10,7 +10,7 @@
             <div v-else class="container">
                 <hr>
                 <h2>Breng Ravot in orde</h2>
-                <p>Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken.</p>
+                <p>Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken. <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">Meer info</a></p>
                 <STList :with-animation="true">
                     <SetupStepRow v-for="{step, type} in $stepsByPriority" :key="type" :type="type" :step="step" />
                 </STList>

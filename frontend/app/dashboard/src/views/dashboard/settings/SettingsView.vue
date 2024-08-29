@@ -98,10 +98,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Gebouwen
+                        Lokalen
                     </h2>
                     <p class="style-description">
-                        Beheer de gebouwen
+                        Beheer jouw (verzekerde) lokalen
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -346,7 +346,7 @@ enum Routes {
     Packages = 'pakketten',
     Referrals = 'referrals',
     Labs = 'experimenten',
-    Premises = 'gebouwen',
+    Premises = 'lokalen',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';

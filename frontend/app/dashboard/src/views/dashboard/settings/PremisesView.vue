@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
         <p class="style-description-block">
-            {{ isReview ? 'Kijk alle gebouwen na. Klik op een gebouw om deze te bewerken. De gebouwen die je hier registreert zijn verzekerd via de brandpolis van KSA' : 'De gebouwen die je hier registreert zijn verzekerd via de brandpolis van KSA' }}
+            {{ isReview ? 'Kijk alle lokalen na. Klik op een lokaal om deze te bewerken. De lokalen die je hier registreert zijn verzekerd via de brandpolis van KSA' : 'De lokalen die je hier registreert zijn verzekerd via de brandpolis van KSA' }}
         </p>
 
         <div v-if="isReview" class="container">
@@ -17,7 +17,7 @@
         <p v-for="warning of premiseLimitationWarnings" :key="warning.id" class="warning-box">{{ warning.message }}</p>
 
         <template v-if="!draggablePremises.length">
-            <p class="info-box">Er zijn nog geen gebouwen.</p>
+            <p class="info-box">Er zijn nog geen lokalen toegevoegd</p>
         </template>
 
         <STList v-model="draggablePremises" :draggable="true">
@@ -29,7 +29,7 @@
         <p>
             <button class="button text" type="button" @click="addPremise">
                 <span class="icon add" />
-                <span>{{ $t('Nieuw gebouw') }}</span>
+                <span>{{ $t('Nieuw lokaal') }}</span>
             </button>
         </p>
     </SaveView>
@@ -60,7 +60,7 @@ const pop = usePop();
 const originalPremises = computed(() => organizationManager$.value.organization.privateMeta?.premises ?? []);
 const {patched: premises, patch, addArrayPatch, hasChanges} = usePatchArray(originalPremises);
 
-const title = 'Gebouwen';
+const title = 'Lokalen';
 const hasSomeChanges = computed(() => {
     if(props.isReview) {
         return hasChanges.value || $hasReviewChanges.value;
@@ -144,11 +144,11 @@ function updatePremiseLimitationWarnings() {
 
         if(max !== null && count > max) {
             const countDiff = count - max;
-            const message = `Verwijder ${countDiff} ${countDiff === 1 ? 'gebouw' : 'gebouwen'} van soort "${name}".`;
+            const message = `Verwijder ${countDiff} ${countDiff === 1 ? 'lokaal' : 'lokalen'} van soort "${name}".`;
             warnings.push({id, message});
         } else if(min !== null && count < min) {
             const countDiff = min - count;
-            const message = `Voeg ${countDiff} ${countDiff === 1 ? 'gebouw' : 'gebouwen'} van soort "${name}" toe.`;
+            const message = `Voeg ${countDiff} ${countDiff === 1 ? 'lokaal' : 'lokalen'} van soort "${name}" toe.`;
             warnings.push({id, message});
         }
     }
