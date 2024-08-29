@@ -83,6 +83,8 @@ export enum EmailTemplateType {
     ForgotPassword = "ForgotPassword",
     VerifyEmail = "VerifyEmail",
     VerifyEmailWithoutCode = "VerifyEmailWithoutCode",
+    AdminInvitation = 'AdminInvitation',
+    AdminInvitationNewUser = 'AdminInvitationNewUser',
 
     DeleteAccountConfirmation = "DeleteAccountConfirmation",
 }
@@ -198,6 +200,8 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DeleteAccountConfirmation: return 'Bevestiging account verwijderen'
             case EmailTemplateType.VerifyEmail: return 'Verifieer e-mailadres'
             case EmailTemplateType.VerifyEmailWithoutCode: return "Verifieer e-mailadres zonder code"
+            case EmailTemplateType.AdminInvitation: return 'Uitnodiging beheerder: bestaande gebruiker'
+            case EmailTemplateType.AdminInvitationNewUser: return 'Uitnodiging beheerder: nieuwe gebruiker'
         }
     }
 
@@ -251,6 +255,8 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DeleteAccountConfirmation: return 'De e-mail als bevestiging als iemand aanvraagt om hun account te verwijderen.'
             case EmailTemplateType.VerifyEmail: return 'De e-mail die wordt verzonden om het e-mailadres te bevestigen als iemand een account aanmaakt.'
             case EmailTemplateType.VerifyEmailWithoutCode: return 'De e-mail die wordt verzonden naar de gebruiker om het e-mailadres te bevestigen als een beheerder dit wijzigt. Deze e-mail bevat geen bevestigingscode.'
+            case EmailTemplateType.AdminInvitation: return 'De e-mail die een bestaande gebruiker ontvangt als hij toegevoegd wordt als beheerder.'
+            case EmailTemplateType.AdminInvitationNewUser: return 'De e-mail die iemand zonder account ontvangt als hij toegevoegd wordt als beheerder.'
         }
 
         return null
@@ -294,6 +300,7 @@ export class EmailTemplate extends AutoEncoder {
 
         if (type === EmailTemplateType.ForgotPassword) {
             return [
+                "greeting",
                 "firstName",
                 "lastName",
                 "email",
@@ -320,8 +327,32 @@ export class EmailTemplate extends AutoEncoder {
             ]
         }
 
+        if(type === EmailTemplateType.AdminInvitation) {
+            return [
+                "greeting",
+                "email",
+                "platformOrOrganizationName",
+                "inviterName",
+                "validUntil",
+                "signInUrl",
+                "resetUrl"
+            ]
+        }
+
+        if(type === EmailTemplateType.AdminInvitationNewUser) {
+            return [
+                "greeting",
+                "email",
+                "platformOrOrganizationName",
+                "inviterName",
+                "validUntil",
+                "resetUrl"
+            ]
+        }
+
         if (type === EmailTemplateType.ExcelExportSucceeded) {
             return [
+                "greeting",
                 "firstName",
                 "lastName",
                 "downloadUrl"
@@ -330,6 +361,7 @@ export class EmailTemplate extends AutoEncoder {
 
         if (type === EmailTemplateType.ExcelExportFailed) {
             return [
+                "greeting",
                 "firstName",
                 "lastName"
             ];
@@ -337,6 +369,7 @@ export class EmailTemplate extends AutoEncoder {
 
         if (type === EmailTemplateType.RegistrationConfirmation) {
             return [
+                "greeting",
                 "firstName",
                 "lastName",
                 "firstNameMember",
@@ -359,6 +392,7 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.OrganizationValidDNS
         ].includes(type)) {
             return [
+                "greeting",
                 "firstName",
                 "lastName",
                 "email",
@@ -394,6 +428,7 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.SingleWebshopExpirationReminder
         ].includes(type)) {
             return [
+                "greeting",
                 "firstName",
                 "organizationName",
                 "packageName",
@@ -424,6 +459,7 @@ export class EmailTemplate extends AutoEncoder {
 
         if (type !== EmailTemplateType.OrderNotification) {
             sharedReplacements.push(
+                "greeting",
                 "firstName",
                 "lastName"
             )

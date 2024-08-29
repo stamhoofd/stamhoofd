@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder, EmailDecoder,field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 export class EmailInformation extends AutoEncoder {
@@ -78,6 +78,10 @@ export class Recipient extends AutoEncoder {
                 token: 'email',
                 value: this.email
             }),
+            Replacement.create({
+                token: 'greeting',
+                value: this.firstName ? `Dag ${this.firstName},` : 'Hallo!'
+            })
         ]
     }
 

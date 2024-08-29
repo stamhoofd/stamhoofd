@@ -249,18 +249,15 @@ export class EmailVerificationCode extends Model {
         const name = organization?.name ?? (await Platform.getSharedPrivateStruct()).config.name;
 
         const replacements: Replacement[] = [
-        Replacement.create({
-            token: 'greeting',
-            value: user.firstName ? `Dag ${user.firstName},` : 'Hallo!'
-        }),
-        Replacement.create({
-            token: 'organizationName',
-            value: name
-        }),
-        Replacement.create({
-            token: 'confirmEmailUrl',
-            value: url
-        })]
+            Replacement.create({
+                token: 'organizationName',
+                value: name
+            }),
+            Replacement.create({
+                token: 'confirmEmailUrl',
+                value: url
+            })
+        ]
 
         if (withCode) {
             const formattedCode = this.code.substr(0, 3)+" "+this.code.substr(3)

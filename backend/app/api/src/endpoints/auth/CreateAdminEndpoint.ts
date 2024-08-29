@@ -1,13 +1,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Email } from '@stamhoofd/email';
-import { PasswordToken, User } from '@stamhoofd/models';
-import { User as UserStruct,UserPermissions, UserWithMembers } from "@stamhoofd/structures";
+import { PasswordToken, sendEmailTemplate, User } from '@stamhoofd/models';
+import { EmailTemplateType, Recipient, Replacement, UserPermissions, User as UserStruct, UserWithMembers } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
-import { Context } from '../../helpers/Context';
 import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures';
+import { Context } from '../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = UserStruct
@@ -95,11 +94,6 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         await admin.save();
 
-        const { from, replyTo } = {
-            from: organization ? organization.getDefaultFrom(request.i18n) : Email.getInternalEmailFor(request.i18n),
-            replyTo: undefined
-        }
-
         // Create a password token that is valid for 7 days
         const validUntil = new Date();
         validUntil.setTime(validUntil.getTime() + 7 * 24 * 3600 * 1000);
@@ -110,28 +104,46 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const name = organization?.name ?? request.i18n.t("shared.platformName")
         const what = organization ? `de vereniging ${name} op ${request.i18n.t("shared.platformName")}` : `${request.i18n.t("shared.platformName")}`
 
-        if (admin.hasAccount()) {
-            const url = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+request.i18n.locale;
+        const emailTo = admin.getEmailTo();
+        const email: string = typeof emailTo === 'string' ? emailTo : emailTo[0]?.email;
 
-            Email.send({
-                from,
-                replyTo,
-                to: admin.getEmailTo(),
-                subject: "✉️ Beheerder van "+name,
-                type: "transactional",
-                text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je toegevoegd als beheerder van ${what}. Je kan inloggen met je bestaande account (${admin.email}) door te surfen naar:\n${url}\n\nDaar kan je jouw vereniging zoeken en aanklikken.\n\n----\n\nWeet je jouw wachtwoord niet meer? Dan kan je een nieuw wachtwoord instellen via de onderstaande link:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+request.i18n.t("shared.platformName")+"\n"
-            });
-        } else {
-            // Send email
-            Email.send({
-                from,
-                replyTo,
-                to: admin.getEmailTo(),
-                subject: "✉️ Uitnodiging beheerder van "+name,
-                type: "transactional",
-                text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je uitgenodigd om beheerder te worden van ${what}. Je kan een account aanmaken door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+request.i18n.t("shared.platformName")+"\n"
-            });
-        }
+        await sendEmailTemplate(organization, {
+            recipients: [
+                Recipient.create({
+                    email,
+                    replacements: [
+                        Replacement.create({
+                            token: 'greeting',
+                            value: admin.firstName ? `Dag ${admin.firstName},` : 'Hallo!'
+                        }),
+                        Replacement.create({
+                            token: 'resetUrl',
+                            value: recoveryUrl
+                        }),
+                        Replacement.create({
+                            token: 'platformOrOrganizationName',
+                            value: what
+                        }),
+                        Replacement.create({
+                            token: 'inviterName',
+                            value: user.firstName ?? 'Iemand'
+                        }),
+                        Replacement.create({
+                            token: 'validUntil',
+                            value: dateTime
+                        }),
+                        Replacement.create({
+                            token: 'email',
+                            value: admin.email
+                        })
+                    ]
+                })
+            ],
+            template: {
+                type: admin.hasAccount() ? EmailTemplateType.AdminInvitation : EmailTemplateType.AdminInvitationNewUser
+            },
+            type: 'transactional'
+        });
 
         return new Response(
             await AuthenticatedStructures.userWithMembers(admin)

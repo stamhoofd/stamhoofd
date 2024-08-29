@@ -80,8 +80,7 @@ export class EditorSmartButton extends AutoEncoder {
             id: "confirmEmailUrl",
             name: "Knop om e-mailadres te bevestigen",
             text: "Bevestig e-mailadres",
-            hint: "Met deze knop kan de ontvanger het e-mailadres bevestigen.",
-            type: 'inline'
+            hint: "Met deze knop kan de ontvanger het e-mailadres bevestigen."
         }))
 
         // Remove all smart variables that are not set in the recipients

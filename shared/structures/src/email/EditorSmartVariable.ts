@@ -147,6 +147,16 @@ export class EditorSmartVariable extends AutoEncoder {
                 deleteMessage: "Je kan de achternaam van een lid enkel gebruiken als je één e-mail per lid verstuurt."
             }),
             EditorSmartVariable.create({
+                id: "inviterName", 
+                name: "Naam van uitnodiger", 
+                example: "Iemand",
+            }),
+            EditorSmartVariable.create({
+                id: "platformOrOrganizationName", 
+                name: "Naam van de vereniging of van het platform", 
+                example: "Demovereniging",
+            }),
+            EditorSmartVariable.create({
                 id: "greeting", 
                 name: "Begroeting", 
                 example: "Dag John,",
