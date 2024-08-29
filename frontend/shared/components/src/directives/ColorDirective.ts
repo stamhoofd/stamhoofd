@@ -15,7 +15,6 @@ export const ColorDirective: ObjectDirective<HTMLElement> = {
         }
 
         const hue = Formatter.stringToNumber(id, 360);
-        console.log('hue', hue)
         const color = Colors.hslToHex({
             h: hue,
             s: 100,
