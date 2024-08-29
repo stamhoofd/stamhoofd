@@ -2,7 +2,7 @@
     <LoadingView v-if="$isLoading" />
     <ReviewSetupStepView v-else :type="SetupStepType.Responsibilities">
         <template #top>
-            <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen ga je naar het tabblad "Leden". Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen. </p>
+            <p>Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen zorg je er eerst voor dat de persoon is ingeschreven in Ravot, daarna kan je functies toekennen door het lid open te klikken in het tabblad 'Leden'. Daar kan je met de rechtermuisknop op een lid klikken en "Functies bewerken" kiezen.</p>
         </template>
 
         <p v-if="!$organizationBasedResponsibilities.length" class="info-box">

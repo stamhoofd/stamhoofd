@@ -1,5 +1,5 @@
 <template>
-    <div class="hover-box container" v-if="hasResponsibilities">
+    <div v-if="hasResponsibilities" class="hover-box container">
         <hr>
         <h2 class="style-with-button">
             <div>Functies</div>
@@ -8,10 +8,17 @@
             </div>
         </h2>
 
-        <STList>
+        <button v-if="sortedResponsibilities.length === 0" class="info-box selectable with-button" type="button" @click="editResponsibilities">
+            {{ props.member.patchedMember.details.firstName }} heeft geen functies
+
+            <span class="button text">
+                Bewerken
+            </span>
+        </button>
+
+        <STList v-else>
             <ViewMemberResponsibilityRow v-for="responsibility in sortedResponsibilities" :key="responsibility.id" :member="member" :responsibility="responsibility" />
         </STList>
-
     </div>
 </template>
 
