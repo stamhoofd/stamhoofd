@@ -18,10 +18,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({})
-export default class STErrorBox extends Vue {
+export default class STErrorBox extends VueComponent {
     beforeEnter(el: HTMLElement) {
         el.style.opacity = "0";
     }

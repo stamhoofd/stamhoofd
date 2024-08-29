@@ -10,7 +10,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
-import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -28,7 +28,7 @@ import PrerenderRedirectView from './views/errors/PrerenderRedirectView.vue';
         ToastBox
     },
 })
-export default class App extends Vue {
+export default class App extends VueComponent {
     root = new ComponentWithProperties(PromiseView, {
         promise: async () => {
             // get organization

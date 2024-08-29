@@ -18,14 +18,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     emits: {
         'update:modelValue': (_value: string) => true
     }
 })
-export default class PrefixInput extends Vue {
+export default class PrefixInput extends VueComponent {
     valid = true;
 
     /** Price in cents */

@@ -27,10 +27,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component
-export default class Slider extends Vue {
+export default class Slider extends VueComponent {
     @Prop({ type: Number, default: 0 })
     min!: number
 

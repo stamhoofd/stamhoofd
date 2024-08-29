@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import { Editor } from '@tiptap/vue-3'
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 import { default as TooltipDirective } from '../directives/Tooltip';
 
@@ -30,7 +30,7 @@ import { default as TooltipDirective } from '../directives/Tooltip';
         tooltip: TooltipDirective
     }
 })
-export default class TextStyleButtonsView extends Vue {
+export default class TextStyleButtonsView extends VueComponent {
     @Prop({ required: true })
     editor: Editor;
 

@@ -28,7 +28,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { AddressInput,ErrorBox, Radio,STErrorsDefault, STInputBox, STList,STListItem,Validator } from "@stamhoofd/components"
 import { ProductDateRange } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import ProductDateRangeInput from "./ProductDateRangeInput.vue"
 
@@ -43,7 +43,7 @@ import ProductDateRangeInput from "./ProductDateRangeInput.vue"
         ProductDateRangeInput
     }
 })
-export default class ProductSelectDateRangeInput extends Vue {
+export default class ProductSelectDateRangeInput extends VueComponent {
     @Prop({ default: "" }) 
         title: string;
 

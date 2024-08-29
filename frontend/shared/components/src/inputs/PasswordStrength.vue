@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import STInputBox from "./STInputBox.vue";
 
@@ -41,7 +41,7 @@ import STInputBox from "./STInputBox.vue";
         STInputBox
     }
 })
-export default class PasswordStrength extends Vue {
+export default class PasswordStrength extends VueComponent {
     @Prop({ default: null })
         modelValue!: string | null
 

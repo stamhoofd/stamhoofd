@@ -120,7 +120,7 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, Dropdown, ErrorBox, IBANInput, LoadingView, PermyriadInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from "@stamhoofd/structures";
@@ -144,7 +144,7 @@ import { Formatter, Sorter } from "@stamhoofd/utility";
         price: Formatter.price.bind(Formatter)
     }
 })
-export default class EditPaymentMethodsBox extends Vue {
+export default class EditPaymentMethodsBox extends VueComponent {
     @Prop({ required: true })
         type: 'registration'|'webshop'
 

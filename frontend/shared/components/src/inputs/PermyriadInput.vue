@@ -27,10 +27,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 @Component
-export default class PermyriadInput extends Vue {
+export default class PermyriadInput extends VueComponent {
     /** in per ten thousands */
     @Prop({ default: 0 })
         min!: number | null

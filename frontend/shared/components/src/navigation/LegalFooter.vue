@@ -48,7 +48,7 @@
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { Organization, Webshop, WebshopTicketType } from "@stamhoofd/structures";
 
 import Logo from "../icons/Logo.vue";
@@ -59,7 +59,7 @@ import { CenteredMessage } from "../overlays/CenteredMessage";
         Logo
     }
 })
-export default class LegalFooter extends Vue {
+export default class LegalFooter extends VueComponent {
     @Prop({ required: true })
         organization!: Organization;
 

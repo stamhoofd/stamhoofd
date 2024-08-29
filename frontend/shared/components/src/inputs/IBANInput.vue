@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import {ErrorBox} from "../errors/ErrorBox";
 import {Validator} from "../errors/Validator";
@@ -17,7 +17,7 @@ import STInputBox from "./STInputBox.vue";
         STInputBox
     }
 })
-export default class IBANInput extends Vue {
+export default class IBANInput extends VueComponent {
     @Prop({ default: "" }) 
         title: string;
 

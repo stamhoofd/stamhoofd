@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { DataValidator } from "@stamhoofd/utility";
 
 import {ErrorBox} from "../errors/ErrorBox";
@@ -25,7 +25,7 @@ import STInputBox from "./STInputBox.vue";
     // All attributes that we don't recognize should be passed to the input, and not to the root (except style and class)
     inheritAttrs: false
 })
-export default class EmailInput extends Vue {
+export default class EmailInput extends VueComponent {
     @Prop({ default: "" }) 
         title: string;
 

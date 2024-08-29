@@ -16,11 +16,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component
-export default class StepsHeader extends Vue {
+export default class StepsHeader extends VueComponent {
     scrolled = false;
 
     @Prop()

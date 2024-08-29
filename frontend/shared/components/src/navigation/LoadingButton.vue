@@ -9,14 +9,14 @@
 
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import Spinner from "../Spinner.vue";
 
 @Component({
     components: {Spinner}
 })
-export default class LoadingButton extends Vue {
+export default class LoadingButton extends VueComponent {
     @Prop({ default: false, type: Boolean })
     loading!: boolean;
 

@@ -19,7 +19,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { DateSelection, ErrorBox, STInputBox, TimeInput, Validator } from "@stamhoofd/components"
 import { ProductDateRange} from "@stamhoofd/structures"
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {
@@ -28,7 +28,7 @@ import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/clas
         TimeInput
     }
 })
-export default class ProductDateRangeInput extends Vue {
+export default class ProductDateRangeInput extends VueComponent {
     /**
      * Assign a validator if you want to offload the validation to components
      */

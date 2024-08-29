@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { Address, ValidatedAddress } from "@stamhoofd/structures";
 
 import { ErrorBox } from "../errors/ErrorBox";
@@ -51,7 +51,7 @@ import STInputBox from "./STInputBox.vue";
     },
     emits: ['update:modelValue', 'modify'],
 })
-export default class SelectionAddressInput extends Vue {
+export default class SelectionAddressInput extends VueComponent {
     @Prop({ default: null }) 
         title: string|null
 

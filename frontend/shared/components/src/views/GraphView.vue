@@ -30,7 +30,7 @@ import {
     LineController,
     LineElement, PointElement, Tooltip
 } from 'chart.js';
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { DateOption } from "./DateRange";
 import GraphDateRangeSelector from "./GraphDateRangeSelector.vue";
@@ -43,7 +43,7 @@ import { GraphViewConfiguration } from "./GraphViewConfiguration";
         Spinner
     }
 })
-export default class GraphView extends  Vue {
+export default class GraphView extends VueComponent {
     @Prop({ required: true }) 
     configurations!: GraphViewConfiguration[][]
 

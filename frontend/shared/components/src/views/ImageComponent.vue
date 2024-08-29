@@ -23,12 +23,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from '@simonbackx/vue-app-navigation/classes';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { DarkMode, Image } from '@stamhoofd/structures';
 
 
 @Component({})
-export default class ImageComponent extends Vue {
+export default class ImageComponent extends VueComponent {
     @Prop({ default: '' })
         alt: string
 

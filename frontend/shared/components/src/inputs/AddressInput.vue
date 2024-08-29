@@ -22,7 +22,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Address, Country, CountryHelper, ValidatedAddress } from "@stamhoofd/structures";
 
@@ -38,7 +38,7 @@ import STInputBox from './STInputBox.vue';
     },
     emits: ["update:modelValue"]
 })
-export default class AddressInput extends Vue {
+export default class AddressInput extends VueComponent {
     @Prop({ default: "" }) 
         title: string;
 

@@ -34,7 +34,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from "../errors/STErrorsDefault.vue"

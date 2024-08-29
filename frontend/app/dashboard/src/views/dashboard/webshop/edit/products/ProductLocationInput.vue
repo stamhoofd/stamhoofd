@@ -11,7 +11,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AddressInput,ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Address, ProductLocation} from "@stamhoofd/structures"
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {
@@ -19,7 +19,7 @@ import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
         AddressInput
     }
 })
-export default class ProductLocationInput extends Vue {
+export default class ProductLocationInput extends VueComponent {
     /**
      * Assign a validator if you want to offload the validation to components
      */

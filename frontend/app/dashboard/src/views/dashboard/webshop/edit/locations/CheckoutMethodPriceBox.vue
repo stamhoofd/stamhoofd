@@ -23,7 +23,7 @@
 <script lang="ts">
 import { Checkbox, ErrorBox, PriceInput, STInputBox } from "@stamhoofd/components";
 import { CheckoutMethodPrice } from "@stamhoofd/structures";
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {
@@ -32,7 +32,7 @@ import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
         Checkbox
     },
 })
-export default class CheckoutMethodPriceBox extends Vue {
+export default class CheckoutMethodPriceBox extends VueComponent {
     @Prop({})
     checkoutMethodPrice: CheckoutMethodPrice
     

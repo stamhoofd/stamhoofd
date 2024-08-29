@@ -22,12 +22,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     emits: ['update:modelValue', 'complete']
 })
-export default class CodeInput extends Vue {
+export default class CodeInput extends VueComponent {
     valid = true;
 
     @Prop({ default: "" })

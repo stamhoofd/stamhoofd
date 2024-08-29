@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
-import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 import { Toast } from "./Toast"
 import ToastView from './ToastView.vue';
@@ -28,7 +28,7 @@ import ToastView from './ToastView.vue';
         ComponentWithPropertiesInstance
     }
 })
-export default class ToastBox extends Vue {
+export default class ToastBox extends VueComponent {
     components: ComponentWithProperties[] = []
     lastOffset = false
 

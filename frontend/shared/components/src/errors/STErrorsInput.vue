@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { ErrorBox } from "./ErrorBox"
 import STErrorBox from "./STErrorBox.vue"
@@ -23,7 +23,7 @@ import STErrorBox from "./STErrorBox.vue"
         STErrorBox
     }
 })
-export default class STErrorsInput extends Vue {
+export default class STErrorsInput extends VueComponent {
     @Prop({ default: "" }) errorFields: string;
     @Prop({ default: null }) errorBox: ErrorBox | null;
     errors: SimpleError[] = [];

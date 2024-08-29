@@ -27,12 +27,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     emits: ['update:modelValue']
 })
-export default class AgeInput extends Vue {
+export default class AgeInput extends VueComponent {
     @Prop({ default: 0 })
         min!: number
 

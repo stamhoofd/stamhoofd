@@ -16,7 +16,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationBar } from "@stamhoofd/components"
-import { Component, Prop,Ref,Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop,Ref, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 import StepsHeader from "./StepsHeader.vue";
 
@@ -27,7 +27,7 @@ import StepsHeader from "./StepsHeader.vue";
         STNavigationBar
     },
 })
-export default class Steps extends Vue {
+export default class Steps extends VueComponent {
     step = 0;
 
     canPop = false

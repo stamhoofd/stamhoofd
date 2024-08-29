@@ -36,7 +36,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, LoadingButton, STInputBox, STList, STListItem } from '@stamhoofd/components';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop, Vue } from '@simonbackx/vue-app-navigation/classes';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
@@ -46,7 +46,7 @@ import { Component, Prop, Vue } from '@simonbackx/vue-app-navigation/classes';
         STInputBox
     }
 })
-export default class AddDiscountCodeBox extends Vue {
+export default class AddDiscountCodeBox extends VueComponent {
     @Prop({required: true })
     applyCode: (code: string) => Promise<boolean>
 

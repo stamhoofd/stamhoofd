@@ -8,7 +8,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Country } from "@stamhoofd/structures"
-import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import {ErrorBox} from "../errors/ErrorBox";
 import {Validator} from "../errors/Validator";
@@ -20,7 +20,7 @@ import STInputBox from "./STInputBox.vue";
     },
     emits: ["update:modelValue"]
 })
-export default class PhoneInput extends Vue {
+export default class PhoneInput extends VueComponent {
     @Prop({ default: "" }) 
         title: string;
 

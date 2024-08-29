@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { isReactive } from "vue";
 import { appToUri } from "../context";
 
@@ -34,7 +34,7 @@ import { appToUri } from "../context";
         return this.context;
     }
 })
-export default class ContextProvider extends Vue {
+export default class ContextProvider extends VueComponent {
     @Prop()
         root!: ComponentWithProperties
 

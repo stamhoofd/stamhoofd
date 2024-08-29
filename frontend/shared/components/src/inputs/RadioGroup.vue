@@ -5,10 +5,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component
-export default class RadioGroup extends Vue {}
+export default class RadioGroup extends VueComponent {}
 </script>
 
 <style lang="scss">

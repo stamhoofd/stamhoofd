@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { Organization, Webshop } from "@stamhoofd/structures";
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 import MetaLogo from "../MetaLogo.vue";
 
@@ -13,7 +13,7 @@ import MetaLogo from "../MetaLogo.vue";
         MetaLogo
     }
 })
-export default class OrganizationLogo extends Vue {
+export default class OrganizationLogo extends VueComponent {
     @Prop({ required: true })
         organization!: Organization
 

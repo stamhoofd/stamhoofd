@@ -38,7 +38,7 @@
 
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { RichText } from "@stamhoofd/structures";
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -77,7 +77,7 @@ function escapeHtml(unsafe: string ): string {
     },
     emits: ['update:modelValue']
 })
-export default class WYSIWYGTextInput extends Vue {
+export default class WYSIWYGTextInput extends VueComponent {
     @Prop({ required: true })
         modelValue!: RichText
 

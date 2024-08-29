@@ -9,7 +9,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
-import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -25,7 +25,7 @@ import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue'
         ModalStackComponent
     },
 })
-export default class App extends Vue {
+export default class App extends VueComponent {
     promise = async () => {
         console.log("Fetching organization from domain...")
 

@@ -12,7 +12,7 @@
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsInput from '../errors/STErrorsInput.vue';
@@ -22,7 +22,7 @@ import STErrorsInput from '../errors/STErrorsInput.vue';
         STErrorsInput
     }
 })
-export default class STInputBox extends Vue {
+export default class STInputBox extends VueComponent {
     @Prop({ default: ""}) errorFields: string;
     @Prop({ default: null }) errorBox: ErrorBox | null;
 

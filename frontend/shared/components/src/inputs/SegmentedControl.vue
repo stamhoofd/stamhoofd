@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     props: {
@@ -34,7 +34,7 @@ import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
     },
     emits: ['update:modelValue']
 })
-export default class SegmentedControl extends Vue {
+export default class SegmentedControl extends VueComponent {
     @Prop({ type: Array })
     public items!: any[];
     

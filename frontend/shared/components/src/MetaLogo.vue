@@ -42,11 +42,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { DarkMode, Image, OrganizationMetaData, WebshopMetaData } from "@stamhoofd/structures";
 
 @Component
-export default class OrganizationLogo extends Vue {
+export default class OrganizationLogo extends VueComponent {
     @Prop({ required: true })
         metaData!: OrganizationMetaData | WebshopMetaData
 

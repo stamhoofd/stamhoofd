@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { Country } from '@stamhoofd/structures';
 
 import { ErrorBox } from "../errors/ErrorBox";
@@ -18,7 +18,7 @@ import STInputBox from "./STInputBox.vue";
         STInputBox
     }
 })
-export default class VATNumberInput extends Vue {
+export default class VATNumberInput extends VueComponent {
     @Prop({ required: true }) 
         country!: Country;
     

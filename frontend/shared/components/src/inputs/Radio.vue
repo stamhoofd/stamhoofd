@@ -11,12 +11,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     emits: ["update:modelValue"]
 })
-export default class Radio extends Vue {
+export default class Radio extends VueComponent {
     @Prop({ default: "", type: String })
     name!: string;
 

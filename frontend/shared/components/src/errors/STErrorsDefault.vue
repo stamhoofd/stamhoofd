@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { ErrorBox } from "./ErrorBox"
 import STErrorBox from "./STErrorBox.vue"
@@ -21,7 +21,7 @@ import { Ref, unref } from 'vue';
         STErrorBox
     }
 })
-export default class STErrorsDefault extends Vue {
+export default class STErrorsDefault extends VueComponent {
     @Prop() 
         errorBox!: ErrorBox | Ref<ErrorBox> | null;
     

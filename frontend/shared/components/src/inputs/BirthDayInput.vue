@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { Formatter } from "@stamhoofd/utility"
 
 import {ErrorBox} from "../errors/ErrorBox";
@@ -53,7 +53,7 @@ import STInputBox from "./STInputBox.vue";
     },
     emits: ['update:modelValue']
 })
-export default class BirthDayInput extends Vue {
+export default class BirthDayInput extends VueComponent {
     @Prop({ default: "" }) 
         title: string;
 
