@@ -164,7 +164,7 @@ export class MemberUserSyncerStatic {
         let user = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase()) ?? await User.getForAuthentication(member.organizationId, email, {allowWithoutAccount: true})
 
         if (user) {
-            console.log("Giving an existing user access to a member: " + user.id + ' - ' + member.id)
+            //console.log("Giving an existing user access to a member: " + user.id + ' - ' + member.id)
             if (!asParent) {
                 if (user.memberId && user.memberId !== member.id) {
                     console.error('Found conflicting user with multiple members', user.id, 'members', user.memberId, 'to', member.id)

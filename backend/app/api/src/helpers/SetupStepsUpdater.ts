@@ -151,9 +151,7 @@ export class SetupStepUpdater {
     ) {
         const setupSteps = organizationRegistrationPeriod.setupSteps;
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         for (const stepType of Object.values(SetupStepType)) {
-            console.log(`[STEP TYPE] ${stepType}`);
             const operation = this.STEP_TYPE_OPERATIONS[stepType];
             await operation(setupSteps, organization, platform);
         }

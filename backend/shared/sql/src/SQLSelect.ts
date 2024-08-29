@@ -124,7 +124,7 @@ export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(E
         const {query, params} = normalizeSQLQuery(this.getSQL())
 
         // when debugging: log all queries
-        console.log(query, params);
+        //console.log(query, params);
         const [rows] = await Database.select(query, params, {nestTables: true});
 
         // Now map aggregated queries to the correct namespace
