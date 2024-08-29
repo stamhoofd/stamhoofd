@@ -1,7 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix,SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, LoginView, ManageEventsView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
-import { PromiseView } from '@stamhoofd/components';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, Country, Organization } from '@stamhoofd/structures';
@@ -38,7 +37,7 @@ export async function loadSessionFromUrl() {
             })
             const organization = response.data
 
-            session = reactive(new SessionContext(organization) as any) as SessionContext;
+            session = new SessionContext(organization)
             await session.loadFromStorage()
             await SessionManager.prepareSessionForUsage(session, false);
         } catch (e) {
@@ -154,7 +153,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
     if (!session.user) {
         // We can't really determine the automatic root view because we are not signed in
         // So return the login view, that will call getScopedAutoRoot again after login
-        const reactiveSession = reactive(session) as SessionContext
+        const reactiveSession = session
         const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
         I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
 
@@ -201,10 +200,9 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
     return getOrganizationSelectionRoot(session)
 }
 
-export async function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+export async function getScopedDashboardRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
-    const reactiveSession = reactive(session) as SessionContext
-    I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
+    I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", reactiveSession?.organization?.address?.country).catch(console.error)
 
     const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
 
@@ -212,7 +210,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
         root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})
     })
 
-    setTitleSuffix(session.organization?.name ?? '');
+    setTitleSuffix(reactiveSession.organization?.name ?? '');
 
     const startTab =  new TabBarItem({
         icon: 'home',
@@ -292,7 +290,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                 name: 'Wat is er nieuw?',
                 badge: whatsNewBadge,
                 action: async function () {
-                    window.open(STAMHOOFD.CHANGELOG_URL![STAMHOOFD.fixedCountry ?? session.organization?.address?.country ?? ''] ?? STAMHOOFD.CHANGELOG_URL![''], '_blank')
+                    window.open(STAMHOOFD.CHANGELOG_URL![STAMHOOFD.fixedCountry ?? reactiveSession.organization?.address?.country ?? ''] ?? STAMHOOFD.CHANGELOG_URL![''], '_blank')
                     whatsNewBadge.value = '';
                     localStorage.setItem("what-is-new", WhatsNewCount.toString());
                 }

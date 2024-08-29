@@ -4,7 +4,7 @@ import { getNonAutoLoginRoot } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
-import { computed, markRaw, reactive } from 'vue';
+import { computed, markRaw } from 'vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 
@@ -13,7 +13,7 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
 }
 
 export async function getScopedAdminRootFromUrl() {
-    const session = reactive(new SessionContext(null) as any) as SessionContext
+    const session = new SessionContext(null)
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
 
@@ -36,9 +36,8 @@ export function getNoPermissionsView() {
     }))
 }
 
-export async function getScopedAdminRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+export async function getScopedAdminRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
-    const reactiveSession = reactive(session as any) as SessionContext
     I18nController.loadDefault(reactiveSession, Country.Belgium, "nl").catch(console.error)
 
     const platformManager = await PlatformManager.createFromCache(reactiveSession, true, true)

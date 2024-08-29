@@ -3,7 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
 import { LoginProviderType, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures'
-import { isReactive } from 'vue'
+import { isReactive, reactive } from 'vue'
 
 import { SessionManager, UrlHelper } from '..'
 import { ContextPermissions } from './ContextPermissions'
@@ -57,6 +57,9 @@ export class SessionContext implements RequestMiddleware {
     constructor(organization: Organization|null) {
         this.organization = organization
         this.usedPlatformStorage = this.organization === null
+
+        // Reactive hack: always force creating reactive SessionContext
+        return reactive(this) as unknown as SessionContext;
     }
 
     disableStorage() {
@@ -549,6 +552,8 @@ export class SessionContext implements RequestMiddleware {
         } else {
             this.user = response.data
         }
+        console.log("Fetched session user")
+
         this._lastFetchedUser = new Date()
 
         if (!isReactive(this.user)) {

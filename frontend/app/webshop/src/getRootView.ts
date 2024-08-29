@@ -27,14 +27,13 @@ export async function getWebshopRootView(session: SessionContext, webshop: Websh
             }))
         });
     }
-    const reactiveSession = reactive(session as any) as SessionContext
-    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
-    const $webshopManager = reactive(new WebshopManager(reactiveSession, webshop) as any) as WebshopManager;
+    const platformManager = await PlatformManager.createFromCache(session, true)
+    const $webshopManager = reactive(new WebshopManager(session, webshop) as any) as WebshopManager;
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
-            $context: reactiveSession,
+            $context: session,
             $platformManager: platformManager,
-            $organizationManager: reactive(new OrganizationManager(reactiveSession)),
+            $organizationManager: reactive(new OrganizationManager(session)),
             $webshopManager,
             $checkoutManager: reactive(new CheckoutManager($webshopManager)),
         }),

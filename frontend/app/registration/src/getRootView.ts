@@ -65,9 +65,8 @@ export async function getScopedRegistrationRootFromUrl() {
 }
 
 export async function getRootView(session: SessionContext, ownDomain = false) {
-    const reactiveSession = reactive(session as any) as SessionContext
-    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
-    await I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country)
+    const platformManager = await PlatformManager.createFromCache(session, true)
+    await I18nController.loadDefault(session, Country.Belgium, "nl", session?.organization?.address?.country)
 
     // Set color
     if (session.organization?.meta.color && ownDomain) {
@@ -83,7 +82,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     })
 
     //const $checkoutManager = new CheckoutManager($memberManager)
-    const $memberManager = reactive(new MemberManager(reactiveSession, platformManager.$platform));
+    const $memberManager = reactive(new MemberManager(session, platformManager.$platform));
     
     const calendarTab = new TabBarItem({
         icon: 'calendar',
@@ -95,12 +94,12 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
-            $context: reactiveSession,
+            $context: session,
             $memberManager,
             $platformManager: platformManager,
             reactive_components: {
                 "tabbar-left": ownDomain ? new ComponentWithProperties(OrganizationLogo, {
-                    organization: reactiveSession.organization
+                    organization: session.organization
                 }) : new ComponentWithProperties(OrganizationSwitcher, {
                     disabled: ownDomain
                 }),
@@ -136,7 +135,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                 })
             ),
             loginRoot: wrapWithModalStack(
-                getNonAutoLoginRoot(reactiveSession)
+                getNonAutoLoginRoot(session)
             )
         })
     });
