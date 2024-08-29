@@ -50,6 +50,9 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     @Prop({ default: "Kies een datum" })
         placeholder!: string
 
+    @Prop({ default: null })
+        time!: {hours: number, minutes: number, seconds: number}|null
+
     hasFocus = false;
     hasFocusUnbounced = false;
 
@@ -107,6 +110,12 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             this.dayText = this.modelValue ? this.modelValue.getDate().toString() : ""
             this.monthText = this.modelValue ? (this.modelValue.getMonth() + 1).toString() : ""
             this.yearText = this.modelValue ? this.modelValue.getFullYear().toString() : ""
+        }
+
+        if (this.modelValue && this.time) {
+            if (this.modelValue.getHours() !== this.time.hours || this.modelValue.getMinutes() !== this.time.minutes || this.modelValue.getSeconds() !== this.time.seconds || this.modelValue.getMilliseconds() !== 0) {
+                this.emitDate(this.modelValue);
+            }
         }
     }
 
@@ -371,7 +380,10 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             return
         }
         const d = new Date(value.getTime())
-        if (this.modelValue) {
+
+        if (this.time) {
+            d.setHours(this.time.hours, this.time.minutes, this.time.seconds, 0)
+        } else if (this.modelValue) {
             d.setHours(this.modelValue.getHours(), this.modelValue.getMinutes(), 0, 0)
         } else {
             d.setHours(12, 0, 0, 0)

@@ -8,11 +8,11 @@
 
         <div class="split-inputs">
             <STInputBox title="Startdatum" error-fields="settings.minAge" :error-box="errors.errorBox">
-                <DateSelection v-model="startDate" />
+                <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
             <STInputBox title="Einddatum" error-fields="settings.maxAge" :error-box="errors.errorBox">
-                <DateSelection v-model="endDate" />
+                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}"/>
             </STInputBox>
         </div>
 

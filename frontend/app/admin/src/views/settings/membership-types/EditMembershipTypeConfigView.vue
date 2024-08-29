@@ -8,11 +8,11 @@
 
         <div class="split-inputs">
             <STInputBox :title="$t('shared.startDate')" error-fields="startDate" :error-box="errors.errorBox">
-                <DateSelection v-model="startDate" />
+                <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
             <STInputBox :title="$t('shared.endDate')" error-fields="endDate" :error-box="errors.errorBox">
-                <DateSelection v-model="endDate" />
+                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}"/>
             </STInputBox>
         </div>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">
@@ -20,7 +20,7 @@
         </p>
 
         <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('admin.settings.membershipTypes.expireDate.title')" error-fields="expireDate" :error-box="errors.errorBox">
-            <DateSelection v-model="expireDate" :required="false" :placeholder="$t('admin.settings.membershipTypes.expireDate.placeholder')" />
+            <DateSelection v-model="expireDate" :required="false" :placeholder="$t('admin.settings.membershipTypes.expireDate.placeholder')" :time="{hours: 23, minutes: 59, seconds: 59}" />
         </STInputBox>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">
             {{ $t('admin.settings.membershipTypes.expireDate.description') }}
