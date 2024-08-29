@@ -17,15 +17,21 @@
             </div>
         </TransitionFade>
     </template>
+    <template v-else>
+        <p v-if="organization$?.period.period.id !== platform.period.id" class="info-box">
+            Jouw groep bevindt zich in een ander werkjaar dan KSA Nationaal.
+        </p>
+    </template>
 </template>
 
 
 <script setup lang="ts">
-import { TransitionFade, useOrganization, useVisibilityChange } from '@stamhoofd/components';
+import { TransitionFade, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { computed, onActivated, ref } from 'vue';
 import SetupStepRow from './SetupStepRow.vue';
 const organization$ = useOrganization();
+const platform = usePlatform();
 const organizationManager = useOrganizationManager();
 
 const $overrideShowSteps = ref(false);
