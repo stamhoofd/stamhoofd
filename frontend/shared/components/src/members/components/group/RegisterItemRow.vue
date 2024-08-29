@@ -9,12 +9,16 @@
 
         <template v-if="showGroup">
             <p class="style-title-prefix-list">
-                {{ item.member.patchedMember.name }}
+                {{ item.organization.name }}
             </p>
 
             <h3 class="style-title-list">
                 {{ item.group.settings.name }}
             </h3>
+
+            <p class="style-description-small">
+                {{ item.member.patchedMember.name }}
+            </p>
         </template>
         <template v-else>
             <h3 class="style-title-list">

@@ -1,10 +1,12 @@
 <template>
     <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? 'Aanpassen' : 'Toevoegen'" :save-icon="isInCart ? 'edit' : 'basket'" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
         <p class="style-title-prefix">
-            {{ item.member.patchedMember.name }}
+            {{ item.organization.name }}
         </p>
 
-        <h1>{{ item.group.settings.name }}</h1>
+        <h1>
+            {{ item.group.settings.name }}
+        </h1>
         <p v-for="registration in item.replaceRegistrations" :key="registration.id" class="style-description">
             <template v-if="registration.group.id !== item.group.id">
                 Verplaatsen vanaf {{ registration.group.settings.name }}
@@ -21,6 +23,7 @@
         </p>
 
         <p v-if="item.group.settings.description" class="style-description-block" v-text="item.group.settings.description" />
+        <p v-else class="style-description-block" v-text="'Schrijf ' +item.member.patchedMember.firstName+ ' hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.' " />
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -95,7 +98,7 @@
 
 <script setup lang="ts">
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
 import { GroupOption, GroupOptionMenu, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -113,6 +116,7 @@ const navigationActions = useNavigationActions()
 const isInCart = computed(() => checkout.value.cart.contains(props.item))
 const pop = usePop()
 const admin = computed(() => checkout.value.isAdminFromSameOrganization)
+const organization = useOrganization();
 
 onMounted(() => {
     errors.errorBox = null
