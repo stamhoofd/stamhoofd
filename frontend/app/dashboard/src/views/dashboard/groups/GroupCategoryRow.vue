@@ -17,7 +17,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, useEmitPatch, usePatchMoveUpDownIds } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, useEmitPatch, usePatchMoveUpDownIds } from '@stamhoofd/components';
 import { GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EditCategoryGroupsView from './EditCategoryGroupsView.vue';
@@ -161,6 +161,21 @@ function deleteMe() {
     }))
 }
 
+function createMergeContextMenuItem(category: GroupCategory, hasGrandParent = true): ContextMenuItem {
+    const name = hasGrandParent ? category.settings.name : 'Hoofdcategorie';
+
+    return new ContextMenuItem({
+        name,
+        disabled: mergeDisabledWith(category),
+        action: async () => {
+            const isConfirm = await CenteredMessage.confirm(`Ben je zeker dat je deze categorie wilt verwijderen en de inhoud verplaatsen naar ${name}?`, "Verwijderen");
+            if(!isConfirm) return;
+            mergeWith(category)
+            return true
+        }
+    });
+}
+
 async function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
@@ -213,31 +228,21 @@ async function showContextMenu(event: MouseEvent) {
                 disabled: props.category.groupIds.length == 0 && props.category.categoryIds.length == 0,
                 childMenu: new ContextMenu([
                     [
-                        new ContextMenuItem({
-                            name: grandParentCategory.value ? parentCategory.value.settings.name : "Hoofdcategorie",
-                            disabled: mergeDisabledWith(parentCategory.value),
-                            action: () => {
-                                mergeWith(parentCategory.value)
-                                return true
-                            }
-                        })
+                        createMergeContextMenuItem(parentCategory.value, !!grandParentCategory.value)
                     ],
-                    subCategories.value.map(cat => 
-                        new ContextMenuItem({
-                            name: cat.settings.name,
-                            disabled: mergeDisabledWith(cat),
-                            action: () => {
-                                mergeWith(cat)
-                                return true
-                            }
-                        })
-                    )
+                    subCategories.value.map(cat => createMergeContextMenuItem(cat))
                 ])
             }),
             new ContextMenuItem({
                 name: "Verwijderen",
                 icon: "trash",
-                action: () => {
+                action: async () => {
+                    const isConfirm = await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen");
+                    
+                    if (!isConfirm) {
+                        return false;
+                    }
+
                     deleteMe();
                     return true;
                 }
