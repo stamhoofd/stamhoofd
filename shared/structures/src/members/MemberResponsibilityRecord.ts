@@ -1,6 +1,7 @@
 import { AutoEncoder, DateDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 import { Group } from "../Group";
+import { type PlatformMember } from "./PlatformMember";
 
 export class MemberResponsibilityRecordBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -32,4 +33,24 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
 export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
     @field({ decoder: Group, nullable: true, version: 328 })
     group: Group|null = null;
+
+    getName(member: PlatformMember, includeOrganization = true) {
+        let allResponsibilities = member.family.platform.config.responsibilities
+
+        let suffix = (this.group ? ' van ' + this.group.settings.name : '')
+
+        if (this.organizationId) {
+            const organization = member.family.getOrganization(this.organizationId);
+            if (organization && organization.privateMeta) {
+                allResponsibilities = [...allResponsibilities, ...organization.privateMeta.responsibilities]
+            }
+
+            if (organization && includeOrganization) {
+                suffix += ' bij '+organization.name
+            }
+        }
+
+        const responsibility = allResponsibilities.find(r => r.id == this.responsibilityId)
+        return (responsibility ? responsibility.name : 'Verwijderde functie') + suffix
+    }
 }

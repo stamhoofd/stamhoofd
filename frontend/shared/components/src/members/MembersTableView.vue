@@ -20,7 +20,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PlatformMember, RegisterItemOption, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PlatformMember, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from "vue";
 import { useMembersObjectFetcher } from "../fetchers/useMembersObjectFetcher";
@@ -208,7 +208,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string[]>({
         name: "Functies", 
         allowSorting: false,
-        getValue: (member) => member.getResponsibilities(organization.value ?? null, true),
+        getValue: (member) => member.getResponsibilities(organization.value ?? null).map(l => l.getName(member, false)),
         format: (list) => {
             if (list.length === 0) {
                 return 'Geen'

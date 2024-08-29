@@ -53,7 +53,7 @@
                         {{ member.patchedMember.users.filter(u => u.memberId === member.id).map(u => u.email).join(', ') }}
                     </p>
                     <p class="style-description-small">
-                        {{ Formatter.joinLast(member.getResponsibilities(organization), ', ', ' en ') }}
+                        {{ Formatter.joinLast(member.getResponsibilities(organization).map(l => l.getName(member, false)), ', ', ' en ') }}
                     </p>
 
                     <template #right>
