@@ -247,7 +247,7 @@ async function switchPeriod(event: MouseEvent) {
                             return false;
                         }
 
-                        if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 62) {
+                        if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 62 && STAMHOOFD.environment !== 'development') {
                             new CenteredMessage('Niet beschikbaar', 'Je kan pas 2 maand voor de start van het nieuwe werkjaar overschakelen.').addCloseButton().show()
                             return false;
                         }
