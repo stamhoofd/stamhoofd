@@ -12,8 +12,8 @@
                 </template>
             </ScrollableSegmentedControl>
 
-            <p v-if="tree.categories.length == 0" class="error-box">
-                {{ member.patchedMember.firstName }} kan je op dit moment niet meer inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
+            <p v-if="tree.categories.length == 0" class="info-box">
+                {{ member.patchedMember.firstName }} kan je op dit moment niet inschrijven bij {{ selectedOrganization.name }}. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
             </p>
 
             <div v-for="(category, index) of tree.categories" :key="category.id" class="container">
