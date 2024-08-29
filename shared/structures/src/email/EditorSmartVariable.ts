@@ -5,7 +5,7 @@ import { Country } from "../addresses/CountryDecoder";
 import { BalanceItem, BalanceItemRelation, BalanceItemRelationType } from "../BalanceItem";
 import { BalanceItemPaymentDetailed } from "../BalanceItemDetailed";
 import { STPackageType, STPackageTypeHelper } from "../billing/STPackage";
-import { Replacement } from "../endpoints/EmailRequest";
+import { Recipient, Replacement } from "../endpoints/EmailRequest";
 import { Payment } from "../members/Payment";
 import { PaymentGeneral } from "../members/PaymentGeneral";
 import { Organization } from "../Organization";
@@ -20,6 +20,7 @@ import { Product, ProductPrice } from "../webshops/Product";
 import { TransferDescriptionType, TransferSettings } from "../webshops/TransferSettings";
 import { WebshopPreview } from "../webshops/Webshop";
 import { WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from "../webshops/WebshopMetaData";
+import { EmailRecipient } from "./Email";
 
 export class EditorSmartVariable extends AutoEncoder {
     @field({ decoder: StringDecoder})
@@ -47,17 +48,19 @@ export class EditorSmartVariable extends AutoEncoder {
         return { type: this.html ? "smartVariableBlock" : "smartVariable", attrs: { id: this.id } }
     }
 
-    static forRecipient(recipient: {replacements: Replacement[]}) {
+    static forRecipient(recipient: EmailRecipient|Recipient) {
+        const replacements = [...recipient.replacements, ...recipient.getDefaultReplacements()]
+
         return this.all.map(v => v.clone()).filter(variable => {
-            const replacement = recipient.replacements.find(r => r.token === variable.id && (r.value.length > 0 || r.html !== undefined))
+            const replacement = replacements.find(r => r.token === variable.id && (r.value.length > 0 || r.html !== undefined))
             if (!replacement) {
                 // Not found
                 return false
             } else {
-                if (replacement.html && (variable.html === undefined || variable.html.length == 0)) {
+                if (replacement.html) {
                     variable.html = replacement.html
                 }
-                if (variable.html === undefined && variable.example.length == 0) {
+                if (variable.html === undefined && replacement.value) {
                     variable.example = replacement.value
                 }
             }

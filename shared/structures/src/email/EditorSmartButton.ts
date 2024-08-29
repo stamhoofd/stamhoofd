@@ -1,5 +1,6 @@
 import { AutoEncoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
-import { Replacement } from "../endpoints/EmailRequest";
+import { Recipient, Replacement } from "../endpoints/EmailRequest";
+import { EmailRecipient } from "./Email";
 
 export class EditorSmartButton extends AutoEncoder {
     @field({ decoder: StringDecoder})
@@ -20,18 +21,21 @@ export class EditorSmartButton extends AutoEncoder {
     @field({ decoder: new EnumDecoder(['block', 'inline']) })
     type: 'block' | 'inline' = 'block'
 
-    static forRecipient(recipient: {replacements: Replacement[]}) {
+    static forRecipient(recipient: EmailRecipient|Recipient) {
+        const replacements = [...recipient.replacements, ...recipient.getDefaultReplacements()]
+
         return this.all.map(v => v.clone()).filter(variable => {
             // Always supported: signInUrl + unsubscribeUrl
             if (variable.id === 'signInUrl' || variable.id === 'unsubscribeUrl') {
                 return true
             }
 
-            const replacement = recipient.replacements.find(r => r.token === variable.id && (r.value.length > 0 || r.html !== undefined))
+            const replacement = replacements.find(r => r.token === variable.id && (r.value.length > 0 || r.html !== undefined))
             if (!replacement) {
                 // Not found
                 return false
             }
+
             return true
         })
     }

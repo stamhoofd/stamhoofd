@@ -2,7 +2,7 @@ import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Enu
 import { v4 as uuidv4 } from "uuid";
 import { EditorSmartButton } from "../email/EditorSmartButton";
 import { EditorSmartVariable } from "../email/EditorSmartVariable";
-import { EmailAttachment, Replacement } from "../endpoints/EmailRequest";
+import { EmailAttachment, Recipient, Replacement } from "../endpoints/EmailRequest";
 import { StamhoofdFilterDecoder } from "../filters/FilteredRequest";
 import { StamhoofdFilter } from "../filters/StamhoofdFilter";
 import { MemberDetails } from "../members/MemberDetails";
@@ -154,12 +154,11 @@ export class EmailRecipient extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date()
+
+    getDefaultReplacements() {
+        return Recipient.create(this).getDefaultReplacements()
+    }
 }
-
-
-
-
-
 
 export class EmailPreview extends Email {
     @field({ decoder: EmailRecipient, nullable: true})

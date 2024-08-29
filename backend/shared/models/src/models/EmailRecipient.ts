@@ -78,4 +78,5 @@ export class EmailRecipient extends Model {
     getStructure() {
         return EmailRecipientStruct.create(this)
     }
+
 }
