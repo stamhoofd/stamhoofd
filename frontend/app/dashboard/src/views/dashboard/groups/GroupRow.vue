@@ -8,6 +8,7 @@
             {{ group.settings.name }}
         </h2>
         <template #right>
+            <button type="button" class="button icon more gray hide-smartphone" @click.stop.prevent="showContextMenu" @contextmenu.stop />
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
@@ -18,7 +19,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { ContextMenu, ContextMenuItem, GroupAvatar, LongPressDirective, STListItem, EditGroupView } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Group, GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
