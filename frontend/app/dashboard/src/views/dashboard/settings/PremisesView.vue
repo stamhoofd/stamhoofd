@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
         <p class="style-description-block">
-            {{ isReview ? 'Kijk alle gebouwen na. Klik op een gebouw om deze te bewerken.' : 'Hier kan je een overzicht van de gebouwen van de groep bijhouden.' }}
+            {{ isReview ? 'Kijk alle gebouwen na. Klik op een gebouw om deze te bewerken. De gebouwen die je hier registreert zijn verzekerd via de brandpolis van KSA' : 'De gebouwen die je hier registreert zijn verzekerd via de brandpolis van KSA' }}
         </p>
 
         <div v-if="isReview" class="container">
