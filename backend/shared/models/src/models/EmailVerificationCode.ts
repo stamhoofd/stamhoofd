@@ -1,10 +1,12 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { I18n } from "@stamhoofd/backend-i18n";
-import { Email } from "@stamhoofd/email";
+import { EmailTemplateType, Recipient, Replacement } from "@stamhoofd/structures";
 import basex from "base-x";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
+import { sendEmailTemplate } from "../helpers/EmailBuilder";
+import { Platform } from "./Platform";
 
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = basex(ALPHABET)
@@ -241,38 +243,58 @@ export class EmailVerificationCode extends Model {
         }
     }
 
-    send(user: import('./User').User, organization: import('./Organization').Organization|null, i18n: I18n, withCode = true) {
-        const { from, replyTo } = {
-            from: (user.organizationPermissions || !organization ? Email.getInternalEmailFor(i18n) : organization.getStrongEmail(i18n)),
-            replyTo: undefined // Don't use replyTo because it affects deliverability rates due to spam filters
-        }
+    async send(user: import('./User').User, organization: import('./Organization').Organization|null, i18n: I18n, withCode = true) {
+        const url = this.getEmailVerificationUrl(user, organization, i18n);
 
-        const url = this.getEmailVerificationUrl(user, organization, i18n)
+        const name = organization?.name ?? (await Platform.getSharedPrivateStruct()).config.name;
 
-        const footer = (!user.organizationPermissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.localizedDomains.marketing()+"/ledenadministratie\n\n" : '')
-        const footerHTML = (!user.organizationPermissions && organization ? "<br><br>—<br><br>Onze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via <a href=\"https://"+i18n.localizedDomains.marketing()+"/ledenadministratie\">Stamhoofd</a><br><br>" : '')
-
-        const name = organization?.name ?? 'Stamhoofd'
+        const replacements: Replacement[] = [
+        Replacement.create({
+            token: 'greeting',
+            value: user.firstName ? `Dag ${user.firstName},` : 'Hallo!'
+        }),
+        Replacement.create({
+            token: 'organizationName',
+            value: name
+        }),
+        Replacement.create({
+            token: 'confirmEmailUrl',
+            value: url
+        })]
 
         if (withCode) {
             const formattedCode = this.code.substr(0, 3)+" "+this.code.substr(3)
-            Email.send({
-                from,
-                replyTo,
-                to: this.email,
-                subject: `[${user.organizationPermissions ? "Stamhoofd" : name}] Verifieer jouw e-mailadres`,
-                type: "transactional",
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.organizationPermissions ? "Stamhoofd" : name}`+footer,
-                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>Dit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.<br><br>${user.organizationPermissions ? "Stamhoofd" : name}`+footerHTML
+
+            await sendEmailTemplate(organization, {
+                recipients: [
+                    Recipient.create({
+                        email: this.email,
+                        replacements: [
+                            ...replacements,
+                            Replacement.create({
+                                token: 'confirmEmailCode',
+                                value: formattedCode
+                            })
+                        ]
+                    })
+                ],
+                template: {
+                    type: EmailTemplateType.VerifyEmail,
+                },
+                type: 'transactional'
             })
         } else {
-            Email.send({
-                from,
-                replyTo,
-                to: this.email,
-                type: "transactional",
-                subject: `[${user.organizationPermissions ? "Stamhoofd" : name}] Verifieer jouw e-mailadres`,
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.organizationPermissions ? "Stamhoofd" : name}`+footer
+            await sendEmailTemplate(organization, {
+                recipients: [
+                    Recipient.create({
+                        email: this.email,
+                        replacements
+                    })
+                ],
+                template: {
+                    type: EmailTemplateType.VerifyEmailWithoutCode,
+                },
+                type: 'transactional'
             })
         }
     }
@@ -305,7 +327,7 @@ export class EmailVerificationCode extends Model {
         if (!user) {
             return
         }
-        verificationCode.send(user, organization, i18n)
+        await verificationCode.send(user, organization, i18n)
     }
 
     /**

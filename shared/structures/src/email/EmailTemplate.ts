@@ -81,6 +81,8 @@ export enum EmailTemplateType {
      */
     ForgotPasswordButNoAccount = "ForgotPasswordButNoAccount",
     ForgotPassword = "ForgotPassword",
+    VerifyEmail = "VerifyEmail",
+    VerifyEmailWithoutCode = "VerifyEmailWithoutCode",
 
     DeleteAccountConfirmation = "DeleteAccountConfirmation",
 }
@@ -194,7 +196,8 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.ForgotPasswordButNoAccount: return 'Wachtwoord vergeten: geen account'
             case EmailTemplateType.ForgotPassword: return 'Wachtwoord vergeten'
             case EmailTemplateType.DeleteAccountConfirmation: return 'Bevestiging account verwijderen'
-
+            case EmailTemplateType.VerifyEmail: return 'Verifieer e-mailadres'
+            case EmailTemplateType.VerifyEmailWithoutCode: return "Verifieer e-mailadres zonder code"
         }
     }
 
@@ -246,7 +249,8 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.ForgotPasswordButNoAccount: return 'Als iemand een wachtwoord probeert te resetten, maar er geen account is met dat e-mailadres'
             case EmailTemplateType.ForgotPassword: return 'De e-mail met een link om je wachtwoord opnieuw in te stellen als je die bent vergeten'
             case EmailTemplateType.DeleteAccountConfirmation: return 'De e-mail als bevestiging als iemand aanvraagt om hun account te verwijderen.'
-
+            case EmailTemplateType.VerifyEmail: return 'De e-mail die wordt verzonden om het e-mailadres te bevestigen als iemand een account aanmaakt.'
+            case EmailTemplateType.VerifyEmailWithoutCode: return 'De e-mail die wordt verzonden naar de gebruiker om het e-mailadres te bevestigen als een beheerder dit wijzigt. Deze e-mail bevat geen bevestigingscode.'
         }
 
         return null
@@ -295,6 +299,25 @@ export class EmailTemplate extends AutoEncoder {
                 "email",
                 "resetUrl"
             ];
+        }
+
+        if(type === EmailTemplateType.VerifyEmail) {
+            return [
+                "greeting",
+                "email",
+                "confirmEmailUrl",
+                "confirmEmailCode",
+                "organizationName"
+            ]
+        }
+
+        if(type === EmailTemplateType.VerifyEmailWithoutCode) {
+            return [
+                "greeting",
+                "email",
+                "confirmEmailUrl",
+                "organizationName"
+            ]
         }
 
         if (type === EmailTemplateType.ExcelExportSucceeded) {

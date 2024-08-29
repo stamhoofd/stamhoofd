@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder, EnumDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { Replacement } from "../endpoints/EmailRequest";
 
 export class EditorSmartButton extends AutoEncoder {
@@ -73,6 +73,14 @@ export class EditorSmartButton extends AutoEncoder {
             name: "Knop om uit te schrijven voor e-mails",
             text: "Uitschrijven",
             hint: "Met deze knop kan de ontvanger zich uitschrijven voor alle e-mails.",
+            type: 'inline'
+        }))
+
+        buttons.push(EditorSmartButton.create({
+            id: "confirmEmailUrl",
+            name: "Knop om e-mailadres te bevestigen",
+            text: "Bevestig e-mailadres",
+            hint: "Met deze knop kan de ontvanger het e-mailadres bevestigen.",
             type: 'inline'
         }))
 

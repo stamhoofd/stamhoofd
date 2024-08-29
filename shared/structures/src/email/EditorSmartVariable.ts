@@ -147,6 +147,11 @@ export class EditorSmartVariable extends AutoEncoder {
                 deleteMessage: "Je kan de achternaam van een lid enkel gebruiken als je één e-mail per lid verstuurt."
             }),
             EditorSmartVariable.create({
+                id: "greeting", 
+                name: "Begroeting", 
+                example: "Dag John,",
+            }),
+            EditorSmartVariable.create({
                 id: "outstandingBalance", 
                 name: "Openstaand bedrag", 
                 example: "", 
@@ -161,6 +166,11 @@ export class EditorSmartVariable extends AutoEncoder {
                 id: "resetUrl", 
                 name: "Voluit link om wachtwoord te herstellen", 
                 example: "https://www.voorbeeld.com/heel-lange-code-waarmee-de-link-beveiligd-wordt", 
+            }),
+            EditorSmartVariable.create({
+                id: "confirmEmailCode", 
+                name: "Code om e-mail te bevestigen",
+                example: "000 000", 
             }),
             EditorSmartVariable.create({
                 id: "loginDetails", 
