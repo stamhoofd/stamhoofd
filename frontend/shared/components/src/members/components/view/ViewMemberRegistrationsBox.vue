@@ -69,7 +69,9 @@ const auth = useAuth();
 const present = usePresent();
 const organization = useOrganization();
 const platform = usePlatform();
-const defaultPeriod = organization.value?.period?.period ?? platform.value.period
+
+// If the organization of this member already moved to the next period, select it by default
+const defaultPeriod = organization.value?.period?.period ?? props.member.filterOrganizations({currentPeriod: true})[0]?.period?.period ?? props.member.filterOrganizations({})[0]?.period?.period ?? platform.value.period
 const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
 const platformManager = usePlatformManager();
 const owner = useRequestOwner();
