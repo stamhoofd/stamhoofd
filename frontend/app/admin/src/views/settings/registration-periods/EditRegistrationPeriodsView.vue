@@ -16,7 +16,7 @@
                 <li>Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.</li>
                 <li>De categorieën en leeftijdsgroepen van de groepen worden gedupliceerd naar het nieuwe werkjaar.</li>
                 <li>De leden moeten zich opnieuw inschrijven voor het nieuwe werkjaar.</li>
-                <li>Alle functies van leden die gekoppeld zijn aan leeftijdsgroepen (leiding) worden beëindigd, andere blijven behouden maar moeten opnieuw nagekeken worden.</li>
+                <li>Alle functies van leden (behalve die met hoofdbeheerder rechten en nationale functies) worden beëindigd</li>
                 <li>Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)</li>
             </ul>
 
