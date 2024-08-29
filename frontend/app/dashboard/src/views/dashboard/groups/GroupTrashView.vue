@@ -43,7 +43,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, STList, STListItem, STNavigationBar, Spinner, Toast } from "@stamhoofd/components";
-import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
+import { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 
@@ -106,6 +106,12 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
     }
 
     async restoreGroup(event, group: Group) {
+        if(this.allCategories.length === 0) {
+            const toast = Toast.error(this.$t("Maak eerst een categorie om deze groep naar terug te zetten."));
+            toast.show();
+            return;
+        }
+
         if (this.allCategories.length == 1) {
             await this.restoreTo(group, this.allCategories[0])
             return

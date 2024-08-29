@@ -1,11 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Group as GroupStruct, GroupPrivateSettings, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version, GroupType } from "@stamhoofd/structures";
+import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from "@stamhoofd/structures";
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from "@simonbackx/simple-encoding";
-import { Context } from "../../../../helpers/Context";
-import { Group, Member, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { Group, Member, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
+import { Context } from "../../../../helpers/Context";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -83,6 +83,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
             if (await Context.auth.hasFullAccess(organization.id)) {
                 if (patch.settings) {
+                    if(patch.settings.categories) {
+                        deleteUnreachable = true;
+                    }
                     organizationPeriod.settings.patchOrPut(patch.settings);
                 }
             } else {
