@@ -26,6 +26,7 @@ export class MemberManager {
             }) as any
         ) as PlatformFamily;
         this.watchCheckout()
+        this.watchUser()
     }
 
     watchUser() {
@@ -130,6 +131,7 @@ export class MemberManager {
     }
 
     async loadMembers() {
+        console.log('MemberManager.loadMembers')
         if (this.$context.user?.members) {
             this.family.insertFromBlob(this.$context.user.members, true)
             return

@@ -1,4 +1,4 @@
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
+import { AutoEncoderPatchType, deepSetArray, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 
 import { AccessRight } from "../AccessRight"
 import { type Group } from "../Group"
@@ -83,7 +83,8 @@ export class PlatformFamily {
         }
 
         if (removeMissing) {
-            this.members = this.members.filter(m => blob.members.find(mb => mb.id === m.id))
+            // Keep same array reference
+            deepSetArray(this.members, this.members.filter(m => blob.members.find(b => b.id === m.id)))
         }
     }
 
