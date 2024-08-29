@@ -97,12 +97,14 @@ declare global {
         readonly SMTP_USERNAME: string,
         readonly SMTP_PASSWORD: string,
         readonly SMTP_PORT: number,
+        readonly SMTP_HEADERS?: Record<string, string>,
 
         // E-mail (transactional e-mails)
         readonly TRANSACTIONAL_SMTP_HOST: string,
         readonly TRANSACTIONAL_SMTP_USERNAME: string,
         readonly TRANSACTIONAL_SMTP_PASSWORD: string,
         readonly TRANSACTIONAL_SMTP_PORT: number,
+        readonly TRANSACTIONAL_SMTP_HEADERS?: Record<string, string>,
         readonly TRANSACTIONAL_WHITELIST?: string[] // E-mails we are allowed to send transactional e-mails from
 
         // Postmark

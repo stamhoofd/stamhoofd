@@ -58,7 +58,8 @@ class EmailStatic {
             auth: {
                 user: STAMHOOFD.SMTP_USERNAME, // generated ethereal user
                 pass: STAMHOOFD.SMTP_PASSWORD // generated ethereal password
-            }
+            },
+            headers: STAMHOOFD.SMTP_HEADERS ?? undefined
         });
         
         // create reusable transporter object using the default SMTP transport
@@ -69,7 +70,8 @@ class EmailStatic {
             auth: {
                 user: STAMHOOFD.TRANSACTIONAL_SMTP_USERNAME, // generated ethereal user
                 pass: STAMHOOFD.TRANSACTIONAL_SMTP_PASSWORD // generated ethereal password
-            }
+            },
+            headers: STAMHOOFD.TRANSACTIONAL_SMTP_HEADERS ?? undefined
         });
 
         // verify connection configuration
