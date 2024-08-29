@@ -4,7 +4,7 @@
             Betaalaccounts
         </h1>
 
-        <p>Koppel betaalaccounts via <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">Stripe</a> of <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">Meer info</a>.</p>
+        <p>Koppel betaalaccounts via <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">Stripe</a> of <a class="inline-link" :href="$domains.getDocs('payconiq')" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">Meer info</a>.</p>
         
         <LoadingView v-if="loadingStripeAccounts" />
         <STErrorsDefault :error-box="errorBox" />
