@@ -10,7 +10,7 @@ export class LocalizedDomains {
     }
 
     static get documentation() {
-        return this.getDomain(STAMHOOFD.domains.marketing ?? STAMHOOFD.domains.marketing);
+        return this.getDomain(STAMHOOFD.domains.documentation ?? STAMHOOFD.domains.marketing);
     }
 
     static getDocs(path: string) {

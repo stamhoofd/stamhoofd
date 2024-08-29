@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix,SplitViewController } from '@simonbackx/vue-app-navigation';
 import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, LoginView, ManageEventsView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { PromiseView } from '@stamhoofd/components';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, Country, Organization } from '@stamhoofd/structures';
 import { computed, markRaw, reactive, ref } from 'vue';
@@ -300,15 +300,17 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
         )
     }
 
-    sharedMoreItems.push(
-        new TabBarItem({
-            icon: 'book',
-            name: 'Documentatie',
-            action: async function () {
-                window.open('https://'+this.$t('shared.domains.marketing')+'/docs', '_blank')
-            }
-        })
-    )
+    if (STAMHOOFD.domains.documentation) {
+        sharedMoreItems.push(
+            new TabBarItem({
+                icon: 'book',
+                name: 'Documentatie',
+                action: async function () {
+                    window.open('https://'+ LocalizedDomains.documentation, '_blank')
+                }
+            })
+        )
+    }
 
 
     if (STAMHOOFD.NOLT_URL) {
