@@ -121,6 +121,13 @@ export class RecordAnswer extends AutoEncoder {
         // Both null
         return false
     }
+
+    static createDefaultAnswer(settings: RecordSettings) {
+        const type = RecordAnswerDecoder.getClassForType(settings.type)
+        return type.create({
+            settings
+        })
+    }
 }
 
 export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {

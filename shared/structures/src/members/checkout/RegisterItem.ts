@@ -1,15 +1,16 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors"
+import { Formatter } from "@stamhoofd/utility"
 import { v4 as uuidv4 } from "uuid"
-import { Group, GroupType } from "../../Group"
+import { Group } from "../../Group"
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from "../../GroupSettings"
 import { Organization } from "../../Organization"
 import { PriceBreakdown } from "../../PriceBreakdown"
 import { StockReservation } from "../../StockReservation"
+import { GroupType } from "../../GroupType"
 import { PlatformMember } from "../PlatformMember"
 import { Registration } from "../Registration"
 import { RegisterContext } from "./RegisterCheckout"
-import { Formatter } from "@stamhoofd/utility"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })

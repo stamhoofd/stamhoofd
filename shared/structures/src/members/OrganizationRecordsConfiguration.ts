@@ -1,7 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { PropertyFilter } from "../filters/PropertyFilter"
-import { Group, GroupType } from "../Group"
+import { type Group } from "../Group"
+import { GroupType } from "../GroupType"
 import { Organization } from "../Organization"
 import { Platform } from "../Platform"
 import { RecordCategory } from "./records/RecordCategory"
@@ -247,7 +248,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             defaultGroupConfig = options.platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.recordsConfiguration.clone() ?? null;
         }
 
-        return this.mergeChildren(...([platformConfig, defaultGroupConfig, organizationConfig, groupConfig].filter(f => f !== null) as OrganizationRecordsConfiguration[]))
+        return this.mergeChildren(...([platformConfig, defaultGroupConfig, organizationConfig, groupConfig].filter(f => f !== null)))
     }
 
     static mergeChildren(...configs: OrganizationRecordsConfiguration[]): OrganizationRecordsConfiguration {

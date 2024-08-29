@@ -1,17 +1,17 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
+import { Colors } from "@stamhoofd/utility";
 import { DefaultAgeGroup } from "./DefaultAgeGroup";
 import { Replacement } from "./endpoints/EmailRequest";
 import { Image } from "./files/Image";
 import { MemberResponsibility } from "./MemberResponsibility";
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 import { OrganizationEmail } from "./OrganizationEmail";
-import { PermissionRoleDetailed } from "./Permissions";
+import { PermissionRoleDetailed } from "./PermissionRole";
 import { RegistrationPeriod } from "./RegistrationPeriod";
-import { UserWithMembers } from "./UserWithMembers";
-import { Colors } from "@stamhoofd/utility";
 import { RichText } from "./RichText";
+import { UserWithMembers } from "./UserWithMembers";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })

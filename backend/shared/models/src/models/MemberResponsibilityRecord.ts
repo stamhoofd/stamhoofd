@@ -1,6 +1,6 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
-import { MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
+import { Group as GroupStruct, MemberResponsibilityRecordBase, MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 export class MemberResponsibilityRecord extends Model {
@@ -41,8 +41,17 @@ export class MemberResponsibilityRecord extends Model {
     @column({ type: "datetime", nullable: true })
     endDate: Date | null = null
 
-    getStructure() {
-        return MemberResponsibilityRecordStruct.create(this)
+    getBaseStructure() {
+        return MemberResponsibilityRecordBase.create({
+            ...this
+        })
+    }
+
+    getStructure(group: GroupStruct|null) {
+        return MemberResponsibilityRecordStruct.create({
+            ...this,
+            group
+        })
     }
 
     /**

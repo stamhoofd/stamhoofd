@@ -262,14 +262,43 @@ export class AuthenticatedStructures {
             }
         }
 
+        const organizationStructs = await Promise.all([...organizations.values()].filter(o => o.active).map(o => this.organization(o)))
+
+        // Load missing groups
+        const allGroups = new Map<string, GroupStruct>()
+        for (const organization of organizationStructs) {
+            for (const group of organization.period.groups) {
+                allGroups.set(group.id, group)
+            }
+        }
+
         for (const blob of memberBlobs) {
-            blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map(r => r.getStructure())
+            for (const registration of blob.registrations) {
+                if (registration.group) {
+                    allGroups.set(registration.group.id, registration.group)
+                }
+            }
+        }
+
+        const groupIds = Formatter.uniqueArray(responsibilities.map(r => r.groupId).filter(id => id !== null)).filter(id => !allGroups.has(id))
+        const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : []
+        const groupStructs = await this.groups(groups)
+        
+        for (const group of groupStructs) {
+            allGroups.set(group.id, group)
+        }
+
+        for (const blob of memberBlobs) {
+            blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map(r => {
+                const group = allGroups.get(r.groupId ?? '') ?? null
+                return r.getStructure(group)
+            })
             blob.platformMemberships = platformMemberships.filter(r => r.memberId == blob.id).map(r => MemberPlatformMembershipStruct.create(r))
         }
 
         return MembersBlob.create({
             members: memberBlobs,
-            organizations: await Promise.all([...organizations.values()].filter(o => o.active).map(o => this.organization(o)))
+            organizations: organizationStructs
         })
     }
 

@@ -1,7 +1,8 @@
 import { AutoEncoder, DateDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
+import { Group } from "../Group";
 
-export class MemberResponsibilityRecord extends AutoEncoder {
+export class MemberResponsibilityRecordBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -26,4 +27,9 @@ export class MemberResponsibilityRecord extends AutoEncoder {
     get isActive() {
         return this.startDate < new Date() && (this.endDate === null || this.endDate > new Date())
     }
+}
+
+export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
+    @field({ decoder: Group, nullable: true, ...NextVersion })
+    group: Group|null = null;
 }

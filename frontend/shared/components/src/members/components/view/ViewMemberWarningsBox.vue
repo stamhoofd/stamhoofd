@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { DataPermissionsSettings, FinancialSupportSettings, MembershipStatus, PermissionLevel, PlatformMember, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAuth, useOrganization, usePlatform } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
@@ -49,7 +49,7 @@ const autoCompletedAnswers = computed(() => {
 
     for (const record of allRecords) {
         if (!answerClone.has(record.id)) {
-            answerClone.set(record.id, record.createDefaultAnswer())
+            answerClone.set(record.id, RecordAnswer.createDefaultAnswer(record))
         }
     }
 

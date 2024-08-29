@@ -1,11 +1,14 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { AccessRight } from './AccessRight';
 import { Group } from './Group';
-// Eslint wants to remove Permissions, but it is needed for types!
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AccessRight, LoadedPermissions, PermissionRole, PermissionsByRole, PermissionsResourceType } from './Permissions';
+import { PermissionRole } from './PermissionRole';
+import { PermissionsByRole } from './PermissionsByRole';
+import { PermissionsResourceType } from './PermissionsResourceType';
 import { OrganizationRegistrationPeriod } from './RegistrationPeriod';
+
+
 /**
  * Give access to a given resouce based by the roles of a user
  */
@@ -102,14 +105,14 @@ export class GroupCategory extends AutoEncoder {
         return true;
     }
 
-    canEdit(permissions: LoadedPermissions|null): boolean {
+    canEdit(permissions: import('./LoadedPermissions').LoadedPermissions|null): boolean {
         if (permissions?.hasFullAccess()) {
             return true
         }
         return false
     }
 
-    canCreate(permissions: LoadedPermissions|null, categories: GroupCategory[] = []): boolean {
+    canCreate(permissions: import('./LoadedPermissions').LoadedPermissions|null, categories: GroupCategory[] = []): boolean {
         if (!permissions) {
             return false
         }
@@ -170,7 +173,7 @@ export class GroupCategoryTree extends GroupCategory {
         return count
     }
 
-    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod, options: {permissions?: LoadedPermissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
+    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod, options: {permissions?: import('./LoadedPermissions').LoadedPermissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
         const categories = organizationPeriod.settings.categories
         const groups = options?.groups ?? organizationPeriod.groups
 

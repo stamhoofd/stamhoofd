@@ -3,6 +3,7 @@
         <div>
             <ViewMemberWarningsBox v-if="isMobile" :member="member" />
             <ViewMemberGeneralBox :member="member" />
+            <ViewMemberResponsibilitiesBox :member="member" />
             <ViewMemberRegistrationsBox :member="member" />
             <ViewMemberUnverifiedBox :member="member" />
             <ViewMemberNotesBox :member="member" />
@@ -24,6 +25,7 @@ import { useIsMobile, usePlatformFamilyManager } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
 import { onMounted } from 'vue';
 import { ViewMemberAccountsBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';
+import ViewMemberResponsibilitiesBox from '../components/view/ViewMemberResponsibilitiesBox.vue';
 
 const isMobile = useIsMobile();
 

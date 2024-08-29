@@ -133,7 +133,7 @@ const answer = computed({
         }
  
         // Create a new one
-        return props.record.createDefaultAnswer()
+        return RecordAnswer.createDefaultAnswer(props.record)
     },
 
     set: (value: RecordAnswer) => {

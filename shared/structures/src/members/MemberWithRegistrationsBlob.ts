@@ -10,10 +10,9 @@ import { compileToInMemoryFilter } from '../filters/InMemoryFilter';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter';
 import { Member } from './Member';
 import { MemberPlatformMembership } from './MemberPlatformMembership';
-import { MemberResponsibilityRecord } from './MemberResponsibilityRecord';
 import { Registration } from './Registration';
 import { Filterable } from './records/RecordCategory';
-
+import { MemberResponsibilityRecord } from './MemberResponsibilityRecord';
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(Registration) })

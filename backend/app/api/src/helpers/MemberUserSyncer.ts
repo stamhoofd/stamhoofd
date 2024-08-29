@@ -116,14 +116,14 @@ export class MemberUserSyncerStatic {
             if (organizationId === null) {
                 const patch = user.permissions.convertPlatformPatch(
                     Permissions.patch({
-                        responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getStructure()) as any
+                        responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getBaseStructure()) as any
                     })
                 )
                 user.permissions = user.permissions.patch(patch)
             } else {
                 const patch = user.permissions.convertPatch(
                     Permissions.patch({
-                        responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getStructure()) as any
+                        responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getBaseStructure()) as any
                     }),
                     organizationId
                 )

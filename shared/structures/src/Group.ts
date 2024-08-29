@@ -1,14 +1,16 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { StamhoofdFilter } from './filters/StamhoofdFilter';
 import { GroupCategory } from './GroupCategory';
+import { GroupGenderType } from './GroupGenderType';
 import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { GroupSettings, WaitingListType } from './GroupSettings';
-import { LoadedPermissions, PermissionLevel, PermissionsResourceType } from './Permissions';
-import { StockReservation } from './StockReservation';
-import { StamhoofdFilter } from './filters/StamhoofdFilter';
-import { GroupGenderType } from './GroupGenderType';
+import { GroupType } from './GroupType';
 import { Gender } from './members/Gender';
+import { PermissionLevel } from './PermissionLevel';
+import { PermissionsResourceType } from './PermissionsResourceType';
+import { StockReservation } from './StockReservation';
 
 export enum GroupStatus {
     "Open" = "Open",
@@ -18,25 +20,6 @@ export enum GroupStatus {
      * @deprecated
      */
     "Archived" = "Archived"
-}
-
-export enum GroupType {
-    /**
-     * registration as a member at an organization - for a specific age group (most of the time)
-     */
-    "Membership" = "Membership",
-
-    /**
-     * Waiting list of any other group
-     */
-    "WaitingList" = "WaitingList",
-
-    /**
-     * Activity
-     */
-    "EventRegistration" = "EventRegistration",
-    // idea: EventPreRegistration = "EventPreRegistration", // let know in advance that you want to join
-    // idea: EventAttendance = "EventAttendance", // attendance list for an event, by admins only
 }
 
 export class Group extends AutoEncoder {
@@ -203,7 +186,7 @@ export class Group extends AutoEncoder {
         return [...map.values()]
     }
 
-    hasAccess(permissions: LoadedPermissions|null, allCategories: GroupCategory[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    hasAccess(permissions: import('./LoadedPermissions').LoadedPermissions|null, allCategories: GroupCategory[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!permissions) {
             return false
         }
@@ -232,15 +215,15 @@ export class Group extends AutoEncoder {
         return true;
     }
 
-    hasReadAccess(permissions: LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
+    hasReadAccess(permissions: import('./LoadedPermissions').LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Read)
     }
 
-    hasWriteAccess(permissions: LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
+    hasWriteAccess(permissions: import('./LoadedPermissions').LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Write)
     }
 
-    hasFullAccess(permissions: LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
+    hasFullAccess(permissions: import('./LoadedPermissions').LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Full)
     }
 

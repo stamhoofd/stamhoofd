@@ -49,15 +49,7 @@
                     </p>
 
                     <template #right>
-                        <span v-if="getResponsibilityMergedRole(responsibility, group?.id).isEmpty" v-tooltip="'Heeft geen automatische rechten'" class="icon layered">
-                            <span class="icon user-blocked-layer-1" />
-                            <span class="icon user-blocked-layer-2 red" />
-                        </span>
-                        <span v-else-if="getResponsibilityMergedRole(responsibility, group?.id).hasAccess(PermissionLevel.Full)" class="icon layered">
-                            <span class="icon user-admin-layer-1" />
-                            <span class="icon user-admin-layer-2 yellow" />
-                        </span>
-                        <span v-else class="icon user" />
+                        <ResponsibilityIcon :responsibility="responsibility" :group="group" :organization="selectedOrganization" />
                     </template>
                 </STListItem>
             </STList>
@@ -78,6 +70,7 @@ import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import Title from './Title.vue';
+import ResponsibilityIcon from '../ResponsibilityIcon.vue';
 
 defineOptions({
     inheritAttrs: false

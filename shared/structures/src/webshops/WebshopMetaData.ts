@@ -13,7 +13,7 @@ import { Image } from '../files/Image';
 import { RecordCategory } from '../members/records/RecordCategory';
 import { PaymentConfiguration, PrivatePaymentConfiguration } from '../PaymentConfiguration';
 import { PaymentMethod } from '../PaymentMethod';
-import { PermissionsByRole } from '../Permissions';
+import { PermissionsByRole } from '../PermissionsByRole';
 import { Policy } from '../Policy';
 import { RichText } from '../RichText';
 import { SeatingPlan } from '../SeatingPlan';

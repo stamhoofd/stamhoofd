@@ -1,9 +1,13 @@
 
 import { AutoEncoder, AutoEncoderPatchType, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { LoadedPermissions, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions } from './Permissions';
+import { LoadedPermissions } from './LoadedPermissions';
+import { PermissionLevel } from './PermissionLevel';
+import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole';
+import { Permissions } from './Permissions';
+import { PermissionsResourceType } from './PermissionsResourceType';
 import { Platform } from './Platform';
-import { OrganizationRegistrationPeriod } from './RegistrationPeriod';
+import { ResourcePermissions } from './ResourcePermissions';
 
 type OrganizationForPermissionCalculation = {
     id: string, 

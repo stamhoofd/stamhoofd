@@ -1,8 +1,13 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 
-import { Group, GroupType } from "../Group"
+import { AccessRight } from "../AccessRight"
+import { type Group } from "../Group"
+import { GroupType } from "../GroupType"
+
 import { Organization } from "../Organization"
-import { AccessRight, PermissionLevel, PermissionsResourceType } from "../Permissions"
+import { PermissionLevel } from "../PermissionLevel"
+import { PermissionsResourceType } from "../PermissionsResourceType"
+
 import { Platform } from "../Platform"
 import { UserPermissions } from "../UserPermissions"
 import { UserWithMembers } from "../UserWithMembers"
@@ -900,31 +905,8 @@ export class PlatformMember implements ObjectWithRecords {
         return this.patchedMember.details.recordAnswers
     }
 
-    getResponsibilities(organization?: Organization|null, short = false) {
+    getResponsibilities(organization?: Organization|null) {
         return this.patchedMember.responsibilities
-            .filter(r => r.endDate === null && (!organization || r.organizationId === organization.id))
-            .map(r => {
-                const org = this.organizations.find(o => o.id === r.organizationId)
-    
-                if (!org && r.organizationId) {
-                    return 'Onbekende functie'
-                }
-                let suffix = '';
-    
-                if (r.groupId && org) {
-                    const group = org.adminAvailableGroups.find(g => g.id === r.groupId)
-                    if (group) {
-                        suffix += (short ? ' ' : ' van ')+group.settings.name
-                    }
-                }
-    
-                if (!short && !organization) {
-                    suffix += org ? ' bij '+org.name : ' (nationaal)';
-                }
-    
-                return (this.platform.config.responsibilities.find(rr => rr.id === r.responsibilityId)?.name 
-                    ?? org?.privateMeta?.responsibilities?.find(rr => rr.id === r.responsibilityId)?.name 
-                    ?? 'Onbekend') + suffix
-        });
+            .filter(r => (r.endDate === null || r.endDate > new Date()) && (!organization || r.organizationId === organization.id))
     }
 }

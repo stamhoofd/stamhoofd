@@ -23,15 +23,6 @@
                 </dd>
             </template>
 
-            <template v-if="hasResponsibilities && (hasWrite || responsibilities.length)">
-                <dt>Functies</dt>
-                <dd class="with-icons" :class="{button: $context.auth.hasFullAccess()}" @click="$context.auth.hasFullAccess() ? editResponsibilities() : null">
-                    {{ responsibilitiesText }}
-
-                    <span v-if="$context.auth.hasFullAccess()" class="icon edit gray" />
-                </dd>
-            </template>
-
             <template v-if="member.patchedMember.details.phone">
                 <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                 <dd v-copyable>
@@ -75,42 +66,16 @@
 </template>
 
 <script setup lang="ts">
-import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
-import { useAuth, useCountry, useOrganization, usePlatform } from '../../../hooks';
-import { useMemberActions } from '../../classes/MemberActionBuilder';
+import { PlatformMember } from '@stamhoofd/structures';
+import { useCountry } from '../../../hooks';
 
 defineOptions({
     inheritAttrs: false
 })
 
-const props = defineProps<{
+defineProps<{
     member: PlatformMember
 }>()
 
 const currentCountry = useCountry();
-const platform = usePlatform()
-const organization = useOrganization()
-const hasResponsibilities = computed(() => ((platform.value.config.responsibilities.length > 0 || (organization.value && organization.value.privateMeta?.responsibilities?.length)) && props.member.patchedMember.details.defaultAge >= 16) || responsibilities.value.length)
-const auth = useAuth();
-const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write)
-
-const responsibilities = computed(() => {
-    return props.member.getResponsibilities(organization.value)
-})
-
-const responsibilitiesText = computed(() => {
-    if (responsibilities.value.length === 0) {
-        return 'Geen'
-    }
-    return Formatter.joinLast(responsibilities.value, ', ', ' en ')
-})
-
-const buildActions = useMemberActions()
-
-async function editResponsibilities() {
-    await buildActions().editResponsibilities(props.member)
-}
-
 </script>

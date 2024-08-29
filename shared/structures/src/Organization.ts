@@ -6,7 +6,6 @@ import { Group } from './Group';
 import { GroupCategoryTree } from './GroupCategory';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
-import { LoadedPermissions } from './Permissions';
 import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod';
 import { UserWithMembers } from './UserWithMembers';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
@@ -59,7 +58,7 @@ export class Organization extends AutoEncoder {
         return this.period.categoryTree.getAllGroups()
     }
 
-    getGroupsForPermissions(permissions?: LoadedPermissions | null) {
+    getGroupsForPermissions(permissions?: import('./LoadedPermissions').LoadedPermissions | null) {
         return this.getCategoryTree({permissions}).getAllGroups()
     }
 
@@ -138,7 +137,7 @@ export class Organization extends AutoEncoder {
      * For registration members perspective, try to use options.admin instead of options.permissions. 
      * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
-    getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: LoadedPermissions | null, smartCombine?: boolean, admin?: boolean}): GroupCategoryTree {
+    getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: import('./LoadedPermissions').LoadedPermissions | null, smartCombine?: boolean, admin?: boolean}): GroupCategoryTree {
         return this.period.getCategoryTree(options ? {...options, organization: this} : {organization: this});
     }
 

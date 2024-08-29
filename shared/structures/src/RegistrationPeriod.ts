@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 import { Group } from "./Group";
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from "./GroupCategory";
 import { Organization } from "./Organization";
-import { LoadedPermissions } from "./Permissions";
 import { SetupSteps } from "./SetupSteps";
 
 export class RegistrationPeriodSettings extends AutoEncoder {
@@ -93,7 +92,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     }
 
     get waitingLists(): Group[] {
-        return (this.groups.map(g => g.waitingList).filter(g => g != null)  as Group[]).filter((value, index, self) => self.findIndex((v) => value.id === v.id) === index)
+        return (this.groups.map(g => g.waitingList).filter(g => g != null)).filter((value, index, self) => self.findIndex((v) => value.id === v.id) === index)
     }
 
     get rootCategory() {
@@ -109,7 +108,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         organization?: Organization,
         maxDepth?: number, 
         filterGroups?: (group: Group) => boolean, 
-        permissions?: LoadedPermissions | null, 
+        permissions?: import('./LoadedPermissions').LoadedPermissions | null, 
         smartCombine?: boolean,
         admin?: boolean
     }): GroupCategoryTree {

@@ -7,7 +7,7 @@ import { OrganizationEmail } from './OrganizationEmail';
 import { PayconiqAccount, PrivatePaymentConfiguration } from './PaymentConfiguration';
 import { PaymentMethod } from './PaymentMethod';
 import { PaymentProvider } from './PaymentProvider';
-import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './Permissions';
+import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole';
 import { StripeMetaData } from './StripeAccount';
 
 export class CreditItem extends AutoEncoder {
