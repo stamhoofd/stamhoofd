@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
-import { Group } from "./Group";
+import { Group, GroupStatus } from "./Group";
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from "./GroupCategory";
 import { Organization } from "./Organization";
 import { SetupSteps } from "./SetupSteps";
@@ -189,6 +189,9 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
             if (newGroup.settings.registrationEndDate) {
                 newGroup.settings.registrationEndDate.setFullYear(newGroup.settings.registrationEndDate.getFullYear() + yearDifference);
             }
+
+            // Force close
+            newGroup.status = GroupStatus.Closed
 
             groupMap.set(group.id, newGroup.id);
             newOrganizationPeriod.groups.push(newGroup);
