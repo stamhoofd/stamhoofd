@@ -13,7 +13,7 @@ import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordRe
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
-import { EmailAddressSettings, PaymentGeneral, PaymentStatus, Token } from '@stamhoofd/structures';
+import { EmailAddressSettings, PaymentGeneral, PaymentStatus, Platform, Token } from '@stamhoofd/structures';
 import { markRaw, nextTick, onMounted, Raw, reactive, Ref, ref } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from "./getRootViews";
 
@@ -257,13 +257,13 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
         const fieldName = type === 'all' ? 'unsubscribedAll' : 'unsubscribedMarketing'
 
         if (details[fieldName]) {
-            if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar "+$t("shared.emails.complaints"))) {
+            if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? Platform.shared.config.name)+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar "+$t("shared.emails.complaints"))) {
                 return
             }
 
             unsubscribe = false
         } else {
-            if (!await CenteredMessage.confirm("Wil je dat we jou geen e-mails meer sturen?", "Ja, uitschrijven", "Hierna ontvang je geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email)) {
+            if (!await CenteredMessage.confirm("Wil je dat we jou geen e-mails meer sturen?", "Ja, uitschrijven", "Hierna ontvang je geen e-mails van "+(details.organization?.name ?? Platform.shared.config.name)+" op "+details.email)) {
                 return
             }
             toast.show()
