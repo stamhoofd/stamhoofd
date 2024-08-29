@@ -372,7 +372,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: "invalid_field",
                         message: "Invalid email",
-                        human: "Je kan een account niet de toegang ontzetten tot een lid als het e-mailadres nog steeds is opgeslagen als onderdeel van de gegevens van dat lid. Verwijder eerst het e-mailadres uit de gegevens van het lid en ontkoppel daarna het account."
+                        human: "Je kan een account niet de toegang ontzeggen tot een lid als het e-mailadres nog steeds is opgeslagen als onderdeel van de gegevens van dat lid. Verwijder eerst het e-mailadres uit de gegevens van het lid en ontkoppel daarna het account."
                     });
                 }
 
