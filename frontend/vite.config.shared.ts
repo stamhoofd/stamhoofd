@@ -69,7 +69,8 @@ export function buildConfig(options: {port: number, clientFiles?: string[]}): Us
         },
         plugins: [
             svgNamespacePlugin({
-                namespace: loadedEnv?.ILLUSTRATIONS_NAMESPACE ?? ''
+                namespace: loadedEnv?.ILLUSTRATIONS_NAMESPACE ?? '',
+                colors: loadedEnv?.ILLUSTRATIONS_COLORS
             }),
             vue({
                 template: {
