@@ -1,4 +1,8 @@
-                    GNU AFFERO GENERAL PUBLIC LICENSE
+This license applies to the entire repository except for subfolders that
+have their own license file. In such cases, the license file in the 
+subfolder takes precedence.
+
+                    GNU AFFERO GENERAL PUBLIC LICENSE                    
                        Version 3, 19 November 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 34 38">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #c9d9ef;
+      }
+
+      .cls-2 {
+        fill: #c4c4c4;
+      }
+
+      .cls-3 {
+        fill: #150958;
+      }
+
+      .cls-4 {
+        fill: #24418a;
+      }
+
+      .cls-5 {
+        fill: none;
+        mask: url(#mask);
+      }
+
+      .cls-6 {
+        fill: #0067b1;
+        fill-rule: evenodd;
+      }
+    </style>
+    <mask id="mask" x="0" y="16" width="34" height="22" maskUnits="userSpaceOnUse">
+      <g id="mask0_6232_11934" data-name="mask0 6232 11934">
+        <path class="cls-2" d="m0,16h34v18c0,2.21-1.79,4-4,4H4c-2.21,0-4-1.79-4-4v-18Z"/>
+      </g>
+    </mask>
+  </defs>
+  <path class="cls-3" d="m17,30L0,16,17,4l17,12-17,14Z"/>
+  <path class="cls-1" d="m3,1c0-.55.45-1,1-1h26c.55,0,1,.45,1,1v28H3V1Z"/>
+  <path class="cls-6" d="m34,34v-18l-17,13L0,16v18c0,2.21,1.79,4,4,4h26c2.21,0,4-1.79,4-4Z"/>
+  <g class="cls-5">
+    <path class="cls-4" d="m15.79,25.93L0,38h34l-15.79-12.07c-.72-.55-1.71-.55-2.43,0Z"/>
+  </g>
+  <path class="cls-4" d="m7.5,4h16c.83,0,1.5.67,1.5,1.5h0c0,.83-.67,1.5-1.5,1.5H7.5c-.83,0-1.5-.67-1.5-1.5h0c0-.83.67-1.5,1.5-1.5Z"/>
+  <path class="cls-4" d="m7.5,10h5c.83,0,1.5.67,1.5,1.5h0c0,.83-.67,1.5-1.5,1.5h-5c-.83,0-1.5-.67-1.5-1.5h0c0-.83.67-1.5,1.5-1.5Z"/>
+</svg>

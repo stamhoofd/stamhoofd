@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 54.68 43.75">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #0067b1;
+      }
+
+      .cls-2, .cls-3 {
+        fill: #c9d9ef;
+      }
+
+      .cls-4 {
+        fill: #dcdcdc;
+      }
+
+      .cls-5 {
+        fill: #24418a;
+      }
+
+      .cls-6 {
+        opacity: .15;
+      }
+
+      .cls-6, .cls-7 {
+        fill: #fff;
+        isolation: isolate;
+      }
+
+      .cls-7 {
+        opacity: .25;
+      }
+
+      .cls-8 {
+        fill: none;
+        mask: url(#mask);
+      }
+
+      .cls-3 {
+        stroke: #c9d9ef;
+        stroke-width: 2.5px;
+      }
+    </style>
+    <mask id="mask" x="0" y="21.25" width="54.68" height="22.5" maskUnits="userSpaceOnUse">
+      <g id="mask0_8461_96" data-name="mask0 8461 96">
+        <path class="cls-4" d="m22.26,21.25h11.25l8.61,12.92c1.66,2.49-.12,5.83-3.12,5.83h-22.24c-3,0-4.78-3.34-3.12-5.83l8.61-12.92Z"/>
+      </g>
+    </mask>
+  </defs>
+  <path class="cls-3" d="m28.94,11.82l-1.05-1.64-1.05,1.64-5.62,8.74-8.61,12.91c-2.22,3.32.17,7.77,4.16,7.77h22.24c3.99,0,6.38-4.45,4.16-7.77l-8.61-12.91-5.62-8.74Z"/>
+  <g class="cls-8">
+    <g>
+      <path class="cls-5" d="m46.01,33.13c-18.12,3.12-11.88-9.38-33.75-7.5-21.87,1.88-7.81,18.12-7.81,18.12h43.75s15.93-13.75-2.19-10.62Z"/>
+      <path class="cls-1" d="m12.26,28.12c16.25,10.63,15.62-8.12,31.25-3.75,15.62,4.38,5,19.38,5,19.38H4.76s-8.75-26.25,7.5-15.62Z"/>
+    </g>
+  </g>
+  <path class="cls-2" d="m22.26,0h11.25c1.38,0,2.5,1.12,2.5,2.5h0c0,1.38-1.12,2.5-2.5,2.5h-11.25c-1.38,0-2.5-1.12-2.5-2.5h0c0-1.38,1.12-2.5,2.5-2.5Z"/>
+  <rect class="cls-2" x="22.26" width="11.25" height="22.5"/>
+  <path class="cls-5" d="m22.26,7.5h5c.69,0,1.25.56,1.25,1.25h0c0,.69-.56,1.25-1.25,1.25h-5v-2.5Z"/>
+  <path class="cls-5" d="m22.26,12.5h5c.69,0,1.25.56,1.25,1.25h0c0,.69-.56,1.25-1.25,1.25h-5v-2.5Z"/>
+  <circle class="cls-6" cx="33.51" cy="31.25" r="1.25"/>
+  <circle class="cls-6" cx="29.76" cy="35" r="1.25"/>
+  <circle class="cls-7" cx="25.38" cy="23.12" r="1.88"/>
+  <circle class="cls-6" cx="29.76" cy="11.25" r="1.25"/>
+  <circle class="cls-7" cx="29.76" cy="20" r="1.25"/>
+  <circle class="cls-6" cx="21.63" cy="28.12" r=".62"/>
+  <circle class="cls-6" cx="17.88" cy="34.38" r="1.88"/>
+</svg>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50 50">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8 {
+        fill: none;
+      }
+
+      .cls-9 {
+        fill: #f47d30;
+      }
+
+      .cls-10 {
+        fill: #f49058;
+      }
+
+      .cls-11 {
+        fill: #fff;
+      }
+
+      .cls-12 {
+        fill: #a58167;
+      }
+
+      .cls-13, .cls-14 {
+        fill: #c9d9ef;
+      }
+
+      .cls-15 {
+        fill: #d66729;
+      }
+
+      .cls-16 {
+        fill: #150958;
+      }
+
+      .cls-17 {
+        fill: #24418a;
+      }
+
+      .cls-2 {
+        stroke: #dcdcdc;
+        stroke-width: .53px;
+      }
+
+      .cls-14 {
+        stroke: #c9d9ef;
+      }
+
+      .cls-14, .cls-7, .cls-8 {
+        stroke-width: 1.06px;
+      }
+
+      .cls-3, .cls-4, .cls-5 {
+        stroke-width: 1.59px;
+      }
+
+      .cls-3, .cls-4, .cls-5, .cls-8 {
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .cls-3, .cls-8 {
+        stroke: #150958;
+      }
+
+      .cls-4 {
+        stroke: #24418a;
+      }
+
+      .cls-5, .cls-7 {
+        stroke: #0067b1;
+      }
+
+      .cls-6 {
+        mask: url(#mask);
+      }
+    </style>
+    <mask id="mask" x="5" y="7" width="40.24" height="36" maskUnits="userSpaceOnUse">
+      <g id="mask0_9591_2207" data-name="mask0 9591 2207">
+        <path class="cls-12" d="m5,10.18c0-1.75,1.42-3.18,3.18-3.18h24.87c.35,0,.7.09,1.01.26l9.52,5.19c1.02.56,1.66,1.63,1.66,2.79v24.58c0,1.75-1.42,3.18-3.18,3.18h-25c-.96,0-1.9-.26-2.72-.75l-8.3-4.98c-.64-.38-1.03-1.07-1.03-1.82V10.18Z"/>
+      </g>
+    </mask>
+  </defs>
+  <rect class="cls-1" width="50" height="50"/>
+  <g class="cls-6">
+    <g>
+      <path class="cls-10" d="m5,7h27.78c.53,0,1.05.13,1.52.39l10.94,5.97L5,17.59V7Z"/>
+      <path class="cls-15" d="m5,9.81c0-1.23,1.35-2,2.41-1.36l7.67,4.6c.32.19.51.54.51.91v8.4l5.29,20.65h-3.83c-.96,0-1.9-.26-2.72-.75l-7.79-4.67c-.96-.57-1.54-1.61-1.54-2.72V9.81Z"/>
+      <path class="cls-9" d="m15.59,14.41c0-.58.47-1.06,1.06-1.06h28.59v26.47c0,1.75-1.42,3.18-3.18,3.18h-23.29c-1.75,0-3.18-1.42-3.18-3.18V14.41Z"/>
+      <path class="cls-13" d="m8.52,9.12h31.21l3.39,2.12H12.07l-3.55-2.12Z"/>
+    </g>
+  </g>
+  <path class="cls-16" d="m8.53,9.12l3.55,2.12v8.6c0,.41-.45.67-.8.45l-2.49-1.49c-.16-.1-.26-.27-.26-.45v-9.23Z"/>
+  <rect class="cls-11" x="19.29" y="16" width="11.12" height="12.71" rx=".79" ry=".79"/>
+  <rect class="cls-13" x="20.88" y="17.59" width="7.94" height="1.59" rx=".79" ry=".79"/>
+  <rect class="cls-13" x="20.88" y="20.76" width="4.76" height="1.59" rx=".79" ry=".79"/>
+  <rect class="cls-17" x="20.88" y="23.94" width="1.59" height="3.18" rx=".32" ry=".32"/>
+  <rect class="cls-17" x="25.65" y="23.94" width="1.59" height="3.18" rx=".32" ry=".32"/>
+  <rect class="cls-17" x="23.26" y="23.94" width=".79" height="3.18" rx=".32" ry=".32"/>
+  <rect class="cls-17" x="24.85" y="23.94" width=".4" height="3.18" rx=".2" ry=".2"/>
+  <rect class="cls-17" x="28.03" y="23.94" width=".79" height="3.18" rx=".32" ry=".32"/>
+  <rect class="cls-16" x="18.76" y="38.76" width="3.18" height="1.06"/>
+  <rect class="cls-16" x="18.76" y="35.59" width="3.18" height="2.12"/>
+  <path class="cls-16" d="m23,35.59h-5.29l2.65-3.18,2.65,3.18Z"/>
+  <path class="cls-2" d="m33.15,32.22l14.84.53"/>
+  <path class="cls-2" d="m34.48,35.13h13.25"/>
+  <path class="cls-2" d="m36.87,29.83l1.32,8.21"/>
+  <path class="cls-2" d="m40.58,29.83l.53,7.42"/>
+  <path class="cls-2" d="m44.02,30.36v6.62"/>
+  <path class="cls-14" d="m32.93,31.21c-.15-.69.4-1.34,1.11-1.29l13.73.93c.28.02.49.25.49.53v5.67c0,.26-.2.49-.46.53l-12.09,1.66c-.55.07-1.06-.28-1.18-.82l-1.6-7.2Z"/>
+  <path class="cls-7" d="m31.83,27.44l8.48,12.19"/>
+  <circle class="cls-16" cx="36.07" cy="45.73" r="2.12"/>
+  <circle class="cls-16" cx="46.14" cy="45.73" r="2.12"/>
+  <path class="cls-4" d="m35.54,43.08v1.27c0,.21.06.41.18.59l.35.53"/>
+  <path class="cls-4" d="m45.61,43.08v1.27c0,.21.06.41.18.59l.35.53"/>
+  <path class="cls-3" d="m29.18,26.92h1.4c.73,0,1.37.5,1.54,1.21l2.88,11.77"/>
+  <path class="cls-5" d="m28.65,26.92h1.33"/>
+  <path class="cls-8" d="m46.14,42.81h-11.14c-.32,0-.63-.16-.81-.43h0c-.6-.9-.05-2.11,1.03-2.25l8.01-1.03"/>
+</svg>

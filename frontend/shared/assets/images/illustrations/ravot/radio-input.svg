@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 42 37.5">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        fill: none;
+      }
+
+      .cls-2 {
+        clip-path: url(#clippath-1);
+      }
+
+      .cls-5 {
+        fill: #c9d9ef;
+      }
+
+      .cls-6 {
+        fill: #150958;
+      }
+
+      .cls-7 {
+        fill: #fff;
+        stroke: #fff;
+        stroke-width: 1.62px;
+      }
+
+      .cls-3 {
+        stroke: #c9d9ef;
+        stroke-width: 2px;
+      }
+
+      .cls-4 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <rect class="cls-1" width="16.25" height="16.25"/>
+    </clipPath>
+    <clipPath id="clippath-1">
+      <rect class="cls-1" y="21.25" width="16.25" height="16.25"/>
+    </clipPath>
+  </defs>
+  <g class="cls-4">
+    <g>
+      <circle class="cls-6" cx="8.12" cy="8.12" r="8.12"/>
+      <circle class="cls-7" cx="8.12" cy="8.12" r="2.03"/>
+    </g>
+  </g>
+  <g class="cls-2">
+    <circle class="cls-3" cx="8.12" cy="29.38" r="7.12"/>
+  </g>
+  <rect class="cls-5" x="21" y="6" width="21" height="7" rx="3" ry="3"/>
+  <rect class="cls-5" x="21" y="26" width="14" height="7" rx="3" ry="3"/>
+</svg>

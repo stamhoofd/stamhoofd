@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 40">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ef3e42;
+      }
+
+      .cls-2 {
+        fill: #b60121;
+      }
+
+      .cls-3 {
+        fill: #c9d9ef;
+      }
+
+      .cls-4 {
+        fill: #24418a;
+      }
+
+      .cls-5 {
+        fill: #1d2129;
+      }
+    </style>
+  </defs>
+  <path class="cls-3" d="m0,12.5h36v21.5c0,3.31-2.69,6-6,6H6c-3.31,0-6-2.69-6-6V12.5Z"/>
+  <path class="cls-1" d="m0,10c0-3.31,2.69-6,6-6h24c3.31,0,6,2.69,6,6v6H0v-6Z"/>
+  <circle class="cls-2" cx="26" cy="9" r="3.5"/>
+  <circle class="cls-2" cx="10" cy="9" r="3.5"/>
+  <path class="cls-5" d="m28,2c0-1.1-.9-2-2-2s-2,.9-2,2v7c0,1.1.9,2,2,2s2-.9,2-2V2Z"/>
+  <path class="cls-5" d="m12,2c0-1.1-.9-2-2-2s-2,.9-2,2v7c0,1.1.9,2,2,2s2-.9,2-2V2Z"/>
+  <rect class="cls-4" x="5" y="21" width="5" height="5" rx="1" ry="1"/>
+  <rect class="cls-4" x="5" y="28" width="5" height="5" rx="1" ry="1"/>
+  <rect class="cls-4" x="12" y="21" width="5" height="5" rx="1" ry="1"/>
+  <rect class="cls-4" x="12" y="28" width="5" height="5" rx="1" ry="1"/>
+  <rect class="cls-1" x="26" y="21" width="5" height="5" rx="1" ry="1"/>
+  <rect class="cls-4" x="19" y="21" width="5" height="5" rx="1" ry="1"/>
+</svg>
