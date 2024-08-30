@@ -624,6 +624,14 @@ export class RegisterItem {
     }
 
     validatePeriod(group: Group, type: 'move' | 'register') {
+        if (group.type === GroupType.WaitingList) {
+            return;
+        }
+
+        if (group.type === GroupType.EventRegistration) {
+            return;
+        }
+
         const platform = this.family.platform
 
         const periodId = group.periodId
