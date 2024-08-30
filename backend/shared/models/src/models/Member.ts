@@ -451,6 +451,11 @@ export class Member extends Model {
                     return []
                 }
 
+                if (defaultMembership.periods.get(platform.periodId) === undefined) {
+                    console.warn('Found default membership without period configuration', defaultMembership.id, platform.periodId)
+                    return []
+                }
+
                 return [{
                     registration: r,
                     membership: defaultMembership,
