@@ -1,10 +1,11 @@
-import viteSvgToWebfont from 'vite-svg-2-webfont';
 import vue from '@vitejs/plugin-vue';
 import fs from 'fs';
 import path, { resolve } from 'path';
+import viteSvgToWebfont from 'vite-svg-2-webfont';
 
-import iconConfig from './shared/assets/images/icons/icons.font';
 import { UserConfig } from 'vite';
+import iconConfig from './shared/assets/images/icons/icons.font';
+import svgNamespacePlugin from './svgNamespacePlugin';
 
 const use_env: Record<string, string> = {}
 
@@ -15,6 +16,8 @@ if (process.env.NODE_ENV === "production") {
     console.log("Building for production...")
 }
 
+let loadedEnv: FrontendEnvironment | undefined = undefined
+
 if (process.env.LOAD_ENV) {
     // Load this in the environment
     const decode = JSON.parse(process.env.LOAD_ENV);
@@ -24,6 +27,7 @@ if (process.env.LOAD_ENV) {
     }
 
     // We restringify to make sure encoding is minified
+    loadedEnv = decode
     use_env["STAMHOOFD"] = JSON.stringify(decode);
     use_env["process.env.NODE_ENV"] = JSON.stringify(decode.environment === "production" ? "production" : "development")
 } else if (process.env.ENV_FILE) {
@@ -41,6 +45,7 @@ if (process.env.LOAD_ENV) {
 
     console.log("Using environment file: "+file)
 
+    loadedEnv = decode
     const stamhoofdEnv = JSON.stringify(decode)
 
     // use runtimeValue, because cache can be optimized if webpack knows which cache to get
@@ -63,6 +68,9 @@ export function buildConfig(options: {port: number, clientFiles?: string[]}): Us
             }
         },
         plugins: [
+            svgNamespacePlugin({
+                namespace: loadedEnv?.ILLUSTRATIONS_NAMESPACE ?? ''
+            }),
             vue({
                 template: {
                     compilerOptions: {

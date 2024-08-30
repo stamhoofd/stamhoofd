@@ -170,6 +170,8 @@ declare global {
         readonly APP_UPDATE_DEVELOPMENT_SERVER_URL?: string
 
         readonly CHANGELOG_URL?: Localized<`https://${string}`>
+
+        readonly ILLUSTRATIONS_NAMESPACE?: string // A subfolder of 'illustrations' will be used for illustrations (if the illustration exists)
     }
 
     /** 
