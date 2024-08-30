@@ -245,7 +245,7 @@ export class SetupStepUpdater {
 
         const responsibilityIds = organizationBasedResponsibilitiesWithRestriction.map(r => r.id);
 
-        const allRecords = await MemberResponsibilityRecord.select()
+        const allRecords = responsibilityIds.length === 0 ? [] : await MemberResponsibilityRecord.select()
             .where('responsibilityId', responsibilityIds)
             .where('organizationId', organization.id)
             .where(SQL.where('endDate', SQLWhereSign.Greater, now).or('endDate', null))
