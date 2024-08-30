@@ -33,7 +33,7 @@
                     Vul ontbrekende gegevens aan van {{ member.patchedMember.details.firstName }}
                 </h3>
                 <p class="style-description-small">
-                    Enkele gegevens van {{ member.patchedMember.details.firstName }} ontbreken ({{ steps }}). Vul ze hier aan.
+                    Enkele gegevens van {{ member.patchedMember.details.firstName }} ontbreken. Vul deze aan.
                 </p>
 
                 <template #right>
@@ -49,10 +49,10 @@
                     Het e-mailadres van dit account is niet toegevoegd bij {{ member.patchedMember.details.firstName }}
                 </h3>
                 <p v-if="member.patchedMember.details.parents.length || member.patchedMember.details.parentsHaveAccess" class="style-description-small">
-                    Voeg jouw e-mailadres ({{ user?.email }}) toe bij één van de ouders of bij {{ member.patchedMember.details.firstName }} als je {{ member.patchedMember.details.firstName }} zelf bent, anders verlies je in de toekomst automatisch de toegang tot dit lid. Je kan ook het e-mailadres van je account zelf wijzigen (rechts bovenaan) als je dit e-mailadres niet meer wilt gebruiken.
+                    Voeg het e-mailadres waarmee je inlogt ({{ user?.email }}) toe bij {{ member.patchedMember.details.firstName }}, anders wordt jouw account losgekoppeld van dit lid. Of wijzig het e-mailadres waarmee je inlogt.
                 </p>
                 <p v-else class="style-description-small">
-                    Voeg jouw e-mailadres ({{ user?.email }}) toe bij het e-mailadres van {{ member.patchedMember.details.firstName }}, anders verlies je in de toekomst automatisch de toegang tot dit lid. Je kan ook het e-mailadres van je account zelf wijzigen (rechts bovenaan) als je dit e-mailadres niet meer wilt gebruiken.
+                    Voeg het e-mailadres waarmee je inlogt ({{ user?.email }}) toe bij {{ member.patchedMember.details.firstName }}, anders wordt jouw account losgekoppeld van dit lid. Of wijzig het e-mailadres waarmee je inlogt.
                 </p>
 
                 <template #right>
@@ -116,8 +116,12 @@ const membersWithMissingData = computed(() => activeMembers.value.flatMap(member
     return [];
 }))
 
+const membersWithoutMissingData = computed(() => activeMembers.value.filter(member => {
+    return !membersWithMissingData.value.find(m => m.member.id === member.id);
+}))
+
 const membersWithMissingEmail = computed(() => {
-    return activeMembers.value.filter(member => {
+    return membersWithoutMissingData.value.filter(member => {
         return !member.patchedMember.details.hasEmail(user.value?.email ?? '');
     })
 });
