@@ -39,7 +39,7 @@
 import { Event } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { usePlatform } from '../../hooks';
+import { useOrganization, usePlatform } from '../../hooks';
 import EventImageBox from './EventImageBox.vue';
 
 const props = defineProps<{
@@ -47,6 +47,7 @@ const props = defineProps<{
 }>();
 
 const platform = usePlatform()
+const organization = useOrganization()
 
 const levelPrefix = computed(() => {
     const prefixes: string[] = []
@@ -59,9 +60,13 @@ const levelPrefix = computed(() => {
             prefixes.push('Nationaal')
         }
     } else {
-        // Name of the organization
-        if (props.event.meta.organizationCache?.name) {
-            prefixes.push(props.event.meta.organizationCache?.name)
+        if (props.event.organizationId === organization.value?.id) {
+            // skip
+        } else {
+            // Name of the organization
+            if (props.event.meta.organizationCache?.name) {
+                prefixes.push(props.event.meta.organizationCache?.name)
+            }
         }
     }
 

@@ -107,12 +107,7 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-                </STList>
 
-                <hr>
-                <h2>Personaliseren</h2>
-
-                <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/palette.svg">

@@ -724,6 +724,10 @@ export class GroupSettings extends AutoEncoder {
             return p.getFilteredOptions(options).length > 0
         })
     }
+
+    get isFree() {
+        return !this.prices.find(p => p.price.price > 0) && !this.optionMenus.find(o => o.options.find(p => p.price.price > 0))
+    }
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType()

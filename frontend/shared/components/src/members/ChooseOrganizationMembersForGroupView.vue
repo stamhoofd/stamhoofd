@@ -4,7 +4,7 @@
             {{ checkout.singleOrganization.name }}
         </p>
         <h1 v-if="group">
-            Inschrijvingen voor {{ group.settings.name }} wijzigen
+            Inschrijvingen voor {{ group.settings.name }}
         </h1>
         <h1 v-else>
             Winkelmandje
@@ -45,16 +45,16 @@
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { startCheckout, useAddMember, useCheckoutDefaultItem, useChooseGroupForMember } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
+import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
 import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';
 import RegisterItemRow from './components/group/RegisterItemRow.vue';
 import SearchOrganizationMembersForGroupView from './SearchOrganizationMembersForGroupView.vue';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
-import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
 
 const props = defineProps<{
     checkout: RegisterCheckout, // we should auto assign this checkout to all search results and newly created members
