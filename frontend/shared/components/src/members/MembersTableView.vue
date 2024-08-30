@@ -90,6 +90,9 @@ useGlobalEventListener('members-deleted', async () => {
 useGlobalEventListener('members-added', async () => {
     tableObjectFetcher.reset(true, true)
 })
+useGlobalEventListener('members-registered', async () => {
+    tableObjectFetcher.reset(true, true)
+})
 
 const configurationId = computed(() => {
     return 'members-'+app+'-org-' + (organization.value?.id ?? 'null')+ '-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '') + (props.responsibility ? '-responsibility-'+props.responsibility.id : '')

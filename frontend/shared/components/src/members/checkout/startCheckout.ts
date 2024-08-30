@@ -63,6 +63,16 @@ async function register({checkout, context, admin, members}: {checkout: Register
         passedFamilies.add(member.family)
     }
 
+    const clearAndEmit = () => {
+        if (checkout.cart.items.length > 0) {
+            GlobalEventBus.sendEvent('members-added', []).catch(console.error)
+        } else if (checkout.cart.deleteRegistrations.length > 0) {
+            GlobalEventBus.sendEvent('members-deleted', []).catch(console.error)
+        }
+    
+        checkout.clear()
+    }
+
     if (payment && payment.status !== PaymentStatus.Succeeded) {
         await PaymentHandler.handlePayment({
             server, 
@@ -71,13 +81,9 @@ async function register({checkout, context, admin, members}: {checkout: Register
             paymentUrl: response.data.paymentUrl, 
             navigate,
             transferSettings: checkout.singleOrganization!.meta.registrationPaymentConfiguration.transferSettings,
-            type: "registration"
+            type: "registration",
         }, async (_payment, navigate: NavigationActions) => {
-            if (checkout.cart.items.length > 0) {
-                GlobalEventBus.sendEvent('members-added', []).catch(console.error)
-            } else if (checkout.cart.deleteRegistrations.length > 0) {
-                GlobalEventBus.sendEvent('members-deleted', []).catch(console.error)
-            }
+            clearAndEmit()
 
             await navigate.show({
                 components: [
@@ -93,18 +99,12 @@ async function register({checkout, context, admin, members}: {checkout: Register
             // Silently ignore for now
             console.log(payment)
         }, () => {
-            checkout.clear()
+            clearAndEmit()
         })
         return;
     }
     
-    if (checkout.cart.items.length > 0) {
-        GlobalEventBus.sendEvent('members-added', []).catch(console.error)
-    } else if (checkout.cart.deleteRegistrations.length > 0) {
-        GlobalEventBus.sendEvent('members-deleted', []).catch(console.error)
-    }
-
-    checkout.clear()
+    clearAndEmit()
     await navigate.show({
         components: [
             new ComponentWithProperties(RegistrationSuccessView, {
