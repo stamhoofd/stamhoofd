@@ -157,7 +157,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Keuzemenu toevoegen
+                    Vraag of keuzemenu toevoegen
                 </h3>
             </STListItem>
         </STList>
