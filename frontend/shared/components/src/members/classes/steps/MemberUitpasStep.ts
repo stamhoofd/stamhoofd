@@ -35,6 +35,11 @@ export class MemberUitpasStep implements EditMemberStep {
             if (details.reviewTimes.isOutdated("uitpasNumber", this.options.outdatedTime)) {
                 return true;
             }
+        } else {
+            // Also ask if never answered the question
+            if (details.uitpasNumber === null && !details.reviewTimes.isReviewed("uitpasNumber")) {
+                return true;
+            }
         }
 
         return false;

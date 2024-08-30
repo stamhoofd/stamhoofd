@@ -59,6 +59,14 @@ export class ReviewTimes extends AutoEncoder {
         }
     }
 
+    isReviewed(name: "records" | "parents" | "emergencyContacts" | "details" | 'uitpasNumber'): boolean {
+        const time = this.getLastReview(name)
+        if (!time) {
+            return false
+        }
+        return true
+    }
+
     isOutdated(name: "records" | "parents" | "emergencyContacts" | "details" | 'uitpasNumber', timeoutMs: number): boolean {
         const time = this.getLastReview(name)
         if (!time) {
