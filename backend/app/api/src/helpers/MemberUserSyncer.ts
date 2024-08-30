@@ -14,12 +14,14 @@ export class MemberUserSyncerStatic {
         // Make sure all these users have access to the member
         for (const email of userEmails) {
             // Link users that are found with these email addresses.
-            await this.linkUser(email, member, false)
+            await this.linkUser(email, member, false, true)
         }
 
         for (const email of parentAndUnverifiedEmails) {
             // Link parents and unverified emails
-            await this.linkUser(email, member, true)
+
+            // Now we add the responsibility permissions to the parent if there are no userEmails
+            await this.linkUser(email, member, userEmails.length > 0, userEmails.length > 0)
         }
 
         if (unlinkUsers && !member.details.parentsHaveAccess) {
@@ -160,7 +162,7 @@ export class MemberUserSyncerStatic {
         await this.updateInheritedPermissions(user)
     }
 
-    async linkUser(email: string, member: MemberWithRegistrations, asParent: boolean) {
+    async linkUser(email: string, member: MemberWithRegistrations, asParent: boolean, updateNameIfEqual = true) {
         let user = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase()) ?? await User.getForAuthentication(member.organizationId, email, {allowWithoutAccount: true})
 
         if (user) {
@@ -189,8 +191,11 @@ export class MemberUserSyncerStatic {
                         }
                     }
                 }
-                user.firstName = member.details.firstName
-                user.lastName = member.details.lastName
+
+                if (updateNameIfEqual) {
+                    user.firstName = member.details.firstName
+                    user.lastName = member.details.lastName
+                }
                 user.memberId = member.id;
                 await this.updateInheritedPermissions(user)
             } else {
@@ -203,8 +208,10 @@ export class MemberUserSyncerStatic {
                 if (!user.firstName && !user.lastName) {
                     const parents = member.details.parents.filter(p => p.email === email)
                     if (parents.length === 1) {
-                        user.firstName = parents[0].firstName
-                        user.lastName = parents[0].lastName
+                        if (updateNameIfEqual) {
+                            user.firstName = parents[0].firstName
+                            user.lastName = parents[0].lastName
+                        }
                         await user.save()
                     }
                 }
@@ -222,15 +229,19 @@ export class MemberUserSyncerStatic {
             user.email = email
 
             if (!asParent) {
-                user.firstName = member.details.firstName
-                user.lastName = member.details.lastName
+                if (updateNameIfEqual) {
+                    user.firstName = member.details.firstName
+                    user.lastName = member.details.lastName
+                }
                 user.memberId = member.id;
                 await this.updateInheritedPermissions(user)
             } else {
                 const parents = member.details.parents.filter(p => p.email === email)
                 if (parents.length === 1) {
-                    user.firstName = parents[0].firstName
-                    user.lastName = parents[0].lastName
+                    if (updateNameIfEqual) {
+                        user.firstName = parents[0].firstName
+                        user.lastName = parents[0].lastName
+                    }
                 }
 
                 if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
