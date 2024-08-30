@@ -38,7 +38,7 @@ export class MemberManager {
         let lastUpdatedAt = new Date(0)
         this._unwatchUser = watch(() => this.$context.user, () => {
             if (this.$context._lastFetchedUser && this.$context._lastFetchedUser > lastUpdatedAt) {
-                if (this.$context.user && this.$context.user.members) {
+                if (this.$context.user && this.$context.user.members && !this.$context.user.members.isStale) {
                     lastUpdatedAt = new Date()
                     this.loadMembers().catch(console.error)
                 }
@@ -136,7 +136,7 @@ export class MemberManager {
 
     async loadMembers() {
         console.log('MemberManager.loadMembers')
-        if (this.$context.user?.members) {
+        if (this.$context.user?.members && !this.$context.user.members.isStale) {
             this.family.insertFromBlob(this.$context.user.members, true)
             return
         }

@@ -44,6 +44,8 @@ export class PlatformFamilyManager {
             shouldRetry: options?.shouldRetry ?? false
         });
 
+        response.data.markReceivedFromBackend()
+
         this.updateOrganizationFromMembers(response.data.members)
         return response.data
     }
@@ -75,6 +77,7 @@ export class PlatformFamilyManager {
 
     async isolatedPatch(members: PlatformMember[], patches: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>, shouldRetry: boolean = false) {
         if (patches.changes.length) {
+            MembersBlob.markAllStale()
             const response = await this.context.authenticatedServer.request({
                 method: "PATCH",
                 path: this.app == 'registration' ? '/members' : "/organization/members",
@@ -83,6 +86,7 @@ export class PlatformFamilyManager {
                 shouldRetry,
                 owner: this
             });
+            response.data.markReceivedFromBackend()
 
             for (const c of members) {
                 // Check in response
@@ -128,6 +132,8 @@ export class PlatformFamilyManager {
 
             let response: RequestResult<MembersBlob>;
             try {
+                MembersBlob.markAllStale()
+                
                 response = await this.context.authenticatedServer.request({
                     method: "PATCH",
                     path: this.app == 'registration' ? '/members' : "/organization/members",
@@ -136,6 +142,9 @@ export class PlatformFamilyManager {
                     shouldRetry,
                     owner: this
                 });
+
+                // Make sure we use local time, so this is never stale
+                response.data.markReceivedFromBackend()
             } catch (e) {
                 for (const c of clearAfter.values()) {
                     c.markFailedSave();

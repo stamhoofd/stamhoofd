@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, field } from '@simonbackx/simple-encoding';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Organization } from '../Organization';
@@ -134,4 +134,26 @@ export class MembersBlob extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Organization) })
     organizations: Organization[] = []
+
+    /**
+     * Timestamp on which the backend constructed this blob
+     * 
+     * This is encoded, so it can be stored locally
+     */
+    @field({ decoder: DateDecoder, ...NextVersion })
+    receivedAt = new Date()
+
+    markReceivedFromBackend() {
+        this.receivedAt = new Date()
+    }
+
+    get isStale() {
+        return MembersBlob.lastPatchedMembersDate !== null && this.receivedAt < MembersBlob.lastPatchedMembersDate
+    }
+
+    static lastPatchedMembersDate: Date | null = null
+
+    static markAllStale() {
+        MembersBlob.lastPatchedMembersDate = new Date()
+    }
 }
