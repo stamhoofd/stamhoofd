@@ -55,7 +55,7 @@ function guardFilterCompareValue(val: any): StamhoofdCompareValue {
     throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.')
 }
 
-function doNormalizeValue(val: StamhoofdCompareValue): string|number|Date|null {
+function doNormalizeValue(val: StamhoofdCompareValue, options?: SQLExpressionFilterOptions): string|number|Date|null|boolean {
     if (val instanceof Date) {
         return val
     }
@@ -65,7 +65,18 @@ function doNormalizeValue(val: StamhoofdCompareValue): string|number|Date|null {
     }
 
     if (typeof val === 'boolean') {
+        if (options?.type === SQLValueType.JSONBoolean) {
+            return val
+        }
         return val === true ? 1 : 0;
+    }
+
+    if (typeof val === 'number') {
+        if (options?.type === SQLValueType.JSONBoolean) {
+            return val === 1 ? true : false
+        }
+
+        return val;
     }
 
     if (val === null) {
@@ -84,19 +95,6 @@ function doNormalizeValue(val: StamhoofdCompareValue): string|number|Date|null {
     }
 
     return val;
-}
-
-function guardScalar(s: any): asserts s is SQLScalarValue|null  {
-    if (typeof s !== 'string' && typeof s !== 'number' && typeof s !== 'boolean' && !(s instanceof Date) && s !== null) {
-        throw new Error('Invalid scalar value')
-    }
-
-}
-
-function guardString(s: any): asserts s is string  {
-    if (typeof s !== 'string') {
-        throw new Error('Invalid string value')
-    }
 }
 
 export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLFilterDefinitions): SQLFilterCompiler {
@@ -120,12 +118,27 @@ export function createSQLFilterNamespace(definitions: SQLFilterDefinitions): SQL
     }
 }
 
-type SQLExpressionFilterOptions = {normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null, isJSONValue?: boolean, isJSONObject?: boolean, nullable?: boolean}
+export enum SQLValueType {
+    'JSONBoolean' = 'JSONBoolean'
+}
 
-export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, {normalizeValue, isJSONObject = false, isJSONValue = false, nullable = false}: SQLExpressionFilterOptions = {}): SQLFilterCompiler {
+type SQLExpressionFilterOptions = {
+    normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null, 
+    isJSONValue?: boolean, 
+    isJSONObject?: boolean, 
+    nullable?: boolean,
+
+    /**
+     * Type of this column, use to normalize values received from filters
+     */
+    type?: SQLValueType
+}
+
+export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, options: SQLExpressionFilterOptions = {}): SQLFilterCompiler {
+    let {normalizeValue, isJSONObject = false, isJSONValue = false, nullable = false} = options;
     normalizeValue = normalizeValue ?? ((v) => v);
     const norm = (val: any) => {
-        const n = doNormalizeValue(guardFilterCompareValue(val));
+        const n = doNormalizeValue(guardFilterCompareValue(val), options);
         return normalizeValue(n);
     }
     const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression
@@ -140,7 +153,6 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         if (Array.isArray(filter)) {
             throw new Error('Unexpected array in filter')
         }
-
         
         const f = filter;
 

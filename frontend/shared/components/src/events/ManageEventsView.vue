@@ -71,6 +71,7 @@ import EventRow from './components/EventRow.vue';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
 import { useAppContext } from '../context';
+import { useEventsObjectFetcher } from '../fetchers';
 
 type ObjectType = Event;
 
@@ -148,31 +149,13 @@ defineRoutes([
     },
 ])
 
-const fetcher = useInfiniteObjectFetcher<ObjectType>({
+const objectFetcher = useEventsObjectFetcher({
     get requiredFilter() {
         return getRequiredFilter()
-    },
-    async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
-        console.log('Events.fetch', data);
-        data.sort = extendSort(data.sort);
-
-        const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/events",
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(Event as Decoder<Event>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-            query: data,
-            shouldRetry: false,
-            owner: this
-        });
-
-        console.log('[Done] Events.fetch', data, response.data);        
-        return response.data
-    },
-
-    async fetchCount(): Promise<number> {
-        throw new Error("Method not implemented.");
     }
 })
+
+const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher)
 
 const addSuggestions = ref(false);
 const suggestedGroups = computed(() => {
@@ -317,13 +300,6 @@ async function editFilter(event: MouseEvent) {
             })
         ]
     })
-}
-
-function extendSort(list: SortList): SortList  {
-    return assertSort(list, [
-        {key: "startDate", order: SortItemDirection.ASC},
-        {key: "id"}
-    ])
 }
 
 

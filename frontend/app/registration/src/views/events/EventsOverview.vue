@@ -40,12 +40,12 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useContext, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useUser } from '@stamhoofd/components';
+import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useContext, useEventsObjectFetcher, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useUser } from '@stamhoofd/components';
 import { assertSort, Event, isEmptyFilter, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref, watchEffect } from 'vue';
-import EventView from './EventView.vue';
 import { useMemberManager } from '../../getRootView';
+import EventView from './EventView.vue';
 
 type ObjectType = Event;
 
@@ -113,31 +113,13 @@ defineRoutes([
     }
 ])
 
-const fetcher = useInfiniteObjectFetcher<ObjectType>({
+const objectFetcher = useEventsObjectFetcher({
     get requiredFilter() {
         return getRequiredFilter()
-    },
-    async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
-        console.log('Events.fetch', data);
-        data.sort = extendSort(data.sort);
-
-        const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/events",
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(Event as Decoder<Event>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-            query: data,
-            shouldRetry: false,
-            owner: this
-        });
-
-        console.log('[Done] Events.fetch', data, response.data);        
-        return response.data
-    },
-
-    async fetchCount(): Promise<number> {
-        throw new Error("Method not implemented.");
     }
 })
+
+const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher)
 
 const groupedEvents = computed(() => {
     return Event.group(fetcher.objects)
@@ -174,19 +156,12 @@ async function editFilter(event: MouseEvent) {
     })
 }
 
-function extendSort(list: SortList): SortList  {
-    return assertSort(list, [
-        {key: "startDate", order: SortItemDirection.ASC},
-        {key: "id"}
-    ])
-}
-
-
 function getRequiredFilter(): StamhoofdFilter|null  {
     return {
         startDate: {
             $gt: new Date()
-        }
+        },
+        'meta.visible': true
     }
 }
 

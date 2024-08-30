@@ -242,7 +242,7 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
             this.nextRequest.filter = this.filter;
 
             // Same for sorting
-            this.nextRequest.sort = this.sort;
+            this.nextRequest.sort = this.objectFetcher.extendSort ? this.objectFetcher.extendSort([...this.sort]) : this.sort;
             
             const data = await this.objectFetcher.fetch(this.nextRequest)
             if (currentClearIndex !== this._clearIndex) {

@@ -3,85 +3,21 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Event } from '@stamhoofd/models';
-import { SQL, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler } from "@stamhoofd/sql";
+import { SQL, SQLFilterDefinitions, SQLSortDefinitions, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
 import { CountFilteredRequest, Event as EventStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
+import { eventFilterCompilers } from '../../../sql-filters/events';
+import { eventSorters } from '../../../sql-sorters/events';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<EventStruct[], LimitedFilteredRequest>
 
-const filterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
-    name: createSQLColumnFilterCompiler('name'),
-    organizationId: createSQLColumnFilterCompiler('organizationId'),
-    startDate: createSQLColumnFilterCompiler('startDate'),
-    endDate: createSQLColumnFilterCompiler('endDate'),
-    groupIds: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('meta'), '$.value.groups[*].id'),
-        {isJSONValue: true, isJSONObject: true}
-    ),
-    defaultAgeGroupIds: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
-        {isJSONValue: true, isJSONObject: true}
-    ),
-    organizationTagIds: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('meta'), '$.value.organizationTagIds'),
-        {isJSONValue: true, isJSONObject: true}
-    )
-}
-
-const sorters: SQLSortDefinitions<Event> = {
-    'id': {
-        getValue(a) {
-            return a.id
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction
-            })
-        }
-    },
-    'name': {
-        getValue(a) {
-            return a.name
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('name'),
-                direction
-            })
-        }
-    },
-    'startDate': {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.startDate)
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('startDate'),
-                direction
-            })
-        }
-    },
-    'endDate': {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.endDate)
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('endDate'),
-                direction
-            })
-        }
-    },
-}
+const filterCompilers: SQLFilterDefinitions = eventFilterCompilers
+const sorters: SQLSortDefinitions<Event> = eventSorters
 
 export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>
@@ -112,7 +48,7 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     {
                         organizationId: null
                     }
-                ]
+                ],
             };
         }
 
