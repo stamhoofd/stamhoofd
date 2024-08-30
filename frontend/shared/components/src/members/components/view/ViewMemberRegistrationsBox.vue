@@ -167,7 +167,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
 
 function switchCycle(event: MouseEvent) {
     const menu = new ContextMenu([
-        (platform.value.periods ?? []).map(p => {
+        (platform.value.periods ?? []).slice(0, 5).map(p => {
             return new ContextMenuItem({
                 name: p.name,
                 selected: p.id === period.value.id,
