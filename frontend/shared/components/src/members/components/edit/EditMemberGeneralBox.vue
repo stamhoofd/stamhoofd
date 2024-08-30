@@ -144,6 +144,33 @@ useValidation(errors.validator, () => {
         }))
     }
 
+    if (isPropertyEnabled('phone') && phone.value) {
+        // Check if duplicate
+        const clone = props.member.patchedMember.details.clone();
+        clone.cleanData();
+        if (clone.phone === null) {
+            se.addError(new SimpleError({
+                code: "invalid_field",
+                message: `Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van ${props.member.patchedMember.details.firstName}. Vul het GSM-nummer van ${props.member.patchedMember.details.firstName} zelf in.`,
+                field: "phone"
+            }))
+        }
+    }
+
+    if (isPropertyEnabled('emailAddress') && email.value) {
+        // Check if duplicate
+        const clone = props.member.patchedMember.details.clone();
+        clone.cleanData();
+        if (clone.email === null) {
+            se.addError(new SimpleError({
+                code: "invalid_field",
+                message: `Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van ${props.member.patchedMember.details.firstName}. Vul het e-mailadres van ${props.member.patchedMember.details.firstName} zelf in.`,
+                field: "email"
+            }))
+        }
+    }
+
+
     if (se.errors.length > 0) {
         errors.errorBox = new ErrorBox(se)
         return false
