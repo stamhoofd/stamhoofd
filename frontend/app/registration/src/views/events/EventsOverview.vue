@@ -38,10 +38,9 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useContext, useEventsObjectFetcher, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useUser } from '@stamhoofd/components';
-import { assertSort, Event, isEmptyFilter, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { Event, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref, watchEffect } from 'vue';
 import { useMemberManager } from '../../getRootView';
@@ -50,12 +49,10 @@ import EventView from './EventView.vue';
 type ObjectType = Event;
 
 const searchQuery = ref('');
-const context = useContext();
 const organization = useOrganization();
 const platform = usePlatform()
 const $navigate = useNavigate();
 const {presentPositionableSheet} = usePositionableSheet()
-const user = useUser()
 const memberManager = useMemberManager()
 
 const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : (memberManager.family.organizations ?? []))
