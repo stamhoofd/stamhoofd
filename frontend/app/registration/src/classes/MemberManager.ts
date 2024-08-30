@@ -35,9 +35,13 @@ export class MemberManager {
         }
 
         // If the user is refetched, also reload the members that we've received
+        let lastUpdatedAt = new Date(0)
         this._unwatchUser = watch(() => this.$context.user, () => {
-            if (this.$context.user && this.$context.user.members) {
-                this.loadMembers().catch(console.error)
+            if (this.$context._lastFetchedUser && this.$context._lastFetchedUser > lastUpdatedAt) {
+                if (this.$context.user && this.$context.user.members) {
+                    lastUpdatedAt = new Date()
+                    this.loadMembers().catch(console.error)
+                }
             }
         }, { deep: true });
     }

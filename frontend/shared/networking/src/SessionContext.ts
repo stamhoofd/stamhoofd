@@ -547,14 +547,14 @@ export class SessionContext implements RequestMiddleware {
             decoder: UserWithMembers as Decoder<UserWithMembers>,
             shouldRetry
         })
+        this._lastFetchedUser = new Date()
+
         if (this.user) {
             this.user.deepSet(response.data)
         } else {
             this.user = response.data
         }
         console.log("Fetched session user")
-
-        this._lastFetchedUser = new Date()
 
         if (!isReactive(this.user)) {
             console.error("SessionContext.user is not reactive after fetching user!")
@@ -564,8 +564,8 @@ export class SessionContext implements RequestMiddleware {
         if (this.organization) {
             const returnedOrganization = this.user.members.organizations.find(o => o.id == this.organization?.id)
             if (returnedOrganization) {
-                this.updateOrganization(returnedOrganization)
                 this._lastFetchedOrganization = new Date()
+                this.updateOrganization(returnedOrganization)
             } else {
                 console.warn('Did not find organization in user response')
             }
