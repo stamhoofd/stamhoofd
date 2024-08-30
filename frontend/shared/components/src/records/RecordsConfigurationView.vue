@@ -1,7 +1,7 @@
 <template>
-    <SaveView :loading="saving" title="Gegevens van leden" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" title="Persoonsgegevens van leden" :disabled="!hasChanges" @save="save">
         <h1>
-            Gegevens van leden
+            Persoonsgegevens van leden
         </h1>
             
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -33,21 +33,23 @@
 
         <hr>
         <h2 v-if="app === 'admin'">
-            Ingebouwde vragenlijsten uitbreiden
+            Ingebouwde persoonsgegevens uitbreiden
         </h2>
         <h2 v-else>
-            Eigen vragenlijsten
+            Extra persoonsgegevens
         </h2>
 
         <p v-if="app == 'dashboard'">
-            Breid het aantal vragenlijsten zelf nog uit. Vervolgens kan je per inschrijvingsgroep (of gewoon voor alle leden) de vragenlijsten inschakelen.
+            Breid het aantal persoonsgegevens zelf nog uit. Vervolgens kan je per inschrijvingsgroep (of gewoon voor alle leden) de persoonsgegevens inschakelen.
         </p>
         <p v-if="app == 'admin'">
-            Voeg zelf nog vragenlijsten toe die voor alle lokale groepen beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen kunnen deze ook nog inschakelen volgens hun wensen.
+            Voeg zelf nog persoonsgegevens toe die voor alle lokale groepen beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen kunnen deze ook nog inschakelen volgens hun wensen.
         </p>
         <p class="style-description-block">
             Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
+
+        <p class="info-box">Gebruik vragenlijsten niet om tijdelijke gegevens te verzamelen. Voeg daarvoor keuzemenu's toe aan je inschrijvingsgroepen of activiteiten.</p>
 
         <STList v-model="categories" :draggable="true">
             <template #item="{item: category}">

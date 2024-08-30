@@ -5,7 +5,7 @@
         </h1>
 
         <p v-if="allowChildCategories" class="style-description">
-            Een vragenlijst bevat één of meerdere vragen, eventueel opgedeeld in categorieën. Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+            Een vragenlijst bevat één of meerdere persoonsgegevens, eventueel opgedeeld in categorieën. Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
         <p v-else class="style-description">
             Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
@@ -113,7 +113,7 @@
 
         <div v-if="defaultEnabled" class="container">
             <hr>
-            <h2>Filters</h2>
+            <h2>Slim in- en uitschakelen</h2>
             <p v-if="allowChildCategories">
                 Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.
             </p>
@@ -121,7 +121,7 @@
                 Je kan kiezen wanneer deze vragen van toepassing zijn.
             </p>
 
-            <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories" :builder="filterBuilder" />
+            <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories && patchedCategory.getAllRecords().length > 1" :builder="filterBuilder" />
         </div>
 
         <div class="container">

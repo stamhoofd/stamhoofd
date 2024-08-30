@@ -168,7 +168,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Vragenlijsten en gegevens van leden
+                            Persoonsgegevens van leden
                         </h2>
                         <p class="style-description">
                             Kies welke informatie je verzamelt van jouw leden
@@ -340,7 +340,7 @@ enum Routes {
     RegistrationPaymentMethods = 'inschrijvingen/betaalmethodes',
     RegistrationPage = 'inschrijvingen/pagina',
     RegistrationGroups = 'inschrijvingen/groepen',
-    RegistrationRecords = 'inschrijvingen/vragenlijsten',
+    RegistrationRecords = 'inschrijvingen/persoonsgegevens',
     RegistrationFreeContributions = 'inschrijvingen/vrije-bijdrage',
     SingleSignOn = 'sso',
     Packages = 'pakketten',

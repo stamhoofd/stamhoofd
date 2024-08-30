@@ -250,7 +250,7 @@ import EditPrivacyView from './privacy/EditPrivacyView.vue';
 
 enum Routes {
     Admins = 'beheerders',
-    Records = 'vragenlijsten',
+    Records = 'persoonsgegevens',
     DefaultAgeGroups = 'standaard-leeftijdsgroepen',
     Responsibilities = 'functies',
     RegistrationPeriods = 'werkjaren',
