@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-networking";
-import { LimitedFilteredRequest, SortList, StamhoofdFilter, mergeFilters } from "@stamhoofd/structures";
+import { LimitedFilteredRequest, SortList, StamhoofdFilter, isEqualFilter, mergeFilters } from "@stamhoofd/structures";
 import { onBeforeUnmount, reactive } from "vue";
 import { ObjectFetcher } from "./ObjectFetcher";
 
@@ -148,7 +148,7 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
     }
     
     setFilter(filter: StamhoofdFilter|null) {
-        if (JSON.stringify(this.baseFilter ?? {}) == JSON.stringify(filter ?? {})) {
+        if (isEqualFilter(filter, this.baseFilter)) {
             console.log('setFilter unchanged')
             return;
         }

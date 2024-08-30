@@ -80,3 +80,15 @@ export function assertSort(list: SortList, assert: AssertSortList): SortList  {
 
     return list;
 }
+
+export function isEqualFilter(a: StamhoofdFilter|null, b: StamhoofdFilter|null) {
+    if (a === null) {
+        return b === null;
+    }
+
+    if (b === null) {
+        return false;
+    }
+
+    return JSON.stringify(a) === JSON.stringify(b); 
+}

@@ -39,10 +39,10 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useContext, useEventsObjectFetcher, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useUser } from '@stamhoofd/components';
-import { Event, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useEventsObjectFetcher, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref, watchEffect } from 'vue';
+import { computed, onActivated, ref, Ref, watchEffect } from 'vue';
 import { useMemberManager } from '../../getRootView';
 import EventView from './EventView.vue';
 
@@ -56,7 +56,29 @@ const {presentPositionableSheet} = usePositionableSheet()
 const memberManager = useMemberManager()
 
 const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : (memberManager.family.organizations ?? []))
-const selectedUIFilter = ref(filterBuilders[0].fromFilter(memberManager.family.getRecommendedEventsFilter())) as Ref<null|UIFilter>;
+
+let recommendedFilter = filterBuilders[0].fromFilter(memberManager.family.getRecommendedEventsFilter())
+const selectedUIFilter = ref(recommendedFilter) as Ref<null|UIFilter>;
+
+function updateRecommendedFilter() {
+    const oldRecommendedFilter = recommendedFilter?.build() ?? null
+    
+    recommendedFilter = filterBuilders[0].fromFilter(memberManager.family.getRecommendedEventsFilter())
+    
+    const currentFilter = selectedUIFilter.value?.build() ?? null
+
+    if (isEqualFilter(currentFilter, oldRecommendedFilter)) {
+        selectedUIFilter.value = recommendedFilter
+    }
+}
+
+onActivated(() => {
+    updateRecommendedFilter()
+})
+
+useVisibilityChange(() => {
+    updateRecommendedFilter()
+})
 
 enum Routes {
     Event = "activiteit"
