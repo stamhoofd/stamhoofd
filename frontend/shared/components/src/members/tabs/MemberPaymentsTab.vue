@@ -153,7 +153,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableA
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncPaymentView, ErrorBox, GlobalEventBus, Spinner, useAuth, useContext, useErrors, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItemWithPayments, FinancialSupportSettings, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, FinancialSupportSettings, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditBalanceItemView from '../../payments/EditBalanceItemView.vue';
@@ -300,7 +300,12 @@ async function createPayment() {
     const payment = PaymentGeneral.create({
         method: PaymentMethod.PointOfSale,
         status: PaymentStatus.Succeeded,
-        paidAt: new Date()
+        paidAt: new Date(),
+        customer: PaymentCustomer.create({
+            firstName: props.member.patchedMember.details.firstName,
+            lastName: props.member.patchedMember.details.lastName,
+            email: props.member.patchedMember.details.email ?? props.member.patchedMember.details.getParentEmails()[0] ?? null,
+        })
     })
 
     const component = new ComponentWithProperties(EditPaymentView, {

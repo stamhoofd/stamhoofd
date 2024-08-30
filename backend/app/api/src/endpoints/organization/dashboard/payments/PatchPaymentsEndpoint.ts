@@ -69,6 +69,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             payment.organizationId = organization.id
             payment.status = PaymentStatus.Created
             payment.method = put.method
+            payment.customer = put.customer
 
             if (payment.method == PaymentMethod.Transfer) {
                 if (!put.transferSettings) {
