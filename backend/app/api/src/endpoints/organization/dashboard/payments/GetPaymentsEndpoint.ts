@@ -134,11 +134,8 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
             }
 
-            query.orderBy(compileToSQLSorter(assertSort(q.sort, [
-                {
-                    key: 'id'
-                }
-            ]), sorters))
+            q.sort = assertSort(q.sort, [{key: 'id'}])
+            query.orderBy(compileToSQLSorter(q.sort, sorters))
             query.limit(q.limit)
         }
        

@@ -4,7 +4,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
-import { CountFilteredRequest, LimitedFilteredRequest, Organization as OrganizationStruct, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, LimitedFilteredRequest, Organization as OrganizationStruct, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
@@ -88,6 +88,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
                 query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
             }
 
+            q.sort = assertSort(q.sort, [{key: 'id'}])
             query.orderBy(compileToSQLSorter(q.sort, sorters))
             query.limit(q.limit)
         }

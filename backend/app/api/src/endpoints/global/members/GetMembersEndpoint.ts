@@ -4,7 +4,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, Platform } from '@stamhoofd/models';
 import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
-import { CountFilteredRequest, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -174,6 +174,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
             }
 
+            q.sort = assertSort(q.sort, [{key: 'id'}])
             query.orderBy(compileToSQLSorter(q.sort, sorters))
             query.limit(q.limit)
         }

@@ -4,7 +4,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Event } from '@stamhoofd/models';
 import { SQL, SQLFilterDefinitions, SQLSortDefinitions, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
-import { CountFilteredRequest, Event as EventStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, Event as EventStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
@@ -88,6 +88,7 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
             }
 
+            q.sort = assertSort(q.sort, [{key: 'id'}])
             query.orderBy(compileToSQLSorter(q.sort, sorters))
             query.limit(q.limit)
         }
