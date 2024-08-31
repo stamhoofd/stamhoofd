@@ -99,7 +99,6 @@ const title = computed(() => $t('admin.settings.membershipTypes.period.title', {
 const pop = usePop();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.config);
-// const {} = usePatchMap()
 
 const $showPricePerDay = computed(() => props.type.behaviour === PlatformMembershipTypeBehaviour.Days);
 
@@ -202,11 +201,6 @@ const shouldNavigateAway = async () => {
 }
 
 function patchPrice(configPrice: PlatformMembershipTypeConfigPrice, patch: PlatformMembershipTypeConfigPrice) {
-    // if(!patch.isPatch()) {
-    //     console.error('Put is not allowed.')
-    //     return;
-    // }
-
     prices.value = prices.value.map(p => {
         if (p.id === configPrice.id) {
             return p.patch(patch)
