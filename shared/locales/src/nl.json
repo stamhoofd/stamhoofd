@@ -40,6 +40,7 @@
     "admin.settings.membershipTypes.new.period": "Instellen voor werkjaar",
     "admin.settings.membershipTypes.new.title": "Nieuw aansluitingstype",
     "admin.settings.membershipTypes.period.addPrice": "Prijs vanaf datum",
+    "admin.settings.membershipTypes.period.addPriceForTag": "Prijs voor organisatie tag",
     "admin.settings.membershipTypes.period.delete.confirmation.title": "Ben je zeker dat je deze instellingen wilt verwijderen?",
     "admin.settings.membershipTypes.period.noPeriodsAvailable": "Je hebt al voor elk werkjaar instellingen toegevoegd",
     "admin.settings.membershipTypes.period.priceDate": "Vanaf",

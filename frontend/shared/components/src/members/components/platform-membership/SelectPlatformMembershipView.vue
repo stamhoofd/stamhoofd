@@ -53,7 +53,9 @@
 </template>
 
 <script setup lang="ts">
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { ScrollableSegmentedControl, Toast, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
@@ -63,8 +65,6 @@ import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
 import { useOrganization, usePlatform } from '../../../hooks';
 import DateSelection from '../../../inputs/DateSelection.vue';
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
 
 const props = defineProps<{
     member: PlatformMember
@@ -213,34 +213,29 @@ function getTypeDateDescription(type: PlatformMembershipType) {
 }
 
 function getTypePriceDescription(type: PlatformMembershipType) {
-    const periodConfig = type.periods.get(platform.value.period.id);
-    if (!periodConfig) {
-        return 'Niet beschikbaar';
-    }
-
-    const priceConfig = periodConfig.getPriceForDate(new Date());
-
-    if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
-        return Formatter.price(priceConfig.pricePerDay) + ' per dag'
-    }
-
-    return Formatter.price(priceConfig.price);
+    return getPriceForDate(type, new Date());
 }
 
 function getTypePriceNormalPrice(type: PlatformMembershipType) {
+    return getPriceForDate(type, new Date(1));
+}
+
+function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const periodConfig = type.periods.get(platform.value.period.id);
     if (!periodConfig) {
         return 'Niet beschikbaar';
     }
 
-    const priceConfig = periodConfig.getPriceForDate(new Date(1));
+    const priceConfig = periodConfig.getPriceConfigForDate(date);
 
     if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
         return Formatter.price(priceConfig.pricePerDay) + ' per dag'
     }
 
-    return Formatter.price(priceConfig.price);
+    const tagIds = organization.value?.meta.tags ?? [];
+    const shouldApplyReducedPrice = props.member.shouldApplyReducedPrice;
+    const price = priceConfig.getBasePrice(tagIds, shouldApplyReducedPrice);
+
+    return Formatter.price(price);
 }
-
-
 </script>

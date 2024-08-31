@@ -400,6 +400,10 @@ export class MemberDetails extends AutoEncoder {
         return this.unverifiedEmails.length > 0 || this.unverifiedAddresses.length > 0 || this.unverifiedPhones.length > 0;
     }
 
+    get shouldApplyReducedPrice(): boolean {
+        return this.requiresFinancialSupport?.value ?? false
+    }
+
     /**
      * @deprecated
      */

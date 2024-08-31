@@ -5,19 +5,25 @@
             <PriceInput v-model="price" placeholder="Gratis" :min="min" />
         </STInputBox>
 
-        <STInputBox v-if="enabled || reducedPrice !== null" :title="financialSupportSettings.priceName" error-fields="price" :error-box="errorBox">
+        <STInputBox v-if="$showReducedPrice" :title="financialSupportSettings.priceName" error-fields="price" :error-box="errorBox">
             <PriceInput v-model="reducedPrice" :placeholder="formatPrice(price)" :min="min" :required="false" />
         </STInputBox>
+
+        <slot v-else-if="$slots.end" name="end" />
+    </div>
+
+    <div v-if="$slots.end && $showReducedPrice" class="split-inputs">
+        <slot name="end" />
     </div>
 </template>
 
 <script setup lang="ts">
+import { SimpleError } from '@simonbackx/simple-errors';
 import { PriceInput, STErrorsDefault, useErrors, useValidation, Validator } from '@stamhoofd/components';
 import { Group, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useFinancialSupportSettings } from '../hooks';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 const props = withDefaults(
     defineProps<{
@@ -39,6 +45,8 @@ const ownErrors = useErrors();
 const {enabled, financialSupportSettings} = useFinancialSupportSettings({
     group: computed(() => props.group),
 })
+
+const $showReducedPrice = computed(() => reducedPrice.value !== null)
 
 useValidation(props.validator, () => {
     if (!enabled.value && model.value.reducedPrice !== null) {

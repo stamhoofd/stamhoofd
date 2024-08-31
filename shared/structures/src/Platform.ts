@@ -5,6 +5,7 @@ import { Colors } from "@stamhoofd/utility";
 import { DefaultAgeGroup } from "./DefaultAgeGroup";
 import { Replacement } from "./endpoints/EmailRequest";
 import { Image } from "./files/Image";
+import { ReduceablePrice } from "./GroupSettings";
 import { MemberResponsibility } from "./MemberResponsibility";
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 import { OrganizationEmail } from "./OrganizationEmail";
@@ -59,14 +60,43 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     startDate: Date|null = null
 
-    @field({ decoder: IntegerDecoder })
-    price = 0
+    /**
+     *@deprecated
+     */
+    @field({ decoder: IntegerDecoder, field: 'price', optional: true })
+    _price = 0
+
+    // key = tag id or an empty string for the default reducable price
+    @field({ decoder: new MapDecoder(StringDecoder, ReduceablePrice), nullable: true, ...NextVersion })
+    prices: Map<string, ReduceablePrice> = new Map([['default', ReduceablePrice.create({price: 0})]]);
     
     /**
      * If you set this, it will be possible to choose a custom start and end date within the startDate - endDate period
      */
     @field({ decoder: IntegerDecoder })
     pricePerDay = 0
+
+    getBasePrice(tagIds: string[], shouldApplyReducedPrice: boolean) {
+        let result: number | null = null;
+
+        for(const tagId of tagIds.concat([''])) {
+            const price = this.prices.get(tagId);
+            if(!price) continue;
+
+            const priceForMember = price.getPrice(shouldApplyReducedPrice);
+
+            if(result === null || priceForMember < result) {
+                result = priceForMember;
+            }
+        }
+
+        return result ?? 0;
+    }
+
+    calculatePrice(tagIds: string[], shouldApplyReducedPrice: boolean, days: number) {
+        const basePrice = this.getBasePrice(tagIds, shouldApplyReducedPrice);
+        return this.pricePerDay * days + basePrice;
+    }
 }
 
 export class PlatformMembershipTypeConfig extends AutoEncoder {
@@ -85,22 +115,53 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PlatformMembershipTypeConfigPrice) })
     prices: PlatformMembershipTypeConfigPrice[] = [PlatformMembershipTypeConfigPrice.create({})]
 
-    getPriceForDate(date: Date) {
+    getPriceConfigForDate(date: Date): PlatformMembershipTypeConfigPrice {
         if (date === undefined) {
             throw new Error("Date is required")
         }
         const sorted = this.prices.slice().sort((a, b) => (a.startDate ?? new Date(0)).getTime() - (b.startDate ?? new Date(0)).getTime())
-        let price = sorted[0];
+        let result = sorted[0];
 
-        for (const p of sorted) {
-            if (p.startDate === null || date >= p.startDate) {
-                price = p
+        for (const priceConfig of sorted) {
+            if (priceConfig.startDate === null || date >= priceConfig.startDate) {
+                result = priceConfig
             }
         }
-        return price
-    
+
+        return result
     }
+
+    getPrice(date: Date, tagIds: string[], shouldApplyReducedPrice: boolean): {config: PlatformMembershipTypeConfigPrice, selectedPrice: number} {
+        const sorted = this.prices.slice().sort((a, b) => (a.startDate ?? new Date(0)).getTime() - (b.startDate ?? new Date(0)).getTime())
+
+        const defaultPriceConfig = sorted[0];
+        let result: {config: PlatformMembershipTypeConfigPrice, selectedPrice: number} = {config: defaultPriceConfig, selectedPrice: defaultPriceConfig.prices.get('')?.getPrice(shouldApplyReducedPrice) ?? 0};
+
+        for (const priceConfig of sorted) {
+            if(priceConfig.startDate === null || date >= priceConfig.startDate) {
+                let selectedPrice: number | null = null;
+                let config: PlatformMembershipTypeConfigPrice | null = null;
+
+                for(const tagId of tagIds.concat([''])) {
+                    const price = priceConfig.prices.get(tagId);
+                    if(!price) continue;
+
+                    const priceForMember = price.getPrice(shouldApplyReducedPrice);
     
+                    if(selectedPrice === null || priceForMember < selectedPrice) {
+                        selectedPrice = priceForMember;
+                        config = priceConfig;
+                    }
+                }
+
+                if(config && selectedPrice !== null) {
+                    result = {config, selectedPrice};
+                }
+            }
+        }
+
+        return result
+    }
 }
 
 export enum PlatformMembershipTypeBehaviour {
@@ -140,12 +201,12 @@ export class PlatformMembershipType extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
     requiredTagIds: string[]|null = null;
 
-    getPrice(periodId: string, date: Date) {
+    getPrice(periodId: string, date: Date, tagIds: string[], isReduced: boolean) {
         const period = this.periods.get(periodId)
         if (!period) {
             return null
         }
-        return period.getPriceForDate(date)
+        return period.getPrice(date, tagIds, isReduced);
     }
 }
 

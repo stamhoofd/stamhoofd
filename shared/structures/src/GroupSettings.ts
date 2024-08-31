@@ -2,15 +2,15 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Image } from './files/Image';
 import { Group } from './Group';
 import { GroupGenderType } from './GroupGenderType';
-import { RegisterItem } from './members/checkout/RegisterItem';
-import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
-import { PlatformMember } from './members/PlatformMember';
 import { OldGroupPrices } from './OldGroupPrices';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase';
 import { StockReservation } from './StockReservation';
+import { Image } from './files/Image';
+import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
+import { PlatformMember } from './members/PlatformMember';
+import { RegisterItem } from './members/checkout/RegisterItem';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -18,14 +18,17 @@ export class ReduceablePrice extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true })
     reducedPrice: number | null = null
+    
+    getPrice(isReduced: boolean) {
+        if(this.reducedPrice === null) {
+            return this.price;
+        }
+
+        return isReduced ? this.reducedPrice : this.price;
+    }
 
     forMember(member: PlatformMember) {
-        if (this.reducedPrice === null) {
-            return this.price
-        }
-        const reduced = member.patchedMember.details.requiresFinancialSupport?.value ?? false
-
-        return reduced ? this.reducedPrice : this.price
+        return this.getPrice(member.patchedMember.details.shouldApplyReducedPrice);
     }
 }
 
