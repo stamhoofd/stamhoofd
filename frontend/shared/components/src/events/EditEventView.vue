@@ -644,7 +644,8 @@ async function addRegistrations() {
             periodId: externalOrganization.value?.period.period.id ?? organization.value?.period.period.id,
             type: GroupType.EventRegistration,
             settings: GroupSettings.create({
-                name: patched.value.name
+                name: patched.value.name,
+                allowRegistrationsByOrganization: isNationalActivity.value,
             })
         })
 
