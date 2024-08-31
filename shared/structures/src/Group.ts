@@ -288,6 +288,20 @@ export class Group extends AutoEncoder {
                     }
                 }
             })
+        } else {
+            if (this.settings.requirePlatformMembershipOn !== null) {
+                const requirePlatformMembershipOn = this.settings.requirePlatformMembershipOn
+
+                filter.push({
+                    platformMemberships: {
+                        $elemMatch: {
+                            endDate: {
+                                $gt: requirePlatformMembershipOn
+                            },
+                        }
+                    }
+                })
+            }
         }
 
         if (this.settings.requireOrganizationIds.length) {
