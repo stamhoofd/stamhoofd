@@ -143,7 +143,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet } from "@stamhoofd/components";
+import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet, useVisibilityChange } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -912,8 +912,6 @@ onMounted(() => {
     if (!canLeaveSelectionMode.value) {
         showSelection.value = true
     }
-
-    refreshOnReturn()
 });
 
 // 
@@ -929,6 +927,10 @@ onDeactivated(() => {
     window.removeEventListener("resize", onResize)
 });
 
+useVisibilityChange(() => {
+    doRefresh()
+})
+
 onBeforeUnmount(() => {
     // Remove event listeners
     if (tableElement.value) {
@@ -936,13 +938,8 @@ onBeforeUnmount(() => {
     }
 
     window.removeEventListener("resize", onResize)
-    document.removeEventListener("visibilitychange", doRefresh)
     props.tableObjectFetcher.destroy();
 });
-
-function refreshOnReturn() {
-    document.addEventListener("visibilitychange", doRefresh);
-}
 
 function doRefresh() {
     if (document.visibilityState === 'visible') {
