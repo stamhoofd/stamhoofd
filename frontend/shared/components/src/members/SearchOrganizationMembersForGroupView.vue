@@ -117,15 +117,18 @@ const fetcher = useInfiniteObjectFetcher<ObjectType>({
         if (!contextOrganization.value) {
             throw new Error("Organization is required")
         }
-        return {
-            registrations: {
-                $elemMatch: {
-                    organization: {
-                        id: contextOrganization.value.id
-                    },
-                }
-            }
-        };
+
+        // we already add this by default in the backend
+        return null;
+        //return {
+        //    registrations: {
+        //        $elemMatch: {
+        //            organization: {
+        //                id: contextOrganization.value.id
+        //            },
+        //        }
+        //    }
+        //};
     },
     async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
         console.log('Members.fetch', data);
