@@ -55,11 +55,12 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { assertSort, Event, isEmptyFilter, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { Event, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
+import { useAppContext } from '../context';
+import { useEventsObjectFetcher } from '../fetchers';
 import { getEventUIFilterBuilders } from '../filters/filterBuilders';
 import { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
@@ -70,8 +71,6 @@ import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableShee
 import EventRow from './components/EventRow.vue';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
-import { useAppContext } from '../context';
-import { useEventsObjectFetcher } from '../fetchers';
 
 type ObjectType = Event;
 
@@ -89,7 +88,6 @@ const organization = useOrganization();
 const platform = usePlatform()
 const $navigate = useNavigate();
 const {presentPositionableSheet} = usePositionableSheet()
-const app = useAppContext();
 const auth = useAuth();
 
 const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [])
@@ -305,9 +303,12 @@ async function editFilter(event: MouseEvent) {
 
 function getRequiredFilter(): StamhoofdFilter|null  {
     if (selectedYear.value === null) {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+
         return {
             startDate: {
-                $gt: new Date()
+                $gt: d
             }
         }
     }
