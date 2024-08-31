@@ -37,7 +37,7 @@
             {{ $t('admin.settings.membershipTypes.expireDate.description') }}
         </p>
 
-        <PlatformMembershipTypeConfigEdit
+        <PlatformMembershipTypePriceConfigEdit
             v-for="(priceConfig, index) of prices"
             :key="priceConfig.id"
             :model-value="priceConfig"
@@ -80,7 +80,7 @@ import { CenteredMessage, DateSelection, ErrorBox, NumberInput, SaveView, useErr
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice, RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import PlatformMembershipTypeConfigEdit from './components/PlatformMembershipTypeConfigEdit.vue';
+import PlatformMembershipTypePriceConfigEdit from './components/PlatformMembershipTypePriceConfigEdit.vue';
 
 const errors = useErrors();
 const saving = ref(false);
