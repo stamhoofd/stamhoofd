@@ -15,7 +15,6 @@ const props = defineProps<{
     tagId: string,
     showPricePerDay: boolean,
     validator: Validator,
-    hasMultiplePrices: boolean,
     errorBox?: ErrorBox | null
 }>();
 
@@ -28,9 +27,7 @@ const tag = $platform.value.config.tags.find(t => t.id === props.tagId);
 const $priceTitle = computed(() => format(props.showPricePerDay ? 'Vaste prijs' : 'Prijs'));
 
 function format(base: string) {
-    if(props.tagId === 'default') {
-        // todo: add translation for replacement
-        if(props.hasMultiplePrices) return `${base} voor andere groepen`;
+    if(!props.tagId) {
         return base;
     }
     return `${base} voor ${tag?.name ?? 'Onbekend'}`

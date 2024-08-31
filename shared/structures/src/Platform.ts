@@ -68,7 +68,7 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
 
     // key = tag id or an empty string for the default reducable price
     @field({ decoder: new MapDecoder(StringDecoder, ReduceablePrice), nullable: true, ...NextVersion })
-    prices: Map<string, ReduceablePrice> = new Map([['default', ReduceablePrice.create({price: 0})]]);
+    prices: Map<string, ReduceablePrice> = new Map([['', ReduceablePrice.create({price: 0})]]);
     
     /**
      * If you set this, it will be possible to choose a custom start and end date within the startDate - endDate period
