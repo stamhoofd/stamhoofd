@@ -14,6 +14,7 @@
 
             <h3 class="style-title-list">
                 {{ item.group.settings.name }}
+                <span v-if="item.group.settings.period && item.group.type === GroupType.Membership" class="title-suffix">{{ item.group.settings.period.nameShort }}</span>
             </h3>
 
             <p class="style-description-small">

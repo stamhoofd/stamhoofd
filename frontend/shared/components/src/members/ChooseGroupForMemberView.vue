@@ -18,9 +18,14 @@
 
             <div v-for="(category, index) of tree.categories" :key="category.id" class="container">
                 <hr v-if="index > 0 || !allowChangingOrganization">
-                <h2>
-                    {{ category.settings.name }}
-                    <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock" />
+                <h2 class="style-with-button">
+                    <div>
+                        {{ category.settings.name }}
+                        <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock gray" />
+                    </div>
+                    <div>
+                        <span class="title-suffix">{{ selectedOrganization.period.period.nameShort }}</span>
+                    </div>
                 </h2>
                 <STList class="illustration-list">
                     <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" @click="openGroup(group)" />
