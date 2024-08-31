@@ -149,6 +149,7 @@ import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { Formatter } from '@stamhoofd/utility';
+import { Toast } from '../overlays/Toast';
 
 const props = defineProps<{
     event: Event;
@@ -312,6 +313,11 @@ const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup()
 
 async function addMembers() {
     if (!props.event.group) {
+        return;
+    }
+
+    if (!organization.value ) {
+        Toast.warning('Ga naar het beheerdersportaal van een groep om leden uit die groep toe te voegen. Dit kan niet via het administratieportaal.').show();
         return;
     }
 
