@@ -68,6 +68,9 @@
                     <p v-if="company.address" class="style-description-small">
                         {{ company.address.shortString() }}
                     </p>
+                    <p v-else class="style-description-small">
+                        <span class="style-tag error">Adres ontbreekt</span>
+                    </p>
 
                     <p v-if="company.administrationEmail" class="style-description-small">
                         {{ company.administrationEmail }}
