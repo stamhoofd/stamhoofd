@@ -1,10 +1,10 @@
 
-import { Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
+import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { AuthenticatedStructures } from "./AuthenticatedStructures";
 import { PatchOrganizationRegistrationPeriodsEndpoint } from "../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint";
 import { QueueHandler } from "@stamhoofd/queues";
 import { SetupStepUpdater } from "./SetupStepsUpdater";
-import { PermissionLevel } from "@stamhoofd/structures";
+import { PermissionLevel, Group as GroupStruct } from "@stamhoofd/structures";
 import { MemberUserSyncer } from "./MemberUserSyncer";
 import { SimpleError } from "@simonbackx/simple-errors";
 
@@ -162,5 +162,41 @@ export class PeriodHelper {
         await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod()
     }
 
-    
+    static async updateGroupsInPeriod(period: RegistrationPeriod) {
+        const tag = "updateGroupsInPeriod-"+period.id;
+        
+        if (QueueHandler.isRunning(tag)) {
+            return;
+        }
+
+        console.log(tag);
+
+        const batchSize = 100;
+        await QueueHandler.schedule(tag, async () => {
+            let lastId = "";
+
+            while (true) {
+                const groups = await Group.where(
+                    {
+                        id: { sign: ">", value: lastId },
+                        periodId: period.id
+                    },
+                    { 
+                        limit: batchSize, 
+                        sort: ["id"] 
+                    }
+                );
+
+                for (const group of groups) {
+                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({id: group.id}), period);
+                    lastId = group.id;
+                }
+
+                if (groups.length < batchSize) {
+                    break;
+                }
+
+            }
+        });
+    }
 }

@@ -5,6 +5,7 @@ import { RegistrationPeriod as RegistrationPeriodStruct } from "@stamhoofd/struc
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Context } from '../../../helpers/Context';
+import { PeriodHelper } from '../../../helpers/PeriodHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -90,6 +91,9 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             }
 
             await model.save();
+
+            // Schedule patch of all groups in this period
+            PeriodHelper.updateGroupsInPeriod(model).catch(console.error);
         }
 
         for (const id of request.body.getDeletes()) {

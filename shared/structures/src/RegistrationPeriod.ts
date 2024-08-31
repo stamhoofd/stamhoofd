@@ -1,38 +1,18 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
-import { Formatter } from "@stamhoofd/utility";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 import { Group, GroupStatus } from "./Group";
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from "./GroupCategory";
 import { Organization } from "./Organization";
+import { RegistrationPeriodBase } from "./RegistrationPeriodBase";
 import { SetupSteps } from "./SetupSteps";
 
 export class RegistrationPeriodSettings extends AutoEncoder {
     // todo
 }
 
-export class RegistrationPeriod extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
-
-    @field({ decoder: DateDecoder })
-    startDate = new Date()
-
-    @field({ decoder: DateDecoder })
-    endDate = new Date()
-
-    @field({ decoder: BooleanDecoder })
-    locked = false
-
+export class RegistrationPeriod extends RegistrationPeriodBase {
     @field({ decoder: RegistrationPeriodSettings })
     settings = RegistrationPeriodSettings.create({})
-
-    get name() {
-        return 'Werkjaar ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
-    }
-
-    get nameShort() {
-        return Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
-    }
 }
 
 export class OrganizationRegistrationPeriodSettings extends AutoEncoder {

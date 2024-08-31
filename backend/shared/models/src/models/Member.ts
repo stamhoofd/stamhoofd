@@ -425,7 +425,9 @@ export class Member extends Model {
 
     static async updateMembershipsForId(id: string, silent = false) {
         return await QueueHandler.schedule('updateMemberships-' + id, async function (this: undefined) {
-            console.log('update memberships for id ', id);
+            if (!silent) {
+                console.log('update memberships for id ', id);
+            }
             
             const me = await Member.getWithRegistrations(id)
             if (!me) {

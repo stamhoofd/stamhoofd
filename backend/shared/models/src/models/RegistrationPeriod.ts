@@ -1,6 +1,6 @@
 import { column, Model } from '@simonbackx/simple-database';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
-import { RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
+import { RegistrationPeriodBase, RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 export class RegistrationPeriod extends Model {
@@ -49,6 +49,10 @@ export class RegistrationPeriod extends Model {
         skipUpdate: true
     })
     updatedAt: Date
+
+    getBaseStructure() {
+        return RegistrationPeriodBase.create(this)
+    }
 
     getStructure() {
         return RegistrationPeriodStruct.create(this)

@@ -6,8 +6,8 @@
             <h1 class="style-navigation-title">
                 {{ title }}
 
-                <span v-if="period" class="title-suffix">
-                    {{ period.period.nameShort }}
+                <span v-if="group.settings.period" class="title-suffix">
+                    {{ group.settings.period.nameShort }}
                 </span>
             </h1>
             <p v-if="isLocked" class="warning-box">

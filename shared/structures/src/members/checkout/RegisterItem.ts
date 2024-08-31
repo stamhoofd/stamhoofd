@@ -623,7 +623,7 @@ export class RegisterItem {
         return this.validationError === null
     }
 
-    validatePeriod(group: Group, type: 'move' | 'register') {
+    validatePeriod(group: Group, type: 'move' | 'register', admin = false) {
         if (group.type === GroupType.WaitingList) {
             return;
         }
@@ -635,17 +635,27 @@ export class RegisterItem {
         const platform = this.family.platform
 
         const periodId = group.periodId
-        if (periodId !== this.organization.period.period.id && periodId !== platform.period.id) {
+        if (periodId !== this.organization.period.period.id) {
+            if (!admin) {
+                throw new SimpleError({
+                    code: "different_period",
+                    message: "Different period",
+                    human: type === 'register' ? `Je kan niet meer inschrijven voor ${group.settings.name} omdat dit werkjaar niet actief is.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dat werkjaar niet actief is.`,
+                })
+            }
+        }
+
+        const period = periodId === platform.period.id ? platform.period : (periodId === this.organization.period.period.id ? this.organization.period.period : group.settings.period)
+
+        if (!period) {
             throw new SimpleError({
-                code: "different_period",
-                message: "Different period",
-                human: type === 'register' ? `Je kan niet meer inschrijven voor ${group.settings.name} omdat dit werkjaar niet actief is.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dat werkjaar niet actief is.`,
+                code: "locked_period",
+                message: "Locked period",
+                human: type === 'register' ? `Je kan niet meer inschrijven voor ${group.settings.name} omdat dit werkjaar is afgesloten.` : `Je kan geen inschrijvingen wijzigen van ${group.settings.name} omdat dit werkjaar is afgesloten.`,
             })
         }
 
-        const period = periodId === platform.period.id ? platform.period : this.organization.period.period
-
-        if (period.locked) {
+        if (!period || period.locked) {
             throw new SimpleError({
                 code: "locked_period",
                 message: "Locked period",
@@ -671,7 +681,7 @@ export class RegisterItem {
                 meta: {recoverable: true}
             })
         }
-        this.validatePeriod(this.group, 'register')
+        this.validatePeriod(this.group, 'register', admin)
 
         if (options?.forWaitingList && !this.group.waitingList) {
             throw new SimpleError({
@@ -718,7 +728,7 @@ export class RegisterItem {
                 })
             }
 
-            this.validatePeriod(registration.group, 'move')
+            this.validatePeriod(registration.group, 'move', admin)
         }
 
         // Already registered

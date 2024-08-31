@@ -129,12 +129,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
 
             for (const groupPut of patch.groups.getPuts()) {
-                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, organizationPeriod.periodId, {allowedIds})
+                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, {allowedIds})
                 deleteUnreachable = true
             }
 
             for (const struct of patch.groups.getPatches()) {
-                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(struct)
+                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(struct, period)
             }
 
 
@@ -191,7 +191,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         await organizationPeriod.save();
 
         for (const s of struct.groups) {
-            await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, organizationPeriod.periodId)
+            await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period)
         }
         const groups = await Group.getAll(organization.id, organizationPeriod.periodId)
 
@@ -213,7 +213,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         Member.updateMembershipsForGroupId(id)
     }
 
-    static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>) {
+    static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null) {
         const model = await Group.getByID(struct.id)
 
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
@@ -221,6 +221,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         if (struct.settings) {
+            struct.settings.period = undefined // Not allowed to patch manually
             model.settings.patchOrPut(struct.settings)
         }
 
@@ -252,6 +253,15 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId)
         }
 
+        if (!period && !model.settings.period) {
+            period = await RegistrationPeriod.getByID(model.periodId)
+        }
+
+        if (period) {
+            model.periodId = period.id
+            model.settings.period = period.getBaseStructure()
+        }
+
         const patch = struct;
         if (patch.waitingList !== undefined) {
             if (patch.waitingList === null) {
@@ -272,7 +282,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 }
                 patch.waitingList.id = model.waitingListId
                 patch.waitingList.type = GroupType.WaitingList
-                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList)
+                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList, period)
             } else {
                 if (model.waitingListId) {
                     // for now don't delete, as waiting lists can be shared between multiple groups
@@ -302,10 +312,15 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
                     model.waitingListId = existing.id
                 } else {
+                    const requiredPeriod = period ?? await RegistrationPeriod.getByID(model.periodId)
+
+                    if (!requiredPeriod) {
+                        throw new Error('Unexpected missing period when creating waiting list')
+                    }
                     const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                         patch.waitingList,
                         model.organizationId,
-                        model.periodId
+                        requiredPeriod
                     )
                     model.waitingListId = group.id
                 }
@@ -322,7 +337,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     }
 
 
-    static async createGroup(struct: GroupStruct, organizationId: string, periodId: string, options?: {allowedIds?: string[]}): Promise<Group> {
+    static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: {allowedIds?: string[]}): Promise<Group> {
         const allowedIds = options?.allowedIds ?? []
 
         if (!await Context.auth.hasFullAccess(organizationId)) {
@@ -339,11 +354,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.id = struct.id
         model.organizationId = organizationId
         model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId)
-        model.periodId = periodId
+        model.periodId = period.id
         model.settings = struct.settings
         model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
         model.status = struct.status
         model.type = struct.type
+        model.settings.period = period.getBaseStructure()
 
         if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
             // Create a temporary permission role for this user
@@ -387,7 +403,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                     struct.waitingList,
                     model.organizationId,
-                    model.periodId
+                    period
                 )
                 model.waitingListId = group.id
             }

@@ -1,4 +1,4 @@
-import { AutoEncoderPatchType, Decoder, patchObject } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, Decoder, isPatch, isPatchableArray, patchObject } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Organization, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct } from "@stamhoofd/structures";
@@ -7,6 +7,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Context } from "../../../helpers/Context";
 import { SetupStepUpdater } from "../../../helpers/SetupStepsUpdater";
 import { PeriodHelper } from "../../../helpers/PeriodHelper";
+import { MembershipHelper } from "../../../helpers/MembershipHelper";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -75,6 +76,7 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         let shouldUpdateSetupSteps = false;
         let shouldMoveToPeriod: RegistrationPeriod | null = null;
+        let shouldUpdateMemberships = false;
 
         if (request.body.config) {
             if (!Context.auth.hasPlatformFullAccess()) {
@@ -98,6 +100,10 @@ export class PatchPlatformEndpoint extends Endpoint<
                 } else {
                     platform.config = patchObject(platform.config, newConfig);
                 }
+            }
+
+            if (newConfig.membershipTypes && isPatchableArray(newConfig.membershipTypes) && newConfig.membershipTypes.changes.length > 0) {
+                shouldUpdateMemberships = true;
             }
         }
 
@@ -158,6 +164,10 @@ export class PatchPlatformEndpoint extends Endpoint<
         }
 
         await platform.save();
+
+        if (shouldUpdateMemberships) {
+            MembershipHelper.updateAll().catch(console.error)
+        }
 
         if (shouldMoveToPeriod) {
             PeriodHelper.moveAllOrganizationsToPeriod(shouldMoveToPeriod).catch(console.error)

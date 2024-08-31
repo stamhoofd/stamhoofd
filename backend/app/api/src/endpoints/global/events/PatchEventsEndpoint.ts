@@ -104,7 +104,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                     put.group,
                     put.group.organizationId,
-                    period.id
+                    period
                 )
                 await event.syncGroupRequirements(group)
                 event.groupId = group.id
@@ -199,7 +199,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     }
                     patch.group.id = event.groupId
                     patch.group.type = GroupType.EventRegistration
-                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group)
+
+                    const period = await RegistrationPeriod.getByDate(event.startDate)
+                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period)
                 } else {
                     if (event.groupId) {
                         // need to delete old group first
@@ -222,7 +224,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                         patch.group,
                         patch.group.organizationId,
-                        period.id
+                        period
                     )
                     event.groupId = group.id
                 }

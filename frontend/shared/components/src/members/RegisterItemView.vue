@@ -6,6 +6,10 @@
 
         <h1>
             {{ item.group.settings.name }}
+
+            <span v-if="item.group.settings.period && item.group.type === GroupType.Membership" class="title-suffix">
+                {{ item.group.settings.period.nameShort }}
+            </span>
         </h1>
         <p v-for="registration in item.replaceRegistrations" :key="registration.id" class="style-description">
             <template v-if="registration.group.id !== item.group.id">
@@ -99,7 +103,7 @@
 <script setup lang="ts">
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
-import { GroupOption, GroupOptionMenu, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
+import { GroupOption, GroupOptionMenu, GroupType, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
 

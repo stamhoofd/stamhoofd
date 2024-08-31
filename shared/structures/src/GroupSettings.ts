@@ -1,17 +1,16 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder, EnumDecoder,field, IntegerDecoder,MapDecoder,RecordDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Image } from './files/Image';
+import { Group } from './Group';
 import { GroupGenderType } from './GroupGenderType';
-import { OldGroupPrices } from './OldGroupPrices';
+import { RegisterItem } from './members/checkout/RegisterItem';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
 import { PlatformMember } from './members/PlatformMember';
+import { OldGroupPrices } from './OldGroupPrices';
+import { RegistrationPeriodBase } from './RegistrationPeriodBase';
 import { StockReservation } from './StockReservation';
-import { RegisterItem } from './members/checkout/RegisterItem';
-import { Group } from './Group';
-import { StamhoofdFilter } from './filters/StamhoofdFilter';
-import { Gender } from './members/Gender';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -288,6 +287,13 @@ export class GroupSettings extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     description = ""
+
+    /**
+     * Cached value so we know what period this group is in, to calculate the age requirements,
+     * and to display the time period in the UI
+     */
+    @field({ decoder: RegistrationPeriodBase, nullable: true, ...NextVersion })
+    period: RegistrationPeriodBase | null = null
 
     @field({ decoder: new ArrayDecoder(GroupPrice), version: 285, upgrade: () => { return [] } }) // Upgrade uses empty array to prevent generating random ids every time
     prices: GroupPrice[] = [GroupPrice.create({})]

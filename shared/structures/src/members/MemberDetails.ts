@@ -428,8 +428,8 @@ export class MemberDetails extends AutoEncoder {
     }
 
     getMatchingError(group: Group): {message: string, description: string} | null {
-        const age = this.ageForYear(Formatter.luxon(group.settings.startDate).year)
         if (group.settings.minAge || group.settings.maxAge) {
+            const age = this.ageForYear(Formatter.luxon(group.settings.period?.startDate ?? new Date()).year)
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {

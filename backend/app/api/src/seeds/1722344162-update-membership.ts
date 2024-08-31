@@ -1,6 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { logger } from '@simonbackx/simple-logging';
-import { Member } from '@stamhoofd/models';
+import { MembershipHelper } from '../helpers/MembershipHelper';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == "test") {
@@ -14,44 +13,5 @@ export default new Migration(async () => {
     }
 
     process.stdout.write('\n');
-    let c = 0;
-    let id: string = '';
-
-    await logger.setContext({tags: ['silent-seed', 'seed']}, async () => {
-        while(true) {
-            const rawMembers = await Member.where({
-                id: {
-                    value: id,
-                    sign: '>'
-                }
-            }, {limit: 500, sort: ['id']});
-
-            if (rawMembers.length === 0) {
-                break;
-            }
-
-            const promises: Promise<any>[] = [];
-            
-
-            for (const member of rawMembers) {
-                promises.push((async () => {
-                    await Member.updateMembershipsForId(member.id, true);
-                    c++;
-        
-                    if (c%1000 === 0) {
-                        process.stdout.write('.');
-                    }
-                    if (c%10000 === 0) {
-                        process.stdout.write('\n');
-                    }
-                })())
-            }
-
-            await Promise.all(promises);
-            id = rawMembers[rawMembers.length - 1].id;
-        }
-    })
-
-    // Do something here
-    return Promise.resolve()
+    await MembershipHelper.updateAll()
 })
