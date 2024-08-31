@@ -123,23 +123,23 @@ export class Formatter {
     /**
      * maandag, 1 januari (2020). Year only in different year
      */
-    static dateWithDay(date: Date): string {
+    static dateWithDay(date: Date, withYear = false): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return "?"
         }
-        return this.weekDay(date) +", "+this.date(date)
+        return this.weekDay(date) +", "+this.date(date, withYear)
     }
 
     /**
      * maandag, 1 januari (2020) om XX:XX. Year only in different year
      */
-    static dateTimeWithDay(date: Date): string {
+    static dateTimeWithDay(date: Date, hideZero = false, withYear = false): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return "?"
         }
-        return this.weekDay(date) +", "+this.dateTime(date)
+        return this.weekDay(date) +", "+this.dateTime(date, hideZero, withYear)
     }
 
 
@@ -184,32 +184,32 @@ export class Formatter {
         return year+"-"+(datetime.month+"").padStart(2, "0")+"-"+(datetime.day+"").padStart(2, "0") + " "+(datetime.hour+"").padStart(2, "0")+":"+(datetime.minute+"").padStart(2, "0")+":"+(datetime.second+"").padStart(2, "0")
     }
 
-    static startDate(startDate: Date, includeDay = false): string {
+    static startDate(startDate: Date, includeDay = false, withYear = false): string {
         if (Formatter.time(startDate) === "0:00") {
             if (includeDay) {
-                return Formatter.dateWithDay(startDate)
+                return Formatter.dateWithDay(startDate, withYear)
             }
-            return Formatter.date(startDate)
+            return Formatter.date(startDate, withYear)
         }
 
         if (includeDay) {
-            return Formatter.dateTimeWithDay(startDate)
+            return Formatter.dateTimeWithDay(startDate, withYear)
         }
-        return Formatter.dateTime(startDate)
+        return Formatter.dateTime(startDate, withYear)
     }
 
-    static endDate(endDate: Date, includeDay = false): string {
+    static endDate(endDate: Date, includeDay = false, withYear = false): string {
         if (Formatter.time(endDate) === "23:59") {
             if (includeDay) {
-                return Formatter.dateWithDay(endDate)
+                return Formatter.dateWithDay(endDate, withYear)
             }
-            return Formatter.date(endDate)
+            return Formatter.date(endDate, withYear)
         }
 
         if (includeDay) {
-            return Formatter.dateTimeWithDay(endDate)
+            return Formatter.dateTimeWithDay(endDate, withYear)
         }
-        return Formatter.dateTime(endDate)
+        return Formatter.dateTime(endDate, false, withYear)
     }
 
     static dateRange(startDate: Date, endDate: Date, join = ' - '): string {
@@ -273,15 +273,15 @@ export class Formatter {
     /**
      * 1 januari (2020) om 12:00. Year only in different year
      */
-    static dateTime(date: Date, hideZero = false): string {
+    static dateTime(date: Date, hideZero = false, withYear = false): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return "?"
         }
         if (hideZero && this.time(date) == "0:00") {
-            return this.date(date)
+            return this.date(date, withYear)
         }
-        return this.date(date) + " om "+this.time(date)
+        return this.date(date, withYear) + " om "+this.time(date)
     }
 
     static integer(value: number): string {

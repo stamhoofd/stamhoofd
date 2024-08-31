@@ -4,7 +4,7 @@
             {{ period.name }}
         </h2>
         <p class="style-description-small">
-            {{ formatDate(period.startDate, true) }} - {{ formatDate(period.endDate, true) }}
+            {{ formatStartDate(period.startDate, false, true) }} - {{ formatEndDate(period.endDate, false, true) }}
         </p>
 
         <template #right>

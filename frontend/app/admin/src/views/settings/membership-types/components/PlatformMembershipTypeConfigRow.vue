@@ -4,6 +4,10 @@
             {{ period.name }}
         </h2>
 
+        <p class="style-description-small">
+            {{ formatStartDate(config.startDate, false, true) }} - {{ formatEndDate(config.endDate, false, true) }} {{ config.expireDate ? '(verloopt op ' + formatEndDate(config.expireDate, false, true)+')' : '' }}
+        </p>
+
 
         <template #right>
             <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">{{ formatPrice(config.prices[0].pricePerDay) }} per dag</span>

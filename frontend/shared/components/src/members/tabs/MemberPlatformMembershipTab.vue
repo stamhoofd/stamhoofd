@@ -20,7 +20,7 @@
                         {{ getMembershipType(membership).name }}
                     </h3>
                     <p class="style-description-small">
-                        {{ formatDate(membership.startDate, true) }} tot en met {{ formatDate(membership.expireDate ?? membership.endDate, true) }}
+                        {{ formatStartDate(membership.startDate, false, true) }} tot en met {{ formatEndDate(membership.expireDate ?? membership.endDate, false, true) }}
                     </p>
                     <p class="style-description-small">
                         Toegevoegd op {{ formatDate(membership.createdAt, true) }}
