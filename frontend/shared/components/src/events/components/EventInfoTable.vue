@@ -50,6 +50,10 @@
                 <span v-else>Inschrijvingen zijn geopend</span>
             </h2>
 
+            <p v-if="app !== 'registration' && !event.group.closed && (organization && event.organizationId !== organization.id && !event.group.settings.allowRegistrationsByOrganization)" class="style-description-small">
+                {{ $t('Leden kunnen enkel zelf inschrijven via Stamhoofd') }}
+            </p>
+
             <template v-if="!differentOrganization && !event.group.closed" #right>
                 <span class="icon arrow-right-small gray" />
             </template>
@@ -61,7 +65,7 @@
 
 
 <script setup lang="ts">
-import { useChooseFamilyMembersForGroup, usePlatform } from '@stamhoofd/components';
+import { useAppContext, useChooseFamilyMembersForGroup, useOrganization, usePlatform } from '@stamhoofd/components';
 import { Event, PlatformFamily } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -77,6 +81,9 @@ const props = withDefaults(
 );
 
 const platform = usePlatform();
+const app = useAppContext();
+const organization = useOrganization();
+
 const googleMapsUrl = computed(() => {
     if (props.event.meta.location?.address) {
         return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(props.event.meta.location.address)}`;

@@ -139,17 +139,17 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
+import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { MembersTableView, useChooseOrganizationMembersForGroup } from '../members';
+import { Toast } from '../overlays/Toast';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
-import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
-import { Formatter } from '@stamhoofd/utility';
-import { Toast } from '../overlays/Toast';
 
 const props = defineProps<{
     event: Event;
