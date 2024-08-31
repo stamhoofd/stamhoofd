@@ -14,13 +14,12 @@ import { computed } from 'vue';
 const props = defineProps<{
     tagId: string,
     showPricePerDay: boolean,
-    validator: Validator
+    validator: Validator,
+    hasMultiplePrices: boolean,
     errorBox?: ErrorBox | null
 }>();
 
-const emits = defineEmits<{(e: 'delete'): void}>();
-
-const model = defineModel<ReduceablePrice>({ required: true })
+const model = defineModel<ReduceablePrice>({ required: true });
 // const {patched, hasChanges, addPatch, patch} = usePatch(props.reduceablePrice);
 
 const $platform = usePlatform();
@@ -29,7 +28,11 @@ const tag = $platform.value.config.tags.find(t => t.id === props.tagId);
 const $priceTitle = computed(() => format(props.showPricePerDay ? 'Vaste prijs' : 'Prijs'));
 
 function format(base: string) {
-    if(props.tagId === 'default') return base;
+    if(props.tagId === 'default') {
+        // todo: add translation for replacement
+        if(props.hasMultiplePrices) return `${base} voor andere groepen`;
+        return base;
+    }
     return `${base} voor ${tag?.name ?? 'Onbekend'}`
 }
 </script>

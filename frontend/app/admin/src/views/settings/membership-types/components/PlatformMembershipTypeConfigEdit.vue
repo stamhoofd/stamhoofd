@@ -29,26 +29,38 @@
             />
         </STInputBox>
 
-        <div v-for="[tagId, reduceablePrice] of model.prices" :key="tagId">
-            <PlatformMembershipTypeConfigPriceRow
-                :model-value="reduceablePrice"
-                :tag-id="tagId"
-                :show-price-per-day="showPricePerDay"
-                :error-box="errorBox" :validator="validator"
-                @update:model-value="patchReduceablePrice(tagId, $event)"
-                @delete="deletePriceForTagId(tagId)"
-            >
-                <STInputBox
-                    v-if="!tagId && (showPricePerDay || $pricePerDay)"
-                    title="Prijs per dag" :error-box="errorBox"
+        <STList>
+            <STListItem v-for="[tagId, reduceablePrice] of model.prices" :key="tagId">
+                <PlatformMembershipTypeConfigPriceRow
+                    :model-value="reduceablePrice"
+                    :tag-id="tagId"
+                    :show-price-per-day="showPricePerDay"
+                    :error-box="errorBox" :validator="validator"
+                    :has-multiple-prices="model.prices.size > 1"
+                    @update:model-value="patchReduceablePrice(tagId, $event)"
                 >
-                    <PriceInput
-                        v-model="$pricePerDay"
-                        placeholder="Prijs per dag"
-                    />
-                </STInputBox>
-            </PlatformMembershipTypeConfigPriceRow>
-        </div>
+                    <STInputBox
+                        v-if="!tagId && (showPricePerDay || $pricePerDay)"
+                        title="Prijs per dag" :error-box="errorBox"
+                    >
+                        <PriceInput
+                            v-model="$pricePerDay"
+                            placeholder="Prijs per dag"
+                        />
+                    </STInputBox>
+                </PlatformMembershipTypeConfigPriceRow>
+                <template #right>
+                    <div>
+                        <button v-if="tagId !== 'default'" class="button text" type="button" @click="deletePriceForTagId(tagId)">
+                            <span class="icon trash" />
+                        </button>
+                        <button v-else-if="model.prices.size > 1" class="button text" type="button" :disabled="true">
+                            <span class="icon trash" />
+                        </button>
+                    </div>
+                </template>
+            </STListItem>
+        </STList>
 
         <p>
             <button class="button text" type="button" @click="addPriceForTag">
@@ -81,7 +93,6 @@ const model = defineModel<PlatformMembershipTypeConfigPrice>({required: true});
 const emits = defineEmits<{(e: 'delete'): void}>();
 const present = usePresent();
 
-// const {patched, addPatch, hasChanges, patch} = usePatch(props.priceConfig);
 const {addPut: addPricePut, addDelete: addDeletePrice, patch: $pricesPatch} = usePatchMap(model.value.prices);
 
 const $startDate = computed({
@@ -95,7 +106,6 @@ const $pricePerDay = computed({
 })
 
 function patchReduceablePrice(tagId: string, reduceablePrice: ReduceablePrice) {
-    console.warn('patch reduceable price')
     addPricePut(tagId, reduceablePrice);
     model.value = model.value.patch({prices: $pricesPatch.value})
 }
