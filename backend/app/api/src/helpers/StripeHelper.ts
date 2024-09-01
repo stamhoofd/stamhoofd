@@ -240,7 +240,7 @@ export class StripeHelper {
                 payment_method: paymentMethod.id,
                 payment_method_types: [payment.method.toLowerCase()],
                 statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
-                application_fee_amount: fee,
+                application_fee_amount: fee ? fee : undefined,
                 on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
                 confirm: true,
                 return_url: redirectUrl,
@@ -314,7 +314,7 @@ export class StripeHelper {
                 locale: i18n.language as 'nl',
                 payment_intent_data: {
                     on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
-                    application_fee_amount: fee,
+                    application_fee_amount: fee ? fee : undefined,
                     transfer_data: !directCharge ? {
                         destination: stripeAccount.accountId,
                     } : undefined,
