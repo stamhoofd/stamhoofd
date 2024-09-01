@@ -6,6 +6,7 @@ import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent
 
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../../organization/shared/ExchangePaymentEndpoint';
+import { QueueHandler } from '@stamhoofd/queues';
 
 type Params = Record<string, never>;
 class Body extends AutoEncoder {
@@ -100,16 +101,9 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
             case "payment_intent.requires_action":
             case "payment_intent.succeeded": {
                 const intentId = request.body.data.object.id;
-                const [model] = await StripePaymentIntent.where({stripeIntentId: intentId}, {limit: 1})
-                if (model && model.organizationId) {
-                    const organization = await Organization.getByID(model.organizationId)
-                    if (organization) {
-                        await ExchangePaymentEndpoint.pollStatus(model.paymentId, organization)
-                    } else {
-                        console.warn("Could not find organization with id", model.organizationId)
-                    }
-                } else {
-                    console.warn("Could not find stripe payment intent with id", intentId)
+                
+                if (intentId && typeof intentId === "string") {
+                    await this.updateIntent(intentId)
                 }
                 break;
             }
@@ -131,11 +125,47 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                 }
                 break;
             }
+            // Listen for charge changes (transaction fees will be added here, after the payment intent succeeded)
+            case "charge.captured":
+            case "charge.expired":
+            case "charge.failed":
+            case "charge.pending":
+            case "charge.refunded":
+            case "charge.succeeded":
+            case "charge.dispute.created":
+            case "charge.dispute.updated":
+            case "charge.dispute.closed":
+            case "charge.refund.updated":
+            case "charge.refund.succeeded":
+            case "charge.updated": {
+                const intentId = request.body.data.object.payment_intent;
+                if (intentId && typeof intentId === "string") {
+                    await this.updateIntent(intentId)
+                } else {
+                    console.log('Received charge event without payment intent', request.body)
+                }
+                break;
+            }
             default: {
                 console.log("Unhandled stripe webhook type", request.body.type);
                 break;
             }
         }
         return new Response(undefined);
+    }
+
+    async updateIntent(intentId: string) {
+        console.log("[Webooks] Updating intent", intentId)
+        const [model] = await StripePaymentIntent.where({stripeIntentId: intentId}, {limit: 1})
+        if (model && model.organizationId) {
+            const organization = await Organization.getByID(model.organizationId)
+            if (organization) {
+                await ExchangePaymentEndpoint.pollStatus(model.paymentId, organization)
+            } else {
+                console.warn("Could not find organization with id", model.organizationId)
+            }
+        } else {
+            console.warn("Could not find stripe payment intent with id", intentId)
+        }
     }
 }
