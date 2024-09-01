@@ -48,6 +48,27 @@ export class StripeHelper {
         }
     }
 
+    /**
+     * Call when the charge is updated in Stripe, so we can save fee information in the payment
+     */
+    static async updateChargeInfo(model: StripePaymentIntent) {
+        const stripe = this.getInstance(model.accountId)
+
+        const intent = await stripe.paymentIntents.retrieve(model.stripeIntentId, {
+            expand: ['latest_charge.balance_transaction']
+        })
+
+        console.log(intent);
+        if (intent.status === "succeeded") {
+            if (intent.latest_charge !== null && typeof intent.latest_charge !== 'string') {
+                const payment = await Payment.getByID(model.paymentId)
+                if (payment) {
+                    await this.saveChargeInfo(model, intent.latest_charge, payment)
+                }
+            }
+        }
+    }
+
     static async getStatus(payment: Payment, cancel = false, testMode = false): Promise<PaymentStatus> {
         if (testMode && !STAMHOOFD.STRIPE_SECRET_KEY.startsWith("sk_test_")) {
             // Do not query anything

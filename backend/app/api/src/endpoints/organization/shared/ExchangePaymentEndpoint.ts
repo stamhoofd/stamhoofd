@@ -193,6 +193,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
      */
     static async pollStatus(paymentId: string, organization: Organization, cancel = false): Promise<Payment | undefined> {
         // Prevent polling the same payment multiple times at the same time: create a queue to prevent races
+        QueueHandler.cancel("payments/"+paymentId); // Prevent creating more than one queue item for the same payment
         return await QueueHandler.schedule("payments/"+paymentId, async () => {
             // Get a new copy of the payment (is required to prevent concurreny bugs)
             const payment = await Payment.getByID(paymentId)
@@ -341,6 +342,14 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     if (this.isManualExpired(payment.status, payment)) {
                         console.error('Manually marking unknown payment as expired', payment.id)
                         await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                    }
+                }
+            } else {
+                // Do a manual update if needed
+                if (payment.status === PaymentStatus.Succeeded) {
+                    if (payment.provider === PaymentProvider.Stripe) {
+                        // Update the status
+                        await StripeHelper.getStatus(payment, false, testMode)
                     }
                 }
             }
