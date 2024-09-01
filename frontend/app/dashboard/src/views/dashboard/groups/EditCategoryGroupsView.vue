@@ -31,7 +31,7 @@
             </Checkbox>
 
             <Checkbox v-if="!isRoot" v-model="isHidden">
-                Toon deze categorie enkel voor beheerders
+                Toon deze categorie enkel voor beheerders of leden met een functie
             </Checkbox>
 
             <p v-if="!isRoot && !isHidden && !isPublic" class="warning-box">
