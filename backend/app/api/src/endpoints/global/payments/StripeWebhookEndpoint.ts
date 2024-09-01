@@ -19,7 +19,7 @@ class Body extends AutoEncoder {
     id: string
 
     /**
-     * Events for direct charges
+     * Set for connect events
      */
     @field({ decoder: StringDecoder, nullable: true, optional: true })
     account: string|null = null
@@ -64,7 +64,8 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     statusCode: 400
                 })
             }
-            event = await stripe.webhooks.constructEventAsync(await request.request.bodyPromise!, sig, STAMHOOFD.STRIPE_ENDPOINT_SECRET);
+            const secret = request.body.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET
+            event = await stripe.webhooks.constructEventAsync(await request.request.bodyPromise!, sig, secret);
         } catch (err) {
             throw new SimpleError({
                 code: "invalid_signature",
