@@ -157,42 +157,51 @@ async function checkGlobalRoutes() {
             } finally {
                 toast.hide()
             }
+            const platformManager = await PlatformManager.createFromCache(session, false)
 
             modalStack.value.present({
                 adjustHistory: false,
                 animated: false,
                 force: true,
                 components: [
-                    new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(PaymentPendingView, { 
-                            server: session.authenticatedServer, 
-                            paymentId,
-                            cancel,
-                            finishedHandler: async function(this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
-                                if (payment && payment.status == PaymentStatus.Succeeded) {
-                                    // TODO: fetch appropriate data for this payment!
-                                    
-                                    if (payment.memberNames.length) {
-                                        await this.show({
-                                            components: [
-                                                new ComponentWithProperties(RegistrationSuccessView, {
-                                                    registrations: [] // todo: fetch registrations
-                                                })
-                                            ], 
-                                            replace: 100, // autocorrects to all
-                                            force: true
-                                        })
+                    new ComponentWithProperties(ContextProvider, {
+                        context: markRaw({
+                            $context: session,
+                            $platformManager: platformManager,
+                            reactive_navigation_url: currentPath,
+                        }),
+                        root: new ComponentWithProperties(NavigationController, {
+                            root: new ComponentWithProperties(PaymentPendingView, { 
+                                server: session.authenticatedServer, 
+                                paymentId,
+                                cancel,
+                                finishedHandler: async function(this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
+                                    if (payment && payment.status == PaymentStatus.Succeeded) {
+                                        // TODO: fetch appropriate data for this payment!
+                                        
+                                        if (payment.memberNames.length) {
+                                            await this.show({
+                                                components: [
+                                                    new ComponentWithProperties(RegistrationSuccessView, {
+                                                        registrations: [] // todo: fetch registrations
+                                                    })
+                                                ], 
+                                                replace: 100, // autocorrects to all
+                                                force: true
+                                            })
+                                        } else {
+                                            await this.dismiss({force: true})
+                                            new CenteredMessage("Betaling voltooid", "De betaling werd voltooid.").addCloseButton().show()
+                                        }
                                     } else {
                                         await this.dismiss({force: true})
-                                        new CenteredMessage("Betaling voltooid", "De betaling werd voltooid.").addCloseButton().show()
+                                        new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton().show()
                                     }
-                                } else {
-                                    await this.dismiss({force: true})
-                                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton().show()
-                                }
-                            } 
+                                } 
+                            })
                         })
                     })
+                    
                 ],
                 modalDisplayStyle: "popup"
             })
