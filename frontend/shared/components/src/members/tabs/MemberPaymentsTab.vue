@@ -120,6 +120,18 @@
 
                     <STList>
                         <STListItem v-for="payment of succeededPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
+                            <template #left>
+                                <figure class="style-image-with-icon gray">
+                                    <figure>
+                                        <img v-if="payment.method === PaymentMethod.Bancontact" src="@stamhoofd/assets/images/partners/icons/bancontact.svg">
+                                        <img v-else-if="payment.method === PaymentMethod.iDEAL" src="@stamhoofd/assets/images/partners/icons/ideal.svg">
+                                        <span v-else class="icon bank" />
+                                    </figure>
+                                    <aside>
+                                    </aside>
+                                </figure>
+                            </template>
+
                             <h3 class="style-title-list">
                                 {{ getPaymentMethodName(payment.method) }}
                                 <template v-if="payment.price < 0">
