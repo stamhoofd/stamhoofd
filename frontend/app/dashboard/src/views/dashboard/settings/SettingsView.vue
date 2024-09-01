@@ -41,7 +41,7 @@
                         Personaliseren
                     </h2>
                     <p class="style-description">
-                        Logo, kleur en domeinnaam
+                        Kies je eigen logo en kleur
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
