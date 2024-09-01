@@ -105,6 +105,14 @@ export class PatchPlatformEndpoint extends Endpoint<
             if (newConfig.membershipTypes && isPatchableArray(newConfig.membershipTypes) && newConfig.membershipTypes.changes.length > 0) {
                 shouldUpdateMemberships = true;
             }
+
+            if (newConfig.defaultAgeGroups && isPatchableArray(newConfig.defaultAgeGroups) && newConfig.defaultAgeGroups.changes.length > 0) {
+                for (const d of newConfig.defaultAgeGroups.getPatches()) {
+                    if (d.defaultMembershipTypeId !== undefined) {
+                        shouldUpdateMemberships = true;
+                    }
+                }
+            }
         }
 
         if (
