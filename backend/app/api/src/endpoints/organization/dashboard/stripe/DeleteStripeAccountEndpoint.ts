@@ -5,6 +5,7 @@ import { PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 import { StripeHelper } from '../../../../helpers/StripeHelper';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = { id: string };
 type Body = undefined;
@@ -39,6 +40,14 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         const model = await StripeAccount.getByID(request.params.id)
         if (!model || model.organizationId != organization.id || model.status !== "active") {
             throw Context.auth.notFoundOrNoAccess("Account niet gevonden")
+        }
+
+        if (model.accountId === STAMHOOFD.STRIPE_ACCOUNT_ID) {
+            throw new SimpleError({
+                code: "invalid_request",
+                message: "Je kan het hoofdaccount van het platform niet verwijderen.",
+                statusCode: 400
+            })
         }
 
         // For now we don't delete them in Stripe because this causes issues with data access

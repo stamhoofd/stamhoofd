@@ -140,6 +140,7 @@ declare global {
         readonly NOLT_SSO_SECRET_KEY?: string
 
         // Stripe
+        readonly STRIPE_ACCOUNT_ID: string
         readonly STRIPE_SECRET_KEY: string
         readonly STRIPE_CONNECT_ENDPOINT_SECRET: string
         readonly STRIPE_ENDPOINT_SECRET: string
