@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save" :disabled="!selectedOrganization">
+    <SaveView :title="title" :loading="loading" :save-text="saveText" :disabled="!selectedOrganization" @save="save">
         <h1>{{ title }}</h1>
 
         <p v-if="availableOrganizations.length === 0" class="warning-box">
@@ -8,7 +8,12 @@
         <template v-else>
             <ScrollableSegmentedControl v-if="availableOrganizations.length > 1" v-model="selectedOrganization" :items="availableOrganizations" :labels="availableOrganizations.map(o => o.name)" />
             
-            <p class="style-description-block">{{ $t('dashboard.platformMemberhip.add.description') }}</p>        
+            <p v-if="organization" class="style-description-block">
+                {{ $t('dashboard.platformMemberhip.add.description') }}
+            </p>        
+            <p v-else class="style-description-block">
+                Het bedrag zal achteraf door KSA Nationaal aan <strong>{{ selectedOrganization.name }}</strong> worden gefactureerd
+            </p>        
 
             <STErrorsDefault :error-box="errors.errorBox" />
             
@@ -47,7 +52,6 @@
                     </template>
                 </STListItem>
             </STList>
-
         </template>
     </SaveView>
 </template>
