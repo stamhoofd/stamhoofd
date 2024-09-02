@@ -37,9 +37,9 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, useNavigationActions, useUninheritedPermissions } from '@stamhoofd/components';
+import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, useNavigationActions, useOrganization, useUninheritedPermissions } from '@stamhoofd/components';
 import { Group, GroupCategoryTree, Organization, PlatformMember } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import { computed, onMounted, Ref, ref, watch } from 'vue';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
@@ -57,6 +57,27 @@ const app = useAppContext();
 const $t = useTranslate();
 const searchOrganizationTitle = computed(() => $t('shared.searchMemberOrganizations.defaultTitle', {firstName: props.member.patchedMember.firstName}))
 const navigate = useNavigationActions();
+const organization = useOrganization();
+
+watch(selectedOrganization, () => {
+    checkOrganization()
+})
+
+function checkOrganization() {
+    if (app !== 'registration') {
+        if (!organization.value) {
+            // Administration panel: register as organizing organization
+            props.member.family.checkout.asOrganizationId = selectedOrganization.value?.id ?? null
+        } else {
+            props.member.family.checkout.asOrganizationId = organization.value.id
+        }
+        props.member.family.checkout.defaultOrganization = selectedOrganization.value
+    }
+}
+
+onMounted(() => {
+    checkOrganization()
+})
 
 const items = computed(() => {
     return props.member.organizations
@@ -75,7 +96,7 @@ const tree = computed(() => {
         admin: !!auth.permissions, 
         smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
         filterGroups: (g) => {
-            return props.member.canRegister(g, selectedOrganization.value!) || props.member.canRegisterForWaitingList(g, selectedOrganization.value!)
+            return props.member.family.checkout.isAdminFromSameOrganization || props.member.canRegister(g, selectedOrganization.value!) || props.member.canRegisterForWaitingList(g, selectedOrganization.value!)
         }
     })
 });
