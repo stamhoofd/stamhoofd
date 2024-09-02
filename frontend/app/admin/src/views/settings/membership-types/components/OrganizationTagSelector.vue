@@ -50,7 +50,14 @@ import { OrganizationTag } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(
-    defineProps<{tagIds?: string[], onAdd: (allTags: OrganizationTag[], addedTags: OrganizationTag[], deletedTags: OrganizationTag[]) => void}>(),
+    defineProps<{
+        tagIds?: string[],
+        onAdd: (
+            allTags: OrganizationTag[],
+            addedTags: OrganizationTag[],
+            deletedTags: OrganizationTag[]
+        ) => void
+    }>(),
     {
         tagIds: () => []
     }

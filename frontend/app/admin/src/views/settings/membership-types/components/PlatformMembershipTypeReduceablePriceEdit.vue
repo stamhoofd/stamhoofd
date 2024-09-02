@@ -19,11 +19,9 @@ const props = defineProps<{
 }>();
 
 const model = defineModel<ReduceablePrice>({ required: true });
-// const {patched, hasChanges, addPatch, patch} = usePatch(props.reduceablePrice);
 
 const $platform = usePlatform();
 const tag = $platform.value.config.tags.find(t => t.id === props.tagId);
-// const $reduceablePrice = ref(props.reduceablePrice);
 const $priceTitle = computed(() => format(props.showPricePerDay ? 'Vaste prijs' : 'Prijs'));
 
 function format(base: string) {

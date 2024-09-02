@@ -232,7 +232,7 @@ function getPriceForDate(type: PlatformMembershipType, date: Date) {
         return Formatter.price(priceConfig.pricePerDay) + ' per dag'
     }
 
-    const tagIds = organization.value?.meta.tags ?? [];
+    const tagIds = selectedOrganization.value?.meta.tags ?? [];
     const shouldApplyReducedPrice = props.member.shouldApplyReducedPrice;
     const price = priceConfig.getBasePrice(tagIds, shouldApplyReducedPrice);
 

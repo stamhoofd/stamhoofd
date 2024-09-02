@@ -131,36 +131,8 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
         return result
     }
 
-    getPrice(date: Date, tagIds: string[], shouldApplyReducedPrice: boolean): {config: PlatformMembershipTypeConfigPrice, selectedPrice: number} {
-        const sorted = this.prices.slice().sort((a, b) => (a.startDate ?? new Date(0)).getTime() - (b.startDate ?? new Date(0)).getTime())
-
-        const defaultPriceConfig = sorted[0];
-        let result: {config: PlatformMembershipTypeConfigPrice, selectedPrice: number} = {config: defaultPriceConfig, selectedPrice: defaultPriceConfig.prices.get('')?.getPrice(shouldApplyReducedPrice) ?? 0};
-
-        for (const priceConfig of sorted) {
-            if(priceConfig.startDate === null || date >= priceConfig.startDate) {
-                let selectedPrice: number | null = null;
-                let config: PlatformMembershipTypeConfigPrice | null = null;
-
-                for(const tagId of tagIds.concat([''])) {
-                    const price = priceConfig.prices.get(tagId);
-                    if(!price) continue;
-
-                    const priceForMember = price.getPrice(shouldApplyReducedPrice);
-    
-                    if(selectedPrice === null || priceForMember < selectedPrice) {
-                        selectedPrice = priceForMember;
-                        config = priceConfig;
-                    }
-                }
-
-                if(config && selectedPrice !== null) {
-                    result = {config, selectedPrice};
-                }
-            }
-        }
-
-        return result
+    getPrice(date: Date, tagIds: string[], shouldApplyReducedPrice: boolean): number {
+        return this.getPriceConfigForDate(date).getBasePrice(tagIds, shouldApplyReducedPrice);
     }
 }
 

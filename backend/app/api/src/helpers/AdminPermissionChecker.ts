@@ -980,7 +980,7 @@ export class AdminPermissionChecker {
 
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
-        const isSetFinancialSupportTrue = data.details.requiresFinancialSupport?.value === true;
+        const isSetFinancialSupportTrue = data.details.shouldApplyReducedPrice;
         const isUserManager = this.isUserManager(member);
 
         if (hasRecordAnswers) {
