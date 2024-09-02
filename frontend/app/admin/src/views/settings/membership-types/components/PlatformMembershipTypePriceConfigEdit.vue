@@ -76,7 +76,7 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import { DateSelection, ErrorBox, PriceInput, usePatchMap, Validator } from '@stamhoofd/components';
 import { OrganizationTag, PlatformMembershipTypeConfigPrice, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import OrganizationTagSelector from './OrganizationTagSelector.vue';
+import OrganizationTagSelectorView from './OrganizationTagSelectorView.vue';
 import PlatformMembershipTypeReduceablePriceEdit from './PlatformMembershipTypeReduceablePriceEdit.vue';
 
 defineProps<{
@@ -113,7 +113,7 @@ async function addPriceForTag() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(OrganizationTagSelector, {
+            new ComponentWithProperties(OrganizationTagSelectorView, {
                 tagIds: Array.from(model.value.prices.keys()).filter(id => id !== ''),
                 onAdd: async (_allTags: OrganizationTag[], addedTags: OrganizationTag[], deletedTags: OrganizationTag[]) => {
                     addedTags.forEach(tag => addPriceForTagId(tag.id));
