@@ -46,7 +46,7 @@ const {enabled, financialSupportSettings} = useFinancialSupportSettings({
     group: computed(() => props.group),
 })
 
-const $showReducedPrice = computed(() => reducedPrice.value !== null)
+const $showReducedPrice = computed(() => enabled || reducedPrice.value !== null)
 
 useValidation(props.validator, () => {
     if (!enabled.value && model.value.reducedPrice !== null) {
