@@ -498,11 +498,11 @@ export class Member extends Model {
             }
 
             // Add the cheapest available membership
-            const organizations = await Organization.getByIDs(...defaultMemberships.map(m => m.registration.organizationId));
+            const organizations = await Organization.getByIDs(...Formatter.uniqueArray(defaultMemberships.map(m => m.registration.organizationId)));
 
             const defaultMembershipsWithOrganization = defaultMemberships.map(({membership, registration}) => {
                 const organizationId = registration.organizationId;
-                const organization = organizations.find(o => o.id === organizationId)!;
+                const organization = organizations.find(o => o.id === organizationId);
                 return {membership, registration, organization}
             });
 

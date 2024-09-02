@@ -6,26 +6,26 @@ import { useOrganization, usePlatform } from "../../hooks";
 export function useFinancialSupportSettings(options?: {group?: Ref<Group|null>|Group|null}) {
     const platform = usePlatform()
     const organization = useOrganization()
-    const group = unref(options?.group);
 
     const financialSupportSettings = computed(() => platform.value.config.financialSupport ?? FinancialSupportSettings.create({}) )
     const recordsConfiguration = computed(() => OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: organization.value,
-        group,
+        group: unref(options?.group),
         includeGroup: true
-    }))
-
-    let enabled = computed(() => recordsConfiguration.value.financialSupport);
-
-    if(!group) {
-        if(useAppContext() === 'admin') {
-            enabled = computed(() => true)
-        }
-    }
+    }));
 
     return {
-        enabled,
+        enabled: computed(() => {
+            const group = unref(options?.group);
+            if(!group) {
+                if(useAppContext() === 'admin') {
+                    return true
+                }
+            }
+
+            return recordsConfiguration.value.financialSupport
+        }),
         priceName: computed(() => financialSupportSettings.value.priceName),
         financialSupportSettings
     }
