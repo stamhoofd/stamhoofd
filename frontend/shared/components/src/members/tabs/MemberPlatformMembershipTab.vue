@@ -32,6 +32,14 @@
                         Verlopen. Verleng de aansluiting om de verzekering te behouden.
                     </p>
 
+                    <p v-if="membership.balanceItemId && auth.hasFullPlatformAccess()" class="style-description-small">
+                        Deze aansluiting werd al aangerekend.
+                    </p>
+
+                    <p v-if="membership.generated && auth.hasFullPlatformAccess()" class="style-description-small">
+                        Deze aansluiting werd automatisch aangemaakt.
+                    </p>
+
                     <template v-if="hasFull" #right>
                         <span>{{ formatPrice(membership.price) }}</span>
                         <LoadingButton v-if="!membership.generated" :loading="deletingMemberships.has(membership.id)">

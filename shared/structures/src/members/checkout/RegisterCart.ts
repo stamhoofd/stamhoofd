@@ -190,6 +190,14 @@ export class RegisterCart {
         this.balanceItems.push(item)
     }
 
+    removeBalanceItem(item: BalanceItemCartItem) {
+        for (let i = this.balanceItems.length - 1; i >= 0; i--) {
+            if (this.balanceItems[i].id === item.id) {
+                this.balanceItems.splice(i, 1)
+            }
+        }
+    }
+
     get isEmpty() {
         return this.count === 0
     }

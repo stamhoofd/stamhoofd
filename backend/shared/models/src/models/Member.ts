@@ -491,8 +491,18 @@ export class Member extends Model {
 
             if (activeMembershipsUndeletable.length) {
                 // Skip automatic additions
-                if (!silent) {
-                    console.log('Skipping automatic membership for: ' + me.id, ' - already has active memberships')
+                for (const m of activeMembershipsUndeletable) {
+                    const beforePrice = m.price
+                
+                    await m.calculatePrice(me)
+
+                    if (beforePrice !== m.price) {
+                        await m.save()
+
+                        console.log('Updated price for membership: ' + me.id + ' - membership ' + m.id)
+                    } else if (!silent) {
+                        console.log('Skipping automatic membership for: ' + me.id, ' - already has active memberships - no price change')
+                    }
                 }
                 return
             }
@@ -522,11 +532,22 @@ export class Member extends Model {
             }
 
             // Check if already have the same membership
-            if (activeMemberships.find(m => m.membershipTypeId == cheapestMembership.membership.id)) {
-                if (!silent) {
-                    console.log('Skipping automatic membership for: ' + me.id, ' - already has this membership')
+            for (const m of activeMemberships) {
+                if (m.membershipTypeId === cheapestMembership.membership.id) {
+                    // Update the price of this active membership (could have changed)
+                    const beforePrice = m.price
+            
+                    await m.calculatePrice(me)
+
+                    if (beforePrice !== m.price) {
+                        await m.save()
+
+                        console.log('Updated price for membership: ' + me.id + ' - membership ' + m.id)
+                    } else if (!silent) {
+                        console.log('Skipping automatic membership for: ' + me.id, ' - already has this membership - no price change')
+                    }
+                    return
                 }
-                return
             }
 
             const periodConfig = cheapestMembership.membership.periods.get(platform.periodId)
@@ -560,7 +581,7 @@ export class Member extends Model {
                 }
             }
 
-            await membership.calculatePrice()
+            await membership.calculatePrice(me)
             await membership.save()
 
             // This reasoning allows us to replace an existing membership with a cheaper one (not date based ones, but type based ones)

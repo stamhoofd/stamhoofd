@@ -166,6 +166,15 @@ export class RegisterCheckout {
         }
     }
 
+    removeBalanceItem(item: BalanceItemCartItem, options?: {calculate?: boolean}) {
+        this.cart.removeBalanceItem(item);
+
+        if (options?.calculate !== false) {
+            this.updatePrices()
+        }
+    }
+
+
     updatePrices() {
         this.cart.calculatePrices()
 

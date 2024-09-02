@@ -33,6 +33,8 @@ export const MembershipCharger = {
             const memberships = await MemberPlatformMembership.select()
                 .where('id', SQLWhereSign.Greater, lastId)
                 .where('balanceItemId', null)
+                .where('deletedAt', null)
+                .whereNot('organizationId', chargeVia)
                 .limit(100)
                 .orderBy(
                     new SQLOrderBy({

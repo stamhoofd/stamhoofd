@@ -45,12 +45,11 @@ const props = withDefaults(
         item: BalanceItemCartItem;
         checkout: RegisterCheckout;
     }>(),
-    {
-    }
+    {}
 );
 
 async function deleteMe() {
-    // todo
+    props.checkout.removeBalanceItem(props.item)
 }
 
 </script>

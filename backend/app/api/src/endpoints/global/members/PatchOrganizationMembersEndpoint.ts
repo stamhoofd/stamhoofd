@@ -171,8 +171,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
                 
+                const wasReduced = member.details.shouldApplyReducedPrice
                 member.details.patchOrPut(patch.details)
                 member.details.cleanData()
+
+                if (wasReduced !== member.details.shouldApplyReducedPrice) {
+                    updateMembershipMemberIds.add(member.id)
+                }
             }
             
             await member.save();
@@ -430,7 +435,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 membership.endDate = put.endDate
                 membership.expireDate = put.expireDate
 
-                await membership.calculatePrice()
+                await membership.calculatePrice(member)
                 await membership.save()
 
                 updateMembershipMemberIds.add(member.id)           

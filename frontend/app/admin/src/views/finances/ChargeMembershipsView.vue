@@ -164,7 +164,7 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, ErrorBox, OrganizationAvatar, Toast, useContext, useErrors, useExternalOrganization, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, OrganizationAvatar, Toast, useContext, useErrors, useExternalOrganization, useInterval, usePatch, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembershipType } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
@@ -178,6 +178,7 @@ const {patch, patched, addPatch, hasChanges, reset} = usePatch(platform)
 const platformManager = usePlatformManager()
 const saving = ref(false)
 const charging = ref(false)
+let loading = false;
 
 reload().catch(console.error)
 
@@ -189,6 +190,8 @@ const {externalOrganization: membershipOrganization, choose: $chooseMembershipOr
         })
     })
 )
+
+useInterval(reload, 10 * 1000)
 
 const chooseMembershipOrganization = () => {
     return $chooseMembershipOrganization('Kies een vereniging die verantwoordelijk is voor het verzamelen van de aansluitingskosten')
@@ -209,18 +212,26 @@ async function save() {
     saving.value = false
 }
 
+
 async function reload() {
+    if (loading) {
+        return
+    }
+
     try {
+        loading = true;
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
             path: '/admin/charge-memberships/summary',
             decoder: ChargeMembershipsSummary as Decoder<ChargeMembershipsSummary>,
-            owner
+            owner,
+            shouldRetry: true
         })
         summary.value = response.data;
     } catch (e) {
         errors.errorBox = new ErrorBox(e)
     }
+    loading = false;
 }
 
 async function charge() {

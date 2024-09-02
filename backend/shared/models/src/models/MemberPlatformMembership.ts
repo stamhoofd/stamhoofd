@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Member } from "./Member";
 import { Organization } from "./Organization";
 import { Platform } from "./Platform";
+import { BalanceItem } from "./BalanceItem";
 
 export class MemberPlatformMembership extends Model {
     static table = "member_platform_memberships";
@@ -91,11 +92,7 @@ export class MemberPlatformMembership extends Model {
         throw new Error('Cannot delete a membership. Use the deletedAt column.');
     }
 
-    async calculatePrice() {
-        if (this.balanceItemId) {
-            return;
-        }
-
+    async calculatePrice(member: Member) {
         const platform = await Platform.getShared();
         const membershipType = platform.config.membershipTypes.find(m => m.id == this.membershipTypeId);
 
@@ -126,15 +123,6 @@ export class MemberPlatformMembership extends Model {
                 human: 'De organisatie is niet gevonden'
             })
         }
-        const member = await Member.getByID(this.memberId);
-        if(!member) {
-            throw new SimpleError({
-                //todo
-                code: 'not_found',
-                message: 'Member not found',
-                human: 'Het lid is niet gevonden'
-            })
-        }
 
         const tagIds = organization.meta.tags;
         const shouldApplyReducedPrice = member.details.shouldApplyReducedPrice;
@@ -159,6 +147,15 @@ export class MemberPlatformMembership extends Model {
             this.startDate = periodConfig.startDate;
             this.endDate = periodConfig.endDate;
             this.expireDate = periodConfig.expireDate;
+        }
+
+        if (this.balanceItemId) {
+            // Also update the balance item
+            const balanceItem = await BalanceItem.getByID(this.balanceItemId);
+            if (balanceItem) {
+                balanceItem.unitPrice = this.price;
+                await balanceItem.save();
+            }
         }
     }
 

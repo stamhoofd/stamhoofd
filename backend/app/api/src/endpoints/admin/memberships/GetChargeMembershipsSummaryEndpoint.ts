@@ -3,6 +3,8 @@ import { SQL, SQLAlias, SQLCount, SQLDistinct, SQLSelectAs, SQLSum } from '@stam
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context';
 import { QueueHandler } from '@stamhoofd/queues';
+import { Platform } from '@stamhoofd/models';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 
 type Params = Record<string, never>;
@@ -39,6 +41,9 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
             );
         }
         
+        const platform = await Platform.getShared()
+        const chargeVia = platform.membershipOrganizationId
+
         const query = SQL
             .select(
                 new SQLSelectAs(
@@ -73,7 +78,9 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                 )
             )
             .from('member_platform_memberships')
-            .where('balanceItemId', null);
+            .where('balanceItemId', null)
+            .where('deletedAt', null)
+            .whereNot('organizationId', chargeVia)
 
         const result = await query.fetch();
         const members = result[0]['data']['members'] as number;
@@ -88,12 +95,12 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                 members: members ?? 0,
                 price: price ?? 0,
                 organizations: organizations ?? 0,
-                membershipsPerType: await this.fetchPerType()
+                membershipsPerType: await this.fetchPerType(chargeVia)
             })
         );
     }
 
-    async fetchPerType() {
+    async fetchPerType(chargeVia: string|null) {
         const query = SQL
             .select(
                 SQL.column('member_platform_memberships', 'membershipTypeId'),
@@ -130,6 +137,8 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
             )
             .from('member_platform_memberships')
             .where('balanceItemId', null)
+            .where('deletedAt', null)
+            .whereNot('organizationId', chargeVia)
             .groupBy(
                 SQL.column('member_platform_memberships', 'membershipTypeId')
             );
