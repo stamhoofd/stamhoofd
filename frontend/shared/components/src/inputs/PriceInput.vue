@@ -90,6 +90,9 @@ export default class PriceInput extends VueComponent {
     }
 
     set internalValue(val: number | null) {
+        if(val === this.modelValue) {
+            return;
+        }
         this.$emit('update:modelValue', val)
     }
 

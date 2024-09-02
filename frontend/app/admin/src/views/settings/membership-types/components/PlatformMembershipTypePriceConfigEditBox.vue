@@ -30,7 +30,7 @@
         </STInputBox>
 
         <STList>
-            <STListItem v-for="[tagId, reduceablePrice] of model.prices" :key="tagId">
+            <STListItem v-for="[tagId, reduceablePrice] of patched.prices" :key="tagId">
                 <PlatformMembershipTypeReduceablePriceEditRow
                     :model-value="reduceablePrice"
                     :tag-id="tagId"
@@ -53,7 +53,7 @@
                         <button v-if="tagId" class="button text" type="button" @click="deletePriceForTagId(tagId)">
                             <span class="icon trash" />
                         </button>
-                        <button v-else-if="model.prices.size > 1" class="button text" type="button" :disabled="true">
+                        <button v-else-if="priceConfig.prices.size > 1" class="button text" type="button" :disabled="true">
                             <span class="icon trash" />
                         </button>
                     </div>
@@ -72,14 +72,16 @@
 
 
 <script setup lang="ts">
+import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { DateSelection, ErrorBox, PriceInput, usePatchMap, Validator } from '@stamhoofd/components';
+import { DateSelection, ErrorBox, PriceInput, useEmitPatch, Validator } from '@stamhoofd/components';
 import { OrganizationTag, PlatformMembershipTypeConfigPrice, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import OrganizationTagSelectorView from './OrganizationTagSelectorView.vue';
 import PlatformMembershipTypeReduceablePriceEditRow from './PlatformMembershipTypeReduceablePriceEditRow.vue';
 
-defineProps<{
+const props = defineProps<{
+    priceConfig: PlatformMembershipTypeConfigPrice,
     hasMultiplePrices: boolean;
     showStartDate: boolean;
     showPricePerDay: boolean;
@@ -87,26 +89,31 @@ defineProps<{
     validator: Validator;
 }>();
 
-const model = defineModel<PlatformMembershipTypeConfigPrice>({required: true});
+const emits = defineEmits<{(e: 'delete'): void, (e: 'patch:priceConfig'): AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>}>();
+const {patched, addPatch} = useEmitPatch<PlatformMembershipTypeConfigPrice>(props, emits, 'priceConfig');
 
-const emits = defineEmits<{(e: 'delete'): void}>();
 const present = usePresent();
 
-const {addPut: addPricePut, addDelete: addDeletePrice, patch: $pricesPatch} = usePatchMap(model.value.prices);
-
 const $startDate = computed({
-    get: () => model.value.startDate,
-    set: (startDate) => model.value = model.value.patch({startDate}),
+    get: () => patched.value.startDate,
+    set: (startDate) => addPatch({startDate}),
 });
 
 const $pricePerDay = computed({
-    get: () => model.value.pricePerDay,
-    set: (pricePerDay) => model.value = model.value.patch({pricePerDay}),
+    get: () => patched.value.pricePerDay,
+    set: (pricePerDay) => addPatch({pricePerDay}),
 })
 
 function patchReduceablePrice(tagId: string, reduceablePrice: ReduceablePrice) {
-    addPricePut(tagId, reduceablePrice);
-    model.value = model.value.patch({prices: $pricesPatch.value})
+    const map = new PatchMap<string, ReduceablePrice>();
+    map.set(tagId, reduceablePrice);
+    addPatch({prices: map});
+}
+
+function deletePriceForTagId(tagId: string) {
+    const map = new PatchMap<string, ReduceablePrice | null>();
+    map.set(tagId, null);
+    addPatch({prices: map});
 }
 
 async function addPriceForTag() {
@@ -114,23 +121,22 @@ async function addPriceForTag() {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(OrganizationTagSelectorView, {
-                tagIds: Array.from(model.value.prices.keys()).filter(id => id !== ''),
+                tagIds: Array.from(patched.value.prices.keys()).filter(id => id !== ''),
                 onAdd: async (_allTags: OrganizationTag[], addedTags: OrganizationTag[], deletedTags: OrganizationTag[]) => {
-                    addedTags.forEach(tag => addPriceForTagId(tag.id));
-                    deletedTags.forEach(tag => deletePriceForTagId(tag.id));
+                    const map = new PatchMap<string, ReduceablePrice | null>();
+
+                    addedTags.forEach(tag => {
+                        map.set(tag.id, ReduceablePrice.create({}));
+                    });
+                    
+                    deletedTags.forEach(tag => {
+                        map.set(tag.id, null)
+                    });
+
+                    addPatch({prices: map});
                 }
             })
         ]
     });
-}
-
-function addPriceForTagId(tagId: string) {
-    addPricePut(tagId, ReduceablePrice.create({}));
-    model.value = model.value.patch({prices: $pricesPatch.value})
-}
-
-function deletePriceForTagId(agId: string) {
-    addDeletePrice(agId);
-    model.value = model.value.patch({prices: $pricesPatch.value})
 }
 </script>

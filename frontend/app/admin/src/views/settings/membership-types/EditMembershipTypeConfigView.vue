@@ -40,14 +40,13 @@
         <PlatformMembershipTypePriceConfigEditBox
             v-for="(priceConfig, index) of prices"
             :key="priceConfig.id"
-            :model-value="priceConfig"
             :has-multiple-prices="prices.length > 1"
             :show-start-date="index > 0"
             :show-price-per-day="$showPricePerDay"
             :error-box="errors.errorBox"
             :validator="errors.validator"
             :price-config="priceConfig"
-            @update:model-value="patchPrice(priceConfig, $event)"
+            @patch:price-config="patchPrice(priceConfig, $event)"
             @delete="deletePrice(priceConfig)"
         />
 
@@ -73,7 +72,7 @@
 
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DateSelection, ErrorBox, NumberInput, SaveView, useErrors, usePatch } from '@stamhoofd/components';
@@ -200,21 +199,11 @@ const shouldNavigateAway = async () => {
     return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
 }
 
-function patchPrice(configPrice: PlatformMembershipTypeConfigPrice, patch: PlatformMembershipTypeConfigPrice) {
-    prices.value = prices.value.map(p => {
-        if (p.id === configPrice.id) {
-            return p.patch(patch)
-        }
-        return p
-    }).sort((a, b) => {
-        if (!a.startDate) {
-            return -1
-        }
-        if (!b.startDate) {
-            return 1
-        }
-        return a.startDate.getTime() - b.startDate.getTime()
-    })
+function patchPrice(priceConfig: PlatformMembershipTypeConfigPrice, patch: AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>) {
+    patch.id = priceConfig.id;
+    const array: PatchableArrayAutoEncoder<PlatformMembershipTypeConfigPrice> = new PatchableArray();
+    array.addPatch(patch);
+    addPatch({prices: array});
 }
 
 function addPrice() {
