@@ -31,7 +31,7 @@
 
         <STList>
             <STListItem v-for="[tagId, reduceablePrice] of model.prices" :key="tagId">
-                <PlatformMembershipTypeReduceablePriceEdit
+                <PlatformMembershipTypeReduceablePriceEditRow
                     :model-value="reduceablePrice"
                     :tag-id="tagId"
                     :show-price-per-day="showPricePerDay"
@@ -47,7 +47,7 @@
                             placeholder="Prijs per dag"
                         />
                     </STInputBox>
-                </PlatformMembershipTypeReduceablePriceEdit>
+                </PlatformMembershipTypeReduceablePriceEditRow>
                 <template #right>
                     <div>
                         <button v-if="tagId" class="button text" type="button" @click="deletePriceForTagId(tagId)">
@@ -77,7 +77,7 @@ import { DateSelection, ErrorBox, PriceInput, usePatchMap, Validator } from '@st
 import { OrganizationTag, PlatformMembershipTypeConfigPrice, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import OrganizationTagSelectorView from './OrganizationTagSelectorView.vue';
-import PlatformMembershipTypeReduceablePriceEdit from './PlatformMembershipTypeReduceablePriceEdit.vue';
+import PlatformMembershipTypeReduceablePriceEditRow from './PlatformMembershipTypeReduceablePriceEditRow.vue';
 
 defineProps<{
     hasMultiplePrices: boolean;
