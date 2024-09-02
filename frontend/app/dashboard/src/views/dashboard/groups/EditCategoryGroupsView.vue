@@ -14,16 +14,22 @@
           
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="!isRoot" title="Naam" error-fields="name" :error-box="errors.errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze categorie"
-                autocomplete=""
-            >
-        </STInputBox>
+        <template v-if="!isRoot">
+            <STInputBox v-if="canDeleteOrRename" title="Naam" error-fields="name" :error-box="errors.errorBox">
+                <input
+                    ref="firstInput"
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    placeholder="Naam van deze categorie"
+                    autocomplete=""
+                >
+            </STInputBox>
+            <Checkbox v-if="isPlatformAdmin" v-model="locked">
+                Vergrendel deze categorie (enkel zichtbaar voor platformbeheerders)
+                <p class="style-description-small">Een vergrendelde categorie kan niet verwijderd of hernoemd worden. Enkel platformbeheerders kunnen een categorie vergrendelen of ontgrendelen (enkel jij ziet deze checkbox).</p>
+            </Checkbox>
+        </template>
 
         <template v-if="enableActivities">
             <Checkbox v-if="categories.length == 0" v-model="limitRegistrations">
@@ -82,7 +88,7 @@
             </button>
         </div>
 
-        <div v-if="!isNew && !isRoot && enableActivities" class="container">
+        <div v-if="canDeleteOrRename &&!isNew && !isRoot && enableActivities" class="container">
             <hr>
             <h2>
                 Verwijder deze categorie
@@ -126,6 +132,7 @@ const pop = usePop()
 const errors = useErrors()
 const present = usePresent()
 const auth = useAuth();
+const isPlatformAdmin = auth.hasFullPlatformAccess();
 
 const patchedCategory = computed(() => {
     const c = patchedPeriod.value.settings.categories.find(c => c.id == props.category.id)
@@ -147,6 +154,19 @@ const name = computed({
         }))
     }
 })
+const locked = computed({
+    get: () => patchedCategory.value.settings.locked,
+    set: (locked: boolean) => {
+        addCategoryPatch(
+            GroupCategory.patch({ 
+                settings: GroupCategorySettings.patch({
+                    locked
+                })
+            })
+        )
+    }
+})
+const canDeleteOrRename = computed(() => !locked.value || isPlatformAdmin);
 const limitRegistrations = computed({
     get: () => patchedCategory.value.settings.maximumRegistrations !== null,
     set: (limitRegistrations: boolean) => {

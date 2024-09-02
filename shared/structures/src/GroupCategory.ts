@@ -49,6 +49,14 @@ export class GroupCategorySettings extends AutoEncoder {
      */
     @field({ decoder: GroupCategoryPermissions, version: 61 })
     permissions = GroupCategoryPermissions.create({})
+
+    /**
+     * Whether the category can be deleted / moved by non admins.
+     */
+    @field({ 
+        decoder: BooleanDecoder, ...NextVersion, 
+    })
+    locked = false
 }
 
 export class GroupCategory extends AutoEncoder {

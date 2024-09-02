@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, useEmitPatch, usePatchMoveUpDownIds } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, useAuth, useEmitPatch, usePatchMoveUpDownIds } from '@stamhoofd/components';
 import { GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EditCategoryGroupsView from './EditCategoryGroupsView.vue';
@@ -29,6 +29,8 @@ const props = defineProps<{
     period: OrganizationRegistrationPeriod
 }>()
 
+const auth = useAuth();
+const isPlatformAdmin = auth.hasFullPlatformAccess();
 const present = usePresent();
 const emit = defineEmits(['patch:period'])
 const {addPatch} = useEmitPatch(props, emit, 'period')
@@ -67,6 +69,9 @@ const description = computed(() => {
 
     return `${childCategories.value.length} categorieën (${childCategories.value.map(g => g.settings.name).join(", ")})`
 })
+
+const locked = computed(() => props.category.settings.locked === true);
+const canDeleteOrRename = computed(() => !locked.value || isPlatformAdmin);
 
 async function editCategory() {
     await present({
@@ -226,7 +231,7 @@ async function showContextMenu(event: MouseEvent) {
             }),
             new ContextMenuItem({
                 name: "Verwijder en verplaats inhoud naar",
-                disabled: props.category.groupIds.length == 0 && props.category.categoryIds.length == 0,
+                disabled: !canDeleteOrRename.value || (props.category.groupIds.length == 0 && props.category.categoryIds.length == 0),
                 childMenu: new ContextMenu([
                     [
                         createMergeContextMenuItem(parentCategory.value, !!grandParentCategory.value)
@@ -237,6 +242,7 @@ async function showContextMenu(event: MouseEvent) {
             new ContextMenuItem({
                 name: "Verwijderen",
                 icon: "trash",
+                disabled: !canDeleteOrRename.value,
                 action: async () => {
                     const isConfirm = await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen");
                     
