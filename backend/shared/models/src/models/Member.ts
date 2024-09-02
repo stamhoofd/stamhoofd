@@ -498,15 +498,17 @@ export class Member extends Model {
             }
 
             // Add the cheapest available membership
-            const defaultMembershipsWithOranization = await Promise.all(defaultMemberships.map(async ({membership, registration}) => {
+            const organizations = await Organization.getByIDs(...defaultMemberships.map(m => m.registration.organizationId));
+
+            const defaultMembershipsWithOrganization = defaultMemberships.map(({membership, registration}) => {
                 const organizationId = registration.organizationId;
-                const organization = await Organization.getByID(organizationId);
+                const organization = organizations.find(o => o.id === organizationId)!;
                 return {membership, registration, organization}
-            }));
+            });
 
             const shouldApplyReducedPrice = me.details.shouldApplyReducedPrice;
 
-            const cheapestMembership = defaultMembershipsWithOranization.sort(({membership: a, registration: ar, organization: ao}, {membership: b, registration: br, organization: bo}) => {
+            const cheapestMembership = defaultMembershipsWithOrganization.sort(({membership: a, registration: ar, organization: ao}, {membership: b, registration: br, organization: bo}) => {
                 const tagIdsA = ao?.meta.tags ?? [];
                 const tagIdsB = bo?.meta.tags ?? [];
                 const diff = a.getPrice(platform.periodId, now, tagIdsA, shouldApplyReducedPrice)! - b.getPrice(platform.periodId, now, tagIdsB, shouldApplyReducedPrice)!
