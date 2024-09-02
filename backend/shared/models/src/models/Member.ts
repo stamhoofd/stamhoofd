@@ -509,7 +509,7 @@ export class Member extends Model {
             const cheapestMembership = defaultMembershipsWithOranization.sort(({membership: a, registration: ar, organization: ao}, {membership: b, registration: br, organization: bo}) => {
                 const tagIdsA = ao?.meta.tags ?? [];
                 const tagIdsB = bo?.meta.tags ?? [];
-                const diff = a.getPrice(platform.periodId, now, tagIdsA, shouldApplyReducedPrice)!.selectedPrice - b.getPrice(platform.periodId, now, tagIdsB, shouldApplyReducedPrice)!.selectedPrice
+                const diff = a.getPrice(platform.periodId, now, tagIdsA, shouldApplyReducedPrice)! - b.getPrice(platform.periodId, now, tagIdsB, shouldApplyReducedPrice)!
                 if (diff == 0) {
                     return Sorter.byDateValue(br.createdAt, ar.createdAt)
                 }
