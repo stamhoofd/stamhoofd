@@ -1,5 +1,6 @@
 import { FinancialSupportSettings, Group, OrganizationRecordsConfiguration } from "@stamhoofd/structures";
 import { computed, Ref, unref } from "vue";
+import { useAppContext } from "../../context";
 import { useOrganization, usePlatform } from "../../hooks";
 
 export function useFinancialSupportSettings(options?: {group?: Ref<Group|null>|Group|null}) {
@@ -12,10 +13,19 @@ export function useFinancialSupportSettings(options?: {group?: Ref<Group|null>|G
         organization: organization.value,
         group: unref(options?.group),
         includeGroup: true
-    }))
+    }));
 
     return {
-        enabled: computed(() => recordsConfiguration.value.financialSupport),
+        enabled: computed(() => {
+            const group = unref(options?.group);
+            if(!group) {
+                if(useAppContext() === 'admin') {
+                    return true
+                }
+            }
+
+            return recordsConfiguration.value.financialSupport
+        }),
         priceName: computed(() => financialSupportSettings.value.priceName),
         financialSupportSettings
     }

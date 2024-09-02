@@ -1,11 +1,13 @@
 
 import { column, Model, SQLResultNamespacedRow } from "@simonbackx/simple-database";
-import { v4 as uuidv4 } from "uuid";
-import { Platform } from "./Platform";
-import { PlatformMembershipTypeBehaviour } from "@stamhoofd/structures";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Formatter } from "@stamhoofd/utility";
 import { SQL, SQLSelect } from "@stamhoofd/sql";
+import { PlatformMembershipTypeBehaviour } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
+import { v4 as uuidv4 } from "uuid";
+import { Member } from "./Member";
+import { Organization } from "./Organization";
+import { Platform } from "./Platform";
 
 export class MemberPlatformMembership extends Model {
     static table = "member_platform_memberships";
@@ -115,7 +117,29 @@ export class MemberPlatformMembership extends Model {
             })
         }
 
-        const priceConfig = periodConfig.getPriceForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? this.startDate : (this.createdAt ?? new Date()));
+        const organization = await Organization.getByID(this.organizationId);
+        if(!organization) {
+            throw new SimpleError({
+                //todo
+                code: 'not_found',
+                message: 'Organization not found',
+                human: 'De organisatie is niet gevonden'
+            })
+        }
+        const member = await Member.getByID(this.memberId);
+        if(!member) {
+            throw new SimpleError({
+                //todo
+                code: 'not_found',
+                message: 'Member not found',
+                human: 'Het lid is niet gevonden'
+            })
+        }
+
+        const tagIds = organization.meta.tags;
+        const shouldApplyReducedPrice = member.details.shouldApplyReducedPrice;
+
+        const priceConfig = periodConfig.getPriceConfigForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? this.startDate : (this.createdAt ?? new Date()));
         
         if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
             // Make sure time is equal between start and end date
@@ -129,9 +153,9 @@ export class MemberPlatformMembership extends Model {
             this.expireDate = null
 
             const days = Math.round((this.endDate.getTime() - this.startDate.getTime()) / (1000 * 60 * 60 * 24));
-            this.price = priceConfig.pricePerDay * days + priceConfig.price;
+            this.price = priceConfig.calculatePrice(tagIds, shouldApplyReducedPrice, days);
         } else {
-            this.price = priceConfig.price;
+            this.price = priceConfig.getBasePrice(tagIds, shouldApplyReducedPrice);
             this.startDate = periodConfig.startDate;
             this.endDate = periodConfig.endDate;
             this.expireDate = periodConfig.expireDate;

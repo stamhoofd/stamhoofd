@@ -448,6 +448,10 @@ export class PlatformMember implements ObjectWithRecords {
         return status
     }
 
+    get shouldApplyReducedPrice() {
+        return this.patchedMember.details.shouldApplyReducedPrice
+    }
+
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {
         this.patch = this.patch.patch(MemberWithRegistrationsBlob.patch(p))
     }

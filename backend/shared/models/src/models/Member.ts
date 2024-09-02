@@ -462,7 +462,8 @@ export class Member extends Model {
                     registration: r,
                     membership: defaultMembership,
                 }]
-            })
+            });
+
             // Get active memberships for this member that
             const memberships = await MemberPlatformMembership.where({memberId: me.id, periodId: platform.periodId })
             const now = new Date()
@@ -497,8 +498,20 @@ export class Member extends Model {
             }
 
             // Add the cheapest available membership
-            const cheapestMembership = defaultMemberships.sort(({membership: a, registration: ar}, {membership: b, registration: br}) => {
-                const diff = a.getPrice(platform.periodId, now)!.price - b.getPrice(platform.periodId, now)!.price
+            const organizations = await Organization.getByIDs(...Formatter.uniqueArray(defaultMemberships.map(m => m.registration.organizationId)));
+
+            const defaultMembershipsWithOrganization = defaultMemberships.map(({membership, registration}) => {
+                const organizationId = registration.organizationId;
+                const organization = organizations.find(o => o.id === organizationId);
+                return {membership, registration, organization}
+            });
+
+            const shouldApplyReducedPrice = me.details.shouldApplyReducedPrice;
+
+            const cheapestMembership = defaultMembershipsWithOrganization.sort(({membership: a, registration: ar, organization: ao}, {membership: b, registration: br, organization: bo}) => {
+                const tagIdsA = ao?.meta.tags ?? [];
+                const tagIdsB = bo?.meta.tags ?? [];
+                const diff = a.getPrice(platform.periodId, now, tagIdsA, shouldApplyReducedPrice)! - b.getPrice(platform.periodId, now, tagIdsB, shouldApplyReducedPrice)!
                 if (diff == 0) {
                     return Sorter.byDateValue(br.createdAt, ar.createdAt)
                 }

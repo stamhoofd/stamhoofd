@@ -32,7 +32,7 @@
 <script lang="ts">
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
-import StepperInput from "./StepperInput.vue"
+import StepperInput from "./StepperInput.vue";
 
 @Component({
     components: {
@@ -85,6 +85,9 @@ export default class NumberInput extends VueComponent {
     }
 
     set internalValue(val: number | null) {
+        if(val === this.modelValue) {
+            return;
+        }
         this.$emit('update:modelValue', val)
     }
 
