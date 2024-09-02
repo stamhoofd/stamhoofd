@@ -11,7 +11,7 @@
 
         <template #right>
             <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">{{ formatPrice(config.prices[0].pricePerDay) }} per dag</span>
-            <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">{{ $price ? formatPrice($price) : '?' }}</span>
+            <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">{{ $price !== undefined ? formatPrice($price) : '?' }}</span>
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
