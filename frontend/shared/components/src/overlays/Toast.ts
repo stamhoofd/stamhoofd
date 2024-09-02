@@ -8,11 +8,24 @@ export class ToastButton {
     text: string;
     icon: string | null;
     action: () => void;
-    
-    constructor(text: string, action: () => void, icon: string | null = null) {
+
+    href: string | null;
+    download: string | null;
+
+    constructor(text: string, action?: () => void, icon: string | null = null) {
         this.text = text
-        this.action = action
+        this.action = action ?? (() => {})
         this.icon = icon
+    }
+
+    setHref(href: string) {
+        this.href = href
+        return this
+    }
+
+    setDownload(download: string) {
+        this.download = download
+        return this
     }
 }
 
@@ -23,6 +36,7 @@ export class Toast {
     withOffset = false
     progress: number | null = null
     button: ToastButton | null = null
+    forceButtonClick = false
 
     autohideAfter: number | null = 7000
 
@@ -86,6 +100,11 @@ export class Toast {
 
     setButton(button: ToastButton | null) {
         this.button = button 
+        return this
+    }
+
+    setForceButtonClick() {
+        this.forceButtonClick = true
         return this
     }
 

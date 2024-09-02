@@ -1,17 +1,17 @@
 <template>
     <div class="toast-view-container">
-        <div class="toast-view" :class="toast.icon" @click="clicked" @mousedown.prevent>
+        <component class="toast-view" :class="(toast.icon ?? '') + (toast.button && toast.forceButtonClick ? ' button' : '')" @click="clicked" @mousedown.prevent :is="!toast.button || !toast.forceButtonClick ? 'div' : (toast.button.href ? 'a' : 'button')"  :href="toast.forceButtonClick ? (toast.button?.href ?? undefined) : undefined" :download="toast.forceButtonClick ? (toast.button?.download ?? undefined) : undefined">
             <div v-if="toast.progress !== null" class="progress" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
             <Spinner v-if="toast.icon == 'spinner'" />
             <span v-else-if="toast.icon" class="first icon" :class="toast.icon" />
             <div>
                 <div>{{ message }}</div>
-                <button v-if="toast.button" class="button text increase-click-area" type="button" @click.stop="clickedButton">
+                <component v-if="toast.button" :is="toast.forceButtonClick ? 'span' : (toast.button.href ? 'a' : 'button')" :href="toast.button.href ?? undefined" :download="toast.button.download ?? undefined" class="button text increase-click-area" type="button" @click.stop="clickedButton">
                     {{ toast.button.text }}
-                </button>
+                </component>
             </div>
             <span v-if="toast.action" class="icon arrow-right" />
-        </div>
+        </component>
     </div>
 </template>
 
@@ -55,7 +55,12 @@ export default class ToastView extends Mixins(NavigationMixin) {
     }
 
     clicked() {
+        if (this.toast.forceButtonClick) {
+            return this.clickedButton()
+        }
+
         this.close();
+        
         if (this.toast.action) {
             this.toast.action()
         }
@@ -103,7 +108,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
 
     box-sizing: border-box;
     @extend .style-input-shadow;
-    background: $color-primary-light;
+    background: $color-primary-background;
     border-radius: $border-radius-modals;
     pointer-events:all;   
 
@@ -124,7 +129,6 @@ export default class ToastView extends Mixins(NavigationMixin) {
     div, .icon.dark {
         color: $color-dark;
     }
-
 
     position: relative;
     overflow: hidden;
@@ -193,7 +197,15 @@ export default class ToastView extends Mixins(NavigationMixin) {
         }
     }
 
+    &.button {
+        &:hover {
+            background: $color-primary-light;
 
+            .button:hover {
+                opacity: 1;
+            }
+        }
+    }
     &> .spinner-container {
         margin-right: 75px - 30px - 28px;
     }

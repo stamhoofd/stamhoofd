@@ -1,7 +1,8 @@
-import { Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
+import { ExcelExportView } from '@stamhoofd/frontend-excel-export'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelSheetFilter, ExcelWorkbookFilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, Platform, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, Platform, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..'
@@ -15,21 +16,10 @@ import { NavigationActions } from '../../types/NavigationActions'
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager'
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
 import { RegistrationActionBuilder } from './RegistrationActionBuilder'
-import { ExcelExportView, SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export'
 import { getSelectableWorkbook } from './getSelectableWorkbook'
 
 export function useDirectMemberActions(options?: {groups?: Group[], organizations?: Organization[]}) {
     return useMemberActions()(options)
-}
-
-function downloadURL(url: string, name: string) {
-    const link = document.createElement("a");
-    link.download = name;
-    link.href = url;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
 
 export function useMemberActions() {

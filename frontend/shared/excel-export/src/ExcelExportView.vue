@@ -51,12 +51,13 @@
 <script lang="ts" setup>
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ScrollableSegmentedControl, Toast, useContext, useErrors } from '@stamhoofd/components';
+import { ErrorBox, ScrollableSegmentedControl, Toast, ToastButton, useContext, useErrors } from '@stamhoofd/components';
 import { Storage } from '@stamhoofd/networking';
 import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelWorkbookFilter, LimitedFilteredRequest, Version } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { SelectableColumn } from './SelectableColumn';
 import { SelectableWorkbook } from './SelectableWorkbook';
+import { Formatter } from '@stamhoofd/utility';
 
 const props = defineProps<{
     type: ExcelExportType,
@@ -154,13 +155,13 @@ async function startExport() {
 }
 
 function downloadURL(url: string, name: string) {
+    
     const link = document.createElement("a");
     link.download = name;
     link.href = url;
-    link.style.display = 'none';
-    document.body.appendChild(link);
+    //document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    //document.body.removeChild(link);
 }
 
 async function doExport() {
@@ -177,8 +178,16 @@ async function doExport() {
         })
 
         if (response.data.url) {
-            Toast.success('Excel bestand wordt gedownload').show()
-            downloadURL(response.data.url, 'leden.xlsx')
+            const filename = Formatter.fileSlug(props.type) + '.xlsx'
+            new Toast('Jouw bestand is klaar, download het hier', 'download')
+                .setButton(
+                    new ToastButton('Downloaden')
+                        .setHref(response.data.url)
+                        .setDownload(filename)
+                )
+                .setHide(null)
+                .setForceButtonClick()
+                .show();
         } else {
             Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show()
         }
