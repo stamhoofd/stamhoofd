@@ -22,8 +22,11 @@ export class MemberUserSyncerStatic {
         }
 
         for (const email of parentAndUnverifiedEmails) {
+            if (userEmails.includes(email)) {
+                continue;
+            }
+            
             // Link parents and unverified emails
-
             // Now we add the responsibility permissions to the parent if there are no userEmails
             await this.linkUser(email, member, userEmails.length > 0, userEmails.length > 0)
         }
