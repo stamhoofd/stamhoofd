@@ -4,13 +4,15 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, Platform } from '@stamhoofd/models';
 import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
-import { CountFilteredRequest, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, Country, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { memberFilterCompilers } from '../../../sql-filters/members';
 import { memberSorters } from '../../../sql-sorters/members';
+import parsePhoneNumber from "libphonenumber-js/max"
+import { request } from 'http';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -131,11 +133,55 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (q.search) {
-            let searchFilter: StamhoofdFilter|null = null
+            let searchFilter: StamhoofdFilter|null = null           
+
+            // is phone?
+            if (!searchFilter && q.search.match(/^\+?[0-9\s-]+$/)) {
+                // Try to format as phone so we have 1:1 space matches
+                try {
+                    const phoneNumber = parsePhoneNumber(q.search, (Context.i18n.country as Country) || Country.Belgium)
+                    if (phoneNumber && phoneNumber.isValid()) {
+                        const formatted = phoneNumber.formatInternational();
+                        searchFilter = {
+                            $or: [
+                                {
+                                    phone: {
+                                        $eq: formatted
+                                    }
+                                },
+                                {
+                                    parentPhone: {
+                                        $eq: formatted
+                                    }
+                                },
+                                {
+                                    unverifiedPhone: {
+                                        $eq: formatted
+                                    }
+                                }
+                            ]
+                        }
+                        
+                    }
+                } catch (e) {
+                    console.error('Failed to parse phone number', q.search, e)
+                }
+            }
+
+             // Is lidnummer?
+             if (!searchFilter && q.search.match(/^[0-9]{4}-[0-9]{6}-[0-9]{1,2}$/) || q.search.match(/^[0-9]{10}$/)) {
+                searchFilter = {
+                    memberNumber: {
+                        $eq: q.search
+                    }
+                }
+            }
 
             // Two search modes:
             // e-mail or name based searching
-            if (q.search.includes('@')) {
+            if (searchFilter) {
+                // already done
+            } else if (q.search.includes('@')) {
                 const isCompleteAddress = DataValidator.isEmailValid(q.search);
 
                 // Member email address contains, or member parent contains
@@ -150,6 +196,11 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             parentEmail: {
                                 [(isCompleteAddress ? '$eq' : '$contains')]: q.search
                             }
+                        },
+                        {
+                            unverifiedEmail: {
+                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search
+                            }
                         }
                     ]
                 } as any as StamhoofdFilter
@@ -162,7 +213,6 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             // todo: Address search detection
-            // todo: Phone number search detection
 
             if (searchFilter) {
                 query.where(compileToSQLFilter(searchFilter, filterCompilers))

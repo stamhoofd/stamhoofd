@@ -9,6 +9,7 @@ import { registrationFilterCompilers } from "./registrations";
 export const memberFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
+    memberNumber: createSQLColumnFilterCompiler('memberNumber'),
     firstName: createSQLColumnFilterCompiler('firstName'),
     lastName: createSQLColumnFilterCompiler('lastName'),
     name: createSQLExpressionFilterCompiler(
@@ -46,6 +47,26 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
 
     parentEmail: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.parents[*].email'),
+        {isJSONValue: true, isJSONObject: true}
+    ),
+
+    unverifiedEmail: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.unverifiedEmails'),
+        {isJSONValue: true, isJSONObject: true}
+    ),
+
+    phone: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.phone'),
+        {isJSONValue: true}
+    ),
+
+    parentPhone: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.parents[*].phone'),
+        {isJSONValue: true, isJSONObject: true}
+    ),
+
+    unverifiedPhone: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.unverifiedPhones'),
         {isJSONValue: true, isJSONObject: true}
     ),
 
