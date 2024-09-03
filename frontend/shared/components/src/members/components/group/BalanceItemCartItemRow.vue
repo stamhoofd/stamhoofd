@@ -1,12 +1,11 @@
 <template>
     <STListItem class="right-stack">
         <template #left>
-            <figure class="style-image-with-icon gray">
+            <figure v-if="item.item.type === BalanceItemType.PlatformMembership" class="style-image-with-icon gray">
                 <figure>
-                    <span class="icon membership-filled"></span>
+                    <span class="icon membership-filled" />
                 </figure>
-                <aside>
-                </aside>
+                <aside />
             </figure>
         </template>
 
@@ -38,7 +37,7 @@
 
 
 <script setup lang="ts">
-import { BalanceItemCartItem, RegisterCheckout } from '@stamhoofd/structures';
+import { BalanceItemCartItem, BalanceItemType, RegisterCheckout } from '@stamhoofd/structures';
 
 const props = withDefaults(
     defineProps<{
