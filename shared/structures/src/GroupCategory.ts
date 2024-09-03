@@ -54,7 +54,7 @@ export class GroupCategorySettings extends AutoEncoder {
      * Whether the category can be deleted / moved by non admins.
      */
     @field({ 
-        decoder: BooleanDecoder, ...NextVersion, 
+        decoder: BooleanDecoder, version: 330, 
     })
     locked = false
 }
