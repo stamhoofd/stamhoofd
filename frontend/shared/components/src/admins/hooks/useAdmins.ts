@@ -1,21 +1,17 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding"
-import { usePop } from "@simonbackx/vue-app-navigation"
-import { Toast, useContext, useOrganization, usePlatform } from "@stamhoofd/components"
-import { ContextPermissions, OrganizationManager, usePlatformManager } from "@stamhoofd/networking"
+import { useOrganization, usePlatform } from "@stamhoofd/components"
+import { ContextPermissions, usePlatformManager } from "@stamhoofd/networking"
 import { PermissionRoleForResponsibility, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from "@stamhoofd/structures"
 import { Sorter } from "@stamhoofd/utility"
-import { computed, getCurrentInstance, onActivated } from "vue"
+import { computed, onActivated } from "vue"
+import { useReloadAdmins } from "./useReloadAdmins"
 
 
 export function useAdmins() {
     const organization = useOrganization()
     const platformManager = usePlatformManager()
-    const $context = useContext()
-    const instance = getCurrentInstance()
     const platform = usePlatform()
-    const pop = usePop()
-
-    let promise: Promise<unknown> | undefined = undefined
+    const { reload, reloadPromise } = useReloadAdmins();
 
     const loading = computed(() => {
         if (organization.value) {
@@ -25,21 +21,6 @@ export function useAdmins() {
         // Platform scope
         return platformManager.value.$platform.admins === undefined
     })
-
-    function reload() {
-        if (organization.value) {
-            const manager = new OrganizationManager($context.value!)
-            promise = manager.loadAdmins(true, true, instance?.proxy).catch((e) => {
-                Toast.fromError(e).show()
-                pop({force: true})?.catch(console.error)
-            })
-        } else {
-            promise = platformManager.value.loadAdmins(true, true, instance?.proxy).catch((e) => {
-                Toast.fromError(e).show()
-                pop({force: true})?.catch(console.error)
-            })
-        }
-    }
     
     if (loading.value) {
         reload()
@@ -129,5 +110,5 @@ export function useAdmins() {
         }
     }
 
-    return { loading, admins, promise, sortedAdmins, sortedMembers, getPermissions, getPermissionsPatch, pushInMemory, dropFromMemory}
+    return { loading, admins, reloadPromise, sortedAdmins, sortedMembers, getPermissions, getPermissionsPatch, pushInMemory, dropFromMemory}
 }

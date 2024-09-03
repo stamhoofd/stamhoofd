@@ -51,6 +51,7 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, MemberResponsibility, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EditRoleView from '../admins/EditRoleView.vue';
+import { useReloadAdmins } from '../admins/hooks/useReloadAdmins';
 import { usePatchRoles } from '../admins/hooks/useRoles';
 import InheritedResponsibilityRow from './components/InheritedResponsibilityRow.vue';
 import ResponsibilityRow from './components/ResponsibilityRow.vue';
@@ -60,6 +61,7 @@ const pop = usePop();
 const present = usePresent();
 const $t = useTranslate();
 const organization = useOrganization()
+const { reloadPromise, reload } = useReloadAdmins()
 
 const {saving, errors, save: rawSave, hasChanges, createInheritedResponsibilityRolePatchArray, responsibilities, inheritedResponsibilitiesWithGroup, patchResponsibilities, patchInheritedResponsibilityRoles} = usePatchRoles()
 
@@ -189,6 +191,8 @@ async function editInheritedResponsibility(responsibility: MemberResponsibility,
 
 async function save() {
     await rawSave(async () => {
+        reload();
+        await reloadPromise();
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()
         await pop({ force: true });
     })

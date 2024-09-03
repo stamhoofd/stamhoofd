@@ -134,7 +134,7 @@ import { useAdmins } from './hooks/useAdmins';
 
 const me = useUser();
 const organization = useOrganization()
-const {sortedAdmins, sortedMembers, loading, promise: loadPromise, getPermissions} = useAdmins()
+const { sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions } = useAdmins()
 
 enum Routes {
     Roles = 'rollen',
@@ -189,7 +189,7 @@ defineRoutes([
             userId: String
         },
         paramsToProps: async (params: {userId: string}) => {
-            await loadPromise;
+            await reloadPromise();
             const user = sortedAdmins.value.find(u => u.id === params.userId)
             if (!user) {
                 throw new Error('User not found')
