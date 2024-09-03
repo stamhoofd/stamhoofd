@@ -8,7 +8,12 @@
 
             <p>{{ $t('dashboard.start.title-description') }}</p>
 
-            <p v-if="STAMHOOFD.environment !== 'production'" class="info-box">Dit is een testomgeving</p>
+            <p>
+                <a :href="$domains.getDocs('stappenplan-opstart-werkjaar')" target="_blank" class="button text selected">
+                    <span class="icon book" />
+                    <span>Stappenplan opstart werkjaar</span>
+                </a>
+            </p>
             
             <SetupStepsView />
         </main>
