@@ -28,6 +28,13 @@ export class OrganizationTag extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     name = ''
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    parentTag: string | null = null;
+
+    get isRootTag() {
+        return this.parentTag === null;
+    }
 }
 
 export class PlatformPremiseType extends AutoEncoder {
