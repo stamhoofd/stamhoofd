@@ -46,6 +46,14 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 30, nullable: true })
     memberNumber: string | null = null;
 
+    /**
+     * Code needed to get access to this member when detecting duplicates. It is only visible for admins, otherwise it will be null.
+     * 
+     * Set this value if you want to gain access to a member but receive the known_member_missing_rights error code
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    securityCode: string | null = null;
+
     @field({ decoder: DateDecoder, optional: true, nullable: true })
     lastExternalSync?: Date | null
 

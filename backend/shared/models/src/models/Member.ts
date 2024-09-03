@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Group, MemberPlatformMembership, Organization, Payment, Platform, Registration, User } from './';
+import { Group, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Payment, Platform, Registration, User } from './';
 export type MemberWithRegistrations = Member & { 
     users: User[], 
     registrations: (Registration & {group: Group})[] 
@@ -712,5 +712,35 @@ export class Member extends Model {
 
     async updateMemberships() {
         return await Member.updateMembershipsForId(this.id)
+    }
+
+    async isSafeToMergeDuplicateWithoutSecurityCode() {
+        // If responsibilities: not safe
+        const responsibilities = await MemberResponsibilityRecord.where({ memberId: this.id }, {limit: 1});
+        if (responsibilities.length > 0) {
+            return false;
+        }
+
+        if (this.details.recordAnswers.size > 0) {
+            return false;
+        }
+
+        if (this.details.reviewTimes.isReviewed('details')) {
+            return false;
+        }
+
+        if (this.details.parents.length > 0) {
+            return false;
+        }
+
+        if (this.details.emergencyContacts.length > 0) {
+            return false;
+        }
+
+        if (this.details.uitpasNumber) {
+            return false;
+        }
+
+        return true;
     }
 }

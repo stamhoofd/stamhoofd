@@ -58,13 +58,23 @@
                 </template>
             </STListItem>
         </STList>
+
+        <template v-if="member.patchedMember.details.securityCode">
+            <hr>
+            <h2>Beveiligingscode</h2>
+            <p>Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders.</p>
+
+            <p class="style-description">
+                <code v-copyable class="style-inline-code style-copyable">{{ Formatter.spaceString(member.patchedMember.details.securityCode, 4, '\u2011') }}</code>
+            </p>
+        </template>
     </div>
 </template>
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useAuth } from '../../../hooks';

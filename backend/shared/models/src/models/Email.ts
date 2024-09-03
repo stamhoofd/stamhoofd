@@ -124,6 +124,14 @@ export class Email extends Model {
                 human: 'Vul een tekst in voor je een e-mail verstuurt'
             })
         }
+
+        if (this.fromAddress == null || this.fromAddress.length == 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Missing from',
+                human: 'Vul een afzender in voor je een e-mail verstuurt'
+            })
+        }
     }
 
     getFromAddress() {
@@ -431,7 +439,7 @@ export class Email extends Model {
                     })
 
                     while (request) {
-                        console.log('Loading page', subfilter.type, request)
+                        console.log('Loading email page', subfilter.type, request)
                         const response = await loader.fetch(request);
 
                         count += response.results.length;
@@ -506,7 +514,7 @@ export class Email extends Model {
                     })
 
                     while (request) {
-                        console.log('Loading page', subfilter.type, request)
+                        console.log('Loading email page', subfilter.type, request)
                         const response = await loader.fetch(request);
 
                         // Note: it is possible that a result in the database doesn't return a recipient (in memory filtering)

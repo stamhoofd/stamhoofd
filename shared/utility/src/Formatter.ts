@@ -38,6 +38,18 @@ export class Formatter {
         return name.replace(/\s+/, " ");
     }
 
+    static spaceString(str: string, spaceLength: number = 4, spaceChar = '\u00A0'): string {
+        // Insert a non breaking space every 4 characters without a regex
+        let result = "";
+        for (let i = 0; i < str.length; i++) {
+            if (i % spaceLength === 0 && i > 0) {
+                result += spaceChar;
+            }
+            result += str[i];
+        }
+        return result;
+    }
+
     static stringToNumber(str: string, maxInt = 256) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {

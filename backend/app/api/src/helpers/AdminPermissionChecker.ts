@@ -943,6 +943,10 @@ export class AdminPermissionChecker {
             // Notes are not visible for the member.
             data.details.notes = null;
 
+            if (!(await this.canAccessMember(member, PermissionLevel.Full))) {
+                data.details.securityCode = null;
+            }
+
             return data;
         }
 
@@ -968,6 +972,11 @@ export class AdminPermissionChecker {
             }
         }
 
+        // At least write permissions is required for now to obtain the security code
+        if (!(await this.canAccessMember(member, PermissionLevel.Write))) {
+            cloned.details.securityCode = null
+        }
+
         return cloned;
     }
 
@@ -979,6 +988,15 @@ export class AdminPermissionChecker {
             throw new SimpleError({
                 code: 'invalid_request',
                 message: 'Cannot PUT a full member details object',
+                statusCode: 400
+            })
+        }
+
+        if (data.details.securityCode !== undefined) {
+            throw new SimpleError({
+                code: 'invalid_request',
+                message: 'Cannot PATCH securityCode',
+                human: 'Je kan de veiligheidscode niet aanpassen',
                 statusCode: 400
             })
         }

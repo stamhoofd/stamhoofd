@@ -1,22 +1,25 @@
 <template>
     <div class="code-input">
-        <div>
+        <div :class="{small: codeLength > 6}">
             <!-- Name incluses 'search' to disable safari autocomplete, who tries to autocomplete an email in a number input?! -->
-            <input 
-                v-for="index in codeLength" 
-                :key="index"
-                ref="numberInput" 
-                inputmode="numeric" 
-                class="input" 
-                autocomplete="one-time-code"
-                :name="'search-code_'+index" 
-                @input="onInput(index - 1)" 
-                @click="selectNext(index - 1)" 
-                @keyup.delete="clearInput(index - 1)" 
-                @keyup.left="selectNext(index - 2)" 
-                @keyup.right="selectNext(index)"
-                @change="updateValue"
-            >
+            <template v-for="index in codeLength" :key="index">
+                <input 
+                    ref="numberInput" 
+                    :inputmode="numbersOnly ? 'numeric' : undefined" 
+                    class="input" 
+                    :class="{small: codeLength > 6}"
+                    autocomplete="one-time-code"
+                    :name="'search-code_'+index" 
+                    @input="onInput(index - 1)" 
+                    @click="selectNext(index - 1)" 
+                    @keyup.delete="clearInput(index - 1)" 
+                    @keyup.left="selectNext(index - 2)" 
+                    @keyup.right="selectNext(index)"
+                    @change="updateValue"
+                >
+                <span v-if="index%spaceLength == 0 && index !== codeLength" class="bump">-</span>
+                <span v-if="index%(spaceLength*2) == 0 && index !== codeLength" class="break"></span>
+            </template>
         </div>
     </div>
 </template>
@@ -32,6 +35,15 @@ export default class CodeInput extends VueComponent {
 
     @Prop({ default: "" })
         modelValue!: string
+
+    @Prop({ default: 6 })
+        codeLength!: number
+
+    @Prop({ default: 3 })
+        spaceLength!: number
+
+    @Prop({ default: true })
+        numbersOnly!: boolean
 
     @Watch("modelValue")
     onValueChanged(value: string, _oldValue: string) {
@@ -56,10 +68,6 @@ export default class CodeInput extends VueComponent {
         }
     }
 
-    get codeLength() {
-        return 6
-    }
-
     mounted() {
         setTimeout(() => {
             this.selectNext(0)
@@ -72,7 +80,7 @@ export default class CodeInput extends VueComponent {
         }
 
         const input = this.$refs.numberInput[index] as HTMLInputElement;
-        input.value = (input.value as string).replace(/[^0-9]/g, '')
+        input.value = this.numbersOnly ? (input.value as string).replace(/[^0-9]/g, '') : (input.value as string).toLocaleUpperCase().replace(/[^0-9A-Z]/g, '')
         if (input.value.length >= 1) {
             this.selectNext(index + 1)
         }
@@ -174,6 +182,8 @@ export default class CodeInput extends VueComponent {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .code-input {
     -webkit-touch-callout: none !important;
@@ -183,8 +193,8 @@ export default class CodeInput extends VueComponent {
         flex-direction: row;
 
         .input {
-            margin: 0 3px;
-            max-width: 38px;
+            margin: 0 2px;
+            max-width: 32px;
             padding-left: 0;
             padding-right: 0;
             text-align: center;
@@ -192,9 +202,29 @@ export default class CodeInput extends VueComponent {
             caret-color: transparent;
             text-transform: uppercase;
             -webkit-touch-callout: none !important;
+        }
 
-            &:nth-child(3) {
-                margin-right: 15px;
+        .bump {
+            width: 15px;
+            align-self: center;
+            text-align: center;
+            font-size: 20px;
+            line-height: 1;
+            font-weight: $font-weight-default;
+            color: $color-gray-text;
+        }
+
+        &.small {
+            flex-wrap: wrap;
+            row-gap: 5px;
+
+            @media (max-width: 600px) {
+                .break {
+                    width: auto;
+                    flex-basis: 100%;
+                    opacity: 0;
+                    height: 0;
+                }
             }
         }
 

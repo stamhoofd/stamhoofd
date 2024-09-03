@@ -1,6 +1,45 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save">
-        <component :is="component" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
+    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? 'Doorgaan' : saveText" @save="save">
+        <template v-if="isDuplicate">
+            <h1>Krijg toegang tot de gegevens van {{ cloned.patchedMember.details.firstName }}</h1>
+            <p>{{ cloned.patchedMember.details.firstName }} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.</p>
+            
+            <STErrorsDefault :error-box="errors.errorBox" />
+
+            <STInputBox title="Beveiligingscode" error-fields="code" :error-box="errors.errorBox" class="max">
+                <CodeInput v-model="code" :code-length="16" :space-length="4" :numbersOnly="false" @complete="save" />
+            </STInputBox>
+
+            <hr>
+            <h2>Waar vind ik deze code?</h2>
+
+            <STList class="illustration-list">    
+                <STListItem class="left-center">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/communication.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Vraag de code aan jouw leiding
+                    </h2>
+                    <p class="style-description">
+                        Jouw leiding kan in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.
+                    </p>
+                </STListItem>
+
+                <STListItem class="left-center">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/email.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Zoek de code onderaan een e-mail die je van ons kreeg
+                    </h2>
+                    <p class="style-description">
+                        Zoek de laatste (recente) e-mail die je van ons kreeg op een e-mailadres die we wél kennen. Daar vind je normaal een beveiligingscode.
+                    </p>
+                </STListItem>
+            </STList>
+        </template>
+        <component :is="component" v-else :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
     </SaveView>
 </template>
 
@@ -10,10 +49,12 @@ import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-nav
 import { PlatformMember, Version } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
 
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { onActivated } from 'vue';
 import { useAppContext } from '../context';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
+import CodeInput from '../inputs/CodeInput.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
@@ -53,6 +94,8 @@ const manager = usePlatformFamilyManager();
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 const willMarkReviewed = !isAdmin;
+const isDuplicate = ref(false);
+const code = ref("");
 
 onActivated(() => {
     cloned.value = props.member.clone() 
@@ -85,6 +128,23 @@ async function save() {
             return;
         }
 
+        if (isDuplicate.value) {
+            if (code.value.length !== 16) {
+                errors.errorBox = new ErrorBox(new SimpleError({
+                    code: 'invalid_field',
+                    message: "Vul de beveiligingscode in",
+                    field: 'code'
+                }));
+                loading.value = false;
+                return;
+            }
+
+            // Set security code on member details - this allows the backend to go through with the request
+            cloned.value.addDetailsPatch({
+                securityCode: code.value
+            })
+        }
+
         if (props.doSave) {
             // Extra clone for saving, so the view doesn't change during saving
             const saveClone = cloned.value.clone();
@@ -106,6 +166,13 @@ async function save() {
         }
 
     } catch (e) {
+        if (isSimpleError(e) || isSimpleErrors(e)) {
+            if (e.hasCode('known_member_missing_rights')) {
+                isDuplicate.value = true;
+                loading.value = false;
+                return;
+            }
+        }
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;

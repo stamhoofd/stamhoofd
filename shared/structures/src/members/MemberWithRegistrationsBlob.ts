@@ -67,10 +67,16 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         const createLoginDetailsReplacement = (email: string) => {
             const formattedEmail = Formatter.escapeHtml(email);
 
+            let suffix = '';
+
+            if (this.details.securityCode) {
+                suffix = ` De beveiligingscode voor ${Formatter.escapeHtml(this.firstName)} is <span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(this.details.securityCode, 4, '-'))}</span>.`
+            }
+
             return Replacement.create({
                 token: "loginDetails",
                 value: "",
-                html: this.hasAccount(email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${formattedEmail}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${formattedEmail}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
+                html: this.hasAccount(email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${formattedEmail}</strong>.${suffix}</em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${formattedEmail}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.${suffix}</em></p>`
             })
         };
 

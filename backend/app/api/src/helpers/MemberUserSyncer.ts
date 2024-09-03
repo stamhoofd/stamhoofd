@@ -1,6 +1,23 @@
 import { Member, MemberResponsibilityRecord, MemberWithRegistrations, User } from "@stamhoofd/models";
 import { SQL } from "@stamhoofd/sql";
 import { MemberDetails, Permissions, UserPermissions } from "@stamhoofd/structures";
+import crypto from "crypto";
+import basex from "base-x";
+
+const ALPHABET = '123456789ABCDEFGHJKMNPQRSTUVWXYZ' // Note: we removed 0, O, I and l to make it easier for humans
+const customBase = basex(ALPHABET)
+
+async function randomBytes(size: number): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        crypto.randomBytes(size, (err: Error | null, buf: Buffer) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(buf);
+        });
+    });
+}
 
 export class MemberUserSyncerStatic {
     /**
@@ -9,11 +26,7 @@ export class MemberUserSyncerStatic {
      * - email addresses have changed
      */
     async onChangeMember(member: MemberWithRegistrations, unlinkUsers: boolean = false) {
-        console.log('onchange member', member.id, 'unlink', unlinkUsers)
-
         const {userEmails, parentAndUnverifiedEmails} = this.getMemberAccessEmails(member.details)
-
-        console.log('emails', userEmails, parentAndUnverifiedEmails)
 
         // Make sure all these users have access to the member
         for (const email of userEmails) {
@@ -55,6 +68,15 @@ export class MemberUserSyncerStatic {
                     }
                 }
             }
+        }
+
+        if (member.details.securityCode === null) {
+            console.log("Generating security code for member "+member.id)
+
+            const length = 16;
+            const code = customBase.encode(await randomBytes(100)).toUpperCase().substring(0, length);
+            member.details.securityCode = code
+            await member.save()
         }
     }
 

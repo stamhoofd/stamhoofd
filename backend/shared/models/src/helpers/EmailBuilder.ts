@@ -270,7 +270,7 @@ export async function getEmailBuilder(organization: Organization|null, email: Em
             token: "signInUrl",
             value: signInUrl
         }))
-
+        
         if (email.defaultReplacements) {
             recipient.replacements.push(...email.defaultReplacements)
         }

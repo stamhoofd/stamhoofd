@@ -51,6 +51,33 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             // Check for duplicates and prevent creating a duplicate member by a user
             const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member);
             if (duplicate) {
+                if (await duplicate.isSafeToMergeDuplicateWithoutSecurityCode()) {
+                    console.log("Merging duplicate without security code: allowed for " + duplicate.id)
+                } else if (struct.details.securityCode) {
+                    // Entered the security code, so we can link the user to the member
+                    if (!duplicate.details.securityCode || struct.details.securityCode !== duplicate.details.securityCode) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            field: 'details.securityCode',
+                            message: "Invalid security code",
+                            human: Context.i18n.$t(`Deze beveiligingscode is ongeldig. Probeer het opnieuw of neem contact op met jouw vereniging om de juiste code te ontvangen.`),
+                            statusCode: 400
+                        })
+                    }
+
+                    console.log("Merging duplicate: security code is correct - for " + duplicate.id)
+                } else {
+                    throw new SimpleError({
+                        code: "known_member_missing_rights",
+                        message: "Creating known member without sufficient access rights",
+                        human: `${member.details.firstName} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.`,
+                        statusCode: 400
+                    })
+                }
+
+                // Allowed!
+                struct.details.securityCode = null
+
                 // Merge data
                 duplicate.details.merge(member.details)
                 await duplicate.save()
