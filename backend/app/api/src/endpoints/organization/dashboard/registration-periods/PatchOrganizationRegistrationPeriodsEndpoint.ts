@@ -81,6 +81,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             let deleteUnreachable = false
             const allowedIds: string[] = []
 
+            //#region prevent patch category lock if no full platform access
+            const originalCategories = organizationPeriod.settings.categories;
+
             if (await Context.auth.hasFullAccess(organization.id)) {
                 if (patch.settings) {
                     if(patch.settings.categories) {
@@ -116,6 +119,49 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     }
                 }
             }
+
+            //#region handle locked categories
+            if(!Context.auth.hasPlatformFullAccess()) {
+                const categoriesAfterPatch = organizationPeriod.settings.categories;
+
+                for(const categoryBefore of originalCategories) {
+                    const locked = categoryBefore.settings.locked;
+
+                    if(locked) {
+                        // todo: use existing function, now a category could still be deleted if the category is moved to another category and that catetory is deleted
+                        const categoryId = categoryBefore.id;
+                        const refCountBefore = originalCategories.filter(c => c.categoryIds.includes(categoryId)).length;
+                        const refCountAfter = categoriesAfterPatch.filter(c => c.categoryIds.includes(categoryId)).length;
+                        const isDeleted = refCountAfter < refCountBefore;
+
+                        if(isDeleted) {
+                            throw Context.auth.error('Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.')
+                        }
+                    }
+
+                    const categoryAfter = categoriesAfterPatch.find(c => c.id === categoryBefore.id);
+                    
+                    if(!categoryAfter) {
+                        if(locked) {
+                            throw Context.auth.error('Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.')
+                        }
+                    } else if(locked !== categoryAfter.settings.locked) {
+                        throw Context.auth.error('Je hebt geen toegangsrechten om deze categorie te vergrendelen of ontgrendelen.')
+                    }
+
+                    if(!locked || !categoryAfter) {
+                        continue;
+                    }
+
+                    const settingsBefore = categoryBefore.settings;
+                    const settingsAfter = categoryAfter.settings;
+
+                    if(settingsBefore.name !== settingsAfter.name) {
+                        throw Context.auth.error('Je hebt geen toegangsrechten de naam van deze vergrendelde categorie te wijzigen.')
+                    }
+                }
+            }
+            //#endregion
 
             await organizationPeriod.save();
 
