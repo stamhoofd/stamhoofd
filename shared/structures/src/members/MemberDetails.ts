@@ -202,26 +202,34 @@ export class MemberDetails extends AutoEncoder {
             }
         }
 
-        const filterUsedAndInvalidEmails = (emails: string[]) => 
+        const filterUsedAndInvalidEmails = (emails: string[], checkAlternative = true) => 
             emails
                 .map(e => e.toLowerCase().trim())
                 .filter(email => {
-                    if (this.email && email === this.email) {
-                        return false
+                    if (checkAlternative) {
+                        if (this.hasEmail(email)) {
+                            return false
+                        }
+                    } else {
+                        if (this.email && email === this.email) {
+                            return false
+                        }
+
+                        for (const parent of this.parents) {
+                            if (parent.hasEmail(email)) {
+                                return false
+                            }
+                        }
                     }
+                    
                     if (!DataValidator.isEmailValid(email)) {
                         return false
                     }
 
-                    for (const parent of this.parents) {
-                        if (parent.hasEmail(email)) {
-                            return false
-                        }
-                    }
                     return true
                 });
 
-        this.alternativeEmails = filterUsedAndInvalidEmails(this.alternativeEmails);
+        this.alternativeEmails = filterUsedAndInvalidEmails(this.alternativeEmails, false);
 
         if (this.phone) {
             const formattedPhone = Formatter.removeDuplicateSpaces(this.phone.trim());

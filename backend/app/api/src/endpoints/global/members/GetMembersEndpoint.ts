@@ -7,12 +7,11 @@ import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
 import { CountFilteredRequest, Country, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
+import parsePhoneNumber from "libphonenumber-js/max";
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { memberFilterCompilers } from '../../../sql-filters/members';
 import { memberSorters } from '../../../sql-sorters/members';
-import parsePhoneNumber from "libphonenumber-js/max"
-import { request } from 'http';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
