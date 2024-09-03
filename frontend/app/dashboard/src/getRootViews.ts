@@ -273,15 +273,15 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         })
     })
 
-    const sharedMoreItems = [
-        new TabBarItem({
-            icon: 'file-filled',
-            name: 'Documenten',
-            component: new ComponentWithProperties(SplitViewController, {
-                root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {})
-            })
-        }),
-    ];
+    const documentsTab =  new TabBarItem({
+        icon: 'file-filled',
+        name: 'Documenten',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {})
+        })
+    })
+
+    const sharedMoreItems: TabBarItem[] = [];
 
     if (STAMHOOFD.CHANGELOG_URL) {
         sharedMoreItems.push(
@@ -377,6 +377,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             });
 
                             if (reactiveSession.auth.hasFullAccess()) {
+                                moreTab.items.unshift(documentsTab)
                                 moreTab.items.unshift(financesTab)
                                 moreTab.items.unshift(settingsTab)
                             } else if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
