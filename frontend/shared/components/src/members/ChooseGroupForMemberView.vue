@@ -12,7 +12,11 @@
                 </template>
             </ScrollableSegmentedControl>
 
-            <p v-if="tree.categories.length == 0" class="info-box">
+            <p v-if="differentOrganization" class="info-box icon basket">
+                Reken eerst jouw huidige winkelmandje af. Je kan de huidige inhoud van jouw winkelmandje niet samen afrekenen met een inschrijving bij {{ selectedOrganization.name }}.
+            </p>
+            
+            <p v-else-if="tree.categories.length == 0" class="info-box">
                 {{ member.patchedMember.firstName }} kan je op dit moment niet inschrijven bij {{ selectedOrganization.name }}. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
             </p>
 
@@ -58,6 +62,7 @@ const $t = useTranslate();
 const searchOrganizationTitle = computed(() => $t('shared.searchMemberOrganizations.defaultTitle', {firstName: props.member.patchedMember.firstName}))
 const navigate = useNavigationActions();
 const organization = useOrganization();
+const differentOrganization = computed(() => selectedOrganization.value && !props.member.family.checkout.cart.isEmpty && props.member.family.checkout.singleOrganization?.id !== selectedOrganization.value.id)
 
 watch(selectedOrganization, () => {
     checkOrganization()
