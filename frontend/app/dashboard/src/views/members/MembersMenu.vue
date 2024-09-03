@@ -66,7 +66,7 @@
                 </div>
             </div>
 
-            <div class="grouped footer">
+            <div v-if="auth.hasFullAccess()" class="grouped footer">
                 <hr>
 
                 <button class="menu-button button" type="button" @click="switchPeriod">
