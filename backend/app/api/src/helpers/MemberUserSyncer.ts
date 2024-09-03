@@ -9,7 +9,11 @@ export class MemberUserSyncerStatic {
      * - email addresses have changed
      */
     async onChangeMember(member: MemberWithRegistrations, unlinkUsers: boolean = false) {
+        console.log('onchange member', member.id, 'unlink', unlinkUsers)
+
         const {userEmails, parentAndUnverifiedEmails} = this.getMemberAccessEmails(member.details)
+
+        console.log('emails', userEmails, parentAndUnverifiedEmails)
 
         // Make sure all these users have access to the member
         for (const email of userEmails) {
@@ -59,7 +63,7 @@ export class MemberUserSyncerStatic {
         }
 
         const unverifiedEmails: string[] = details.unverifiedEmails;
-        const parentAndUnverifiedEmails = details.parentsHaveAccess ? details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails).concat(unverifiedEmails) : []
+        const parentAndUnverifiedEmails = details.parentsHaveAccess ? details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails).concat(unverifiedEmails) : details.unverifiedEmails
 
         return {
             userEmails,
@@ -163,6 +167,8 @@ export class MemberUserSyncerStatic {
     }
 
     async linkUser(email: string, member: MemberWithRegistrations, asParent: boolean, updateNameIfEqual = true) {
+        console.log('Linking user', email, 'to member', member.id, 'as parent', asParent, 'update name if equal', updateNameIfEqual)
+
         let user = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase()) ?? await User.getForAuthentication(member.organizationId, email, {allowWithoutAccount: true})
 
         if (user) {
