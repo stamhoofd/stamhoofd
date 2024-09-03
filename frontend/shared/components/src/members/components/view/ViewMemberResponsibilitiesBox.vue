@@ -1,5 +1,5 @@
 <template>
-    <div v-if="hasResponsibilities" class="hover-box container">
+    <div v-if="hasResponsibilities && (sortedResponsibilities.length || auth.hasFullAccess())" class="hover-box container">
         <hr>
         <h2 class="style-with-button">
             <div>Functies</div>
@@ -7,6 +7,8 @@
                 <button v-if="auth.hasFullAccess()" type="button" class="button icon edit gray" @click.prevent="editResponsibilities" />
             </div>
         </h2>
+
+
 
         <button v-if="sortedResponsibilities.length === 0" class="info-box selectable with-button" type="button" @click="editResponsibilities">
             {{ props.member.patchedMember.details.firstName }} heeft geen functies
