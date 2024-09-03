@@ -80,7 +80,7 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController, useUrl } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
@@ -100,6 +100,7 @@ const organizationManager = useOrganizationManager()
 const owner = useRequestOwner();
 const present = usePresent();
 const auth = useAuth();
+const splitViewController = useSplitViewController();
 
 const tree = computed(() => {
     return period.value.getCategoryTree({
@@ -270,12 +271,14 @@ async function switchPeriod(event: MouseEvent) {
                     period.value = organizationPeriod
 
                     // Make sure we open the first group again
-                    await $navigate(Routes.Group, {
-                        properties: {
-                            group: tree.value.getAllGroups()[0],
-                            period: period.value
-                        }
-                    })
+                    if (!splitViewController.value?.shouldCollapse()) {
+                        await $navigate(Routes.Group, {
+                            properties: {
+                                group: tree.value.getAllGroups()[0],
+                                period: period.value
+                            }
+                        })
+                    }
                     return true;
                 }
             });
