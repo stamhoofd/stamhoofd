@@ -218,10 +218,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 if (patchResponsibility.startDate !== undefined) {
-
-                    if (patchResponsibility.startDate > new Date()) {
+                    if (patchResponsibility.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
                         throw Context.auth.error("Je kan de startdatum van een functie niet in de toekomst zetten")
                     }
+                    if (patchResponsibility.startDate.getTime() > Date.now()) {
+                        patchResponsibility.startDate = new Date() // force now
+                    }
+
                     const daysDiff = Math.abs((new Date().getTime() - patchResponsibility.startDate.getTime()) / (1000 * 60 * 60 * 24))
 
                     if (daysDiff > 60 && !Context.auth.hasPlatformFullAccess()) {
@@ -348,8 +351,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 // Allow patching begin and end date
                 model.endDate = put.endDate
 
-                if (put.startDate > new Date()) {
+                if (put.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
                     throw Context.auth.error("Je kan de startdatum van een functie niet in de toekomst zetten")
+                }
+
+                if (put.startDate.getTime() > Date.now()) {
+                    put.startDate = new Date() // force now
                 }
 
                 if (put.endDate && put.endDate > new Date(Date.now() + 60*1000)) {
