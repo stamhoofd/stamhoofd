@@ -271,9 +271,14 @@ export class AdminPermissionChecker {
             return true;
         }
 
+        if (registration.deactivatedAt || !registration.registeredAt) {
+            // No full access: cannot access deactivated registrations
+            return false;
+        }
+
         const allGroups = await this.getOrganizationGroups(registration.organizationId)
         const group = allGroups.find(g => g.id === registration.groupId)
-        if (!group) {
+        if (!group || group.deletedAt) {
             return false;
         }
 

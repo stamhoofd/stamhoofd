@@ -105,7 +105,8 @@ const objectFetcher = useMembersObjectFetcher()
 async function showContextMenu(event: MouseEvent) {
     const builder = buildActions({
         organizations: props.member.organizations,
-        groups: props.member.filterGroups({currentPeriod: true})
+        groups: props.member.filterGroups({currentPeriod: true}),
+        forceWriteAccess: hasWrite.value
     })
 
     const actions = builder.getActions()

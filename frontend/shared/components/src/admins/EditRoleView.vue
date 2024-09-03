@@ -119,8 +119,8 @@
                         v-for="group in groups" 
                         :key="group.id" 
                         :role="patched" 
-                        :inheritedRoles="inheritedRoles"
-                        :resource="{id: group.id, name: group.settings.name, type: PermissionsResourceType.Groups }" 
+                        :inherited-roles="inheritedRoles"
+                        :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }" 
                         :configurable-access-rights="[]"
                         type="resource" 
                         @patch:role="addPatch" 
@@ -256,10 +256,10 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
 import { AccessRight, Group, GroupCategory, maximumPermissionlevel, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
-import { Ref, computed, ref } from 'vue';
+import { computed, Ref, ref } from 'vue';
+import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
-import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
 
 const errors = useErrors();
 const saving = ref(false);

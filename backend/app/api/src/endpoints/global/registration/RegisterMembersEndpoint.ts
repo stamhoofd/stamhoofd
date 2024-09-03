@@ -121,7 +121,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: "forbidden",
                     message: "No permission to register this member",
-                    human: 'Je hebt niet de juiste toegangsrechten om dit lid in te schrijven.',
+                    human: 'Je hebt niet de juiste toegangsrechten om dit lid in te schrijven. Je kan enkel leden inschrijven als je minstens bewerkrechten hebt voor dat lid.',
                     statusCode: 403
                 });
             }

@@ -2,6 +2,7 @@
 import { AutoEncoder, AutoEncoderPatchType, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { LoadedPermissions } from './LoadedPermissions';
+import { MemberResponsibility } from './MemberResponsibility';
 import { PermissionLevel } from './PermissionLevel';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole';
 import { Permissions } from './Permissions';
@@ -16,6 +17,7 @@ type OrganizationForPermissionCalculation = {
     }, 
     privateMeta?: {
         roles: PermissionRoleDetailed[],
+        responsibilities: MemberResponsibility[],
         inheritedResponsibilityRoles: PermissionRoleForResponsibility[]
     }|null
 }
@@ -100,7 +102,7 @@ export class UserPermissions extends AutoEncoder {
         }
         const organizationRoles = organization?.privateMeta?.roles ?? []
         const inheritedResponsibilityRoles = organization?.privateMeta?.inheritedResponsibilityRoles ?? []
-        const allResponsibilities = Platform.shared.config.responsibilities
+        const allResponsibilities = [...Platform.shared.config.responsibilities, ...(organization?.privateMeta?.responsibilities ?? [])]
         return LoadedPermissions.from(permissions, organizationRoles, inheritedResponsibilityRoles, allResponsibilities)
     }
 

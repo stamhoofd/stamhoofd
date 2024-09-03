@@ -116,7 +116,7 @@ export class ContextPermissions {
             return true;
         }
 
-        for (const registration of member.member.registrations) {
+        for (const registration of member.filterRegistrations({currentPeriod: true})) {
             const organization = member.family.getOrganization(registration.organizationId);
             if (organization) {
                 if (this.canAccessRegistration(registration, organization, permissionLevel)) {

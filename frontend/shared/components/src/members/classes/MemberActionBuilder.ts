@@ -30,7 +30,7 @@ export function useMemberActions() {
     const organization = useOrganization()
     const platform = usePlatform()
 
-    return (options?: {groups?: Group[], organizations?: Organization[]}) => {
+    return (options?: {groups?: Group[], organizations?: Organization[], forceWriteAccess?: boolean|null}) => {
         return new MemberActionBuilder({
             present,
             platform: platform.value,
@@ -38,7 +38,8 @@ export function useMemberActions() {
             groups: options?.groups ?? [],
             organizations: organization.value ? [organization.value] : (options?.organizations ?? []),
             platformFamilyManager,
-            owner
+            owner,
+            forceWriteAccess: options?.forceWriteAccess
         })
     }
 }
@@ -60,6 +61,8 @@ export class MemberActionBuilder {
     platformFamilyManager: PlatformFamilyManager
     owner: any
 
+    forceWriteAccess: boolean|null = null
+
     constructor(settings: {
         present: ReturnType<typeof usePresent>,
         context: SessionContext,
@@ -67,7 +70,8 @@ export class MemberActionBuilder {
         platform: Platform,
         organizations: Organization[],
         platformFamilyManager: PlatformFamilyManager
-        owner: any
+        owner: any,
+        forceWriteAccess?: boolean|null
     }) {
         this.present = settings.present
         this.context = settings.context
@@ -76,9 +80,14 @@ export class MemberActionBuilder {
         this.organizations = settings.organizations
         this.platformFamilyManager = settings.platformFamilyManager
         this.owner = settings.owner
+        this.forceWriteAccess = settings.forceWriteAccess ?? null
     }
 
     get hasWrite() {
+        if (this.forceWriteAccess !== null) {
+            return this.forceWriteAccess
+        }
+
         for (const group of this.groups) {
             if (!this.context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                 return false
