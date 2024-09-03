@@ -364,7 +364,7 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
 
             if (!jsonFile) {
                 this.importingSeatingPlan = false
-                new CenteredMessage("Dit is geen geldig zaalplan uit Stamhoofd").addCloseButton().show()
+                new CenteredMessage(this.$t("Dit is geen geldig zaalplan uit Stamhoofd")).addCloseButton().show()
                 return
             }
 

@@ -388,7 +388,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
                 })
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""
-            case PaymentMethod.PointOfSale: return "De betaling loopt niet via Stamhoofd"
+            case PaymentMethod.PointOfSale: return this.$t("De betaling loopt niet via Stamhoofd")
         }
     }
 

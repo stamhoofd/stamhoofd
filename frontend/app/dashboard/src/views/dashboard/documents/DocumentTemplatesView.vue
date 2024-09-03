@@ -115,7 +115,7 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
 
     addDocument() {
         if (this.organization.meta.packages.disableActivities) {
-            new Toast("Je kan geen documenten aanmaken in de gratis versie van Stamhoofd", 'error red').show()
+            new Toast(this.$t("Je kan geen documenten aanmaken in de gratis versie van Stamhoofd"), 'error red').show()
             return
         }
 
