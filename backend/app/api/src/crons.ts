@@ -586,7 +586,11 @@ let lastDripCheck: Date | null = null
 let lastDripId = ""
 async function checkDrips() {
     if (STAMHOOFD.environment === "development") {
-        //return;
+        return;
+    }
+
+    if (STAMHOOFD.userMode === 'platform') {
+        return;
     }
 
     if (lastDripCheck && lastDripCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
