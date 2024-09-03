@@ -164,7 +164,8 @@ export class PlatformFamily {
 
     copyFromClone(clone: PlatformFamily) {
         for (const member of this.members) {
-            const cloneMember = clone.members.find(m => m.id === member.id || (m._oldId && m._oldId === member.id && member.isNew))
+            const cloneMember = clone.members.find(m => m.id === member.id) ??  clone.members.find(m => m._oldId && m._oldId === member.id)
+            
             if (cloneMember) {
                 member.member.deepSet(cloneMember.member)
                 member.patch.deepSet(cloneMember.patch)

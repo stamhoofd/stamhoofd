@@ -993,12 +993,8 @@ export class AdminPermissionChecker {
         }
 
         if (data.details.securityCode !== undefined) {
-            throw new SimpleError({
-                code: 'invalid_request',
-                message: 'Cannot PATCH securityCode',
-                human: 'Je kan de veiligheidscode niet aanpassen',
-                statusCode: 400
-            })
+            // Unset silently
+            data.details.securityCode = undefined
         }
 
         const hasRecordAnswers = !!data.details.recordAnswers;

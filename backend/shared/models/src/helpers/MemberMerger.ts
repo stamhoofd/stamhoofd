@@ -24,6 +24,10 @@ import {
 export async function mergeMultipleMembers(members: Member[]) {
     const { base, others } = selectBaseMember(members);
 
+    if (!base.existsInDatabase) {
+        throw Error("Base member does not exist in database")
+    }
+
     for (const other of others) {
         await mergeTwoMembers(base, other);
     }
@@ -45,7 +49,7 @@ export async function findEqualMembers({
     });
 }
 
-async function mergeTwoMembers(base: Member, other: Member): Promise<void> {
+export async function mergeTwoMembers(base: Member, other: Member): Promise<void> {
     mergeMemberDetails(base, other);
 
     await mergeRegistrations(base, other);
@@ -56,10 +60,14 @@ async function mergeTwoMembers(base: Member, other: Member): Promise<void> {
     await mergeMemberPlatformMemberships(base, other);
 
     await base.save();
-    // store other member in merged_member table
-    const mergedMember = MergedMember.fromMember(other, base.id);
-    await mergedMember.save();
-    await other.delete();
+
+    if (other.existsInDatabase) {
+        // store other member in merged_member table
+        const mergedMember = MergedMember.fromMember(other, base.id);
+        await mergedMember.save();
+
+        await other.delete();
+    }
 }
 
 async function mergeRegistrations(base: Member, other: Member) {
@@ -188,6 +196,8 @@ async function mergeModels<M extends typeof ModelWithMemberId>(
 export function mergeMemberDetails(base: Member, other: Member): void {
     const baseDetails = base.details;
     const otherDetails = other.details;
+    baseDetails.cleanData();
+    otherDetails.cleanData();
 
     // string details
     mergeStringIfBaseNotSet(baseDetails, otherDetails, "firstName");
@@ -197,7 +207,7 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     mergeStringIfBaseNotSet(baseDetails, otherDetails, "uitpasNumber");
 
     // email
-    mergeEmail(baseDetails, otherDetails, baseDetails.unverifiedEmails);
+    mergeEmail(baseDetails, otherDetails);
 
     // phone
     mergePhone(baseDetails, otherDetails, baseDetails);
@@ -282,7 +292,7 @@ export function selectBaseMember(members: Member[]): {
         throw Error("Members array length is less than 2.");
     }
     const sorted = members.sort(
-        (m1, m2) => m2.createdAt.getTime() - m1.createdAt.getTime()
+        (m1, m2) => (m2.existsInDatabase ? 0 : m2.createdAt.getTime()) - (m1.existsInDatabase ? 0 : m1.createdAt.getTime())
     );
 
     return { base: sorted[0], others: sorted.slice(1, undefined) };
@@ -346,21 +356,21 @@ function mergeParent(base: Parent, other: Parent, baseDetails: MemberDetails) {
     mergeStringIfBaseNotSet(base, other, "firstName");
     mergeStringIfBaseNotSet(base, other, "lastName");
     // add other emails to alternative emails
-    mergeEmail(base, other, base.alternativeEmails);
+    mergeEmail(base, other);
     mergePhone(base, other, baseDetails);
     mergeAddress(base, other, baseDetails);
 }
 
 function mergeEmail(
-    base: { email: string | null | undefined },
-    other: { email: string | null | undefined },
-    alternativeEmails: string[]
+    base: { email: string | null, alternativeEmails: string[] },
+    other: { email: string | null, alternativeEmails: string[] }
 ) {
     const isEmailMerged = mergeStringIfBaseNotSet(base, other, "email");
-    const otherEmail = other.email;
-    if (!isEmailMerged && !isNullOrEmpty(otherEmail)) {
-        if (!alternativeEmails.some((email) => email === otherEmail)) {
-            alternativeEmails.push(otherEmail!);
+    base.alternativeEmails = Formatter.uniqueArray([...base.alternativeEmails, ...other.alternativeEmails]);
+
+    if (!isEmailMerged && !isNullOrEmpty(other.email)) {
+        if (!base.alternativeEmails.some((email) => email === other.email!)) {
+            base.alternativeEmails.push(other.email!);
         }
     }
 }
