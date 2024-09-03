@@ -8,6 +8,13 @@
 
             <p>{{ $t('Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.') }}</p>
 
+            <p>
+                <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
+                    <span class="icon book" />
+                    <span>Hulp nodig?</span>
+                </a>
+            </p>
+            
             <template v-if="members.length == 0 && isAcceptingNewMembers">
                 <button class="button primary" type="button" @click="registerMembers">
                     <span class="icon edit" />
