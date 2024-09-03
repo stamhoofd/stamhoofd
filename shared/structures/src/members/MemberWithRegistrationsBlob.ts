@@ -140,7 +140,7 @@ export class MembersBlob extends AutoEncoder {
      * 
      * This is encoded, so it can be stored locally
      */
-    @field({ decoder: DateDecoder, ...NextVersion })
+    @field({ decoder: DateDecoder, version: 329 })
     receivedAt = new Date()
 
     markReceivedFromBackend() {

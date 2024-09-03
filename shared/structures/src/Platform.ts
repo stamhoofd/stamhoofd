@@ -67,7 +67,7 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
     _price = 0
 
     // key = tag id or an empty string for the default reducable price
-    @field({ decoder: new MapDecoder(StringDecoder, ReduceablePrice), ...NextVersion })
+    @field({ decoder: new MapDecoder(StringDecoder, ReduceablePrice), version: 329 })
     prices: Map<string, ReduceablePrice> = new Map([['', ReduceablePrice.create({price: 0})]]);
     
     /**

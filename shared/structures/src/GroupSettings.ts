@@ -295,7 +295,7 @@ export class GroupSettings extends AutoEncoder {
      * Cached value so we know what period this group is in, to calculate the age requirements,
      * and to display the time period in the UI
      */
-    @field({ decoder: RegistrationPeriodBase, nullable: true, ...NextVersion })
+    @field({ decoder: RegistrationPeriodBase, nullable: true, version: 329 })
     period: RegistrationPeriodBase | null = null
 
     @field({ decoder: new ArrayDecoder(GroupPrice), version: 285, upgrade: () => { return [] } }) // Upgrade uses empty array to prevent generating random ids every time
