@@ -15,12 +15,15 @@
                 </a>
             </p>
             
-            <SetupStepsView />
+            <SetupStepsView v-if="auth.hasFullAccess()" />
         </main>
     </section>
 </template>
 
 <script setup lang="ts">
+import { useAuth } from '@stamhoofd/components';
 import SetupStepsView from './SetupStepsView.vue';
+
+const auth = useAuth();
 
 </script>
