@@ -25,9 +25,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { SegmentedControl, TableActionsContextMenu, TableActionSelection, useAuth, useBackForward, useKeyUpDown, useOrganization } from '@stamhoofd/components';
+import { SegmentedControl, TableActionsContextMenu, TableActionSelection, useAuth, useBackForward, useOrganization } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
-import { computed, getCurrentInstance, markRaw, ref } from 'vue';
+import { computed, markRaw, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';
 import { useEditMember } from './composables/useEditMember';
@@ -94,6 +94,7 @@ const tabIndex = computed(() => {
 const hasWrite = computed(() => {
     return auth.canAccessPlatformMember(props.member, PermissionLevel.Write)
 })
+
 const {hasNext, hasPrevious, goBack, goForward} = useBackForward('member', props, computed(() => {
     return {initialTab: tabIndex.value}
 }))
@@ -104,6 +105,7 @@ const objectFetcher = useMembersObjectFetcher()
 async function showContextMenu(event: MouseEvent) {
     const builder = buildActions({
         organizations: props.member.organizations,
+        groups: props.member.groups
     })
 
     const actions = builder.getActions()
