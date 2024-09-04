@@ -1,10 +1,11 @@
+import { field } from "@simonbackx/simple-encoding";
 import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from "@stamhoofd/excel-writer";
-import { StripeAccount as StripeAccountStruct, BalanceItemPaymentDetailed, BalanceItemRelationType, CountryHelper, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, PaginatedResponse, PaymentProvider } from "@stamhoofd/structures";
+import { StripeAccount } from "@stamhoofd/models";
+import { BalanceItemPaymentDetailed, BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { ExportToExcelEndpoint } from "../endpoints/global/files/ExportToExcelEndpoint";
 import { GetPaymentsEndpoint } from "../endpoints/organization/dashboard/payments/GetPaymentsEndpoint";
-import { Formatter } from "@stamhoofd/utility";
-import { StripeAccount } from "@stamhoofd/models";
-import { field } from "@simonbackx/simple-encoding";
+import { XlsxTransformerColumnHelper } from "../helpers/xlsxAddressTransformerColumnFactory";
 
 type PaymentWithItem = {
     payment: PaymentGeneral,
@@ -499,64 +500,10 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                 }
             }
         },
-        {
-            match: (id) => {
-                if (id === 'customer.company.address') {
-                    return [
-                        {
-                            id: 'customer.company.address.street',
-                            name: 'Adres - Straat',
-                            width: 30,
-                            getValue: (object: PaymentGeneralWithStripeAccount) => {
-                                return {
-                                    value: object.customer?.company?.address?.street || ''
-                                }
-                            }
-                        },
-                        {
-                            id: 'customer.company.address.number',
-                            name: 'Adres - Nummer',
-                            width: 20,
-                            getValue: (object: PaymentGeneralWithStripeAccount) => {
-                                return {
-                                    value: object.customer?.company?.address?.number || ''
-                                }
-                            }
-                        },
-                        {
-                            id: 'customer.company.address.postalCode',
-                            name: 'Adres - Postcode',
-                            width: 20,
-                            getValue: (object: PaymentGeneralWithStripeAccount) => {
-                                return {
-                                    value: object.customer?.company?.address?.postalCode || ''
-                                }
-                            }
-                        },
-                        {
-                            id: 'customer.company.address.city',
-                            name: 'Adres - Stad',
-                            width: 20,
-                            getValue: (object: PaymentGeneralWithStripeAccount) => {
-                                return {
-                                    value: object.customer?.company?.address?.city || ''
-                                }
-                            }
-                        },
-                        {
-                            id: 'customer.company.address.country',
-                            name: 'Adres - Land',
-                            width: 20,
-                            getValue: (object: PaymentGeneralWithStripeAccount) => {
-                                return {
-                                    value: object.customer?.company?.address?.country ? CountryHelper.getName(object.customer?.company?.address?.country) : ''
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        },
+        XlsxTransformerColumnHelper.createAddressColumns<PaymentGeneralWithStripeAccount>({
+            matchId: 'customer.company.address',
+            getAddress: (object) => object.customer?.company?.address
+        }),
         {
             id: 'customer.company.administrationEmail',
             name: 'E-mailadres administratie',
