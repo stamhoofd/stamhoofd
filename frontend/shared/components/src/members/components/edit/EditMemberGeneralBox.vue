@@ -33,49 +33,45 @@
                     </RadioGroup>
                 </STInputBox>
 
-                <template v-if="!member.isNew">
-                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
-                    <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator">
-                        <template #right>
-                            <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add gray" type="button" @click="addEmail" />
-                        </template>
-                    </EmailInput>
-                    <EmailInput 
-                        v-for="n in alternativeEmails.length" 
-                        :model-value="getEmail(n - 1)" 
-                        :key="n" 
-                        :required="true" 
-                        :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') " 
-                        :placeholder="'Enkel van lid zelf'"  
-                        :validator="validator" 
-                        @update:model-value="setEmail(n - 1, $event)"
-                    >
-                        <template #right>
-                            <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
-                        </template>
-                    </EmailInput>
-                    <template v-if="(isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
-                        <p v-if="member.patchedMember.details.parentsHaveAccess" class="style-description-small">
-                            {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
-                                één van de ingevoerde e-mailadressen
-                            </template><template v-else>
-                                het ingevoerde e-mailadres
-                            </template>. Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
-                        </p>
-                        <p v-else class="style-description-small">
-                            {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
-                                één van de ingevoerde e-mailadressen
-                            </template><template v-else>
-                                het ingevoerde e-mailadres
-                            </template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
-                        </p>
+                <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator">
+                    <template #right>
+                        <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add gray" type="button" @click="addEmail" />
                     </template>
+                </EmailInput>
+                <EmailInput 
+                    v-for="n in alternativeEmails.length" 
+                    :key="n" 
+                    :model-value="getEmail(n - 1)" 
+                    :required="true" 
+                    :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') " 
+                    :placeholder="'Enkel van lid zelf'"  
+                    :validator="validator" 
+                    @update:model-value="setEmail(n - 1, $event)"
+                >
+                    <template #right>
+                        <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
+                    </template>
+                </EmailInput>
+                <template v-if="(isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
+                    <p v-if="member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                        {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
+                            één van de ingevoerde e-mailadressen
+                        </template><template v-else>
+                            het ingevoerde e-mailadres
+                        </template>. Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
+                    </p>
+                    <p v-else class="style-description-small">
+                        {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
+                            één van de ingevoerde e-mailadressen
+                        </template><template v-else>
+                            het ingevoerde e-mailadres
+                        </template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
+                    </p>
                 </template>
             </div>
             
-            <div v-if="!member.isNew">
-                <SelectionAddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
-            </div>
+            <SelectionAddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
@@ -182,15 +178,9 @@ useValidation(errors.validator, () => {
 
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
-        if (props.member.patchedMember.details.defaultAge < 24) {
-            return " van dit lid"
-        }
-        return ""
+        return " van dit lid"
     }
-    if (props.member.patchedMember.details.defaultAge < 24) {
-        return " van "+firstName.value
-    }
-    return ""
+    return " van "+firstName.value
 })
 
 const firstName = computed({
