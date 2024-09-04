@@ -50,6 +50,16 @@ export async function findEqualMembers({
 }
 
 export async function mergeTwoMembers(base: Member, other: Member): Promise<void> {
+    console.log('Merging two member', base.id, other.id, base.details.name, other.details.name)
+
+    if (base.id === other.id) {
+        throw new Error('Cannot merge the same member')
+    }
+
+    if (!base.existsInDatabase) {
+        throw new Error('Cannot merge to base member that does not exist in database')
+    }
+
     mergeMemberDetails(base, other);
 
     await mergeRegistrations(base, other);
@@ -62,6 +72,8 @@ export async function mergeTwoMembers(base: Member, other: Member): Promise<void
     await base.save();
 
     if (other.existsInDatabase) {
+        console.log('Deleting duplicate member', other.id, other.details.name)
+
         // store other member in merged_member table
         const mergedMember = MergedMember.fromMember(other, base.id);
         await mergedMember.save();

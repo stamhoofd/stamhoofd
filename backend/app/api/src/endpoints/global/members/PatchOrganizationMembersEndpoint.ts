@@ -499,21 +499,23 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw Context.auth.error("Je hebt niet voldoende rechten om dit lid te verwijderen")
             }
 
-            await MemberUserSyncer.onDeleteMember(member)
-            await User.deleteForDeletedMember(member.id)
-            await BalanceItem.deleteForDeletedMember(member.id)
-            await member.delete()
-            shouldUpdateSetupSteps = true
+            throw Context.auth.error("Verwijderen van leden is tijdelijk uitgeschakeld.")
 
-            // Update occupancy of this member because we removed registrations
-            const groupIds = member.registrations.flatMap(r => r.groupId)
-            for (const id of groupIds) {
-                const group = await getGroup(id)
-                if (group) {
-                    // We need to update this group occupancy because we moved one member away from it
-                    updateGroups.set(group.id, group)
-                }
-            }
+            //await MemberUserSyncer.onDeleteMember(member)
+            //await User.deleteForDeletedMember(member.id)
+            //await BalanceItem.deleteForDeletedMember(member.id)
+            //await member.delete()
+            //shouldUpdateSetupSteps = true
+//
+            //// Update occupancy of this member because we removed registrations
+            //const groupIds = member.registrations.flatMap(r => r.groupId)
+            //for (const id of groupIds) {
+            //    const group = await getGroup(id)
+            //    if (group) {
+            //        // We need to update this group occupancy because we moved one member away from it
+            //        updateGroups.set(group.id, group)
+            //    }
+            //}
         }
 
         await Member.updateOutstandingBalance(Formatter.uniqueArray(balanceItemMemberIds))
@@ -555,12 +557,16 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         if (!member.details.birthDay) {
             return
         }
-        const existingMembers = await Member.where({ organizationId: member.organizationId, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
+        let existingMembers = await Member.where({ organizationId: member.organizationId, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
+
+        if (member.existsInDatabase) {
+            existingMembers = existingMembers.filter(e => e.id !== member.id)
+        }
         
         if (existingMembers.length > 0) {
             const withRegistrations = await Member.getBlobByIds(...existingMembers.map(m => m.id))
-            for (const member of withRegistrations) {
-                if (member.registrations.length > 0) {
+            for (const m of withRegistrations) {
+                if (m.registrations.length > 0) {
                     return member
                 }
             }
