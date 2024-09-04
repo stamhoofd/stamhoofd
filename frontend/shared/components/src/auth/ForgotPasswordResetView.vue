@@ -36,29 +36,15 @@
                     </div>
                 </div>
 
-                <div v-if="!hasAccount && hasPermissions" class="checkbox-box">
-                    <Checkbox v-model="acceptPrivacy" class="long-text">
-                        Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">het privacybeleid</a>.
-                    </Checkbox>
-
-                    <Checkbox v-model="acceptTerms" class="long-text">
-                        Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord.
-                    </Checkbox>
-
-                    <Checkbox v-model="acceptDataAgreement" class="long-text">
-                        Ik heb <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord.
-                    </Checkbox>
-                </div>
+                <SignupPoliciesBox :validator="validator">
+                    <LoadingButton :loading="loading" class="block input-spacing">
+                        <button id="submit" class="button primary" type="submit">
+                            <span class="icon lock" />
+                            <span>{{ buttonText }}</span>
+                        </button>
+                    </LoadingButton>
+                </SignupPoliciesBox>
             </main>
-
-            <STFloatingFooter>
-                <LoadingButton :loading="loading">
-                    <button class="button primary full" type="submit">
-                        <span class="icon lock" />
-                        <span>{{ buttonText }}</span>
-                    </button>
-                </LoadingButton>
-            </STFloatingFooter>
         </form>
     </div>
 </template>
@@ -70,6 +56,7 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
 import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingView, PasswordStrength, ReplaceRootEventBus, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { NewUser, Token } from '@stamhoofd/structures';
+import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -83,7 +70,8 @@ import { NewUser, Token } from '@stamhoofd/structures';
         Checkbox,
         Spinner,
         PasswordStrength,
-        LoadingView
+        LoadingView,
+        SignupPoliciesBox
     }
 })
 export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
@@ -195,29 +183,6 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                     }))
                 }
                 errors.throwIfNotEmpty()
-
-                if (this.hasPermissions) {
-                    if (!this.acceptPrivacy) {
-                        throw new SimpleError({
-                            code: "read_privacy",
-                            message: "Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken."
-                        })
-                    }
-
-                    if (!this.acceptTerms) {
-                        throw new SimpleError({
-                            code: "read_privacy",
-                            message: "Je moet akkoord gaan met de algemene voorwaarden voor je een account kan aanmaken."
-                        })
-                    }
-
-                    if (!this.acceptDataAgreement) {
-                        throw new SimpleError({
-                            code: "read_privacy",
-                            message: "Je moet akkoord gaan met de verwerkersovereenkomst voor je een account kan aanmaken."
-                        })
-                    }
-                }
             } catch (e) {
                 this.errorBox = new ErrorBox(e)
                 return

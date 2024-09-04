@@ -30,25 +30,14 @@
                 </div>
             </div>
 
-            <Checkbox v-for="policy of requiredPolicies" :key="policy.id" :model-value="isAccepted(policy)" class="long-text" @update:model-value="setAccepted(policy, $event)">
-                <div v-if="policy.richText.html" class="style-wysiwyg" v-html="policy.richText.html" /><span v-else>{{ policy.name }}</span>
-            </Checkbox>
-
-            <footer class="signup-footer">
+            <SignupPoliciesBox :validator="errors.validator">
                 <LoadingButton :loading="loading" class="block input-spacing">
                     <button id="submit" class="button primary" type="submit">
                         <span class="icon lock" />
                         <span>Account aanmaken</span>
                     </button>
                 </LoadingButton>
-            </footer>
-            
-            <div v-if="policies.filter(p => !p.checkbox).length > 0" class="policy-footer">
-                <p v-for="policy of policies.filter(p => !p.checkbox)" :key="policy.id" class="style-description-block">
-                    <span v-if="policy.richText.html" class="style-wysiwyg gray" v-html="policy.richText.html" />
-                    <span v-else>{{ policy.name }}</span>
-                </p>
-            </div>
+            </SignupPoliciesBox>
         </main>
     </form>
 </template>
@@ -57,16 +46,15 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import { LoginHelper } from '@stamhoofd/networking';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 
-import { PlatformPolicy, RichText } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import EmailInput from '../inputs/EmailInput.vue';
 import PasswordStrength from '../inputs/PasswordStrength.vue';
 import ConfirmEmailView from './ConfirmEmailView.vue';
+import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -79,52 +67,13 @@ const props = withDefaults(
 )
 
 const errors = useErrors()
-const organization = useOrganization()
-const platform = usePlatform()
 const $context = useContext();
 const show = useShow()
 
 const email = ref(props.initialEmail)
 const password = ref("")
 const passwordRepeat = ref("")
-const acceptPrivacy = ref(new Set<string>())
 const loading = ref(false)
-
-const policies = computed(() =>{
-    if (STAMHOOFD.userMode === 'organization') {
-        if (!organization.value) {
-            return []
-        }
-
-        const url = organization.value.meta.privacyPolicyUrl || organization.value.meta.privacyPolicyFile?.getPublicPath() || ''
-
-        return [
-            PlatformPolicy.create({
-                name: "Privacybeleid",
-                url,
-                checkbox: true,
-                richText: RichText.create({
-                    html: 'Ik ga akkoord met <a href="'+Formatter.escapeHtml(url)+'" target="_blank">het privacybeleid</a>.'
-                })
-            })
-        ]
-    }
-    return platform.value.config.privacy.policies.filter(p => p.enableAtSignup)
-});
-
-const requiredPolicies = computed(() => policies.value.filter(p => p.checkbox))
-
-function isAccepted(policy: PlatformPolicy) {
-    return acceptPrivacy.value.has(policy.id)
-}
-
-function setAccepted(policy: PlatformPolicy, value: boolean) {
-    if (value) {
-        acceptPrivacy.value.add(policy.id)
-    } else {
-        acceptPrivacy.value.delete(policy.id)
-    }
-}
 
 async function submit() {
     if (loading.value) {
@@ -132,16 +81,6 @@ async function submit() {
     }  
  
     const valid = await errors.validator.validate()
-
-    for (const policy of requiredPolicies.value) {
-        if (!isAccepted(policy)) {
-            errors.errorBox = new ErrorBox(new SimpleError({
-                code: "read_privacy",
-                message: "Je moet akkoord gaan met de voorwaarden voor je een account kan aanmaken."
-            }))
-            return;
-        }
-    }
 
     if (password.value != passwordRepeat.value) {
         errors.errorBox = new ErrorBox(
@@ -189,16 +128,3 @@ async function submit() {
     }
 }
 </script>
-
-<style lang="scss">
-.signup-view {
-    .policy-footer {
-        padding-top: 15px;
-    }
-
-    footer {
-        padding-top: 15px;
-    }
-}
-
-</style>
