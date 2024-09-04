@@ -8,8 +8,25 @@ export class XlsxTransformerColumnHelper {
             ...this.createColumnsForParent(1),
         ]
     }
+
+    static createColumnsForAddresses<T>({limit, getAddresses, matchIdStart, identifier}: {limit: number, getAddresses: (object: T) => Address[], matchIdStart: string, identifier: string}): XlsxTransformerColumn<unknown>[] {
+        const result: XlsxTransformerColumn<unknown>[] = [];
+
+        for(let i = 0; i <= limit; i++) {
+            const column = this.createAddressColumns({
+                matchId: `${matchIdStart}.${i}`,
+                getAddress: (object: T) => getAddresses(object)[i],
+                identifier: `${identifier} ${i + 1}`,
+            });
+
+            result.push(column);
+        }
+
+        return result;
+    }
+
     static createColumnsForParent(parentIndex: number): XlsxTransformerColumn<unknown>[] {
-        const getParent = (member: MemberWithRegistrationsBlob): Parent => member.details.parents[parentIndex]; 
+        const getParent = (member: MemberWithRegistrationsBlob): Parent | null | undefined => member.details.parents[parentIndex]; 
 
         const parentNumber = parentIndex + 1;
 
@@ -22,16 +39,20 @@ export class XlsxTransformerColumnHelper {
                 id: getId('type'),
                 name: getName('Type'),
                 width: 20,
-                getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: ParentTypeHelper.getName(getParent(member).type)
-                })
+                getValue: (member: MemberWithRegistrationsBlob) => {
+                    const parent = getParent(member);
+
+                    return {
+                        value: parent ? ParentTypeHelper.getName(parent.type) : ''
+                    }
+                }
             },
             {
                 id: getId('firstName'),
                 name: getName('Voornaam'),
                 width: 20,
                 getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: getParent(member).firstName
+                    value: getParent(member)?.firstName ?? ''
                 })
             },
             {
@@ -39,7 +60,7 @@ export class XlsxTransformerColumnHelper {
                 name: getName('Achternaam'),
                 width: 20,
                 getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: getParent(member).lastName
+                    value: getParent(member)?.lastName ?? ''
                 })
             },
             {
@@ -47,7 +68,7 @@ export class XlsxTransformerColumnHelper {
                 name: getName('Telefoonnummer'),
                 width: 20,
                 getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: getParent(member).email
+                    value: getParent(member)?.phone ?? ''
                 })
             },
             {
@@ -55,13 +76,13 @@ export class XlsxTransformerColumnHelper {
                 name: getName('E-mailadres'),
                 width: 20,
                 getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: getParent(member).email
+                    value: getParent(member)?.email ?? ''
                 })
             },
             XlsxTransformerColumnHelper.createAddressColumns<MemberWithRegistrationsBlob>({
                 matchId: getId('address'),
-                getAddress: (member) => getParent(member).address,
-                identifier
+                getAddress: (member) => getParent(member)?.address,
+                identifier: getName('Adres')
             }),
         ]
     }
@@ -70,7 +91,7 @@ export class XlsxTransformerColumnHelper {
         const getId = (value: string) => matchId + '.' + value;
         const identifierText = identifier ? `${identifier} - ` : '';
         const getName = (value: string) => {
-            const name =`${identifierText}adres - ${value}`;
+            const name =`${identifierText}${value}`;
             return name[0].toUpperCase() + name.slice(1);
         };
     

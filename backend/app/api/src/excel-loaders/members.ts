@@ -102,23 +102,35 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
                 },
                 XlsxTransformerColumnHelper.createAddressColumns<MemberWithRegistrationsBlob>({
                     matchId: 'address',
-                    getAddress: (object) => object.details.address,
+                    identifier: 'Adres',
+                    getAddress: (object) => {
+                        // get member address if exists
+                        const memberAddress = object.details.address;
+                        if(memberAddress) {
+                            return memberAddress;
+                        }
+
+                        // else get address of first parent with address
+                        for(const parent of object.details.parents) {
+                            if(parent.address) {
+                                return parent.address;
+                            }
+                        }
+
+                        return null;
+                    }
                 }),
-                ...XlsxTransformerColumnHelper.creatColumnsForParents(),
-
-                // parent 1
-
-                // parent 2
-
-                // unverified data
                 {
-                    id: 'unverifiedEmails',
-                    name: 'Niet-geverifieerde e-mails',
+                    id: 'securityCode',
+                    name: 'Beveiligingscode',
                     width: 20,
                     getValue: (object: MemberWithRegistrationsBlob) => ({
-                        value: object.details.unverifiedEmails.join(', '),
+                        value: object.details.securityCode,
                     })
                 },
+                ...XlsxTransformerColumnHelper.creatColumnsForParents(),
+
+                // unverified data
                 {
                     id: 'unverifiedPhones',
                     name: 'Niet-geverifieerde telefoonnummers',
@@ -127,6 +139,20 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
                         value: object.details.unverifiedPhones.join(', '),
                     })
                 },
+                {
+                    id: 'unverifiedEmails',
+                    name: 'Niet-geverifieerde e-mailadressen',
+                    width: 20,
+                    getValue: (object: MemberWithRegistrationsBlob) => ({
+                        value: object.details.unverifiedEmails.join(', '),
+                    })
+                },
+                ...XlsxTransformerColumnHelper.createColumnsForAddresses<MemberWithRegistrationsBlob>({
+                    matchIdStart: 'unverifiedAddresses',
+                    identifier: 'Niet-geverifieerd adres',
+                    getAddresses: (object) => object.details.unverifiedAddresses,
+                    limit: 2
+                }),
                 {
                     id: 'unverifiedAddresses',
                     name: 'Niet-geverifieerde adressen',

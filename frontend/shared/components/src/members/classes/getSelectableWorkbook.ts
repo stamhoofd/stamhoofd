@@ -66,48 +66,85 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
 
                     new SelectableColumn({
                         id: 'address',
-                        name: 'Adres'
+                        name: 'Adres',
+                        description: 'Adres van het lid, of het adres van de eerste ouder met een adres.'
+                    }),
+
+                    new SelectableColumn({
+                        id: 'securityCode',
+                        name: 'Beveiligingscode',
+                        enabled: false,
+                        description: 'Code om een onbekende gebruiker toegang te geven tot een lid.'
                     }),
 
                     ...[1,2].flatMap((parentNumber, parentIndex) => {
                         const getId = (value: string) => `parent.${parentIndex}.${value}`;
                         const category = `Ouder ${parentNumber}`;
+                        const enabled = false;
 
                         return [
                             new SelectableColumn({
                                 id: getId('type'),
                                 name: 'Type',
-                                category
+                                category,
+                                enabled
                             }),
                             new SelectableColumn({
                                 id: getId('firstName'),
                                 name: 'Voornaam',
-                                category
+                                category,
+                                enabled
                             }),
                             new SelectableColumn({
                                 id: getId('lastName'),
                                 name: 'Achternaam',
-                                category
+                                category,
+                                enabled
                             }),
                             new SelectableColumn({
                                 id: getId('phone'),
                                 name: 'Telefoonnummer',
-                                category
+                                category,
+                                enabled
                             }),
         
                             new SelectableColumn({
                                 id: getId('email'),
                                 name: 'E-mailadres',
-                                category
+                                category,
+                                enabled
                             }),
                             new SelectableColumn({
                                 id: getId('address'),
                                 name: 'Adres',
-                                category
+                                category,
+                                enabled
                             }),
                         ]
                     }),
 
+                    new SelectableColumn({
+                        id: 'unverifiedPhones',
+                        name: 'Telefoonnummers',
+                        category: 'Niet-geverifieerde gegevens',
+                        enabled: false
+                    }),
+
+                    new SelectableColumn({
+                        id: 'unverifiedEmails',
+                        name: 'E-mailadressen',
+                        category: 'Niet-geverifieerde gegevens',
+                        enabled: false
+                    }),
+
+                    ...[1, 2].map((number, index) => {
+                        return new SelectableColumn({
+                            id:  `unverifiedAddresses.${index}`,
+                            name: `Adres ${number}`,
+                            category: 'Niet-geverifieerde gegevens',
+                            enabled: false
+                        })
+                    }),
 
                     ...flattenedCategories.flatMap((category) => {
                         return category.getAllRecords().flatMap((record) => {

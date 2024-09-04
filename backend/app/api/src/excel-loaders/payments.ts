@@ -502,7 +502,8 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         XlsxTransformerColumnHelper.createAddressColumns<PaymentGeneralWithStripeAccount>({
             matchId: 'customer.company.address',
-            getAddress: (object) => object.customer?.company?.address
+            getAddress: (object) => object.customer?.company?.address,
+            identifier: 'Adres'
         }),
         {
             id: 'customer.company.administrationEmail',
