@@ -65,6 +65,14 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
                     })
                 },
                 {
+                    id: 'age',
+                    name: 'Leeftijd',
+                    width: 20,
+                    getValue: (object: MemberWithRegistrationsBlob) => ({
+                        value: object.details.age,
+                    })
+                },
+                {
                     id: 'gender',
                     name: 'Geslacht',
                     width: 20,
@@ -75,14 +83,6 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
                             value: formatGender(gender)
                         })
                     }
-                },
-                {
-                    id: 'uitpasNumber',
-                    name: 'UiTPAS-nummer',
-                    width: 20,
-                    getValue: (object: MemberWithRegistrationsBlob) => ({
-                        value: object.details.uitpasNumber,
-                    })
                 },
                 {
                     id: 'phone',
@@ -128,6 +128,32 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
                         value: object.details.securityCode,
                     })
                 },
+                {
+                    id: 'uitpasNumber',
+                    name: 'UiTPAS-nummer',
+                    width: 20,
+                    getValue: (object: MemberWithRegistrationsBlob) => ({
+                        value: object.details.uitpasNumber,
+                    })
+                },
+                {
+                    id: 'requiresFinancialSupport',
+                    // todo: use correct term
+                    name: 'Financiële ondersteuning',
+                    width: 20,
+                    getValue: (object: MemberWithRegistrationsBlob) => ({
+                        value: XlsxTransformerColumnHelper.formatBoolean(object.details.requiresFinancialSupport?.value),
+                    })
+                },
+                {
+                    id: 'notes',
+                    name: 'Notities',
+                    width: 20,
+                    getValue: (object: MemberWithRegistrationsBlob) => ({
+                        value: object.details.notes,
+                    })
+                },
+
                 ...XlsxTransformerColumnHelper.creatColumnsForParents(),
 
                 // unverified data

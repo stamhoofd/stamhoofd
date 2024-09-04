@@ -1,13 +1,19 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from "@stamhoofd/frontend-excel-export";
-import { Organization, Platform, RecordCategory } from "@stamhoofd/structures";
+import { FinancialSupportSettings, Organization, Platform, RecordCategory } from "@stamhoofd/structures";
 
+// , permissions?: UserPermissions|null
 export function getSelectableWorkbook(platform: Platform, organization: Organization | null) {
     const recordCategories = [
         ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
         ...platform.config.recordsConfiguration.recordCategories
     ]
 
-    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, (r) => r.excelColumns.length > 0)
+    // todo: check permissions
+    // const recordsConfiguration = OrganizationRecordsConfiguration.build({platform, organization});
+    const financialSupportSettings = platform.config.financialSupport ?? FinancialSupportSettings.create({});
+    const financialSupportTitle = financialSupportSettings.title;
+    
+    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, (r) => r.excelColumns.length > 0);
 
     return new SelectableWorkbook({
         sheets: [
@@ -45,13 +51,14 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     }),
 
                     new SelectableColumn({
-                        id: 'gender',
-                        name: 'Geslacht'
+                        id: 'age',
+                        name: 'Leeftijd',
+                        enabled: false
                     }),
 
                     new SelectableColumn({
-                        id: 'uitpasNumber',
-                        name: 'UiTPAS-nummer'
+                        id: 'gender',
+                        name: 'Geslacht'
                     }),
 
                     new SelectableColumn({
@@ -75,6 +82,23 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         name: 'Beveiligingscode',
                         enabled: false,
                         description: 'Code om een onbekende gebruiker toegang te geven tot een lid.'
+                    }),
+
+                    new SelectableColumn({
+                        id: 'requiresFinancialSupport',
+                        name: financialSupportTitle,
+                        enabled: false,
+                    }),
+
+                    new SelectableColumn({
+                        id: 'uitpasNumber',
+                        name: 'UiTPAS-nummer'
+                    }),
+
+                    new SelectableColumn({
+                        id: 'notes',
+                        name: 'Notities',
+                        enabled: false,
                     }),
 
                     ...[1,2].flatMap((parentNumber, parentIndex) => {
@@ -161,3 +185,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         ]
     })
 }
+
+// function getEnabledRecordCategories(permissions: UserPermissions | null, recordsConfiguration: OrganizationRecordsConfiguration) {
+
+// }

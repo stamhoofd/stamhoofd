@@ -2,6 +2,18 @@ import { XlsxTransformerColumn } from "@stamhoofd/excel-writer";
 import { Address, CountryHelper, MemberWithRegistrationsBlob, Parent, ParentTypeHelper } from "@stamhoofd/structures";
 
 export class XlsxTransformerColumnHelper {
+    static formatBoolean(value: boolean | undefined | null): string {
+        if(value === true) {
+            return "Ja";
+        }
+
+        if(value === false) {
+            return 'Nee'
+        }
+
+        return '';
+    }
+
     static creatColumnsForParents(): XlsxTransformerColumn<unknown>[] {
         return [
             ...this.createColumnsForParent(0),
