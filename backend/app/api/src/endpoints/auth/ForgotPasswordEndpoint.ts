@@ -54,6 +54,8 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
         await sendEmailTemplate(organization, {
             recipients: [
                 Recipient.create({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
                     email: request.body.email,
                     replacements: [
                         Replacement.create({

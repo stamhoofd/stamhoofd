@@ -81,6 +81,9 @@ export enum EmailTemplateType {
      */
     ForgotPasswordButNoAccount = "ForgotPasswordButNoAccount",
     ForgotPassword = "ForgotPassword",
+
+    SignupAlreadyHasAccount = "SignupAlreadyHasAccount",
+
     VerifyEmail = "VerifyEmail",
     VerifyEmailWithoutCode = "VerifyEmailWithoutCode",
     AdminInvitation = 'AdminInvitation',
@@ -195,6 +198,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.ExcelExportSucceeded: return 'Export: Excel export geslaagd'
             case EmailTemplateType.ExcelExportFailed: return 'Export: Excel export mislukt'
 
+            case EmailTemplateType.SignupAlreadyHasAccount: return 'Registratie: account bestaat al'
             case EmailTemplateType.ForgotPasswordButNoAccount: return 'Wachtwoord vergeten: geen account'
             case EmailTemplateType.ForgotPassword: return 'Wachtwoord vergeten'
             case EmailTemplateType.DeleteAccountConfirmation: return 'Bevestiging account verwijderen'
@@ -257,6 +261,8 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.VerifyEmailWithoutCode: return 'De e-mail die wordt verzonden naar de gebruiker om het e-mailadres te bevestigen als een beheerder dit wijzigt. Deze e-mail bevat geen bevestigingscode.'
             case EmailTemplateType.AdminInvitation: return 'De e-mail die een bestaande gebruiker ontvangt als hij toegevoegd wordt als beheerder.'
             case EmailTemplateType.AdminInvitationNewUser: return 'De e-mail die iemand zonder account ontvangt als hij toegevoegd wordt als beheerder.'
+
+            case EmailTemplateType.SignupAlreadyHasAccount: return 'Als iemand probeert een account aan te maken, maar er al een account bestaat met dat e-mailadres'
         }
 
         return null
@@ -286,6 +292,14 @@ export class EmailTemplate extends AutoEncoder {
     }
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
+        if (type === EmailTemplateType.SignupAlreadyHasAccount) {
+            return [
+                "greeting",
+                "email",
+                "resetUrl"
+            ];
+        }
+
         if (type === EmailTemplateType.ForgotPasswordButNoAccount) {
             return [
                 "email"

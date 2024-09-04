@@ -1,9 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email } from '@stamhoofd/email';
-import { EmailVerificationCode, PasswordToken, User } from '@stamhoofd/models';
-import { NewUser, SignupResponse } from "@stamhoofd/structures";
+import { EmailVerificationCode, PasswordToken, sendEmailTemplate, User } from '@stamhoofd/models';
+import { EmailTemplateType, NewUser, Recipient, Replacement, SignupResponse } from "@stamhoofd/structures";
 
 import { Context } from '../../helpers/Context';
 
@@ -57,28 +56,37 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             user = u
 
             if (u.hasAccount()) {
-                // Send an e-mail to say you already have an account + follow password forgot flow
-                const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, organization, request.i18n)
-                const { from, replyTo } = {
-                    from: (user.permissions || !organization ? Email.getInternalEmailFor(request.i18n) : organization.getDefaultFrom(request.i18n)),
-                    replyTo: undefined
-                }
-                
-                const footer = (!user.permissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+request.i18n.localizedDomains.marketing()+"/ledenadministratie\n\n" : '')
-
-                const name = organization ? organization.name : 'Stamhoofd'
-                // Send email
-                Email.send({
-                    from,
-                    replyTo,
-                    to: user.email,
-                    subject: `[${name}] Je hebt al een account`,
-                    type: "transactional",
-                    text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe probeerde een account aan te maken, maar je hebt eigenlijk al een account met e-mailadres "+user.email+". Als je jouw wachtwoord niet meer weet, kan je een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopiëren in de adresbalk van jouw browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet proberen te registreren? Dan mag je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? "Stamhoofd" : name)+footer
-                });
-
                 // Don't send the code
-                sendCode = false
+                sendCode = false;
+
+                // We don't await this block to avoid user enumeration attack using request response time
+                (async () => {
+                    // Send an e-mail to say you already have an account + follow password forgot flow
+                    const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, organization, request.i18n)
+
+                    // Create e-mail builder
+                    await sendEmailTemplate(organization, {
+                        recipients: [
+                            Recipient.create({
+                                firstName: user.firstName,
+                                lastName: user.lastName,
+                                email: request.body.email,
+                                replacements: [
+                                    Replacement.create({
+                                        token: 'resetUrl',
+                                        value: recoveryUrl
+                                    })
+                                ]
+                            })
+                        ],
+                        template: {
+                            type: EmailTemplateType.SignupAlreadyHasAccount,
+                        },
+                        type: 'transactional'
+                    })
+
+                })().catch(console.error);
+
             } else {
                 // This is safe, because we are the first one. There is no password yet.
                 // If a hacker tries this, he won't be able to sign in, because he needs to
@@ -97,7 +105,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         const code = await EmailVerificationCode.createFor(user, user.email)
 
         if (sendCode) {
-            code.send(user, organization, request.i18n)
+            code.send(user, organization, request.i18n).catch(console.error)
         }
 
         return new Response(SignupResponse.create({
