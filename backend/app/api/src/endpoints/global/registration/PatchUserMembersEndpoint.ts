@@ -108,7 +108,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 })
             }
 
-            const duplicate = await this.checkDuplicate(member, securityCode)
+            /*const duplicate = await this.checkDuplicate(member, securityCode)
             if (duplicate) {
                 // Remove the member from the list
                 members.splice(members.findIndex(m => m.id === member.id), 1)
@@ -116,7 +116,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 // Add new
                 addedMembers.push(duplicate)
                 continue
-            }
+            }*/
 
             await member.save();
             await MemberUserSyncer.onChangeMember(member)
