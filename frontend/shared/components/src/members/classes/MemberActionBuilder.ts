@@ -272,8 +272,8 @@ export class MemberActionBuilder {
         return r;
     }
 
-    getActions(): TableAction<PlatformMember>[] {
-        return [
+    getActions(options: {includeDelete?: boolean} = {}): TableAction<PlatformMember>[] {
+        const actions = [
             new InMemoryTableAction({
                 name: "Bewerk lid",
                 icon: "edit",
@@ -334,22 +334,26 @@ export class MemberActionBuilder {
             ...this.getMoveAction(),
             ...this.getEditAction(),
 
-            ...this.getUnsubscribeAction(),
-
-            new InMemoryTableAction({
-                name: "Definitief verwijderen",
-                priority: 1,
-                groupIndex: 100,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                icon: "trash",
-                enabled: !this.context.organization && this.context.auth.hasFullPlatformAccess(),
-                handler: async (members: PlatformMember[]) => {
-                    await this.deleteMembers(members);
-                }
-            })
-
+            ...this.getUnsubscribeAction()
         ]
+
+        if(options?.includeDelete) {
+            actions.push(
+                new InMemoryTableAction({
+                    name: "Definitief verwijderen",
+                    priority: 1,
+                    groupIndex: 100,
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    icon: "trash",
+                    enabled: !this.context.organization && this.context.auth.hasFullPlatformAccess(),
+                    handler: async (members: PlatformMember[]) => {
+                        await this.deleteMembers(members);
+                    }
+                }));
+        }
+
+        return actions;
     }
 
     // Action implementations
