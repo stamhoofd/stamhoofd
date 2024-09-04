@@ -567,7 +567,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const withRegistrations = await Member.getBlobByIds(...existingMembers.map(m => m.id))
             for (const m of withRegistrations) {
                 if (m.registrations.length > 0) {
-                    return member
+                    return m
                 }
             }
 
