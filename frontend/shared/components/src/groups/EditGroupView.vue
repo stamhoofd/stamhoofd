@@ -28,9 +28,7 @@
                             Geen automatische aansluiting of verzekeringen (!)
                         </option>
                         <option v-for="ageGroup of defaultAgeGroups" :key="ageGroup.id" :value="ageGroup.id">
-                            {{ ageGroup.name }}<template v-if="!ageGroup.defaultMembershipTypeId">
-                                (niet automatisch)
-                            </template>
+                            {{ getAgeGroupSelectionText(ageGroup) }}
                         </option>
                     </Dropdown>
                 </STInputBox>
@@ -477,7 +475,7 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AgeInput, DateSelection, Dropdown, EditGroupView, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, NumberInput, OrganizationAvatar, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Country, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, WaitingListType } from '@stamhoofd/structures';
+import { Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, WaitingListType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -1093,6 +1091,42 @@ const shouldNavigateAway = async () => {
         return true;
     }
     return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+}
+
+function getAgeGroupAgeString(ageGroup: DefaultAgeGroup): string {
+    const {minAge, maxAge} = ageGroup;
+    if(minAge === null && maxAge === null) {
+        return '';
+    }
+
+    if(minAge && maxAge) {
+        return `${minAge} - ${maxAge} jaar`;
+    }
+
+    if(minAge) {
+        return `+${minAge}`;
+    }
+
+    if(maxAge) {
+        return `-${maxAge}`;
+    }
+
+    return '';
+}
+
+function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
+    let text = ageGroup.name;
+    const ageGroupAgeString = getAgeGroupAgeString(ageGroup);
+
+    if(ageGroupAgeString) {
+        text = text + ': ' + ageGroupAgeString;
+    }
+
+    if(!ageGroup.defaultMembershipTypeId) {
+        text = text + ' (niet automatisch)';
+    }
+
+    return text;
 }
 
 defineExpose({
