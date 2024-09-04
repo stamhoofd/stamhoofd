@@ -51,7 +51,7 @@ export class MemberDetails extends AutoEncoder {
      * 
      * Set this value if you want to gain access to a member but receive the known_member_missing_rights error code
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 331 })
     securityCode: string | null = null;
 
     @field({ decoder: DateDecoder, optional: true, nullable: true })
