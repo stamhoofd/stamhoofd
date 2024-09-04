@@ -280,7 +280,7 @@ class EmailStatic {
         }
 
         // Filter by environment
-        if (STAMHOOFD.environment !== 'production') {
+        if (STAMHOOFD.environment !== 'production' || (STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS && STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS.length > 0)) {
             const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? []
             recipients = this.filterWhitelist(recipients, whitelist)
         }
