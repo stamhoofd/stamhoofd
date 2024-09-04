@@ -8,19 +8,24 @@
 
             <p>{{ $t('Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.') }}</p>
 
-            <p>
+            <p v-if="members.length == 0" class="style-button-bar">
+                <button v-if="isAcceptingNewMembers" class="button primary" type="button" @click="registerMembers">
+                    <span class="icon edit" />
+                    <span>Schrijf een lid in</span>
+                </button>
+
+                <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
+                    <span class="icon book" />
+                    <span>Hulp nodig?</span>
+                </a>
+            </p>
+            <p v-else class="style-button-bar">
                 <a :href="$domains.getDocs('mijn-account')" target="_blank" class="button text selected">
                     <span class="icon book" />
                     <span>Hulp nodig?</span>
                 </a>
             </p>
             
-            <template v-if="members.length == 0 && isAcceptingNewMembers">
-                <button class="button primary" type="button" @click="registerMembers">
-                    <span class="icon edit" />
-                    <span>Schrijf een lid in</span>
-                </button>
-            </template>
 
             <QuickActionsBox />
 

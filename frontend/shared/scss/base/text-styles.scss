@@ -606,9 +606,14 @@
     gap: 15px;
     margin-top: 10px;
     align-items: center;
+    flex-wrap: wrap;
 
     &.right-align {
         justify-content: flex-end;
+    }
+
+    &> *.primary:first-child {
+        margin-right: 10px;
     }
 
     hr + & {
