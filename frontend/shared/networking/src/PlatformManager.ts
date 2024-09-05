@@ -26,6 +26,7 @@ export class PlatformManager {
         if ($platform.config.color) {
             ColorHelper.setColor($platform.config.color)
         }
+        this.setFavicon()
     }
 
     /**
@@ -48,6 +49,25 @@ export class PlatformManager {
         const platformManager = new PlatformManager($context, platform)
         await platformManager.savePlatform()
         return platformManager;
+    }
+
+    setFavicon() {
+        if (!this.$platform.config.squareLogo) {
+            return;
+        }
+
+        const linkElement = document.querySelector("link[rel='icon']") as HTMLLinkElement
+        if (linkElement) {
+            return;
+        }
+
+        const href = this.$platform.config.squareLogo?.getPathForSize(256, 256);
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = href.endsWith(".svg") ? "image/svg+xml" : (href.endsWith(".png") ? "image/png" : "image/jpeg");
+        link.href = href;
+
+        document.head.appendChild(link);
     }
 
     static async fetchPlatform($context: SessionContext) {
