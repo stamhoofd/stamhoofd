@@ -2,7 +2,8 @@
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
     <div v-if="platform.config.coverPhoto" class="cover-image-container">
         <div class="left">
-            <ImageComponent :image="platform.config.coverPhoto" />
+            <ImageComponent :image="platform.config.coverPhoto" class="cover-image" />
+            <ImageComponent v-if="platform.config.coverBottomLeftOverlayImage" :image="platform.config.coverBottomLeftOverlayImage" class="overlay" :auto-height="true" :style="'width: ' + platform.config.coverBottomLeftOverlayWidth + 'px'" />
         </div>
         <div class="right">
             <ComponentWithPropertiesInstance :key="root.key" :component="root" />
@@ -38,7 +39,7 @@ defineExpose({
         display: none;
         position: relative;
 
-        .image-component {
+        .cover-image {
             position: absolute;
             left: 0;
             top: 0;
@@ -49,6 +50,14 @@ defineExpose({
                 object-fit: cover;
             }
         }
+
+        .overlay {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            max-width: 100%;
+        }
+
     }
 }
 

@@ -39,17 +39,36 @@
             Deze foto wordt gebruikt op de inlogpagina. Kies bij voorkeur een foto die goed in een portretformaat past.
         </p>
 
-        <p class="info-box" v-if="!coverPhoto">
+        <p v-if="!coverPhoto" class="info-box">
             Geen omslagfoto ingesteld
         </p>
 
         <ImageComponent v-if="coverPhoto" :image="coverPhoto" :auto-height="true" style="max-height: 400px;" />
+
+        <hr>
+        <h2 class="style-with-button">
+            <div>Omslagfoto overlay</div>
+            <div>
+                <button v-if="coverBottomLeftOverlayImage" type="button" class="button text only-icon-smartphone" @click="coverBottomLeftOverlayImage = null">
+                    <span class="icon trash" />
+                    <span>Verwijderen</span>
+                </button>
+                <UploadButton v-model="coverBottomLeftOverlayImage" :text="coverBottomLeftOverlayImage ? 'Vervangen' : 'Uploaden'" :resolutions="overlayResolutions" />
+            </div>
+        </h2>
+        <p>Deze afbeelding wordt in de linkeronderhoek van de omslagfoto geplaatst. Kies bij voorkeur een mét een achtergrondkleur dat hier goed op werd aangepast.</p>
+
+        <STInputBox title="Breedte">
+            <NumberInput v-model="coverBottomLeftOverlayWidth" title="Transparantie" :validator="errors.validator" :min="10" suffix="px" />
+        </STInputBox>
+
+        <ImageComponent v-if="coverBottomLeftOverlayImage" :image="coverBottomLeftOverlayImage" :auto-height="true" :style="'width: ' + coverBottomLeftOverlayWidth +  'px'" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, LogoEditor, Toast, UploadButton, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, LogoEditor, NumberInput, STInputBox, Toast, UploadButton, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { DarkMode, Image, Platform, PlatformConfig, ResolutionRequest } from '@stamhoofd/structures';
@@ -79,6 +98,23 @@ const color = computed({
 const coverPhoto = computed({
     get: () => patched.value.config.coverPhoto,
     set: (value: Image | null) => addPatch(Platform.patch({config: PlatformConfig.patch({coverPhoto: value})}))
+})
+
+const coverBottomLeftOverlayImage = computed({
+    get: () => patched.value.config.coverBottomLeftOverlayImage,
+    set: (value: Image | null) => addPatch(Platform.patch({config: PlatformConfig.patch({coverBottomLeftOverlayImage: value})}))
+})
+
+const coverBottomLeftOverlayWidth = computed({
+    get: () => patched.value.config.coverBottomLeftOverlayWidth,
+    set: (value: number) => {
+        addPatch(Platform.patch({config: PlatformConfig.patch({coverBottomLeftOverlayWidth: value})}));
+
+        if (coverBottomLeftOverlayImage.value) {
+            coverBottomLeftOverlayImage.value = null;
+            Toast.error('Upload een nieuwe overlay: je kan de breedte enkel aanpassen VOOR het uploaden - anders kunnen we de resolutie niet correct afstemmen op alle apparaten. Wil je jouw aanpassing ongedaan maken? Klik dan op het kruisje en sla niet op.').setHide(15 * 1000).show()
+        }
+    }
 })
 
 async function save() {
@@ -135,6 +171,19 @@ const resolutions = [
         width: 100
     })
 ]
+
+const overlayResolutions = computed(() => [
+    ResolutionRequest.create({
+        width: coverBottomLeftOverlayWidth.value,
+    }),
+    ResolutionRequest.create({
+        width: coverBottomLeftOverlayWidth.value * 2,
+    }),
+    ResolutionRequest.create({
+        width: coverBottomLeftOverlayWidth.value * 3,
+    })
+]
+);
 
 defineExpose({
     shouldNavigateAway

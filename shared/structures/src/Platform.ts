@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 import { Colors } from "@stamhoofd/utility";
@@ -276,6 +276,12 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: Image, nullable: true, version: 310 })
     coverPhoto: Image|null = null
+
+    @field({ decoder: Image, nullable: true, ...NextVersion })
+    coverBottomLeftOverlayImage: Image|null = null
+
+    @field({ decoder: NumberDecoder, ...NextVersion })
+    coverBottomLeftOverlayWidth = 150
 
     @field({ decoder: StringDecoder, nullable: true, version: 310 })
     color: string | null = null
