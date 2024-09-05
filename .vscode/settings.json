@@ -20,7 +20,7 @@
         "yaml": false,
         "json": false
     },
-    "editor.codeLens": false,
+    "editor.codeLens": true,
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.formatOnPaste": false,
     "editor.formatOnSave": false,
