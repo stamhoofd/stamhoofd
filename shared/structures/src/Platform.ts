@@ -277,13 +277,13 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: Image, nullable: true, version: 310 })
     coverPhoto: Image|null = null
 
-    @field({ decoder: Image, nullable: true, ...NextVersion })
+    @field({ decoder: Image, nullable: true, version: 332 })
     coverBottomLeftOverlayImage: Image|null = null
 
-    @field({ decoder: NumberDecoder, ...NextVersion })
+    @field({ decoder: NumberDecoder, version: 332 })
     coverBottomLeftOverlayWidth = 150
 
-    @field({ decoder: RichText, ...NextVersion})
+    @field({ decoder: RichText, version: 332})
     footerText = RichText.create({})
 
     @field({ decoder: StringDecoder, nullable: true, version: 310 })
