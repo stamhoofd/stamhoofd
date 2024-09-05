@@ -14,6 +14,10 @@
                 Wissen
             </button>.
         </p>
+
+        <p v-if="checkboxWarning" v-show="!dataPermissions" class="warning-box">
+            {{ checkboxWarning }}
+        </p>
     </div>
     <div v-else class="container">
         <Title v-bind="$attrs" :title="title" />
@@ -24,6 +28,10 @@
         <Checkbox v-model="dataPermissions">
             {{ checkboxLabel }}
         </Checkbox>
+
+        <p v-if="checkboxWarning" v-show="!dataPermissions" class="warning-box">
+            {{ checkboxWarning }}
+        </p>
     </div>
 </template>
 
@@ -37,6 +45,7 @@ import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import { useDataPermissionSettings } from '../../../groups';
+import { usePlatform } from '../../../hooks';
 import Title from './Title.vue';
 
 defineOptions({
@@ -50,9 +59,12 @@ const props = defineProps<{
     willMarkReviewed?: boolean
 }>();
 
+const platform = usePlatform();
 const errors = useErrors({validator: props.validator});
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
+
+const checkboxWarning = computed(() => platform.value.config.dataPermission?.checkboxWarning ?? null)
 
 useValidation(props.validator, async () => {
     if (props.willMarkReviewed) {

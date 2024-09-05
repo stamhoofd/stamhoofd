@@ -33,11 +33,19 @@
         </p>
 
         <hr>
-        <h2>Waarschuwing bij leden</h2>
+        <h2>Waarschuwing voor beheerder</h2>
         <p>Als een lid geen toestemming gaf, dan tonen we dit als waarschuwing als je dat lid bekijkt als beheerder. Je kan zelf de tekst in deze waarschuwing wijzigen. Dit is niet zichtbaar voor de leden zelf.</p>
     
-        <STInputBox title="Waarschuwingstekst" class="max">
+        <STInputBox title="Waarschuwingstekst voor beheerder" class="max">
             <input v-model="warningText" class="input" :placeholder="inheritedDataPermission?.warningText || DataPermissionsSettings.defaultWarningText">
+        </STInputBox>
+
+        <hr>
+        <h2>Waarschuwing voor lid</h2>
+        <p>Als een lid geen toestemming geeft, dan tonen we dit als waarschuwing bij het aankruisvakje. Je kan zelf de tekst in deze waarschuwing wijzigen.</p>
+    
+        <STInputBox title="Waarschuwingstekst voor lid (optioneel)" class="max">
+            <input v-model="checkboxWarning" class="input" :placeholder="checkboxWarningPlaceholder">
         </STInputBox>
     </SaveView>
 </template>
@@ -103,6 +111,21 @@ const warningText = computed({
         });
     }
 });
+
+const checkboxWarning = computed({
+    get: () => patched.value?.checkboxWarning ?? "",
+    set: (checkboxWarning) => {
+        addPatch({
+            checkboxWarning: checkboxWarning.trim() ?? null
+        });
+    }
+});
+
+const checkboxWarningPlaceholder = computed(() => {
+    const base = props.inheritedDataPermission?.checkboxWarning || DataPermissionsSettings.defaultCheckboxWarning;
+    if(!base) return '(Optioneel)';
+    return base + ' (optioneel)';
+})
 
 async function save() {
     if (saving.value) {

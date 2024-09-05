@@ -110,6 +110,14 @@ export class DataPermissionsSettings extends AutoEncoder {
     checkboxLabel = DataPermissionsSettings.defaultCheckboxLabel
 
     /**
+     * Warning that is shown if the checkbox is not checked
+     * E.g. 'Without this information the group will not be able to offer a reduced price if you are eligible for financial support.'
+     */
+    @field({decoder: StringDecoder, nullable: true, ...NextVersion})
+    checkboxWarning: string | null = null;
+
+    /**
+     * Warning for administrators
      * E.g. 'Uses financial support'
      */
     @field({ decoder: StringDecoder, optional: true })
@@ -129,6 +137,10 @@ export class DataPermissionsSettings extends AutoEncoder {
 
     static get defaultWarningText() {
         return "Geen toestemming om gevoelige gegevens te verzamelen"
+    }
+
+    static get defaultCheckboxWarning() {
+        return ""
     }
 }
 
