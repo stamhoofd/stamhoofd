@@ -57,7 +57,7 @@
 
                 <template v-if="hasFullAccess">
                     <hr>
-                    <h2 >
+                    <h2>
                         Instellingen
                     </h2>
 
@@ -109,6 +109,24 @@
                     </STList>
                 </template>
 
+                <hr>
+                <h2>Link kopiëren</h2>
+                <p>De link naar deze activiteit in 'Mijn account'. Deel deze link met leden.</p>
+
+                
+                <div class="input-with-buttons">
+                    <div>
+                        <input class="input" :value="link" readonly>
+                    </div>
+                    <div>
+                        <button v-copyable="link" type="button" class="button text">
+                            <span class="icon copy" />
+                            <span class="hide-small">Kopiëren</span>
+                        </button>
+                    </div>
+                </div>
+
+
                 <template v-if="event.group && (!organization || event.organizationId === organization.id || (event.group.settings.allowRegistrationsByOrganization && !event.group.closed))">
                     <hr>
                     <h2>Handmatig leden inschrijven</h2>
@@ -142,6 +160,7 @@ import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/struct
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
+import { appToUri } from '../context';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
 import { useContext, useOrganization, usePlatform } from '../hooks';
@@ -191,6 +210,10 @@ const levelPrefix = computed(() => {
 
     return Formatter.joinLast(prefixes, ', ', ' en ')
 });
+
+const link = computed(() => {
+    return `https://${STAMHOOFD.domains.dashboard}/${appToUri('registration')}/activiteiten/${props.event.startDate.getFullYear()}/${Formatter.slug(props.event.name)}/${props.event.id}`
+})
 
 
 enum Routes {
