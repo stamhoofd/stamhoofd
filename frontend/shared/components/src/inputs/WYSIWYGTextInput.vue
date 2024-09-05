@@ -90,6 +90,9 @@ export default class WYSIWYGTextInput extends VueComponent {
     @Prop({ required: false, default: null })
         color!: string | null
 
+    @Prop({ default: "" })
+        editorClass!: string
+
     showLinkEditor = false
     editLink = ""
     editor: Editor|null = null
@@ -166,6 +169,11 @@ export default class WYSIWYGTextInput extends VueComponent {
             },
             onUpdate: ({ editor }) => {
                 this.$emit('update:modelValue', RichText.create({ html: editor.getHTML(), text: editor.getText() }))
+            },
+            editorProps: {
+                attributes: {
+                class: this.editorClass
+                },
             },
         })
     }

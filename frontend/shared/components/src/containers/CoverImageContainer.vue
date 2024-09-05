@@ -78,10 +78,10 @@ defineExpose({
             overflow: clip;
 
             .st-view {
-                > main.allow-vertical-center {
-                    flex-grow: 0;
-                    margin-top: auto;
-                    margin-bottom: auto;
+                .st-view-vertical-center {
+                    flex-grow: 1;
+                    display: flex;
+                    align-items: center;
                 }
             }
         }

@@ -168,6 +168,7 @@ export { default as ForgotPasswordResetView } from "./src/auth/ForgotPasswordRes
 export { default as ForgotPasswordView } from "./src/auth/ForgotPasswordView.vue"
 export { default as LoginView } from "./src/auth/LoginView.vue"
 export { default as NoPermissionsView } from "./src/auth/NoPermissionsView.vue"
+export { default as PlatformFooter } from "./src/auth/PlatformFooter.vue"
 
 // Admin views
 export * from './src/admins'

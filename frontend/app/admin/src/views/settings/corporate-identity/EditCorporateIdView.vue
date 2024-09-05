@@ -62,13 +62,24 @@
             <NumberInput v-model="coverBottomLeftOverlayWidth" title="Transparantie" :validator="errors.validator" :min="10" suffix="px" />
         </STInputBox>
 
-        <ImageComponent v-if="coverBottomLeftOverlayImage" :image="coverBottomLeftOverlayImage" :auto-height="true" :style="'width: ' + coverBottomLeftOverlayWidth +  'px'" />
+        <ImageComponent v-if="coverBottomLeftOverlayImage" :image="coverBottomLeftOverlayImage" :auto-height="true" :style="'width: ' + coverBottomLeftOverlayWidth + 'px'" />
+
+        <hr>
+        <h2>Footer</h2>
+        
+        <STInputBox error-fields="footerText" :error-box="errors.errorBox" class="max">
+            <WYSIWYGTextInput
+                v-model="footerText"
+                placeholder="Tekst die naast het aanvinkvakje staat"
+                editor-class="gray subtle-links"
+            />
+        </STInputBox>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, LogoEditor, NumberInput, STInputBox, Toast, UploadButton, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, LogoEditor, NumberInput, STInputBox, Toast, UploadButton, useErrors, usePatch, usePlatform, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { DarkMode, Image, Platform, PlatformConfig, ResolutionRequest } from '@stamhoofd/structures';
@@ -103,6 +114,11 @@ const coverPhoto = computed({
 const coverBottomLeftOverlayImage = computed({
     get: () => patched.value.config.coverBottomLeftOverlayImage,
     set: (value: Image | null) => addPatch(Platform.patch({config: PlatformConfig.patch({coverBottomLeftOverlayImage: value})}))
+})
+
+const footerText = computed({
+    get: () => patched.value.config.footerText,
+    set: (value) => addPatch(Platform.patch({config: PlatformConfig.patch({footerText: value})}))
 })
 
 const coverBottomLeftOverlayWidth = computed({

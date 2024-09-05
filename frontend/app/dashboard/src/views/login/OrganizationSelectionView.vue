@@ -6,7 +6,7 @@
         <div class="st-view">
             <STNavigationBar :large="!isNative" class="transparent" title="Beheer jouw groep" />
 
-            <main class="center small organization-selection-view">
+            <main class="flex center small organization-selection-view">
                 <h1>
                     {{ $t('Zoek jouw vereniging') }}
                 </h1>
@@ -55,6 +55,8 @@
                         <span>Mijn vereniging staat er niet tussen</span>
                     </button>
                 </footer>
+
+                <PlatformFooter />
             </main>
         </div>
     </div>
@@ -64,7 +66,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, getAppDescription, getAppTitle, Option, Spinner, STGradientBackground, Toast, useContextOptions, usePlatform } from '@stamhoofd/components';
+import { ContextLogo, getAppDescription, getAppTitle, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useContextOptions, usePlatform } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from "@stamhoofd/utility";

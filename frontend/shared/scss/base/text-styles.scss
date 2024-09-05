@@ -1117,6 +1117,21 @@
         }
     }
 
+    &.subtle-links {
+        a {
+            &, &:link, &:visited {
+                color: $color-gray-text;
+                font-weight: $font-weight-default;
+                text-decoration: underline;
+                text-decoration-color: $color-border;
+
+                &:hover {
+                    text-decoration-color: $color-gray-text;
+                }
+            }
+        }
+    }
+
     ul, ol {
         padding-left: 25px;
 

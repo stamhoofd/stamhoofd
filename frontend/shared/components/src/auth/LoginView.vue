@@ -2,43 +2,49 @@
     <form class="st-view login-view" data-submit-last-field @submit.prevent="submit">
         <STNavigationBar :large="true" title="Inloggen" class="transparent" />
 
-        <main class="center small allow-vertical-center">
-            <h1>Inloggen bij KSA</h1>
+        <main class="center small flex">
+            <div class="st-view-vertical-center">
+                <div class="container">
+                    <h1>Inloggen bij KSA</h1>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+                    <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
-            <p v-if="lock" class="style-description-small">
-                {{ lock }}
-            </p>
+                    <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+                    <p v-if="lock" class="style-description-small">
+                        {{ lock }}
+                    </p>
 
-            <STInputBox title="Wachtwoord" class="max">
-                <template #right>
-                    <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
-                        <span>Vergeten</span>
-                        <span class="icon help" />
+                    <STInputBox title="Wachtwoord" class="max">
+                        <template #right>
+                            <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
+                                <span>Vergeten</span>
+                                <span class="icon help" />
+                            </button>
+                        </template>
+                        <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                    </STInputBox>
+                    <VersionFooter v-if="showVersionFooter" />
+
+                    <LoadingButton v-else :loading="loading" class="block">
+                        <button id="submit" class="button primary full" type="submit">
+                            <span class="lock icon" />
+                            <span>Inloggen</span>
+                        </button>
+                    </LoadingButton>
+
+                    <hr>
+                    <p class="style-description-small">
+                        Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
+                    </p>
+
+                    <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
+                        <span>Account aanmaken</span>
+                        <span class="icon arrow-right-small" />
                     </button>
-                </template>
-                <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
-            </STInputBox>
-            <VersionFooter v-if="showVersionFooter" />
+                </div>
+            </div>
 
-            <LoadingButton v-else :loading="loading" class="block">
-                <button id="submit" class="button primary full" type="submit">
-                    <span class="lock icon" />
-                    <span>Inloggen</span>
-                </button>
-            </LoadingButton>
-
-            <hr>
-            <p class="style-description-small">
-                Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
-            </p>
-
-            <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
-                <span>Account aanmaken</span>
-                <span class="icon arrow-right-small" />
-            </button>
+            <PlatformFooter />
         </main>
     </form>
 </template>
@@ -56,6 +62,7 @@ import { useContext } from '../hooks';
 import EmailInput from '../inputs/EmailInput.vue';
 import ConfirmEmailView from './ConfirmEmailView.vue';
 import ForgotPasswordView from './ForgotPasswordView.vue';
+import PlatformFooter from './PlatformFooter.vue';
 
 const props = withDefaults(
     defineProps<{

@@ -5,10 +5,11 @@
     @extend .style-description-small;
     margin-top: auto;
     line-height: 1.6;
-    padding: 0 0 20px 0;
+    padding: 15px 20px;
+    opacity: 0.6;
 
     .st-view > main > & {
-        margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+        margin: 0 calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px)));
         margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
         margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
         margin-top: auto;
@@ -28,9 +29,7 @@
         --color-current-background-shade: #{$color-background-shade-darker};
     }
 
-     >div {
-        padding: 15px;
-
+    > div {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -54,7 +53,6 @@
 
          >div,
          >aside {
-            padding-bottom: 20px;
             min-width: 0;
 
             &:first-child {
