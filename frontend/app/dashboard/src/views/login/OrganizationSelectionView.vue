@@ -274,6 +274,10 @@ const $navigate = useNavigate()
         padding-top: 15px;
     }
 
+    form {
+        margin-bottom: 10px;
+    }
+
     > .search-result {
         @extend .style-input-shadow;
         background: $color-background;
@@ -281,7 +285,7 @@ const $navigate = useNavigate()
         padding: 15px 15px;
         padding-right: 0px;
         border-radius: $border-radius;
-        margin: 10px 0;
+        margin: 5px 0;
         transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
         cursor: pointer;
         touch-action: manipulation;
