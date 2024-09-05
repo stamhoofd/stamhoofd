@@ -185,7 +185,7 @@ export class PlatformFamilyManager {
         }
     }
 
-    private updateUserMemberId(createdMembers: MemberWithRegistrationsBlob[]) {
+    private updateUserMemberId(members: MemberWithRegistrationsBlob[]) {
         const user = this.context.auth.user;
         if (!user) {
             return;
@@ -194,7 +194,7 @@ export class PlatformFamilyManager {
         const userId = user.id;
         const userMemberId = user.memberId;
 
-        const newUserMemberId = createdMembers
+        const newUserMemberId = members
             .flatMap(cm => cm.users)
             .find(u => u.id === userId)?.memberId ?? null;
 
