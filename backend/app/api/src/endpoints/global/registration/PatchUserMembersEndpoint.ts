@@ -178,14 +178,16 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 }
 
                 // Entered the security code, so we can link the user to the member
-                if (!duplicate.details.securityCode || securityCode !== duplicate.details.securityCode) {
-                    throw new SimpleError({
-                        code: "invalid_field",
-                        field: 'details.securityCode',
-                        message: "Invalid security code",
-                        human: Context.i18n.$t(`Deze beveiligingscode is ongeldig. Probeer het opnieuw of neem contact op met jouw vereniging om de juiste code te ontvangen.`),
-                        statusCode: 400
-                    })
+                if (STAMHOOFD.environment !== 'development') {
+                    if (!duplicate.details.securityCode || securityCode !== duplicate.details.securityCode) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            field: 'details.securityCode',
+                            message: "Invalid security code",
+                            human: Context.i18n.$t(`Deze beveiligingscode is ongeldig. Probeer het opnieuw of neem contact op met jouw vereniging om de juiste code te ontvangen.`),
+                            statusCode: 400
+                        })
+                    }
                 }
 
                 console.log("Merging duplicate: security code is correct - for " + duplicate.id)
