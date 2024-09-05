@@ -96,6 +96,7 @@ export class PlatformFamilyManager {
                 }
             }
 
+            this.updateUserMemberId(response.data.members);
             this.updateOrganizationFromMembers(response.data.members)
         }
     }
@@ -179,7 +180,26 @@ export class PlatformFamilyManager {
                 }
             }
 
+            this.updateUserMemberId(response.data.members);
             this.updateOrganizationFromMembers(response.data.members)
+        }
+    }
+
+    private updateUserMemberId(createdMembers: MemberWithRegistrationsBlob[]) {
+        const user = this.context.auth.user;
+        if (!user) {
+            return;
+        }
+
+        const userId = user.id;
+        const userMemberId = user.memberId;
+
+        const newUserMemberId = createdMembers
+            .flatMap(cm => cm.users)
+            .find(u => u.id === userId)?.memberId ?? null;
+
+        if(userMemberId !== newUserMemberId) {
+            this.context.updateData(true, false, false).catch(console.error)
         }
     }
 
