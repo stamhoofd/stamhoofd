@@ -77,4 +77,8 @@ export class ReviewTimes extends AutoEncoder {
         }
         return false
     }
+
+    clearAll() {
+        this.times = []
+    }
 }

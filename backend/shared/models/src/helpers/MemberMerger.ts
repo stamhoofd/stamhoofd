@@ -69,6 +69,9 @@ export async function mergeTwoMembers(base: Member, other: Member): Promise<void
     await mergeDocuments(base, other);
     await mergeMemberPlatformMemberships(base, other);
 
+    // Force review of all details
+    base.details.reviewTimes.clearAll();
+
     await base.save();
 
     if (other.existsInDatabase) {
