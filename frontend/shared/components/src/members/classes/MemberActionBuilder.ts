@@ -1,4 +1,5 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
+import { SimpleError } from '@simonbackx/simple-errors'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
@@ -9,10 +10,10 @@ import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultI
 import { GlobalEventBus } from '../../EventBus'
 import EmailView from '../../email/EmailView.vue'
 import { useContext, useOrganization, usePlatform } from '../../hooks'
-import { CenteredMessage } from '../../overlays/CenteredMessage'
 import { Toast } from '../../overlays/Toast'
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/classes'
 import { NavigationActions } from '../../types/NavigationActions'
+import DeleteView from '../../views/DeleteView.vue'
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager'
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
 import { RegistrationActionBuilder } from './RegistrationActionBuilder'
@@ -530,23 +531,41 @@ export class MemberActionBuilder {
         }).catch(console.error)
     }
     async deleteMembers(members: PlatformMember[]) {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je ' + Formatter.pluralText(members.length, 'lid', 'leden') + ' wilt verwijderen?', 'Ja, verwijderen', 'De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.')) {
-            return
+        if(members.length > 1) {
+            throw new SimpleError({
+                code: 'not-supported',
+                message: 'Meerdere leden verwijderen is niet ondersteund',
+            })
         }
 
-        if (!await CenteredMessage.confirm('Ben je 100% zeker?', 'Ja, verwijderen', 'De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.')) {
-            return
-        }
+        const member = members[0].patchedMember;
+        const name = member.name;
+        
+        await this.present({
+            components: [
+                new ComponentWithProperties(DeleteView, {
+                    title: `Verwijder lid ${name}?`,
+                    description: `Ben je 100% zeker dat je ${name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.`,
+                    confirmationTitle: 'Bevestig de naam van het lid',
+                    confirmationPlaceholder: 'Volledige naam',
+                    confirmationCode: name,
+                    checkboxText: 'Ja, ik ben 100% zeker',
+                    onDelete: async () => {
+                        const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+                        for (const member of members) {
+                            patch.addDelete(member.id)
+                        }
 
-        const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-        for (const member of members) {
-            patch.addDelete(member.id)
-        }
+                        await this.platformFamilyManager.isolatedPatch(members, patch)
+                        GlobalEventBus.sendEvent('members-deleted', members).catch(console.error)
 
-        await this.platformFamilyManager.isolatedPatch(members, patch)
-        GlobalEventBus.sendEvent('members-deleted', members).catch(console.error)
-
-        Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, 'lid', 'leden')) + ' verwijderd').show()
+                        Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, 'lid', 'leden')) + ' verwijderd').show();
+                        return true;
+                    }
+                })
+            ],
+            modalDisplayStyle: "sheet"
+        });
     }
 
     async exportToExcel(selection: TableActionSelection<PlatformMember>) {
