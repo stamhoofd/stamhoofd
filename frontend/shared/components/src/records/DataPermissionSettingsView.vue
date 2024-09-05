@@ -116,7 +116,7 @@ const checkboxWarning = computed({
     get: () => patched.value?.checkboxWarning ?? "",
     set: (checkboxWarning) => {
         addPatch({
-            checkboxWarning: checkboxWarning.trim() ?? null
+            checkboxWarning: checkboxWarning ?? null
         });
     }
 });
