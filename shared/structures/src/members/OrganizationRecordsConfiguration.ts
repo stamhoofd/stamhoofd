@@ -113,7 +113,7 @@ export class DataPermissionsSettings extends AutoEncoder {
      * Warning that is shown if the checkbox is not checked
      * E.g. 'Without this information the group will not be able to offer a reduced price if you are eligible for financial support.'
      */
-    @field({decoder: StringDecoder, nullable: true, ...NextVersion})
+    @field({decoder: StringDecoder, nullable: true, version: 333})
     checkboxWarning: string | null = null;
 
     /**
