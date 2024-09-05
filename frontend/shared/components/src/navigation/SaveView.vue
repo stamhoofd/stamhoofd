@@ -37,7 +37,7 @@
                     {{ cancelText }}
                 </button>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" :disabled="disabled" type="submit">
+                    <button class="button" :class="saveButtonClass" :disabled="disabled" type="submit">
                         <span v-if="saveIcon" class="icon " :class="saveIcon" />
                         <span>{{ saveText }}</span>
                         <span v-if="saveIconRight" class="icon " :class="saveIconRight" />
@@ -92,6 +92,9 @@ export default class SaveView extends Mixins(NavigationMixin) {
 
     @Prop({ default: null })
         saveIcon!: string | null;
+
+    @Prop({ default: "primary" })
+        saveButtonClass!: string | null;
 
     @Prop({ default: null })
         saveIconRight!: string | null;

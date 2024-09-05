@@ -109,7 +109,7 @@ async function showContextMenu(event: MouseEvent) {
         forceWriteAccess: hasWrite.value
     })
 
-    const actions = builder.getActions()
+    const actions = builder.getActions({includeDelete: true})
 
     const el = event.currentTarget! as HTMLElement;
     const bounds = el.getBoundingClientRect()
