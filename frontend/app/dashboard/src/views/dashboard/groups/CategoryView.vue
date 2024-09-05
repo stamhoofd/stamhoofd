@@ -25,6 +25,7 @@
                             Bekijk alle leden samen
                         </p>
                         <template #right>
+                            <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -38,6 +39,7 @@
                         {{ category.settings.name }}
 
                         <template #right>
+                            <span v-if="category.getMemberCount() !== null" class="style-description-small">{{ category.getMemberCount() }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -104,7 +106,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, ContextMenu, ContextMenuItem, EditGroupView, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
+import { Group, GroupCategory, GroupCategoryTree, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 import GroupOverview from "./GroupOverview.vue";
 
 @Component({
