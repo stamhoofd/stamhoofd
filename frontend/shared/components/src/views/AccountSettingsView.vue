@@ -52,7 +52,7 @@
 
                 <STListItem :selectable="true" @click.prevent="deleteRequest">
                     <template #left>
-                        <LoadingButton :loading="deletingAccount">
+                        <LoadingButton>
                             <span class="icon trash" />
                         </LoadingButton>
                     </template>
@@ -96,8 +96,8 @@ import { ComponentWithProperties, useDismiss, usePop, usePresent } from "@simonb
 import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, useContext, useErrors, usePatch, usePlatform, useUser, useValidation } from "@stamhoofd/components";
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
-import { sleep } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
+import DeleteView from './DeleteView.vue';
 
 const $context = useContext();
 const $platform = usePlatform();
@@ -112,7 +112,6 @@ const {patched, addPatch, hasChanges, patch} = usePatch($user.value!);
 
 const isUserModeOrganization = STAMHOOFD.userMode === 'organization';
 const saving = ref(false);
-const deletingAccount = ref(false);
 const policies = computed(() => $platform.value.config.privacy.policies)
 
 onMounted(() => {
@@ -184,20 +183,33 @@ async function save() {
 }
 
 async function  deleteRequest() {
-    deletingAccount.value = true;
-
-    try {
-        await sleep(2000)
-
-        if (await CenteredMessage.confirm("Ben je zeker dat je jouw account wilt verwijderen?", "Verwijderen", "Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.")) {
-            await $context.value.deleteAccount()
-
-            Toast.success("Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.").show()
-            await pop({force: true})
-        }
-    } finally {
-        deletingAccount.value = false
+    const user = $user.value;
+    if(!user) {
+        return;
     }
+
+    const confirmationCode = user.email;
+
+    await present({
+        components: [
+            new ComponentWithProperties(DeleteView, {
+                title: 'Verwijder jouw account?',
+                description: `Ben je 100% zeker dat je jouw account wilt verwijderen? Vul dan je huidige e-mailadres in ter bevestiging. Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.`,
+                confirmationTitle: 'Bevestig je e-mailadres',
+                confirmationPlaceholder: 'Huidige e-mailadres',
+                confirmationCode,
+                checkboxText: 'Ja, ik ben 100% zeker',
+                onDelete: async () => {
+                    await $context.value.deleteAccount()
+
+                    Toast.success("Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.").show()
+                    await pop({force: true})
+                    return true;
+                }
+            })
+        ],
+        modalDisplayStyle: "sheet"
+    });
 }
 
 async function openChangePassword() {
