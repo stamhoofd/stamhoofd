@@ -94,9 +94,3 @@ async function doDelete() {
     }
 }
 </script>
-
-<style lang="scss">
-form {
-    margin-top: 8px;
-}
-</style>
