@@ -175,6 +175,7 @@ declare global {
 
         readonly ILLUSTRATIONS_NAMESPACE?: string // A subfolder of 'illustrations' will be used for illustrations (if the illustration exists)
         readonly ILLUSTRATIONS_COLORS?: Record<string, `#${string}`>
+        readonly PLAUSIBLE_DOMAIN?: string
 
     }
 

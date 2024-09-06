@@ -21,7 +21,7 @@ VueGlobalHelper.setup(app)
 const i18n = I18nController.getI18n()
 app.use(i18n)
 
-if (!isPrerender) {
+if (!isPrerender && STAMHOOFD.PLAUSIBLE_DOMAIN) {
     ViewportHelper.setup(true)
 
     // Load plausible if not production
@@ -31,7 +31,7 @@ if (!isPrerender) {
             //do stuff with the script
             console.log("Plausible loaded")
         };
-        script.setAttribute("data-domain", "stamhoofd.app");
+        script.setAttribute("data-domain", STAMHOOFD.PLAUSIBLE_DOMAIN);
         script.src = "https://plausible.io/js/plausible.js";
         document.head.appendChild(script); //or something of the likes
         const w = (window as any);
@@ -41,5 +41,10 @@ if (!isPrerender) {
             console.log("Debug plausible with args ", arguments)
         }
     }
+} else {
+    (window as any).plausible = function() {
+        console.log("Debug plausible with args ", arguments)
+    }
 }
+
 app.mount("#app")
