@@ -4,7 +4,7 @@
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
-        
+
         <p v-if="visibleParents.length === 0" class="info-box">
             Nog geen ouders toegevoegd. Voeg een ouder van {{ member.patchedMember.details.firstName }} toe via de knop hieronder.
         </p>
@@ -127,12 +127,14 @@ const visibleParents = computed(() => {
 
     // Loop family members
     for (const member of props.member.family.members) {
-        for (const parent of member.member.details.parents) {
+        for (const parent of member.patchedMember.details.parents) {
             if (!result.find(p => p.id === parent.id)) {
                 result.push(parent);
             }
         }
     }
+
+    
     return result;
 });
 
