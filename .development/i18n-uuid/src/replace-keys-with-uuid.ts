@@ -57,6 +57,7 @@ type TranslationValue = string | {
 function replaceKeysWithUuidInTranslations(
     translationsWithPath: Map<string, Record<string, string>>,
 ) {
+    const keysToSkip = ['replacements'];
     const replacedKeys = new Map<string, string>();
 
     const setTranslationsOnResult = (result: Record<string, string>, translations: TranslationValue, parentKeys = '') => {
@@ -65,10 +66,11 @@ function replaceKeysWithUuidInTranslations(
         }
 
         for (const key in translations) {
+            if(keysToSkip.includes(key)) continue;
             const fullKey = parentKeys ? `${parentKeys}.${key}` : key;
 
             const setOnResult = (uuidKey: string) => {
-                delete translations[key];
+                delete result[key];
                 result[uuidKey] = translations[key] as string;
             }
             
@@ -88,7 +90,7 @@ function replaceKeysWithUuidInTranslations(
             }
 
             setTranslationsOnResult(result, value, fullKey);
-            delete translations[key];
+            delete result[key];
         }
     }
 
