@@ -97,10 +97,6 @@ const willMarkReviewed = !isAdmin;
 const isDuplicate = ref(false);
 const code = ref("");
 
-onActivated(() => {
-    cloned.value = props.member.clone() 
-});
-
 function patchMemberWithReviewed(member: PlatformMember) {
     if (props.markReviewed.length && willMarkReviewed) {
         const times = member.patchedMember.details.reviewTimes.clone();
