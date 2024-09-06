@@ -209,7 +209,7 @@ async function save() {
         }
 
         if (props.member && props.isNew) {
-            const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.member.details.defaultAge < 30)
+            const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'))
 
             if (minorMembers.length > 0 && !await CenteredMessage.confirm("Wil je deze ouder bij alle gezinsleden toevoegen?", "Overal toevoegen", "Je kan deze ouder ook automatisch toevoegen bij " + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' en ')+'.', 'Enkel hier', false)) {
                 props.member.addParent(patched.value)
