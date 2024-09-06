@@ -7,7 +7,7 @@ export function replaceKeysWithUuid() {
     replaceKeysWithUuidInTranslations(translationsWithPath);
 }
 
-function getTranslationsWithPath() {
+function getTranslationsWithPath(): Map<string, Record<string, string>> {
     // Path to the directory containing your translation files (e.g., locales/en.json)
     const localesDir = "../../shared/locales/src";
 
@@ -176,7 +176,7 @@ export function replaceOccurrences(replacedKeys: Map<string, string>) {
                 const containsPattern = searchValue.test(newContent);
                 if(!containsPattern) continue;
                 
-                newContent = fileContent.replace(searchValue, replaceValue);
+                newContent = newContent.replace(searchValue, replaceValue);
                 break;
             }
         }
