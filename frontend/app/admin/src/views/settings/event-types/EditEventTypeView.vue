@@ -44,6 +44,10 @@
                 <NumberInput v-model="maximumDays" :placeholder="$t('104dca1f-f6eb-4193-ae27-5e5f96e4e481')" :required="false" />
             </STInputBox>
         </div>
+
+        <Checkbox v-model="isLocationRequired">{{ $t('De locatie is verplicht') }}
+            <p class="style-description-small">{{$t('Indien aangevinkt kan deze soort activiteit niet aangemaakt worden zonder dat de locatie is ingevuld.')}}</p>
+        </Checkbox>
     </SaveView>
 </template>
 
@@ -51,7 +55,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, useErrors, usePatch, NumberInput } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, NumberInput, SaveView, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformEventType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -133,6 +137,11 @@ const minimumDays = computed({
 const maximumDays = computed({
     get: () => patched.value.maximumDays,
     set: (maximumDays) => addPatch({maximumDays}),
+});
+
+const isLocationRequired = computed({
+    get: () => patched.value.isLocationRequired,
+    set: (isLocationRequired) => addPatch({isLocationRequired}),
 });
 
 const shouldNavigateAway = async () => {
