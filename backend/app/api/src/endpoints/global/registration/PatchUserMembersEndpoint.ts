@@ -2,13 +2,13 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member, mergeTwoMembers, RateLimiter } from '@stamhoofd/models';
-import { MemberWithRegistrationsBlob, MembersBlob } from "@stamhoofd/structures";
+import { MemberDetails, MembersBlob, MemberWithRegistrationsBlob } from "@stamhoofd/structures";
 
+import { Email } from '@stamhoofd/email';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
-import { Email } from '@stamhoofd/email';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
@@ -60,6 +60,8 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             struct.details.cleanData()
             member.details = struct.details
 
+            this.throwIfInvalidDetails(member.details);
+
             const duplicate = await this.checkDuplicate(member, struct.details.securityCode)
             if (duplicate) {
                 addedMembers.push(duplicate)
@@ -95,8 +97,10 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                         field: "details"
                     })
                 }
+
                 member.details.patchOrPut(struct.details)
-                member.details.cleanData()
+                member.details.cleanData();
+                this.throwIfInvalidDetails(member.details);
             }
 
             if (!member.details) {
@@ -204,6 +208,24 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
             await mergeTwoMembers(duplicate, member)
             return duplicate
+        }
+    }
+
+    private throwIfInvalidDetails(details: MemberDetails) {
+        if(details.firstName.length < 2) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Voornaam is te kort",
+                field: "firstName"
+            });
+        }
+
+        if(details.lastName.length < 2) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Achternaam is te kort",
+                field: "lastName"
+            });
         }
     }
 }
