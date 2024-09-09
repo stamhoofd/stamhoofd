@@ -31,12 +31,11 @@ import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContains
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, ReviewCheckbox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useReview, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, ReviewCheckbox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useReview, useSetupStepTranslations, Validator } from "@stamhoofd/components";
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, SetupStepType, Version } from "@stamhoofd/structures";
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
-
 @Component({
     components: {
         SaveView,
@@ -63,8 +62,9 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
     temp_organization = this.$organization
     loadingMollie = false
     $t = useTranslate();
+    setupTranslations = useSetupStepTranslations();
 
-    title: string = this.isReview ? this.$t(`setup.${SetupStepType.Payment}.review.title`) : 'Betaalmethodes voor inschrijvingen';
+    title: string = this.isReview ? this.setupTranslations.getReviewTitle(SetupStepType.Payment) : 'Betaalmethodes voor inschrijvingen';
 
     review = useReview(SetupStepType.Payment);
     hasReviewChanges = this.review.$hasChanges;

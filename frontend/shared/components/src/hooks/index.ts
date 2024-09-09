@@ -23,3 +23,4 @@ export * from "./useSalesDisabled";
 export * from "./useMembersPackage";
 export * from "./useGlobalEventListener";
 export * from "./useBackForward";
+export * from "./useSetupStepTranslations";

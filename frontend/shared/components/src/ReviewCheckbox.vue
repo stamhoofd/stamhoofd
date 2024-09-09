@@ -7,7 +7,7 @@
                 </div>
             </template>
             <h2 class="style-title-list">
-                {{ $t(`setup.${props.data.type}.review.checkboxTitle`) }}
+                {{ checkboxTitle }}
             </h2>
             <TransitionFade>
                 <p v-if="$review" class="style-description-small">
@@ -19,13 +19,16 @@
 </template>
 
 <script lang="ts" setup>
-import { TransitionFade } from '@stamhoofd/components';
+import { TransitionFade, useSetupStepTranslations } from '@stamhoofd/components';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { ReviewCheckboxData } from './useReview';
 
 const props = defineProps<{data: ReviewCheckboxData}>();
 const $review = computed(() => props.data.step?.review);
+const setupStepTranslations = useSetupStepTranslations();
+
+const checkboxTitle = computed(() => setupStepTranslations.getReviewCheckboxTitle(props.data.type));
 
 const value = computed({
     get: () => props.data.checkboxValue,

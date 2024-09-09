@@ -8,10 +8,10 @@
             </IconContainer>
         </template>
         <h2 class="style-title-list">
-            {{ $isDone ? $t(`setup.${props.type}.review.title`) : $t(`setup.${props.type}.todo.title`) }}
+            {{ title }}
         </h2>
         <p class="style-description">
-            {{ $isDone ? $t(`setup.${props.type}.review.description`) : $t(`setup.${props.type}.todo.description`) }}
+            {{ description }}
         </p>
         <template #right>
             <span v-if="!step.isDone" class="style-description-small">{{ step.finishedSteps }} / {{ step.totalSteps }}</span>
@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EmailSettingsView, GeneralSettingsView, IconContainer, ProgressIcon, STListItem } from '@stamhoofd/components';
+import { EmailSettingsView, GeneralSettingsView, IconContainer, ProgressIcon, STListItem, useSetupStepTranslations } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
@@ -35,6 +35,11 @@ const props = defineProps<{type: SetupStepType, step: SetupStep}>();
 
 const $navigate = useNavigate();
 const organizationManager = useOrganizationManager();
+const setupStepTranslations = useSetupStepTranslations();
+
+const title = computed(() => $isDone.value ? setupStepTranslations.getReviewTitle(props.type) : setupStepTranslations.getTodoTitle(props.type));
+const description = computed(() => $isDone.value ? setupStepTranslations.getReviewDescription(props.type) : setupStepTranslations.getTodoDescription(props.type));
+
 const $isDone = computed(() => props.step.isDone);
 
 const $progress = computed(() => {
