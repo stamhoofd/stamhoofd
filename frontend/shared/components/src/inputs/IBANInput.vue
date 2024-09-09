@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="iban" :error-box="errorBox">
-        <input v-model="ibanRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder !== null ? placeholder : $t('shared.inputs.iban.placeholder')" :autocomplete="autocomplete" @change="validate">
+        <input v-model="ibanRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder !== null ? placeholder : $t('0c63751f-8cd1-48af-a8a6-2b6a02447d63')" :autocomplete="autocomplete" @change="validate">
     </STInputBox>
 </template>
 

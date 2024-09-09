@@ -51,7 +51,7 @@
             </h2>
 
             <p v-if="app !== 'registration' && !event.group.closed && (organization && event.organizationId !== organization.id && !event.group.settings.allowRegistrationsByOrganization)" class="style-description-small">
-                {{ $t('Leden kunnen enkel zelf inschrijven via Stamhoofd') }}
+                {{ $t('34fdb013-005c-46c4-b52e-e58f7697b586') }}
             </p>
 
             <template v-if="!differentOrganization && !event.group.closed" #right>

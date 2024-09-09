@@ -20,19 +20,19 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('shared.address') }}
+                        {{ $t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5') }}
                     </h3>
                     <p v-copyable class="style-definition-text">
                         {{ organization.address }}
                     </p>
                     <p v-if="organization.meta.companyAddress && organization.meta.companyAddress != organization.address" class="style-description-small">
-                        {{ $t('shared.invoiceAddress') }}: {{ organization.meta.companyAddress }}
+                        {{ $t('10c2c710-3c0d-445b-bb2e-c3f43cd6397b') }}: {{ organization.meta.companyAddress }}
                     </p>
                 </STListItem>
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('shared.invoiceDetails') }}
+                        {{ $t('3dae9ed2-c904-448a-834e-c60bfaed88d1') }}
                     </h3>
                     <p v-copyable class="style-definition-text">
                         {{ organization.meta.companyName || organization.name }}
@@ -47,7 +47,7 @@
 
                 <STListItem v-if="organization.website" element-name="a" :href="organization.website" :selectable="true" target="_blank">
                     <h3 class="style-definition-label">
-                        {{ $t('shared.website') }}
+                        {{ $t('00c90aa3-2d42-45bc-a3e7-56565b7a4e0e') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ organization.website }}
@@ -123,7 +123,7 @@
                         Instellingen
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.organizations.settings.description') }}
+                        {{ $t('a5b61d4d-207f-485c-8748-cbb04fcb2d23') }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -138,7 +138,7 @@
                         Leden
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.organizations.actions.members.description') }}
+                        {{ $t('eb91fb5c-72fc-44d4-9b84-4c9f7791e27a') }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -153,7 +153,7 @@
                         Beheerdersportaal
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.organizations.login.description') }}
+                        {{ $t('2300284a-a015-4c97-8ad1-6c9f2bbde174') }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -163,13 +163,13 @@
 
             <hr>
             <h2>
-                {{ $t('admin.organizations.actions.delete.title') }}
+                {{ $t('f477755c-2d6e-473c-b9b9-2ebe0af173f3') }}
             </h2>
 
             <LoadingButton :loading="deleting">
                 <button class="button secundary danger" type="button" @click="deleteMe">
                     <span class="icon trash" />
-                    <span>{{ $t('Verwijderen') }}</span>
+                    <span>{{ $t('838cae8b-92a5-43d2-82ba-01b8e830054b') }}</span>
                 </button>
             </LoadingButton>
         </main>
@@ -302,7 +302,7 @@ async function deleteMe() {
     }
     deleting.value = true;
 
-    if (!await CenteredMessage.confirm($t('admin.organizations.deleteConfirmation.title'), $t('shared.confirmDelete'), $t('admin.organizations.deleteConfirmation.description'))) {
+    if (!await CenteredMessage.confirm($t('92c19888-7ac0-46b5-b691-05b29e52e110'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9a528611-db36-4bb0-9de4-29b653ea6165'))) {
         deleting.value = false;
         return;
     }
@@ -312,7 +312,7 @@ async function deleteMe() {
 
     // Second confirmation window
 
-    if (!await CenteredMessage.confirm($t('admin.organizations.deleteConfirmation2.title'), $t('shared.confirmDelete'), $t('admin.organizations.deleteConfirmation.description'))) {
+    if (!await CenteredMessage.confirm($t('2be85b13-52d6-4322-adcc-b491b5749422'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9a528611-db36-4bb0-9de4-29b653ea6165'))) {
         deleting.value = false;
         return;
     }
@@ -320,7 +320,7 @@ async function deleteMe() {
     // Wait 3 seconds
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    if (!await CenteredMessage.confirm($t('admin.organizations.deleteConfirmation3.title'), $t('shared.confirmDelete'), $t('admin.organizations.deleteConfirmation.description'))) {
+    if (!await CenteredMessage.confirm($t('6435b870-2298-49bb-bd28-904e864178d3'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9a528611-db36-4bb0-9de4-29b653ea6165'))) {
         deleting.value = false;
         return;
     }

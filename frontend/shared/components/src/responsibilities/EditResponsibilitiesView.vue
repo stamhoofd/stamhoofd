@@ -8,7 +8,7 @@
 
         <template v-if="inheritedResponsibilitiesWithGroup.length">
             <hr>
-            <h2>{{ $t('admin.settings.responsibilities.inherited') }}</h2>
+            <h2>{{ $t('e55af974-4ce3-4cf2-a56b-d7c8f6fbeaec') }}</h2>
             <p>Ken automatisch rechten toe aan leden die een bepaalde ingebouwde functie hebben.</p>
 
             <STList>
@@ -108,7 +108,7 @@ const groupedDraggableResponsibilites = computed(() => {
     });
 })
 
-const title = $t('admin.settings.responsibilities.title')
+const title = $t('e7ba96d7-b233-45c4-8331-d429fcea40a9')
 
 async function addResponsibility() {
     const arr: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray()
@@ -202,7 +202,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

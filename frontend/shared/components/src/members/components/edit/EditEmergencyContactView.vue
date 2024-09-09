@@ -37,7 +37,7 @@
             </div>
 
             <div>
-                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="errors.validator" :placeholder="$t('shared.inputs.mobile.label')" :required="true" />
+                <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :required="true" />
             </div>
         </div>
     </SaveView>

@@ -122,7 +122,7 @@ export default class PhoneInput extends VueComponent {
                         if (!silent) {
                             this.errorBox = new ErrorBox(new SimpleError({
                                 "code": "invalid_field",
-                                "message": this.$t("shared.inputs.mobile.invalidMessageTryCountry").toString(),
+                                "message": this.$t("f7cbe04a-3175-4794-8f74-8261a11fbade").toString(),
                                 "field": "phone"
                             }))
                         }
@@ -132,7 +132,7 @@ export default class PhoneInput extends VueComponent {
                 if (!silent) {
                     this.errorBox = new ErrorBox(new SimpleError({
                         "code": "invalid_field",
-                        "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
+                        "message": this.$t("ce4a8d4e-a0a2-456e-8fb6-c541c58ef0a1").toString(),
                         "field": "phone"
                     }))
                 }
@@ -155,7 +155,7 @@ export default class PhoneInput extends VueComponent {
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
+                    "message": this.$t("ce4a8d4e-a0a2-456e-8fb6-c541c58ef0a1").toString(),
                     "field": "phone"
                 }))
             }

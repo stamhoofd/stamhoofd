@@ -8,7 +8,7 @@
             </h1>
 
             <p v-if="!isMailOk && !isRegisterOk" class="warning-box">
-                Je moet jouw domeinnaam al in bezit hebben voor je deze kan instellen. Contacteer ons gerust via {{ $t('shared.emails.general') }} als je hulp nodig hebt.
+                Je moet jouw domeinnaam al in bezit hebben voor je deze kan instellen. Contacteer ons gerust via {{ $t('59b85264-c4c3-4cf6-8923-9b43282b2787') }} als je hulp nodig hebt.
             </p>
             <template v-else>
                 <p v-if="isMailOk" class="success-box">
@@ -17,7 +17,7 @@
                     </template>
                 </p>
                 <p v-else class="warning-box">
-                    {{ $t('dashboard.settings.domain.inactive') }}
+                    {{ $t('94547449-549d-4572-b217-c1a089b12997') }}
                 </p>
 
                 <template v-if="enableMemberModule">
@@ -37,7 +37,7 @@
                     v-model="mailDomain"
                     class="input"
                     type="text"
-                    :placeholder="$t('dashboard.settings.domain.domainPlaceholder')"
+                    :placeholder="$t('d687b491-be68-4e5b-9acb-e2c090951c23')"
                     @change="domainChanged"
                 >
             </STInputBox>
@@ -70,7 +70,7 @@
                     v-model="registerDomain"
                     class="input"
                     type="text"
-                    :placeholder="'inschrijven.' + $t('dashboard.settings.domain.domainPlaceholder')"
+                    :placeholder="'inschrijven.' + $t('d687b491-be68-4e5b-9acb-e2c090951c23')"
                     @change="registerDomainChanged"
                 >
             </STInputBox>

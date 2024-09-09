@@ -6,7 +6,7 @@
                 Mijn account
             </h1>
 
-            <p>{{ $t('Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.') }}</p>
+            <p>{{ $t('369440db-a9e0-4530-a06b-3ea05cc6a2b0') }}</p>
 
             <p v-if="members.length == 0" class="style-button-bar">
                 <button v-if="isAcceptingNewMembers" class="button primary" type="button" @click="registerMembers">

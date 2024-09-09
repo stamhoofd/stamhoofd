@@ -185,7 +185,7 @@
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
                 <p class="st-list-description">
-                    {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
+                    {{ $t('fa1b8694-6a8c-46ea-ab5e-7ed792083bf0') }}
                 </p>
                 <p v-if="isBelgium" class="info-box">
                     Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)
@@ -200,7 +200,7 @@
             </template>
             <template v-else>
                 <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
-                    {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
+                    {{ $t('ee891dc5-b8e5-4991-951c-28973dd5df05') }}
                 </p>
                 <p v-else class="warning-box">
                     Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
@@ -227,7 +227,7 @@
                 <p class="st-list-description">
                     <button class="button text" type="button" @click="disconnectMollie">
                         <span class="icon trash" />
-                        <span>{{ $t('Account loskoppelen van Stamhoofd') }}</span>
+                        <span>{{ $t('eb55e12d-0c0a-491e-bdbc-6e705b9d82a7') }}</span>
                     </button>
                 </p>
 
@@ -639,7 +639,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 throw new SimpleError({
                     code: "state_verification_failed",
                     message: "State is not the same",
-                    human: "Er ging iets mis bij het koppelen. Een onbekende pagina probeerde Mollie te koppelen. Contacteer ons via "+this.$t('shared.emails.general')+" als je Mollie probeert te koppelen en het blijft mislukken."
+                    human: "Er ging iets mis bij het koppelen. Een onbekende pagina probeerde Mollie te koppelen. Contacteer ons via "+this.$t('59b85264-c4c3-4cf6-8923-9b43282b2787')+" als je Mollie probeert te koppelen en het blijft mislukken."
                 })
             }
             const response = await this.$context.authenticatedServer.request({

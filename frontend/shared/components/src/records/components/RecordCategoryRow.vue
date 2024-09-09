@@ -5,7 +5,7 @@
         </template>
         
         <h3 class="style-title-list">
-            {{ category.name || $t('shared.untitled') }}
+            {{ category.name || $t('54685a94-1ae2-46f9-aa4b-03f0b3939fd3') }}
         </h3>
         <p v-if="filterDescription" class="style-description-small">
             {{ filterDescription }}

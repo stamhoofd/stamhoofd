@@ -50,7 +50,7 @@
                 <h2>Koppelen: {{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
-                <p class="info-box">{{ $t('dashboard.documents.template.field.categories.info') }}</p>
+                <p class="info-box">{{ $t('39d0d9ca-2f37-40b6-84a4-51fb29b4cce6') }}</p>
                 
                 <MultiSelectInput v-for="field of category.getAllRecords()" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @update:model-value="setLinkedFields(field, $event)" />
             </div>

@@ -93,7 +93,7 @@
         <template v-if="showAdministrationFee">
             <hr>
             <h2>Administratiekosten</h2>
-            <p>{{ $t('administrationFee.description') }}</p>
+            <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
         
             <div class="split-inputs">
                 <STInputBox title="Vaste kost" error-fields="administrationFee.fixed" :error-box="errorBox">
@@ -361,7 +361,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
         const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta) ?? PaymentProvider.Stripe
 
         switch (paymentMethod) {
-            case PaymentMethod.Transfer: return this.$t("Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd")
+            case PaymentMethod.Transfer: return this.$t("d2749916-b99a-47af-9bc4-300648fe77a7")
             case PaymentMethod.Payconiq: 
                 return this.providerText(provider, {
                     [PaymentProvider.Payconiq]: "",
@@ -388,7 +388,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
                 })
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""
-            case PaymentMethod.PointOfSale: return this.$t("De betaling loopt niet via Stamhoofd")
+            case PaymentMethod.PointOfSale: return this.$t("f511ce18-7a60-4fe8-8695-16216ffb7bdc")
         }
     }
 
@@ -470,7 +470,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
             }
         }
 
-        return this.$t('kan niet activeren, eerst aansluiten', {paymentMethod: PaymentMethodHelper.getName(paymentMethod)});
+        return this.$t('253a60ce-cba7-4679-863c-494609d03e8f', {paymentMethod: PaymentMethodHelper.getName(paymentMethod)});
     }
 
     // Administration cost
@@ -534,7 +534,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
         return [
             { 
                 value: TransferDescriptionType.Structured,
-                name: this.$t('shared.transferTypes.structured'),
+                name: this.$t('f22ff741-6a05-4b15-aa6a-16e3a197ac99'),
                 description: "Willekeurig aangemaakt."
             },
             { 
@@ -611,15 +611,15 @@ export default class EditPaymentMethodsBox extends VueComponent {
     }
 
     get transferExample() {
-        const fakeReference = this.type === 'registration' ? this.$t('shared.exampleData.names').toString() : "152";
+        const fakeReference = this.type === 'registration' ? this.$t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : "152";
         const settings = this.config.transferSettings
 
         return settings.generateDescription(fakeReference, this.organization.address.country, {
             nr: this.type === 'registration' ? '' : fakeReference,
-            email: this.type === 'registration' ? '' : this.$t('shared.exampleData.email').toString(),
-            phone: this.type === 'registration' ? '' : this.$t('shared.exampleData.phone').toString(),
-            name: this.type === 'registration' ? this.$t('shared.exampleData.names').toString() : this.$t('shared.exampleData.name').toString(),
-            naam: this.type === 'registration' ? this.$t('shared.exampleData.names').toString() : this.$t('shared.exampleData.name').toString(),
+            email: this.type === 'registration' ? '' : this.$t('245e4d9b-3b80-42f5-8503-89a480995f0e').toString(),
+            phone: this.type === 'registration' ? '' : this.$t('0c3689c1-01f8-455a-a9b0-8f766c03b2d3').toString(),
+            name: this.type === 'registration' ? this.$t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : this.$t('bb910a6c-ec64-46d8-bebb-c3b4312bbfb4').toString(),
+            naam: this.type === 'registration' ? this.$t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : this.$t('bb910a6c-ec64-46d8-bebb-c3b4312bbfb4').toString(),
         })
     }
 

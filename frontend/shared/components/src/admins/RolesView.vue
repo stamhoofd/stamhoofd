@@ -6,7 +6,7 @@
         </template>
     
         <h1>Externe beheerdersrollen</h1>
-        <p>{{ $t('admin.roles.description') }}</p>
+        <p>{{ $t('9021f6b0-d1ae-422b-9651-48c7f5383b0b') }}</p>
 
         <p class="info-box">
             Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).

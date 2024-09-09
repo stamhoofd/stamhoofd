@@ -3,13 +3,13 @@
         <h1>{{ title }}</h1>
 
         <p v-if="availableOrganizations.length === 0" class="warning-box">
-            {{ $t('dashboard.platformMemberhip.add.noOrganizations') }}
+            {{ $t('ec0c482e-0528-499f-82fa-b081bf708ded') }}
         </p>
         <template v-else>
             <ScrollableSegmentedControl v-if="availableOrganizations.length > 1" v-model="selectedOrganization" :items="availableOrganizations" :labels="availableOrganizations.map(o => o.name)" />
             
             <p v-if="organization" class="style-description-block">
-                {{ $t('dashboard.platformMemberhip.add.description') }}
+                {{ $t('7c2fee1a-0838-4346-848d-a3d984e70fdc') }}
             </p>        
             <p v-else class="style-description-block">
                 Het bedrag zal achteraf door KSA Nationaal aan <strong>{{ selectedOrganization.name }}</strong> worden gefactureerd
@@ -34,11 +34,11 @@
                     </p>
 
                     <div v-if="selectedMembershipType.id === type.id && type.behaviour === PlatformMembershipTypeBehaviour.Days">
-                        <STInputBox :title="$t('dashboard.platformMemberhip.add.startDate')" :error-box="errors.errorBox" error-fields="startDate">
+                        <STInputBox :title="$t('3d3a30bb-3628-413e-8d1a-3864b1dae8e1')" :error-box="errors.errorBox" error-fields="startDate">
                             <DateSelection v-model="customStartDate" class="option" />
                         </STInputBox>
 
-                        <STInputBox :title="$t('dashboard.platformMemberhip.add.endDate')" :error-box="errors.errorBox" error-fields="endDate">
+                        <STInputBox :title="$t('f3cc0597-fe12-4cb1-bd41-4c7ce5d59235')" :error-box="errors.errorBox" error-fields="endDate">
                             <DateSelection v-model="customEndDate" class="option" />
                         </STInputBox>
                     </div>
@@ -75,7 +75,7 @@ const props = defineProps<{
 }>();
 
 const $t = useTranslate();
-const title = $t('dashboard.platformMemberhip.add.title');
+const title = $t('cb85826e-06fc-473c-95c2-ba338fdbab50');
 const loading = ref(false);
 const saveText = 'Toevoegen';
 const organization = useOrganization();

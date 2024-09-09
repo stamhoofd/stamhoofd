@@ -7,38 +7,38 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('shared.name') " error-fields="name" :error-box="errors.errorBox">
+            <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') " error-fields="name" :error-box="errors.errorBox">
                 <input
                     v-model="name"
                     class="input"
                     type="text"
-                    :placeholder="$t('shared.name') "
+                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
                 >
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('Beschrijving')" error-fields="description" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('688fc9a3-68af-4aa3-ae6c-7d35a5f954ad')" error-fields="description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
                 type="text"
-                :placeholder="$t('Optioneel. Geef een beschrijving van dit soort lokaal.')"
+                :placeholder="$t('37739daf-2424-4f6e-a316-d4ac6bdaef85')"
                 autocomplete=""
             />
         </STInputBox>
 
         <hr>
-        <h2>{{ $t('Limieten') }}</h2>
+        <h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
 
         <p class="style-description-small">Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.</p>
 
         <div class="split-inputs">
-            <STInputBox :title="$t('Minimum aantal')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="min" :placeholder="$t('Geen')" :required="false" />
+            <STInputBox :title="$t('87bd59dd-77fa-4519-9fab-abf46707e51f')" error-fields="minimumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="min" :placeholder="$t('e41660ea-180a-45ef-987c-e780319c4331')" :required="false" />
             </STInputBox>
 
-            <STInputBox :title="$t('Maximum aantal')" error-fields="maximumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="max" :placeholder="$t('Onbeperkt')" :required="false" />
+            <STInputBox :title="$t('94f1f064-808e-4447-9813-d1c2d9a0375a')" error-fields="maximumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="max" :placeholder="$t('104dca1f-f6eb-4193-ae27-5e5f96e4e481')" :required="false" />
             </STInputBox>
         </div>
     </SaveView>
@@ -64,7 +64,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformPremiseType>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
-const title = computed(() => props.isNew ? $t('Nieuw type lokaal') : $t('Wijzig type lokaal'));
+const title = computed(() => props.isNew ? $t('58949c21-cefa-4818-b643-72b41b6e0449') : $t('595705ee-d41e-474a-8180-17b94cd0a3cc'));
 const pop = usePop();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
@@ -92,7 +92,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je dit lokaaltype wilt verwijderen?'), $t('Verwijderen'), $t('Dit kan nare gevolgen hebben als er al lokalen van dit type zijn'))) {
+    if (!await CenteredMessage.confirm($t('0388e538-52e1-421e-baac-6d788adf44d3'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('78cf134f-d4fb-4da4-b077-0419f29e4268'))) {
         return
     }
         
@@ -132,7 +132,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
     
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

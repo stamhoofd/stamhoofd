@@ -19,7 +19,7 @@
         </a>
 
         <a v-if="!isPlatform" class="button primary" href="/aansluiten" @click.prevent="$navigate('join')">
-            {{ $t("dashboard.join") }}
+            {{ $t("2cd40bd9-b158-42e3-81e2-c02c560ab2e5") }}
         </a>
     </template>
 </template>

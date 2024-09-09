@@ -14,7 +14,7 @@
 
                 <template v-for="(phone, index) of unverifiedPhones">
                     <MemberDetailWithButton
-                        :label="formatWithIndex($t('shared.inputs.mobile.label'), index, unverifiedPhones)"
+                        :label="formatWithIndex($t('90d84282-3274-4d85-81cd-b2ae95429c34'), index, unverifiedPhones)"
                         :value="phone" icon="trash" color="gray"
                         :onClick="() => deletePhone(phone)"/>
                 </template>

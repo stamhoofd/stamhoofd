@@ -1,12 +1,12 @@
 {
-    "admin.organizations.uri.description": "Het groepsnummer is een unieke code voor deze vereniging. Deze wordt in de URL-balk van de browser gebruikt.",
-    "admin.organizations.uri.label": "Groepsnummer",
-    "dashboard.organization-selection.welcome-description": "Welkom op Ravot. Zoek hieronder de groep waar je wilt inschrijven of ga naar het algemene ledenportaal.",
-    "replacements": {
-        "Vereniging": "Groep",
-        "vereniging": "groep",
-        "Verenigingen": "Groepen",
-        "verenigingen": "groepen"
-    },
-    "Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.": "Welkom op het ledenplatform van KSA, hier kan je jouw gegevens beheren en je inschrijven bij een KSA groep of voor een activiteit."
+  "replacements": {
+    "Vereniging": "Groep",
+    "vereniging": "groep",
+    "Verenigingen": "Groepen",
+    "verenigingen": "groepen"
+  },
+  "81c91169-db1e-4819-8716-5382ffbaa43b": "Het groepsnummer is een unieke code voor deze vereniging. Deze wordt in de URL-balk van de browser gebruikt.",
+  "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": "Groepsnummer",
+  "b4307772-62dd-48a4-bae3-9d46df314727": "Welkom op Ravot. Zoek hieronder de groep waar je wilt inschrijven of ga naar het algemene ledenportaal.",
+  "369440db-a9e0-4530-a06b-3ea05cc6a2b0": "Welkom op het ledenplatform van KSA, hier kan je jouw gegevens beheren en je inschrijven bij een KSA groep of voor een activiteit."
 }

@@ -49,7 +49,7 @@
                     </template>
                 </p>
                 <p v-else class="warning-box">
-                    {{ $t('dashboard.settings.domain.inactive') }}
+                    {{ $t('94547449-549d-4572-b217-c1a089b12997') }}
                 </p>
 
                 <template v-if="enableMemberModule">
@@ -78,10 +78,10 @@
 
             <template v-else>
                 <p v-if="organization.registerUrl && enableMemberModule" class="st-list-description">
-                    Jullie ledenportaal is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations') }}
+                    Jullie ledenportaal is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('57e20ed4-d50a-4947-96fc-57958550dcfa') }}
                 </p>
                 <p v-else class="st-list-description">
-                    {{ $t('dashboard.settings.personalize.domainDescription') }}
+                    {{ $t('8b32118a-658d-4e17-96f9-a009449ec342') }}
                 </p>
 
                 <p class="st-list-description">

@@ -38,7 +38,7 @@
                 v-model="url"
                 class="input"
                 type="url"
-                :placeholder="$t('dashboard.inputs.privacyUrl.placeholder')"
+                :placeholder="$t('daf8a992-77cd-4c20-8bca-5c692fd1e431')"
             >
         </STInputBox>
 

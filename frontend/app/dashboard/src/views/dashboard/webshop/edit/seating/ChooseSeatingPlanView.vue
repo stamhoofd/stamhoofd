@@ -69,7 +69,7 @@
                     Importeer zaalplan
                 </h2>
                 <p class="style-description">
-                    {{ $t('dashboard.webshop.edit.seating.import.description') }}
+                    {{ $t('5c7d8f29-9d83-4f33-9d6b-0f947e384f75') }}
                 </p>
 
                 <template #right>
@@ -364,7 +364,7 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
 
             if (!jsonFile) {
                 this.importingSeatingPlan = false
-                new CenteredMessage(this.$t("Dit is geen geldig zaalplan uit Stamhoofd")).addCloseButton().show()
+                new CenteredMessage(this.$t("de1d5cdf-6aa6-4912-828a-82cb53f8abf6")).addCloseButton().show()
                 return
             }
 
@@ -403,7 +403,7 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
             
         } catch (e) {
             console.error(e)
-            const message = this.$t('dashboard.webshop.edit.seating.import.error');
+            const message = this.$t('977fa720-e451-4dd8-a317-881cf7a409b1');
             new Toast(message, 'error red')
         } finally {
             this.importingSeatingPlan = false

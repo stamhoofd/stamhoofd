@@ -20,7 +20,7 @@
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
         </template>
 
-        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
+        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="$checkoutManager.checkout.fieldAnswers" :error-box="errorBox" />
     </SaveView>

@@ -28,7 +28,7 @@
             </div>
 
             <div>
-                <UrlInput v-model="website" :title="$t('shared.website.optional')" :placeholder="$t('dashboard.inputs.website.placeholder')" :validator="errors.validator" :required="false" />
+                <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false" />
 
                 <p class="style-description-small">
                     De link naar de website van jouw vereniging.
@@ -109,7 +109,7 @@ import EditCompanyView from "./components/EditCompanyView.vue";
 
 const props = defineProps<{isReview?: boolean}>();
 
-const title = computed(() => props.isReview ? $t('setup.Companies.review.title') : 'Algemene instellingen');
+const title = computed(() => props.isReview ? $t('31df7737-2a25-4a6c-9766-39acc3ccdbc8') : 'Algemene instellingen');
 const organizationManager = useOrganizationManager();
 const errors = useErrors();
 const saving = ref(false);
@@ -257,7 +257,7 @@ const shouldNavigateAway = async () => {
     if (!hasSomeChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

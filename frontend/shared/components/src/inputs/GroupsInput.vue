@@ -6,7 +6,7 @@
                 <Checkbox v-model="allGroups" />
             </template>
             <h3 class="style-title-list">
-                {{ $t('shared.allAgeGroups') }}
+                {{ $t('07d642d2-d04a-4d96-b155-8dbdb1a9e4ff') }}
             </h3>
         </STListItem>
 

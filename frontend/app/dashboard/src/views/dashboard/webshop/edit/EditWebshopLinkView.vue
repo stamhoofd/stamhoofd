@@ -10,7 +10,7 @@
         </p>
 
         <p v-if="hasOrders" class="warning-box">
-            {{ $t('dashboard.webshop.edit.link.warning') }}
+            {{ $t('7a44f6f1-bb2f-4e46-93c2-afcae9db3f80') }}
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
@@ -35,13 +35,13 @@
                     v-model="customUrl"
                     class="input"
                     type="text"
-                    :placeholder="$t('dashboard.inputs.shopUrl.placeholder')"
+                    :placeholder="$t('e06f1e9b-dc4c-4b3b-8ab7-52cd8048d894')"
                     autocomplete=""
                     @blur="resetCache"
                 >
             </STInputBox>
             <p class="st-list-description">
-                {{ $t('dashboard.webshop.customDomain.description') }}
+                {{ $t('2ad81e83-bca1-43c9-9f18-3af1ae6e35a7') }}
             </p>
             
             <template v-if="didDNSRecordsChange">

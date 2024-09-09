@@ -92,7 +92,7 @@
 
                     <template #right>
                         <StepperInput v-if="option.allowAmount" />
-                        <span v-if="option.hidden" v-tooltip="$t('Verborgen')" class="icon gray eye-off" />
+                        <span v-if="option.hidden" v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off" />
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
                     </template>
@@ -170,7 +170,7 @@ const multipleChoice = computed({
 
 function addOption() {
     const price = GroupOption.create({
-        name: $t('Naamloos'),
+        name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
         price: patched.value.options[0]?.price?.clone()
     })
     addOptionPut(price)
@@ -231,7 +231,7 @@ async function  showContextMenu(event: MouseEvent) {
                 name: "Verwijderen",
                 icon: "trash",
                 action: async () => {
-                    if (!await CenteredMessage.confirm($t('Ben je zeker dat je dit keuzemenu wilt verwijderen?'), $t('shared.confirmDelete'), $t('Het keuzemenu wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'))) {
+                    if (!await CenteredMessage.confirm($t('f58412a9-9db9-4aa3-ad68-fa089d4f345b'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9f8c1ed0-371b-4c22-940c-57d624734c18'))) {
                         return;
                     }
                     emit('delete')

@@ -8,15 +8,15 @@
 
             <main class="flex center small organization-selection-view">
                 <h1>
-                    {{ $t('Zoek jouw vereniging') }}
+                    {{ $t('24a048f6-3c97-4c80-87b7-eccc244b5d12') }}
                 </h1>
 
                 <p class="style-description-block style-description-large">
-                    {{ $t('dashboard.organization-selection.welcome-description') }}
+                    {{ $t('b4307772-62dd-48a4-bae3-9d46df314727') }}
                 </p>
 
                 <form class="input-icon-container icon search gray" @submit.prevent>
-                    <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('dashboard.organization-selection.search-placeholder')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
+                    <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
                 </form>
 
                 <Spinner v-if="loadingResults" class="gray center" />

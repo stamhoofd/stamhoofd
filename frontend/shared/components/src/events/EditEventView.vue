@@ -47,7 +47,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ patched.group ? $t('Bewerk inschrijvingsinstellingen') : $t('Inschrijvingen verzamelen') }}
+                    {{ patched.group ? $t('76eb7982-9fc5-490a-9414-42bb7f10b8d6') : $t('8c30c20d-b734-4ece-bca9-292d064c5028') }}
                 </h3>
 
                 <p class="style-description-small">
@@ -253,7 +253,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Locatie toevoegen') }}
+                    {{ $t('b735b655-5037-4b7c-90d2-711ac066c194') }}
                 </h3>
             </STListItem>
 
@@ -264,7 +264,7 @@
 
                 <UploadButton v-model="coverPhoto" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
-                        {{ $t('Omslagfoto toevoegen') }}
+                        {{ $t('9448b5c3-579e-48c4-a4a4-2d8d0e6210b8') }}
                     </h3>
                 </UploadButton>
             </STListItem>
@@ -596,7 +596,7 @@ async function save() {
             decoder: new ArrayDecoder(Event as Decoder<Event>),
         })
 
-        Toast.success($t('shared.saveConfirmation')).show()
+        Toast.success($t('dced31f7-3554-425d-bae9-85416e3742d6')).show()
 
         // Make sure original event is patched
         deepSetArray([props.event], response.data)
@@ -708,7 +708,7 @@ async function addRegistrations() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze activiteit wilt verwijderen?'), $t('Verwijderen'), $t('Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.'))) {
+    if (!await CenteredMessage.confirm($t('86b98821-ab1e-4be0-9a8e-f09239a88f88'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('338cb29d-2ceb-49cc-86c2-662b0c259eb1'))) {
         return
     }
 
@@ -729,7 +729,7 @@ async function deleteMe() {
             decoder: new ArrayDecoder(Event as Decoder<Event>),
         })
 
-        Toast.success($t('De activiteit is verwijderd')).show()
+        Toast.success($t('50df35d9-992f-4697-9150-aa8643ee4f18')).show()
         props.callback?.()
         await pop({force: true})
     } catch (e) {
@@ -744,7 +744,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

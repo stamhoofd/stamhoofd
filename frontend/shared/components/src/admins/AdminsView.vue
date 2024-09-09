@@ -6,7 +6,7 @@
     
         <main class="center">
             <h1>Beheerders</h1>
-            <p>{{ $t('admin.admins.description') }}</p>
+            <p>{{ $t('ac3b2a14-e029-404c-9fe1-2aab4279a3ac') }}</p>
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">

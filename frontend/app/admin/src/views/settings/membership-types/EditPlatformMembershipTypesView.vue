@@ -15,7 +15,7 @@
         <p>
             <button class="button text" type="button" @click="addType">
                 <span class="icon add" />
-                <span>{{ $t('admin.settings.membershipTypes.add') }}</span>
+                <span>{{ $t('99df0115-6c75-49be-a20b-fff9944c4bca') }}</span>
             </button>
         </p>
     </SaveView>
@@ -44,7 +44,7 @@ const {patched: types, patch, addArrayPatch, hasChanges} = usePatchArray(origina
 const draggableTypes = useDraggableArray(() => types.value, addArrayPatch)
 const saving = ref(false);
 
-const title = $t('admin.settings.membershipTypes.title')
+const title = $t('429e2447-3506-4828-bb08-a4cde355c78d')
 
 async function addType() {
     const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray()
@@ -120,7 +120,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

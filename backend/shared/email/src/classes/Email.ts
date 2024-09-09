@@ -436,7 +436,7 @@ class EmailStatic {
      * Please use EmailBuilder.sendEmailTemplate
      */
     getPersonalEmailFor(i18n: I18n) {
-        return '"Simon Backx" <'+ (i18n.$t("shared.emails.personal")) +'>'
+        return '"Simon Backx" <'+ (i18n.$t("5670bc42-cf94-46b6-9ce0-7cdc4ffbb4d9")) +'>'
     }
 
     /**

@@ -8,12 +8,12 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('shared.name') ">
+            <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
                 <input
                     v-model="name"
                     class="input"
                     type="text"
-                    :placeholder="$t('shared.name') "
+                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
                 >
             </STInputBox>
             <STInputBox title="Type" error-fields="behaviour" :error-box="errors.errorBox">
@@ -28,12 +28,12 @@
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('shared.description')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
                 type="text"
-                :placeholder="$t('shared.optional')"
+                :placeholder="$t('3db64326-c892-4fdb-8293-3d713453383a')"
                 autocomplete=""
             />
         </STInputBox>
@@ -52,7 +52,7 @@
         <p>
             <button class="button text" type="button" @click="addConfig">
                 <span class="icon add" />
-                <span>{{ $t('admin.settings.membershipTypes.new.period') }}</span>
+                <span>{{ $t('0b7c21d5-b9ed-4ddc-9370-7f58255f4eba') }}</span>
             </button>
         </p>
 
@@ -99,7 +99,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformMembershipType>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
-const title = computed(() => props.isNew ? $t('admin.settings.membershipTypes.new.title') : $t('admin.settings.membershipTypes.edit.title'));
+const title = computed(() => props.isNew ? $t('105eefd4-2e16-4b4e-b964-ec51feb11955') : $t('9bc2ae42-208d-475a-8496-82859f04a7be'));
 const pop = usePop();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
@@ -135,7 +135,7 @@ const save = async () => {
         if (name.value.length < 2) {
             throw new SimpleError({
                 code: "invalid_field",
-                message: $t('shared.errors.name.empty'),
+                message: $t('9aa8ff59-33ae-4ac4-93b6-97e071b13012'),
                 field: "name"
             })
         }
@@ -157,7 +157,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('admin.settings.membershipTypes.delete.confirmation.title'), $t('Verwijderen'), $t('admin.settings.membershipTypes.delete.confirmation.description'))) {
+    if (!await CenteredMessage.confirm($t('866219fd-b946-4a96-b84b-3c2d26850cfa'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('b101058a-6b13-4df7-81ef-1f5c925bbf71'))) {
         return
     }
         
@@ -229,7 +229,7 @@ async function addConfig(event: MouseEvent) {
     const availablePeriods = originalPeriods.value.filter(p => !patched.value.periods.has(p.id))
 
     if (availablePeriods.length === 0) {
-        Toast.info($t('admin.settings.membershipTypes.period.noPeriodsAvailable')).show()
+        Toast.info($t('3b257435-9ae7-4840-8f0f-f71318013935')).show()
         return
     }
 
@@ -303,7 +303,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
     
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

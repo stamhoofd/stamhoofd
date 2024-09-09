@@ -83,10 +83,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('dashboard.settings.menu.paymentAccounts.title') }}
+                        {{ $t('46c3ece9-3197-4668-9528-b1258b77e789') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('dashboard.settings.menu.paymentAccounts.description') }}
+                        {{ $t('eec0bece-8f7a-4da4-8943-d6eef7cd7c31') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -135,10 +135,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('dashboard.settings.menu.paymentMethods.title') }}
+                            {{ $t('741fa4dc-7001-40d6-b1d2-cd3c88334607') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('dashboard.settings.menu.paymentMethods.description') }}
+                            {{ $t('c42e02a5-8d91-47fd-98b8-c2407119b41d') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -256,7 +256,7 @@
 
             <template v-if="!salesDisabled">
                 <hr>
-                <h2>{{ $t('shared.platformName') }}</h2>
+                <h2>{{ $t('405a811e-ebb1-4948-84cd-8fb5860104e6') }}</h2>
                 <STList class="illustration-list">    
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
                         <template #left>
@@ -278,7 +278,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{$t("Vertel Stamhoofd door aan andere verenigingen")}}
+                            {{$t("0208e14e-b26e-4411-9e8e-461b63b1c0c1")}}
                         </h2>
                         <p class="style-description">
                             Geef 25 euro en krijg zelf ook een tegoed

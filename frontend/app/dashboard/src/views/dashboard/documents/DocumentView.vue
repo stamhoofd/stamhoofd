@@ -13,7 +13,7 @@
             </h1>           
 
             <p v-if="unlinkedAnswers.length" class="info-box">
-                {{ $t('De velden {unlinkedAnswersText} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Stamhoofd', { unlinkedAnswersText }) }}
+                {{ $t('719f31f6-cae0-41b0-97e6-ab8f5ff01d19', { unlinkedAnswersText }) }}
                 <button class="button text" type="button" @click="resetDocument">
                     Reset
                 </button>

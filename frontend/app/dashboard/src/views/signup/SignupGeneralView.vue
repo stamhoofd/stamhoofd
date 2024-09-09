@@ -5,13 +5,13 @@
         
         <main>
             <h1>
-                {{ $t("Sluit jouw vereniging aan bij Stamhoofd") }}
+                {{ $t("92f76d54-282e-448e-ae15-21411b7bc085") }}
             </h1>
             <p>
-                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $domains.marketing" target="_blank" class="inline-link" v-if="validatedRegisterCode">{{ $t("Lees hier meer over Stamhoofd.") }}</a>
+                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $domains.marketing" target="_blank" class="inline-link" v-if="validatedRegisterCode">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
             </p>
             <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
-                {{ $t('Gebruikt jouw vereniging Stamhoofd al?') }} 
+                {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }} 
                 <span class="button text" type="button">
                     Log dan hier in
                 </span>
@@ -25,7 +25,7 @@
             </p>
 
             <p v-if="reuseRegisterCode" class="warning-box">
-                {{$t('dashboard.signup.reuseRegisterCode.warning')}}
+                {{$t('5e60cf0f-5489-4e90-8dab-97c56c2e989c')}}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />

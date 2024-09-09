@@ -137,13 +137,13 @@
         </template>
 
         <hr>
-        <h2>{{ $t("shared.platformName") }}</h2>
+        <h2>{{ $t("405a811e-ebb1-4948-84cd-8fb5860104e6") }}</h2>
         <p>
-            {{ $t('dashboard.webshop.edit.reduceBranding.description') }}
+            {{ $t('768afe13-5f57-4a82-a6ac-77c8999b8aeb') }}
         </p>
 
         <Checkbox v-model="reduceBranding">
-            {{ $t('dashboard.webshop.edit.reduceBranding.label') }}
+            {{ $t('f8f3a5be-624a-4d39-b401-78ad833b64dd') }}
         </Checkbox>
     </SaveView>
 </template>

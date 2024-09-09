@@ -26,7 +26,7 @@
                     </div>
                 </STInputBox>
 
-                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="errors.validator" :placeholder="$t('dashboard.inputs.parentPhone.placeholder')" :required="app === 'registration'" />
+                <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('7f30db7e-4851-4aa6-b731-2c898054f707')" :required="app === 'registration'" />
                 
                 <EmailInput v-model="email" :required="app === 'registration'" :title="'E-mailadres' " placeholder="E-mailadres van ouder" :validator="errors.validator">
                         <template #right>

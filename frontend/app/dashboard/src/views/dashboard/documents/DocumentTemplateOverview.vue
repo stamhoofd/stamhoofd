@@ -55,7 +55,7 @@
 
             <hr>
             <h2>Automatische wijzigingen</h2>
-            <p>{{ $t('dashboard.documents.template.autoChange.description') }}</p>
+            <p>{{ $t('fa988b87-6665-43e4-a177-77031826e9a8') }}</p>
 
             <Checkbox :model-value="template.updatesEnabled" :disabled="settingUpdatesEnabled" @update:model-value="toggleUpdatesEnabled">
                 Documenten automatisch wijzigen

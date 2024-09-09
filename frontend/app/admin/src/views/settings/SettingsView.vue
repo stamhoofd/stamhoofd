@@ -13,10 +13,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Huisstijl') }}
+                        {{ $t('017ee92d-62a3-4f64-afec-e2fa7055e97c') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Stel de kleuren en huisstijl in van het platform') }}
+                        {{ $t('2a2b9d40-9ccc-4653-84ff-6aa5829434fb') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -28,10 +28,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('admin.settings.admins.title') }}
+                        {{ $t('c0f067fd-3d30-4199-b9da-879a4f011f27') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.settings.admins.description') }}
+                        {{ $t('28483e7d-2831-4b1a-8321-3c2bc02df268') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -43,10 +43,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('admin.settings.registrationPeriods.title') }}
+                        {{ $t('1cbf76ca-79d3-4f12-8f09-dc585f5e9da3') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.settings.registrationPeriods.description') }}
+                        {{ $t('ef07b66f-6b78-4c47-9599-d8847ea97aaa') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -59,10 +59,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('admin.settings.defaultAgeGroups.title') }}
+                        {{ $t('24682ea8-b3c6-4372-9a63-5385520888ff') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.settings.defaultAgeGroups.description') }}
+                        {{ $t('8677fa37-3092-42af-869e-bd7363461d32') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -74,10 +74,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('admin.settings.responsibilities.title') }}
+                        {{ $t('e7ba96d7-b233-45c4-8331-d429fcea40a9') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.settings.responsibilities.description') }}
+                        {{ $t('e392de09-15a4-4726-8751-074a4d1db650') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -89,10 +89,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/membership.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('admin.settings.membershipTypes.title') }}
+                        {{ $t('429e2447-3506-4828-bb08-a4cde355c78d') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.settings.membershipTypes.description') }}
+                        {{ $t('21683697-3ebf-4f15-827a-ff18d1941f32') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -104,10 +104,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/tent.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Soorten activiteiten') }}
+                        {{ $t('de211760-1306-4108-92e3-9301435d8988') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Stel in welke soorten activiteiten er bestaan en toegevoegd kunnen worden aan de kalender') }}
+                        {{ $t('70fd0ad1-d005-46ff-9376-50e16d876f4e') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -119,10 +119,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Soorten lokalen') }}
+                        {{ $t('5d0062df-e595-4e28-b1e3-d399102dfadf') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Stel in welke soorten lokalen groepen kunnen toevoegen') }}
+                        {{ $t('76b00f58-a587-431f-9c28-1b86d394fc26') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -139,10 +139,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('admin.settings.records.title') }}
+                        {{ $t('97201c59-fdcc-48c4-a305-c6b585fddf71') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('admin.settings.records.description') }}
+                        {{ $t('c5247c05-c8f2-401d-9b77-967e052ef5f7') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -157,7 +157,7 @@
                         {{ platform.config.financialSupport?.title || FinancialSupportSettings.defaultTitle }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Wijzig de instellingen rond financiële ondersteuning') }}
+                        {{ $t('b6a7d8fa-58ed-41dd-a2d0-ada96a4e56bb') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -169,10 +169,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Toestemming gegevensverzameling') }}
+                        {{ $t('2eed292c-1a52-4432-8195-c4ea8a951358') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Wijzig de instellingen rond toestemming voor gegevensverzameling') }}
+                        {{ $t('a122d0f1-c29d-40de-8700-7506596cdf63') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -184,10 +184,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Privacyvoorwaarden en andere overeenkomsten') }}
+                        {{ $t('8ce9e8f6-69a6-4053-a518-015f5189c9b3') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Wijzig de privacyvoorwaarden') }}
+                        {{ $t('6ea3e603-3c38-4bd9-a6ec-e135cfbd41d0') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />

@@ -53,7 +53,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<RegistrationPeriod>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
-const title = computed(() => props.isNew ? $t('admin.settings.registrationPeriods.new.title') : $t('admin.settings.registrationPeriods.edit.title'));
+const title = computed(() => props.isNew ? $t('c6f24e63-4735-43c4-a93a-405755ba70c2') : $t('7118def6-da94-4fce-9398-2131b31acf01'));
 const pop = usePop();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.period);
@@ -81,7 +81,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('admin.settings.registrationPeriods.delete.confirmation.title'), $t('Verwijderen'), $t('admin.settings.registrationPeriods.delete.confirmation.description'))) {
+    if (!await CenteredMessage.confirm($t('ca303b26-d586-4e46-ad0d-af968d252261'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('2e055510-5527-45f9-8ed7-7d8f8cd03a4f'))) {
         return
     }
         
@@ -116,7 +116,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
     
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

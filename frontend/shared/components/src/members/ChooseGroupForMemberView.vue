@@ -59,7 +59,7 @@ const auth = useUninheritedPermissions({patchedOrganization: selectedOrganizatio
 const present = usePresent()
 const app = useAppContext();
 const $t = useTranslate();
-const searchOrganizationTitle = computed(() => $t('shared.searchMemberOrganizations.defaultTitle', {firstName: props.member.patchedMember.firstName}))
+const searchOrganizationTitle = computed(() => $t('2669729c-718d-49a1-9e4f-b3a65a6479a8', {firstName: props.member.patchedMember.firstName}))
 const navigate = useNavigationActions();
 const organization = useOrganization();
 const differentOrganization = computed(() => selectedOrganization.value && !props.member.family.checkout.cart.isEmpty && props.member.family.checkout.singleOrganization?.id !== selectedOrganization.value.id)

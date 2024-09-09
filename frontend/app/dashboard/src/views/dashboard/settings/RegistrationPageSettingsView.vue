@@ -6,7 +6,7 @@
             <h1>Jullie ledenportaal</h1>
 
             <p class="style-description">
-                {{ $t('dashboard.settings.registrationPage.description') }}
+                {{ $t('3e94193d-873b-4770-ba03-5f7528debf2c') }}
             </p>
 
             <hr>
@@ -23,7 +23,7 @@
             <input v-tooltip="'Klik om te kopiëren'" class="input" :value="organization.registerUrl" readonly @click="copyElement">
 
             <p class="info-box">
-                {{ $t('dashboard.settings.registrationPage.linkDescription') }}
+                {{ $t('c78c4a14-8796-4ddc-a449-33a38ef3a6ac') }}
             </p>
 
             <hr>

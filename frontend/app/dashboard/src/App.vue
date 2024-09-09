@@ -266,7 +266,7 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
         const fieldName = type === 'all' ? 'unsubscribedAll' : 'unsubscribedMarketing'
 
         if (details[fieldName]) {
-            if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? Platform.shared.config.name)+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar "+$t("shared.emails.complaints"))) {
+            if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? Platform.shared.config.name)+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar "+$t("edac937d-5eda-445e-8bba-2c2b353d3f27"))) {
                 return
             }
 

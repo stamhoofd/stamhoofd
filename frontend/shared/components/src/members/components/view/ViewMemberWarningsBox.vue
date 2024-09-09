@@ -86,14 +86,14 @@ const warnings = computed(() => {
 
     if (props.member.membershipStatus === MembershipStatus.Inactive) {
         warnings.push(RecordWarning.create({
-            text: $t('shared.noMembershipWarning'),
+            text: $t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e'),
             type: RecordWarningType.Error
         }))
     }
 
     if (props.member.membershipStatus === MembershipStatus.Expiring) {
         warnings.push(RecordWarning.create({
-            text: $t('shared.membershipExpiringWarning'),
+            text: $t('1af084bf-42d6-4a59-a7da-d1e87c6dba8e'),
             type: RecordWarningType.Warning
         }))
     }

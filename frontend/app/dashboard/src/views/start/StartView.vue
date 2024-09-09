@@ -1,12 +1,12 @@
 <template>
     <section class="st-view">
-        <STNavigationBar :title="$t('dashboard.start.title')" />
+        <STNavigationBar :title="$t('d5d2e25f-588e-496e-925f-f7e375c3888a')" />
         <main class="center">
             <h1>
-                {{ $t('dashboard.start.title') }}
+                {{ $t('d5d2e25f-588e-496e-925f-f7e375c3888a') }}
             </h1>
 
-            <p>{{ $t('dashboard.start.title-description') }}</p>
+            <p>{{ $t('5dbc2f08-f2d0-43bc-973d-b789077ca3ad') }}</p>
 
             <p>
                 <a :href="$domains.getDocs('stappenplan-opstart-werkjaar')" target="_blank" class="button text selected">

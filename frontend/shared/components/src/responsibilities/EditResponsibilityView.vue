@@ -6,21 +6,21 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('shared.name') ">
+        <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
             <input
                 v-model="name"
                 class="input"
                 type="text"
-                :placeholder="$t('shared.name') "
+                :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
             >
         </STInputBox>
 
-        <STInputBox :title="$t('shared.description')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
                 type="text"
-                :placeholder="$t('shared.optional')"
+                :placeholder="$t('3db64326-c892-4fdb-8293-3d713453383a')"
                 autocomplete=""
             />
         </STInputBox>
@@ -172,12 +172,12 @@
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
             <h2>
-                {{ $t('admin.settings.responsibilities.delete.title') }}
+                {{ $t('1e83f389-222b-48c7-ab9f-c77f82ea05af') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('838cae8b-92a5-43d2-82ba-01b8e830054b') }}</span>
             </button>
         </div>
     </SaveView>
@@ -205,7 +205,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<MemberResponsibility>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
-const title = computed(() => props.isNew ? $t('admin.settings.responsibilities.new.title') : $t('admin.settings.responsibilities.edit.title'));
+const title = computed(() => props.isNew ? $t('7540c9f1-2164-4865-a6c5-ad72e0abd4e5') : $t('2e9f8eb3-806a-4037-bd01-f381a725956b'));
 const pop = usePop();
 const app = useAppContext();
 
@@ -220,7 +220,7 @@ const save = async () => {
         if (name.value.length < 2) {
             throw new SimpleError({
                 code: "invalid_field",
-                message: $t('shared.errors.name.empty'),
+                message: $t('9aa8ff59-33ae-4ac4-93b6-97e071b13012'),
                 field: "name"
             })
         }
@@ -242,7 +242,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('admin.settings.responsibilities.delete.confirmation.title'), $t('Verwijderen'), $t('admin.settings.responsibilities.delete.confirmation.description'))) {
+    if (!await CenteredMessage.confirm($t('8f155af7-52ce-441f-bd3c-669bda1450eb'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('78085d8c-9987-4eda-a747-7f7847d86dc4'))) {
         return
     }
         
@@ -355,7 +355,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
     
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

@@ -123,7 +123,7 @@ const settings = new RecordEditorSettings({
 family.members.push(settings.exampleValue)
 
 const properties = [
-    buildPropertyRefs('phone', $t('shared.inputs.mobile.label') + ' (van lid zelf)'),
+    buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' (van lid zelf)'),
     buildPropertyRefs('emailAddress', 'E-mailadres (van lid zelf)'),
     buildPropertyRefs('gender', 'Gender'),
     buildPropertyRefs('birthDay', 'Geboortedatum'),

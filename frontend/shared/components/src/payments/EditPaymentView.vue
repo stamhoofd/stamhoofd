@@ -8,7 +8,7 @@
             Kies hieronder wat er precies betaald werd. 
         </p>
         <p v-else>
-            {{ $t('shared.payments.reimburse.info') }}
+            {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
         </p>
 
         <STErrorsDefault :error-box="errorBox" />

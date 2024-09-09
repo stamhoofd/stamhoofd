@@ -444,12 +444,12 @@ export class Organization extends Model {
                 to: i18n.localizedDomains.marketing()
             },
             {
-                from: defaultI18n.$t("shared.emails.general"),
-                to: i18n.$t("shared.emails.general")
+                from: defaultI18n.$t("59b85264-c4c3-4cf6-8923-9b43282b2787"),
+                to: i18n.$t("59b85264-c4c3-4cf6-8923-9b43282b2787")
             },
             {
-                from: defaultI18n.$t("shared.domains.email"),
-                to: i18n.$t("shared.domains.email")
+                from: defaultI18n.$t("6b3555a2-ace4-4f37-a1fd-18921552f2b5"),
+                to: i18n.$t("6b3555a2-ace4-4f37-a1fd-18921552f2b5")
             }
         ];
 

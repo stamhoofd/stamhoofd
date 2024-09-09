@@ -20,7 +20,7 @@
                     API-keys
                 </h2>
                 <p class="style-description">
-                    {{ $t('Maak API-keys aan om toegang te krijgen tot de Stamhoofd-API.') }}
+                    {{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}
                 </p>
                 <template #right>
                     <span class="icon arrow-right-small gray" />

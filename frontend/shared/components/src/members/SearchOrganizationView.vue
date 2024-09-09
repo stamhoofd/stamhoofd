@@ -1,6 +1,6 @@
 <template>
     <div class="st-view search-organization-view">
-        <STNavigationBar :title="$t('Zoeken')" />
+        <STNavigationBar :title="$t('857e22fa-a4ac-4306-a631-d5133b6c8834')" />
 
         <main>
             <h1>{{ title }}</h1>
@@ -25,7 +25,7 @@
                 </STListItem>
             </STList>
             <p v-if="!loadingResults && results.length == 0 && query" class="info-box">
-                {{ $t('shared.searchMemberOrganizations.empty') }}
+                {{ $t('735ec53c-5b23-469a-9365-d1216e1c739b') }}
             </p>
         </main>
     </div>

@@ -10,7 +10,7 @@
         <hr>
         <h2>Ingebouwde gegevens</h2>
 
-        <p>{{ $t('dashboard.webshop.edit.buildInData.description') }}</p>
+        <p>{{ $t('fd68e1a7-6059-47fc-b7ad-fdfe4924a67d') }}</p>
 
         <STList>
             <STListItem element-name="label" :selectable="true">
@@ -18,7 +18,7 @@
                     <Checkbox v-model="phoneEnabled" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('shared.inputs.mobile.label') }}
+                    {{ $t('90d84282-3274-4d85-81cd-b2ae95429c34') }}
                 </p>
             </STListItem>
         </STList>

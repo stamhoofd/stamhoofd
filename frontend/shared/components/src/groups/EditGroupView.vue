@@ -98,11 +98,11 @@
         <div v-if="type !== GroupType.WaitingList || patched.settings.prices.length !== 1 || patched.settings.prices[0]?.price.price" class="container">
             <hr>
             <h2 class="style-with-button">
-                <div>{{ $t('Tarieven') }}</div>
+                <div>{{ $t('0fb1a3a9-4ced-4097-b931-e865b3173cf9') }}</div>
                 <div>
                     <button class="button text only-icon-smartphone" type="button" @click="addGroupPrice">
                         <span class="icon add" />
-                        <span>{{ $t('Tarief') }}</span>
+                        <span>{{ $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc') }}</span>
                     </button>
                 </div>
             </h2>
@@ -131,7 +131,7 @@
                         </p>
 
                         <template #right>
-                            <span v-if="price.hidden" v-tooltip="$t('Verborgen')" class="icon gray eye-off" />
+                            <span v-if="price.hidden" v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off" />
                             <span class="button icon drag gray" @click.stop @contextmenu.stop />
                             <span class="icon arrow-right-small gray" />
                         </template>
@@ -191,10 +191,10 @@
                 </p>
 
                 <div v-if="virtualOpenStatus === 'RegistrationStartDate'" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox :title="$t('Openen op')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('4f7cef46-0b46-4225-839e-510d8a8b95bc')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
                         <DateSelection v-model="registrationStartDate" />
                     </STInputBox>
-                    <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('Vanaf')" :validator="errors.validator" /> 
+                    <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" /> 
                 </div>
             </STListItem>
 
@@ -217,14 +217,14 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Sluit inschrijvingen automatisch na een bepaalde datum') }}
+                    {{ $t('fd378bac-7d3d-4932-b511-851078805aff') }}
                 </h3>
 
                 <div v-if="useRegistrationEndDate" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox :title="$t('Inschrijven sluit op')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('6905dd1f-fe82-4ddc-bc6c-9ad496d34a71')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
                         <DateSelection v-model="registrationEndDate" />
                     </STInputBox>
-                    <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
+                    <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('1617abfe-8657-4a9f-9fe3-6e6d896c4ef6')" :validator="errors.validator" />
                 </div>
             </STListItem>
         </STList>
@@ -901,13 +901,13 @@ const useRegistrationEndDate = computed({
 
 const title = computed(() => {
     if (props.group.type === GroupType.WaitingList) {
-        return props.isNew ? $t('Nieuwe wachtlijst') :$t('Wachtlijst bewerken');
+        return props.isNew ? $t('5936be80-5f7a-429b-8bc2-7afdd47ff232') :$t('b3f49e49-2db8-46e3-8a9b-bc05a4b989c0');
     }
 
     if (props.group.type === GroupType.EventRegistration) {
-        return props.isNew ? $t('groups.title.new.eventRegistration') :$t('groups.title.edit.eventRegistration');
+        return props.isNew ? $t('bd6ad13b-be70-4d03-a1a0-3578786f4df3') :$t('8fd3a74f-5dae-4a7e-bcd3-7ac1da2e7e6c');
     }
-    return props.isNew ? $t('groups.title.new.membership') : $t('groups.title.edit.membership');
+    return props.isNew ? $t('c7944f69-c772-4cc5-b7c8-2ef96272dfe0') : $t('d886e927-86d1-48ed-93ed-60e924484db1');
 });
 
 async function save() {
@@ -924,7 +924,7 @@ async function save() {
         }
         await props.saveHandler(patch.value);
         if (props.showToasts) {
-            await Toast.success($t('shared.confirmation.saved')).show();
+            await Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
         }
         await pop({force: true})
     } catch (e) {
@@ -935,7 +935,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm(props.group.type === GroupType.EventRegistration ? $t('groups.confirm.delete.eventRegistration') : $t('groups.confirm.delete.membership'), $t('shared.confirmDelete'))) {
+    if (!await CenteredMessage.confirm(props.group.type === GroupType.EventRegistration ? $t('90ec517b-14e6-4436-8c91-fabac5c1bddf') : $t('11426f89-b2bf-4f7a-bd5a-a51c34e6aa96'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'))) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {
@@ -946,7 +946,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            await Toast.success($t('shared.confirmation.deleted')).show();
+            await Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }
         await pop({force: true})
     } catch (e) {
@@ -958,7 +958,7 @@ async function deleteMe() {
 
 function addGroupPrice() {
     const price = GroupPrice.create({
-        name: $t('Naamloos'),
+        name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
         price: patched.value.settings.prices[0]?.price?.clone()
     })
     addPricePut(price)
@@ -985,10 +985,10 @@ async function editGroupPrice(price: GroupPrice) {
 
 async function addGroupOptionMenu() {
     const optionMenu = GroupOptionMenu.create({
-        name: $t('Naamloos'),
+        name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
         options: [
             GroupOption.create({
-                name: $t('Optie 1')
+                name: $t('82b0f786-db14-4a2c-8514-3ca3b28ac65f')
             })
         ]
     })
@@ -1090,7 +1090,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 function getAgeGroupAgeString(ageGroup: DefaultAgeGroup): string {

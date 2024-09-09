@@ -55,7 +55,7 @@
 
                 <div v-if="useMaximum" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="Maximum aantal" error-fields="maximum" :error-box="errors.errorBox">
-                        <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('Ongelimiteerd')" :min="2" />
+                        <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('c5562430-7c78-454c-8d61-7b4a98fbaf02')" :min="2" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -116,7 +116,7 @@ const $t = useTranslate();
 const pop = usePop();
 
 const title = computed(() => {
-    return props.isNew ? $t('Nieuwe keuze') : $t('Wijzig keuze');
+    return props.isNew ? $t('c4c91c69-3b09-4db5-b83f-170475a509f7') : $t('0dbd634f-8012-4d75-97a2-594f6dffe752');
 });
 
 const name = computed({
@@ -178,7 +178,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze keuze wilt verwijderen?'), $t('shared.confirmDelete'), $t('De keuze wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'))) {
+    if (!await CenteredMessage.confirm($t('6e82b7fc-581f-43cb-8b3a-cff97b9820ed'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('659cbbac-a470-4ab6-803d-b45ac580ea68'))) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {
@@ -189,7 +189,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            await Toast.success($t('shared.confirmation.deleted')).show();
+            await Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }
         await pop({force: true})
     } catch (e) {
@@ -204,7 +204,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

@@ -39,7 +39,7 @@ const $t = useTranslate();
 const pop = usePop();
 
 const title = computed(() => {
-    return props.isNew ? $t('Nieuwe facturatiegegevens') : $t('Facturatiegegevens bewerken');
+    return props.isNew ? $t('2d998332-6028-4be3-aa81-fd0f34d00be7') : $t('119d091e-820f-46f0-91f0-5b036fa63e55');
 });
 
 async function save() {
@@ -64,7 +64,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze facturatiegegevens wilt verwijderen?'), $t('shared.confirmDelete'))) {
+    if (!await CenteredMessage.confirm($t('3f81e947-a0a3-4d21-81d7-3298e65d49b1'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'))) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {
@@ -86,7 +86,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

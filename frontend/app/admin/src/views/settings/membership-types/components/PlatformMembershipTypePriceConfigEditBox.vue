@@ -10,7 +10,7 @@
                 <div>
                     <button class="button text" type="button" @click="emits('delete')">
                         <span class="icon trash" />
-                        <span class="hide-smartphone">{{ $t('Verwijderen') }}</span>
+                        <span class="hide-smartphone">{{ $t('838cae8b-92a5-43d2-82ba-01b8e830054b') }}</span>
                     </button>
                 </div>
             </h2>
@@ -21,11 +21,11 @@
 
         <STInputBox
             v-if="showStartDate || $startDate"
-            :title="$t('admin.settings.membershipTypes.period.priceDate')" :error-box="errorBox"
+            :title="$t('d93bd297-5794-4588-8bfb-17fb2074a364')" :error-box="errorBox"
         >
             <DateSelection
                 v-model="$startDate" :required="false"
-                :placeholder="$t('admin.settings.membershipTypes.expireDate.placeholder')"
+                :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')"
             />
         </STInputBox>
 
@@ -64,7 +64,7 @@
         <p>
             <button class="button text" type="button" @click="addPriceForTag">
                 <span class="icon add" />
-                <span>{{ $t('admin.settings.membershipTypes.period.addPriceForTag') }}</span>
+                <span>{{ $t('9ad86597-3455-4837-bfee-249835678f7c') }}</span>
             </button>
         </p>
     </div>

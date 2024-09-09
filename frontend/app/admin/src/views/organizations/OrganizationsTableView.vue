@@ -11,7 +11,7 @@
         @click="showOrganization"
     >
         <template #empty>
-            {{ $t('admin.organizations.emptyMessage') }}
+            {{ $t('4fa242b7-c05d-44d4-ada5-fb60e91af818') }}
         </template>
     </ModernTableView>
 </template>
@@ -44,7 +44,7 @@ const title = computed(() => {
     if (props.tag) {
         return props.tag.name
     }
-    return $t('admin.organizations.allTitle')
+    return $t('d4a9ca3f-72c9-4418-90fa-5d648b23ee7e')
 })
 
 const context = useContext();
@@ -152,7 +152,7 @@ const actions: TableAction<Organization>[] = []
 if (auth.hasPlatformFullAccess()) {
     actions.push(
         new InMemoryTableAction({
-            name: $t('admin.organizations.new'),
+            name: $t('7066aee7-9e51-4767-b288-460646ceca50'),
             icon: "add",
             priority: 0,
             groupIndex: 1,
@@ -180,7 +180,7 @@ if (auth.hasPlatformFullAccess()) {
                             owner,
                             decoder: new ArrayDecoder(Organization as Decoder<Organization>)
                         });
-                        new Toast($t('admin.organizations.createSucceeded'), "success green").show()
+                        new Toast($t('8459189d-6f9a-4541-9fb7-7618061f1969'), "success green").show()
 
                         // Reload table
                         tableObjectFetcher.reset(true, true)

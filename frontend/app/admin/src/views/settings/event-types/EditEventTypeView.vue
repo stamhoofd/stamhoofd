@@ -7,41 +7,41 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('shared.name') " error-fields="name" :error-box="errors.errorBox">
+            <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') " error-fields="name" :error-box="errors.errorBox">
                 <input
                     v-model="name"
                     class="input"
                     type="text"
-                    :placeholder="$t('shared.name') "
+                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
                 >
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('Beschrijving')" error-fields="description" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('688fc9a3-68af-4aa3-ae6c-7d35a5f954ad')" error-fields="description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
                 type="text"
-                :placeholder="$t('Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.')"
+                :placeholder="$t('930218d2-2e00-4d1f-90c9-59d77c1ed377')"
                 autocomplete=""
             />
         </STInputBox>
 
         <hr>
-        <h2>{{ $t('Limieten') }}</h2>
+        <h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
 
-        <STInputBox :title="$t('Maximum aantal activiteiten per jaar (optioneel)')" error-fields="maximum" :error-box="errors.errorBox">
-            <NumberInput v-model="maximum" :placeholder="$t('Geen')" :required="false" />
+        <STInputBox :title="$t('f9c5b001-dd96-4a70-82c7-505246f7be8c')" error-fields="maximum" :error-box="errors.errorBox">
+            <NumberInput v-model="maximum" :placeholder="$t('e41660ea-180a-45ef-987c-e780319c4331')" :required="false" />
         </STInputBox>
-        <p class="style-description-small">{{ $t('Het maximum geldt per lokale groep') }}</p>
+        <p class="style-description-small">{{ $t('f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc') }}</p>
 
         <div class="split-inputs">
-            <STInputBox :title="$t('Minimum aantal dagen')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="minimumDays" :placeholder="$t('Geen')" :required="false" />
+            <STInputBox :title="$t('93210fca-b5c6-431c-b109-736fe32b90ac')" error-fields="minimumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="minimumDays" :placeholder="$t('e41660ea-180a-45ef-987c-e780319c4331')" :required="false" />
             </STInputBox>
 
-            <STInputBox :title="$t('Maximum aantal dagen')" error-fields="maximumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="maximumDays" :placeholder="$t('Onbeperkt')" :required="false" />
+            <STInputBox :title="$t('08e038ea-805b-42bf-8755-6f6875aae836')" error-fields="maximumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="maximumDays" :placeholder="$t('104dca1f-f6eb-4193-ae27-5e5f96e4e481')" :required="false" />
             </STInputBox>
         </div>
     </SaveView>
@@ -67,7 +67,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformEventType>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
-const title = computed(() => props.isNew ? $t('Nieuwe soort activiteit') : $t('Wijzig soort activiteit'));
+const title = computed(() => props.isNew ? $t('9b76d069-ba68-4909-a084-ba74994c8b56') : $t('49a36bd7-3231-45da-a502-8f0cf83639f5'));
 const pop = usePop();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
@@ -95,7 +95,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze soort activiteit wilt verwijderen?'), $t('Verwijderen'), $t('Dit kan nare gevolgen hebben als er al activiteiten van dit type zijn'))) {
+    if (!await CenteredMessage.confirm($t('24cdd0db-df35-4ef2-8230-7cade040fcfc'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('dc8871b4-8d65-4247-9c2b-56e183cdf052'))) {
         return
     }
         
@@ -140,7 +140,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
     
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

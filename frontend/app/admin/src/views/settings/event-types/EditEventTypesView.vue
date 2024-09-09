@@ -15,7 +15,7 @@
         <p>
             <button class="button text" type="button" @click="addType">
                 <span class="icon add" />
-                <span>{{ $t('Nieuwe soort activiteit') }}</span>
+                <span>{{ $t('9b76d069-ba68-4909-a084-ba74994c8b56') }}</span>
             </button>
         </p>
     </SaveView>
@@ -45,7 +45,7 @@ const draggableTypes = useDraggableArray(() => types.value, addArrayPatch)
 
 const saving = ref(false);
 
-const title = $t('Soorten activiteiten')
+const title = $t('de211760-1306-4108-92e3-9301435d8988')
 
 async function addType() {
     const arr: PatchableArrayAutoEncoder<PlatformEventType> = new PatchableArray()
@@ -122,7 +122,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

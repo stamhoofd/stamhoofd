@@ -5,7 +5,7 @@
                 <Checkbox v-model="allTags" />
             </template>
             <h3 class="style-title-list">
-                {{ $t('shared.allOrganizations') }}
+                {{ $t('4835dfd4-10b0-4e91-b581-d1b3eefa73f7') }}
             </h3>
         </STListItem>
 

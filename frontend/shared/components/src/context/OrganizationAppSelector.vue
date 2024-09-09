@@ -4,7 +4,7 @@
 
         <main>
             <h1 v-if="!popup">
-                {{ $t('Kies een vereniging') }}
+                {{ $t('34aff020-6017-4c23-85b1-44a692988ee6') }}
             </h1>
 
             <template v-if="currentOptions.length">

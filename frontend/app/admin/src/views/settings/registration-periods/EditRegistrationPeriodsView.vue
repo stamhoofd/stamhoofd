@@ -38,7 +38,7 @@
         <p>
             <button class="button text" type="button" @click="addPeriod">
                 <span class="icon add" />
-                <span>{{ $t('admin.settings.registrationPeriods.new.button') }}</span>
+                <span>{{ $t('1929850b-e0ad-4b35-b3e5-6652dd4774e2') }}</span>
             </button>
         </p>
     </SaveView>
@@ -195,7 +195,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

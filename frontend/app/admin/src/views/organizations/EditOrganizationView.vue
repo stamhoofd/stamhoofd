@@ -7,31 +7,31 @@
 
         <div class="split-inputs">
             <div>
-                <STInputBox :title="$t('admin.organizations.nameLabel')" error-fields="name" :error-box="errors.errorBox">
+                <STInputBox :title="$t('6793e0dc-66f0-4a70-b8ac-fb41e2063871')" error-fields="name" :error-box="errors.errorBox">
                     <input
                         id="organization-name"
                         ref="firstInput"
                         v-model="name"
                         class="input"
                         type="text"
-                        :placeholder="$t('admin.organizations.namePlaceholder')"
+                        :placeholder="$t('bc8578de-ee3c-4aac-bd19-3fd4040168a4')"
                         autocomplete="organization"
                     >
                 </STInputBox>
 
-                <AddressInput v-model="address" :title="$t('admin.organizations.addressLabel')" :validator="errors.validator" />
+                <AddressInput v-model="address" :title="$t('74303d1c-2700-4340-816e-03cb9c3fb188')" :validator="errors.validator" />
             </div>
 
             <div>
-                <UrlInput v-model="website" :title="$t('shared.website.optional')" :placeholder="$t('dashboard.inputs.website.placeholder')" :validator="errors.validator" :required="false" />
+                <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false" />
 
                 <p class="style-description-small">
-                    {{ $t('admin.organizations.website.description') }}
+                    {{ $t('5f0e24bb-10db-428b-a480-6f73d959cafa') }}
                 </p>
             </div>
         </div>
 
-        <STInputBox :title="$t('admin.organizations.uri.label')" error-fields="name" :error-box="errors.errorBox">
+        <STInputBox :title="$t('2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2')" error-fields="name" :error-box="errors.errorBox">
             <OrganizationUriInput
                 v-model="uri"
                 :validator="errors.validator"
@@ -39,11 +39,11 @@
             />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('admin.organizations.uri.description') }}
+            {{ $t('81c91169-db1e-4819-8716-5382ffbaa43b') }}
         </p>
 
         <hr>
-        <h2>{{ $t('admin.organizations.tags') }}</h2>
+        <h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}</h2>
         <STList>
             <SelectOrganizationTagRow v-for="tag in tags" :key="tag.id" :organization="patched" :tag="tag" @patch:organization="addPatch" />
         </STList>
@@ -77,7 +77,7 @@ const $t = useTranslate();
 
 const saving = ref(false);
 
-const title = computed(() => props.isNew ? $t('admin.organizations.new') : $t('admin.organizations.edit'));
+const title = computed(() => props.isNew ? $t('7066aee7-9e51-4767-b288-460646ceca50') : $t('e276e384-22f1-4894-93ae-8874329c6767'));
 
 const name = computed({
     get: () => patched.value.name,
@@ -124,7 +124,7 @@ async function save() {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'name',
-                message: $t('admin.organizations.errors.nameRequired')
+                message: $t('11b55f40-f3d4-4ce7-9831-57d188367b9f')
             })
         }
         await props.saveHandler(patch.value);
@@ -140,7 +140,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

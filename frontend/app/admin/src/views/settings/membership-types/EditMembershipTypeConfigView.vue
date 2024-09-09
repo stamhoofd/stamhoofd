@@ -10,11 +10,11 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('shared.startDate')" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('a656bc79-940d-4cfd-a7f8-4700cd95a4f3')" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox :title="$t('shared.endDate')" error-fields="endDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('7955066a-93c8-4872-8ac7-e7ccdc7f61f9')" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
             </STInputBox>
         </div>
@@ -24,17 +24,17 @@
 
         <STInputBox
             v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period"
-            :title="$t('admin.settings.membershipTypes.expireDate.title')" error-fields="expireDate"
+            :title="$t('b0215bc3-b94d-47de-99d2-4dcb9f59b299')" error-fields="expireDate"
             :error-box="errors.errorBox"
         >
             <DateSelection
                 v-model="expireDate" :required="false"
-                :placeholder="$t('admin.settings.membershipTypes.expireDate.placeholder')"
+                :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')"
                 :time="{hours: 23, minutes: 59, seconds: 59}"
             />
         </STInputBox>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">
-            {{ $t('admin.settings.membershipTypes.expireDate.description') }}
+            {{ $t('e866488b-bc8d-481f-900b-9cf1779f44b8') }}
         </p>
 
         <PlatformMembershipTypePriceConfigEditBox
@@ -54,7 +54,7 @@
         <p>
             <button class="button text" type="button" @click="addPrice">
                 <span class="icon add" />
-                <span>{{ $t('admin.settings.membershipTypes.period.addPrice') }}</span>
+                <span>{{ $t('285539ab-4119-4dcd-b0fe-87952f71d90d') }}</span>
             </button>
         </p>
 
@@ -94,7 +94,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformMembershipTypeConfig>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
-const title = computed(() => $t('admin.settings.membershipTypes.period.title', {periodName: props.period.name}));
+const title = computed(() => $t('8301bf8b-569b-4a66-8985-455392098279', {periodName: props.period.name}));
 const pop = usePop();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.config);
@@ -151,7 +151,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('admin.settings.membershipTypes.period.delete.confirmation.title'), $t('Verwijderen'))) {
+    if (!await CenteredMessage.confirm($t('0d0147f0-f42e-4f6b-bf04-16c21fb8ae7d'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'))) {
         return
     }
         
@@ -196,7 +196,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
     
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 function patchPrice(priceConfig: PlatformMembershipTypeConfigPrice, patch: AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>) {

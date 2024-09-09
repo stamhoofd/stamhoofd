@@ -19,7 +19,7 @@
             >
         </STInputBox>
 
-        <UrlInput v-model="url" :title="$t('shared.website.optional')" :validator="validator" :required="false" />
+        <UrlInput v-model="url" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :validator="validator" :required="false" />
 
         <p class="style-description-small">
             Op plaatsen waar technisch mogelijk, kan men op het logo klikken om de website te bezoeken.
@@ -45,7 +45,7 @@
                 <UploadButton v-model="logo" :text="logo ? 'Vervangen' : 'Uploaden'" :resolutions="logoResolutions" />
             </div>
         </h2>
-        <p>{{ $t('dashboard.sponsors.logo.description') }}</p>
+        <p>{{ $t('df8e9385-314f-4403-b0d5-e5893f68d442') }}</p>
 
         <ImageComponent v-if="logo" :image="logo" :max-height="150" :auto-height="true" />
 
@@ -57,7 +57,7 @@
                 <UploadButton v-model="banner" :text="banner ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
             </div>
         </h2>
-        <p>{{ $t('dashboard.sponsors.logo.dimensions.description') }}</p>
+        <p>{{ $t('b375f5be-879c-4696-8ccf-0e7066e3f5f4') }}</p>
 
         <ImageComponent v-if="banner" :image="banner" :max-height="150" :auto-height="true" />
 

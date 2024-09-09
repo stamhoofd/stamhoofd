@@ -15,7 +15,7 @@
                 v-model="name"
                 class="input"
                 type="text"
-                :placeholder="$t('dashboard.webshop.deliveryMethod.name.placeholder')"
+                :placeholder="$t('0d4b25fe-6a3d-480b-86e8-e21c664a15ee')"
                 autocomplete=""
             >
         </STInputBox>

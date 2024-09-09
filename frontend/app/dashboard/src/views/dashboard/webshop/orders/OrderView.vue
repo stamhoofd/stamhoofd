@@ -237,7 +237,7 @@
 
                 <STListItem v-if="order.data.customer.phone">
                     <h3 class="style-definition-label">
-                        {{ $t("shared.inputs.mobile.label") }}
+                        {{ $t("90d84282-3274-4d85-81cd-b2ae95429c34") }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.phone }}

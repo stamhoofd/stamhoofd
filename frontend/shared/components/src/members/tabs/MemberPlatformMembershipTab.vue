@@ -6,7 +6,7 @@
             </p>
 
             <p v-if="memberships.length === 0" class="warning-box">
-                {{ $t('shared.noMembershipWarning') }}
+                {{ $t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e') }}
             </p>
 
             <STList v-else>

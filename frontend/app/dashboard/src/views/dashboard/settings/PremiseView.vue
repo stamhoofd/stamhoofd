@@ -5,29 +5,29 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
             
-            <STInputBox :title="$t('shared.name')" error-fields="name" :error-box="errors.errorBox">
+            <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e')" error-fields="name" :error-box="errors.errorBox">
                 <input
                     id="premise-name"
                     v-model="name"
                     class="input"
                     type="text"
-                    :placeholder="$t('Naam van het lokaal')"
+                    :placeholder="$t('8505e377-cc4d-4551-98d3-60a70d8b2c7b')"
                     autocomplete=""
                 >
             </STInputBox>
 
-            <STInputBox :title="$t('shared.description')" error-fields="description" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="description" :error-box="errors.errorBox" class="max">
                 <textarea
                     id="premise-description"
                     v-model="description"
                     class="input"
                     type="text"
-                    :placeholder="$t('Beschrijving van het lokaal')"
+                    :placeholder="$t('13650793-84d9-407a-b477-79b40011441d')"
                     autocomplete=""
                 />
             </STInputBox>
             
-            <AddressInput v-model="address" :title="$t('shared.address')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
+            <AddressInput v-model="address" :title="$t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
         
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
                 <hr>
@@ -92,7 +92,7 @@ const props = withDefaults(
 
 const $t = useTranslate();
 
-const title = computed(() => props.isNew ? $t('Nieuw lokaal') : $t('Wijzig lokaal'));
+const title = computed(() => props.isNew ? $t('5e40dfe9-b4ed-497c-a37d-e162191ba96a') : $t('09186fb9-2c94-4425-95e7-66cc2fd398ff'));
 const errors = useErrors();
 const platform$ = usePlatform();
 

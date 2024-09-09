@@ -24,7 +24,7 @@
             </template>
 
             <template v-if="member.patchedMember.details.phone">
-                <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
+                <dt>{{ $t('90d84282-3274-4d85-81cd-b2ae95429c34') }}</dt>
                 <dd v-copyable>
                     {{ member.patchedMember.details.phone }}
                 </dd>

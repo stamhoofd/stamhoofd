@@ -188,7 +188,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                             code: "invalid_field",
                             field: 'details.securityCode',
                             message: "Invalid security code",
-                            human: Context.i18n.$t('Deze beveiligingscode is ongeldig. Probeer het opnieuw of neem contact op met jouw vereniging om de juiste code te ontvangen.'),
+                            human: Context.i18n.$t('49753d6a-7ca4-4145-8024-0be05a9ab063'),
                             statusCode: 400
                         })
                     }

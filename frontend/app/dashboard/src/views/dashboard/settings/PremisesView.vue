@@ -29,7 +29,7 @@
         <p>
             <button class="button text" type="button" @click="addPremise">
                 <span class="icon add" />
-                <span>{{ $t('Nieuw lokaal') }}</span>
+                <span>{{ $t('5e40dfe9-b4ed-497c-a37d-e162191ba96a') }}</span>
             </button>
         </p>
     </SaveView>
@@ -190,7 +190,7 @@ const shouldNavigateAway = async () => {
     if (!hasSomeChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
 }
 
 defineExpose({

@@ -107,7 +107,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
 
     async restoreGroup(event, group: Group) {
         if(this.allCategories.length === 0) {
-            const toast = Toast.error(this.$t("Maak eerst een categorie om deze groep naar terug te zetten."));
+            const toast = Toast.error(this.$t("3e9cdd5a-b614-4e2b-bc84-48566628a60f"));
             toast.show();
             return;
         }
