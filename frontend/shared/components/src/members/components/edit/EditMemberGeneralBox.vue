@@ -127,14 +127,14 @@ const title = computed(() => {
 
 useValidation(errors.validator, () => {
     const se = new SimpleErrors()
-    if (firstName.value.length < 2) {
+    if (firstName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: "invalid_field",
             message: "Vul de voornaam in",
             field: "firstName"
         }))
     }
-    if (lastName.value.length < 2) {
+    if (lastName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: "invalid_field",
             message: "Vul de achternaam in",
