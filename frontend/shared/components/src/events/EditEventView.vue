@@ -334,8 +334,6 @@ useValidation(errors.validator, () => {
     return true
 })
 
-
-
 const type = computed(() => {
     const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId)
     return type ?? null

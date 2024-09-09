@@ -63,7 +63,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     human: 'Je kan geen activiteiten voor een specifieke organisatie aanmaken als je geen platform hoofdbeheerder bent',
                 })
             }
-
+            
             const eventOrganization = put.organizationId ? (await Organization.getByID(put.organizationId)) : null
             if (!eventOrganization && put.organizationId) {
                 throw new SimpleError({
@@ -79,8 +79,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.name = put.name
             event.startDate = put.startDate
             event.endDate = put.endDate
-            event.meta = put.meta
-            event.typeId = await PatchEventsEndpoint.validateEventType(put.typeId)
+            event.meta = put.meta;
+            const type = await PatchEventsEndpoint.getEventType(put.typeId);
+            event.typeId = type.id;
             event.meta.organizationCache = eventOrganization ? NamedObject.create({id: eventOrganization.id, name: eventOrganization.name}) : null
             await PatchEventsEndpoint.checkEventLimits(event)
 
@@ -108,6 +109,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 )
                 await event.syncGroupRequirements(group)
                 event.groupId = group.id
+            }
+
+            if(type.isLocationRequired === true) {
+                PatchEventsEndpoint.throwIfAddressIsMissing(event);
             }
 
             await event.save()
@@ -178,7 +183,12 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
             }
 
-            event.typeId = patch.typeId ? (await PatchEventsEndpoint.validateEventType(patch.typeId)) : event.typeId
+            const type = await PatchEventsEndpoint.getEventType(patch.typeId ?? event.typeId);
+
+            if(patch.typeId) {
+                event.typeId = type.id;
+            }
+
             await PatchEventsEndpoint.checkEventLimits(event)
 
             if (patch.group !== undefined) {
@@ -228,6 +238,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     )
                     event.groupId = group.id
                 }
+            }
+
+            if(type.isLocationRequired === true) {
+                PatchEventsEndpoint.throwIfAddressIsMissing(event);
             }
 
             await event.save()
@@ -344,5 +358,20 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 })
             }
         }
+    }
+
+    private static throwIfAddressIsMissing(event: Event) {
+        const address = event.meta.location?.address;
+
+        if(!address) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Empty number",
+                human: "De locatie is verplicht voor deze soort activiteit.",
+                field: "event_required"
+            })
+        }
+
+        address.throwIfIncomplete();
     }
 }

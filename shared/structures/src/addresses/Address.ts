@@ -196,6 +196,48 @@ export class Address extends AutoEncoder {
             street
         }
     }
+
+    throwIfIncomplete() {
+        if (this.street.trim().length == 0) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Empty street",
+                human: "De straat is verplicht"
+            })
+        }
+
+        if (this.number.trim().length == 0) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Empty number",
+                human: "Het huisnummer is verplicht"
+            })
+        }
+
+        if (this.postalCode.trim().length == 0) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Empty postal code",
+                human: "De postcode is verplicht"
+            })
+        }
+
+        if (this.city.trim().length == 0) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Empty city",
+                human: "De gemeente is verplicht"
+            })
+        }
+
+        if (this.country == null) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Empty country",
+                human: "Het land is verplicht"
+            })
+        }
+    }
 }
 
 export class ValidatedAddress extends Address {
