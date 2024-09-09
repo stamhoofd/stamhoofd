@@ -11,40 +11,55 @@ import { writeTranslation } from "./write-translations";
  * @returns the default languages with the missing keys added
  */
 export function addMissingKeys(): Record<string, string> {
-    const {filePath, translations} = getDefaultTranslations();
-    const {missingKeys, filesWithMissingKeys} = getMissingKeys(translations);
+    console.log("Start add missing keys.");
+    const { filePath, translations } = getDefaultTranslations();
+    const { missingKeys, filesWithMissingKeys } = getMissingKeys(translations);
 
-    //#region create uuid for missing keys
-    const missingUuidKeys = new Map<string, string>();
-    const replacedKeys = new Map<string, string>();
+    if (missingKeys.size > 0) {
+        console.log(
+            `Found ${missingKeys.size} missing key(s) in ${filesWithMissingKeys.size} file(s).`,
+        );
 
-    for(const key of missingKeys) {
-        if(uuidValidate(key)) {
-            missingUuidKeys.set('todo', key);
-        } else {
-            const uuid = uuidv4();
-            replacedKeys.set(key, uuid);
+        //#region create uuid for missing keys
+        const missingUuidKeys = new Map<string, string>();
+        const replacedKeys = new Map<string, string>();
+
+        for (const key of missingKeys) {
+            if (uuidValidate(key)) {
+                missingUuidKeys.set("todo", key);
+            } else {
+                const uuid = uuidv4();
+                replacedKeys.set(key, uuid);
+            }
         }
+        //#endregion
+
+        // replace the missing key with the uuid
+        replaceOccurrences(replacedKeys, Array.from(filesWithMissingKeys));
+
+        //#region add the keys and the value to the default translations
+        for (const [oldKey, newKey] of new Map([
+            ...replacedKeys,
+            ...missingUuidKeys,
+        ]).entries()) {
+            if (translations[newKey]) continue;
+            translations[newKey] = oldKey;
+        }
+
+        writeTranslation(filePath, translations);
+        //#endregion
+    } else {
+        console.log("No missing keys found.");
     }
-    //#endregion
 
-    // replace the missing key with the uuid
-    replaceOccurrences(replacedKeys, Array.from(filesWithMissingKeys));
-
-    //#region add the keys and the value to the default translations
-    for(const [oldKey, newKey] of (new Map([...replacedKeys, ...missingUuidKeys])).entries()) {
-        if(translations[newKey]) continue;
-        translations[newKey] = oldKey;
-    }
-    
-    writeTranslation(filePath, translations);
-    //#endregion
-
-
+    console.log("Finished add missing keys.");
     return translations;
 }
 
-function getMissingKeys(translations: Record<string, string>): {missingKeys: Set<string>, filesWithMissingKeys: Set<string>} {
+function getMissingKeys(translations: Record<string, string>): {
+    missingKeys: Set<string>;
+    filesWithMissingKeys: Set<string>;
+} {
     // todo: use cache or pass with argument?
     const filesToSearch = getFilesToSearch();
 
@@ -70,10 +85,10 @@ function getMissingKeys(translations: Record<string, string>): {missingKeys: Set
             }
         }
 
-        if(hasMissingKey) {
+        if (hasMissingKey) {
             filesWithMissingKeys.add(filePath);
         }
     }
 
-    return {missingKeys, filesWithMissingKeys};
+    return { missingKeys, filesWithMissingKeys };
 }

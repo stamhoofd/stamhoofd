@@ -2,10 +2,13 @@ import fs from "fs";
 import { v4 as uuidv4, validate as uuidValidate } from "uuid";
 import { getFilesToSearch } from "./get-files-to-search";
 import { getTranslationsWithPath } from "./get-translations-with-path";
+import { writeTranslation } from "./write-translations";
 
 export function replaceKeysWithUuid() {
+    console.log('Start replace keys with uuids.')
     const translationsWithPath = getTranslationsWithPath();
     replaceKeysWithUuidInTranslations(translationsWithPath);
+    console.log('Finished replace keys with uuids.')
 }
 
 type TranslationValue =
@@ -25,10 +28,12 @@ function replaceKeysWithUuidInTranslations(
         result: Record<string, string>,
         translations: TranslationValue,
         parentKeys = "",
-    ) => {
+    ): number => {
         if (typeof translations === "string") {
             throw new Error(`Unexpected string: ${translations}`);
         }
+
+        let changes = 0;
 
         for (const key in translations) {
             if (keysToSkip.includes(key)) continue;
@@ -36,7 +41,8 @@ function replaceKeysWithUuidInTranslations(
 
             const setOnResult = (uuidKey: string) => {
                 delete result[key];
-                result[uuidKey] = translations[key] as string;
+                result[uuidKey] = translations[key] as string
+                changes++;
             };
 
             if (replacedKeys.has(fullKey)) {
@@ -54,16 +60,22 @@ function replaceKeysWithUuidInTranslations(
                 continue;
             }
 
-            flattenTranslationsAndReplaceKeys(result, value, fullKey);
+            const deepChanges = flattenTranslationsAndReplaceKeys(result, value, fullKey);
             delete result[key];
+            changes += deepChanges;
         }
+
+        return changes;
     };
 
     for (const [filePath, translations] of translationsWithPath) {
         const newTranslations = { ...translations };
-        flattenTranslationsAndReplaceKeys(newTranslations, translations);
-        fs.writeFileSync(filePath, JSON.stringify(newTranslations, null, 2));
-        console.log(`Replaced keys with UUIDs in: ${filePath}`);
+        const changes = flattenTranslationsAndReplaceKeys(newTranslations, translations);
+
+        if(changes > 0) {
+            writeTranslation(filePath, newTranslations);
+            console.log(`Replaced ${changes} key(s) with UUIDs in: ${filePath}`);
+        }
     }
 
     replaceOccurrences(replacedKeys);
