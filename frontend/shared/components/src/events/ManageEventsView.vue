@@ -59,7 +59,6 @@ import { ComponentWithProperties, defineRoutes, NavigationController, useNavigat
 import { Event, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
-import { useAppContext } from '../context';
 import { useEventsObjectFetcher } from '../fetchers';
 import { getEventUIFilterBuilders } from '../filters/filterBuilders';
 import { UIFilter } from '../filters/UIFilter';
@@ -302,19 +301,20 @@ async function editFilter(event: MouseEvent) {
 
 
 function getRequiredFilter(): StamhoofdFilter|null  {
+    const org = organization.value;
+
+    const filters: StamhoofdFilter = {};
+
+    // filter on start date
     if (selectedYear.value === null) {
         const d = new Date();
         d.setHours(0, 0, 0, 0);
 
-        return {
-            startDate: {
-                $gt: d
-            }
-        }
-    }
-
-    return {
-        $and: [
+        filters['startDate'] = {
+            $gt: d
+        };
+    } else {
+        filters['$and'] = [
             {
                 startDate: {
                     $gte: new Date(selectedYear.value, 0, 1),
@@ -327,6 +327,15 @@ function getRequiredFilter(): StamhoofdFilter|null  {
             }
         ]
     }
+
+    // filter on organization tag ids, if organization lvl
+    if(org) {
+        filters['organizationTagIds'] = {
+            $in: [null, ...org.meta.tags]
+        }
+    }
+
+    return filters;
 }
 
 watch(selectedYear, () => {
