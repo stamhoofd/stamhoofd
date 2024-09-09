@@ -7,11 +7,17 @@ const defaultLocale = "nl";
 const otherMainLocales = ["en"];
 const localesDir = "../../shared/locales/src";
 
-export function syncMainLanguages() {
-    syncMainLanguageInDirectory(localesDir);
+export function syncMainLocales() {
+    console.log('Start sync main locales.');
+    const hasChanged = syncMainLocalesInDirectory(localesDir);
+    if(!hasChanged) {
+        console.log('Main locales already up to date.');
+    }
+    console.log('Finished sync main locales.');
 }
 
-function syncMainLanguageInDirectory(dir: string) {
+function syncMainLocalesInDirectory(dir: string): boolean {
+    let hasChanged = false;
     const files = fs.readdirSync(dir);
 
     // filePath, translations
@@ -24,14 +30,15 @@ function syncMainLanguageInDirectory(dir: string) {
         const stats = fs.statSync(filePath);
 
         if (stats.isFile()) {
-            if (filePath.endsWith(`${defaultLocale}.json`)) {
+            if (file === `${defaultLocale}.json`) {
                 mainTranslations = readTranslations(filePath);
                 continue;
             }
 
             for (const otherMainLocale of otherMainLocales) {
-                if (filePath.endsWith(`${otherMainLocale}.json`)) {
+                if (file === `${otherMainLocale}.json`) {
                     otherTranslations.set(filePath, readTranslations(filePath));
+                    break;
                 }
             }
 
@@ -39,31 +46,39 @@ function syncMainLanguageInDirectory(dir: string) {
         }
 
         if (stats.isDirectory()) {
-            syncMainLanguageInDirectory(filePath);
+            const hasChildDirectoryChanged = syncMainLocalesInDirectory(filePath);
+            if(hasChildDirectoryChanged) {
+                hasChanged = true;
+            }
         }
     }
 
-    if (otherTranslations.size > 0 && !mainTranslations) {
+    if (otherTranslations.size > 0) {
         if (!mainTranslations) {
             console.warn("No default translations found in directory: " + dir);
         } else {
             for (const [filePath, translations] of otherTranslations) {
-                let hasChanged = false;
+                let keysAdded = 0;
 
                 for (const [key, value] of Object.entries<string>(
                     mainTranslations,
                 )) {
-                    console.log(key);
                     if (!translations[key]) {
                         translations[key] = value;
-                        hasChanged = true;
+                        keysAdded++;
                     }
                 }
 
-                if (hasChanged) {
+                if (keysAdded > 0) {
+                    console.log(`Sync main locales: added ${keysAdded} key(s) to ${filePath}.`);
                     writeTranslation(filePath, translations);
+                    if(!hasChanged) {
+                        hasChanged = true;
+                    }
                 }
             }
         }
     }
+
+    return hasChanged;
 }
