@@ -1,32 +1,50 @@
 import fs from "fs";
 import { validate as uuidValidate, v4 as uuidv4 } from "uuid";
 import { getFilesToSearch } from "./get-files-to-search";
-import { getTranslationsWithPath } from "./get-translations-with-path";
+import { getDefaultTranslations } from "./get-translations-with-path";
 import { replaceOccurrences } from "./replace-keys-with-uuid";
-import { writeTranslations } from "./write-translations";
+import { writeTranslation } from "./write-translations";
 
 /**
- * Search for missing keys in files and add them to the .json translation files.
+ * Add keys from source files to the default .json translation files,
+ * if they do not already exist.
+ * @returns the default languages with the missing keys added
  */
+export function addMissingKeys(): Record<string, string> {
+    const {filePath, translations} = getDefaultTranslations();
+    const {missingKeys, filesWithMissingKeys} = getMissingKeys(translations);
 
-export function addMissingKeys() {
-    const translationsWithPath = getTranslationsWithPath();
-    const {missingKeys, filesWithMissingKeys} = getMissingKeys();
-
+    //#region create uuid for missing keys
+    const missingUuidKeys = new Map<string, string>();
     const replacedKeys = new Map<string, string>();
 
     for(const key of missingKeys) {
-        const uuid = uuidv4();
-        replacedKeys.set(key, uuid);
+        if(uuidValidate(key)) {
+            missingUuidKeys.set('todo', key);
+        } else {
+            const uuid = uuidv4();
+            replacedKeys.set(key, uuid);
+        }
     }
+    //#endregion
 
+    // replace the missing key with the uuid
     replaceOccurrences(replacedKeys, Array.from(filesWithMissingKeys));
 
-    addKeysToTranslations(translationsWithPath, replacedKeys);
-    writeTranslations(translationsWithPath);
+    //#region add the keys and the value to the default translations
+    for(const [oldKey, newKey] of (new Map([...replacedKeys, ...missingUuidKeys])).entries()) {
+        if(translations[newKey]) continue;
+        translations[newKey] = oldKey;
+    }
+    
+    writeTranslation(filePath, translations);
+    //#endregion
+
+
+    return translations;
 }
 
-function getMissingKeys(): {missingKeys: Set<string>, filesWithMissingKeys: Set<string>} {
+function getMissingKeys(translations: Record<string, string>): {missingKeys: Set<string>, filesWithMissingKeys: Set<string>} {
     // todo: use cache or pass with argument?
     const filesToSearch = getFilesToSearch();
 
@@ -46,7 +64,7 @@ function getMissingKeys(): {missingKeys: Set<string>, filesWithMissingKeys: Set<
         while ((matches = regex.exec(fileContent)) !== null) {
             const key = matches[1];
 
-            if (!uuidValidate(key)) {
+            if (!translations[key]) {
                 missingKeys.add(key);
                 hasMissingKey = true;
             }
@@ -58,13 +76,4 @@ function getMissingKeys(): {missingKeys: Set<string>, filesWithMissingKeys: Set<
     }
 
     return {missingKeys, filesWithMissingKeys};
-}
-
-export function addKeysToTranslations(translationsWithPath: Map<string, Record<string, string>>, replacedKeys: Map<string, string>): void {
-    for(const translations of translationsWithPath.values()) {
-        for(const [oldKey, newKey] of replacedKeys.entries()) {
-            if(translations[newKey]) continue;
-            translations[newKey] = oldKey;
-        }
-    }
 }

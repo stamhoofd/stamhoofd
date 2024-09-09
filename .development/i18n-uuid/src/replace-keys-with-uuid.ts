@@ -21,7 +21,7 @@ function replaceKeysWithUuidInTranslations(
     // oldKey, newKey
     const replacedKeys = new Map<string, string>();
 
-    const setTranslationsOnResult = (
+    const flattenTranslationsAndReplaceKeys = (
         result: Record<string, string>,
         translations: TranslationValue,
         parentKeys = "",
@@ -54,14 +54,14 @@ function replaceKeysWithUuidInTranslations(
                 continue;
             }
 
-            setTranslationsOnResult(result, value, fullKey);
+            flattenTranslationsAndReplaceKeys(result, value, fullKey);
             delete result[key];
         }
     };
 
     for (const [filePath, translations] of translationsWithPath) {
         const newTranslations = { ...translations };
-        setTranslationsOnResult(newTranslations, translations);
+        flattenTranslationsAndReplaceKeys(newTranslations, translations);
         fs.writeFileSync(filePath, JSON.stringify(newTranslations, null, 2));
         console.log(`Replaced keys with UUIDs in: ${filePath}`);
     }
