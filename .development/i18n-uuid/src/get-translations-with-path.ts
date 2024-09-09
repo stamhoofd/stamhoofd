@@ -1,10 +1,11 @@
 import fs from "fs";
 import path from "path";
+import { globals } from "./globals";
 import { readTranslations } from "./read-translations";
 
 export function getTranslationsWithPath(): Map<string, Record<string, string>> {
     // Path to the directory containing your translation files (e.g., locales/en.json)
-    const localesDir = "../../shared/locales/src";
+    const localesDir = globals.I18NUUID_LOCALES_DIR;
 
     const result = new Map();
 
@@ -43,8 +44,8 @@ export function getTranslationsWithPath(): Map<string, Record<string, string>> {
 }
 
 export function getDefaultTranslations(): {translations: Record<string, string>, filePath: string} {
-    const defaultLocale = 'nl';
-    const filePath = `../../shared/locales/src/${defaultLocale}.json`;
+    const defaultLocale = globals.I18NUUID_DEFAULT_LOCALE;
+    const filePath = `${globals.I18NUUID_LOCALES_DIR}/${defaultLocale}.json`;
     const translations = readTranslations(filePath);
     return {translations, filePath};
 }

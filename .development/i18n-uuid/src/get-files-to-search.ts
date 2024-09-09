@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
+import { globals } from "./globals";
 
 export function getFilesToSearch(): string[] {
-    const root = "/Users/bjarne/Projects/stamhoofd";
+    const root = globals.I18NUUID_ROOT;
     const typescript = /^[^.]+.ts$/;
     const vue = /^[^.]+.vue$/;
 
@@ -11,11 +12,7 @@ export function getFilesToSearch(): string[] {
         vue
     ]
 
-    const excludeDirectories = [
-        'dist',
-        'esm',
-        'node_modules',
-    ]
+    const excludeDirectories = globals.I18NUUID_EXCLUDE_DIRS_ARRAY;
 
     const getAllEligibleFiles = (dir: string) => {
         const files = fs.readdirSync(dir);

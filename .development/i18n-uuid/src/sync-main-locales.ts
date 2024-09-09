@@ -1,24 +1,23 @@
 import fs from "fs";
 import path from "path";
+import { globals } from "./globals";
 import { readTranslations } from "./read-translations";
 import { writeTranslation } from "./write-translations";
 
-const defaultLocale = "nl";
-const otherMainLocales = ["en"];
-const localesDir = "../../shared/locales/src";
-
 export function syncMainLocales() {
-    console.log('Start sync main locales.');
-    const hasChanged = syncMainLocalesInDirectory(localesDir);
-    if(!hasChanged) {
-        console.log('Main locales already up to date.');
+    console.log("Start sync main locales.");
+    const hasChanged = syncMainLocalesInDirectory(globals.I18NUUID_LOCALES_DIR);
+    if (!hasChanged) {
+        console.log("Main locales already up to date.");
     }
-    console.log('Finished sync main locales.');
+    console.log("Finished sync main locales.");
 }
 
 function syncMainLocalesInDirectory(dir: string): boolean {
     let hasChanged = false;
     const files = fs.readdirSync(dir);
+    const defaultLocale = globals.I18NUUID_DEFAULT_LOCALE;
+    const otherMainLocales = globals.I18NUUID_OTHER_MAIN_LOCALES_ARRAY;
 
     // filePath, translations
     let mainTranslations: Record<string, string> | undefined;
@@ -46,8 +45,9 @@ function syncMainLocalesInDirectory(dir: string): boolean {
         }
 
         if (stats.isDirectory()) {
-            const hasChildDirectoryChanged = syncMainLocalesInDirectory(filePath);
-            if(hasChildDirectoryChanged) {
+            const hasChildDirectoryChanged =
+                syncMainLocalesInDirectory(filePath);
+            if (hasChildDirectoryChanged) {
                 hasChanged = true;
             }
         }
@@ -70,9 +70,11 @@ function syncMainLocalesInDirectory(dir: string): boolean {
                 }
 
                 if (keysAdded > 0) {
-                    console.log(`Sync main locales: added ${keysAdded} key(s) to ${filePath}.`);
+                    console.log(
+                        `Sync main locales: added ${keysAdded} key(s) to ${filePath}.`,
+                    );
                     writeTranslation(filePath, translations);
-                    if(!hasChanged) {
+                    if (!hasChanged) {
                         hasChanged = true;
                     }
                 }
