@@ -6,7 +6,6 @@ import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent
 
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../../organization/shared/ExchangePaymentEndpoint';
-import { QueueHandler } from '@stamhoofd/queues';
 
 type Params = Record<string, never>;
 class Body extends AutoEncoder {

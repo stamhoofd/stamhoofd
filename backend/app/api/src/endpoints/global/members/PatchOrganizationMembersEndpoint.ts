@@ -499,23 +499,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw Context.auth.error("Je hebt niet voldoende rechten om dit lid te verwijderen")
             }
 
-            throw Context.auth.error("Verwijderen van leden is tijdelijk uitgeschakeld.")
+            await MemberUserSyncer.onDeleteMember(member)
+            await User.deleteForDeletedMember(member.id)
+            await BalanceItem.deleteForDeletedMember(member.id)
+            await member.delete()
+            shouldUpdateSetupSteps = true
 
-            //await MemberUserSyncer.onDeleteMember(member)
-            //await User.deleteForDeletedMember(member.id)
-            //await BalanceItem.deleteForDeletedMember(member.id)
-            //await member.delete()
-            //shouldUpdateSetupSteps = true
-//
-            //// Update occupancy of this member because we removed registrations
-            //const groupIds = member.registrations.flatMap(r => r.groupId)
-            //for (const id of groupIds) {
-            //    const group = await getGroup(id)
-            //    if (group) {
-            //        // We need to update this group occupancy because we moved one member away from it
-            //        updateGroups.set(group.id, group)
-            //    }
-            //}
+            // Update occupancy of this member because we removed registrations
+            const groupIds = member.registrations.flatMap(r => r.groupId)
+            for (const id of groupIds) {
+                const group = await getGroup(id)
+                if (group) {
+                    // We need to update this group occupancy because we moved one member away from it
+                    updateGroups.set(group.id, group)
+                }
+            }
         }
 
         await Member.updateOutstandingBalance(Formatter.uniqueArray(balanceItemMemberIds))
