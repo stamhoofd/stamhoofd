@@ -274,9 +274,9 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useValidation, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -310,29 +310,6 @@ const pop = usePop();
 const organization = useOrganization();
 const present = usePresent();
 const platform = usePlatform();
-
-useValidation(errors.validator, () => {
-    const se = new SimpleErrors()
-
-    if(isLocationRequired.value) {
-        if(!location.value) {
-            se.addError(new SimpleError({
-                code: "invalid_field",
-                message: "De locatie is verplicht voor deze soort activiteit.",
-                field: "event_required"
-            }))
-        }
-    }
-
-    if (se.errors.length > 0) {
-        errors.errorBox = new ErrorBox(se)
-        return false
-    }
-
-    errors.errorBox = null
-
-    return true
-})
 
 const type = computed(() => {
     const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId)
@@ -591,17 +568,28 @@ async function save() {
         return;
     }
 
-
     errors.errorBox = null;
 
     saving.value = true;
-    
+
     if (!await errors.validator.validate()) {
         saving.value = false;
         return;
     }
 
     try {
+        //#region validate location
+        if(isLocationRequired.value) {
+            if(!location.value) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "De locatie is verplicht voor deze soort activiteit.",
+                    field: "event_required"
+                });
+            }
+        }
+        //#endregion
+
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
 
         if (props.isNew) {
@@ -627,7 +615,6 @@ async function save() {
         await pop({force: true})
     } catch (e) {
         errors.errorBox = new ErrorBox(e)
-    
     }
 
     saving.value = false;
