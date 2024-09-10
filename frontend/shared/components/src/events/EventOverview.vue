@@ -155,7 +155,7 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
@@ -170,12 +170,18 @@ import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
 
-const props = defineProps<{
-    event: Event;
-}>();
+const props = withDefaults(
+    defineProps<{
+        event: Event;
+        afterDelete?: (() => void)|null;
+    }>(), {
+        afterDelete: null
+    }
+);
 
 const title = computed(() => props.event.name);
 const $navigate = useNavigate();
+const pop = usePop();
 const organization = useOrganization();
 const context = useContext()
 const platform = usePlatform()
@@ -256,7 +262,11 @@ defineRoutes([
         paramsToProps: () => {
             return {
                 event: props.event,
-                isNew: false
+                isNew: false,
+                callback: async () => {
+                    props.afterDelete?.();
+                    await pop();
+                }
             }
         }
     },

@@ -126,7 +126,8 @@ defineRoutes([
 
             if (events.results.length === 1) {
                 return {
-                    event: events.results[0]
+                    event: events.results[0],
+                    afterDelete: afterDeleteEvent
                 }
             }
             Toast.error('Activiteit niet gevonden').show()
@@ -276,7 +277,11 @@ async function onClickEvent(event: Event) {
         return await addEvent(event)
     }
 
-    await $navigate(Routes.Event, {properties: {event}})
+    await $navigate(Routes.Event, {properties: {event, afterDelete: afterDeleteEvent}})
+}
+
+function afterDeleteEvent() {
+    fetcher.reset();
 }
 
 async function editFilter(event: MouseEvent) {
