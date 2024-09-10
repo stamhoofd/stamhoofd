@@ -139,9 +139,9 @@ const securityCode = computed(() => props.member.patchedMember.details.securityC
 
 async function renewSecurityCode() {
     if(!await CenteredMessage.confirm(
-        $t('Nieuwe beveiligingscode'),
+        $t('Wil je de beveiligingscode resetten?'),
         $t('Ja, resetten'),
-        $t('Ben je zeker dat je een nieuwe beveiligingscode wilt genereren? De huidige code zal niet meer gebruikt kunnen worden.'))) {
+        $t('De huidige code zal niet meer gebruikt kunnen worden.'))) {
         return;
     }
 
