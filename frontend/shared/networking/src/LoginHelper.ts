@@ -87,6 +87,7 @@ export class LoginHelper {
     ): Promise<{ verificationToken?: string }> {
         let tokenResponse: RequestResult<Token>
         try {
+            session.setLoadingError(null)
             tokenResponse = await session.server.request({
                 method: "POST",
                 path: "/oauth/token",

@@ -807,7 +807,21 @@ export class SessionContext implements RequestMiddleware {
         if (this.token.isRefreshing() || this.token.needsRefresh()) {
             // Already expired.
             console.log("Request started with expired access token, refreshing before starting request...")
-            await this.token.refresh(this.server, () => request.shouldRetry)
+            try {
+                await this.token.refresh(this.server, () => request.shouldRetry)
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) { 
+                    if (e.hasCode("invalid_refresh_token")) {
+                        await this.logout()                        
+                        throw new SimpleError({
+                            code: '',
+                            message: '',
+                            human: 'Je bent niet langer ingelogd. Log opnieuw in om verder te gaan.'
+                        });
+                    }
+                }
+                throw e;
+            }
         }
 
         request.headers["Authorization"] = "Bearer " + this.token.token.accessToken;
@@ -853,7 +867,7 @@ export class SessionContext implements RequestMiddleware {
                     if (e.hasCode("invalid_refresh_token")) {
                         console.log("Refresh token is invalid, logout")
                         this.setLoadingError(e)
-                        Toast.fromError(e).show()
+                        await this.logout()
                         return false;
                     }
                 }
