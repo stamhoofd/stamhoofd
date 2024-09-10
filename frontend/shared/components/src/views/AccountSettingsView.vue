@@ -88,7 +88,7 @@
 <script lang="ts" setup>
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, useContext, useErrors, usePatch, usePlatform, useUser, useValidation } from "@stamhoofd/components";
+import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, usePatch, usePlatform, useUser, useValidation } from "@stamhoofd/components";
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
 import { computed, onMounted, ref } from 'vue';
