@@ -992,15 +992,18 @@ export class AdminPermissionChecker {
             })
         }
 
-        if (data.details.securityCode !== undefined) {
-            // Unset silently
-            data.details.securityCode = undefined
-        }
-
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
         const isSetFinancialSupportTrue = data.details.shouldApplyReducedPrice;
         const isUserManager = this.isUserManager(member);
+
+        if (data.details.securityCode !== undefined) {
+            // can only be set to null, and only by the user manager
+            if(!isUserManager || data.details.securityCode !== null) {
+                // Unset silently
+                data.details.securityCode = undefined
+            }
+        }
 
         if (hasRecordAnswers) {
             if (!(data.details.recordAnswers instanceof PatchMap)) {
