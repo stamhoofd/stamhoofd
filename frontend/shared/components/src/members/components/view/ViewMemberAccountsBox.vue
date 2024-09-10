@@ -54,25 +54,32 @@
             </STList>
         </template>
 
-        <template v-if="member.patchedMember.details.securityCode">
+        <div v-if="securityCode" class="hover-box container">
             <hr>
-            <h2>Beveiligingscode</h2>
+            <h2 class="style-with-button">
+                <div>Beveiligingscode</div>
+                <div v-if="shouldShowResetSecurityCode">
+                    <button type="button" class="button icon retry hover-show" @click="renewSecurityCode" />
+                </div>
+            </h2>
             <p>Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders.</p>
 
             <p class="style-description">
-                <code v-copyable class="style-inline-code style-copyable">{{ Formatter.spaceString(member.patchedMember.details.securityCode, 4, '\u2011') }}</code>
+                <code v-copyable class="style-inline-code style-copyable">{{ Formatter.spaceString(securityCode, 4, '\u2011') }}</code>
             </p>
-        </template>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User } from '@stamhoofd/structures';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useAuth } from '../../../hooks';
+import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
 
@@ -86,7 +93,9 @@ const auth = useAuth()
 const app = useAppContext()
 const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, PermissionLevel.Write))
 const deletingUsers = ref(new Set<string>())
+const isRenewingSecurityCode = ref(false);
 const platformFamilyManager = usePlatformFamilyManager()
+const $t = useTranslate();
 
 const sortedUsers = computed(() => {
     return props.member.patchedMember.users.slice().sort((a, b) => {
@@ -95,6 +104,10 @@ const sortedUsers = computed(() => {
             Sorter.byBooleanValue(a.hasAccount, b.hasAccount),
         )
     })
+})
+
+const shouldShowResetSecurityCode = computed(() => {
+    return auth.canAccessPlatformMember(props.member, PermissionLevel.Full);
 })
 
 async function deleteUser(user: User) {
@@ -120,5 +133,41 @@ async function deleteUser(user: User) {
 
 function isDeletingUser(user: User) {
     return deletingUsers.value.has(user.id)
+}
+
+const securityCode = computed(() => props.member.patchedMember.details.securityCode);
+
+async function renewSecurityCode() {
+    if(!await CenteredMessage.confirm(
+        $t('Wil je de beveiligingscode resetten?'),
+        $t('Ja, resetten'),
+        $t('De huidige code zal niet meer gebruikt kunnen worden.'))) {
+        return;
+    }
+
+    if (isRenewingSecurityCode.value) {
+        return
+    }
+
+    isRenewingSecurityCode.value = true;
+    
+    try {
+        const id = props.member.id
+        const patch = MemberWithRegistrationsBlob.patch({
+            id,
+            details: MemberDetails.patch({
+                securityCode: null
+            })
+        });
+
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
+        arr.addPatch(patch)
+        await platformFamilyManager.isolatedPatch([props.member], arr)
+        Toast.success($t('Nieuwe beveiligingscode gegenereerd')).show()
+    } catch (e) {
+        Toast.fromError(e).show()
+    }
+
+    isRenewingSecurityCode.value = false;
 }
 </script>
