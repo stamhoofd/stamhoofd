@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/redirecter",
-    "version": "2.34.1",
+    "version": "2.35.0",
     "main": "index.ts",
     "license": "UNLICENCED",
     "scripts": {
