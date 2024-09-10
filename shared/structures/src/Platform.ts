@@ -211,7 +211,7 @@ export class PlatformEventType extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true, version: 288 })
     minimumDays: null | number = null
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 334 })
     isLocationRequired: boolean = false
 }
 
