@@ -67,8 +67,10 @@ const showContextMenu = async () => {
         --block-width: 25px;
     }
 
-    &:hover {
-        opacity: 0.8;
+    @media (hover: hover) {
+        &:hover {
+            opacity: 0.8;
+        }
     }
 
     &:active {
