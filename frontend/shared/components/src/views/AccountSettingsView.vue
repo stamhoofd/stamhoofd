@@ -58,9 +58,19 @@
                     </template>
 
 
-                    <p class="style-title-list">
+                    <h3 class="style-title-list">
                         Account verwijderen
-                    </p>
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" @click.prevent="logout">
+                    <template #left>
+                        <span class="icon logout" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Uitloggen
+                    </h3>
                 </STListItem>
             </STList>
 
@@ -72,21 +82,6 @@
                 </p>
             </template>
         </main>
-
-        <STToolbar class="sticky">
-            <template v-if="($isMobile || $isIOS || $isAndroid)" #right>
-                <button class="button secundary" type="button" @click="logout">
-                    <span class="icon logout" />
-                    <span>Uitloggen</span>
-                </button>
-            </template>
-            <template v-else #left>
-                <button class="button secundary" type="button" @click="logout">
-                    <span class="icon logout" />
-                    <span>Uitloggen</span>
-                </button>
-            </template>
-        </STToolbar>
     </div>
 </template>
 
