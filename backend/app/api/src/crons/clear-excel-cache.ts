@@ -1,8 +1,6 @@
-import fs from "fs";
-import fsPromises from "fs/promises";
-import path from "path";
+import fs from "fs/promises";
 
-export function clearExcelCache() {
+export async function clearExcelCache() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
@@ -13,19 +11,18 @@ export function clearExcelCache() {
 
     const dateLimit = new Date(currentYear, currentMonth, currentDay - maxDaysInCache, 0,0,0,0);
 
-    const files = fs.readdirSync(dir);
+    const files = await fs.readdir(dir, {withFileTypes: true});
 
     for (const file of files) {
-        const filePath = path.join(dir, file);
-        const stats = fs.statSync(filePath);
-
-        if (stats.isDirectory()) {
+        if (file.isDirectory()) {
             try {
-                const date = getDateFromDirectoryName(file);
+                const date = getDateFromDirectoryName(file.name);
                 const shouldDelete = date < dateLimit;
 
                 if(shouldDelete) {
-                    deleteDirectory(filePath);
+                    const path = file.path + '/' + file.name;
+                    await fs.rm(path, { recursive: true, force: true })
+                    console.log("Removed", path)
                 }
             } catch(error) {
                 console.error(error);
@@ -58,10 +55,4 @@ function getDateFromDirectoryName(file: string): Date {
     }
 
     return new Date(year, month - 1, day);
-}
-
-function deleteDirectory(path: fs.PathLike) {
-    fsPromises.rm(path, { recursive: true, force: true })
-        .then(() => console.log("Removed", path))
-        .catch(console.error)
 }
