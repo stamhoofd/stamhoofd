@@ -287,6 +287,7 @@ import { useContext, useOrganization, usePatch, usePlatform } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 import SearchOrganizationView from '../members/SearchOrganizationView.vue';
+import DeleteView from '../views/DeleteView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -725,38 +726,50 @@ async function addRegistrations() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('86b98821-ab1e-4be0-9a8e-f09239a88f88'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('338cb29d-2ceb-49cc-86c2-662b0c259eb1'))) {
-        return
-    }
-
     if (saving.value || deleting.value) {
         return;
     }
 
-    deleting.value = true;
+    const confirmationCode = name.value;
 
-    try {
-        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
-        arr.addDelete(props.event.id)
+    await present({
+        components: [
+            new ComponentWithProperties(DeleteView, {
+                title: $t('Verwijder deze activiteit?'),
+                description: $t('Ben je 100% zeker dat je deze activiteit wilt verwijderen? Vul dan de naam van de activiteit in ter bevestiging. Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.'),
+                confirmationTitle: $t('Bevestig de naam van de activiteit'),
+                confirmationPlaceholder: $t('Naam van de activiteit'),
+                confirmationCode,
+                checkboxText: $t('Ja, ik ben 100% zeker'),
+                onDelete: async () => {
+                    deleting.value = true;
 
-        await context.value.authenticatedServer.request({
-            method: 'PATCH',
-            path: '/events',
-            body: arr,
-            decoder: new ArrayDecoder(Event as Decoder<Event>),
-        })
+                    try {
+                        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+                        arr.addDelete(props.event.id);
 
-        GlobalEventBus.sendEvent('event-deleted', props.event).catch(console.error)
+                        await context.value.authenticatedServer.request({
+                            method: 'PATCH',
+                            path: '/events',
+                            body: arr,
+                            decoder: new ArrayDecoder(Event as Decoder<Event>),
+                        })
 
-        Toast.success($t('50df35d9-992f-4697-9150-aa8643ee4f18')).show()
-        props.callback?.()
-        await pop({force: true})
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
-    
-    }
+                        GlobalEventBus.sendEvent('event-deleted', props.event).catch(console.error)
 
-    deleting.value = false;
+                        Toast.success($t('50df35d9-992f-4697-9150-aa8643ee4f18')).show()
+                        props.callback?.()
+                        await pop({force: true})
+                    } catch (e) {
+                        errors.errorBox = new ErrorBox(e);
+                    }
+
+                    return true;
+                }
+            })
+        ],
+        modalDisplayStyle: "sheet"
+    });
 }
 
 const shouldNavigateAway = async () => {
