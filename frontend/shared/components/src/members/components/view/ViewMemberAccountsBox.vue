@@ -58,7 +58,7 @@
             <hr>
             <h2 class="style-with-button">
                 <div>Beveiligingscode</div>
-                <div>
+                <div v-if="shouldShowResetSecurityCode">
                     <button type="button" class="button icon retry hover-show" @click="renewSecurityCode" />
                 </div>
             </h2>
@@ -106,6 +106,10 @@ const sortedUsers = computed(() => {
     })
 })
 
+const shouldShowResetSecurityCode = computed(() => {
+    return auth.canAccessPlatformMember(props.member, PermissionLevel.Full);
+})
+
 async function deleteUser(user: User) {
     if (deletingUsers.value.has(user.id)) {
         return
@@ -136,7 +140,7 @@ const securityCode = computed(() => props.member.patchedMember.details.securityC
 async function renewSecurityCode() {
     if(!await CenteredMessage.confirm(
         $t('Nieuwe beveiligingscode'),
-        $t('Bevestig'),
+        $t('Ja, resetten'),
         $t('Ben je zeker dat je een nieuwe beveiligingscode wilt genereren? De huidige code zal niet meer gebruikt kunnen worden.'))) {
         return;
     }
