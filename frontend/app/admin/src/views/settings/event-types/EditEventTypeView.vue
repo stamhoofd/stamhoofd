@@ -45,8 +45,8 @@
             </STInputBox>
         </div>
 
-        <Checkbox v-model="isLocationRequired">{{ $t('De locatie is verplicht') }}
-            <p class="style-description-small">{{$t('Indien aangevinkt kan deze soort activiteit niet aangemaakt worden zonder dat de locatie is ingevuld.')}}</p>
+        <Checkbox v-model="isLocationRequired">{{ $t('7a63f22a-1f4d-4dfa-9030-47137ff52bab') }}
+            <p class="style-description-small">{{$t('07963171-3e53-4aa7-b5f1-bce9470a62e9')}}</p>
         </Checkbox>
     </SaveView>
 </template>

@@ -735,12 +735,12 @@ async function deleteMe() {
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: $t('Verwijder deze activiteit?'),
-                description: $t('Ben je 100% zeker dat je deze activiteit wilt verwijderen? Vul dan de naam van de activiteit in ter bevestiging. Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.'),
-                confirmationTitle: $t('Bevestig de naam van de activiteit'),
-                confirmationPlaceholder: $t('Naam van de activiteit'),
+                title: $t('14a63393-32e4-448b-8cb5-aa0e0629667b'),
+                description: $t('52312517-de77-4dd5-8c77-cef97c573578'),
+                confirmationTitle: $t('b584fc1c-6b13-442b-b2cc-f59e39fea6e7'),
+                confirmationPlaceholder: $t('deb2a251-2eab-4132-849e-6b1a8bc87300'),
                 confirmationCode,
-                checkboxText: $t('Ja, ik ben 100% zeker'),
+                checkboxText: $t('4a1ad6f2-d061-4fe0-8206-8540442ad038'),
                 onDelete: async () => {
                     deleting.value = true;
 

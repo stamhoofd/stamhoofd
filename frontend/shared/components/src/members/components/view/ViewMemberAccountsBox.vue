@@ -139,9 +139,9 @@ const securityCode = computed(() => props.member.patchedMember.details.securityC
 
 async function renewSecurityCode() {
     if(!await CenteredMessage.confirm(
-        $t('Wil je de beveiligingscode resetten?'),
-        $t('Ja, resetten'),
-        $t('De huidige code zal niet meer gebruikt kunnen worden.'))) {
+        $t('db2fa1f9-4a3d-4f03-ad7d-fba479452d14'),
+        $t('3341eabb-512a-40f9-8679-6420ae92f1c6'),
+        $t('d9870397-d89a-47ec-8ae6-0601e49b9116'))) {
         return;
     }
 
@@ -163,7 +163,7 @@ async function renewSecurityCode() {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
         arr.addPatch(patch)
         await platformFamilyManager.isolatedPatch([props.member], arr)
-        Toast.success($t('Nieuwe beveiligingscode gegenereerd')).show()
+        Toast.success($t('0c427a9d-2485-498f-bb88-a420843745f4')).show()
     } catch (e) {
         Toast.fromError(e).show()
     }
