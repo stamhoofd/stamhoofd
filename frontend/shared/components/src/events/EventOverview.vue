@@ -155,7 +155,7 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
@@ -163,7 +163,7 @@ import ExternalOrganizationContainer from '../containers/ExternalOrganizationCon
 import { appToUri } from '../context';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
-import { useContext, useOrganization, usePlatform } from '../hooks';
+import { useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
 import { MembersTableView, useChooseOrganizationMembersForGroup } from '../members';
 import { Toast } from '../overlays/Toast';
 import ImageComponent from '../views/ImageComponent.vue';
@@ -179,6 +179,7 @@ const $navigate = useNavigate();
 const organization = useOrganization();
 const context = useContext()
 const platform = usePlatform()
+const pop = usePop();
 const groupOrganization = ref<Organization | null>(null);
 
 function setOrganization(o: Organization) {
@@ -350,6 +351,11 @@ async function addMembers() {
     })
 }
 
+useGlobalEventListener('event-deleted', async (event: Event) => {
+    if(event.id === props.event.id) {
+        await pop({force: true})
+    }
+})
 </script>
 
 <style lang="scss">

@@ -63,7 +63,7 @@ import { useEventsObjectFetcher } from '../fetchers';
 import { getEventUIFilterBuilders } from '../filters/filterBuilders';
 import { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
-import { useAuth, useContext, useOrganization, usePlatform, useUser } from '../hooks';
+import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform, useUser } from '../hooks';
 import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
 import { Toast } from '../overlays/Toast';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
@@ -337,6 +337,10 @@ function getRequiredFilter(): StamhoofdFilter|null  {
 
     return filters;
 }
+
+useGlobalEventListener('event-deleted', async () => {
+    fetcher.reset()
+})
 
 watch(selectedYear, () => {
     fetcher.reset()

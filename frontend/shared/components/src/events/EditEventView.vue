@@ -276,7 +276,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, GlobalEventBus, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -745,6 +745,8 @@ async function deleteMe() {
             body: arr,
             decoder: new ArrayDecoder(Event as Decoder<Event>),
         })
+
+        GlobalEventBus.sendEvent('event-deleted', props.event).catch(console.error)
 
         Toast.success($t('50df35d9-992f-4697-9150-aa8643ee4f18')).show()
         props.callback?.()
