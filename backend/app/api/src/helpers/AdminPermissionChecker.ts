@@ -1000,7 +1000,7 @@ export class AdminPermissionChecker {
         if (data.details.securityCode !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
 
-            // can only be set to null, and only by the user manager
+            // can only be set to null, and only if can access member with full access
             if(!hasFullAccess || data.details.securityCode !== null) {
                 // Unset silently
                 data.details.securityCode = undefined
