@@ -55,11 +55,10 @@ const root = new ComponentWithProperties(PromiseView, {
                 component =  (await getScopedRegistrationRootFromUrl())
             }
 
-            // Check routes after mounting component
-            checkGlobalRoutes().catch(console.error)
+            console.log('Resolved root component')
             return component
         } catch (e) {
-            console.error(e)
+            console.error('Error in dashboard.App promise', e)
             Toast.fromError(e).setHide(null).show()
             throw e
         }
@@ -83,16 +82,18 @@ async function checkGlobalRoutes() {
         // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
 
         const token = queryString.get('token');
-        const session = reactive((parts[1] ? (await SessionContext.createFrom({organizationId: parts[1]})) : new SessionContext(null)) as Raw<SessionContext>) as SessionContext;
+        const session = parts[1] ? (await SessionContext.createFrom({organizationId: parts[1]})) : new SessionContext(null);
         const platformManager = await PlatformManager.createFromCache(session, false)
         modalStack.value.present({
             adjustHistory: false,
+            animated: false,
             components: [
                 new ComponentWithProperties(ContextProvider, {
                     context: markRaw({
                         $context: session,
                         $platformManager: platformManager,
                         reactive_navigation_url: currentPath,
+                        stamhoofd_app: 'auto'
                     }),
                     root: new ComponentWithProperties(ForgotPasswordResetView, { token })
                 })
@@ -169,6 +170,7 @@ async function checkGlobalRoutes() {
                             $context: session,
                             $platformManager: platformManager,
                             reactive_navigation_url: currentPath,
+                            stamhoofd_app: 'auto'
                         }),
                         root: new ComponentWithProperties(NavigationController, {
                             root: new ComponentWithProperties(PaymentPendingView, { 
@@ -210,7 +212,7 @@ async function checkGlobalRoutes() {
 }
 
 
-onMounted(() => {
+onMounted(async () => {
     if (!modalStack.value) {
         throw new Error("Modal stack not loaded")
     }
@@ -238,11 +240,21 @@ onMounted(() => {
         })
     })
 
-    AppManager.shared.checkUpdates({
-        visibleCheck: 'spinner',
-        visibleDownload: true,
-        installAutomatically: true
-    }).catch(console.error)
+    // First check updates, and only after that, check for global routes
+    // reason: otherwise the checkUpdates will dismiss the modal stack, and that can hide the reset password view instead of the update view
+    try {
+        await AppManager.shared.checkUpdates({
+            visibleCheck: 'spinner',
+            visibleDownload: true,
+            installAutomatically: true
+        })
+    } catch (e) {
+        console.error(e)
+    }
+
+    // Check routes
+    checkGlobalRoutes().catch(console.error)
+
 })
 
 async function unsubscribe(id: string, token: string, type: 'all' | 'marketing') {

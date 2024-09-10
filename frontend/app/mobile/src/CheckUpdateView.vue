@@ -1,5 +1,5 @@
 <template>
-    <LoadingView v-if="showLoading" />
+    <LoadingView v-if="showLoading" class="check-update-loading-view" />
     <div v-else class="st-view check-update-view">
         <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true" />
 
@@ -70,6 +70,11 @@ export default class CheckUpdateView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
+        console.log('Mounted CheckUpdateView')
+        if (!this.status.shouldBeVisible) {
+            console.log('Update should not be visible: dismiss on mount')
+            this.dismiss({force: true, animated: false})
+        }
         this.status.setDoHide(() => {
             this.dismiss({force: true, animated: false})
         })

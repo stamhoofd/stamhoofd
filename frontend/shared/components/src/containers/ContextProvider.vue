@@ -1,6 +1,6 @@
 <template>
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
-    <div>
+    <div class="context-provider-view">
         <ComponentWithPropertiesInstance :component="root" :key="root.key" />
     </div>
 </template>

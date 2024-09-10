@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="forgot-password-reset-view-container">
         <LoadingView v-if="loadingSession" key="loadingView" />
         <form v-else key="form" class="forgot-password-reset-view st-view" @submit.prevent="submit">
             <STNavigationBar :title="title" />
@@ -57,6 +57,7 @@ import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, Loadin
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { NewUser, Token } from '@stamhoofd/structures';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
+import { reactive } from 'vue';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({

@@ -1,6 +1,6 @@
 <template>
     <transition name="fade" appear>
-        <div class="st-view">
+        <div class="st-view loading-view-container">
             <STNavigationBar v-if="errorBox" title="Fout" />
 
             <div v-if="!errorBox" class="loading-view">

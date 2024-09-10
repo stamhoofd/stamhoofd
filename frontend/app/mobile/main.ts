@@ -260,9 +260,10 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
         throw e
     }
 }
-
+let isCheckingUpdates = false
+let lastUpdateCheck: Date|null = null;
 CApp.addListener('appStateChange', (state) => {
-    if (state.isActive && STAMHOOFD.environment !== 'staging') {
+    if (state.isActive && STAMHOOFD.environment !== 'staging' && (lastUpdateCheck === null || lastUpdateCheck.getTime() < Date.now() - 5 * 1000)) {
         // (don't check on staging)
         AppManager.shared.checkUpdates({
             checkTimeout: 10 * 1000
@@ -277,13 +278,14 @@ CApp.getInfo().then((info) => {
     })
 }).catch(console.error);
 
-let isCheckingUpdates = false
+
 AppManager.shared.checkUpdates = async (options) => {
     if (isCheckingUpdates) {
         console.log('Already checking updates. Skipped.')
         return
     }
     isCheckingUpdates = true
+    lastUpdateCheck = new Date()
     const status = new UpdateStatus(options)
     try {
         await status.start()
