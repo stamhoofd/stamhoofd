@@ -265,6 +265,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
                 throw Context.auth.error()
             }
+
+            if(event.groupId) {
+                await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
+                event.groupId = null;
+            }
             
             await event.delete();
         }
