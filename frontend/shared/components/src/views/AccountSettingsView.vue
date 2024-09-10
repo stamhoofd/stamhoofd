@@ -8,14 +8,14 @@
             </h1>
             <p>Met een account kan je één of meerdere leden beheren.</p>
 
-            <p v-if="isUserModeOrganization && patchedUser.organizationId === null" class="error-box icon privacy">
+            <p v-if="isUserModeOrganization && patched.organizationId === null" class="error-box icon privacy">
                 Dit is een platform account
             </p>
         
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <form @submit.prevent="save">
-                <STInputBox title="Mijn naam" error-fields="firstName,lastName" :error-box="errorBox">
+                <STInputBox title="Mijn naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
                     <div class="input-group">
                         <div>
                             <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
@@ -26,11 +26,11 @@
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" />
+                <EmailInput v-model="email" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" />
 
                 <div class="style-button-bar">
-                    <LoadingButton :loading="saving" class=" ">
-                        <button id="submit" class="button primary" type="submit">
+                    <LoadingButton :loading="saving">
+                        <button id="submit" class="button primary" type="submit" :disabled="!hasChanges">
                             <span>Opslaan</span>
                         </button>
                     </LoadingButton>
@@ -52,7 +52,7 @@
 
                 <STListItem :selectable="true" @click.prevent="deleteRequest">
                     <template #left>
-                        <LoadingButton :loading="deletingAccount">
+                        <LoadingButton>
                             <span class="icon trash" />
                         </LoadingButton>
                     </template>
@@ -85,193 +85,147 @@
     </div>
 </template>
 
-<script lang="ts">
-import { patchContainsChanges } from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, CenteredMessage, ChangePasswordView, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties, useDismiss, usePop, usePresent } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, usePatch, usePlatform, useUser, useValidation } from "@stamhoofd/components";
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
-import { User, Version } from "@stamhoofd/structures";
-import { sleep } from '@stamhoofd/utility';
+import { computed, onMounted, ref } from 'vue';
+import DeleteView from './DeleteView.vue';
+
+const $context = useContext();
+const $platform = usePlatform();
+const $user = useUser();
+const errors = useErrors();
+const present = usePresent();
+const dismiss = useDismiss();
+const pop = usePop();
+const $t = useTranslate();
+const {patched, addPatch, hasChanges, patch} = usePatch($user.value!);
 
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        DateSelection,
-        RadioGroup,
-        BackButton,
-        LoadingButton,
-        EmailInput
-    },
-    navigation: {
-        title: 'Mijn account'
+const isUserModeOrganization = STAMHOOFD.userMode === 'organization';
+const saving = ref(false);
+const policies = computed(() => $platform.value.config.privacy.policies)
+
+onMounted(() => {
+    $context.value.fetchUser(false).catch(console.error)
+})
+
+const email = computed({
+    get: () => patched.value.email,
+    set: (email) => {
+        addPatch({email});
     }
 })
-export default class AccountSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    showDomainSettings = true
-    
-    userPatch = User.patch({})
-    deletingAccount = false;
 
-    created() {
-        this.userPatch.id = this.$user!.id
+const firstName = computed({
+    get: () => patched.value.firstName,
+    set: (firstName) => {
+        addPatch({firstName});
+    }
+})
+
+const lastName = computed({
+    get: () => patched.value.lastName,
+    set: (lastName) => {
+        addPatch({lastName});
+    }
+})
+
+useValidation(errors.validator, () => {
+    const se = new SimpleErrors();
+
+    if (se.errors.length > 0) {
+        errors.errorBox = new ErrorBox(se)
+        return false
     }
 
-    mounted() {
-        // Refresh
-        this.$context.fetchUser(false).catch(console.error)
+    errors.errorBox = null;
+    return true;
+});
+
+async function save() {
+    if (saving.value) {
+        return;
     }
 
-    get patchedUser() {
-        return this.$user!.patch(this.userPatch)
+    const isValid = await errors.validator.validate()
+
+    if (!isValid) {
+        return;
     }
 
-    get isUserModeOrganization() {
-        return STAMHOOFD.userMode === 'organization'
-    }
+    saving.value = true
 
-    get email() {
-        return this.patchedUser.email
-    }
+    try {
+        const result = await LoginHelper.patchUser($context.value, patch.value)
 
-    set email(email: string) {
-        this.userPatch = this.userPatch.patch({
-            email
-        })
-    }
-
-    get isAdmin() {
-        return !!this.$user?.permissions 
-    }
-
-    get firstName() {
-        return this.patchedUser.firstName
-    }
-
-    set firstName(firstName: string | null) {
-        this.userPatch = this.userPatch.patch({
-            firstName
-        })
-    }
-
-    get lastName() {
-        return this.patchedUser.lastName
-    }
-
-    set lastName(lastName: string | null) {
-        this.userPatch = this.userPatch.patch({
-            lastName
-        })
-    }
-
-    get policies() {
-        return this.$platform.config.privacy.policies
-    }
-
-    get privacyUrl() {
-        if (!this.$organization) {
-            return null;
-        }
-
-        if (this.$organization.meta.privacyPolicyUrl) {
-            return this.$organization.meta.privacyPolicyUrl
+        if (result.verificationToken) {
+            await present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: patched.value.email }).setDisplayStyle("sheet"))
+        } else {
+            const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
+            toast.show()
         }
         
-        if (this.$organization.meta.privacyPolicyFile) {
-            return this.$organization.meta.privacyPolicyFile.getPublicPath()
-        }
-        return null
-    }
-
-    async save() {
-        if (this.saving) {
-            return;
-        }
-
-        const errors = new SimpleErrors()
-        // validations here
-
-        let valid = false
-
-        if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
-            valid = true
-        }
-        valid = valid && await this.validator.validate()
-
-        if (!valid) {
-            return;
-        }
-
-        this.saving = true
-
-        try {
-            const result = await LoginHelper.patchUser(this.$context, this.userPatch)
-
-            if (result.verificationToken) {
-                this.present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: this.patchedUser.email }).setDisplayStyle("sheet"))
-            } else {
-                const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
-                toast.show()
-            }
-
-            // Create a new patch
-            this.userPatch = User.patch({ id: this.$user!.id })
-            this.dismiss({force: true});
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
-        }
-
-        this.saving = false
-    }
-
-    async deleteRequest() {
-        this.deletingAccount = true;
-
-        try {
-            await sleep(2000)
-
-            if (await CenteredMessage.confirm("Ben je zeker dat je jouw account wilt verwijderen?", "Verwijderen", "Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.")) {
-                await this.$context.deleteAccount()
-
-                Toast.success("Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.").show()
-                await this.pop({force: true})
-            }
-        } finally {
-            this.deletingAccount = false
-        }
-    }
-
-    async shouldNavigateAway() {
-        if (!patchContainsChanges(this.userPatch, this.$user!, { version: Version })) {
-            return true;
-        }
-        if (await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Sluiten zonder opslaan")) {
-            return true;
-        }
-        return false;
-    }
-
-    openChangePassword() {
-        this.present(new ComponentWithProperties(ChangePasswordView, {}).setDisplayStyle("sheet"))
-    }
-
-    async logout() {
-        if (await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
-            await this.$context.logout()
-            await this.pop({force: true})
-        }
+        await dismiss({force: true});
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    } finally {
+        saving.value = false
     }
 }
+
+async function  deleteRequest() {
+    const user = $user.value;
+    if(!user) {
+        return;
+    }
+
+    const confirmationCode = user.email;
+
+    await present({
+        components: [
+            new ComponentWithProperties(DeleteView, {
+                title: 'Verwijder jouw account?',
+                description: `Ben je 100% zeker dat je jouw account wilt verwijderen? Vul dan je huidige e-mailadres in ter bevestiging. Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.`,
+                confirmationTitle: 'Bevestig je e-mailadres',
+                confirmationPlaceholder: 'Huidige e-mailadres',
+                confirmationCode,
+                checkboxText: 'Ja, ik ben 100% zeker',
+                onDelete: async () => {
+                    await $context.value.deleteAccount()
+
+                    Toast.success("Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.").show()
+                    await pop({force: true})
+                    return true;
+                }
+            })
+        ],
+        modalDisplayStyle: "sheet"
+    });
+}
+
+async function openChangePassword() {
+    await present(new ComponentWithProperties(ChangePasswordView, {}).setDisplayStyle("sheet"))
+}
+
+async function logout() {
+    if (await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
+        await $context.value.logout()
+        await pop({force: true})
+    }
+}
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+}
+
+defineExpose({
+    shouldNavigateAway
+})
 </script>
