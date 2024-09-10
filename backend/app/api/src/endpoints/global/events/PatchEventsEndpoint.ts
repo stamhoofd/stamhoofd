@@ -256,6 +256,24 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             events.push(event)
         }
 
+        for (const id of request.body.getDeletes()) {
+            const event = await Event.getByID(id);
+            if (!event) {
+                throw new SimpleError({ code: "not_found", message: "Event not found", statusCode: 404 });
+            }
+
+            if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
+                throw Context.auth.error()
+            }
+
+            if(event.groupId) {
+                await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
+                event.groupId = null;
+            }
+            
+            await event.delete();
+        }
+
         return new Response(
             await AuthenticatedStructures.events(events)
         );
