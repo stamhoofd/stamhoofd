@@ -456,14 +456,14 @@ async function doCheckPayments(payments: Payment[]) {
     }
 }
 
-// Check payments between 11 minutes and 24 hours, newest first
+// Check payments between 11 minutes and 2 hours, oldest first
 async function checkPayments() {
     if (STAMHOOFD.environment === "development") {
-        return;
+        //return;
     }
 
     const timeout = 60 * 1000 * 11;
-    const timeout2 = 60 * 1000 * 60 * 23; // 1 hour pause
+    const timeout2 = 60 * 1000 * 60 * 2;
 
     const payments = await Payment.where({
         status: {
@@ -486,12 +486,12 @@ async function checkPayments() {
             }
         ],
     }, {
-        limit: 100,
+        limit: 500,
 
-        // Return newest payments first
+        // Return oldest payments first
         sort: [{
             column: 'createdAt',
-            direction: 'DESC'
+            direction: 'ASC'
         }]
     })
 
@@ -499,13 +499,13 @@ async function checkPayments() {
     await doCheckPayments(payments)
 }
 
-// Check and mark payments as expired that took too long
+// Check and mark payments older than 2 hours
 async function checkOldPayments() {
     if (STAMHOOFD.environment === "development") {
-        return;
+        //return;
     }
 
-    const timeout = 60 * 1000 * 60 * 24;
+    const timeout = 60 * 1000 * 60 * 2;
     
     const payments = await Payment.where({
         status: {
@@ -522,7 +522,7 @@ async function checkOldPayments() {
             value: new Date(new Date().getTime() - timeout)
         },
     }, {
-        limit: 100,
+        limit: 500,
 
         // Return newest payments first
         sort: [{
