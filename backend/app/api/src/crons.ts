@@ -506,7 +506,8 @@ async function checkOldPayments() {
     }
 
     const timeout = 60 * 1000 * 60 * 2;
-    
+    const timeout2 = 60 * 1000 * 60 * 24 * 2; // Maximum keep checking for 2 days
+
     const payments = await Payment.where({
         status: {
             sign: "IN",
@@ -517,17 +518,23 @@ async function checkOldPayments() {
             value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
         },
         // Check all payments that are 11 minutes old and are still pending
-        createdAt: {
-            sign: "<",
-            value: new Date(new Date().getTime() - timeout)
-        },
+        createdAt: [
+            {
+                sign: "<",
+                value: new Date(new Date().getTime() - timeout)
+            },
+            {
+                sign: ">",
+                value: new Date(new Date().getTime() - timeout2)
+            }
+        ],
     }, {
         limit: 500,
 
         // Return newest payments first
         sort: [{
             column: 'createdAt',
-            direction: 'DESC'
+            direction: 'ASC'
         }]
     })
 
