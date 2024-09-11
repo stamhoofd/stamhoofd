@@ -531,7 +531,7 @@ async function checkOldPayments() {
     }, {
         limit: 500,
 
-        // Return newest payments first
+        // Return oldest payments first
         sort: [{
             column: 'createdAt',
             direction: 'ASC'
