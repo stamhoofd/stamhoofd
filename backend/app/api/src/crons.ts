@@ -426,42 +426,7 @@ async function checkComplaints() {
     }
 }
 
-// Keep checking pending paymetns for 3 days
-async function checkPayments() {
-    if (STAMHOOFD.environment === "development") {
-        return;
-    }
-
-    const timeout = 60*1000*31;
-    
-    // TODO: only select the ID + organizationId
-    const payments = await Payment.where({
-        status: {
-            sign: "IN",
-            value: [PaymentStatus.Created, PaymentStatus.Pending]
-        },
-        method: {
-            sign: "IN",
-            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
-        },
-        // Check all payments that are 11 minutes old and are still pending
-        createdAt: {
-            sign: "<",
-            value: new Date(new Date().getTime() - timeout)
-        },
-    }, {
-        limit: 100,
-
-        // Return oldest payments first
-        // If at some point, they are still pending after 1 day, their status should change to failed
-        sort: [{
-            column: 'createdAt',
-            direction: 'ASC'
-        }]
-    })
-
-    console.log("[DELAYED PAYMENTS] Checking pending payments: "+payments.length)
-
+async function doCheckPayments(payments: Payment[]) {
     for (const payment of payments) {
         try {
             if (payment.organizationId) {
@@ -489,6 +454,85 @@ async function checkPayments() {
             console.error(e)
         }
     }
+}
+
+// Check payments between 11 minutes and 24 hours, newest first
+async function checkPayments() {
+    if (STAMHOOFD.environment === "development") {
+        return;
+    }
+
+    const timeout = 60 * 1000 * 11;
+    const timeout2 = 60 * 1000 * 60 * 23; // 1 hour pause
+
+    const payments = await Payment.where({
+        status: {
+            sign: "IN",
+            value: [PaymentStatus.Created, PaymentStatus.Pending]
+        },
+        method: {
+            sign: "IN",
+            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
+        },
+        // Check all payments that are 11 minutes old and are still pending
+        createdAt: [
+            {
+                sign: "<",
+                value: new Date(new Date().getTime() - timeout)
+            },
+            {
+                sign: ">",
+                value: new Date(new Date().getTime() - timeout2)
+            }
+        ],
+    }, {
+        limit: 100,
+
+        // Return newest payments first
+        sort: [{
+            column: 'createdAt',
+            direction: 'DESC'
+        }]
+    })
+
+    console.log("[DELAYED PAYMENTS] Checking pending payments: "+payments.length)
+    await doCheckPayments(payments)
+}
+
+// Check and mark payments as expired that took too long
+async function checkOldPayments() {
+    if (STAMHOOFD.environment === "development") {
+        return;
+    }
+
+    const timeout = 60 * 1000 * 60 * 24;
+    
+    const payments = await Payment.where({
+        status: {
+            sign: "IN",
+            value: [PaymentStatus.Created, PaymentStatus.Pending]
+        },
+        method: {
+            sign: "IN",
+            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
+        },
+        // Check all payments that are 11 minutes old and are still pending
+        createdAt: {
+            sign: "<",
+            value: new Date(new Date().getTime() - timeout)
+        },
+    }, {
+        limit: 100,
+
+        // Return newest payments first
+        sort: [{
+            column: 'createdAt',
+            direction: 'DESC'
+        }]
+    })
+
+    console.log("[CHECK OLD PAYMENTS] Checking old payments: " + payments.length)
+    await doCheckPayments(payments)
 }
 
 let didCheckBuckaroo = false;
@@ -768,6 +812,12 @@ registeredCronJobs.push({
 registeredCronJobs.push({
     name: 'checkPayments',
     method: checkPayments,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkOldPayments',
+    method: checkOldPayments,
     running: false
 });
 
