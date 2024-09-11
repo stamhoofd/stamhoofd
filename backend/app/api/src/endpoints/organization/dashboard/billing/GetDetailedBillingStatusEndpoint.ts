@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
+import { OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentStatus } from "@stamhoofd/structures";
 
 import { BalanceItem, Organization, Payment } from "@stamhoofd/models";
 import { SQL } from "@stamhoofd/sql";
