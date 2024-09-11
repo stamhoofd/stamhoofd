@@ -59,7 +59,7 @@ export class BalanceItemPayment extends Model {
     static payment = new ManyToOneRelation(Payment, "payment")
 
     async markPaid(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
-        // Update cached amountPaid of the balance item
+        // Update cached amountPaid of the balance item (this will get overwritten later, but we need it to calculate the status)
         this.balanceItem.pricePaid += this.price
 
         // Update status
@@ -69,6 +69,7 @@ export class BalanceItemPayment extends Model {
 
         // Do logic of balance item
         if (this.balanceItem.status === BalanceItemStatus.Paid && old !== BalanceItemStatus.Paid) {
+            // Only call markPaid once (if it wasn't (partially) paid before)
             await this.balanceItem.markPaid(this.payment, organization)
         } else {
             await this.balanceItem.markUpdated(this.payment, organization)
@@ -79,14 +80,6 @@ export class BalanceItemPayment extends Model {
      * Call this once a earlier succeeded payment is no longer succeeded
      */
     async undoPaid(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
-        // Update cached amountPaid of the balance item
-        this.balanceItem.pricePaid -= this.price
-
-        // Update status
-        this.balanceItem.status = this.balanceItem.pricePaid >= this.balanceItem.price ? BalanceItemStatus.Paid : BalanceItemStatus.Pending;
-
-        await this.balanceItem.save();
-
         await this.balanceItem.undoPaid(this.payment, organization)
     }
 

@@ -72,9 +72,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             return null
         }
         const updateGroups = new Map<string, Group>()
-
-        const balanceItemMemberIds: string[] = []
-        const balanceItemRegistrationIdsPerOrganization: Map<string, string[]> = new Map()
         const updateMembershipMemberIds = new Set<string>()
 
         // Loop all members one by one
@@ -144,7 +141,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             await member.save()
             members.push(member)
-            balanceItemMemberIds.push(member.id)
             updateMembershipMemberIds.add(member.id)
 
             // Auto link users based on data
@@ -516,26 +512,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
         }
 
-        await Member.updateOutstandingBalance(Formatter.uniqueArray(balanceItemMemberIds))
-        for (const [organizationId, balanceItemRegistrationIds] of balanceItemRegistrationIdsPerOrganization) {
-            await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds), organizationId)
-        }
-        
         // Loop all groups and update occupancy if needed
         for (const group of updateGroups.values()) {
             await group.updateOccupancy()
             await group.save()
         }
         
-        // We need to refetch the outstanding amounts of members that have changed
-        const updatedMembers = balanceItemMemberIds.length > 0 ? await Member.getBlobByIds(...balanceItemMemberIds) : []
-        for (const member of updatedMembers) {
-            const index = members.findIndex(m => m.id === member.id)
-            if (index !== -1) {
-                members[index] = member
-            }
-        }
-
         for (const member of members) {
             if (updateMembershipMemberIds.has(member.id)) {
                 await member.updateMemberships()

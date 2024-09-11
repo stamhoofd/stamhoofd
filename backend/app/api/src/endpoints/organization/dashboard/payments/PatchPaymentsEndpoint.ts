@@ -153,6 +153,8 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 for (const balanceItem of balanceItems) {
                     await balanceItem.markUpdated(payment, organization)
                 }
+
+                await BalanceItem.updateOutstanding(balanceItems)
             }
 
             changedPayments.push(payment)

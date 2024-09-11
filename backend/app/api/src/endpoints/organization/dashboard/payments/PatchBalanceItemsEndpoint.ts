@@ -1,10 +1,9 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, Member, Order, Registration, User } from '@stamhoofd/models';
+import { BalanceItem, Member, Order, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, PermissionLevel } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context';
 
@@ -43,6 +42,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         const returnedModels: BalanceItem[] = []
+        const updateOutstandingBalance: BalanceItem[] = []
 
         // Keep track of updates
         const memberIds: string[] = []
@@ -80,6 +80,8 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 await model.save();
                 returnedModels.push(model);
+
+                updateOutstandingBalance.push(model)
             }
 
             for (const patch of request.body.getPatches()) {
@@ -145,11 +147,14 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 await model.save();
                 returnedModels.push(model);
+                
+                if (patch.unitPrice || patch.amount || patch.status) {
+                    updateOutstandingBalance.push(model)
+                }
             }
         });
 
-        await Member.updateOutstandingBalance(Formatter.uniqueArray(memberIds))
-        await Registration.updateOutstandingBalance(Formatter.uniqueArray(registrationIds), organization.id)
+        await BalanceItem.updateOutstanding(updateOutstandingBalance)
 
          return new Response(
             await BalanceItem.getStructureWithPayments(returnedModels)

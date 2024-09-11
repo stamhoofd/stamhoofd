@@ -71,6 +71,37 @@ export class SQLCount implements SQLExpression {
         ])
     }
 }
+
+export class SQLPlusSign implements SQLExpression {
+    getSQL(): SQLQuery {
+        return '+'
+    }
+}
+
+export class SQLMultiplicationSign implements SQLExpression {
+    getSQL(): SQLQuery {
+        return '*'
+    }
+}
+
+export class SQLMinusSign implements SQLExpression {
+    getSQL(): SQLQuery {
+        return '-'
+    }
+}
+
+export class SQLCalculation implements SQLExpression {
+    expressions: SQLExpression[]
+
+    constructor(...expressions: SQLExpression[]) {
+        this.expressions = expressions
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery(this.expressions.map(e => e.getSQL(options)), ' ')
+    }
+}
+
 export class SQLSum implements SQLExpression {
     expression: SQLExpression
 
@@ -103,6 +134,25 @@ export class SQLSelectAs implements SQLExpression {
         ])
     }
 }
+
+export class SQLAssignment implements SQLExpression {
+    key: SQLExpression
+    value: SQLExpression
+
+    constructor(key: SQLExpression, value: SQLExpression) {
+        this.key = key
+        this.value = value;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            this.key.getSQL(options),
+            ' = ',
+            this.value.getSQL(options)
+        ])
+    }
+}
+
 
 export class SQLAlias implements SQLExpression {
     name: string;

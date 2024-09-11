@@ -1,11 +1,12 @@
 import { SQLResultNamespacedRow } from "@simonbackx/simple-database";
 import { SQLDelete } from "./SQLDelete";
-import { SQLExpression } from "./SQLExpression";
-import { SQLColumnExpression, SQLSafeValue, SQLTableExpression, SQLWildcardSelectExpression } from "./SQLExpressions";
+import { isSQLExpression, SQLExpression } from "./SQLExpression";
+import { SQLAssignment, SQLColumnExpression, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from "./SQLExpressions";
 import { SQLJoin, SQLJoinType } from "./SQLJoin";
 import { SQLJsonExtract, SQLJsonLength } from "./SQLJsonExpressions";
 import { parseTable, SQLSelect } from "./SQLSelect";
 import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from "./SQLWhere";
+import { SQLInsert } from "./SQLInsert";
 
 class StaticSQL {
     wildcard(namespace?: string) {
@@ -43,6 +44,14 @@ class StaticSQL {
             return new SQLSelect(this.wildcard())
         }
         return new SQLSelect(...columns)
+    }
+
+    insert(tableName: SQLTableExpression|string): InstanceType<typeof SQLInsert> {
+        return new SQLInsert(tableName)
+    }
+
+    assignment(key: SQLExpression|string, value: SQLExpression|SQLScalarValue): SQLAssignment {
+        return new SQLAssignment(typeof key === 'string' ? new SQLColumnExpression(key) : key, isSQLExpression(value) ? value : new SQLScalar(value))
     }
 
     where(...args: ParseWhereArguments): SQLWhere {

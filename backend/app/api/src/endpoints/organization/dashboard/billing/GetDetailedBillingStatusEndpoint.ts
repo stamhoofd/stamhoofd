@@ -37,7 +37,6 @@ export class GetDetailedBillingStatusEndpoint extends Endpoint<Params, Query, Bo
         
         const balanceItemModels = await BalanceItem.balanceItemsForOrganization(organization.id);
 
-        // Hide pending online payments
         const paymentModels = await Payment.select()
             .where('payingOrganizationId', organization.id)
             .andWhere(

@@ -590,7 +590,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // Make sure every price is accurate before creating a payment
-            await BalanceItem.updateOutstanding(createdBalanceItems, organization.id)
+            await BalanceItem.updateOutstanding(createdBalanceItems)
             const response = await this.createPayment({
                 balanceItems: mappedBalanceItems,
                 organization,
@@ -604,7 +604,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 payment = response.payment
             }
         } else {
-            await BalanceItem.updateOutstanding(createdBalanceItems, organization.id)
+            await BalanceItem.updateOutstanding(createdBalanceItems)
         }
 
 

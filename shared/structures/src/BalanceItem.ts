@@ -290,7 +290,7 @@ export class BalanceItemWithPayments extends BalanceItem {
 
     get pendingPrice() {
         // Never return more than the total amount to pay (that means we have multiple payments for the same item - which isn't a huge problem and will be detected/signaled if multiple of those are marked as paid)
-        const toPay = this.price - this.pricePaid;
+        const toPay = Math.max(0, this.price - this.pricePaid);
         const pending = this.payments.filter(p => p.payment.isPending).map(p => Math.max(0, p.price)).reduce((t, total) => total + t, 0)
 
         return Math.min(toPay, pending);

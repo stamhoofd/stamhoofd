@@ -43,7 +43,7 @@
             <PriceInput :model-value="patchedBalanceItem.price" placeholder="Gratis" :min="null" :disabled="true" />
         </STInputBox>
 
-        <template v-if="family && family.members.length > 1 && member">
+        <template v-if="family && family.members.length > 1 && member && isNew">
             <hr>
             <h2>Lid</h2>
             <p>Selecteer wie het bedrag verschuldigd is.</p>

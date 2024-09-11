@@ -72,8 +72,8 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
         if (payment.status === status) {
             return;
-        }
-        // const wasPaid = payment.paidAt !== null
+        }        
+
         if (status === PaymentStatus.Succeeded) {
             payment.status = PaymentStatus.Succeeded
             payment.paidAt = new Date()
@@ -90,39 +90,20 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     await balanceItemPayment.markPaid(organization);
                 }
 
-                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem), organization.id)
+                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
             })
-
-            //if (!wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
-            //    // Charge transaction fees
-            //    let fee = 0
-            //
-            //    if (payment.method === PaymentMethod.iDEAL) {
-            //        fee = calculateFee(payment.price, 21, 20); // € 0,21 + 0,2%
-            //    } else if (payment.method === PaymentMethod.Bancontact || payment.method === PaymentMethod.Payconiq) {
-            //        fee = calculateFee(payment.price, 24, 20); // € 0,24 + 0,2%
-            //    } else {
-            //        fee = calculateFee(payment.price, 25, 150); // € 0,25 + 1,5%
-            //    }
-            //
-            //    const name = "Transactiekosten voor "+PaymentMethodHelper.getName(payment.method)
-            //    const item = STInvoiceItem.create({
-            //        name,
-            //        description: "Via Buckaroo",
-            //        amount: 1,
-            //        unitPrice: fee,
-            //        canUseCredits: false
-            //    })
-            //    console.log("Scheduling transaction fee charge for ", payment.id, item)
-            //    await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
-            //        await STPendingInvoice.addItems(organization, [item])
-            //    });
-            //}
             return;
         }
 
+        const oldStatus = payment.status
+
+        // Save before updating balance items
+        payment.status = status
+        payment.paidAt = null
+        await payment.save();
+
         // If OLD status was succeeded, we need to revert the actions
-        if (payment.status === PaymentStatus.Succeeded) {
+        if (oldStatus === PaymentStatus.Succeeded) {
             // No longer succeeded
             await QueueHandler.schedule("balance-item-update/"+organization.id, async () => {
                 const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
@@ -133,10 +114,11 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     await balanceItemPayment.undoPaid(organization);
                 }
 
-                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem), organization.id)
+                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
             })
         }
         
+        // Moved to failed
         if (status == PaymentStatus.Failed) {
             await QueueHandler.schedule("balance-item-update/"+organization.id, async () => {
                 const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
@@ -147,12 +129,12 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     await balanceItemPayment.markFailed(organization);
                 }
 
-                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem), organization.id)
+                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
             })
         }
 
         // If OLD status was FAILED, we need to revert the actions
-        if (payment.status === PaymentStatus.Failed) { // OLD FAILED!! -> NOW PENDING
+        if (oldStatus === PaymentStatus.Failed) { // OLD FAILED!! -> NOW PENDING
             await QueueHandler.schedule("balance-item-update/"+organization.id, async () => {
                 const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
                     (await BalanceItemPayment.where({paymentId: payment.id})).map(r => r.setRelation(BalanceItemPayment.payment, payment))
@@ -161,12 +143,10 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 for (const balanceItemPayment of balanceItemPayments) {
                     await balanceItemPayment.undoFailed(organization);
                 }
+
+                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
             })
         }
-
-        payment.status = status
-        payment.paidAt = null
-        await payment.save();
     }
 
     /**

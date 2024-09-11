@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { Organization, Payment, Webshop } from './';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
+import { CachedOutstandingBalance } from './CachedOutstandingBalance';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -83,6 +84,12 @@ export class BalanceItem extends Model {
     @column({ type: "integer" })
     pricePaid = 0
 
+    /**
+     * Cached value, for optimizations
+     */
+    @column({ type: "integer" })
+    pricePending = 0
+
     @column({ type: "string" })
     status = BalanceItemStatus.Pending
 
@@ -151,10 +158,7 @@ export class BalanceItem extends Model {
                         await group.updateOccupancy()
                         await group.save()
                     }
-                }
-
-                // 2. Update registration cached prices  
-                // TODO          
+                }      
             }
         }
 
@@ -217,7 +221,7 @@ export class BalanceItem extends Model {
     }
 
     updateStatus() {
-        this.status = this.pricePaid >= this.price ? BalanceItemStatus.Paid : (this.pricePaid > 0 ? BalanceItemStatus.Pending : (this.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending));
+        this.status = this.pricePaid !== 0 && this.pricePaid >= this.price ? BalanceItemStatus.Paid : (this.pricePaid !== 0 ? BalanceItemStatus.Pending : (this.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending));
     }
 
     static async deleteItems(items: BalanceItem[]) {
@@ -300,18 +304,40 @@ export class BalanceItem extends Model {
         }
     }
 
-    static async updateOutstanding(items: BalanceItem[], organizationId?: string) {
-        const Member = (await import('./Member')).Member;
+    static async updateOutstanding(items: BalanceItem[]) {
+
+        console.log("Update outstanding balance for", items.length, "items")
 
         await BalanceItem.updatePricePaid(items.map(i => i.id));
-
+        await BalanceItem.updatePricePending(items.map(i => i.id));
+        
+        // Deprecated: the member balances have moved to CachedOutstandingBalance
         // Update outstanding amount of related members and registrations
-        const memberIds: string[] = Formatter.uniqueArray(items.map(p => p.memberId).filter(id => id !== null)) as any
+        const memberIds: string[] = Formatter.uniqueArray(items.map(p => p.memberId).filter(id => id !== null))
+        
+        const Member = (await import('./Member')).Member;
         await Member.updateOutstandingBalance(memberIds)
-
+       
         const {Registration} = await import('./Registration');
-        const registrationIds: string[] = Formatter.uniqueArray(items.map(p => p.registrationId).filter(id => id !== null)) as any
-        await Registration.updateOutstandingBalance(registrationIds, organizationId)
+
+        const organizationIds = Formatter.uniqueArray(items.map(p => p.organizationId))
+        for (const organizationId of organizationIds) {
+            const filteredItems = items.filter(i => i.organizationId === organizationId)
+            
+            const memberIds = Formatter.uniqueArray(filteredItems.map(p => p.memberId).filter(id => id !== null))
+            await CachedOutstandingBalance.updateForMembers(organizationId, memberIds)
+
+            const userIds = Formatter.uniqueArray(filteredItems.filter(p => p.memberId === null && p.userId !== null).map(p => p.userId!))
+            await CachedOutstandingBalance.updateForUsers(organizationId, userIds)
+
+            const organizationIds = Formatter.uniqueArray(filteredItems.map(p => p.payingOrganizationId).filter(id => id !== null))
+            await CachedOutstandingBalance.updateForOrganizations(organizationId, organizationIds)
+
+            // Deprecated: we'll need to move the outstanding balance of registrations to CachedOutstandingBalance
+            const registrationIds: string[] = Formatter.uniqueArray(filteredItems.map(p => p.registrationId).filter(id => id !== null))
+            await Registration.updateOutstandingBalance(registrationIds, organizationId)
+    
+        }
     }
 
     /**
@@ -334,6 +360,8 @@ export class BalanceItem extends Model {
             params.push(balanceItemIds)
         }
         
+        // Note: we'll never mark a balance item as 'paid' via the database -> because we need to rigger the markPaid function manually, which will call the appropriate functions
+        // this method will set the balance item to paid once, and only call the handlers once
         const query = `
         UPDATE
             balance_items
@@ -349,7 +377,56 @@ export class BalanceItem extends Model {
             GROUP BY
                 balanceItemId
             ) i ON i.balanceItemId = balance_items.id 
-        SET balance_items.pricePaid = coalesce(i.price, 0)
+        SET balance_items.pricePaid = coalesce(i.price, 0), balance_items.status = (CASE
+            WHEN balance_items.status = '${BalanceItemStatus.Paid}' AND balance_items.pricePaid != 0 AND balance_items.pricePaid >= (balance_items.unitPrice * balance_items.amount) THEN '${BalanceItemStatus.Paid}'
+            WHEN balance_items.pricePaid != 0 THEN '${BalanceItemStatus.Pending}'
+            WHEN balance_items.status = '${BalanceItemStatus.Hidden}' THEN '${BalanceItemStatus.Hidden}'
+            ELSE '${BalanceItemStatus.Pending}'
+        END)
+        ${secondWhere}`;
+
+        await Database.update(query, params)
+    }
+
+    /**
+     * Call this after updating the pricePaid
+     */
+    static async updatePricePending(balanceItemIds: string[] | 'all') {
+        if (balanceItemIds !== 'all' && balanceItemIds.length == 0) {
+            return
+        }
+
+        const params: any[] = []
+        let firstWhere = ''
+        let secondWhere = ''
+
+        if (balanceItemIds !== 'all') {
+            firstWhere = ` AND balanceItemId IN (?)`
+            params.push(balanceItemIds)
+
+            secondWhere = `WHERE balance_items.id IN (?)`
+            params.push(balanceItemIds)
+        }
+        
+        const query = `
+        UPDATE
+            balance_items
+        LEFT JOIN (
+            SELECT
+                balanceItemId,
+                sum(GREATEST(0, balance_item_payments.price)) AS price
+            FROM
+                balance_item_payments
+                LEFT JOIN payments ON payments.id = balance_item_payments.paymentId
+            WHERE
+                payments.status != 'Succeeded' AND payments.status != 'Failed'${firstWhere}
+            GROUP BY
+                balanceItemId
+            ) i ON i.balanceItemId = balance_items.id 
+        SET balance_items.pricePending = LEAST(
+            GREATEST(0, balance_items.unitPrice * balance_items.amount - balance_items.pricePaid), 
+            coalesce(i.price, 0)
+        )
         ${secondWhere}`;
 
         await Database.update(query, params)
