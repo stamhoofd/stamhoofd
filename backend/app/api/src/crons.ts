@@ -7,6 +7,7 @@ import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
 
+import { clearExcelCache } from './crons/clear-excel-cache';
 import { ExchangePaymentEndpoint } from './endpoints/organization/shared/ExchangePaymentEndpoint';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
@@ -711,6 +712,12 @@ registeredCronJobs.push({
     method: checkDrips,
     running: false
 });
+
+registeredCronJobs.push({
+    name: 'clearExcelCache',
+    method: clearExcelCache,
+    running: false
+})
 
 async function run(name: string, handler: () => Promise<void>) {
     try {

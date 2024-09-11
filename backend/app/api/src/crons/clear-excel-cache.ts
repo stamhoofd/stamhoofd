@@ -1,17 +1,50 @@
 import fs from "fs/promises";
 
+const msIn22Hours = 79200000;
+let lastExcelClear: number | null = null;
+
 export async function clearExcelCache() {
     const now = new Date();
+
+    const didClear = await clearExcelCacheHelper({
+        lastExcelClear,
+        now,
+        cachePath: STAMHOOFD.CACHE_PATH,
+        environment: STAMHOOFD.environment
+    });
+
+    if(didClear) {
+        lastExcelClear = now.getTime();
+    }
+}
+
+export async function clearExcelCacheHelper
+({lastExcelClear, now, cachePath, environment}: {lastExcelClear: number | null, now: Date, cachePath: string, environment: "production" | "development" | "staging" | "test"}): Promise<boolean> {
+    if (environment === "development") {
+        return false;
+    }
+
+    const hour = now.getHours();
+
+    // between 3 and 6 AM
+    if(hour < 3 || hour > 5) {
+        return false;
+    }
+
+    // only run once each day
+    if(lastExcelClear !== null && lastExcelClear + msIn22Hours > now.getTime()) {
+        return false;
+    }
+
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     const currentDay = now.getDate();
 
     const maxDaysInCache = 2;
-    const dir: string = STAMHOOFD.CACHE_PATH;
 
     const dateLimit = new Date(currentYear, currentMonth, currentDay - maxDaysInCache, 0,0,0,0);
 
-    const files = await fs.readdir(dir, {withFileTypes: true});
+    const files = await fs.readdir(cachePath, {withFileTypes: true});
 
     for (const file of files) {
         if (file.isDirectory()) {
@@ -29,7 +62,8 @@ export async function clearExcelCache() {
             }
         }
     }
-    
+
+    return true;
 }
 
 function getDateFromDirectoryName(file: string): Date {
