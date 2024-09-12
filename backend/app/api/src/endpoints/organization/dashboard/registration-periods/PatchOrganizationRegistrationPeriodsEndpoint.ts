@@ -455,7 +455,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
         }
 
-        await model.updateOccupancy()
         await model.save();
         return model;
     }

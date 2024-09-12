@@ -204,18 +204,22 @@ export class PlatformFamilyManager {
     }
 
     updateOrganizationFromMembers(members: MemberWithRegistrationsBlob[]) {
-        // Update organizations we received
-        // this updates the group cached counts
-        if (this.context.organization) {
-            // Update group data we received
-            const processedGroups = new Set<string>()
-            for (const member of members) {
-                for (const registration of member.registrations) {
-                    if (registration.organizationId === this.context.organization.id && !processedGroups.has(registration.groupId)) {
-                        const originalGroup = this.context.organization.period.groups.find(g => g.id === registration.groupId)
-                        originalGroup?.deepSet(registration.group)
-                        processedGroups.add(registration.groupId)
-                    }
+        updateOrganizationFromMembers(this.context, members);
+    }
+}
+
+export function updateOrganizationFromMembers(context: SessionContext, members: MemberWithRegistrationsBlob[]) {
+    // Update organizations we received
+    // this updates the group cached counts
+    if (context.organization) {
+        // Update group data we received
+        const processedGroups = new Set<string>()
+        for (const member of members) {
+            for (const registration of member.registrations) {
+                if (registration.organizationId === context.organization.id && !processedGroups.has(registration.groupId)) {
+                    const originalGroup = context.organization.period.groups.find(g => g.id === registration.groupId)
+                    originalGroup?.deepSet(registration.group)
+                    processedGroups.add(registration.groupId)
                 }
             }
         }

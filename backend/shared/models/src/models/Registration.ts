@@ -1,5 +1,4 @@
 import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
-import { Email } from '@stamhoofd/email';
 import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
@@ -436,7 +435,7 @@ export class Registration extends Model {
 
             if (updated.shouldIncludeStock()) {
                 const groupStockReservations: StockReservation[] = [
-                    // Group level stock reservatiosn (stored in the group)
+                    // Group level stock reservations (stored in the group)
                     StockReservation.create({
                         objectId: updated.groupPrice.id,
                         objectType: 'GroupPrice',
