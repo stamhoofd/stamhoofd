@@ -7,6 +7,7 @@ import { DisplayOptions, NavigationActions } from '../../types/NavigationActions
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { RegistrationSuccessView } from '../checkout';
 import { ViewStep, ViewStepsManager } from '../classes/ViewStepsManager';
+import { updateOrganizationFromMembers } from '../PlatformFamilyManager';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
@@ -62,6 +63,8 @@ async function register({checkout, context, admin, members}: {checkout: Register
         member.family.updateFromBlob(response.data.members)
         passedFamilies.add(member.family)
     }
+
+    updateOrganizationFromMembers(context, response.data.members.members);
 
     const clearAndEmit = () => {
         if (checkout.cart.items.length > 0) {
