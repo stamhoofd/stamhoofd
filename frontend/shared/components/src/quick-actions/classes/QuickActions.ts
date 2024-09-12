@@ -5,7 +5,9 @@ export interface QuickAction {
     illustration?: string
     leftComponent?: any,
     title: string
-    description: string
+    description: string,
+    rightText?: string,
+    rightTextClass?: string,
     action: () => Promise<void>|void
 }
 

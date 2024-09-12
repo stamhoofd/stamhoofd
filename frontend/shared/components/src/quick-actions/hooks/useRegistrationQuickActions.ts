@@ -1,7 +1,11 @@
+import { Decoder } from "@simonbackx/simple-encoding";
+import { useRequestOwner } from "@stamhoofd/networking";
 import { useMemberManager } from "@stamhoofd/registration";
-import { PlatformMember, GroupType } from "@stamhoofd/structures";
+import { GroupType, OrganizationBillingStatus, PlatformMember } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { computed } from "vue";
+import { computed, ref, Ref } from "vue";
+import { ErrorBox } from "../../errors/ErrorBox";
+import { useErrors } from "../../errors/useErrors";
 import { GlobalEventBus } from "../../EventBus";
 import { useContext, useUser } from "../../hooks";
 import { useEditMember } from "../../members";
@@ -10,9 +14,10 @@ import { getAllMemberSteps } from "../../members/classes/steps";
 import { useNavigationActions } from "../../types/NavigationActions";
 import { QuickAction, QuickActions } from "../classes/QuickActions";
 
-import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg'
-import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
+import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
+import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
+import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
 
 export function useRegistrationQuickActions(): QuickActions {
     const memberManager = useMemberManager();
@@ -21,7 +26,9 @@ export function useRegistrationQuickActions(): QuickActions {
     const navigate = useNavigationActions();
     const user = useUser();
     const editMember = useEditMember();
-
+    const owner = useRequestOwner()
+    const errors = useErrors()
+    
     async function openCart() {
         await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
     }
@@ -68,6 +75,29 @@ export function useRegistrationQuickActions(): QuickActions {
         })
     });
 
+    // Load outstanding amount
+    const outstandingBalance = ref(null) as Ref<OrganizationBillingStatus | null>
+    updateBalance().catch(console.error)
+
+    // Fetch balance
+    async function updateBalance() {
+        try {
+            const response = await context.value.authenticatedServer.request({
+                method: 'GET',
+                path: `/user/billing/status`,
+                decoder: OrganizationBillingStatus as Decoder<OrganizationBillingStatus>,
+                shouldRetry: true,
+                owner,
+                timeout: 5 * 60 * 1000
+            })
+
+            outstandingBalance.value = response.data
+        } catch (e) {
+            errors.errorBox = new ErrorBox(e)
+        }
+    }
+
+
     return {
         actions: computed(() => {
             const arr: QuickAction[] = [];
@@ -77,6 +107,24 @@ export function useRegistrationQuickActions(): QuickActions {
                     title: 'Mandje afrekenen',
                     description: checkout.value.cart.price > 0 ? 'Betaal en bevestig je inschrijvingen.' : 'Bevestig je inschrijvingen.',
                     action: openCart
+                })
+            }
+
+            for (const organizationStatus of outstandingBalance.value?.organizations || []) {
+                const open = organizationStatus.amount - organizationStatus.amountPending
+                if (open <= 0) {
+                    continue;
+                }
+
+                arr.push({
+                    illustration: outstandingAmountSvg,
+                    title: 'Betaal jouw openstaand bedrag aan ' + organizationStatus.organization.name,
+                    description: 'Je hebt een openstaand bedrag van ' + Formatter.price(open) + ' bij ' + organizationStatus.organization.name + '',
+                    rightText: Formatter.price(open),
+                    rightTextClass: 'style-price',
+                    action: async () => {
+                        // todo
+                    }
                 })
             }
 
@@ -98,9 +146,14 @@ export function useRegistrationQuickActions(): QuickActions {
                     action: () => checkAllMemberData(member)
                 })
             }
-            
+
             return arr;
         }),
-        loading: false
+        loading: computed(() => {
+            return (outstandingBalance.value === null);
+        }),
+        errorBox: computed(() => {
+            return errors.errorBox
+        })
     }
 }

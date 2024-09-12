@@ -22,6 +22,9 @@
                 </p>
 
                 <template #right>
+                    <span :class="action.rightTextClass ?? ''" v-if="action.rightText">
+                        {{ action.rightText }}
+                    </span>
                     <span class="icon arrow-right-small gray" />
                 </template>
             </STListItem>

@@ -22,7 +22,6 @@ export function useDashboardQuickActions(): QuickActions {
     const errors = useErrors()
     const auth = useAuth();
 
-
     // Load outstanding amount
     const outstandingBalance = ref(null) as Ref<OrganizationBillingStatus | null>
     updateBalance().catch(console.error)
@@ -48,9 +47,7 @@ export function useDashboardQuickActions(): QuickActions {
         } catch (e) {
             errors.errorBox = new ErrorBox(e)
         }
-
     }
-
 
     return {
         actions: computed(() => {
@@ -86,7 +83,7 @@ export function useDashboardQuickActions(): QuickActions {
             return arr;
         }),
         loading: computed(() => {
-            return unref(registrationQuickActions.loading) || (outstandingBalance === null);
+            return unref(registrationQuickActions.loading) || (outstandingBalance.value === null);
         }),
         errorBox: computed(() => {
             return mergeErrorBox(
