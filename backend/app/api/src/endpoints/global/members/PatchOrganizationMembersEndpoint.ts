@@ -71,7 +71,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
             return null
         }
-        const updateGroups = new Map<string, Group>()
+        const updateGroups = new Map<string, Group>();
+        const updateRegistrations = new Map<string, Registration>();
         const updateMembershipMemberIds = new Set<string>()
 
         // Loop all members one by one
@@ -501,15 +502,19 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await member.delete()
             shouldUpdateSetupSteps = true
 
-            // Update occupancy of this member because we removed registrations
-            const groupIds = member.registrations.flatMap(r => r.groupId)
-            for (const id of groupIds) {
-                const group = await getGroup(id)
+            for(const registration of member.registrations) {
+                const groupId = registration.groupId;
+                const group = await getGroup(groupId);
+                updateRegistrations.set(registration.id, registration);
                 if (group) {
                     // We need to update this group occupancy because we moved one member away from it
                     updateGroups.set(group.id, group)
                 }
             }
+        }
+
+        for(const registration of updateRegistrations.values()) {
+            registration.scheduleStockUpdate();
         }
 
         // Loop all groups and update occupancy if needed
