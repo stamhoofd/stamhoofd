@@ -1,5 +1,5 @@
 import { Factory } from "@simonbackx/simple-database";
-import { GroupCategory, OldGroupPrice, OldGroupPrices,GroupSettings, PermissionsByRole } from "@stamhoofd/structures";
+import { GroupPrice, GroupSettings, OldGroupPrice, OldGroupPrices, PermissionsByRole, ReduceablePrice } from "@stamhoofd/structures";
 
 import { Group } from "../models/Group";
 import { Organization } from "../models/Organization";
@@ -8,7 +8,8 @@ import { OrganizationFactory } from './OrganizationFactory';
 class Options {
     organization?: Organization;
     price?: number;
-    reducedPrice?: number
+    reducedPrice?: number;
+    stock?: number;
 
     delayDate?: Date
     delayPrice?: number
@@ -36,6 +37,15 @@ export class GroupFactory extends Factory<Options, Group> {
                         price: this.options.price ?? 400,
                         reducedPrice: this.options.reducedPrice ?? null
                     })],
+                })
+            ],
+            prices: [
+                GroupPrice.create({
+                    price: ReduceablePrice.create({
+                        price: this.options.price ?? 400,
+                        reducedPrice: this.options.reducedPrice ?? null
+                    }),
+                    stock: this.options.stock ?? null
                 })
             ],
         })

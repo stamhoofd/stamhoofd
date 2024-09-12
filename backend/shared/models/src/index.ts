@@ -9,6 +9,7 @@ export * from "./factories/RegisterCodeFactory"
 export * from "./factories/RegistrationFactory"
 export * from "./factories/UserFactory"
 export * from "./factories/WebshopFactory"
+export * from "./factories/RegistrationPeriodFactory"
 
 // Helpers
 export * from "./helpers/EmailBuilder"
