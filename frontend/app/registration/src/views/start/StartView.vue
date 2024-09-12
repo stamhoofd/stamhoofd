@@ -26,8 +26,7 @@
                 </a>
             </p>
             
-
-            <QuickActionsBox />
+            <QuickActionsBox :quick-actions="quickActions" />
 
             <div v-if="members.length > 0" class="container">
                 <hr>
@@ -119,12 +118,11 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { MemberIcon, Toast, useAddMember, useChooseGroupForMember, useContext, useUser, useVisibilityChange } from '@stamhoofd/components';
+import { MemberIcon, QuickActionsBox, Toast, useAddMember, useChooseGroupForMember, useRegistrationQuickActions, useUser } from '@stamhoofd/components';
 import { GroupType, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useMemberManager } from '../../getRootView';
-import QuickActionsBox from './components/QuickActionsBox.vue';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
@@ -178,6 +176,7 @@ defineRoutes([
 const $navigate = useNavigate();
 const memberManager = useMemberManager();
 const user = useUser();
+const quickActions = useRegistrationQuickActions()
 
 const members = computed(() => memberManager.family.members);
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);

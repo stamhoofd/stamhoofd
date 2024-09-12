@@ -1,8 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AppType, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, Country, Organization } from '@stamhoofd/structures';
 import { computed, markRaw, reactive, ref } from 'vue';
 
@@ -11,6 +11,29 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
+}
+
+export async function wrapContext(context: SessionContext, app: AppType|'auto', component: ComponentWithProperties, options?: {ownDomain: boolean}) {
+    const platformManager = await PlatformManager.createFromCache(context, true)
+    const $memberManager = new MemberManager(context, platformManager.$platform);
+    
+    return new ComponentWithProperties(ContextProvider, {
+        context: markRaw({
+            $context: context,
+            $platformManager: platformManager,
+            $memberManager,
+            $organizationManager: new OrganizationManager(context),
+            reactive_components: {
+                "tabbar-left": options?.ownDomain && context.organization ? new ComponentWithProperties(OrganizationLogo, {
+                    organization: context.organization
+                }) : new ComponentWithProperties(OrganizationSwitcher, {}),
+                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
+                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
+            },
+            stamhoofd_app: app
+        }),
+        root: component
+    });
 }
 
 export async function loadSessionFromUrl() {
@@ -77,13 +100,11 @@ export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: {i
 
 
 export async function getOrganizationSelectionRoot(optionalSession?: SessionContext|null) {
-    const session = reactive(optionalSession ?? new SessionContext(null)) as SessionContext;
+    const session = optionalSession ?? new SessionContext(null)
     const reactiveSession = session
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
     await I18nController.loadDefault(reactiveSession, Country.Belgium, "nl")
-
-    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
 
     let baseRoot = new ComponentWithProperties(CoverImageContainer, {
         root: new ComponentWithProperties(NavigationController, {
@@ -100,20 +121,7 @@ export async function getOrganizationSelectionRoot(optionalSession?: SessionCont
         });
     }
 
-    return new ComponentWithProperties(ContextProvider, {
-        context: markRaw({
-            $context: reactiveSession,
-            $platformManager: platformManager,
-            //reactive_navigation_url: "/",
-            reactive_components: {
-                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
-                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
-            },
-            stamhoofd_app: 'auto',
-        }),
-        root: wrapWithModalStack(baseRoot)
-    });
+    return await wrapContext(reactiveSession, 'auto', baseRoot)
 }
 
 export function getNoPermissionsView() {
@@ -143,7 +151,7 @@ export async function getScopedDashboardRootFromUrl() {
 
 export async function getScopedAutoRootFromUrl() {
     const fromUrl = await loadSessionFromUrl()
-    const session = reactive(fromUrl ?? (await SessionManager.getLastGlobalSession())) as SessionContext;
+    const session = fromUrl ?? (await SessionManager.getLastGlobalSession())
     await SessionManager.prepareSessionForUsage(session, false);
     
     return await getScopedAutoRoot(session)
@@ -154,35 +162,21 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
         // We can't really determine the automatic root view because we are not signed in
         // So return the login view, that will call getScopedAutoRoot again after login
         const reactiveSession = session
-        const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
         I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
 
-        return new ComponentWithProperties(ContextProvider, {
-            context: markRaw({
-                $context: reactiveSession,
-                $platformManager: platformManager,
-                //reactive_navigation_url: "auto" + (session.organization ? '/'+session.organization!.uri : ''),
-                reactive_components: {
-                    "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
-                    "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
-                    "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
-                },
-                stamhoofd_app: 'auto',
-            }),
-            root: wrapWithModalStack(
-                new ComponentWithProperties(AuthenticatedView, {
-                    root: new ComponentWithProperties(PromiseView, {
-                        promise: async () => {
-                            // Replace itself again after a successful login
-                            const root = await getScopedAutoRoot(reactiveSession, options)
-                            await ReplaceRootEventBus.sendEvent('replace', root);
-                            return new ComponentWithProperties({}, {});
-                        }
-                    }),
-                    loginRoot: wrapWithModalStack(getLoginRoot()),
-                })
-            )
-        });
+        return await wrapContext(reactiveSession, 'auto', wrapWithModalStack(
+            new ComponentWithProperties(AuthenticatedView, {
+                root: new ComponentWithProperties(PromiseView, {
+                    promise: async () => {
+                        // Replace itself again after a successful login
+                        const root = await getScopedAutoRoot(reactiveSession, options)
+                        await ReplaceRootEventBus.sendEvent('replace', root);
+                        return new ComponentWithProperties({}, {});
+                    }
+                }),
+                loginRoot: wrapWithModalStack(getLoginRoot()),
+            })
+        ))
     }
 
     
@@ -203,8 +197,6 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
 export async function getScopedDashboardRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", reactiveSession?.organization?.address?.country).catch(console.error)
-
-    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
 
     const startView = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})
@@ -332,68 +324,54 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
     //     }).catch(console.error)
     // }
 
-    return new ComponentWithProperties(ContextProvider, {
-        context: markRaw({
-            $context: reactiveSession,
-            $platformManager: platformManager,
-            $organizationManager: new OrganizationManager(reactiveSession),
-            //reactive_navigation_url: "beheerders/" + session.organization!.uri,
-            reactive_components: {
-                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
-                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
-            },
-            stamhoofd_app: 'dashboard',
-        }),
-        root: wrapWithModalStack(
-            new ComponentWithProperties(AuthenticatedView, {
-                root: wrapWithModalStack(
-                    new ComponentWithProperties(TabBarController, {
-                        tabs: computed(() => {
-                            const organization = reactiveSession.organization;
+    return wrapContext(reactiveSession, 'dashboard', wrapWithModalStack(
+        new ComponentWithProperties(AuthenticatedView, {
+            root: wrapWithModalStack(
+                new ComponentWithProperties(TabBarController, {
+                    tabs: computed(() => {
+                        const organization = reactiveSession.organization;
 
-                            const tabs: (TabBarItem|TabBarItemGroup)[] = [
-                                startTab
-                            ]
+                        const tabs: (TabBarItem|TabBarItemGroup)[] = [
+                            startTab
+                        ]
 
-                            if (organization?.meta.packages.useMembers) {
-                                tabs.push(membersTab)
-
-                                if (reactiveSession.auth.hasFullAccess()) {
-                                    tabs.push(calendarTab)
-                                }
-                            }
-
-                            if (organization?.meta.packages.useWebshops) {
-                                tabs.push(webshopsTab)
-                            }
-
-                            const moreTab = new TabBarItemGroup({
-                                icon: 'category',
-                                name: 'Meer',
-                                items: [
-                                    ...sharedMoreItems // need to create a new array, don't pass directly!
-                                ]
-                            });
+                        if (organization?.meta.packages.useMembers) {
+                            tabs.push(membersTab)
 
                             if (reactiveSession.auth.hasFullAccess()) {
-                                moreTab.items.unshift(documentsTab)
-                                moreTab.items.unshift(financesTab)
-                                moreTab.items.unshift(settingsTab)
-                            } else if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
-                                moreTab.items.unshift(financesTab)
+                                tabs.push(calendarTab)
                             }
+                        }
 
-                            tabs.push(moreTab)
+                        if (organization?.meta.packages.useWebshops) {
+                            tabs.push(webshopsTab)
+                        }
 
-                            return tabs;
-                        })
+                        const moreTab = new TabBarItemGroup({
+                            icon: 'category',
+                            name: 'Meer',
+                            items: [
+                                ...sharedMoreItems // need to create a new array, don't pass directly!
+                            ]
+                        });
+
+                        if (reactiveSession.auth.hasFullAccess()) {
+                            moreTab.items.unshift(documentsTab)
+                            moreTab.items.unshift(financesTab)
+                            moreTab.items.unshift(settingsTab)
+                        } else if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+                            moreTab.items.unshift(financesTab)
+                        }
+
+                        tabs.push(moreTab)
+
+                        return tabs;
                     })
-                ),
-                loginRoot: wrapWithModalStack(getNonAutoLoginRoot(reactiveSession, options)),
-                noPermissionsRoot: getNoPermissionsView(),
-            }), 
-            options.initialPresents
-        )
-    });
+                })
+            ),
+            loginRoot: wrapWithModalStack(getNonAutoLoginRoot(reactiveSession, options)),
+            noPermissionsRoot: getNoPermissionsView(),
+        }), 
+        options.initialPresents
+    ));
 }

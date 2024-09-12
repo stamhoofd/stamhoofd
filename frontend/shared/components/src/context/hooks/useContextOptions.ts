@@ -44,6 +44,18 @@ export function useContextOptions() {
     const $user = useUser();
     const $organization = useOrganization();
     const app = useAppContext();
+
+    const getRegistrationOption = async (): Promise<Option> => {
+        const context = new SessionContext(null)
+        await context.loadFromStorage();
+
+        return {
+            id: 'registration',
+            organization: null,
+            app: 'registration',
+            context
+        }
+    }
     
     const getDefaultOptions = async () => {
         const opts: Option[] = [];
@@ -63,15 +75,7 @@ export function useContextOptions() {
         }
 
         if (STAMHOOFD.userMode === 'platform') {
-            const context = new SessionContext(null)
-            await context.loadFromStorage();
-
-            opts.push({
-                id: 'registration',
-                organization: null,
-                app: 'registration',
-                context
-            })
+            opts.push(await getRegistrationOption())
         }
 
         for (const organizationId of $user.value?.permissions?.organizationPermissions.keys() ?? []) {
@@ -163,6 +167,7 @@ export function useContextOptions() {
 
     return {
         getDefaultOptions,
+        getRegistrationOption,
         getOptionForOrganization,
         buildRootForOption,
         selectOption,

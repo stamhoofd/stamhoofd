@@ -353,7 +353,7 @@ export class Member extends Model {
      /**
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
-    static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
+     static async getMemberIdsWithRegistrationForUser(user: User): Promise<string[]> {
         const query = SQL
             .select('id')
             .from(Member.table)
@@ -370,7 +370,14 @@ export class Member extends Model {
             )
 
         const data = await query.fetch()
-        return this.getBlobByIds(...data.map((r) => r.members.id as string));
+        return data.map((r) => r.members.id as string)
+    }
+
+     /**
+     * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
+     */
+    static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
+        return this.getBlobByIds(...(await this.getMemberIdsWithRegistrationForUser(user)));
     }
 
     getStructureWithRegistrations(this: MemberWithRegistrations, forOrganization: null | boolean = null) {

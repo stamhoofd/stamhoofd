@@ -14,16 +14,20 @@
                     <span>Stappenplan opstart werkjaar</span>
                 </a>
             </p>
-            
+
+            <QuickActionsBox :quick-actions="quickActions" />
+
             <SetupStepsView v-if="auth.hasFullAccess()" />
         </main>
     </section>
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '@stamhoofd/components';
+import { QuickActionsBox, useAuth } from '@stamhoofd/components';
+import { useDashboardQuickActions } from '@stamhoofd/components/src/quick-actions/hooks/useDashboardQuickActions';
 import SetupStepsView from './SetupStepsView.vue';
 
 const auth = useAuth();
+const quickActions = useDashboardQuickActions()
 
 </script>

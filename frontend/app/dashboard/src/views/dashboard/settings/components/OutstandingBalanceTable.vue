@@ -136,7 +136,7 @@ const groupedItems = computed(() => {
         map.get(code)!.add(item);
     }
 
-    return Array.from(map.values()).filter(v => v.price > 0);
+    return Array.from(map.values()).filter(v => v.price !== 0);
 })
 
 const priceBreakdown = computed(() => {

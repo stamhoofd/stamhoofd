@@ -522,7 +522,7 @@ export class BalanceItem extends Model {
     static async balanceItemsForOrganization(organizationId: string): Promise<BalanceItem[]> {
         return await BalanceItem.select()
                 .where('payingOrganizationId', organizationId)
-                .where('status', BalanceItemStatus.Pending)
+                .whereNot('status', BalanceItemStatus.Hidden)
                 .fetch();
     }
 

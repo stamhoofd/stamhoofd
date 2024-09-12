@@ -24,6 +24,7 @@ export * from "./src/groups"
 export * from "./src/filters"
 export * from "./src/organizations"
 export * from "./src/fetchers"
+export * from "./src/quick-actions"
 
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"

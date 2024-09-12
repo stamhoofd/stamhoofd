@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
-import { AccessRight, Address, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
+import { Address, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
@@ -13,7 +13,7 @@ import { QueueHandler } from "@stamhoofd/queues";
 import { validateDNSRecords } from "../helpers/DNSValidator";
 import { getEmailBuilderForTemplate } from "../helpers/EmailBuilder";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { Group, OrganizationRegistrationPeriod, StripeAccount } from "./";
+import { OrganizationRegistrationPeriod, StripeAccount } from "./";
 
 export class Organization extends Model {
     static table = "organizations";

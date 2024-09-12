@@ -12,13 +12,23 @@ type Query = undefined;
 type ResponseBody = OrganizationDetailedBillingStatus;
 type Body = undefined;
 
-export class GetDetailedBillingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationDetailedBillingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/billing/status/detailed", {});
+        if (request.getVersion() <= 334) {
+            // Deprecated
+            const params = Endpoint.parseParameters(request.url, "/billing/status/detailed", {});
+
+            if (params) {
+                return [true, params as Params];
+            }
+            return [false];
+        }
+
+        const params = Endpoint.parseParameters(request.url, "/organization/billing/status/detailed", {});
 
         if (params) {
             return [true, params as Params];

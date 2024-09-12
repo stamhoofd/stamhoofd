@@ -17,7 +17,7 @@
                         Betalingen exporteren
                     </h2>
                     <p class="style-description">
-                        {{$t("64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f")}}
+                        {{ $t("64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -72,7 +72,7 @@
                             Breng de betaling van dit bedrag in orde.
                         </p>
 
-                        <p class="style-description">
+                        <p v-if="BalanceItemWithPayments.getOutstandingBalance(item.balanceItems).totalPending > 0" class="style-description">
                             Betaling van {{ formatPrice(BalanceItemWithPayments.getOutstandingBalance(item.balanceItems).totalPending) }} gestart, maar nog in verwerking.
                         </p>
 

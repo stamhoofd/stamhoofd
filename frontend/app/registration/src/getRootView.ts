@@ -1,7 +1,7 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
 import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
-import { getNonAutoLoginRoot } from "@stamhoofd/dashboard";
+import { getNonAutoLoginRoot, wrapContext } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, PlatformManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
@@ -65,7 +65,6 @@ export async function getScopedRegistrationRootFromUrl() {
 }
 
 export async function getRootView(session: SessionContext, ownDomain = false) {
-    const platformManager = await PlatformManager.createFromCache(session, true)
     await I18nController.loadDefault(session, Country.Belgium, "nl", session?.organization?.address?.country)
 
     // Set color
@@ -80,9 +79,6 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     const cartRoot = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(CartView, {})
     })
-
-    //const $checkoutManager = new CheckoutManager($memberManager)
-    const $memberManager = reactive(new MemberManager(session, platformManager.$platform));
     
     const calendarTab = new TabBarItem({
         icon: 'calendar',
@@ -92,51 +88,35 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
         })
     });
 
-    return new ComponentWithProperties(ContextProvider, {
-        context: markRaw({
-            $context: session,
-            $memberManager,
-            $platformManager: platformManager,
-            reactive_components: {
-                "tabbar-left": ownDomain ? new ComponentWithProperties(OrganizationLogo, {
-                    organization: session.organization
-                }) : new ComponentWithProperties(OrganizationSwitcher, {
-                    disabled: ownDomain
-                }),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
-                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
-            },
-            stamhoofd_app: 'registration',
-        }),
-        root: new ComponentWithProperties(AuthenticatedView, {
-            root: wrapWithModalStack(
-                new ComponentWithProperties(PromiseView, {
-                    promise: async () => {
-                        await $memberManager.loadMembers()
-                        await $memberManager.loadCheckout()
+    return wrapContext(session, 'registration', new ComponentWithProperties(AuthenticatedView, {
+        root: wrapWithModalStack(
+            new ComponentWithProperties(PromiseView, {
+                promise: async function (this: PromiseView) {
+                    const $memberManager = this.$memberManager
+                    await $memberManager.loadMembers()
+                    await $memberManager.loadCheckout()
 
-                        return new ComponentWithProperties(TabBarController, {
-                            tabs: [
-                                new TabBarItem({
-                                    icon: 'home',
-                                    name: 'Start',
-                                    component: startView
-                                }),
-                                calendarTab,
-                                new TabBarItem({
-                                    icon: 'basket',
-                                    name: 'Mandje',
-                                    component: cartRoot,
-                                    badge: computed(() => $memberManager.family.checkout.cart.count == 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0))
-                                })
-                            ],
-                        })
-                    }
-                })
-            ),
-            loginRoot: wrapWithModalStack(
-                getNonAutoLoginRoot(session)
-            )
-        })
-    });
+                    return new ComponentWithProperties(TabBarController, {
+                        tabs: [
+                            new TabBarItem({
+                                icon: 'home',
+                                name: 'Start',
+                                component: startView
+                            }),
+                            calendarTab,
+                            new TabBarItem({
+                                icon: 'basket',
+                                name: 'Mandje',
+                                component: cartRoot,
+                                badge: computed(() => $memberManager.family.checkout.cart.count == 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0))
+                            })
+                        ],
+                    })
+                }
+            })
+        ),
+        loginRoot: wrapWithModalStack(
+            getNonAutoLoginRoot(session)
+        )
+    }), {ownDomain});
 }

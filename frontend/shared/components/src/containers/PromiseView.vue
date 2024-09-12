@@ -21,7 +21,7 @@ import LoadingView from "./LoadingView.vue";
 })
 export default class PromiseView extends Mixins(NavigationMixin) {
     @Prop({required: true})
-        promise!: () => Promise<ComponentWithProperties>
+        promise!: (this: typeof PromiseView) => Promise<ComponentWithProperties>
 
     root: ComponentWithProperties | null = null
     passRoutes = false;

@@ -1,5 +1,5 @@
 import { LocalizedDomains } from "@stamhoofd/frontend-i18n";
-import { OrganizationManager, SessionContext } from "@stamhoofd/networking";
+import { MemberManager, OrganizationManager, SessionContext } from "@stamhoofd/networking";
 import { CountryHelper, Organization, Platform, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import Vue from "vue";
@@ -33,6 +33,7 @@ declare module 'vue' {
         readonly $platform: Platform;
         readonly $user: User|null;
         readonly $organizationManager: OrganizationManager;
+        readonly $memberManager: MemberManager;
         readonly $app: ReturnType<typeof import('@stamhoofd/components').useAppContext>;
 
         // Global components

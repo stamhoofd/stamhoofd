@@ -1,10 +1,10 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, ManageEventsView, MembersTableView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
-import { getNonAutoLoginRoot } from '@stamhoofd/dashboard';
+import { AsyncComponent, AuthenticatedView, ManageEventsView, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
-import { computed, markRaw } from 'vue';
+import { computed } from 'vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 
@@ -110,44 +110,31 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
     });
 
 
-    return new ComponentWithProperties(ContextProvider, {
-        context: markRaw({
-            $context: reactiveSession,
-            $platformManager: platformManager,
-            //reactive_navigation_url: "administratie",
-            reactive_components: {
-                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
-                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
-            },
-            stamhoofd_app: 'admin'
-        }),
-        root: wrapWithModalStack(
-            new ComponentWithProperties(AuthenticatedView, {
-                root: wrapWithModalStack(
-                    new ComponentWithProperties(TabBarController, {
-                        tabs: computed(() => {
-                            const tabs: (TabBarItem|TabBarItemGroup)[] = [
-                                startTab,
-                                membersTab,
-                                groupsTab,
-                                calendarTab
-                            ]
+    return wrapContext(reactiveSession, 'admin', wrapWithModalStack(
+        new ComponentWithProperties(AuthenticatedView, {
+            root: wrapWithModalStack(
+                new ComponentWithProperties(TabBarController, {
+                    tabs: computed(() => {
+                        const tabs: (TabBarItem|TabBarItemGroup)[] = [
+                            startTab,
+                            membersTab,
+                            groupsTab,
+                            calendarTab
+                        ]
 
-                            if (reactiveSession.auth.hasFullPlatformAccess()) {
-                                tabs.push(moreTab)
-                            }
+                        if (reactiveSession.auth.hasFullPlatformAccess()) {
+                            tabs.push(moreTab)
+                        }
 
-                            return tabs;
-                        })
+                        return tabs;
                     })
-                ),
-                loginRoot: wrapWithModalStack(
-                    getNonAutoLoginRoot(reactiveSession, options)
-                ),
-                noPermissionsRoot: getNoPermissionsView()
-            }), 
-            options.initialPresents
-        )
-    });
+                })
+            ),
+            loginRoot: wrapWithModalStack(
+                getNonAutoLoginRoot(reactiveSession, options)
+            ),
+            noPermissionsRoot: getNoPermissionsView()
+        }), 
+        options.initialPresents
+    ));
 }

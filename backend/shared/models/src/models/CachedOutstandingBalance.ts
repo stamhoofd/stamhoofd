@@ -1,5 +1,5 @@
-import { column, Model } from '@simonbackx/simple-database';
-import { SQL, SQLAlias, SQLCalculation, SQLMinusSign, SQLMultiplicationSign, SQLSelectAs, SQLSum, SQLWhere } from '@stamhoofd/sql';
+import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { SQL, SQLAlias, SQLCalculation, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere } from '@stamhoofd/sql';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { BalanceItem } from './BalanceItem';
@@ -62,6 +62,17 @@ export class CachedOutstandingBalance extends Model {
         skipUpdate: true
     })
     updatedAt: Date
+
+    static async getForObjects(objectIds: string[], limitOrganizationId?: string|null): Promise<CachedOutstandingBalance[]> {
+        const query = this.select()
+            .where("objectId", objectIds);
+
+        if (limitOrganizationId) {
+            query.where("organizationId", limitOrganizationId);
+        }
+
+        return await query.fetch();
+    }
 
     static async updateForObjects(organizationId: string, objectIds: string[], objectType: CachedOutstandingBalanceType) {
         switch (objectType) {
@@ -206,5 +217,23 @@ export class CachedOutstandingBalance extends Model {
         }
         const results = await this.fetchForObjects(organizationId, userIds, "userId", SQL.where("memberId", null));
         await this.setForResults(organizationId, results, "user");
+    }
+
+    /**
+     * Experimental: needs to move to library
+     */
+    static select() {
+        const transformer = (row: SQLResultNamespacedRow): CachedOutstandingBalance => {
+            const d = (this as typeof CachedOutstandingBalance & typeof Model).fromRow(row[this.table] as any) as CachedOutstandingBalance|undefined
+
+            if (!d) {
+                throw new Error("EmailTemplate not found")
+            }
+
+            return d;
+        }
+        
+        const select = new SQLSelect(transformer, SQL.wildcard())
+        return select.from(SQL.table(this.table))
     }
 }

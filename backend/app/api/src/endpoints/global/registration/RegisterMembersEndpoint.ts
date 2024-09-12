@@ -309,6 +309,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         console.log('Registering members using whoWillPayNow', whoWillPayNow, checkout.paymentMethod, totalPrice)
 
         const createdBalanceItems: BalanceItem[] = []
+        const unrelatedCreatedBalanceItems: BalanceItem[] = []
         const shouldMarkValid = whoWillPayNow === 'nobody' || checkout.paymentMethod === PaymentMethod.Transfer || checkout.paymentMethod === PaymentMethod.PointOfSale || checkout.paymentMethod === PaymentMethod.Unknown
         
         // Create negative balance items
@@ -408,6 +409,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 await balanceItem2.save();
 
                 // do not add to createdBalanceItems array because we don't want to add this to the payment if we create a payment
+                unrelatedCreatedBalanceItems.push(balanceItem2)
             } else {
                 balanceItem.memberId = registration.memberId;
                 balanceItem.userId = user.id
@@ -590,23 +592,27 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // Make sure every price is accurate before creating a payment
-            await BalanceItem.updateOutstanding(createdBalanceItems)
-            const response = await this.createPayment({
-                balanceItems: mappedBalanceItems,
-                organization,
-                user,
-                checkout: request.body,
-                members
-            })
+            await BalanceItem.updateOutstanding([...createdBalanceItems, ...unrelatedCreatedBalanceItems])
+            try {
+                const response = await this.createPayment({
+                    balanceItems: mappedBalanceItems,
+                    organization,
+                    user,
+                    checkout: request.body,
+                    members
+                })
 
-            if (response) {
-                paymentUrl = response.paymentUrl
-                payment = response.payment
+                if (response) {
+                    paymentUrl = response.paymentUrl
+                    payment = response.payment
+                }
+            } finally {
+                // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
+                await BalanceItem.updateOutstanding(createdBalanceItems)
             }
         } else {
-            await BalanceItem.updateOutstanding(createdBalanceItems)
+            await BalanceItem.updateOutstanding([...createdBalanceItems, ...unrelatedCreatedBalanceItems])
         }
-
 
         // Update occupancy
         for (const group of groups) {
