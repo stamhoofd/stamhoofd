@@ -575,6 +575,10 @@ async function checkReservedUntil() {
         }
     })
 
+    for(const registration of registrations) {
+        registration.scheduleStockUpdate()
+    }
+
     // Update occupancy
     for (const group of groups) {
         await group.updateOccupancy()
