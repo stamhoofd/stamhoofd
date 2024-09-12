@@ -168,12 +168,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        // Update occupancies
-        // TODO: might not be needed in the future (for performance)
-        for (const group of groups) {
-            await group.updateOccupancy()
-        }
-
         // Validate balance items (can only happen serverside)
         const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id)
         let memberBalanceItemsStructs: BalanceItemWithPayments[] = []
