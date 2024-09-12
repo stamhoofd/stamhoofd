@@ -20,7 +20,7 @@
         "@types/formidable": "3.4.5",
         "@types/luxon": "3.4.2",
         "@types/mysql": "^2.15.20",
-        "@types/node": "^18.11.17"
+        "@types/node": "^20.12"
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.14.0",
