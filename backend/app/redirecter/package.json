@@ -10,7 +10,7 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
-        "@types/node": "^18.11.17"
+        "@types/node": "^20.12"
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.14.0",
