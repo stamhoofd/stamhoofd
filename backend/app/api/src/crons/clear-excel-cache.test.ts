@@ -123,13 +123,13 @@ describe("clearExcelCacheHelper", () => {
 
         const file1 = new Dirent();
         file1.name = 'some-file';
-        file1.path = testPath;
+        file1.parentPath = testPath;
         file1.isDirectory = () => false;
 
         const directories = [dir1, dir2, dir3, dir4, dir5, dir6, dir7];
 
         directories.forEach(dir => {
-            dir.path = testPath;
+            dir.parentPath = testPath;
             dir.isDirectory = () => true;
         })
 

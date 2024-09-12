@@ -53,7 +53,7 @@ export async function clearExcelCacheHelper
                 const shouldDelete = date < dateLimit;
 
                 if(shouldDelete) {
-                    const path = file.path + '/' + file.name;
+                    const path = file.parentPath + '/' + file.name;
                     await fs.rm(path, { recursive: true, force: true })
                     console.log("Removed", path)
                 }
