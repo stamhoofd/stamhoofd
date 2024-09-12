@@ -3,7 +3,6 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from "@stamhoofd/structures";
@@ -160,6 +159,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         
         const registrations: RegistrationWithMemberAndGroup[] = []
         const payRegistrations: {registration: RegistrationWithMemberAndGroup, item: RegisterItem}[] = []
+        const deactivatedRegistrationGroupIds: string[] = [];
 
         if (checkout.cart.isEmpty) {
             throw new SimpleError({
@@ -352,6 +352,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             
             // Clear the registration
             await existingRegistration.deactivate()
+            deactivatedRegistrationGroupIds.push(existingRegistration.groupId);
 
             const group = groups.find(g => g.id === existingRegistration.groupId)
             if (!group) {
@@ -610,7 +611,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Update occupancy
         for (const group of groups) {
-            if (registrations.find(p => p.groupId === group.id) || checkout.cart.deleteRegistrations.find(p => p.groupId === group.id)) {
+            if (registrations.some(r => r.groupId === group.id) || deactivatedRegistrationGroupIds.some(id => id === group.id)) {
                 await group.updateOccupancy()
                 await group.save()
             }
