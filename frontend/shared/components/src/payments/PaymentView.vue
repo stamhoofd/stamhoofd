@@ -331,7 +331,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAuth, useBackForward, useContext, useErrors } from "@stamhoofd/components";
+import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors } from "@stamhoofd/components";
 import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 
 import { useRequestOwner } from "@stamhoofd/networking";
@@ -355,7 +355,8 @@ const errors = useErrors()
 const title =  PaymentMethodHelper.getNameCapitalized(props.payment.method ?? PaymentMethod.Unknown)
 const isManualMethod = props.payment.method === PaymentMethod.Transfer || props.payment.method === PaymentMethod.PointOfSale || props.payment.method === PaymentMethod.Unknown
 const auth = useAuth();
-const canWrite = computed(() => auth.canAccessPayment(props.payment, PermissionLevel.Write))
+const app = useAppContext()
+const canWrite = computed(() => app === 'dashboard' && auth.canAccessPayment(props.payment, PermissionLevel.Write))
 const VATPercentage = 21; // todo
 const context = useContext()
 const owner = useRequestOwner()
