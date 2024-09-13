@@ -100,7 +100,7 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import { EditParentView, MemberIcon, NavigationActions, useEditMember, usePlatformFamilyManager } from '@stamhoofd/components';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useMemberManager } from '../../getRootView';
+import { useMemberManager } from '@stamhoofd/networking';
 
 const memberManager = useMemberManager();
 const present = usePresent()

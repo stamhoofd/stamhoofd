@@ -4,7 +4,11 @@ import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from
 import { SessionContext, Storage } from '@stamhoofd/networking';
 import { Document, GroupsWithOrganizations, IDRegisterCheckout, MembersBlob, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { reactive, watch } from 'vue';
+import { inject, reactive, watch } from 'vue';
+
+export function useMemberManager() {
+    return inject<MemberManager>('$memberManager', null as unknown as MemberManager) as MemberManager
+}
 
 /**
  * Controls the fetching and decrypting of members

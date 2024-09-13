@@ -50,7 +50,7 @@ import { EventInfoTable, ExternalOrganizationContainer, ImageComponent, useChoos
 import { Event, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import { useMemberManager } from '../../getRootView';
+import { useMemberManager } from '@stamhoofd/networking';
 
 const props = defineProps<{
     event: Event;

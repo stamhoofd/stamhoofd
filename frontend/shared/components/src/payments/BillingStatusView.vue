@@ -5,7 +5,7 @@
         <main>
             <h1>Betalingen</h1>
 
-            <OutstandingBalanceTable :item="item" />
+            <OutstandingBalanceTable v-for="item in items" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
 
             <template v-if="pendingPayments.length > 0">
                 <hr>
@@ -98,18 +98,26 @@ import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OutstandingBalanceTable from "./OutstandingBalanceTable.vue";
 
-const props = defineProps<{
-    item: OrganizationDetailedBillingStatusItem
-}>();
+const props = withDefaults(
+    defineProps<{
+        /**
+         * Whether the view is dedicated to a single organization (so we can hide organization names in the view)
+         */
+        singleOrganization?: boolean,
+        items: OrganizationDetailedBillingStatusItem[]
+    }>(), {
+        singleOrganization: false
+    }
+);
 
 const present = usePresent()
 
 const pendingPayments = computed(() => {
-    return props.item.payments.filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
+    return props.items.flatMap(i => i.payments).filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
 });
 
 const succeededPayments = computed(() => {
-    return props.item.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
+    return props.items.flatMap(i => i.payments).filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
 }); 
 
 async function openPayment(payment: PaymentGeneral) {

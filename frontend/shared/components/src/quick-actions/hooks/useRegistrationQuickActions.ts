@@ -1,9 +1,8 @@
 import { Decoder } from "@simonbackx/simple-encoding";
-import { useRequestOwner } from "@stamhoofd/networking";
-import { useMemberManager } from "@stamhoofd/registration";
+import { useMemberManager, useRequestOwner } from "@stamhoofd/networking";
 import { GroupType, OrganizationBillingStatus, PlatformMember } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { computed, ref, Ref } from "vue";
+import { computed, onActivated, ref, Ref } from "vue";
 import { ErrorBox } from "../../errors/ErrorBox";
 import { useErrors } from "../../errors/useErrors";
 import { GlobalEventBus } from "../../EventBus";
@@ -18,6 +17,7 @@ import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
+import { useNavigate } from "@simonbackx/vue-app-navigation";
 
 export function useRegistrationQuickActions(): QuickActions {
     const memberManager = useMemberManager();
@@ -28,6 +28,7 @@ export function useRegistrationQuickActions(): QuickActions {
     const editMember = useEditMember();
     const owner = useRequestOwner()
     const errors = useErrors()
+    const $navigate = useNavigate()
     
     async function openCart() {
         await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
@@ -97,6 +98,9 @@ export function useRegistrationQuickActions(): QuickActions {
         }
     }
 
+    onActivated(() => {
+        updateBalance().catch(console.error)
+    })
 
     return {
         actions: computed(() => {
@@ -123,7 +127,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     rightText: Formatter.price(open),
                     rightTextClass: 'style-price',
                     action: async () => {
-                        // todo
+                        await $navigate('payments');
                     }
                 })
             }

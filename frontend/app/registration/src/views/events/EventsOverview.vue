@@ -43,7 +43,7 @@ import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UI
 import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, ref, Ref, watchEffect } from 'vue';
-import { useMemberManager } from '../../getRootView';
+import { useMemberManager } from '@stamhoofd/networking';
 import EventView from './EventView.vue';
 
 type ObjectType = Event;

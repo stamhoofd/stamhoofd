@@ -1,23 +1,18 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
-import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
+import { AuthenticatedView, ColorHelper, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
 import { getNonAutoLoginRoot, wrapContext } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { NetworkManager, PlatformManager, SessionContext, SessionManager } from "@stamhoofd/networking";
+import { NetworkManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
-import { computed, inject, markRaw, reactive } from "vue";
+import { computed } from "vue";
 
-import { MemberManager } from "./classes/MemberManager";
 import CartView from "./views/cart/CartView.vue";
 import EventsOverview from "./views/events/EventsOverview.vue";
 import StartView from "./views/start/StartView.vue";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
-}
-
-export function useMemberManager() {
-    return inject('$memberManager') as MemberManager;
 }
 
 export async function getScopedRegistrationRootFromUrl() {

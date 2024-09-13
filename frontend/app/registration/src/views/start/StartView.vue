@@ -86,7 +86,7 @@
                             Lid inschrijven
                         </h3>
                         <p class="style-description-small">
-                            Schrijf een lid in
+                            Schrijf iemand in.
                         </p>
 
                         <template #right>
@@ -103,7 +103,24 @@
                             Gegevens nakijken
                         </h3>
                         <p class="style-description-small">
-                            Pas gegevens aan en bekijk al jouw inschrijvingen
+                            Pas gegevens aan en bekijk al jouw inschrijvingen.
+                        </p>
+
+                        <template #right>
+                            <span class="icon gray arrow-right-small" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem class="left-center" :selectable="true" @click="$navigate(Routes.Payments)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/creditcards.svg" class="style-illustration-img">
+                        </template>
+
+                        <h3 class="style-title-list">
+                            Betalingen en openstaande rekening
+                        </h3>
+                        <p class="style-description-small">
+                            Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.
                         </p>
 
                         <template #right>
@@ -122,12 +139,13 @@ import { MemberIcon, QuickActionsBox, Toast, useAddMember, useChooseGroupForMemb
 import { GroupType, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useMemberManager } from '../../getRootView';
+import { useMemberManager } from '@stamhoofd/networking';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
     CheckData = 'checkData',
-    ViewMember = 'viewMember'
+    ViewMember = 'viewMember',
+    Payments = 'payments'
 }
 defineRoutes([
     {
@@ -140,6 +158,12 @@ defineRoutes([
         name: Routes.CheckData,
         url: 'gegevens',
         component: async () => (await import('../members/CheckDataView.vue')).default as any,
+        present: 'popup'
+    },
+    {
+        name: Routes.Payments,
+        url: 'betalingen',
+        component: async () => (await import('./payments/MemberBillingStatusView.vue')).default as any,
         present: 'popup'
     },
     {

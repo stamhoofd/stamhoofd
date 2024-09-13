@@ -1,11 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentStatus } from "@stamhoofd/structures";
+import { OrganizationDetailedBillingStatus, PaymentStatus } from "@stamhoofd/structures";
 
-import { BalanceItem, Organization, Payment } from "@stamhoofd/models";
+import { BalanceItem, Payment } from "@stamhoofd/models";
 import { SQL } from "@stamhoofd/sql";
-import { Formatter } from "@stamhoofd/utility";
-import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
 import { Context } from "../../../../helpers/Context";
+import { GetUserDetailedBilingStatusEndpoint } from "../../../global/registration/GetUserDetailedBillingStatusEndpoint";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -54,33 +53,6 @@ export class GetOrganizationDetailedBillingStatusEndpoint extends Endpoint<Param
             )
             .fetch()
 
-        const organizationIds = Formatter.uniqueArray([
-            ...balanceItemModels.map(b => b.organizationId),
-            ...paymentModels.map(p => p.organizationId).filter(p => p !== null)
-        ])
-        
-        // Group by organization you'll have to pay to
-        if (organizationIds.length === 0) {
-            return new Response(
-                OrganizationDetailedBillingStatus.create({})
-            )
-        }
-
-        const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels)
-        const organizationModels = await Organization.getByIDs(...organizationIds)
-        const organizations = await AuthenticatedStructures.organizations(organizationModels)
-        const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false)
-
-        return new Response(
-            OrganizationDetailedBillingStatus.create({
-                organizations: organizations.map(o => {
-                    return OrganizationDetailedBillingStatusItem.create({
-                        organization: o,
-                        balanceItems: balanceItems.filter(b => b.organizationId == o.id),
-                        payments: payments.filter(p => p.organizationId === o.id)
-                    })
-                })
-            })
-        )
+        return new Response(await GetUserDetailedBilingStatusEndpoint.getDetailedBillingStatus(balanceItemModels, paymentModels));
     }
 }

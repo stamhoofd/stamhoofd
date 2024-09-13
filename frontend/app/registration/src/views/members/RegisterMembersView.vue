@@ -46,7 +46,7 @@
 import { MemberIcon, useAddMember, useChooseGroupForMember, useUser } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useMemberManager } from '../../getRootView';
+import { useMemberManager } from '@stamhoofd/networking';
 
 const memberManager = useMemberManager();
 const members = computed(() => memberManager.family.members);

@@ -39,14 +39,13 @@
 </template>
 
 <script setup lang="ts">
-import { ErrorBox, PriceBreakdownBox, RegisterItemRow, startCheckout, useContext, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
+import { ErrorBox, PriceBreakdownBox, RegisterItemRow, startCheckout, useContext, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { useMemberManager } from '@stamhoofd/networking';
 import { computed, onActivated, onMounted, ref } from 'vue';
-import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
 const checkout = computed(() => memberManager.family.checkout)
 const cart = computed(() => checkout.value.cart)
-const organization = useOrganization()
 const errors = useErrors()
 const context = useContext()
 const navigate = useNavigationActions();

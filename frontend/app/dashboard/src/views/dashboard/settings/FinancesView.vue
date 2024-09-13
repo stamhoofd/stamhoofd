@@ -107,13 +107,12 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, useAuth, useContext, useErrors } from '@stamhoofd/components';
+import { ErrorBox, useAuth, useContext, useErrors, BillingStatusView } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, BalanceItemWithPayments, OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions, ref, Ref } from 'vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
-import BillingStatusView from './components/BillingStatusView.vue';
 
 enum Routes {
     Transfers = "Transfers",

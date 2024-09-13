@@ -99,8 +99,23 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const deleteRegistrationIds = request.body.cart.deleteRegistrationIds
         const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id)
 
+        // Validate balance items (can only happen serverside)
+        const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id)
+        let memberBalanceItemsStructs: BalanceItemWithPayments[] = []
+        let balanceItemsModels: BalanceItem[] = []
+        if (balanceItemIds.length > 0) {
+            balanceItemsModels = await BalanceItem.where({ id: { sign:'IN', value: balanceItemIds }, organizationId: organization.id })
+            if (balanceItemsModels.length != balanceItemIds.length) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+            memberBalanceItemsStructs = await BalanceItem.getStructureWithPayments(balanceItemsModels)
+        }
+
         const memberIds = Formatter.uniqueArray(
-            [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId)]
+            [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId), ...balanceItemsModels.map(i => i.memberId).filter(m => m !== null)]
         )
         const members = await Member.getBlobByIds(...memberIds)
         const groupIds = request.body.groupIds
@@ -166,21 +181,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 code: "empty_data",
                 message: "Oeps, jouw mandje is leeg. Voeg eerst inschrijvingen toe voor je verder gaat."
             })
-        }
-
-        // Validate balance items (can only happen serverside)
-        const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id)
-        let memberBalanceItemsStructs: BalanceItemWithPayments[] = []
-        let balanceItemsModels: BalanceItem[] = []
-        if (balanceItemIds.length > 0) {
-            balanceItemsModels = await BalanceItem.where({ id: { sign:'IN', value: balanceItemIds }, organizationId: organization.id })
-            if (balanceItemsModels.length != balanceItemIds.length) {
-                throw new SimpleError({
-                    code: "invalid_data",
-                    message: "Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast. Herlaad de pagina en probeer opnieuw."
-                })
-            }
-            memberBalanceItemsStructs = await BalanceItem.getStructureWithPayments(balanceItemsModels)
         }
 
         // Validate the cart
