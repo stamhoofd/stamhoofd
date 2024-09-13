@@ -61,7 +61,7 @@
                 <p>Hier vind je een overzicht van wat je moet betalen aan {{ item.organization.name }}, bv. voor de aansluitingkosten van leden.</p>
 
                 <STList class="illustration-list">    
-                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.OutstandingBalance, {properties: {item}})">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.OutstandingBalance, {properties: {items: [item]}})">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                         </template>
@@ -84,7 +84,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OutstandingBalance, {properties: {item}})">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OutstandingBalance, {properties: {items: [item]}})">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                         </template>
@@ -179,17 +179,17 @@ defineRoutes([
             }
 
             return {
-                item
+                items: [item]
             }
         },
         propsToParams(props) {
-            if (!("item" in props) || !(props.item instanceof OrganizationDetailedBillingStatusItem)) {
-                throw new Error('Missing item')
+            if (!("items" in props) || (!Array.isArray(props.items)) || !(props.items[0] instanceof OrganizationDetailedBillingStatusItem)) {
+                throw new Error('Missing items')
             }
 
             return {
                 params: {
-                    uri: props.item.organization.uri
+                    uri: props.items[0].organization.uri
                 }
             }
         }
