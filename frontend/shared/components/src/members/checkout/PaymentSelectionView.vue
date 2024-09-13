@@ -3,14 +3,12 @@
         <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'" />
         <main v-if="needsPay" class="center">
             <h1>Kies een betaalmethode</h1>
-            <p>
-                <span>Te betalen: </span>
-                <span class="style-tag">{{ formatPrice(checkout.totalPrice) }}</span>
-            </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
+
+            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
         </main>
         <main v-else class="center">
             <h1>Bevestig je inschrijvingen</h1>
@@ -38,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, LoadingButton, NavigationActions, PaymentSelectionList, STErrorsDefault, STNavigationBar, STToolbar, useErrors, useNavigationActions } from "@stamhoofd/components";
+import { ErrorBox, LoadingButton, NavigationActions, PaymentSelectionList, PriceBreakdownBox, STErrorsDefault, STNavigationBar, STToolbar, useErrors, useNavigationActions } from "@stamhoofd/components";
 import { RegisterCheckout } from "@stamhoofd/structures";
 import { computed, onMounted, ref } from "vue";
 

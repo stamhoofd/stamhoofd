@@ -316,9 +316,6 @@
                         <p v-if="item.price < 0" class="style-tag">
                             Terugbetaling
                         </p>
-                        <p v-else-if="payment.paidAt && (item.balanceItem.status === 'Hidden' || item.balanceItem.amount === 0)" class="style-tag error">
-                            Deze schuld werd verwijderd na betaling. Het verschil zal bij volgende betalingen in rekening gebracht worden.
-                        </p>
                         
                         <template #right>
                             <span class="style-price-base">{{ item.price === 0 ? 'Gratis' : formatPrice(item.price) }}</span>

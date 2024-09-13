@@ -1,18 +1,22 @@
 <template>
     <STListItem class="right-stack">
         <template #left>
-            <figure v-if="item.item.type === BalanceItemType.PlatformMembership" class="style-image-with-icon gray">
+            <figure class="style-image-with-icon gray">
                 <figure>
-                    <span class="icon membership-filled" />
+                    <span class="icon" :class="getBalanceItemTypeIcon(item.item.type)" />
                 </figure>
-                <aside />
+                <aside>
+                    <span v-if="item.item.amount <= 0" class="icon disabled small red" />
+                    <span v-if="item.item.amount > 1" class="style-bubble primary">
+                        {{ item.item.amount }}
+                    </span>
+                </aside>
             </figure>
         </template>
 
         <p v-if="item.item.itemPrefix" class="style-title-prefix-list">
             {{ item.item.itemPrefix }}
         </p>
-        
             
         <h3 class="style-title-list">
             <span>{{ item.item.itemTitle }}</span>
@@ -20,10 +24,6 @@
 
         <p class="style-description-small">
             <span>{{ item.item.itemDescription }}</span>
-        </p>
-
-        <p class="style-description-small">
-            <span>{{ item.item.description }}</span>
         </p>
 
         <template #right>
@@ -37,7 +37,7 @@
 
 
 <script setup lang="ts">
-import { BalanceItemCartItem, BalanceItemType, RegisterCheckout } from '@stamhoofd/structures';
+import { BalanceItemCartItem, getBalanceItemTypeIcon, RegisterCheckout } from '@stamhoofd/structures';
 
 const props = withDefaults(
     defineProps<{

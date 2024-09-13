@@ -18,6 +18,7 @@ export { default as EditMemberAllBox } from "./components/edit/EditMemberAllBox.
 export { default as RegisterItemRow } from "./components/group/RegisterItemRow.vue"
 export { default as RegisterItemCheckboxRow } from "./components/group/RegisterItemCheckboxRow.vue"
 export { default as DeleteRegistrationRow } from "./components/group/DeleteRegistrationRow.vue"
+export { default as BalanceItemCartItemRow } from "./components/group/BalanceItemCartItemRow.vue"
 
 export * from "./checkout";
 export * from "./hooks";

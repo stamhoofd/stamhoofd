@@ -111,7 +111,7 @@ export class MemberManager {
                     owner: {},
                     shouldRetry: true
                 })
-                
+
                 const checkout = idCheckout.hydrate({
                     members: this.family.members,
                     groups: [...knownGroups, ...groupsWithOrganizations.groups],

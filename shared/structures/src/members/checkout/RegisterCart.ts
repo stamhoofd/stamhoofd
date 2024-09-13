@@ -104,9 +104,6 @@ export class RegisterCart {
             return false;
         }
 
-        //if (this.singleOrganization && item.organization.id !== this.singleOrganization.id) {
-        //    return false;
-        //}
         return true;
     }
 

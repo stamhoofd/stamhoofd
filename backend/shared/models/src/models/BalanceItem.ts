@@ -119,6 +119,10 @@ export class BalanceItem extends Model {
         return this.unitPrice * this.amount;
     }
 
+    get priceOpen() {
+        return this.price - this.pricePaid - this.pricePending;
+    }
+
     async markUpdated(payment: Payment, organization: Organization) {
         // For orders: mark order as changed (so they are refetched in front ends)
         if (this.orderId) {
@@ -414,7 +418,7 @@ export class BalanceItem extends Model {
         LEFT JOIN (
             SELECT
                 balanceItemId,
-                sum(GREATEST(0, balance_item_payments.price)) AS price
+                sum(balance_item_payments.price) AS price
             FROM
                 balance_item_payments
                 LEFT JOIN payments ON payments.id = balance_item_payments.paymentId
@@ -424,7 +428,7 @@ export class BalanceItem extends Model {
                 balanceItemId
             ) i ON i.balanceItemId = balance_items.id 
         SET balance_items.pricePending = LEAST(
-            GREATEST(0, balance_items.unitPrice * balance_items.amount - balance_items.pricePaid), 
+            balance_items.unitPrice * balance_items.amount - balance_items.pricePaid, 
             coalesce(i.price, 0)
         )
         ${secondWhere}`;

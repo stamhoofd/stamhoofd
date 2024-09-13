@@ -31,7 +31,7 @@ export class BalanceItemCartItem extends AutoEncoder {
             this.item = found
         }
 
-        const maxPrice = BalanceItemWithPayments.getOutstandingBalance([this.item]).total // Allow to start multiple payments for pending balance items in case of payment cancellations
+        const maxPrice = this.item.priceOpen
 
         if (maxPrice === 0) {
             throw new SimpleError({

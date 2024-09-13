@@ -15,60 +15,55 @@
                 
                 <STList>
                     <STListItem v-for="item in filteredBalanceItems" :key="item.id" :selectable="hasWrite" @click="editBalanceItem(item)">
-                        <h3 class="style-title-list">
-                            <span v-if="item.amount > 1" class="style-price">{{ item.amount }} x</span> {{ item.description }}
-                        </h3>
-                        <p v-if="item.memberId && getMember(item.memberId) && multipleMembers" class="style-description-small">
-                            {{ getMember(item.memberId)!.patchedMember.name }}
+                        <template #left>
+                            <span v-if="item.amount === 0" class="style-amount min-width">
+                                <span class="icon disabled gray" />
+                            </span>
+                            <span v-else class="style-amount min-width">{{ formatFloat(item.amount) }}</span>
+                        </template>
+
+                        <p v-if="item.itemPrefix" class="style-title-prefix-list">
+                            {{ item.itemPrefix }}
                         </p>
+
+                        
+                        <h3 class="style-title-list">
+                            {{ item.itemTitle }}
+                        </h3>
+
+                        <p v-if="item.itemDescription" class="style-description-small">
+                            {{ item.itemDescription }}
+                        </p>
+
                         <p class="style-description-small">
                             {{ formatDate(item.createdAt) }}
                         </p>
-                        <p class="style-description-small">
-                            {{ formatPrice(item.price) }}
+
+                        <p v-if="item.amount === 0" class="style-description-small">
+                            Deze schuld werd verwijderd maar werd al (deels) betaald
                         </p>
+
+                        <p v-else class="style-description-small">
+                            {{ formatFloat(item.amount) }} x {{ formatPrice(item.unitPrice) }} te betalen
+                        </p>
+
+                        <p v-if="item.pricePaid !== 0" class="style-description-small">
+                            {{ formatPrice(item.pricePaid) }} betaald
+                        </p>
+
+                        <p v-if="item.pricePending !== 0" class="style-description-small">
+                            {{ formatPrice(item.pricePending) }} in verwerking
+                        </p>
+
                         <template #right>
-                            <span v-if="item.pricePaid === item.price" class="style-tag success">Betaald</span>
-                            <span v-else-if="item.pricePaid > 0" class="style-tag warn">{{ formatPrice(item.pricePaid) }} betaald</span>
-                            <span v-else-if="!item.hasPendingPayment" class="style-tag">Openstaand</span>
-                            <span v-else class="style-tag warn">In verwerking</span>
+                            <p class="style-price-base">
+                                {{ formatPrice(item.priceOpen) }}
+                            </p>
                         </template>
                     </STListItem>
                 </STList>
 
-                <div v-if="filteredBalanceItems.length > 0" class="style-pricing-box">
-                    <STList>
-                        <STListItem v-if="outstandingBalance.total >= 0">
-                            Totaal te betalen
-
-                            <template #right>
-                                {{ formatPrice(outstandingBalance.total) }}
-                            </template>
-                        </STListItem>
-                        <STListItem v-else-if="outstandingBalance.totalPending > 0">
-                            Totaal te betalen
-
-                            <template #right>
-                                {{ formatPrice(0) }}
-                            </template>
-                        </STListItem>
-                        <STListItem v-if="outstandingBalance.totalPending > 0">
-                            Waarvan in verwerking
-
-                            <template #right>
-                                {{ formatPrice(outstandingBalance.totalPending) }}
-                            </template>
-                        </STListItem>
-
-                        <STListItem v-if="outstandingBalance.total < 0">
-                            Totaal terug te betalen
-
-                            <template #right>
-                                {{ formatPrice(outstandingBalance.total) }}
-                            </template>
-                        </STListItem>
-                    </STList>
-                </div>
+                <PriceBreakdownBox :price-breakdown="priceBreakown" />
 
                 <button v-if="hasWrite" type="button" class="button text" @click="createBalanceItem">
                     <span class="icon add" />
@@ -98,19 +93,7 @@
                     <p>Het kan dat het openstaande bedrag eerder betaald werd via overschrijving. In dit geval weten we nog niet of die echt is uitgevoerd tot jullie het bedrag ontvangen op jullie rekening. Je kan deze overschrijvingen hier markeren als betaald of annuleren.</p>
 
                     <STList>
-                        <STListItem v-for="payment of pendingPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
-                            <h3 class="style-title-list">
-                                {{ getPaymentMethodName(payment.method) }}
-                            </h3>
-                            <p class="style-description-small">
-                                Aangemaakt op {{ formatDate(payment.createdAt) }}
-                            </p>
-
-                            <template #right>
-                                <span>{{ formatPrice(payment.price) }}</span>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
+                        <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payment="payment" :payments="pendingPayments" />
                     </STList>
                 </template>
 
@@ -119,40 +102,7 @@
                     <h2>Betalingen</h2>
 
                     <STList>
-                        <STListItem v-for="payment of succeededPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
-                            <template #left>
-                                <figure class="style-image-with-icon gray">
-                                    <figure>
-                                        <img v-if="payment.method === PaymentMethod.Bancontact" src="@stamhoofd/assets/images/partners/icons/bancontact.svg">
-                                        <img v-else-if="payment.method === PaymentMethod.iDEAL" src="@stamhoofd/assets/images/partners/icons/ideal.svg">
-                                        <span v-else class="icon bank" />
-                                    </figure>
-                                    <aside>
-                                    </aside>
-                                </figure>
-                            </template>
-
-                            <h3 class="style-title-list">
-                                {{ getPaymentMethodName(payment.method) }}
-                                <template v-if="payment.price < 0">
-                                    (terugbetaling)
-                                </template>
-                            </h3>
-                            <p v-if="!payment.paidAt || formatDate(payment.createdAt) !== formatDate(payment.paidAt)" class="style-description-small">
-                                Aangemaakt op {{ formatDate(payment.createdAt) }}
-                            </p>
-                            <p v-if="payment.paidAt && payment.price >= 0" class="style-description-small">
-                                Betaald op {{ formatDate(payment.paidAt) }}
-                            </p>
-                            <p v-else-if="payment.paidAt" class="style-description-small">
-                                Terugbetaald op {{ formatDate(payment.paidAt) }}
-                            </p>
-
-                            <template #right>
-                                <span>{{ formatPrice(payment.price) }}</span>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
+                        <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
                     </STList>
                 </template>
             </template>
@@ -163,9 +113,9 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncPaymentView, ErrorBox, GlobalEventBus, Spinner, useAuth, useContext, useErrors, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { AsyncPaymentView, ErrorBox, GlobalEventBus, PaymentRow, PriceBreakdownBox, Spinner, useAuth, useContext, useErrors, useFinancialSupportSettings, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItemWithPayments, FinancialSupportSettings, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, FinancialSupportSettings, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditBalanceItemView from '../../payments/EditBalanceItemView.vue';
@@ -200,20 +150,47 @@ GlobalEventBus.addListener(this, "paymentPatch", async (payment) => {
     return Promise.resolve()
 })
 
-const filteredBalanceItems = computed(() => {
-    return balanceItems.value.filter(b => b.price - b.pricePaid !== 0)
+const priceBreakown = computed(() => {
+    const balance = outstandingBalance.value
+
+    const all = [
+        {
+            name: 'Reeds betaald',
+            price: balance.pricePaid
+        },
+        {
+            name: 'In verwerking',
+            price: balance.pricePending,
+        }
+    ].filter(a => a.price !== 0)
+
+    if (all.length > 0) {
+        all.unshift({
+            name: 'Totaalprijs',
+            price: balance.price
+        })
+    }
+
+    return [
+        ...all,
+        {
+            name: balance.priceOpen < 0 ? 'Terug te krijgen' : 'Te betalen',
+            price: Math.abs(balance.priceOpen)
+        }
+    ];
 });
 
-const multipleMembers = computed(() => {
-    return props.member.family.members.length > 1
+const filteredBalanceItems = computed(() => {
+    return balanceItems.value.filter(b => b.priceOpen !== 0)
 });
+const {financialSupportSettings} = useFinancialSupportSettings()
 
 const financialSupportWarningText = computed(() => {
-    return platform.value.config.recordsConfiguration.financialSupport?.warningText ?? organization.value?.meta.recordsConfiguration.financialSupport?.warningText ?? FinancialSupportSettings.defaultWarningText
+    return financialSupportSettings.value.warningText
 });
 
 const outstandingBalance = computed(() => {
-    return BalanceItemWithPayments.getOutstandingBalance(balanceItems.value)
+    return BalanceItemWithPayments.getOutstandingBalance(filteredBalanceItems.value)
 });
 
 const paymentIds = computed(() => {
@@ -298,14 +275,6 @@ async function reload() {
         errors.errorBox = new ErrorBox(e)
     }
     loadingPayments.value = false;
-}
-
-function getMember(id: string) {
-    return props.member.family.members.find(m => m.id == id)
-}
-
-function getPaymentMethodName(method: PaymentMethod) {
-    return PaymentMethodHelper.getNameCapitalized(method);
 }
 
 async function createPayment() {

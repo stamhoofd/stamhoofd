@@ -70,6 +70,16 @@ export class IDRegisterCheckout extends AutoEncoder {
         checkout.paymentMethod = this.paymentMethod
         checkout.asOrganizationId = this.asOrganizationId
         checkout.customer = this.customer
+
+        if (context.organizations[0] && !checkout.cart.isEmpty && checkout.defaultOrganization === null) {
+            const preferredId = checkout.singleOrganizationId
+            checkout.setDefaultOrganization((preferredId ? context.organizations.find(o => o.id === preferredId) : null) ?? context.organizations[0])
+        } else {
+            if (!checkout.cart.isEmpty && !checkout.singleOrganization) {
+                throw new Error('Missing default organization')
+            }
+        }
+
         return checkout
     }
 
@@ -122,6 +132,13 @@ export class RegisterCheckout {
     }
 
     add(item: RegisterItem, options?: {calculate?: boolean}) {
+        if (this.cart.isEmpty) {
+            this.defaultOrganization = null
+        }
+
+        if (!this.singleOrganization) {
+            this.setDefaultOrganization(item.organization)
+        }
         this.cart.add(item)
 
         if (options?.calculate !== false) {
@@ -135,12 +152,20 @@ export class RegisterCheckout {
         if (options?.calculate !== false) {
             this.updatePrices()
         }
+
+        if (this.cart.isEmpty) {
+            this.defaultOrganization = null
+        }
     }
 
     removeMemberAndGroup(memberId: string, groupId: string, options?: {calculate?: boolean}) {
         this.cart.removeMemberAndGroup(memberId, groupId)
         if (options?.calculate !== false) {
             this.updatePrices()
+        }
+
+        if (this.cart.isEmpty) {
+            this.defaultOrganization = null
         }
     }
 
@@ -149,12 +174,20 @@ export class RegisterCheckout {
         if (options?.calculate !== false) {
             this.updatePrices()
         }
+
+        if (this.cart.isEmpty) {
+            this.defaultOrganization = null
+        }
     }
 
     unremoveRegistration(registration: RegistrationWithMember, options?: {calculate?: boolean}) {
         this.cart.unremoveRegistration(registration)
         if (options?.calculate !== false) {
             this.updatePrices()
+        }
+
+        if (this.cart.isEmpty) {
+            this.defaultOrganization = null
         }
     }
 
@@ -172,8 +205,11 @@ export class RegisterCheckout {
         if (options?.calculate !== false) {
             this.updatePrices()
         }
-    }
 
+        if (this.cart.isEmpty) {
+            this.defaultOrganization = null
+        }
+    }
 
     updatePrices() {
         this.cart.calculatePrices()

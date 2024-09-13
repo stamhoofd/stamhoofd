@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div v-if="groupedItems.length !== 0 || !showName" class="container">
         <hr>
         <h2>
             Openstaand<template v-if="showName">
@@ -14,7 +14,19 @@
             <STList>
                 <STListItem v-for="group in groupedItems" :key="group.id">
                     <template #left>
-                        <span class="style-amount min-width">{{ formatFloat(group.amount) }}</span>
+                        <span class="style-amount min-width">
+                            <figure class="style-image-with-icon gray">
+                                <figure>
+                                    <span class="icon" :class="getBalanceItemTypeIcon(group.balanceItem.type)" />
+                                </figure>
+                                <aside>
+                                    <span v-if="group.amount <= 0" class="icon disabled small red" />
+                                    <span v-if="group.amount > 1" class="style-bubble primary">
+                                        {{ group.amount }}
+                                    </span>
+                                </aside>
+                            </figure>
+                        </span>
                     </template>
 
                     <p v-if="group.prefix" class="style-title-prefix-list">
@@ -34,7 +46,7 @@
                     </p>
                     
                     <template #right>
-                        <p class="style-description-small">
+                        <p class="style-price-base">
                             {{ formatPrice(group.price) }}
                         </p>
                     </template>
@@ -57,7 +69,7 @@
 import { useDismiss } from "@simonbackx/vue-app-navigation";
 import { GlobalEventBus, PriceBreakdownBox, Toast, useAppContext, useOrganizationCart } from "@stamhoofd/components";
 import { useMemberManager } from "@stamhoofd/networking";
-import { BalanceItemCartItem, BalanceItemWithPayments, OrganizationDetailedBillingStatusItem, RegisterCheckout } from '@stamhoofd/structures';
+import { BalanceItemCartItem, BalanceItemWithPayments, OrganizationDetailedBillingStatusItem, RegisterCheckout, getBalanceItemTypeIcon } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -106,7 +118,7 @@ class GroupedItems {
      * Only shows outstanding price
      */
     get price() {
-        return this.items.reduce((acc, item) => acc + item.openPrice, 0);
+        return this.items.reduce((acc, item) => acc + item.priceOpen, 0);
     }
 
     get prefix() {
@@ -174,7 +186,7 @@ async function checkout() {
     }
     
     for (const g of filteredItems.value) {
-        const open = g.openPrice;
+        const open = g.priceOpen;
 
         if (open !== 0) {
             checkout.addBalanceItem(BalanceItemCartItem.create({

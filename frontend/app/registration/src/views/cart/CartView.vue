@@ -22,24 +22,27 @@
             <template v-else>
                 <STList>
                     <RegisterItemRow v-for="item in cart.items" :key="item.id" class="right-stack" :item="item" />
+                    <BalanceItemCartItemRow v-for="item in cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
                 </STList>
                 <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
 
-                <LoadingButton :loading="loading">
-                    <button class="button primary" type="button" @click="goToCheckout">
-                        <span v-if="checkout.totalPrice">Afrekenen</span>
-                        <span v-else>Bevestigen</span>
+                <p class="style-button-bar right-align">
+                    <LoadingButton :loading="loading">
+                        <button class="button primary" type="button" @click="goToCheckout">
+                            <span v-if="checkout.totalPrice">Afrekenen</span>
+                            <span v-else>Bevestigen</span>
 
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
+                            <span class="icon arrow-right" />
+                        </button>
+                    </LoadingButton>
+                </p>
             </template>
         </main>
     </section>
 </template>
 
 <script setup lang="ts">
-import { ErrorBox, PriceBreakdownBox, RegisterItemRow, startCheckout, useContext, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { BalanceItemCartItemRow, ErrorBox, PriceBreakdownBox, RegisterItemRow, startCheckout, useContext, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { useMemberManager } from '@stamhoofd/networking';
 import { computed, onActivated, onMounted, ref } from 'vue';
 

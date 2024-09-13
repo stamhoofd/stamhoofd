@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDeco
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment, PrivatePayment } from "./members/Payment";
+import { PriceBreakdown } from "./PriceBreakdown";
 
 export enum BalanceItemStatus {
     /**
@@ -38,6 +39,18 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.Other: return "Andere"
         case BalanceItemType.PlatformMembership: return "Aansluiting"
     }
+}
+
+export function getBalanceItemTypeIcon(type: BalanceItemType): string|null {
+    switch (type) {
+        case BalanceItemType.Registration: return "membership-filled"
+        case BalanceItemType.AdministrationFee: return "calculator"
+        case BalanceItemType.FreeContribution: return "gift"
+        case BalanceItemType.Order: return "basket"
+        case BalanceItemType.Other: return "card"
+        case BalanceItemType.PlatformMembership: return "membership-filled"
+    }
+    return null;
 }
 
 export enum BalanceItemRelationType {
@@ -119,8 +132,15 @@ export class BalanceItem extends AutoEncoder {
         return this.unitPrice * this.amount;
     }
 
+    get priceOpen() {
+        return this.price - this.pricePaid - this.pricePending
+    } 
+
     @field({ decoder: IntegerDecoder })
     pricePaid = 0
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    pricePending = 0
 
     @field({ decoder: DateDecoder })
     createdAt = new Date()
@@ -169,6 +189,33 @@ export class BalanceItem extends AutoEncoder {
         return null
     }
 
+    get priceBreakown(): PriceBreakdown {
+        const all = [
+            {
+                name: 'Reeds betaald',
+                price: this.pricePaid,
+            },
+            {
+                name: 'In verwerking',
+                price: this.pricePending,
+            }
+        ].filter(a => a.price !== 0)
+
+        if (all.length > 0) {
+            all.unshift({
+                name: 'Totaalprijs',
+                price: this.price
+            })
+        }
+
+        return [
+            ...all,
+            {
+                name: this.priceOpen < 0 ? 'Terug te krijgen' : 'Te betalen',
+                price: Math.abs(this.priceOpen)
+            }
+        ];
+    }
 
     /**
      * Unique identifier whithing a reporting group
@@ -193,19 +240,21 @@ export class BalanceItem extends AutoEncoder {
      * When displayed as a single item
      */
     get itemPrefix(): string {
+        const prefix = this.amount === 0 ? 'Geannuleerde ' : '';
+
         switch (this.type) {
             case BalanceItemType.Registration: {
                 if (this.relations.get(BalanceItemRelationType.GroupOption)) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
-                    return 'Inschrijving voor ' + group;
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'onbekende inschrijvingsgroep';
+                    return prefix + 'inschrijving voor ' + group;
                 }
-                return 'Inschrijving'
+                return prefix + 'inschrijving'
             }
-            case BalanceItemType.AdministrationFee: return 'Administratiekosten'
-            case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
-            case BalanceItemType.Order: return 'Bestelling'
-            case BalanceItemType.Other: return 'Andere'
-            case BalanceItemType.PlatformMembership: return "Aansluiting"
+            case BalanceItemType.AdministrationFee: return prefix + 'administratiekosten'
+            case BalanceItemType.FreeContribution: return prefix + 'vrije bijdrage'
+            case BalanceItemType.Order: return prefix + 'bestelling'
+            case BalanceItemType.Other: return prefix + 'andere'
+            case BalanceItemType.PlatformMembership: return prefix + "aansluiting"
         }
     }
 
@@ -288,29 +337,33 @@ export class BalanceItemWithPayments extends BalanceItem {
         return !!this.payments.find(p => p.payment.isPending)
     }
 
-    get pendingPrice() {
-        // Never return more than the total amount to pay (that means we have multiple payments for the same item - which isn't a huge problem and will be detected/signaled if multiple of those are marked as paid)
-        const toPay = Math.max(0, this.price - this.pricePaid);
-        const pending = this.payments.filter(p => p.payment.isPending).map(p => Math.max(0, p.price)).reduce((t, total) => total + t, 0)
-
-        return Math.min(toPay, pending);
-    }
-
-    get openPrice() {
-        return this.price - this.pricePaid - this.pendingPrice
-    } 
-
     static getOutstandingBalance(items: BalanceItemWithPayments[]) {
         // Get sum of balance payments
-        const totalPending = items.map(p => p.pendingPrice).reduce((t, total) => total + t, 0)
-        
-        const total = items.map(p => p.price - p.pricePaid).reduce((t, total) => total + t, 0)
+        const totalPending = items.map(p => p.pricePending).reduce((t, total) => total + t, 0)
+        const totalPaid = items.map(p => p.pricePaid).reduce((t, total) => total + t, 0)
+        const totalPrice = items.map(p => p.price).reduce((t, total) => total + t, 0)
+
+        const total = totalPrice - totalPaid
         const totalOpen = total - totalPending;
 
         return {
+            /**
+             * @deprecated 
+             */
             totalPending, // Pending payment
+            /**
+             * @deprecated 
+             */
             totalOpen, // Not yet started
-            total: totalPending + totalOpen // total not yet paid
+            /**
+             * @deprecated 
+             */
+            total: totalPending + totalOpen, // total not yet paid
+
+            price: totalPrice,
+            pricePending: totalPending,
+            priceOpen: totalOpen,
+            pricePaid: totalPaid
         }
     }
 }

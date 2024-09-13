@@ -637,12 +637,20 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new Error('Unexpected balance item from other organization')
             }
 
-            if (price < 0 || (price > 0 && price > balanceItem.price - balanceItem.pricePaid)) {
+            if (price > 0 && price > Math.max(balanceItem.priceOpen, balanceItem.price - balanceItem.pricePaid)) {
                 throw new SimpleError({
                     code: "invalid_data",
-                    message: "Oeps, het bedrag dat je probeert te betalen is ongeldig. Herlaad de pagina en probeer opnieuw."
+                    message: "Oeps, het bedrag dat je probeert te betalen is ongeldig (het bedrag is hoger dan het bedrag dat je moet betalen). Herlaad de pagina en probeer opnieuw."
                 })
             }
+
+            if (price < 0 && price < Math.min(balanceItem.priceOpen, balanceItem.price - balanceItem.pricePaid)) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, het bedrag dat je probeert te betalen is ongeldig (het terug te krijgen bedrag is hoger dan het bedrag dat je kan terug krijgen). Herlaad de pagina en probeer opnieuw."
+                })
+            }
+
             totalPrice += price
 
             if (price > 0 && balanceItem.memberId) {

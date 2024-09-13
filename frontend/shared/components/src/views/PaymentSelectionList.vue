@@ -26,7 +26,10 @@
                 </div>
 
                 <template #right>
-                    <img v-if="getLogo(paymentMethod) && (!$isMobile || paymentMethod !== 'Payconiq')" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">
+                    <PaymentMethodIcon 
+                        v-if="(!$isMobile || paymentMethod !== 'Payconiq')" 
+                        :method="paymentMethod" 
+                    />
                 </template>
             </STListItem>
         </STList>
@@ -35,11 +38,12 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg";
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg";
 import { LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Country, Organization, PaymentMethod, PaymentMethodHelper } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import PaymentMethodIcon from "../payments/components/PaymentMethodIcon.vue";
 
 @Component({
     components: {
@@ -49,7 +53,8 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
         STListItem,
         Radio,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
+        PaymentMethodIcon
     },
     model: {
         // Already vue 3 compliant

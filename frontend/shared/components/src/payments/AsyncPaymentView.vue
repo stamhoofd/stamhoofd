@@ -25,6 +25,11 @@ load().catch(console.error)
 
 async function load() {
     try {
+        if (props.payment instanceof PaymentGeneral) {
+            loadedPayment.value = props.payment;
+            return;
+        }
+        
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
             path: `/payments/${props.payment.id}`,

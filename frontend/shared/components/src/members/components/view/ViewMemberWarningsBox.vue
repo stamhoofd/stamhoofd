@@ -15,12 +15,12 @@
 </template>
 
 <script setup lang="ts">
-import { DataPermissionsSettings, FinancialSupportSettings, MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
-import { computed } from 'vue';
-import { useAuth, useOrganization, usePlatform } from '../../../hooks';
-import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
+import { useAuth, useOrganization } from '../../../hooks';
+import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({
     inheritAttrs: false
@@ -30,7 +30,6 @@ const props = defineProps<{
     member: PlatformMember
 }>()
 const organization = useOrganization();
-const platform = usePlatform();
 const auth = useAuth();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
 const $t = useTranslate()

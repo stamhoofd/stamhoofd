@@ -31,17 +31,13 @@
 
         <div class="split-inputs">
             <STInputBox title="Eenheidsprijs" error-fields="unitPrice" :error-box="errors.errorBox">
-                <PriceInput v-model="unitPrice" placeholder="Gratis" :min="null" :disabled="!!balanceItem.order" />
+                <PriceInput v-model="unitPrice" placeholder="Gratis" :min="null" />
             </STInputBox>
 
             <STInputBox title="Aantal" error-fields="amount" :error-box="errors.errorBox">
-                <NumberInput v-model="amount" placeholder="1" :min="1" :disabled="!!balanceItem.order" :stepper="true" />
+                <NumberInput v-model="amount" placeholder="1" :min="Math.min(1, balanceItem.amount)" :stepper="true" />
             </STInputBox>
         </div>
-
-        <STInputBox v-if="amount > 1" title="Totaalprijs" error-fields="unitPrice" :error-box="errors.errorBox">
-            <PriceInput :model-value="patchedBalanceItem.price" placeholder="Gratis" :min="null" :disabled="true" />
-        </STInputBox>
 
         <template v-if="family && family.members.length > 1 && member && isNew">
             <hr>
@@ -70,9 +66,11 @@
             </STList>
         </template>
 
+        <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
+
         <template v-if="!isNew && hasPayments(patchedBalanceItem)">
             <hr>
-            <h2>Betaalpogingen</h2>
+            <h2>Betalingen</h2>
             <p>Een openstaand bedrag kan door een lid betaald worden via het ledenportaal. Daar kan men via één van de ingestelde betaalmethodes afrekenen. Meerdere openstaande bedragen (ook over meerdere leden heen als een account meerdere leden beheert) kunnen in één keer betaald worden, vandaar dat het bedrag van een betaling vaak hoger is dan het bedrag van een individuele afrekening.</p>
 
             <p v-if="patchedBalanceItem.payments.length == 0" class="info-box">
@@ -80,66 +78,8 @@
             </p>
 
             <STList v-else>
-                <STListItem v-for="payment of patchedBalanceItem.payments" :key="payment.id" :selectable="true" class="right-stack" @click="openPayment(payment.payment)">
-                    <h3 class="style-title-list">
-                        {{ getPaymentMethodName(payment.payment.method) }}
-                        <template v-if="payment.payment.price < 0">
-                            (terugbetaling)
-                        </template>
-                    </h3>
-                    <p v-if="payment.payment.price >= 0" class="style-description-small">
-                        Totaalbedrag is {{ formatPrice(payment.payment.price) }}, waarvan {{ formatPrice(payment.price) }} bestemd voor deze aanrekening
-                    </p>
-                    <p v-else class="style-description-small">
-                        Er werd {{ formatPrice(-payment.payment.price) }} terugbetaald
-                    </p>
-
-                    <p v-if="!payment.payment.paidAt || formatDate(payment.payment.createdAt) !== formatDate(payment.payment.paidAt)" class="style-description-small">
-                        Aangemaakt op {{ formatDate(payment.payment.createdAt) }}
-                    </p>
-                    <p v-if="payment.payment.paidAt && payment.payment.price >= 0" class="style-description-small">
-                        Betaald op {{ formatDate(payment.payment.paidAt) }}
-                    </p>
-                    <p v-else-if="payment.payment.paidAt" class="style-description-small">
-                        Terugbetaald op {{ formatDate(payment.payment.paidAt) }}
-                    </p>
-
-                    <template #right>
-                        <span v-if="payment.payment.isFailed" class="style-tag error">Mislukt</span>
-                        <span v-else-if="payment.payment.isPending" class="style-tag warn">In verwerking</span>
-                        <span v-else-if="payment.payment.isSucceeded" class="style-tag success">{{ formatPrice(payment.payment.price) }}</span>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                <PaymentRow v-for="payment of patchedBalanceItem.payments" :key="payment.id" :payment="payment.payment" :payments="patchedBalanceItem.payments.map(b => b.payment)" />
             </STList>
-
-            <div v-if="patchedBalanceItem.payments.length > 0" class="pricing-box">
-                <STList>
-                    <STListItem>
-                        Betaald
-
-                        <template #right>
-                            {{ formatPrice(outstanding.paid) }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem>
-                        Nog te betalen
-
-                        <template #right>
-                            {{ formatPrice(outstanding.remaining) }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="outstanding.pending">
-                        Waarvan in verwerking
-
-                        <template #right>
-                            {{ formatPrice(outstanding.pending) }}
-                        </template>
-                    </STListItem>
-                </STList>
-            </div>
 
             <template v-if="outstanding.pending === 0 && outstanding.paid === 0">
                 <hr>
@@ -167,9 +107,10 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceInput, ViewMemberRegistrationRow, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, ViewMemberRegistrationRow, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PaymentMethod, PaymentMethodHelper, PlatformFamily, Registration } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
+import PaymentRow from './components/PaymentRow.vue';
 
 const props = defineProps<{
     balanceItem: BalanceItemWithPayments|BalanceItem,
@@ -227,16 +168,9 @@ const member = computed(() => {
 })
 
 const outstanding = computed(() => {
-    if (!hasPayments(patchedBalanceItem.value)) {
-        return {
-            paid: 0,
-            pending: 0,
-            remaining: 0
-        }
-    }
-    const paid = patchedBalanceItem.value.payments.filter(p => p.payment.isSucceeded).map(p => p.price).reduce((a, b) => a + b, 0)
-    const pending = patchedBalanceItem.value.payments.filter(p => p.payment.isPending).map(p => p.price).reduce((a, b) => a + b, 0)
-    const remaining = patchedBalanceItem.value.price - paid
+    const paid = patchedBalanceItem.value.pricePaid
+    const pending = patchedBalanceItem.value.pricePending
+    const remaining = patchedBalanceItem.value.price - paid - pending
 
     return {
         paid,

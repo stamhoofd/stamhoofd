@@ -979,6 +979,16 @@
         > * {
             display: block;
         }
+
+        .style-bubble {
+            margin: 2px;
+            width: 16px;
+            height: 16px;
+            min-width: 16px;
+            line-height: 16px;
+            font-size: 12px;
+            font-weight: $font-weight-bold;
+        }
     }
 }
 

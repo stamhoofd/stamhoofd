@@ -13,36 +13,7 @@
                 <p>Bij betalingen via overschrijving of domiciliëring kan het even duren voor we een betaling ontvangen en bevestigen. Je kan hier de status opvolgen.</p>
 
                 <STList>
-                    <STListItem v-for="payment of pendingPayments" :key="payment.id" :selectable="true" class="right-stack" @click="openPayment(payment)">
-                        <template #left>
-                            <figure class="style-image-with-icon gray">
-                                <figure>
-                                    <img v-if="payment.method === PaymentMethod.Bancontact" src="@stamhoofd/assets/images/partners/icons/bancontact.svg">
-                                    <img v-else-if="payment.method === PaymentMethod.iDEAL" src="@stamhoofd/assets/images/partners/icons/ideal.svg">
-                                    <span v-else class="icon bank" />
-                                </figure>
-                                <aside>
-                                    <span class="icon clock small gray" />
-                                </aside>
-                            </figure>
-                        </template>
-
-                        <h3 class="style-title-list">
-                            {{ PaymentMethodHelper.getNameCapitalized(payment.method) }}
-                        </h3>
-
-                        <p v-if="payment.getShortDescription()" class="style-description-small">
-                            {{ payment.getShortDescription() }}
-                        </p>
-                        <p class="style-description-small">
-                            Aangemaakt op {{ formatDate(payment.createdAt) }}
-                        </p>
-
-                        <template #right>
-                            <span class="style-price-base">{{ formatPrice(payment.price) }}</span>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
+                    <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
                 </STList>
             </template>
 
@@ -54,37 +25,7 @@
             </p>
 
             <STList v-else>
-                <STListItem v-for="payment of succeededPayments" :key="payment.id" :selectable="true" class="right-stack" @click="openPayment(payment)">
-                    <template #left>
-                        <figure class="style-image-with-icon gray">
-                            <figure>
-                                <img v-if="payment.method === PaymentMethod.Bancontact" src="@stamhoofd/assets/images/partners/icons/bancontact.svg">
-                                <img v-else-if="payment.method === PaymentMethod.iDEAL" src="@stamhoofd/assets/images/partners/icons/ideal.svg">
-                                <span v-else class="icon bank" />
-                            </figure>
-                            <aside />
-                        </figure>
-                    </template>
-
-                    <h3 class="style-title-list">
-                        {{ PaymentMethodHelper.getNameCapitalized(payment.method) }}
-                    </h3>
-                    <p v-if="payment.getShortDescription()" class="style-description-small">
-                        {{ payment.getShortDescription() }}
-                    </p>
-
-                    <p v-if="!payment.paidAt || formatDate(payment.createdAt) !== formatDate(payment.paidAt)" class="style-description-small">
-                        Aangemaakt op {{ formatDate(payment.createdAt) }}
-                    </p>
-                    <p v-if="payment.paidAt" class="style-description-small">
-                        Betaald op {{ formatDate(payment.paidAt) }}
-                    </p>
-
-                    <template #right>
-                        <span class="style-price-base">{{ formatPrice(payment.price) }}</span>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
             </STList>
         </main>
     </div>
@@ -93,10 +34,11 @@
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { PaymentView } from '@stamhoofd/components';
-import { OrganizationDetailedBillingStatusItem, PaymentGeneral, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
+import { OrganizationDetailedBillingStatusItem, PaymentGeneral } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OutstandingBalanceTable from "./OutstandingBalanceTable.vue";
+import PaymentRow from './components/PaymentRow.vue';
 
 const props = withDefaults(
     defineProps<{
