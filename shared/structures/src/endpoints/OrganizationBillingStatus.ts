@@ -10,7 +10,7 @@ export class OrganizationBillingStatusItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     amount = 0
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 335 })
     amountPending = 0
 }
 

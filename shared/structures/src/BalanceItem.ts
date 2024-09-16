@@ -139,7 +139,7 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     pricePaid = 0
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 335 })
     pricePending = 0
 
     @field({ decoder: DateDecoder })
