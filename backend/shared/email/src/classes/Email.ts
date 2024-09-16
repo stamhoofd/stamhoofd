@@ -392,6 +392,9 @@ class EmailStatic {
             data.retryCount = (data.retryCount ?? 0) + 1;
 
             if (data.retryCount <= 2) {
+                if (data.type === 'transactional') {
+                    data.type = 'broadcast';
+                }
                 this.send(data);
             } else {
                 try {
