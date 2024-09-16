@@ -94,6 +94,7 @@ const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
 .st-list {
     padding: 0;
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    position: relative;
 
     .st-list > & {
         // Allow stacking if we need partial draggable area
@@ -118,7 +119,7 @@ const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
 
         &.list-leave-active {
             position: absolute;
-            }
+        }
 
         &.is-dragging {
             .middle, .right, .left {

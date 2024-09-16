@@ -1,6 +1,6 @@
 <template>
-    <LoadingView v-if="loading" />
-    <div v-else class="st-view background">
+    <LoadingBox :show="loading" />
+    <div v-if="!loading" class="st-view background">
         <STNavigationBar title="Beheerders" />
 
     
@@ -123,7 +123,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EditResponsibilitiesView, LoadingView, useOrganization, useUser } from '@stamhoofd/components';
+import { EditResponsibilitiesView, LoadingBox, useOrganization, useUser } from '@stamhoofd/components';
 import { PermissionLevel, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions } from 'vue';

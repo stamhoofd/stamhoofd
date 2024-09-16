@@ -15,11 +15,11 @@ export function useAdmins() {
 
     const loading = computed(() => {
         if (organization.value) {
-            return organization.value?.admins === undefined
+            return organization.value?.admins === undefined || organization.value?.admins === null
         }
     
         // Platform scope
-        return platformManager.value.$platform.admins === undefined
+        return platformManager.value.$platform.admins === undefined || platformManager.value.$platform.admins === null
     })
     
     if (loading.value) {

@@ -1,17 +1,17 @@
 <template>
     <template v-if="$stepsByPriority.length">
         <TransitionFade>
-            <p v-if="$areAllComplete && !$overrideShowSteps" class="success-box selectable with-button" @click="showSteps">
+            <p v-if="$areAllComplete && !$overrideShowSteps" class="success-box selectable with-button" @click="showSteps" key="done">
                 Ravot is in orde
                 <button class="button text" type="button">
                     Toon stappen
                 </button>
             </p>
-            <div v-else class="container">
+            <div v-else class="container" key="steps">
                 <hr>
                 <h2>Breng Ravot in orde</h2>
                 <p>Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken. <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">Meer info</a></p>
-                <STList :with-animation="true">
+                <STList :with-animation="false">
                     <SetupStepRow v-for="{step, type} in $stepsByPriority" :key="type" :type="type" :step="step" />
                 </STList>
             </div>
@@ -43,6 +43,7 @@ onActivated(() => forceUpdateOrganization());
 useVisibilityChange(() => forceUpdateOrganization());
 
 async function forceUpdateOrganization() {
+    console.log('forceUpdateOrganization');
     await organizationManager.value.forceUpdate();
 }
 

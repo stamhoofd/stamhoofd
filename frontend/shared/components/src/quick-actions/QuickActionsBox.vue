@@ -1,8 +1,6 @@
 <template>
-    <div v-if="loading" key="loading" >
-        <LoadingView :error-box="errorBox" />
-    </div>
-    <div v-else-if="actions.length" class="container" key="view">
+    <LoadingBox :show="loading" :error-box="errorBox" />
+    <div v-if="actions.length" class="container" key="view">
         <hr>
         <h2>
             Snelle acties
@@ -34,7 +32,7 @@
 
 <script setup lang="ts">
 import { computed, unref } from 'vue';
-import LoadingView from '../containers/LoadingView.vue';
+import LoadingBox from '../containers/LoadingBox.vue';
 import { QuickActions } from './classes/QuickActions';
 
 const props = defineProps<{
