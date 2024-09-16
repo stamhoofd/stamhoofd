@@ -59,8 +59,10 @@ export function useDashboardQuickActions(): QuickActions {
             if (registrationActions.length > 0) {
                 arr.push({
                     leftComponent: PlatformAvatar,
-                    title: $t('Ga naar het ledenportaal'),
-                    description: registrationActions.length === 1 ? $t('Je hebt één openstaande persoonlijke actie in het ledenportaal.') : $t('Je hebt {count} openstaande persoonlijke acties in het ledenportaal.', {count: registrationActions.length}),
+                    title: $t('5dac2674-d262-409c-a3f7-58b958c10876'),
+                    description: registrationActions.length === 1 ? 
+                        $t('6720c55c-b9a5-44ad-bdd5-4681e8e2478e') 
+                        : $t('d43da88d-8890-4fa8-894d-e0a4fa6d3565', {count: registrationActions.length.toString()}),
                     action: async () => {
                         contextOptions.selectOption(await contextOptions.getRegistrationOption())
                     }
