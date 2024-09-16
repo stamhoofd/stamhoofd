@@ -1,9 +1,7 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent, AuthenticatedView, ManageEventsView, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Country } from '@stamhoofd/structures';
+import { SessionContext, SessionManager } from '@stamhoofd/networking';
 import { computed } from 'vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
@@ -16,8 +14,6 @@ export async function getScopedAdminRootFromUrl() {
     const session = new SessionContext(null)
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
-
-    await I18nController.loadDefault(session, Country.Belgium, "nl")
 
     return await getScopedAdminRoot(session)
 }
@@ -38,10 +34,6 @@ export function getNoPermissionsView() {
 
 export async function getScopedAdminRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
-    I18nController.loadDefault(reactiveSession, Country.Belgium, "nl").catch(console.error)
-
-    const platformManager = await PlatformManager.createFromCache(reactiveSession, true, true)
-
     const startView = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('./views/start/StartView.vue'), {})
     })

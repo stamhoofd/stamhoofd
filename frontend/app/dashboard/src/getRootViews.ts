@@ -8,6 +8,7 @@ import { computed, markRaw, reactive, ref } from 'vue';
 
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
@@ -168,9 +169,16 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
             new ComponentWithProperties(AuthenticatedView, {
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
-                        // Replace itself again after a successful login
-                        const root = await getScopedAutoRoot(reactiveSession, options)
-                        await ReplaceRootEventBus.sendEvent('replace', root);
+                        if (reactiveSession.user) {
+                            // Replace itself again after a successful login
+                            const root = await getScopedAutoRoot(reactiveSession, options)
+                            await ReplaceRootEventBus.sendEvent('replace', root);
+                        } else {
+                            throw new SimpleError({
+                                code: 'infinite_redirect',
+                                message: 'Er ging iets mis: te veel doorverwijzingen.'
+                            })
+                        }
                         return new ComponentWithProperties({}, {});
                     }
                 }),
