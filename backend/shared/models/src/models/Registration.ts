@@ -395,6 +395,7 @@ export class Registration extends Model {
                 type: EmailTemplateType.RegistrationTransferDetails,
                 group
             },
+            type: "transactional",
             recipients
         })
     }

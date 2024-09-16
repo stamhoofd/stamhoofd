@@ -99,7 +99,8 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                                 token: 'downloadUrl',
                                 value: url
                             }))
-                        ]
+                        ],
+                        type: 'transactional'
                     })
 
                 }
@@ -113,7 +114,8 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                         },
                         recipients: [
                             user.createRecipient()
-                        ]
+                        ],
+                        type: 'transactional'
                     })
                 }
                 throw error
