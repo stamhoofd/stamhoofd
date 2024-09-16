@@ -64,7 +64,7 @@ function getMissingKeys(translations: Record<string, string>): {
     const filesToSearch = getFilesToSearch();
 
     // Regex to match $t('value') or $t("value")
-    const regex = /\$t\(['"]([^'"]+)['"]\)/g;
+    const regex = /\$t\(['"]([^'"]+)['"](,.+)?\)/g;
 
     const missingKeys = new Set<string>();
     const filesWithMissingKeys = new Set<string>();
