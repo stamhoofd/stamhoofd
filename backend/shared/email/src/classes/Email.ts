@@ -6,6 +6,11 @@ import htmlToText from 'html-to-text';
 import { sleep } from '@stamhoofd/utility';
 import { I18n } from "@stamhoofd/backend-i18n"
 import { SimpleError } from '@simonbackx/simple-errors';
+import {type default as Postmark} from "postmark";
+
+// Importing postmark returns undefined (this is a bug, so we need to use require)
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const postmark = require("postmark")
 
 export type EmailInterfaceRecipient = {
     name?: string|null;
@@ -32,6 +37,18 @@ export type EmailInterface = EmailInterfaceBase & {
 
 /// An email builder is called until it returns undefined. This allows to reduce memory usage for an e-mail with multiple recipients
 export type EmailBuilder = () => EmailInterface | undefined
+
+type InternalEmailData = {
+    from: string;
+    bcc: string|undefined;
+    replyTo: string|undefined;
+    to: string;
+    subject: string;
+    text?: string;
+    html?: string;
+    attachments?: { filename: string; path?: string; href?: string; content?: string|Buffer; contentType?: string }[];
+    headers?: Record<string, string>;
+}
 
 class EmailStatic {
     transporter: Mail;
@@ -316,7 +333,7 @@ class EmailStatic {
         this.setupIfNeeded();
 
         // send mail with defined transport object
-        const mail: any = {
+        const mail: InternalEmailData = {
             from: data.from, // sender address
             bcc: (STAMHOOFD.environment === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
             replyTo: data.replyTo,
@@ -361,20 +378,25 @@ class EmailStatic {
             const transporter = (data.type === "transactional") ? this.transactionalTransporter : this.transporter
 
             if (data.type === "transactional") {
-                data.headers = {
+                mail.headers = {
                     ...data.headers,
                     ...STAMHOOFD.TRANSACTIONAL_SMTP_HEADERS
                 }
             } else {
-                data.headers = {
+                mail.headers = {
                     ...data.headers,
                     ...STAMHOOFD.SMTP_HEADERS
                 }
             }
 
-            const info = await transporter.sendMail(mail);
-            console.log("Message sent:", to, data.subject, info.messageId, data.type);
-
+            if (STAMHOOFD.POSTMARK_SERVER_TOKEN && (data.retryCount === 1)) {
+                await this.sendApi(mail)
+                console.log("Message sent via api:", to, data.subject, data.type);
+            } else {
+                const info = await transporter.sendMail(mail);
+                console.log("Message sent:", to, data.subject, info.messageId, data.type);
+            }
+            
             try {
                 data.callback?.(null)
             } catch (e) {
@@ -392,7 +414,8 @@ class EmailStatic {
             data.retryCount = (data.retryCount ?? 0) + 1;
 
             if (data.retryCount <= 2) {
-                if (data.type === 'transactional') {
+                
+                if (data.type === 'transactional' && data.retryCount === 2) {
                     data.type = 'broadcast';
                 }
                 this.send(data);
@@ -415,6 +438,40 @@ class EmailStatic {
                 }
             }
         }
+    }
+
+    private async sendApi(data: InternalEmailData) {
+        if (!STAMHOOFD.POSTMARK_SERVER_TOKEN) {
+            throw new Error("Missing POSTMARK_SERVER_TOKEN")
+        }
+        const client = new postmark.ServerClient(STAMHOOFD.POSTMARK_SERVER_TOKEN);
+        const headers: {Name: string, Value: string}[] = [];
+        for (const key in data.headers) {
+            headers.push({ Name: key, Value: data.headers[key] });
+        }
+
+        const message: Postmark.Models.Message = {
+            "From": data.from,
+            "To": data.to,
+            "Bcc": data.bcc,
+            "Subject": data.subject,
+            "TextBody": data.text,
+            "HtmlBody": data.html,
+            "Headers": headers,
+            "ReplyTo": data.replyTo,
+            "Tag": "api",
+            "MessageStream": (data.headers?.["X-PM-Message-Stream"] ?? "outbound")
+        };
+
+        console.log('Falling back to Postmark API', message);
+
+        try {
+            await client.sendEmail(message);
+        } catch (e) {
+            console.error('Failed to send email with Postmark API', e);
+            throw e;
+        }
+
     }
 
     /**

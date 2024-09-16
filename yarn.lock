@@ -3857,7 +3857,7 @@ aws-sdk@^2.885.0:
     uuid "8.0.0"
     xml2js "0.6.2"
 
-axios@1.6.8, axios@^1.6.0, axios@^1.6.1, axios@^1.6.2:
+axios@1.6.8, axios@^1.6.0, axios@^1.6.1:
   version "1.6.8"
   resolved "https://registry.npmjs.org/axios/-/axios-1.6.8.tgz"
   integrity sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==
@@ -3872,6 +3872,15 @@ axios@^0.27.2, axios@^0.28.1:
   integrity sha512-iUcGA5a7p0mVb4Gm/sy+FSECNkPFT4y7wt6OM/CDpO/OnNCvSs3PoMG8ibrC9jRoGYU0gUK5pXVC4NPXq6lHRQ==
   dependencies:
     follow-redirects "^1.15.0"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
+
+axios@^1.7.4:
+  version "1.7.7"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.7.tgz#2f554296f9892a72ac8d8e4c5b79c14a91d0a47f"
+  integrity sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==
+  dependencies:
+    follow-redirects "^1.15.6"
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
@@ -9998,12 +10007,12 @@ postcss@8.4.38, postcss@^8.4.38, postcss@^8.4.39:
     picocolors "^1.0.0"
     source-map-js "^1.2.0"
 
-postmark@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.npmjs.org/postmark/-/postmark-4.0.2.tgz"
-  integrity sha512-2zlCv+KVVQ0KoamXZHE7d+gXzLlr8tPE+PxQmtUaIZhbHzZAq4D6yH2b+ykhA8wYCc5ISodcx8U1aNLenXBs9g==
+postmark@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/postmark/-/postmark-4.0.5.tgz#515ae85562fcedbec6ae7eb0ef180dded1dbc05d"
+  integrity sha512-nerZdd3TwOH4CgGboZnlUM/q7oZk0EqpZgJL+Y3Nup8kHeaukxouQ6JcFF3EJEijc4QbuNv1TefGhboAKtf/SQ==
   dependencies:
-    axios "^1.6.2"
+    axios "^1.7.4"
 
 prebuild-install@^7.1.1:
   version "7.1.2"
