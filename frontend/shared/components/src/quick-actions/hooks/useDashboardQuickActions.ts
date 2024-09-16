@@ -13,6 +13,9 @@ import { useErrors } from "../../errors/useErrors";
 import { GlobalEventBus } from "../../EventBus";
 
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
+import { useTranslate } from "@stamhoofd/frontend-i18n";
+
+const $t = useTranslate();
 
 export function useDashboardQuickActions(): QuickActions {
     const registrationQuickActions = useRegistrationQuickActions();
@@ -56,8 +59,8 @@ export function useDashboardQuickActions(): QuickActions {
             if (registrationActions.length > 0) {
                 arr.push({
                     leftComponent: PlatformAvatar,
-                    title: 'Ga naar het ledenportaal',
-                    description: 'Je hebt ' + Formatter.pluralText(registrationActions.length, 'openstaande persoonlijke actie', 'openstaande persoonlijke acties') + ' in het ledenportaal',
+                    title: $t('Ga naar het ledenportaal'),
+                    description: registrationActions.length === 1 ? $t('Je hebt één openstaande persoonlijke actie in het ledenportaal.') : $t('Je hebt {count} openstaande persoonlijke acties in het ledenportaal.', {count: registrationActions.length}),
                     action: async () => {
                         contextOptions.selectOption(await contextOptions.getRegistrationOption())
                     }
