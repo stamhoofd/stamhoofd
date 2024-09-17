@@ -151,7 +151,7 @@ const editableList = computed(() => {
     }
 
     // All auto
-    const orgId = organization.value ?? props.groups?.[0]?.organizationId ?? null;
+    const orgId = organization.value?.id ?? props.groups?.[0]?.organizationId ?? null;
     const base = patched.value.filter(t => !EmailTemplate.isSavedEmail(t.type) && props.types.includes(t.type) && ((t.groupId === null && props.groups === null) || (props.groups && props.groups.some(g => g.id === t.groupId))) && (!orgId || t.organizationId === orgId));
 
     // Create missing ones
