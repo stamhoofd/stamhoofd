@@ -17,7 +17,8 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
 export async function wrapContext(context: SessionContext, app: AppType|'auto', component: ComponentWithProperties, options?: {ownDomain: boolean}) {
     const platformManager = await PlatformManager.createFromCache(context, true)
     const $memberManager = new MemberManager(context, platformManager.$platform);
-    
+    await I18nController.loadDefault(context, Country.Belgium, "nl", context?.organization?.address?.country)
+
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
             $context: context,
@@ -105,7 +106,6 @@ export async function getOrganizationSelectionRoot(optionalSession?: SessionCont
     const reactiveSession = session
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
-    await I18nController.loadDefault(reactiveSession, Country.Belgium, "nl")
 
     let baseRoot = new ComponentWithProperties(CoverImageContainer, {
         root: new ComponentWithProperties(NavigationController, {
@@ -163,7 +163,6 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
         // We can't really determine the automatic root view because we are not signed in
         // So return the login view, that will call getScopedAutoRoot again after login
         const reactiveSession = session
-        I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
 
         return await wrapContext(reactiveSession, 'auto', wrapWithModalStack(
             new ComponentWithProperties(AuthenticatedView, {
@@ -204,8 +203,6 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
 
 export async function getScopedDashboardRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
-    I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", reactiveSession?.organization?.address?.country).catch(console.error)
-
     const startView = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})
     })

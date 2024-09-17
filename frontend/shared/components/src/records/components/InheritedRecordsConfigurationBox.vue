@@ -25,12 +25,22 @@
             <template #left>
                 <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked" />
             </template>
+            
+            <p v-if="property.value.configuration" class="style-title-prefix-list">
+                {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
+            </p>
+
             <p class="style-title-list">
                 {{ property.value.title }}
             </p>
-            <p v-if="property.value.configuration" class="style-description-small">
-                {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
+            <p v-if="property.value.description" class="style-description-small">
+                {{ property.value.description }}
             </p>
+
+            <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
+                {{ property.value.options?.warning ?? 'Dit werd onjuist ingesteld' }}
+            </p>
+
             <template v-if="!property.value.locked && property.value.enabled" #right>
                 <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
             </template>
@@ -70,11 +80,13 @@ const props = withDefaults(
     defineProps<{
         recordsConfiguration: OrganizationRecordsConfiguration,
         inheritedRecordsConfiguration?: OrganizationRecordsConfiguration|null,
-        overrideOrganization?: Organization|null
+        overrideOrganization?: Organization|null,
+        groupLevel?: boolean
     }>(),
     {
         inheritedRecordsConfiguration: null,
-        overrideOrganization: null
+        overrideOrganization: null,
+        groupLevel: false
     }
 );
 
@@ -123,13 +135,29 @@ const settings = new RecordEditorSettings({
 family.members.push(settings.exampleValue)
 
 const properties = [
-    buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' (van lid zelf)'),
-    buildPropertyRefs('emailAddress', 'E-mailadres (van lid zelf)'),
     buildPropertyRefs('gender', 'Gender'),
     buildPropertyRefs('birthDay', 'Geboortedatum'),
-    buildPropertyRefs('address', 'Adres'),
-    buildPropertyRefs('parents', 'Ouders'),
-    buildPropertyRefs('emergencyContacts', 'Noodcontactpersonen'),
+    buildPropertyRefs('parents', 'Oudergegevens', {
+        description: 'Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders'
+    }),
+    buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' (van lid zelf)', {
+        description: 'Het GSM-nummer van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen GSM-nummer kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een GSM-nummer heeft.',
+        warning: 'Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.',
+        preventAlways: true
+    }),
+    buildPropertyRefs('emailAddress', 'E-mailadres (van lid zelf)', {
+        description: 'Het e-mailadres van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen e-mailadres kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een e-mailadres heeft.',
+        warning: 'Maak dit niet verplicht voor alle leden, anders moeten erg jonge leden ook verplicht een eigen e-mailadres invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.',
+        preventAlways: true
+    }),
+    buildPropertyRefs('address', 'Adres (van lid zelf)', {
+        description: 'Het adres van elke ouder wordt al verzameld via de oudergegevens. We raden af om dit te activeren voor minderjarige leden. Bij ouders kan er namelijk per ouder een apart adres ingesteld worden, wat beter geschikt is. Enkel voor volwassen leden is dit beter aangewezen.',
+        warning: 'We raden heel sterk af om dit in te schakelen voor minderjarige leden. Gebruik een leeftijdsfilter om dit enkel in te schakelen voor volwassen leden.',
+        preventAlways: true
+    }),
+    buildPropertyRefs('emergencyContacts', 'Extra noodcontactpersonen', {
+        description: 'Naam, relatie en telefoonnummer van één of meerdere noodcontactpersonen (als uitbreiding op ouders, niet de ouders zelf)'
+    }),
     buildPropertyRefs('uitpasNumber', 'UiTPAS-nummer')
 ]
 
@@ -177,7 +205,7 @@ const financialSupport = {
 }
 
 // Methods
-function buildPropertyRefs(property: PropertyName, title: string) {
+function buildPropertyRefs(property: PropertyName, title: string, options?: {warning?: string, description?: string, preventAlways?: boolean}) {
     const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property])
     const enabled = computed({
         get: () => !!getFilterConfiguration(property),
@@ -188,10 +216,12 @@ function buildPropertyRefs(property: PropertyName, title: string) {
     return ref({
         name: property,
         title,
+        description: options?.description,
+        options,
         enabled,
         locked,
         configuration,
-        edit: () => editPropertyFilterConfiguration(property, title)
+        edit: () => editPropertyFilterConfiguration(property, title, options)
     })
 }
 
@@ -217,12 +247,13 @@ function setEnableProperty(property: PropertyName, enable: boolean) {
     }
 }
 
-async function editPropertyFilterConfiguration(property: PropertyName, title: string) {
+async function editPropertyFilterConfiguration(property: PropertyName, title: string, options?: {warning?: string, description?: string}) {
     await present({
         components: [
             new ComponentWithProperties(PropertyFilterView, {
                 configuration: getFilterConfiguration(property) ?? PropertyFilter.createDefault(),
                 title,
+                options,
                 builder: settings.filterBuilder([]),
                 setConfiguration: (configuration: PropertyFilter) => {
                     addPatch({

@@ -6,6 +6,13 @@
             <h1>
                 {{ title }}
             </h1>
+            <p v-if="options?.description">
+                {{ options.description }}
+            </p>
+
+            <p class="warning-box" v-if="options?.warning">
+                {{ options.warning }}
+            </p>
             <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
 
             <PropertyFilterInput v-model="editingConfiguration" :builder="builder" />
@@ -45,6 +52,9 @@ import PropertyFilterInput from "./PropertyFilterInput.vue";
 export default class PropertyFilterView extends Mixins(NavigationMixin) {
     @Prop({ default: "" })
         title!: string
+
+    @Prop({ default: () => ({}) })
+        options?: {warning?: string, description?: string}
 
     @Prop({ required: true })
         builder!: UIFilterBuilder
