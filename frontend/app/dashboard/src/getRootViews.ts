@@ -4,11 +4,11 @@ import { AccountSwitcher, AppType, AsyncComponent, AuthenticatedView, ContextNav
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, Country, Organization } from '@stamhoofd/structures';
-import { computed, markRaw, reactive, ref } from 'vue';
+import { computed, markRaw, ref } from 'vue';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })

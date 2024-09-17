@@ -11,6 +11,7 @@
 
 
 <script lang="ts" setup>
+import { onMounted, ref } from "vue";
 import { ErrorBox } from "../errors/ErrorBox";
 import Spinner from "../Spinner.vue";
 
@@ -26,6 +27,15 @@ withDefaults(
         errorBox: null
     }
 );
+
+const mounted = ref(false);
+
+onMounted(() => {
+    setTimeout(() => {
+        mounted.value = true;
+    }, 100);
+});
+
 </script>
 
 <style lang="scss">
@@ -33,7 +43,7 @@ withDefaults(
 @use '@stamhoofd/scss/base/text-styles';
 
 .loading-view {
-    position: absolute;
+    position: absolute !important;
     left: 0;
     right: 0;
     top: 0;
@@ -46,15 +56,18 @@ withDefaults(
     min-height: calc(var(--vh, 1vh) * 100);
     transition: opacity 0.2s;
 
+    .st-view > & {
+        position: absolute !important;
+    }
+
     > .spinner-container {
         opacity: 1;
         position: absolute;
         left: 0;
         top: 0;
-        transition: opacity 0.2s 1s;
         right: 0;
         height: 100% !important;
-
+        transition: opacity 2s 0.5s; // Slow fading in spinner, with delay, to prevent showing it too fast (don't want to show it if everything loads fast)
     }
 
     &.fade-enter-from {
@@ -65,20 +78,26 @@ withDefaults(
         }
     }
 
-    &.fade-enter-to {
-        opacity: 1;
+    &.fade-enter-from.mounted {
+        opacity: 0; // Fade in
 
+        // If already mounted: immediately show spinner
         > .spinner-container {
             opacity: 1;
         }
     }
 
+    &.fade-enter-to.mounted {
+        opacity: 1;
+    }
+
     &.fade-leave-to {
         opacity: 0;
+    }
 
-        > .spinner-container {
-            opacity: 1;
-        }
+    &.fade-leave-active {
+        // Allow user interactino during fade
+        //pointer-events: none;
     }
 }
 </style>
