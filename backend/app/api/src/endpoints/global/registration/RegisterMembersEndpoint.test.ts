@@ -144,10 +144,9 @@ describe("Endpoint.RegisterMembers", () => {
                 totalPrice: 15,
                 customer: null,
             });
-
-            // todo: use regex for port and version?
-            nock('https://api.ext.payconiq.com:443/v3')
-            .post('/payments')
+            
+            nock('https://api.ext.payconiq.com')
+            .post('/v3/payments')
             .reply(200, {
                 paymentId: 'testPaymentId',
                 _links: {
