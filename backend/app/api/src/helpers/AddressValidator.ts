@@ -55,6 +55,17 @@ export class AddressValidatorStatic {
                 })
             }
         }
+
+        if (address.country !== Country.Belgium && address.country !== Country.Netherlands) {
+            // No validation for other countries
+            return ValidatedAddress.create(Object.assign({ ... address }, {
+                postalCode: address.postalCode,
+                city: address.city,
+                cityId: 'unknown',
+                parentCityId: null,
+                provinceId: 'unknown',
+            }))
+        }
         
         const city = await PostalCode.getCity(postalCode, address.city, address.country)
 

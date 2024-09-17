@@ -85,6 +85,18 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
         if (StringCompare.typoCount(request.query.query, "Nederland") < 3) {
             countries.push(Country.Netherlands)
         }
+
+        if (StringCompare.typoCount(request.query.query, "Luxemburg") < 3) {
+            countries.push(Country.Luxembourg)
+        }
+
+        if (StringCompare.typoCount(request.query.query, "Duitsland") < 3) {
+            countries.push(Country.Germany)
+        }
+
+        if (StringCompare.typoCount(request.query.query, "Frankrijk") < 3) {
+            countries.push(Country.France)
+        }
         
         return new Response(SearchRegions.create({
             cities: loadedCities.map(c => CityStruct.create(Object.assign({...c}, { province: ProvinceStruct.create(c.province) }))),
