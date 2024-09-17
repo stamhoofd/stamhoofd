@@ -16,6 +16,7 @@ class Options {
     delayReducedPrice?: number
     skipCategory?: boolean
     permissions?: PermissionsByRole
+    maxMembers?: number | null
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -48,6 +49,7 @@ export class GroupFactory extends Factory<Options, Group> {
                     stock: this.options.stock ?? null
                 })
             ],
+            maxMembers: this.options.maxMembers === undefined ? null : this.options.maxMembers
         })
 
         if (this.options.delayPrice !== undefined) {

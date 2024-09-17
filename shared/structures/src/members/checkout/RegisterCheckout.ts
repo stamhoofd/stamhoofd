@@ -10,9 +10,9 @@ import { PaymentMethod } from "../../PaymentMethod";
 import { PriceBreakdown } from "../../PriceBreakdown";
 import { PlatformMember } from "../PlatformMember";
 import { RegistrationWithMember } from "../RegistrationWithMember";
+import { BalanceItemCartItem } from "./BalanceItemCartItem";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
 import { RegisterItem } from "./RegisterItem";
-import { BalanceItemCartItem } from "./BalanceItemCartItem";
 
 export type RegisterContext = {
     members: PlatformMember[],
