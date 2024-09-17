@@ -209,7 +209,14 @@ function buildPropertyRefs(property: PropertyName, title: string, options?: {war
     const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property])
     const enabled = computed({
         get: () => !!getFilterConfiguration(property),
-        set: (value: boolean) => setEnableProperty(property, value)
+        set: (value: boolean) => {
+            if (value) {
+                // Show dialog
+                editPropertyFilterConfiguration(property, title, options)
+            } else {
+                setEnableProperty(property, value)
+            }
+        }
     })
     const configuration = computed(() => getFilterConfiguration(property))
 
