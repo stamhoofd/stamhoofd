@@ -303,7 +303,7 @@ class EmailStatic {
             const info = await transporter.sendMail(mail);
             console.log("Message sent:", to, data.subject, info.messageId, data.type);
         } catch (e) {
-            console.error("Failed to send e-mail:")
+            console.error("Failed to send e-mail:", data.type)
             console.error(e);
             console.error(mail);
 
@@ -318,6 +318,9 @@ class EmailStatic {
             data.retryCount = (data.retryCount ?? 0) + 1;
 
             if (data.retryCount <= 2) {
+                if (data.type === 'transactional') {
+                    data.type = 'broadcast';
+                }
                 this.send(data);
             } else {
                 // Email address is not verified.
