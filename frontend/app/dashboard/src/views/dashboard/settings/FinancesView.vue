@@ -210,7 +210,7 @@ async function updateBalance() {
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
-            path: `/billing/status/detailed`,
+            path: `/organization/billing/status/detailed`,
             decoder: OrganizationDetailedBillingStatus as Decoder<OrganizationDetailedBillingStatus>,
             shouldRetry: true,
             owner,
