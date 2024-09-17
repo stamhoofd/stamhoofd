@@ -237,7 +237,7 @@ export class BalanceItem extends Model {
 
         // Set other items to zero (the balance item payments keep the real price)
         for (const item of items) {
-            needsUpdate = needsUpdate || (item.price > 0 && item.status !== BalanceItemStatus.Hidden)
+            needsUpdate = true
 
             // Don't change status of items that are already paid or are partially paid
             // Not using item.paidPrice, since this is cached
@@ -264,7 +264,7 @@ export class BalanceItem extends Model {
         for (const item of items) {
             if (item.status === BalanceItemStatus.Hidden) {
                 item.status = BalanceItemStatus.Pending
-                needsUpdate = needsUpdate || item.price > 0
+                needsUpdate = true
                 await item.save()
             }
         }

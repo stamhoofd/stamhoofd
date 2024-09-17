@@ -154,6 +154,13 @@ export class CachedOutstandingBalance extends Model {
 
             results.push([objectId, {amount, amountPending}]);
         }
+
+        // Add missing object ids (with 0 amount, otherwise we don't reset the amounts back to zero when all the balance items are hidden)
+        for (const objectId of objectIds) {
+            if (!results.find(([id]) => id === objectId)) {
+                results.push([objectId, {amount: 0, amountPending: 0}]);
+            }
+        }
             
         return results;
     }
