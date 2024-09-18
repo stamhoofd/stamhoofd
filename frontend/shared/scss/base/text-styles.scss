@@ -223,6 +223,10 @@
         font-weight: $font-weight-semibold;
     }
 
+    &.red {
+        color: $color-error;
+    }
+
     @media (max-width: 400px) {
         font-size: 15px;
         

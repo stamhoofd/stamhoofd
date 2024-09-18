@@ -50,19 +50,6 @@
                     </h3>
                 </STListItem>
 
-                <STListItem :selectable="true" @click.prevent="deleteRequest">
-                    <template #left>
-                        <LoadingButton>
-                            <span class="icon trash" />
-                        </LoadingButton>
-                    </template>
-
-
-                    <h3 class="style-title-list">
-                        Account verwijderen
-                    </h3>
-                </STListItem>
-
                 <STListItem :selectable="true" @click.prevent="logout">
                     <template #left>
                         <span class="icon logout" />
@@ -70,6 +57,19 @@
 
                     <h3 class="style-title-list">
                         Uitloggen
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" @click.prevent="deleteRequest">
+                    <template #left>
+                        <LoadingButton>
+                            <span class="icon trash red" />
+                        </LoadingButton>
+                    </template>
+
+
+                    <h3 class="style-title-list red">
+                        Account verwijderen
                     </h3>
                 </STListItem>
             </STList>

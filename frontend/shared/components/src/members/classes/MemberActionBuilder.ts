@@ -228,6 +228,7 @@ export class MemberActionBuilder {
 
         return [new InMemoryTableAction({
             name: "Uitschrijven",
+            destructive: true,
             priority: 0,
             groupIndex: 7,
             needsSelection: true,
@@ -342,6 +343,7 @@ export class MemberActionBuilder {
             actions.push(
                 new InMemoryTableAction({
                     name: "Definitief verwijderen",
+                    destructive: true,
                     priority: 1,
                     groupIndex: 100,
                     needsSelection: true,

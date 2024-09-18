@@ -127,6 +127,7 @@ export class RegistrationActionBuilder {
     getUnsubscribeAction(): TableAction<PlatformMember>[] {
         return [new InMemoryTableAction({
             name: "Uitschrijven",
+            destructive: true,
             priority: 0,
             groupIndex: 7,
             needsSelection: true,

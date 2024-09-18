@@ -856,6 +856,10 @@ export default class ContextMenuView extends VueComponent {
             cursor: not-allowed;
         }
 
+        &.destructive {
+            color: $color-error;
+        }
+
         &:not(.disabled) {
             &.isOpen {
                 background: $color-gray-2;

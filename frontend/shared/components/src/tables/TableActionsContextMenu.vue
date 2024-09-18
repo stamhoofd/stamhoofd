@@ -2,7 +2,7 @@
     <ContextMenuView v-bind="$attrs" ref="contextMenuView">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :context-menu-view="$refs.contextMenuView" :class="{'disabled': isDisabled(action)}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
+            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :context-menu-view="$refs.contextMenuView" :class="{'disabled': isDisabled(action), destructive: action.destructive}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
                 <p>{{ action.name }}</p>
                 <p v-if="action.description" class="description">
                     {{ action.description }}

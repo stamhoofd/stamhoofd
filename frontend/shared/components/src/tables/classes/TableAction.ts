@@ -24,6 +24,7 @@ export abstract class TableAction<T extends {id: string}> {
     icon: string;
     tooltip = ""
     enabled = true
+    destructive = false
 
     /// Determines order
     priority: number;
@@ -88,6 +89,7 @@ export abstract class TableAction<T extends {id: string}> {
         this.allowAutoSelectAll = settings.allowAutoSelectAll ?? true;
         this.childActions = settings.childActions ?? [];
         this.childMenu = settings.childMenu ?? null;
+        this.destructive = settings.destructive ?? false;
     }
 
     setGroupIndex(index: number) {
