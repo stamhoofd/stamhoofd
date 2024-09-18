@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/utility",
-    "version": "2.36.2",
+    "version": "2.37.0",
     "main": "./dist/index.js",
     "module": "./esm/dist/index.js",
     "types": "./dist/index.d.ts",
