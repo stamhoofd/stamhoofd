@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Decoder, EncodableObject } from '@simonbackx/simple-encoding';
+import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ArchiverWriterAdapter, exportToExcel, XlsxTransformerSheet, XlsxWriter } from '@stamhoofd/excel-writer';
 import { Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Replacement, Version } from '@stamhoofd/structures';
+import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, IPaginatedResponse, LimitedFilteredRequest, Replacement, Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 import { Context } from '../../../helpers/Context';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
@@ -16,8 +16,8 @@ type Query = undefined;
 type Body = ExcelExportRequest;
 type ResponseBody = ExcelExportResponse;
 
-type ExcelExporter<T extends EncodableObject> = {
-    fetch(request: LimitedFilteredRequest): Promise<PaginatedResponse<T[], LimitedFilteredRequest>>
+type ExcelExporter<T> = {
+    fetch(request: LimitedFilteredRequest): Promise<IPaginatedResponse<T[], LimitedFilteredRequest>>
     sheets: XlsxTransformerSheet<T, unknown>[]
 }
 
@@ -35,7 +35,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
     bodyDecoder = ExcelExportRequest as Decoder<ExcelExportRequest>
 
     // Other endpoints can register exports here
-    static loaders: Map<ExcelExportType, ExcelExporter<EncodableObject>> = new Map()
+    static loaders: Map<ExcelExportType, ExcelExporter<unknown>> = new Map()
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "POST") {
@@ -137,7 +137,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         }))
     }
 
-    async job(loader: ExcelExporter<EncodableObject>, request: ExcelExportRequest, type: string): Promise<string> {
+    async job(loader: ExcelExporter<unknown>, request: ExcelExportRequest, type: string): Promise<string> {
         // Only run 1 export per user at the same time
         return await QueueHandler.schedule('user-export-to-excel-' + Context.user!.id, async () => {
             // Allow maximum 2 running Excel jobs at the same time for all users

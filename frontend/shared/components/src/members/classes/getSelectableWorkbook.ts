@@ -101,6 +101,32 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         enabled: false,
                     }),
 
+                    ...(!organization ? [
+                        new SelectableColumn({
+                            id: 'organization',
+                            name: 'Groep',
+                            enabled: false,
+                        }),
+                        new SelectableColumn({
+                            id: 'uri',
+                            name: 'Groepsnummer',
+                            enabled: false,
+                        }),
+                        new SelectableColumn({
+                            id: 'defaultAgeGroup',
+                            name: 'Standaard leeftijdsgroep',
+                            enabled: false,
+                        }),
+                    ] : []),
+
+                    ...(organization ? [
+                        new SelectableColumn({
+                            id: 'group',
+                            name: 'Leeftijdsgroep',
+                            enabled: false,
+                        }),
+                    ] : []),
+
                     ...[1,2].flatMap((parentNumber, parentIndex) => {
                         const getId = (value: string) => `parent.${parentIndex}.${value}`;
                         const category = `Ouder ${parentNumber}`;

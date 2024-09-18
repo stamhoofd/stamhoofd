@@ -1,10 +1,9 @@
-import { EncodableObject } from "@simonbackx/simple-encoding";
-import { LimitedFilteredRequest, PaginatedResponse } from "@stamhoofd/structures";
+import { IPaginatedResponse, LimitedFilteredRequest } from "@stamhoofd/structures";
 
-export function fetchToAsyncIterator<T extends EncodableObject>(
+export function fetchToAsyncIterator<T>(
     initialFilter: LimitedFilteredRequest, 
     loader: {
-        fetch(request: LimitedFilteredRequest): Promise<PaginatedResponse<T, LimitedFilteredRequest>>
+        fetch(request: LimitedFilteredRequest): Promise<IPaginatedResponse<T, LimitedFilteredRequest>>
     }
 ): AsyncIterable<T> {
     return {

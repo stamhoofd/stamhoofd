@@ -9,6 +9,8 @@
         <h3 class="style-title-list">
             {{ group.settings.name }}
         </h3>
+        <p v-if="defaultAgeGroup && group.settings.name !== defaultAgeGroup && app === 'admin'" class="style-description-small" v-text="defaultAgeGroup" />
+
         <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description" />
 
         <p v-if="registration.registeredAt" class="style-description-small">
@@ -32,7 +34,7 @@
 import { PlatformMember, Registration } from '@stamhoofd/structures';
 import { computed, getCurrentInstance } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { useOrganization } from '../../../hooks';
+import { useOrganization, usePlatform } from '../../../hooks';
 import GroupIconWithWaitingList from '../group/GroupIconWithWaitingList.vue';
 
 const props = defineProps<{
@@ -43,6 +45,7 @@ const emit = defineEmits(["edit"]);
 
 const instance = getCurrentInstance();
 const organization = useOrganization();
+const platform = usePlatform()
 const app = useAppContext()
 const isEditable = computed(() => {
     return !!instance?.vnode.props?.onEdit
@@ -52,6 +55,13 @@ const group = computed(() => {
 })
 const registrationOrganization = computed(() => {
     return props.member.organizations.find(o => o.id === group.value.organizationId)
+})
+
+const defaultAgeGroup = computed(() => {
+    if (!group.value.defaultAgeGroupId) {
+        return 'Geen standaard leeftijdsgroep';
+    }
+    return platform.value.config.defaultAgeGroups.find(ag => ag.id === group.value.defaultAgeGroupId)?.name
 })
 
 function editRegistration(event: any) {

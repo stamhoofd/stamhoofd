@@ -1,6 +1,22 @@
 import { Data,Decoder,EncodableObject, Encodeable, EncodeContext, encodeObject } from "@simonbackx/simple-encoding";
 
-export class PaginatedResponse<Result extends EncodableObject, Query extends Encodeable> implements Encodeable {
+export class IPaginatedResponse<Result, Query>  {
+    results: Result;
+    next?: Query;
+}
+
+export class UnencodeablePaginatedResponse<Result, Query> implements IPaginatedResponse<Result, Query> {
+    results: Result;
+    next?: Query;
+
+    constructor(data: {results: Result;next?: Query}) {
+        this.results = data.results
+        this.next = data.next
+    }
+}
+
+
+export class PaginatedResponse<Result extends EncodableObject, Query extends Encodeable> implements Encodeable, IPaginatedResponse<Result, Query>  {
     results: Result;
     next?: Query;
 
