@@ -105,7 +105,7 @@ function setFilter(index: number, oldFilter: UIFilter, newFilter: UIFilter|null)
 }
 
 function isGroup(filter: UIFilter): filter is GroupUIFilter {
-    return (filter instanceof GroupUIFilter) && !filter.builder.wrapFilter;
+    return (filter instanceof GroupUIFilter) && !filter.builder.wrapFilter && !filter.builder.wrapper;
 }
 
 function setFilterMode(mode: GroupUIFilterMode, index: number) {

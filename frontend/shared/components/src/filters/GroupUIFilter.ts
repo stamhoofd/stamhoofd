@@ -50,10 +50,10 @@ export class GroupUIFilter extends UIFilter {
             return null;
         }
         
-        let flattened = this.builder.wrapFilter ? this.filters.slice() : this.filters.map(f => f?.flatten()).filter(f => !!f);
+        let flattened = this.builder.wrapFilter || this.builder.wrapper ? this.filters.slice() : this.filters.map(f => f?.flatten()).filter(f => !!f);
         
         flattened = flattened.flatMap(f => {
-            if (f instanceof GroupUIFilter && f.mode === this.mode) {
+            if (f instanceof GroupUIFilter && f.mode === this.mode && !f.builder.wrapFilter && !f.builder.wrapper) {
                 return f.filters
             }
             return f
@@ -63,7 +63,7 @@ export class GroupUIFilter extends UIFilter {
             return null;
         }
 
-        if (flattened.length === 1 && !this.builder.wrapFilter) {
+        if (flattened.length === 1 && !this.builder.wrapFilter && !this.builder.wrapper) {
             return flattened[0]
         }
 
@@ -86,17 +86,24 @@ export class GroupUIFilter extends UIFilter {
             return []
         }
 
-        if (array.length == 0) {
-            return last
-        }
-
         const plast = array.pop()
         const flattened = array.flatMap(a => [...a, {text: ', ', style: 'gray'}])
         if (plast) {
             flattened.push(...plast)
         }
-        flattened.push({text: this.mode === GroupUIFilterMode.And ? ' en ' : ' of ', style: 'gray'})
+
+        if (flattened.length > 0) {
+            flattened.push({text: this.mode === GroupUIFilterMode.And ? ' en ' : ' of ', style: 'gray'})
+        }
+
         flattened.push(...last)
+
+        if (this.builder.wrapper) {
+            flattened.push({
+                text: ' (' + this.builder.name + ')',
+                style: 'gray'
+            })
+        }
 
         return flattened
     }
@@ -108,11 +115,11 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     wrapFilter?: UIFilterWrapper|null
     wrapper?: WrapperFilter
     
-    constructor({builders, name, wrapFilter, wrapper}: {builders: UIFilterBuilder[], name?: string, wrapFilter?: UIFilterWrapper|null, wrapper?: WrapperFilter}) {
-        this.builders = builders
-        this.name = name ?? this.name
-        this.wrapFilter = wrapFilter ?? null
-        this.wrapper = wrapper
+    constructor(data: {builders: UIFilterBuilder[], name?: string, wrapFilter?: UIFilterWrapper|null, wrapper?: WrapperFilter}) {
+        this.builders = data.builders
+        this.name = data.name ?? this.name
+        this.wrapFilter = data.wrapFilter ?? null
+        this.wrapper = data.wrapper
     }
 
     create(): GroupUIFilter {

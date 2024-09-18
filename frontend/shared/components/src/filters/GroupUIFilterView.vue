@@ -67,7 +67,7 @@ function copyFromChanged(filter: UIFilter|null) {
         return;
     }
 
-    if (filter instanceof GroupUIFilter) {
+    if (filter instanceof GroupUIFilter && filter.builder === props.filter.builder) {
         props.filter.filters = filter.filters;
         props.filter.mode = filter.mode;
         return;
