@@ -2,15 +2,14 @@
 import { Decoder, EncodableObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email } from '@stamhoofd/email';
 import { ArchiverWriterAdapter, exportToExcel, XlsxTransformerSheet, XlsxWriter } from '@stamhoofd/excel-writer';
-import { getEmailBuilderForTemplate, Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
-import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, Version } from '@stamhoofd/structures';
+import { Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
+import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Replacement, Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 import { Context } from '../../../helpers/Context';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
 import { FileCache } from '../../../helpers/FileCache';
-import { QueueHandler } from '@stamhoofd/queues';
 
 type Params = { type: string };
 type Query = undefined;
@@ -52,7 +51,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope();
+        await Context.setOptionalOrganizationScope();
         const {user} = await Context.authenticate()
 
         if (user.isApiUser) {
