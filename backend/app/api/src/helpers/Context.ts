@@ -133,8 +133,8 @@ export class ContextInstance {
         return await this.setOrganizationScope()
     }
 
-    async setOrganizationScope() {
-        const organization = await Organization.fromApiHost(this.request.host);
+    async setOrganizationScope(options?: {allowInactive?: boolean}) {
+        const organization = await Organization.fromApiHost(this.request.host, options);
 
         this.organization = organization
         this.i18n.switchToLocale({ country: organization.address.country })

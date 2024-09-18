@@ -37,11 +37,21 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
-        const {user} = await Context.authenticate()
+        const organization = await Context.setOrganizationScope({allowInactive: true});
+        await Context.authenticate()
 
         if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
+        }
+
+        if (!organization.active && !Context.auth.hasPlatformFullAccess()) {
+            throw new SimpleError({
+                code: "permission_denied",
+                message: "You do not have permissions to edit an inactive organization",
+                human: 'Je hebt geen toegangsrechten om een inactieve groep te bewerken',
+                statusCode: 403
+            })
+
         }
         
         // check if organization ID matches
@@ -293,6 +303,13 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
     
                     organization.meta.tags = patchedMeta.tags;
                 }
+            }
+
+            if (request.body.active !== undefined) {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error('Enkel een platform hoofdbeheerder kan een groep (in)actief maken')
+                }
+                organization.active = request.body.active;
             }
 
             if (request.body.uri) {

@@ -76,7 +76,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="editTags">
+                <STListItem :selectable="hasWrite" @click="hasWrite ? editTags : undefined">
                     <h3 class="style-definition-label">
                         Tags
                     </h3>
@@ -85,7 +85,7 @@
                     </p>
 
                     <template #right>
-                        <span class="icon edit gray" />
+                        <span class="icon edit gray" v-if="hasWrite" />
                     </template>
                 </STListItem>
 

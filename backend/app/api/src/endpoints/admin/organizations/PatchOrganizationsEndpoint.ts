@@ -43,6 +43,10 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
         const platform = await Platform.getShared()
 
         for (const id of request.body.getDeletes()) {
+            if (!Context.auth.hasPlatformFullAccess()) {
+                throw Context.auth.error('Enkel een platform hoofdbeheerder kan groepen verwijderen')
+            }
+
             const organization = await Organization.getByID(id);
             if (!organization) {
                 throw new SimpleError({ code: "not_found", message: "Organization not found", statusCode: 404 });
@@ -85,6 +89,10 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
         // Organization creation
         for (const {put} of request.body.getPuts()) {
+            if (!Context.auth.hasPlatformFullAccess()) {
+                throw Context.auth.error('Enkel een platform hoofdbeheerder kan nieuwe groepen aanmaken')
+            }
+
             if (put.name.length < 4) {
                 if (put.name.length == 0) {
                     throw new SimpleError({

@@ -47,6 +47,15 @@
         <STList>
             <SelectOrganizationTagRow v-for="tag in tags" :key="tag.id" :organization="patched" :tag="tag" @patch:organization="addPatch" />
         </STList>
+
+        <template v-if="auth.hasFullPlatformAccess()">
+            <hr>
+            <h2>{{ $t('Actief') }}</h2>
+            
+            <STList>
+                <CheckboxListItem v-model="active" :label="$t('Actief')" description="Leden kunnen geen inactieve groepen vinden of erbij inloggen."/>
+            </STList>
+        </template>
     </SaveView>
 </template>
 
@@ -54,7 +63,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, ErrorBox, UrlInput, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, CheckboxListItem, ErrorBox, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -65,6 +74,7 @@ import SelectOrganizationTagRow from './tags/components/SelectOrganizationTagRow
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
+const auth = useAuth()
 
 const props = defineProps<{
     organization: Organization,
@@ -103,6 +113,11 @@ const address = computed({
 const website = computed({
     get: () => patched.value.website,
     set: (value) => addPatch({website: value})
+})
+
+const active = computed({
+    get: () => patched.value.active,
+    set: (value) => addPatch({active: value})
 })
 
 const tags = computed(() => platform.value.config.tags)

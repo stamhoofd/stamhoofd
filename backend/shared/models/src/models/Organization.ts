@@ -196,7 +196,7 @@ export class Organization extends Model {
      * Get an Organization by looking at the host of a request
      * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
      */
-    static async fromApiHost(host: string): Promise<Organization> {
+    static async fromApiHost(host: string, options?: {allowInactive?: boolean}): Promise<Organization> {
         const splitted = host.split('.')
         if (splitted.length < 2) {
             throw new SimpleError({
@@ -213,7 +213,7 @@ export class Organization extends Model {
             });
         }
 
-        if (!organization.active) {
+        if (!organization.active && !options?.allowInactive) {
             throw new SimpleError({
                 code: "archived",
                 message: "This organization is archived",

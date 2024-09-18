@@ -60,7 +60,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'Invalid organizationId',
-                    human: 'Je kan geen activiteiten voor een specifieke organisatie aanmaken als je geen platform hoofdbeheerder bent',
+                    human: 'Je kan activiteiten aanmaken via het administratieportaal als je geen platform hoofdbeheerder bent',
                 })
             }
             
