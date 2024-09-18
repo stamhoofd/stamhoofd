@@ -20,7 +20,7 @@ export async function loadGroupOrganization(context: SessionContext, organizatio
         return context.organization;
     }
 
-    const response = await SessionContext.serverForOrganization(startCheckout).request({
+    const response = await SessionContext.serverForOrganization(organizationId).request({
         method: "GET",
         path: "/organization",
         decoder: Organization as Decoder<Organization>,
