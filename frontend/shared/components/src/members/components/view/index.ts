@@ -11,6 +11,6 @@ export { default as ViewMemberRecordCategoriesBox } from "./ViewMemberRecordCate
 export { default as ViewMemberRecordCategoryBox } from "./ViewMemberRecordCategoryBox.vue";
 export { default as ViewMemberRegistrationRow } from "./ViewMemberRegistrationRow.vue";
 export { default as ViewMemberRegistrationsBox } from "./ViewMemberRegistrationsBox.vue";
+export { default as ViewMemberSecurityCodeBox } from "./ViewMemberSecurityCodeBox.vue";
 export { default as ViewMemberUnverifiedBox } from "./ViewMemberUnverifiedBox.vue";
 export { default as ViewMemberWarningsBox } from "./ViewMemberWarningsBox.vue";
-

@@ -16,6 +16,7 @@
             <ViewMemberWarningsBox v-if="!isMobile" :member="member" />
             <ViewMemberAccountsBox :member="member" />
             <ViewMemberFamilyBox :member="member" />
+            <ViewMemberSecurityCodeBox :member="member" />
         </div>
     </div>
 </template>
@@ -24,7 +25,7 @@
 import { useIsMobile, usePlatformFamilyManager } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
 import { onMounted } from 'vue';
-import { ViewMemberAccountsBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';
+import { ViewMemberAccountsBox, ViewMemberSecurityCodeBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';
 import ViewMemberResponsibilitiesBox from '../components/view/ViewMemberResponsibilitiesBox.vue';
 
 const isMobile = useIsMobile();

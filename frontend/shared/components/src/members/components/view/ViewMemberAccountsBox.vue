@@ -1,85 +1,67 @@
 <template>
-    <div v-if="member.patchedMember.users.length > 0 || member.patchedMember.details.securityCode" class="hover-box container">
-        <template v-if="member.patchedMember.users.length > 0">
-            <hr>
-            <h2 class="style-with-button">
-                <span class="icon-spacer">Accounts</span>
-                <a
-                    v-if="!$isTouch"
-                    class="button icon gray help"
-                    target="_blank"
-                    :href="$domains.getDocs('leden-beheren-met-meerdere-ouders')"
-                />
-            </h2>
-            <STList>
-                <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
-                    <template v-if="user.hasAccount && user.verified" #left>
-                        <span class="icon user small" />
-                    </template>
-                    <template v-else-if="user.hasAccount && !user.verified" #left>
-                        <span v-tooltip="'Deze gebruiker moet het e-mailadres nog verifiëren.'" class="icon email small" />
-                    </template>
-                    <template v-else #left>
-                        <span v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" />
-                    </template>
-                    <template v-if="(user.firstName || user.lastName) && (user.name !== member.patchedMember.name)">
-                        <h3 v-if="user.firstName || user.lastName" class="style-title-list">
-                            {{ user.firstName }} {{ user.lastName }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ user.email }}
-                        </p>
-                    </template>
-                    <h3 v-else class="style-title-list">
-                        {{ user.email }}
+    <div v-if="member.patchedMember.users.length > 0" class="hover-box container">
+        <hr>
+        <h2 class="style-with-button">
+            <span class="icon-spacer">Accounts</span>
+            <a
+                v-if="!$isTouch && app !== 'registration'"
+                class="button icon gray help"
+                target="_blank"
+                :href="$domains.getDocs('leden-beheren-met-meerdere-ouders')"
+            />
+        </h2>
+        <p>Dit zijn alle e-mailadressen die toegang hebben tot de gegevens van {{ member.patchedMember.firstName }}. Hierop kan je inloggen of een account aanmaken.</p>
+        <STList>
+            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
+                <template v-if="user.hasAccount && user.verified" #left>
+                    <span class="icon user small" />
+                </template>
+                <template v-else-if="user.hasAccount && !user.verified" #left>
+                    <span v-tooltip="'Deze gebruiker moet het e-mailadres nog verifiëren.'" class="icon email small" />
+                </template>
+                <template v-else #left>
+                    <span v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" />
+                </template>
+                <template v-if="(user.firstName || user.lastName) && (user.name !== member.patchedMember.name)">
+                    <h3 v-if="user.firstName || user.lastName" class="style-title-list">
+                        {{ user.firstName }} {{ user.lastName }}
                     </h3>
-                    <p v-if="!user.hasAccount" class="style-description-small">
-                        Kan registreren
+                    <p class="style-description-small">
+                        {{ user.email }}
                     </p>
-                    <p v-else-if="!user.verified" class="style-description-small">
-                        E-mailadres nog niet geverifieerd
-                    </p>
-                    <p v-if="user.memberId === member.id" class="style-description-small">
-                        Dit is een account van {{ member.patchedMember.firstName }} zelf
-                    </p>
-                    <p v-if="user.permissions && app !== 'registration'" class="style-description-small">
-                        Heeft toegang tot beheerdersportaal
-                    </p>
-                    <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
-                        <LoadingButton :loading="isDeletingUser(user)" class="hover-show">
-                            <button type="button" class="button icon trash" @click.stop="deleteUser(user)" />
-                        </LoadingButton>
-                    </template>
-                </STListItem>
-            </STList>
-        </template>
-
-        <div v-if="securityCode" class="hover-box container">
-            <hr>
-            <h2 class="style-with-button">
-                <div>Beveiligingscode</div>
-                <div v-if="shouldShowResetSecurityCode">
-                    <button type="button" class="button icon retry hover-show" @click="renewSecurityCode" />
-                </div>
-            </h2>
-            <p>Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders.</p>
-
-            <p class="style-description">
-                <code v-copyable class="style-inline-code style-copyable">{{ Formatter.spaceString(securityCode, 4, '\u2011') }}</code>
-            </p>
-        </div>
+                </template>
+                <h3 v-else class="style-title-list">
+                    {{ user.email }}
+                </h3>
+                <p v-if="!user.hasAccount" class="style-description-small">
+                    Kan registreren
+                </p>
+                <p v-else-if="!user.verified" class="style-description-small">
+                    E-mailadres nog niet geverifieerd
+                </p>
+                <p v-if="user.memberId === member.id" class="style-description-small">
+                    Dit is een account van {{ member.patchedMember.firstName }} zelf
+                </p>
+                <p v-if="user.permissions && app !== 'registration'" class="style-description-small">
+                    Heeft toegang tot beheerdersportaal
+                </p>
+                <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
+                    <LoadingButton :loading="isDeletingUser(user)" class="hover-show">
+                        <button type="button" class="button icon trash" @click.stop="deleteUser(user)" />
+                    </LoadingButton>
+                </template>
+            </STListItem>
+        </STList>
     </div>
 </template>
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useAuth } from '../../../hooks';
-import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
 
@@ -93,9 +75,7 @@ const auth = useAuth()
 const app = useAppContext()
 const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, PermissionLevel.Write))
 const deletingUsers = ref(new Set<string>())
-const isRenewingSecurityCode = ref(false);
 const platformFamilyManager = usePlatformFamilyManager()
-const $t = useTranslate();
 
 const sortedUsers = computed(() => {
     return props.member.patchedMember.users.slice().sort((a, b) => {
@@ -104,10 +84,6 @@ const sortedUsers = computed(() => {
             Sorter.byBooleanValue(a.hasAccount, b.hasAccount),
         )
     })
-})
-
-const shouldShowResetSecurityCode = computed(() => {
-    return auth.canAccessPlatformMember(props.member, PermissionLevel.Full);
 })
 
 async function deleteUser(user: User) {
@@ -133,41 +109,5 @@ async function deleteUser(user: User) {
 
 function isDeletingUser(user: User) {
     return deletingUsers.value.has(user.id)
-}
-
-const securityCode = computed(() => props.member.patchedMember.details.securityCode);
-
-async function renewSecurityCode() {
-    if(!await CenteredMessage.confirm(
-        $t('db2fa1f9-4a3d-4f03-ad7d-fba479452d14'),
-        $t('3341eabb-512a-40f9-8679-6420ae92f1c6'),
-        $t('d9870397-d89a-47ec-8ae6-0601e49b9116'))) {
-        return;
-    }
-
-    if (isRenewingSecurityCode.value) {
-        return
-    }
-
-    isRenewingSecurityCode.value = true;
-    
-    try {
-        const id = props.member.id
-        const patch = MemberWithRegistrationsBlob.patch({
-            id,
-            details: MemberDetails.patch({
-                securityCode: null
-            })
-        });
-
-        const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
-        arr.addPatch(patch)
-        await platformFamilyManager.isolatedPatch([props.member], arr)
-        Toast.success($t('0c427a9d-2485-498f-bb88-a420843745f4')).show()
-    } catch (e) {
-        Toast.fromError(e).show()
-    }
-
-    isRenewingSecurityCode.value = false;
 }
 </script>

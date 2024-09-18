@@ -32,13 +32,17 @@
 </template>
 
 <script setup lang="ts">
-import { useEditMember, ViewMemberAccountsBox, ViewMemberActionsBox, ViewMemberEmergencyContactsBox, ViewMemberGeneralBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox } from '@stamhoofd/components';
+import { useAppContext, useEditMember, ViewMemberAccountsBox, ViewMemberActionsBox, ViewMemberEmergencyContactsBox, ViewMemberGeneralBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox } from '@stamhoofd/components';
+import ViewMemberSecurityCodeBox from '@stamhoofd/components/src/members/components/view/ViewMemberSecurityCodeBox.vue';
 import { Gender, PlatformMember } from '@stamhoofd/structures';
 
 const props = defineProps<{
     member: PlatformMember
 }>();
+
 const editMember = useEditMember();
+const app = useAppContext();
+
 async function doEdit() {
     await editMember(props.member, {title: 'Gegevens bewerken'});
 }
