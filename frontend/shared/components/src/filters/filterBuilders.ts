@@ -433,43 +433,50 @@ export function useGetOrganizationUIFilterBuilders() {
         })];
 
         if (user?.permissions?.platform !== null) {
-            all.push(new MultipleChoiceFilterBuilder({
-                name: 'Vlagmoment afgerond',
-                options: Object.entries(setupStepFilterNameMap).map(([k, v]) => new MultipleChoiceUIFilterOption(v, k as SetupStepType)),
-                wrapFilter: (f: StamhoofdFilter) => {
-                    const choices = Array.isArray(f) ? f : [f];
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: "Vlagmomenten",
+                    options: Object.entries(setupStepFilterNameMap).map(
+                        ([k, v]) =>
+                            new MultipleChoiceUIFilterOption(
+                                v,
+                                k as SetupStepType,
+                            ),
+                    ),
+                    wrapFilter: (f: StamhoofdFilter) => {
+                        const choices = Array.isArray(f) ? f : [f];
 
-                    return {
-                        flagMoments: {
-                            $elemMatch: {
-                                periodId: {
-                                    $eq: platform.value.period.id,
+                        return {
+                            flagMoments: {
+                                $elemMatch: {
+                                    periodId: {
+                                        $eq: platform.value.period.id,
+                                    },
+                                    ...Object.fromEntries(
+                                        Object.values(SetupStepType)
+                                            .filter(
+                                                (x) =>
+                                                    isNaN(Number(x)) &&
+                                                    choices.includes(x),
+                                            )
+                                            .map((setupStep) => {
+                                                return [
+                                                    setupStep,
+                                                    {
+                                                        reviewedAt: {
+                                                            $neq: null,
+                                                        },
+                                                        complete: { $eq: 1 },
+                                                    },
+                                                ];
+                                            }),
+                                    ),
                                 },
-                                ...Object.fromEntries(
-                                    Object.values(SetupStepType)
-                                        .filter(
-                                            (x) =>
-                                                isNaN(Number(x)) &&
-                                                choices.includes(x),
-                                        )
-                                        .flatMap((setupStep) => {
-                                            return [
-                                                [
-                                                    `${setupStep}_reviewedAt`,
-                                                    { $neq: null },
-                                                ],
-                                                [
-                                                    `${setupStep}_complete`,
-                                                    { $eq: 1 },
-                                                ],
-                                            ];
-                                        }),
-                                ),
                             },
-                        },
-                    };
-                },
-            }))
+                        };
+                    },
+                }),
+            );
         }
 
         // Recursive: self referencing groups
