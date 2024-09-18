@@ -81,6 +81,7 @@ const saveText = 'Toevoegen';
 const organization = useOrganization();
 const platform = usePlatform();
 const now = new Date();
+const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
 const customStartDate = ref(tomorrow);
 const customEndDate = ref(tomorrow);
@@ -123,7 +124,7 @@ async function save() {
         const errors = new SimpleErrors();
 
         if (selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days) {
-            if (customStartDate.value < tomorrow) {
+            if (customStartDate.value < today) {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
