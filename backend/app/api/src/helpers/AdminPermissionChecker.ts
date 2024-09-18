@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
-import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from "@stamhoofd/models"
+import { BalanceItem, CachedOutstandingBalance, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from "@stamhoofd/models"
 import { AccessRight, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
 
@@ -250,7 +250,20 @@ export class AdminPermissionChecker {
      * Only full admins can delete members permanently
      */
     async canDeleteMember(member: MemberWithRegistrations) {
+        if (member.registrations.length === 0 && this.isUserManager(member)) {
+            const platformMemberships = await MemberPlatformMembership.where({ memberId: member.id })
+            if (platformMemberships.length === 0) {
+                return true;
+            }
+
+            const cachedBalance = await CachedOutstandingBalance.getForObjects([member.id])
+            if (cachedBalance.length === 0 || (cachedBalance[0].amount === 0 && cachedBalance[0].amountPending === 0)) {
+                return true;
+            }
+        }
+
         if (member.organizationId) {
+            // Not a platform
             return await this.hasFullAccess(member.organizationId)
         }
         return this.hasPlatformFullAccess()

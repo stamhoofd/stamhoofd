@@ -546,7 +546,7 @@ export class MemberActionBuilder {
         await this.present({
             components: [
                 new ComponentWithProperties(DeleteView, {
-                    title: `Verwijder lid ${name}?`,
+                    title: `${name} definitief verwijderen?`,
                     description: `Ben je 100% zeker dat je ${name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.`,
                     confirmationTitle: 'Bevestig de naam van het lid',
                     confirmationPlaceholder: 'Volledige naam',

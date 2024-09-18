@@ -71,8 +71,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
             return null
         }
-        const updateGroups = new Map<string, Group>();
-        const updateRegistrations = new Map<string, Registration>();
+
         const updateMembershipMemberIds = new Set<string>()
 
         // Loop all members one by one
@@ -489,39 +488,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
         }
 
-        // Loop all members one by one
-        for (const id of request.body.getDeletes()) {
-            const member = await Member.getWithRegistrations(id)
-            if (!member || !await Context.auth.canDeleteMember(member)) {
-                throw Context.auth.error("Je hebt niet voldoende rechten om dit lid te verwijderen")
-            }
-
-            await MemberUserSyncer.onDeleteMember(member)
-            await User.deleteForDeletedMember(member.id)
-            await BalanceItem.deleteForDeletedMember(member.id)
-            await member.delete()
-            shouldUpdateSetupSteps = true
-
-            for(const registration of member.registrations) {
-                const groupId = registration.groupId;
-                const group = await getGroup(groupId);
-                updateRegistrations.set(registration.id, registration);
-                if (group) {
-                    // We need to update this group occupancy because we moved one member away from it
-                    updateGroups.set(group.id, group)
-                }
-            }
-        }
-
-        for(const registration of updateRegistrations.values()) {
-            registration.scheduleStockUpdate();
-        }
-
-        // Loop all groups and update occupancy if needed
-        for (const group of updateGroups.values()) {
-            await group.updateOccupancy()
-            await group.save()
-        }
+        await PatchOrganizationMembersEndpoint.deleteMembers(request.body.getDeletes())
         
         for (const member of members) {
             if (updateMembershipMemberIds.has(member.id)) {
@@ -536,6 +503,50 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return new Response(
             await AuthenticatedStructures.membersBlob(members)
         );
+    }
+
+    static async deleteMembers(ids: string[]) {
+        const updateGroups = new Set<string>();
+        const updateRegistrations = new Map<string, Registration>();
+        const updateSteps = new Set<string>();
+        
+        // Loop all members one by one
+        for (const id of ids) {
+            const member = await Member.getWithRegistrations(id)
+            if (!member || !await Context.auth.canDeleteMember(member)) {
+                throw Context.auth.error("Je hebt niet voldoende rechten om dit lid te verwijderen")
+            }
+
+            await MemberUserSyncer.onDeleteMember(member)
+            await User.deleteForDeletedMember(member.id)
+            await BalanceItem.deleteForDeletedMember(member.id)
+            await member.delete()
+
+            for(const registration of member.registrations) {
+                const groupId = registration.groupId;
+                updateRegistrations.set(registration.id, registration);
+                updateGroups.add(groupId);
+                updateSteps.add(registration.organizationId);
+            }
+        }
+
+        for(const registration of updateRegistrations.values()) {
+            registration.scheduleStockUpdate();
+        }
+
+        const groups = await Group.getByIDs(...Array.from(updateGroups));
+
+        // Loop all groups and update occupancy if needed
+        for (const group of groups) {
+            await group.updateOccupancy()
+            await group.save()
+        }
+
+        const organizations = await Organization.getByIDs(...Array.from(updateSteps));
+        
+        for (const organization of organizations) {
+            SetupStepUpdater.updateForOrganization(organization).catch(console.error);
+        }
     }
 
     static async checkDuplicate(member: Member) {

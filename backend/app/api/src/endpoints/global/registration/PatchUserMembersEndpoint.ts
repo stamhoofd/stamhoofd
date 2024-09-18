@@ -134,6 +134,8 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             // Give access to created members
             await Member.users.reverse("members").link(user, addedMembers)
         }
+
+        await PatchOrganizationMembersEndpoint.deleteMembers(request.body.getDeletes())
         
         members = await Member.getMembersWithRegistrationForUser(user)
 

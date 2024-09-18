@@ -96,6 +96,14 @@ export class PlatformFamilyManager {
                 }
             }
 
+            // Remove deleted members from family
+            for (const memberId of patches.getDeletes()) {
+                const member = members.find(m => m.id === memberId)
+                if (member) {
+                    member.family.deleteMember(memberId)
+                }
+            }
+
             this.updateUserMemberId(response.data.members);
             this.updateOrganizationFromMembers(response.data.members)
         }

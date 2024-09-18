@@ -41,7 +41,7 @@ const props =
 const pop = usePop();
 const errors = useErrors();
 
-const deleteText = 'Verwijder';
+const deleteText = 'Verwijderen';
 const cancelText = 'Annuleren';
 const confirmationCodeInput = ref('');
 const isConfirm = ref(false);

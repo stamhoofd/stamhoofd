@@ -184,7 +184,7 @@ export class PlatformFamily {
         for (const c of clone.members) {
             const member = this.members.find(m => m.id === c.id)
             if (!member) {
-                this.members.push(c)
+                this.members.push(c._cloneWithFamily(this))
             }
         }
 
@@ -339,6 +339,10 @@ export class PlatformFamily {
 
         return filter
     }
+
+    deleteMember(id: string) {
+        this.members = this.members.filter(m => m.id !== id)
+    }
 }
 
 export enum MembershipStatus {
@@ -386,12 +390,16 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     _cloneWithFamily(family: PlatformFamily) {
-        return new PlatformMember({
+        const c = new PlatformMember({
             member: this.member.clone(),
             family,
             isNew: this.isNew,
             patch: this.patch.clone()
         })
+
+        c._oldId = this._oldId
+
+        return c;
     }
 
     get organizations() {

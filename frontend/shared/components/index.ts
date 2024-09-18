@@ -148,6 +148,7 @@ export { default as ProductBox } from "./src/views/ProductBox.vue"
 export { default as ProductGrid } from "./src/views/ProductGrid.vue"
 export { default as SeatSelectionBox } from "./src/views/SeatSelectionBox.vue"
 export { default as ShowSeatsView } from "./src/views/ShowSeatsView.vue"
+export { default as DeleteView } from "./src/views/DeleteView.vue"
 
 // Payment
 export * from "./src/ColorHelper"
