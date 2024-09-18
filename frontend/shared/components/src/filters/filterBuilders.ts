@@ -2,6 +2,7 @@ import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdFilter, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
+import { usePlatform } from "../hooks";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
 import { NumberFilterBuilder } from "./NumberUIFilter";
@@ -393,6 +394,7 @@ const organizationMemberUIFilterBuilders: UIFilterBuilders = [
 
 export function useGetOrganizationUIFilterBuilders() {
     const $t = useTranslate();
+    const platform = usePlatform();
      
     const setupStepFilterNameMap: Record<SetupStepType, string> = {
         [SetupStepType.Responsibilities]: $t('Functies'),
@@ -429,47 +431,44 @@ export function useGetOrganizationUIFilterBuilders() {
                 }
             }
         })];
-    
-        // if (user?.permissions?.platform !== null) {
-        //     all.push(new GroupUIFilterBuilder({
-        //         name: 'Vlagmomenten',
-        //         // options: Object.entries(setupStepFilterNameMap).map(([k, v]) => new MultipleChoiceUIFilterOption(v, k as SetupStepType)),
-        //         // builders: [
-        //         //     new StringFilterBuilder({
-        //         //         name: 'Naam',
-        //         //         key: 'name'
-        //         //     })
-        //         // ],
-        //         builders: Object.entries(setupStepFilterNameMap).map(([key, name]) => new StringFilterBuilder({name, key})),
-        //         wrapper: {
-        //             // flagMoments: {
-        //             //         completeSetupSteps: {
-        //             //             $contains: UIFilterWrapperMarker
-        //             //         }
-        //             // }
-        //             // flagMoments: {
-        //             //     $contains: 'Functions'
-        //             // }
-        //             flagMoments: {
-        //                 $elemMatch: UIFilterWrapperMarker
-        //             }
-        //         }
-        //     }))
-        // }
 
         if (user?.permissions?.platform !== null) {
             all.push(new MultipleChoiceFilterBuilder({
-                name: 'Vlagmomenten',
+                name: 'Vlagmoment afgerond',
                 options: Object.entries(setupStepFilterNameMap).map(([k, v]) => new MultipleChoiceUIFilterOption(v, k as SetupStepType)),
-                wrapper: {
-                    flagMoments: {
-                        $elemMatch: {
-                            completeSetupSteps: {
-                                $in: UIFilterWrapperMarker
-                            }
-                        }
-                    }
-                }
+                wrapFilter: (f: StamhoofdFilter) => {
+                    const choices = Array.isArray(f) ? f : [f];
+
+                    return {
+                        flagMoments: {
+                            $elemMatch: {
+                                periodId: {
+                                    $eq: platform.value.period.id,
+                                },
+                                ...Object.fromEntries(
+                                    Object.values(SetupStepType)
+                                        .filter(
+                                            (x) =>
+                                                isNaN(Number(x)) &&
+                                                choices.includes(x),
+                                        )
+                                        .flatMap((setupStep) => {
+                                            return [
+                                                [
+                                                    `${setupStep}_reviewedAt`,
+                                                    { $neq: null },
+                                                ],
+                                                [
+                                                    `${setupStep}_complete`,
+                                                    { $eq: 1 },
+                                                ],
+                                            ];
+                                        }),
+                                ),
+                            },
+                        },
+                    };
+                },
             }))
         }
 

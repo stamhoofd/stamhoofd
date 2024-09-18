@@ -1,4 +1,5 @@
-import { SQL, SQLCompleteSetupSteps, SQLConcat, SQLFilterDefinitions, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
+import { SQL, SQLConcat, SQLExpressionOptions, SQLFilterCompiler, SQLFilterDefinitions, SQLNow, SQLNull, SQLQuery, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
+import { SetupStepType } from "@stamhoofd/structures";
 
 export const organizationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -41,24 +42,30 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
             SQL.column('organization_registration_periods', 'organizationId'),
             SQL.column('organizations', 'id')
         ),
-        // {
-        //     ...baseSQLFilterCompilers,     
-        //     ...Object.fromEntries(Object.values(SetupStepType)
-        //             .filter((x) => isNaN(Number(x)))
-        //             .map(setupStep => {
-        //                 console.log('test12:',setupStep)
-        //                 return [setupStep, createSQLExpressionFilterCompiler(
-        //                     new SQLCompleteSetupSteps(SQL.column('organization_registration_periods', 'setupSteps'), '$.value.steps'),
-        //                     {isJSONValue: true, isJSONObject: false}
-        //                 )]
-        //             }))
-        //     }
         {
-            completeSetupSteps: createSQLExpressionFilterCompiler(
-                new SQLCompleteSetupSteps(),
-                {isJSONValue: true, isJSONObject: false}
-            )
-        }
+            ...baseSQLFilterCompilers,
+            periodId: createSQLColumnFilterCompiler(SQL.column('organization_registration_periods', 'periodId')),
+            ...Object.fromEntries(Object.values(SetupStepType)
+                    .filter((x) => isNaN(Number(x)))
+                    .flatMap(setupStep => {
+                        const reviewed: [string, SQLFilterCompiler] = [
+                            `${setupStep}_reviewedAt`,
+                            createSQLExpressionFilterCompiler(
+                            SQL.jsonValue(SQL.column('organization_registration_periods', 'setupSteps'), `$.value.steps.${setupStep}.review.date`),
+                            {isJSONValue: true, isJSONObject: false})
+                        ];
+
+                        const done: [string, SQLFilterCompiler] = [
+                            `${setupStep}_complete`,
+                            
+                            createSQLExpressionFilterCompiler(
+                                { getSQL: (_options?: SQLExpressionOptions): SQLQuery => `case when CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.Functions.finishedSteps")) AS unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.Functions.totalSteps")) AS unsigned) then 1 else 0 end`},
+                                {isJSONValue: false, isJSONObject: false})
+                        ];
+
+                        return [reviewed, done];
+                    }))
+            }
     ),
     packages: createSQLRelationFilterCompiler(
         SQL.select().from(
