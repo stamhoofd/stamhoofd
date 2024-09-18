@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from "uuid";
 
 export class EmailInformation extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -117,17 +118,28 @@ export class Recipient extends AutoEncoder {
 }
 
 export class EmailAttachment extends AutoEncoder {
-    @field({ decoder: StringDecoder, nullable: true })
-    filename: string | null = null
+    /**
+     * Silently added, incompatible change but shouldn't be a problem since this was only used temporarily
+     */
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string
 
-    @field({ decoder: StringDecoder, nullable: true })
-    contentType: string | null = null
+    @field({ decoder: StringDecoder})
+    filename: string
+
+    @field({ decoder: StringDecoder })
+    contentType: string
 
     /**
      * base64 encoded content
      */
     @field({ decoder: StringDecoder })
     content: string;
+
+    get bytes() {
+        // Calculates bytes of base64 string 
+        return Math.ceil((this.content.length / 4) * 3) - (this.content.endsWith('==') ? 2 : this.content.endsWith('=') ? 1 : 0);
+    }
 }
 
 export class EmailRequest extends AutoEncoder {

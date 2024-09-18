@@ -89,6 +89,12 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             rebuild = true;
         }
 
+        // Attachments
+        if (request.body.attachments !== undefined) {
+            model.attachments = patchObject(model.attachments, request.body.attachments);
+            model.validateAttachments()
+        }
+
         await model.save();
 
         if (rebuild) {

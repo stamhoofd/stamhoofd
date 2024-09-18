@@ -83,6 +83,8 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         model.fromAddress = request.body.fromAddress;
         model.fromName = request.body.fromName;
 
+        model.validateAttachments()
+
         // Check default
         if (JSON.stringify(model.json).length < 3 && model.recipientFilter.filters[0].type && EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)) {
             const type = EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)

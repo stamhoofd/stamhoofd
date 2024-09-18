@@ -1,5 +1,5 @@
 <template>
-    <LoadingView v-if="creatingEmail || !email" :error-box="errors.errorBox" />
+    <LoadingView v-if="creatingEmail || !email || !patchedEmail" :error-box="errors.errorBox" />
     <EditorView v-else ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="send">
         <h1 class="style-navigation-title">
             Nieuwe e-mail
@@ -30,7 +30,7 @@
                     </button>
                 </div>
                 <template #right>
-                    <span v-if="email.recipientCount !== null" class="style-description-small">{{ formatInteger(email.recipientCount) }}</span>
+                    <span v-if="patchedEmail.recipientCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.recipientCount) }}</span>
                     <span v-else class="style-placeholder-skeleton" />
                 </template>
             </STListItem>
@@ -64,18 +64,18 @@
         <!-- Editor footer -->
         <template #footer>
             <!-- E-mail attachments -->
-            <STList v-if="files.length > 0">
-                <STListItem v-for="(file, index) in files" :key="index" class="file-list-item">
+            <STList v-if="patchedEmail.attachments.length > 0">
+                <STListItem v-for="attachment in patchedEmail.attachments" :key="attachment.id" class="file-list-item">
                     <template #left>
-                        <span :class="'icon '+getFileIcon(file)" />
+                        <span :class="'icon '+getFileIcon(attachment)" />
                     </template>
-                    <h3 class="style-title-list" v-text="file.name" />
+                    <h3 class="style-title-list" v-text="attachment.filename" />
                     <p class="style-description-small">
-                        {{ file.size }}
+                        {{ Formatter.fileSize(attachment.bytes) }}
                     </p>
 
                     <template #right>
-                        <button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" />
+                        <button class="button icon gray trash" type="button" @click.stop="deleteAttachment(attachment)" />
                     </template>
                 </STListItem>
             </STList>
@@ -98,10 +98,10 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, Decoder, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Email, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, OrganizationEmail } from '@stamhoofd/structures';
+import { Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, OrganizationEmail } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
@@ -345,6 +345,8 @@ async function patchEmail() {
     } catch (e) {
         console.error(e);
         //patch.value = patch.value ? _savingPatch.patch(patch.value) : _savingPatch
+
+        Toast.fromError(e).setHide(20000).show()
     }
     savingPatch.value = null
 }
@@ -494,36 +496,74 @@ async function showToMenu(event: MouseEvent) {
     menu.show({ button: event.currentTarget }).catch(console.error)
 }
 
-function getFileIcon(file: TmpFile) {
-    if (file.file.name.endsWith(".png") || file.file.name.endsWith(".jpg") || file.file.name.endsWith(".jpeg") || file.file.name.endsWith(".gif")) {
+function getFileIcon(file: EmailAttachment) {
+    if (file.filename.endsWith(".png") || file.filename.endsWith(".jpg") || file.filename.endsWith(".jpeg") || file.filename.endsWith(".gif")) {
         return "file-image"
     }
-    if (file.file.name.endsWith(".pdf")) {
+    if (file.filename.endsWith(".pdf")) {
         return "file-pdf color-pdf"
     }
-    if (file.file.name.endsWith(".xlsx") || file.file.name.endsWith(".xls")) {
+    if (file.filename.endsWith(".xlsx") || file.filename.endsWith(".xls")) {
         return "file-excel color-excel"
     }
-    if (file.file.name.endsWith(".docx") || file.file.name.endsWith(".doc")) {
+    if (file.filename.endsWith(".docx") || file.filename.endsWith(".doc")) {
         return "file-word color-word"
     }
     return "file"
 }
 
-function deleteAttachment(index: number) {
-    files.value.splice(index, 1)
+function deleteAttachment(attachment: EmailAttachment) {
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmailAttachment>;
+    arr.addDelete(attachment.id)
+    addPatch({attachments: arr})
 }
 
-function changedFile(event: InputEvent & { target: HTMLInputElement & { files: FileList } }) {
+async function toBase64(file: File) {
+    return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            // Remove data:*;base64,
+            const str = reader.result as string
+            const index = str.indexOf("base64,")
+            if (index !== -1) {
+                resolve(str.slice(index + 7))
+            } else {
+                reject("Invalid base64")
+            }
+        }
+        reader.onerror = (e) => {
+            reject(e)
+        }
+
+        reader.readAsDataURL(file)
+    })
+}
+
+async function changedFile(event: InputEvent & { target: HTMLInputElement & { files: FileList } }) {
     if (!event.target.files || event.target.files.length == 0) {
         return;
     }
 
-    for (const file of event.target.files as FileList) {
-        const f = new TmpFile(file.name, file)
-        files.value.push(f)
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmailAttachment>;
 
-        if (f.file.name.endsWith(".docx") || f.file.name.endsWith(".xlsx") || f.file.name.endsWith(".doc") || f.file.name.endsWith(".xls")) {
+    for (const file of event.target.files as FileList) {
+        if (file.size > 10 * 1024 * 1024) {
+            const error = "Bestanden groter dan 10MB kunnen niet worden verstuurd."
+            Toast.error(error).setHide(20*1000).show()
+            continue;
+        }
+
+        //const f = new TmpFile(file.name, file)
+        //files.value.push(f)
+
+        // Add attachment
+        arr.addPut(EmailAttachment.create({
+            filename: file.name,
+            contentType: file.type,
+            content: await toBase64(file)
+        }))
+
+        if (file.name.endsWith(".docx") || file.name.endsWith(".xlsx") || file.name.endsWith(".doc") || file.name.endsWith(".xls")) {
             const error = "We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door."
             Toast.warning(error).setHide(30*1000).show()
         }
@@ -531,6 +571,9 @@ function changedFile(event: InputEvent & { target: HTMLInputElement & { files: F
     
     // Clear selection
     (event.target as any).value = null;
+
+    // Add patch
+    addPatch({attachments: arr})
 }
 
 const canOpenTemplates = computed(() => {

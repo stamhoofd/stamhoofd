@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { Email as EmailClass } from "@stamhoofd/email";
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -11,7 +12,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { Organization } from './Organization';
-import { I18n } from '@stamhoofd/backend-i18n';
 
 export class Email extends Model {
     static table = "emails";
@@ -132,6 +132,46 @@ export class Email extends Model {
                 human: 'Vul een afzender in voor je een e-mail verstuurt'
             })
         }
+
+        this.validateAttachments()
+    }
+    
+    validateAttachments() {
+        // Validate attachments
+        const size = this.attachments.reduce((value: number, attachment) => {
+            return value + attachment.bytes
+        }, 0)
+        
+        if (size > 9.5*1024*1024) {
+            throw new SimpleError({
+                code: "too_big_attachments",
+                message: "Too big attachments",
+                human: "Jouw bericht is te groot. Grote bijlages verstuur je beter niet via e-mail, je plaatst dan best een link naar de locatie in bv. Google Drive. De maximale grootte van een e-mail is 10MB, inclusief het bericht. Als je grote bestanden verstuurt kan je ze ook proberen te verkleinen.",
+                field: "attachments"
+            })
+        }
+
+        const safeContentTypes = [
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/pdf",
+            "image/jpeg",
+            "image/png",
+            "image/gif"
+        ]
+
+        for (const attachment of this.attachments) {
+            if (attachment.contentType && !safeContentTypes.includes(attachment.contentType)) {
+                throw new SimpleError({
+                    code: "content_type_not_supported",
+                    message: "Content-Type not supported",
+                    human: "Het bestandstype van jouw bijlage wordt niet ondersteund of is onveilig om in een e-mail te plaatsen. Overweeg om je bestand op bv. Google Drive te zetten en de link in jouw e-mail te zetten.",
+                    field: "attachments"
+                })
+            }
+        }
     }
 
     getFromAddress() {
@@ -172,7 +212,7 @@ export class Email extends Model {
         await this.save();
 
         const id = this.id;
-        return await QueueHandler.schedule('send-email', async function () {
+        return await QueueHandler.schedule('send-email', async function (this: unknown) {
             let upToDate = await Email.getByID(id);
             if (!upToDate) {
                 throw new SimpleError({
@@ -253,6 +293,27 @@ export class Email extends Model {
             const batchSize = 100;
             const recipientsSet = new Set<string>();
 
+            const attachments = upToDate.attachments.map((attachment, index) => {
+                let filename = "bijlage-"+index;
+                
+                if (attachment.contentType == "application/pdf") {
+                    // tmp solution for pdf only
+                    filename += ".pdf"
+                }
+    
+                // Correct file name if needed
+                if (attachment.filename) {
+                    filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+/, "").replace(/-+$/, "")
+                }
+    
+                return {
+                    filename: filename,
+                    content: attachment.content,
+                    contentType: attachment.contentType ?? undefined,
+                    encoding: "base64"
+                }
+            })
+
             // eslint-disable-next-line no-constant-condition
             while (true) {
                 const data = await SQL.select()
@@ -315,6 +376,7 @@ export class Email extends Model {
                         subject: upToDate.subject!, 
                         html: upToDate.html!,
                         type: "broadcast",
+                        attachments,
                         callback(error: Error|null ) {
                             callback(error).catch(console.error)
                         },
