@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding"
 import { useOrganization, usePlatform } from "@stamhoofd/components"
 import { ContextPermissions, usePlatformManager } from "@stamhoofd/networking"
-import { PermissionRoleForResponsibility, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from "@stamhoofd/structures"
+import { PermissionLevel, PermissionRoleForResponsibility, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from "@stamhoofd/structures"
 import { Sorter } from "@stamhoofd/utility"
 import { computed, onActivated } from "vue"
 import { useReloadAdmins } from "./useReloadAdmins"
@@ -57,10 +57,14 @@ export function useAdmins() {
     }
 
     const sortedAdmins = computed(() => {
-        return admins.value.filter(a => !a.memberId || (getPermissions(a) && !!getPermissions(a)?.roles.find(r => !(r instanceof PermissionRoleForResponsibility)))).sort((a, b) => Sorter.stack(
-            Sorter.byBooleanValue(getPermissions(a)?.hasFullAccess() ?? false, getPermissions(b)?.hasFullAccess() ?? false), 
-            Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)
-        ))
+        return admins.value
+            .filter(a => !a.memberId 
+                || (getPermissions(a) && (!!getPermissions(a)?.roles.find(r => !(r instanceof PermissionRoleForResponsibility))) || (getPermissions(a)?.level ?? PermissionLevel.None) !== PermissionLevel.None)
+            )
+            .sort((a, b) => Sorter.stack(
+                Sorter.byBooleanValue(getPermissions(a)?.hasFullAccess() ?? false, getPermissions(b)?.hasFullAccess() ?? false), 
+                Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)
+            ))
     })
 
     const sortedMembers = computed(() => {
