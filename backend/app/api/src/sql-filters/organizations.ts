@@ -1,4 +1,4 @@
-import { SQL, SQLConcat, SQLFilterDefinitions, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
+import { SQL, SQLCompleteSetupSteps, SQLConcat, SQLFilterDefinitions, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
 
 export const organizationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -33,6 +33,32 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
     tags: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.tags'),
         {isJSONValue: true, isJSONObject: true}
+    ),
+    flagMoments: createSQLRelationFilterCompiler(
+        SQL.select().from(
+            SQL.table('organization_registration_periods')
+        ).where(
+            SQL.column('organization_registration_periods', 'organizationId'),
+            SQL.column('organizations', 'id')
+        ),
+        // {
+        //     ...baseSQLFilterCompilers,     
+        //     ...Object.fromEntries(Object.values(SetupStepType)
+        //             .filter((x) => isNaN(Number(x)))
+        //             .map(setupStep => {
+        //                 console.log('test12:',setupStep)
+        //                 return [setupStep, createSQLExpressionFilterCompiler(
+        //                     new SQLCompleteSetupSteps(SQL.column('organization_registration_periods', 'setupSteps'), '$.value.steps'),
+        //                     {isJSONValue: true, isJSONObject: false}
+        //                 )]
+        //             }))
+        //     }
+        {
+            completeSetupSteps: createSQLExpressionFilterCompiler(
+                new SQLCompleteSetupSteps(),
+                {isJSONValue: true, isJSONObject: false}
+            )
+        }
     ),
     packages: createSQLRelationFilterCompiler(
         SQL.select().from(

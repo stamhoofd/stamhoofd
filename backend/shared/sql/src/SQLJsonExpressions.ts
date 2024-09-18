@@ -1,3 +1,4 @@
+import { SetupStepType } from "@stamhoofd/structures";
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from "./SQLExpression";
 import { SQLSafeValue } from "./SQLExpressions";
 import { SQLWhere } from "./SQLWhere";
@@ -147,5 +148,19 @@ export class SQLJsonOverlaps extends SQLWhere {
                 this.jsonDoc2.getSQL(options),
             ')'
         ])
+    }
+}
+
+export class SQLCompleteSetupSteps implements SQLExpression {
+    getSQL(_options?: SQLExpressionOptions): SQLQuery {
+        return `CONCAT(${Object.values(SetupStepType)
+            .filter((x) => isNaN(Number(x)))
+            .map((setupStep) => {
+                return `CASE WHEN (JSON_EXTRACT(setupSteps, '$.value.steps.${setupStep}.review.date') IS NOT NULL
+                    AND CAST(JSON_UNQUOTE(JSON_EXTRACT(setupSteps, '$.value.steps.${setupStep}.finishedSteps')) as unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(setupSteps, '$.value.steps.${setupStep}.totalSteps')) as unsigned)) THEN
+                    '${setupStep}'
+                    ELSE '' END`;
+            })
+            .join(", ")})`;
     }
 }

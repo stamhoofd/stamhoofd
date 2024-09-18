@@ -1,4 +1,5 @@
-import { Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, StamhoofdFilter, User } from "@stamhoofd/structures";
+import { useTranslate } from "@stamhoofd/frontend-i18n";
+import { Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdFilter, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
@@ -390,40 +391,102 @@ const organizationMemberUIFilterBuilders: UIFilterBuilders = [
     }),
 ]
 
-export const organizationsUIFilterBuilders: UIFilterBuilders = [
-    new StringFilterBuilder({
-        name: 'Naam',
-        key: 'name'
-    }),
-    new GroupUIFilterBuilder({
-        name: 'Leden',
-        builders: organizationMemberUIFilterBuilders,
-        wrapper: {
-            members: {
-                $elemMatch: UIFilterWrapperMarker
-            }
-        }
-    }),
-    new MultipleChoiceFilterBuilder({
-        name: 'Actief',
-        options: [
-            new MultipleChoiceUIFilterOption('Actief', 1),
-            new MultipleChoiceUIFilterOption('Inactief', 0)
-        ],
-        wrapper: {
-            active: {
-                $in: UIFilterWrapperMarker
-            }
-        }
-    })
-];
+export function useGetOrganizationUIFilterBuilders() {
+    const $t = useTranslate();
+     
+    const setupStepFilterNameMap: Record<SetupStepType, string> = {
+        [SetupStepType.Responsibilities]: $t('Functies'),
+        [SetupStepType.Companies]: $t('Facturatiegegevens'),
+        [SetupStepType.Groups]: $t('Leeftijdsgroepen'),
+        [SetupStepType.Premises]: $t('Lokalen'),
+        [SetupStepType.Emails]: $t('E-mailadressen'),
+        [SetupStepType.Payment]: $t('Betaalmethodes'),
+    }
 
-// Recursive: self referencing groups
-organizationsUIFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: organizationsUIFilterBuilders
-    })
-)
+    const getOrganizationUIFilterBuilders = (user: User | null) => {
+        const all = [new StringFilterBuilder({
+            name: 'Naam',
+            key: 'name'
+        }),
+        new GroupUIFilterBuilder({
+            name: 'Leden',
+            builders: organizationMemberUIFilterBuilders,
+            wrapper: {
+                members: {
+                    $elemMatch: UIFilterWrapperMarker
+                }
+            }
+        }),
+        new MultipleChoiceFilterBuilder({
+            name: 'Actief',
+            options: [
+                new MultipleChoiceUIFilterOption('Actief', 1),
+                new MultipleChoiceUIFilterOption('Inactief', 0)
+            ],
+            wrapper: {
+                active: {
+                    $in: UIFilterWrapperMarker
+                }
+            }
+        })];
+    
+        // if (user?.permissions?.platform !== null) {
+        //     all.push(new GroupUIFilterBuilder({
+        //         name: 'Vlagmomenten',
+        //         // options: Object.entries(setupStepFilterNameMap).map(([k, v]) => new MultipleChoiceUIFilterOption(v, k as SetupStepType)),
+        //         // builders: [
+        //         //     new StringFilterBuilder({
+        //         //         name: 'Naam',
+        //         //         key: 'name'
+        //         //     })
+        //         // ],
+        //         builders: Object.entries(setupStepFilterNameMap).map(([key, name]) => new StringFilterBuilder({name, key})),
+        //         wrapper: {
+        //             // flagMoments: {
+        //             //         completeSetupSteps: {
+        //             //             $contains: UIFilterWrapperMarker
+        //             //         }
+        //             // }
+        //             // flagMoments: {
+        //             //     $contains: 'Functions'
+        //             // }
+        //             flagMoments: {
+        //                 $elemMatch: UIFilterWrapperMarker
+        //             }
+        //         }
+        //     }))
+        // }
+
+        if (user?.permissions?.platform !== null) {
+            all.push(new MultipleChoiceFilterBuilder({
+                name: 'Vlagmomenten',
+                options: Object.entries(setupStepFilterNameMap).map(([k, v]) => new MultipleChoiceUIFilterOption(v, k as SetupStepType)),
+                wrapper: {
+                    flagMoments: {
+                        $elemMatch: {
+                            completeSetupSteps: {
+                                $in: UIFilterWrapperMarker
+                            }
+                        }
+                    }
+                }
+            }))
+        }
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all
+            })
+        )
+    
+        return all;
+    }
+
+    return {getOrganizationUIFilterBuilders};
+}
+
+
 
 // Events
 export function getEventUIFilterBuilders(platform: Platform, organizations: Organization[]) {
