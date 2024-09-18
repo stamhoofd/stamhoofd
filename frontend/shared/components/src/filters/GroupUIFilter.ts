@@ -131,7 +131,7 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
         const result = unwrapFilterForBuilder(this, filter);
         if (!result.match) {
-            filter = [] 
+            filter = []
         } else {
             filter = result.markerValue ?? []
         }
@@ -167,7 +167,12 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
                     continue;
                 }
                 const decoded = builder.fromFilter(f);
+
                 if (decoded !== null) {
+                    if(decoded instanceof GroupUIFilter && !decoded.filters.length) {
+                        continue;
+                    }
+
                     // do we have a leftover?
                     const unwrappedF = unwrapFilterForBuilder(builder, f);
 
