@@ -44,7 +44,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
         resolutions: ResolutionRequest[] | null
     
     @Prop({ default: null })
-        value: Image | null;
+        modelValue: Image | null;
 
     uploading = false
 

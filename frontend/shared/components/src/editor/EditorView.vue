@@ -72,7 +72,7 @@
                     <button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
                     <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
                     <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent />
-                    <UploadButton :resolutions="imageResolutions" @input="insertImage" @mousedown.native.prevent>
+                    <UploadButton :resolutions="imageResolutions" @update:modelValue="insertImage" @mousedown.native.prevent>
                         <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
                     </UploadButton>
                     <slot name="buttons" />
@@ -91,7 +91,7 @@
             <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
             <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
             <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent />
-            <UploadButton :resolutions="imageResolutions" @input="insertImage" @mousedown.native.prevent>
+            <UploadButton :resolutions="imageResolutions" @update:modelValue="insertImage" @mousedown.native.prevent>
                 <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
             </UploadButton>
             <slot name="buttons" />
