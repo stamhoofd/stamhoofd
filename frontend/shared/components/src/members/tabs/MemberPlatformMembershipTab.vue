@@ -17,7 +17,11 @@
                         <span v-else class="icon success" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ getMembershipType(membership).name }}
+                        <span>{{ getMembershipType(membership).name }}</span>
+
+                        <span v-if="membership.freeAmount" class="style-tag discount inline-first">
+                            {{ Formatter.pluralText(membership.freeAmount, 'dag', 'dagen') }} gratis
+                        </span>
                     </h3>
                     <p class="style-description-small">
                         {{ formatStartDate(membership.startDate, false, true) }} tot en met {{ formatEndDate(membership.expireDate ?? membership.endDate, false, true) }}
@@ -41,7 +45,12 @@
                     </p>
 
                     <template v-if="hasFull" #right>
-                        <span>{{ formatPrice(membership.price) }}</span>
+                        <span v-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
+                        <template v-else>
+                            <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>
+                            <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
+                        </template>
+
                         <LoadingButton v-if="!membership.generated" :loading="deletingMemberships.has(membership.id)">
                             <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
                         </LoadingButton>
@@ -64,11 +73,13 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAuth, usePlatform } from '../../hooks';
 import { Toast } from '../../overlays/Toast';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import SelectPlatformMembershipView from '../components/platform-membership/SelectPlatformMembershipView.vue';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 const props = defineProps<{
     member: PlatformMember
@@ -83,7 +94,12 @@ const auth = useAuth();
 const hasFull = auth.hasFullAccess()
 
 const memberships = computed(() => {
-    return props.member.member.platformMemberships.filter(m => m.endDate >= now);
+    return props.member.member.platformMemberships
+        .filter(m => m.endDate >= now)
+        .sort((a, b) => Sorter.stack(
+            Sorter.byDateValue(b.startDate, a.startDate),
+            Sorter.byDateValue(b.createdAt, a.createdAt)
+        ));
 });
 
 function getOrganizationName(membership: MemberPlatformMembership) {
@@ -103,6 +119,10 @@ async function addMembership() {
 
 async function deleteMembership(membership: MemberPlatformMembership) {
     if (deletingMemberships.value.has(membership.id)) {
+        return;
+    }
+
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze aansluiting wilt verwijderen?', 'Ja, verwijderen')) {
         return;
     }
 

@@ -498,18 +498,9 @@ export class Member extends Model {
 
             if (activeMembershipsUndeletable.length) {
                 // Skip automatic additions
-                for (const m of activeMembershipsUndeletable) {
-                    const beforePrice = m.price
-                
+                for (const m of activeMembershipsUndeletable) {                
                     await m.calculatePrice(me)
-
-                    if (beforePrice !== m.price) {
-                        await m.save()
-
-                        console.log('Updated price for membership: ' + me.id + ' - membership ' + m.id)
-                    } else if (!silent) {
-                        console.log('Skipping automatic membership for: ' + me.id, ' - already has active memberships - no price change')
-                    }
+                    await m.save()
                 }
                 return
             }
@@ -541,18 +532,9 @@ export class Member extends Model {
             // Check if already have the same membership
             for (const m of activeMemberships) {
                 if (m.membershipTypeId === cheapestMembership.membership.id) {
-                    // Update the price of this active membership (could have changed)
-                    const beforePrice = m.price
-            
+                    // Update the price of this active membership (could have changed)            
                     await m.calculatePrice(me)
-
-                    if (beforePrice !== m.price) {
-                        await m.save()
-
-                        console.log('Updated price for membership: ' + me.id + ' - membership ' + m.id)
-                    } else if (!silent) {
-                        console.log('Skipping automatic membership for: ' + me.id, ' - already has this membership - no price change')
-                    }
+                    await m.save()
                     return
                 }
             }

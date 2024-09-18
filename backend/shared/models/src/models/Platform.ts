@@ -77,7 +77,12 @@ export class Platform extends Model {
     }
 
     async save() {
-        Platform.sharedStruct = null
-        return await super.save()
+        Platform.clearCache()
+        const s = await super.save()
+
+        // Force update cache immediately
+        await Platform.getSharedStruct();
+
+        return s;
     }
 }

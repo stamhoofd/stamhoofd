@@ -1,9 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { sleep } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 
 type Params = Record<string, never>;

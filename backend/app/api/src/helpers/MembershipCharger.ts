@@ -27,6 +27,7 @@ export const MembershipCharger = {
 
         let createdCount = 0;
         let createdPrice = 0;
+        const chunkSize = 100;
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
@@ -35,7 +36,7 @@ export const MembershipCharger = {
                 .where('balanceItemId', null)
                 .where('deletedAt', null)
                 .whereNot('organizationId', chargeVia)
-                .limit(100)
+                .limit(chunkSize)
                 .orderBy(
                     new SQLOrderBy({
                         column: SQL.column('id'),
@@ -57,6 +58,7 @@ export const MembershipCharger = {
                 if (membership.balanceItemId) {
                     continue;
                 }
+
                 const type = getType(membership.membershipTypeId);
                 if (!type) {
                     console.error('Unknown membership type id ', membership.membershipTypeId)
@@ -71,6 +73,14 @@ export const MembershipCharger = {
 
                 if (!member) {
                     console.error('Unexpected missing member id ', membership.memberId, 'for membership', membership.id)
+                    continue;
+                }
+
+                // Force price update (required because could have changed - especially for free memberships in combination with deletes)
+                try {
+                    await membership.calculatePrice(member)
+                } catch (e) {
+                    console.error('Failed to update price for membership. Not charged.', membership.id, e)
                     continue;
                 }
 
@@ -101,6 +111,7 @@ export const MembershipCharger = {
 
                 await balanceItem.save();
                 membership.balanceItemId = balanceItem.id;
+                membership.maximumFreeAmount = membership.freeAmount;
                 await membership.save()
 
                 createdBalanceItems.push(balanceItem)
@@ -111,7 +122,7 @@ export const MembershipCharger = {
 
             await BalanceItem.updateOutstanding(createdBalanceItems)
 
-            if (memberships.length < 100) {
+            if (memberships.length < chunkSize) {
                 break;
             }
             
@@ -124,5 +135,76 @@ export const MembershipCharger = {
         }
 
         console.log('Charged ' + Formatter.integer(createdCount) +'  memberships, for a total value of ' + Formatter.price(createdPrice))
+    },
+
+    async updatePrices(organizationId?: string) {
+        console.log('Update prices...')
+        
+        // Loop all
+        let lastId = "";
+        let createdCount = 0;
+        const chunkSize = 100;
+
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const q = MemberPlatformMembership.select()
+                .where('id', SQLWhereSign.Greater, lastId)
+                .where('balanceItemId', null)
+                .where('deletedAt', null);
+
+            if (organizationId) {
+                q.where('organizationId', organizationId)
+            }
+                
+            const memberships = await q
+                .limit(chunkSize)
+                .orderBy(
+                    new SQLOrderBy({
+                        column: SQL.column('id'),
+                        direction: 'ASC'
+                    })
+                )
+                .fetch();
+        
+            if (memberships.length === 0) {
+                break;
+            }
+
+            const memberIds = Formatter.uniqueArray(memberships.map(m => m.memberId))
+            const members = await Member.getByIDs(...memberIds)
+
+            for (const membership of memberships) {
+                const member = members.find(m => m.id === membership.memberId)
+
+                if (!member) {
+                    console.error('Unexpected missing member id ', membership.memberId, 'for membership', membership.id)
+                    continue;
+                }
+
+                // Force price update (required because could have changed - especially for free memberships in combination with deletes)
+                try {
+                    await membership.calculatePrice(member)
+                    await membership.save()
+                } catch (e) {
+                    console.error('Failed to update price for membership', membership.id, e)
+                    continue;
+                }
+                console.log('Updated price for membership', membership.id, membership.price)
+                createdCount += 1;
+            }
+
+            if (memberships.length < chunkSize) {
+                break;
+            }
+            
+            const z = lastId;
+            lastId = memberships[memberships.length - 1].id;
+
+            if (lastId === z) {
+                throw new Error('Unexpected infinite loop found in MembershipCharger')
+            }
+        }
+
+        console.log('Updated prices of ' + Formatter.integer(createdCount) +'  memberships')
     }
 };

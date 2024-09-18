@@ -167,7 +167,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { CenteredMessage, ErrorBox, OrganizationAvatar, Toast, useContext, useErrors, useExternalOrganization, useInterval, usePatch, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembershipType } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import { computed, onActivated, Ref, ref } from 'vue';
 
 const errors = useErrors();
 const summary = ref(null) as Ref<null | ChargeMembershipsSummary>
@@ -180,8 +180,6 @@ const saving = ref(false)
 const charging = ref(false)
 let loading = false;
 
-reload().catch(console.error)
-
 const {externalOrganization: membershipOrganization, choose: $chooseMembershipOrganization, loading: loadingOrganization, errorBox: loadingOrganizationErrorBox} = useExternalOrganization(
     computed({
         get: () => patched.value.membershipOrganizationId,
@@ -192,6 +190,10 @@ const {externalOrganization: membershipOrganization, choose: $chooseMembershipOr
 )
 
 useInterval(reload, 10 * 1000)
+
+onActivated(() => {
+    reload().catch(console.error)
+})
 
 const chooseMembershipOrganization = () => {
     return $chooseMembershipOrganization('Kies een vereniging die verantwoordelijk is voor het verzamelen van de aansluitingskosten')

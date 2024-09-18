@@ -368,6 +368,7 @@
 
 .style-discount-price {
     @extend .style-price-base;
+    font-weight: $font-weight-semibold;
     color: $color-discount;
     margin-left: 5px;
 }

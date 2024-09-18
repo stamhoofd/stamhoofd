@@ -1,7 +1,7 @@
 
 import { column, Model, SQLResultNamespacedRow } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { SQL, SQLSelect } from "@stamhoofd/sql";
+import { SQL, SQLSelect, SQLWhereSign } from "@stamhoofd/sql";
 import { PlatformMembershipTypeBehaviour } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
@@ -48,6 +48,19 @@ export class MemberPlatformMembership extends Model {
     @column({ type: "integer" })
     price = 0;
 
+    @column({ type: "integer" })
+    priceWithoutDiscount = 0;
+
+    /**
+     * Contains the amount of days, or either 1/0 to count the amount of 'free' days maximum could be awarded.
+     * Set to 0 when already a different 'free' membership was created, so it shouldn't count for a free day
+     */
+    @column({ type: "integer" })
+    maximumFreeAmount = 0;
+
+    @column({ type: "integer" })
+    freeAmount = 0;
+
     /**
      * Whether this was added automatically by the system
      */
@@ -93,7 +106,7 @@ export class MemberPlatformMembership extends Model {
     }
 
     async calculatePrice(member: Member) {
-        const platform = await Platform.getShared();
+        const platform = await Platform.getSharedPrivateStruct();
         const membershipType = platform.config.membershipTypes.find(m => m.id == this.membershipTypeId);
 
         if (!membershipType) {
@@ -115,7 +128,7 @@ export class MemberPlatformMembership extends Model {
         }
 
         const organization = await Organization.getByID(this.organizationId);
-        if(!organization) {
+        if (!organization) {
             throw new SimpleError({
                 //todo
                 code: 'not_found',
@@ -126,9 +139,40 @@ export class MemberPlatformMembership extends Model {
 
         const tagIds = organization.meta.tags;
         const shouldApplyReducedPrice = member.details.shouldApplyReducedPrice;
-
-        const priceConfig = periodConfig.getPriceConfigForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? this.startDate : (this.createdAt ?? new Date()));
         
+        const priceConfig = periodConfig.getPriceConfigForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? this.startDate : (this.createdAt ?? new Date()));
+        const earliestPriceConfig = periodConfig.getPriceConfigForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? new Date(1950, 0, 1) : (new Date(1950, 0, 1)));
+
+        let freeDays = 0;
+
+        const d = this.createdAt ??new Date();
+
+        if (periodConfig.amountFree) {
+            // Check if this organization has rights to free memberships
+            const alreadyUsed = await MemberPlatformMembership.select()
+                .where('organizationId', this.organizationId)
+                .where('membershipTypeId', this.membershipTypeId)
+                .where('periodId', this.periodId)
+                .where('deletedAt', null)
+                .whereNot('id', this.id)
+                .where(
+                    SQL.where('createdAt', SQLWhereSign.Less, d)
+                    .or(
+                        SQL.where('createdAt', SQLWhereSign.Equal, d)
+                            .and('id', SQLWhereSign.Less, this.id)
+                    )
+                )
+                .sum(SQL.column('maximumFreeAmount'));
+
+            if (alreadyUsed < periodConfig.amountFree) {
+                freeDays = periodConfig.amountFree - alreadyUsed;
+                console.log('Free membership created for ', this.id, periodConfig.amountFree, alreadyUsed);
+            } else {
+                console.log('No free membership created for', this.id, periodConfig.amountFree, alreadyUsed);
+            }
+        }
+
+
         if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
             // Make sure time is equal between start and end date
             let startBrussels = Formatter.luxon(this.startDate);
@@ -141,20 +185,48 @@ export class MemberPlatformMembership extends Model {
             this.expireDate = null
 
             const days = Math.round((this.endDate.getTime() - this.startDate.getTime()) / (1000 * 60 * 60 * 24));
-            this.price = priceConfig.calculatePrice(tagIds, shouldApplyReducedPrice, days);
+            this.maximumFreeAmount = days;
+            this.priceWithoutDiscount = earliestPriceConfig.calculatePrice(tagIds, false, days);
+            this.price = priceConfig.calculatePrice(tagIds, shouldApplyReducedPrice, Math.max(0, days - freeDays));
+            this.freeAmount = Math.min(days, freeDays);
         } else {
+            this.priceWithoutDiscount = earliestPriceConfig.getBasePrice(tagIds, false);
             this.price = priceConfig.getBasePrice(tagIds, shouldApplyReducedPrice);
             this.startDate = periodConfig.startDate;
             this.endDate = periodConfig.endDate;
             this.expireDate = periodConfig.expireDate;
+            this.maximumFreeAmount = this.price > 0 ? 1 : 0;
+            this.freeAmount = 0;
+
+            if (freeDays > 0) {
+                this.price = 0;
+                this.freeAmount = 1;
+            }
         }
 
         if (this.balanceItemId) {
+            this.maximumFreeAmount = this.freeAmount;
+
             // Also update the balance item
             const balanceItem = await BalanceItem.getByID(this.balanceItemId);
             if (balanceItem) {
                 balanceItem.unitPrice = this.price;
                 await balanceItem.save();
+
+                await BalanceItem.updateOutstanding([balanceItem]);
+            }
+        }
+    }
+
+    async doDelete() {
+        this.deletedAt = new Date()
+        await this.save()
+
+        if (this.balanceItemId) {
+            // Also update the balance item
+            const balanceItem = await BalanceItem.getByID(this.balanceItemId);
+            if (balanceItem) {
+                await BalanceItem.deleteItems([balanceItem])
             }
         }
     }

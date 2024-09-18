@@ -10,6 +10,8 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { SetupStepUpdater } from '../../../helpers/SetupStepsUpdater';
+import { MembershipCharger } from '../../../helpers/MembershipCharger';
+import { QueueHandler } from '@stamhoofd/queues';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -73,6 +75,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         const updateMembershipMemberIds = new Set<string>()
+        const updateMembershipsForOrganizations = new Set<string>()
 
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
@@ -470,7 +473,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                if (!membership.canDelete()) {
+                if (!membership.canDelete() && !Context.auth.hasPlatformFullAccess()) {
                     throw new SimpleError({
                         code: "invalid_field",
                         message: "Invalid invoice",
@@ -478,8 +481,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                membership.deletedAt = new Date()
-                await membership.save()
+                await membership.doDelete();
+                updateMembershipsForOrganizations.add(membership.organizationId) // can influence free memberships in other members of same organization
                 updateMembershipMemberIds.add(member.id)
             }
 
@@ -494,6 +497,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (updateMembershipMemberIds.has(member.id)) {
                 await member.updateMemberships()
             }
+        }
+
+        if (updateMembershipsForOrganizations.size) {
+            QueueHandler.schedule('update-membership-prices', async () => {
+                for (const id of updateMembershipsForOrganizations) {
+                    await MembershipCharger.updatePrices(id)
+                }
+            }).catch(console.error);
         }
 
         if(shouldUpdateSetupSteps && organization) {

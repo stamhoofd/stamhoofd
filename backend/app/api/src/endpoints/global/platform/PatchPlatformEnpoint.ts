@@ -1,13 +1,15 @@
-import { AutoEncoderPatchType, Decoder, isPatch, isPatchableArray, patchObject } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, Decoder, isPatchableArray, patchObject } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Organization, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct } from "@stamhoofd/structures";
 
 import { SimpleError } from "@simonbackx/simple-errors";
+import { QueueHandler } from "@stamhoofd/queues";
 import { Context } from "../../../helpers/Context";
-import { SetupStepUpdater } from "../../../helpers/SetupStepsUpdater";
-import { PeriodHelper } from "../../../helpers/PeriodHelper";
+import { MembershipCharger } from "../../../helpers/MembershipCharger";
 import { MembershipHelper } from "../../../helpers/MembershipHelper";
+import { PeriodHelper } from "../../../helpers/PeriodHelper";
+import { SetupStepUpdater } from "../../../helpers/SetupStepsUpdater";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -174,7 +176,12 @@ export class PatchPlatformEndpoint extends Endpoint<
         await platform.save();
 
         if (shouldUpdateMemberships) {
-            MembershipHelper.updateAll().catch(console.error)
+            if (!QueueHandler.isRunning('update-membership-prices')) {
+                QueueHandler.schedule('update-membership-prices', async () => {
+                    await MembershipCharger.updatePrices()
+                    await MembershipHelper.updateAll()
+                }).catch(console.error);
+            }
         }
 
         if (shouldMoveToPeriod) {
