@@ -272,7 +272,8 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string|num
     return null;
 }
 
-export type StyledDescription = {text: string; style: string}[]
+export type StyledDescriptionChoice = {id: string; text: string; action: () => void; isSelected: () => boolean};
+export type StyledDescription = {text: string; style: string, choices?: StyledDescriptionChoice[]}[]
 
 export abstract class UIFilter {
     id = uuidv4();

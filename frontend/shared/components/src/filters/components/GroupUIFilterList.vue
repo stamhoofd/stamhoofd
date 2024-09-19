@@ -7,7 +7,13 @@
                 </template>
 
                 <div v-if="!isGroup(child)">
-                    <span v-for="(s, i) in child.styledDescription" :key="i" :class="'styled-description ' + s.style" v-text="s.text" />
+                    <template v-for="(s, i) in child.styledDescription" :key="i">
+                        <span v-if="s.choices?.length" class="button text inline margin-space" :class="s.style" type="button" @click.stop.prevent="$event => showChoices($event, s.choices!)">
+                            <span v-text="getSelectedChoiceText(s.choices)"/>
+                            <span class="icon arrow-down-small" />
+                        </span>
+                        <span v-else class="styled-description" :class="s.style" v-text="s.text"/>
+                    </template>
                 </div>
                 <div v-else>
                     <GroupUIFilterList :filter="child" @click.stop @replace="setFilter(index, child, $event)" />
@@ -43,14 +49,15 @@ import { ComponentWithProperties, useShow } from "@simonbackx/vue-app-navigation
 
 import { computed } from "vue";
 import Dropdown from "../../inputs/Dropdown.vue";
+import { ContextMenu, ContextMenuItem } from "../../overlays/ContextMenu";
 import { GroupUIFilter, GroupUIFilterMode } from "../GroupUIFilter";
-import { UIFilter } from "../UIFilter";
+import { StyledDescriptionChoice, UIFilter } from "../UIFilter";
 import UIFilterEditor from "../UIFilterEditor.vue";
 
 const props = defineProps<{
     filter: GroupUIFilter
 }>();
-const show = useShow()
+const show = useShow();
 
 const emit = defineEmits<{
     replace: [patch: UIFilter|null]
@@ -65,6 +72,25 @@ const draggableFilters = computed({
         emit('replace', clone.flatten());
     }
 })
+
+function getSelectedChoiceText(choices: StyledDescriptionChoice[]) {
+    return choices.find(c => c.isSelected())?.text;
+}
+
+async function showChoices(event: MouseEvent, choices: StyledDescriptionChoice[]) {
+    const menu = new ContextMenu([
+        choices.map(choice => {
+            return new ContextMenuItem({
+                name: choice.text,
+                action: choice.action
+            })
+        })
+    ])
+
+    await menu.show({
+        button: event.currentTarget as HTMLElement
+    })
+}
 
 async function editFilter(index: number, filter: UIFilter) {
     await show({
@@ -196,5 +222,4 @@ function setFilterMode(mode: GroupUIFilterMode, index: number) {
     top: 30px;
     position: absolute;
 }
-
 </style>

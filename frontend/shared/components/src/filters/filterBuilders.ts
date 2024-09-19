@@ -435,7 +435,7 @@ export function useGetOrganizationUIFilterBuilders() {
         if (user?.permissions?.platform !== null) {
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: "Vlagmomenten",
+                    name: "Voltooide vlagmomenten",
                     options: Object.entries(setupStepFilterNameMap).map(
                         ([k, v]) =>
                             new MultipleChoiceUIFilterOption(

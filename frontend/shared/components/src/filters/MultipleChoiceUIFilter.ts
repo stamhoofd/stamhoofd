@@ -3,7 +3,7 @@ import { StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import MultipleChoiceUIFilterView from "./MultipleChoiceUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
+import { StyledDescription, UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 
 export class MultipleChoiceUIFilterOption {
     name: string;
@@ -37,16 +37,35 @@ export class MultipleChoiceUIFilter extends UIFilter {
         })
     }
 
-    get styledDescription() {
+    override get styledDescription(): StyledDescription  {
         return [
             {
                 text: this.builder.name,
                 style: ''
             },
             {
-                text: ' is ',
-                style: 'gray'
-            }, {
+                text: '',
+                style: '',
+                choices: [
+                    {
+                        id: 'is',
+                        text: 'is',
+                        action: () => {
+                            this.isInverted = false;
+                        },
+                        isSelected: () => !this.isInverted
+                    },
+                    {
+                        id: 'is not',
+                        text: 'is niet',
+                        action: () => {
+                            this.isInverted = true;
+                        },
+                        isSelected: () => this.isInverted
+                    }
+                ]
+            },
+            {
                 text: Formatter.joinLast(this.options.map(o => o.name), ', ', ' of '),
                 style: ''
             }

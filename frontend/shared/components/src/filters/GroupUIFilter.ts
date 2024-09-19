@@ -2,7 +2,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { StamhoofdFilter } from "@stamhoofd/structures";
 
 import GroupUIFilterView from "./GroupUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
+import { StyledDescription, UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 import { UnknownFilterBuilder } from "./UnknownUIFilter";
 
 export enum GroupUIFilterMode {
@@ -78,7 +78,7 @@ export class GroupUIFilter extends UIFilter {
         })
     }
 
-    get styledDescription() {
+    override get styledDescription(): StyledDescription {
         const array = this.filters.map(b => b.styledDescription)
         const last = array.pop()
         
