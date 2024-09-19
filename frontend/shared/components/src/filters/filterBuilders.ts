@@ -94,6 +94,7 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
         all.push(
             new MultipleChoiceFilterBuilder({
                 name: 'Functies',
+                isSubjectPlural: true,
                 options: platform.config.responsibilities.map(responsibility => {
                     return new MultipleChoiceUIFilterOption(responsibility.name, responsibility.id);
                 }),
@@ -113,6 +114,7 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
         all.push(
             new MultipleChoiceFilterBuilder({
                 name: 'Tags',
+                isSubjectPlural: true,
                 options: platform.config.tags.map(tag => {
                     return new MultipleChoiceUIFilterOption(tag.name, tag.id);
                 }),
@@ -436,6 +438,7 @@ export function useGetOrganizationUIFilterBuilders() {
             all.push(
                 new MultipleChoiceFilterBuilder({
                     name: "Voltooide vlagmomenten",
+                    isSubjectPlural: true,
                     mode: MultipleChoiceUIFilterMode.And,
                     options: Object.entries(setupStepFilterNameMap).map(
                         ([k, v]) =>
