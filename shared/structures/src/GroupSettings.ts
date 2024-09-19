@@ -270,6 +270,9 @@ export class GroupSettings extends AutoEncoder {
         // Determine price
         for (const price of this.prices) {
             if (!price.startDate || price.startDate <= date) {
+                if (foundPrice && foundPrice.startDate && (!price.startDate || price.startDate < foundPrice.startDate)) {
+                    continue;
+                }
                 foundPrice = price
             }
         }

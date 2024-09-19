@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <div v-for="priceGroup in prices" :key="priceGroup.id" class="container">
+        <div v-for="priceGroup in sortedPrices" :key="priceGroup.id" class="container">
             <hr>
             <h2 v-if="!priceGroup.startDate">
                 Standaard tarief
@@ -147,6 +147,18 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
 
     get enableFinancialSupport() {
         return (this.patchedOrganization ?? OrganizationManager.organization).meta.recordsConfiguration.financialSupport !== null
+    }
+
+    get sortedPrices() {
+        return this.prices.slice().sort((a, b) => {
+            if (a.startDate === null) {
+                return -1
+            }
+            if (b.startDate === null) {
+                return 1
+            }
+            return a.startDate.getTime() - b.startDate.getTime()
+        })
     }
 
     get canRegisterMultipleGroups() {
