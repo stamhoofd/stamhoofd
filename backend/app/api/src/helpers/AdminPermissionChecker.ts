@@ -952,12 +952,9 @@ export class AdminPermissionChecker {
         const isUserManager = this.isUserManager(member)
         if (isUserManager) {
             // For the user manager, we don't delete data, because when registering a new member, it doesn't have any organizations yet...
-
-            // Notes are not visible for the member.
-            data.details.notes = null;
-
             if (!(await this.canAccessMember(member, PermissionLevel.Full))) {
                 data.details.securityCode = null;
+                data.details.notes = null;
             }
 
             return data;
@@ -1065,7 +1062,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (hasNotes && isUserManager) {
+        if (hasNotes && isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full))) {
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'Cannot edit notes',

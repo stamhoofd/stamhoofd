@@ -754,6 +754,11 @@ export class MemberDetails extends AutoEncoder {
                 this.unverifiedAddresses.push(address)
             }
         }
+
+        // Notes
+        if (other.notes) {
+            this.notes = (this.notes ? (this.notes + '\n') : '') + other.notes
+        }
     }
 
     getEmailReplacements() {
