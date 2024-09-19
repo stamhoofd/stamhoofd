@@ -475,7 +475,43 @@ export function useGetOrganizationUIFilterBuilders() {
                             },
                         };
                     },
-                }),
+                    unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter|null => {
+                        if(typeof f !== 'object') return null
+
+                        const elemMatch = (f as any).flagMoments?.$elemMatch;
+                        if(!elemMatch) return null
+
+                        const periodId = elemMatch.periodId?.$eq;
+                        if(periodId !== platform.value.period.id) return null
+
+                        const enumValues = Object.values(SetupStepType).filter(x => isNaN(Number(x)));
+                        const stringifiedValueToMatch = JSON.stringify({
+                            reviewedAt: {$neq: null},
+                            complete: {$eq: 1}
+                        });
+
+                        const results: SetupStepType[] = [];
+
+                        for(const [key, value] of Object.entries(elemMatch)) {
+                            if(enumValues.includes(key as SetupStepType)) {
+                                if(JSON.stringify(value) === stringifiedValueToMatch) {
+                                    results.push(key as SetupStepType)
+                                } else {
+                                    return null;
+                                }
+                            } else if(key !== 'periodId') {
+                                return null
+                            }
+                        }
+
+                        if(results.length) {
+                            return results;
+                        }
+                        
+                        return null;
+                    }
+                }
+                ),
             );
         }
 
