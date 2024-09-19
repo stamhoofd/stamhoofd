@@ -57,14 +57,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
     }
 
     override get styledDescription(): StyledDescription  {
-        const lastJoinWord =
-            this.mode === MultipleChoiceUIFilterMode.Or
-                ? this.isInverted
-                    ? "en"
-                    : "of"
-                : this.isInverted
-                    ? "of"
-                    : "en";
+        const lastJoinWord = this.mode === MultipleChoiceUIFilterMode.Or ? 'of' : 'en';
 
         return [
             {
