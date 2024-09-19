@@ -18,8 +18,8 @@ export class StringUIFilter extends UIFilter {
     value = ""
     mode: StringFilterMode = StringFilterMode.Equals
 
-    constructor(data: Partial<StringUIFilter>) {
-        super(data)
+    constructor(data: Partial<StringUIFilter>, options: {isInverted?: boolean} = {}) {
+        super(data, options)
         Object.assign(this, data);
     }
 
@@ -242,10 +242,10 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
         return null;
     }
     
-    create(): StringUIFilter {
+    create(options: {isInverted?: boolean} = {}): StringUIFilter {
         return new StringUIFilter({
             builder: this,
             value: ''
-        })
+        }, options)
     }
 }

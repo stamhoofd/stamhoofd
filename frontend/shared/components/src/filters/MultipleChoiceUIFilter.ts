@@ -99,9 +99,9 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
         return null;
     }
     
-    create(): MultipleChoiceUIFilter {
+    create(options: {isInverted?: boolean} = {}): MultipleChoiceUIFilter {
         return new MultipleChoiceUIFilter({
             builder: this
-        })
+        }, options)
     }
 }

@@ -122,10 +122,10 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
         this.wrapper = data.wrapper
     }
 
-    create(): GroupUIFilter {
+    create(options: {isInverted?: boolean} = {}): GroupUIFilter {
         return new GroupUIFilter({
             builder: this
-        })
+        }, options)
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
