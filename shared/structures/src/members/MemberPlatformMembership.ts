@@ -35,7 +35,7 @@ export class MemberPlatformMembership extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     priceWithoutDiscount = 0;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 336 })
     freeAmount = 0;
 
     @field({ decoder: BooleanDecoder })
