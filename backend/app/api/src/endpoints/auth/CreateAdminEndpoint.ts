@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { PasswordToken, sendEmailTemplate, User } from '@stamhoofd/models';
+import { PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
 import { EmailTemplateType, Recipient, Replacement, UserPermissions, User as UserStruct, UserWithMembers } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
@@ -100,9 +100,10 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const dateTime = Formatter.dateTime(validUntil)
         const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(admin, organization, request.i18n, validUntil)
+        const platformName =  ((await Platform.getSharedStruct()).config.name)
         
-        const name = organization?.name ?? request.i18n.t("shared.platformName")
-        const what = organization ? `de vereniging ${name} op ${request.i18n.t("shared.platformName")}` : `${request.i18n.t("shared.platformName")}`
+        const name = organization?.name ?? platformName
+        const what = organization ? `de vereniging ${name} op ${platformName}` : platformName
 
         const emailTo = admin.getEmailTo();
         const email: string = typeof emailTo === 'string' ? emailTo : emailTo[0]?.email;
