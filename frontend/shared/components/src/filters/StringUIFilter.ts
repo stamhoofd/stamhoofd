@@ -2,7 +2,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { StamhoofdFilter } from "@stamhoofd/structures";
 
 import StringUIFilterView from "./StringUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
+import { StyledDescriptionChoice, UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 
 export enum StringFilterMode {
     Contains = "Contains",
@@ -105,14 +105,7 @@ export class StringUIFilter extends UIFilter {
     }
 
     get combinationWord(): string {
-        switch (this.mode) {
-            case StringFilterMode.Contains: return 'bevat';
-            case StringFilterMode.NotContains: return 'bevat niet';
-            case StringFilterMode.Equals: return 'is gelijk aan';
-            case StringFilterMode.NotEquals: return 'is niet gelijk aan';
-            case StringFilterMode.Empty: return 'is leeg';
-            case StringFilterMode.NotEmpty: return 'is niet leeg';
-        }
+        return this.createCominationWord(this.mode);
     }
 
     get ignoreValue(): boolean {
@@ -124,6 +117,16 @@ export class StringUIFilter extends UIFilter {
     }
 
     get styledDescription() {
+        const choices: StyledDescriptionChoice[] = Object.values(StringFilterMode).filter(x => isNaN(Number(x)))
+            .map(mode => {
+                return {
+                    id: mode,
+                    text: this.createCominationWord(mode),
+                    action: () => this.mode = mode,
+                    isSelected: () => this.mode === mode
+                }
+            });
+
         if (this.ignoreValue) {
             return [
                 {
@@ -132,7 +135,8 @@ export class StringUIFilter extends UIFilter {
                 },
                 {
                     text: ' '+ this.combinationWord,
-                    style: 'gray'
+                    style: 'gray',
+                    choices
                 }
             ]
         }
@@ -144,12 +148,25 @@ export class StringUIFilter extends UIFilter {
             },
             {
                 text: ' '+ this.combinationWord +' ',
-                style: 'gray'
-            }, {
+                style: 'gray',
+                choices
+            },
+            {
                 text: this.value,
                 style: ''
             }
         ]
+    }
+
+    private createCominationWord(mode: StringFilterMode) {
+        switch (mode) {
+            case StringFilterMode.Contains: return 'bevat';
+            case StringFilterMode.NotContains: return 'bevat niet';
+            case StringFilterMode.Equals: return 'is gelijk aan';
+            case StringFilterMode.NotEquals: return 'is niet gelijk aan';
+            case StringFilterMode.Empty: return 'is leeg';
+            case StringFilterMode.NotEmpty: return 'is niet leeg';
+        }
     }
 }
 
