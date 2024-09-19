@@ -22,13 +22,46 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
     fromFilter(filter: StamhoofdFilter): UIFilter|null
 }
 
-export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): {match: boolean, markerValue?: StamhoofdFilter|undefined, leftOver?: StamhoofdFilter} {
+export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): {match: boolean, markerValue?: StamhoofdFilter|undefined, leftOver?: StamhoofdFilter, isInverted?: boolean} {
     if (builder.wrapper) {
-        return unwrapFilter(filter, builder.wrapper);
+        const result = unwrapFilter(filter, builder.wrapper);
+
+        if(!result.match) {
+            const invertedFilter = UIFilter.invertFilter(filter);
+
+            if(invertedFilter) {
+                const invertedResult = unwrapFilter(invertedFilter, builder.wrapper);
+
+                if(invertedResult.match) {
+                    return {
+                        ...invertedResult,
+                        isInverted: true
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     if (builder.unwrapFilter) {
         const r = builder.unwrapFilter(filter);
+
+        if(r === null) {
+            const invertedFilter = UIFilter.invertFilter(filter);
+
+            if(invertedFilter) {
+                const invertedResult = builder.unwrapFilter(invertedFilter)
+                if(invertedResult !== null) {
+                    return {
+                        match: true,
+                        markerValue: invertedResult,
+                        isInverted: true
+                    }
+                }
+            }
+        }
+
         return {
             match: true,
             markerValue: r
@@ -319,7 +352,7 @@ export abstract class UIFilter {
         return b
     }
 
-    private static invertFilter(filter: StamhoofdFilter | null) {
+    static invertFilter(filter: StamhoofdFilter | null) {
         if(filter === null) {
             return null;
         }

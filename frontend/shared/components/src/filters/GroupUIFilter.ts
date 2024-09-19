@@ -190,6 +190,9 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
         const groupFilter = this.create();
         groupFilter.filters = subfilters;
         groupFilter.mode = mode;
+        if(result.isInverted) {
+            groupFilter.isInverted = true;
+        }
         return groupFilter;
     }
 }

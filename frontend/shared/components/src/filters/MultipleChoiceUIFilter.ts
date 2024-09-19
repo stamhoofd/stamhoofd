@@ -53,7 +53,14 @@ export class MultipleChoiceUIFilter extends UIFilter {
 
     override get styledDescription(): StyledDescription  {
         const isPlural = this.options.length > 1;
-        const lastJoinWord = this.mode === MultipleChoiceUIFilterMode.Or ? 'of' : 'en'
+        const lastJoinWord =
+            this.mode === MultipleChoiceUIFilterMode.Or
+                ? this.isInverted
+                    ? "en"
+                    : "of"
+                : this.isInverted
+                    ? "of"
+                    : "en";
 
         return [
             {
@@ -131,7 +138,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
             if (options.length === response.length) {
                 const uiFilter = new MultipleChoiceUIFilter({
                     builder: this
-                }, {mode: this.mode})
+                }, {mode: this.mode, isInverted: match.isInverted})
                 uiFilter.options = options;
 
                 return uiFilter;

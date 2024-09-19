@@ -186,7 +186,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const {markerValue: unwrapped} = unwrapFilterForBuilder(this, filter)
+        const {markerValue: unwrapped, isInverted} = unwrapFilterForBuilder(this, filter)
         
         if (unwrapped === null || unwrapped === undefined) {
             return null;
@@ -203,7 +203,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
                 builder: this,
                 value: contains,
                 mode: StringFilterMode.Contains
-            })
+            }, {isInverted})
         }
 
         const notContains = unwrapFilterByPath(unwrapped, ['$not', this.key, '$contains']);
@@ -213,7 +213,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
                 builder: this,
                 value: notContains,
                 mode: StringFilterMode.NotContains
-            })
+            }, {isInverted})
         }
 
         const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']);
@@ -223,7 +223,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
                 builder: this,
                 value: equals,
                 mode: StringFilterMode.Equals
-            })
+            }, {isInverted})
         }
 
         const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']);
@@ -233,7 +233,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
                 builder: this,
                 value: notEquals,
                 mode: StringFilterMode.NotEquals
-            })
+            }, {isInverted})
         }
 
         const empty = unwrapFilterByPath(unwrapped, ['$or', 0, this.key, '$eq']);
@@ -243,7 +243,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
                 builder: this,
                 value: '',
                 mode: StringFilterMode.Empty
-            })
+            }, {isInverted})
         }
 
         const notEmpty = unwrapFilterByPath(unwrapped, ['$not', '$or', 0, this.key, '$eq']);
@@ -253,7 +253,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
                 builder: this,
                 value: '',
                 mode: StringFilterMode.NotEmpty
-            })
+            }, {isInverted})
         }
 
         return null;
