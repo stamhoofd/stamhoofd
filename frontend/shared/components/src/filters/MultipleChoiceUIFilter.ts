@@ -15,9 +15,23 @@ export class MultipleChoiceUIFilterOption {
     }
 }
 
+export enum MultipleChoiceUIFilterMode {
+    And = 'And',
+    Or = 'Or'
+}
+
 export class MultipleChoiceUIFilter extends UIFilter {
     builder: MultipleChoiceFilterBuilder
     options: MultipleChoiceUIFilterOption[] = []
+    mode: MultipleChoiceUIFilterMode = MultipleChoiceUIFilterMode.Or;
+
+    constructor(data: Partial<UIFilter>, options: {isInverted?: boolean, mode?: MultipleChoiceUIFilterMode} = {}) {
+        super(data, options);
+
+        if(options.mode) {
+            this.mode = options.mode;
+        }
+    }
 
     doBuild(): StamhoofdFilter {
         return this.options.map(o => o.value)
@@ -38,6 +52,9 @@ export class MultipleChoiceUIFilter extends UIFilter {
     }
 
     override get styledDescription(): StyledDescription  {
+        const isPlural = this.options.length > 1;
+        const lastJoinWord = this.mode === MultipleChoiceUIFilterMode.Or ? 'of' : 'en'
+
         return [
             {
                 text: this.builder.name,
@@ -49,7 +66,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                 choices: [
                     {
                         id: 'is',
-                        text: 'is',
+                        text: isPlural ? 'zijn' : 'is',
                         action: () => {
                             this.isInverted = false;
                         },
@@ -57,7 +74,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                     },
                     {
                         id: 'is not',
-                        text: 'is niet',
+                        text: isPlural ? 'zijn niet' : 'is niet',
                         action: () => {
                             this.isInverted = true;
                         },
@@ -66,7 +83,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                 ]
             },
             {
-                text: Formatter.joinLast(this.options.map(o => o.name), ', ', ' of '),
+                text: Formatter.joinLast(this.options.map(o => o.name), ', ', ` ${lastJoinWord} `),
                 style: ''
             }
         ]
@@ -78,20 +95,26 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
     options: MultipleChoiceUIFilterOption[] = []
     wrapper?: WrapperFilter;
     wrapFilter?: UIFilterWrapper | null | undefined;
-    unwrapFilter?: UIFilterUnwrapper | null | undefined
+    unwrapFilter?: UIFilterUnwrapper | null | undefined;
+    mode: MultipleChoiceUIFilterMode = MultipleChoiceUIFilterMode.Or;
 
     constructor(data: {
         name: string, 
         options: MultipleChoiceUIFilterOption[], 
         wrapper?: WrapperFilter,
         wrapFilter?: UIFilterWrapper | null | undefined,
-        unwrapFilter?: UIFilterUnwrapper | null | undefined
+        unwrapFilter?: UIFilterUnwrapper | null | undefined,
+        mode?: MultipleChoiceUIFilterMode
     }) {
         this.name = data.name;
         this.options = data.options;
         this.wrapper = data.wrapper;
         this.wrapFilter = data.wrapFilter
         this.unwrapFilter = data.unwrapFilter
+
+        if(data.mode) {
+            this.mode = data.mode;
+        }
     }
     
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
@@ -108,7 +131,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
             if (options.length === response.length) {
                 const uiFilter = new MultipleChoiceUIFilter({
                     builder: this
-                })
+                }, {mode: this.mode})
                 uiFilter.options = options;
 
                 return uiFilter;
@@ -121,6 +144,6 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
     create(options: {isInverted?: boolean} = {}): MultipleChoiceUIFilter {
         return new MultipleChoiceUIFilter({
             builder: this
-        }, options)
+        }, {...options, mode: this.mode})
     }
 }

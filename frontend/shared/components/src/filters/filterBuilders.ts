@@ -4,7 +4,7 @@ import { Formatter } from "@stamhoofd/utility";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
 import { usePlatform } from "../hooks";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
 import { NumberFilterBuilder } from "./NumberUIFilter";
 import { StringFilterBuilder } from "./StringUIFilter";
 import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from "./UIFilter";
@@ -436,6 +436,7 @@ export function useGetOrganizationUIFilterBuilders() {
             all.push(
                 new MultipleChoiceFilterBuilder({
                     name: "Voltooide vlagmomenten",
+                    mode: MultipleChoiceUIFilterMode.And,
                     options: Object.entries(setupStepFilterNameMap).map(
                         ([k, v]) =>
                             new MultipleChoiceUIFilterOption(
