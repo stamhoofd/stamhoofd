@@ -41,7 +41,7 @@ export class MemberUserSyncerStatic {
             
             // Link parents and unverified emails
             // Now we add the responsibility permissions to the parent if there are no userEmails
-            await this.linkUser(email, member, userEmails.length > 0, userEmails.length > 0)
+            await this.linkUser(email, member, userEmails.length > 0 || !member.details.unverifiedEmails.includes(email) || member.details.defaultAge < 16, true)
         }
 
         if (unlinkUsers && !member.details.parentsHaveAccess) {
@@ -63,7 +63,7 @@ export class MemberUserSyncerStatic {
                         await this.unlinkUser(user, member)
                     } else {
                         // Make sure only linked as a parent, not as user self
-                        // This makes sure we don't inherit permissions and aren't counted as 'begin' the member
+                        // This makes sure we don't inherit permissions and aren't counted as 'being' the member
                         await this.linkUser(user.email, member, true)
                     }
                 }
