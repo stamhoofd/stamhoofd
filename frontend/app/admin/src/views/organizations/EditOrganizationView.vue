@@ -50,10 +50,10 @@
 
         <template v-if="auth.hasFullPlatformAccess()">
             <hr>
-            <h2>{{ $t('Actief') }}</h2>
+            <h2>{{ $t('97475ade-4e97-4989-b2f4-fecd534db3c4') }}</h2>
             
             <STList>
-                <CheckboxListItem v-model="active" :label="$t('Actief')" description="Leden kunnen geen inactieve groepen vinden of erbij inloggen."/>
+                <CheckboxListItem v-model="active" :label="$t('97475ade-4e97-4989-b2f4-fecd534db3c4')" description="Leden kunnen geen inactieve groepen vinden of erbij inloggen."/>
             </STList>
         </template>
     </SaveView>

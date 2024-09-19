@@ -495,7 +495,7 @@ export class TicketBuilder {
         this.document.font('Metropolis-Medium');
         this.document.fillColor(COLOR_GRAY);
 
-        const shareText = I18nController.i18n.$t("Ticketverkoop via Stamhoofd")
+        const shareText = I18nController.i18n.$t("cd6e3548-aea1-4f74-9c66-b1fa43de6438")
         const expectedHeight = this.document.heightOfString(shareText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 }) - 2
         height = Math.max(height, qrHeight - expectedHeight)
 
@@ -503,7 +503,7 @@ export class TicketBuilder {
             this.document.text("Ticketverkoop via ", PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 , lineGap: 2, paragraphGap: 2, continued: true })
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
-            this.document.text(I18nController.i18n.$t("Stamhoofd"), { continued: false, link: 'https://'+LocalizedDomains.marketing })
+            this.document.text(I18nController.i18n.$t("68914509-aa54-40c7-9f53-7b8a02149198"), { continued: false, link: 'https://'+LocalizedDomains.marketing })
         }
 
         height += expectedHeight + 2
