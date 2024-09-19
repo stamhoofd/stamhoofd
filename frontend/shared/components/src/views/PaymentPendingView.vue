@@ -68,6 +68,9 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
     @Prop({ required: true })
         finishedHandler: (payment: PaymentGeneral | null) => void
+    
+    @Prop({ required: false, default: null })
+        errorHandler: (error: unknown) => Promise<void> | void
 
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 200);
@@ -121,7 +124,11 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
                     return;
                 }
                 this.didFinish = true
-                this.finishedHandler.call(this, this.payment);
+                if (this.errorHandler) {
+                    this.errorHandler.call(this, e)
+                } else {
+                    this.finishedHandler.call(this, this.payment);
+                }
             })
     }
 

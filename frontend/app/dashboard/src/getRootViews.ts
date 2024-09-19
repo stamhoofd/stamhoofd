@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AppType, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, onCheckRoutes, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
+import { AccountSwitcher, AppType, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, Country, Organization } from '@stamhoofd/structures';
@@ -9,12 +9,13 @@ import { computed, markRaw, ref } from 'vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
+import { useGlobalRoutes } from './useGlobalRoutes';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
 }
 
-export async function wrapContext(context: SessionContext, app: AppType|'auto', component: ComponentWithProperties, options?: {ownDomain: boolean}) {
+export async function wrapContext(context: SessionContext, app: AppType|'auto', component: ComponentWithProperties, options?: {ownDomain?: boolean, initialPresents?: PushOptions[]}) {
     const platformManager = await PlatformManager.createFromCache(context, true)
     const $memberManager = new MemberManager(context, platformManager.$platform);
     await I18nController.loadDefault(context, Country.Belgium, "nl", context?.organization?.address?.country)
@@ -34,7 +35,12 @@ export async function wrapContext(context: SessionContext, app: AppType|'auto', 
             },
             stamhoofd_app: app
         }),
-        root: component
+        root: wrapWithModalStack(new ComponentWithProperties(CustomHooksContainer, {
+            root: component,
+            hooks: () => {
+                useGlobalRoutes()
+            }
+        }), options?.initialPresents)
     });
 }
 
@@ -164,7 +170,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
         // So return the login view, that will call getScopedAutoRoot again after login
         const reactiveSession = session
 
-        return await wrapContext(reactiveSession, 'auto', wrapWithModalStack(
+        return await wrapContext(reactiveSession, 'auto', 
             new ComponentWithProperties(AuthenticatedView, {
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
@@ -183,7 +189,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
                 }),
                 loginRoot: wrapWithModalStack(getLoginRoot()),
             })
-        ))
+        )
     }
 
     
@@ -329,7 +335,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
     //     }).catch(console.error)
     // }
 
-    return wrapContext(reactiveSession, 'dashboard', wrapWithModalStack(
+    return wrapContext(reactiveSession, 'dashboard', 
         new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {
@@ -376,7 +382,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
             ),
             loginRoot: wrapWithModalStack(getNonAutoLoginRoot(reactiveSession, options)),
             noPermissionsRoot: getNoPermissionsView(),
-        }), 
-        options.initialPresents
-    ));
+        }),
+        options
+    );
 }

@@ -7,15 +7,15 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, NavigationMixin, PushOptions } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
-import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PaymentPendingView, PromiseView, RegistrationSuccessView, ReplaceRootEventBus, Toast, ToastBox, uriToApp } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox, uriToApp } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { AppManager, LoginHelper, NetworkManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, NetworkManager, SessionContext, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
-import { EmailAddressSettings, PaymentGeneral, PaymentStatus, Platform, Token } from '@stamhoofd/structures';
-import { markRaw, nextTick, onMounted, Raw, reactive, Ref, ref } from 'vue';
-import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from "./getRootViews";
+import { EmailAddressSettings, Platform } from '@stamhoofd/structures';
+import { nextTick, onMounted, reactive, Ref, ref } from 'vue';
+import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRootFromUrl } from "./getRootViews";
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent>|null>;
 HistoryManager.activate();
@@ -76,40 +76,6 @@ async function checkGlobalRoutes() {
     const queryString = UrlHelper.initial.getSearchParams()
     console.log('check global routes', parts, queryString, currentPath)
 
-    if (parts.length > 0 && parts[0] == 'reset-password') {
-        UrlHelper.shared.clear()
-
-        // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
-
-        const token = queryString.get('token');
-        const session = parts[1] ? (await SessionContext.createFrom({organizationId: parts[1]})) : new SessionContext(null);
-        const platformManager = await PlatformManager.createFromCache(session, false)
-        modalStack.value.present({
-            adjustHistory: false,
-            animated: false,
-            components: [
-                new ComponentWithProperties(ContextProvider, {
-                    context: markRaw({
-                        $context: session,
-                        $platformManager: platformManager,
-                        reactive_navigation_url: currentPath,
-                        stamhoofd_app: 'auto'
-                    }),
-                    root: new ComponentWithProperties(ForgotPasswordResetView, { token })
-                })
-            ],
-            modalDisplayStyle: "popup",
-            checkRoutes: true
-        });
-    }
-
-    if (parts.length >= 1 && parts[0] == 'login' && queryString.get("refresh_token") && queryString.get("organization_id")) {
-        const organizationId = queryString.get("organization_id")!
-        const refreshToken = queryString.get("refresh_token")!
-        
-        await loginWithToken(organizationId, refreshToken)
-    }
-
     if (parts.length == 1 && parts[0] == 'unsubscribe') {
         const id = queryString.get('id')
         const token = queryString.get('token')
@@ -140,73 +106,6 @@ async function checkGlobalRoutes() {
                 toast.hide()
                 CenteredMessage.fromError(e).addCloseButton().show()
             }
-        }
-    }
-
-    if (queryString.get('paymentId')) {
-        const paymentId = queryString.get('paymentId')
-        const organizationId = queryString.get('organizationId')
-            
-        if (paymentId) {
-            const cancel = queryString.get("cancel") === "true"
-            const toast = new Toast("Betaling ophalen...", "spinner").setHide(null).show()
-            let session: SessionContext
-            
-            try {
-                session = reactive((organizationId ? (await SessionContext.createFrom({organizationId})) : new SessionContext(null)) as Raw<SessionContext>) as SessionContext;
-                await session.loadFromStorage()
-            } finally {
-                toast.hide()
-            }
-            const platformManager = await PlatformManager.createFromCache(session, false)
-
-            modalStack.value.present({
-                adjustHistory: false,
-                animated: false,
-                force: true,
-                components: [
-                    new ComponentWithProperties(ContextProvider, {
-                        context: markRaw({
-                            $context: session,
-                            $platformManager: platformManager,
-                            reactive_navigation_url: currentPath,
-                            stamhoofd_app: 'auto'
-                        }),
-                        root: new ComponentWithProperties(NavigationController, {
-                            root: new ComponentWithProperties(PaymentPendingView, { 
-                                server: session.authenticatedServer, 
-                                paymentId,
-                                cancel,
-                                finishedHandler: async function(this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
-                                    if (payment && payment.status == PaymentStatus.Succeeded) {
-                                        // TODO: fetch appropriate data for this payment!
-                                        
-                                        if (payment.memberNames.length) {
-                                            await this.show({
-                                                components: [
-                                                    new ComponentWithProperties(RegistrationSuccessView, {
-                                                        registrations: [] // todo: fetch registrations
-                                                    })
-                                                ], 
-                                                replace: 100, // autocorrects to all
-                                                force: true
-                                            })
-                                        } else {
-                                            await this.dismiss({force: true})
-                                            new CenteredMessage("Betaling voltooid", "De betaling werd voltooid.").addCloseButton().show()
-                                        }
-                                    } else {
-                                        await this.dismiss({force: true})
-                                        new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton().show()
-                                    }
-                                } 
-                            })
-                        })
-                    })
-                    
-                ],
-                modalDisplayStyle: "popup"
-            })
         }
     }
 }
@@ -314,34 +213,6 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
     }
 }
 
-/**
- * Login at a given organization, with the given refresh token
- */
-async function loginWithToken(organizationId: string, refreshToken: string) {
-    // TODO: add security toggle in system configuration to disable this feature
-    if (!await CenteredMessage.confirm("Ben je zeker dat je wilt inloggen via deze link?", "Inloggen", "Klik op annuleren als je niet weet waar dit over gaat.")) {
-        return
-    }
-    try {
-        const session = await SessionManager.getContextForOrganization(organizationId)
-
-        if (session.user) {
-            // Clear user
-            session.user = null;
-        }
-
-        await session.setToken(new Token({
-            accessToken: "",
-            refreshToken,
-            accessTokenValidUntil: new Date(0)
-        }))
-        await SessionManager.prepareSessionForUsage(session, false)
-        await ReplaceRootEventBus.sendEvent("replace", await getScopedDashboardRoot(session))
-    } catch (e) {
-        console.error(e)
-        Toast.fromError(e).show()
-    }
-}
 </script>
 
 <style lang="scss">

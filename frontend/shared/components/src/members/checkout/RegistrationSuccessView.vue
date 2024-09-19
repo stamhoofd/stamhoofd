@@ -14,7 +14,7 @@
                 </p>
 
                 <p v-else>
-                    We houden je op de hoogte.
+                    Jouw betaling is gelukt. 
                 </p>
             </template>
             <p v-else>
@@ -36,31 +36,50 @@
 <script lang="ts" setup>
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { STToolbar, useContext } from '@stamhoofd/components';
-import { GroupType, RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
+import { useMemberManager } from '@stamhoofd/networking';
+import { BalanceItemRelationType, GroupType, PaymentGeneral, RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted } from 'vue';
 
 const props = withDefaults(
     defineProps<{
         checkout?: RegisterCheckout|null,
-        registrations: RegistrationWithMember[]
+        registrations: RegistrationWithMember[],
+        payment?: PaymentGeneral|null,
     }>(),
     {
         checkout: null,
+        payment: null,
     }
 );
 const dismiss = useDismiss()
 const context = useContext()
+const memberManager = useMemberManager()
 
 onMounted(() => {
     props.checkout?.clear()
+    if (!props.checkout) {
+        memberManager.family.checkout.clear()
+    }
 
     // Force reload
     context.value.updateData(true, false, false).catch(console.error)
 })
 
-const names = Formatter.uniqueArray(props.registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.firstName ?? "?"))
+let names = Formatter.uniqueArray(props.registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.firstName ?? "?"))
 const waitingListNames = Formatter.uniqueArray(props.registrations.filter(r => r.group.type === GroupType.WaitingList).map(r => r.member.firstName ?? "?"))
+
+if (props.payment && names.length === 0 && waitingListNames.length === 0) {
+    names = Formatter.uniqueArray(
+        props.payment.balanceItemPayments.flatMap(p => {
+            if (!p.balanceItem.relations.get(BalanceItemRelationType.Group)) {
+                return []
+            }
+            const id = p.balanceItem.relations.get(BalanceItemRelationType.Member)?.name
+            return id ? [id] : []
+        })
+    )
+}
 
 const title = computed(() => {
     let t = "Hoera! "
@@ -88,6 +107,11 @@ const title = computed(() => {
             t += waitingListNames.join('')+" is ingeschreven op de wachtlijst"
         }
     }
+
+    if (names.length === 0 && waitingListNames.length === 0) {
+        t += "Gelukt!"
+    }
+
     return t
 });
 

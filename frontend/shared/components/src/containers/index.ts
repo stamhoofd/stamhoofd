@@ -9,4 +9,6 @@ export { default as TabBarController } from "./TabBarController.vue"
 export { default as JumpToContainer } from "./JumpToContainer.vue"
 export { default as ExternalOrganizationContainer } from "./ExternalOrganizationContainer.vue"
 export { default as CoverImageContainer } from "./CoverImageContainer.vue"
+export { default as CustomHooksContainer } from "./CustomHooksContainer.vue"
+
 export * from "./TabBarItem"

@@ -43,7 +43,7 @@ export class CenteredMessage {
         this.type = type
     }
 
-    static fromError(errors: Error) {
+    static fromError(errors: unknown) {
         let simpleErrors: SimpleErrors
         if (isSimpleError(errors)) {
             simpleErrors = new SimpleErrors(errors)
@@ -52,7 +52,7 @@ export class CenteredMessage {
         } else {
             simpleErrors = new SimpleErrors(new SimpleError({
                 code: "unknown_error",
-                message: errors.message
+                message: (errors as any).message
             }))
         }
 

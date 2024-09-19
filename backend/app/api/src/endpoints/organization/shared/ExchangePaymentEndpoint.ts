@@ -46,7 +46,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope()
+        const organization = await Context.setOptionalOrganizationScope()
         if (!request.query.exchange) {
             await Context.authenticate()
         }
@@ -152,13 +152,24 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     /**
      * ID of payment is needed because of race conditions (need to fetch payment in a race condition save queue)
      */
-    static async pollStatus(paymentId: string, organization: Organization, cancel = false): Promise<Payment | undefined> {
+    static async pollStatus(paymentId: string, org: Organization|null, cancel = false): Promise<Payment | undefined> {
         // Prevent polling the same payment multiple times at the same time: create a queue to prevent races
         QueueHandler.cancel("payments/"+paymentId); // Prevent creating more than one queue item for the same payment
         return await QueueHandler.schedule("payments/"+paymentId, async () => {
             // Get a new copy of the payment (is required to prevent concurreny bugs)
             const payment = await Payment.getByID(paymentId)
             if (!payment) {
+                return
+            }
+
+            if (!payment.organizationId) {
+                console.error('Payment without organization not supported', payment.id)
+                return
+            }
+
+            const organization = org ?? await Organization.getByID(payment.organizationId)
+            if (!organization) {
+                console.error('Organization not found for payment', payment.id)
                 return
             }
 
