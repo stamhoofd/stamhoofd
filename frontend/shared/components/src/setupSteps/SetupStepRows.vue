@@ -13,7 +13,11 @@ import { SetupSteps, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import SetupStepRow from './SetupStepRow.vue';
 
-const props = defineProps<{ steps: SetupSteps, listType: 'review' | 'todo' }>();
+const props = defineProps<{
+    steps: SetupSteps,
+    listType: 'review' | 'todo'
+}>();
+
 const emits = defineEmits<{(e: 'select', setupStepType: SetupStepType): void}>();
 
 const $steps = computed(() => props.steps.getAll() ?? []);

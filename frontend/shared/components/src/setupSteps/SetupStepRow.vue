@@ -29,7 +29,11 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
-const props = defineProps<{setupStepType: SetupStepType, step: SetupStep, listType: 'review' | 'todo'}>();
+const props = defineProps<{
+    setupStepType: SetupStepType,
+    step: SetupStep,
+    listType: 'review' | 'todo'
+}>();
 
 const setupStepTranslations = useSetupStepTranslations();
 const $t = useTranslate();
