@@ -466,9 +466,7 @@ export function useGetOrganizationUIFilterBuilders() {
                                     ...Object.fromEntries(
                                         Object.values(SetupStepType)
                                             .filter(
-                                                (x) =>
-                                                    isNaN(Number(x)) &&
-                                                    choices.includes(x),
+                                                (x) => choices.includes(x),
                                             )
                                             .map((setupStep) => {
                                                 return [
@@ -495,7 +493,7 @@ export function useGetOrganizationUIFilterBuilders() {
                         const periodId = elemMatch.periodId?.$eq;
                         if(periodId !== platform.value.period.id) return null
 
-                        const enumValues = Object.values(SetupStepType).filter(x => isNaN(Number(x)));
+                        const enumValues = Object.values(SetupStepType);
                         const stringifiedValueToMatch = JSON.stringify({
                             reviewedAt: {$neq: null},
                             complete: true

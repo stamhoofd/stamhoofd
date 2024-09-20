@@ -71,7 +71,6 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
             ),
             ...Object.fromEntries(
                 Object.values(SetupStepType)
-                    .filter((x) => isNaN(Number(x)))
                     .map((setupStep) => {
                         return [
                             setupStep,

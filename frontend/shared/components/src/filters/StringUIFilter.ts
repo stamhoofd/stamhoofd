@@ -117,7 +117,7 @@ export class StringUIFilter extends UIFilter {
     }
 
     get styledDescription() {
-        const choices: StyledDescriptionChoice[] = Object.values(StringFilterMode).filter(x => isNaN(Number(x)))
+        const choices: StyledDescriptionChoice[] = Object.values(StringFilterMode)
             .map(mode => {
                 return {
                     id: mode,
