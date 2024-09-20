@@ -43,6 +43,10 @@ async function register({checkout, context, admin, members}: {checkout: Register
         idCheckout.cancelUrl = new URL(window.location.href)
     }
 
+    // Force https protocol (the app can use capacitor:// instead of https, so we need to swap)
+    idCheckout.redirectUrl.protocol = "https:"
+    idCheckout.cancelUrl.protocol = "https:"
+
     const response = await server.request({
         method: "POST",
         path: "/members/register",
