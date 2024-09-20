@@ -307,13 +307,14 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string|num
 
 export type StyledDescriptionChoice = {id: string; text: string; action: () => void; isSelected: () => boolean};
 export type StyledDescription = {text: string; style: string, choices?: StyledDescriptionChoice[]}[]
+export type UiFilterOptions = {isInverted?: boolean};
 
 export abstract class UIFilter {
     id = uuidv4();
     builder!: UIFilterBuilder
     isInverted = false;
 
-    constructor(data: Partial<UIFilter>, options: {isInverted?: boolean} = {}) {
+    constructor(data: Partial<UIFilter>, options: UiFilterOptions = {}) {
         Object.assign(this, data);
 
         if(options.isInverted) {

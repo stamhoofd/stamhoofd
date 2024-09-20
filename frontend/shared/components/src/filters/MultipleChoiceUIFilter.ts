@@ -3,7 +3,7 @@ import { StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import MultipleChoiceUIFilterView from "./MultipleChoiceUIFilterView.vue";
-import { StyledDescription, UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
+import { StyledDescription, UIFilter, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 
 export class MultipleChoiceUIFilterOption {
     name: string;
@@ -22,28 +22,21 @@ export enum MultipleChoiceUIFilterMode {
 
 export class MultipleChoiceUIFilter extends UIFilter {
     builder: MultipleChoiceFilterBuilder
-    options: MultipleChoiceUIFilterOption[] = []
-    mode: MultipleChoiceUIFilterMode = MultipleChoiceUIFilterMode.Or;
-    isSubjectPlural = false;
+    selectedOptions: MultipleChoiceUIFilterOption[] = []
+    configuration: MultipleChoiceUiFilterConfiguration;
 
-    constructor(data: Partial<UIFilter>, options: {isInverted?: boolean, mode?: MultipleChoiceUIFilterMode, isSubjectPlural?: boolean} = {}) {
+    constructor(data: Partial<UIFilter>, options: UiFilterOptions, multipleChoiceConfiguration: MultipleChoiceUiFilterConfiguration) {
         super(data, options);
 
-        if(options.mode) {
-            this.mode = options.mode;
-        }
-
-        if(options.isSubjectPlural) {
-            this.isSubjectPlural = true;
-        }
+        this.configuration = multipleChoiceConfiguration;
     }
 
     doBuild(): StamhoofdFilter {
-        return this.options.map(o => o.value)
+        return this.selectedOptions.map(o => o.value)
     }
 
     flatten() {
-        if (this.options.length === 0) {
+        if (this.selectedOptions.length === 0) {
             return null;
         }
 
@@ -57,7 +50,8 @@ export class MultipleChoiceUIFilter extends UIFilter {
     }
 
     override get styledDescription(): StyledDescription  {
-        const lastJoinWord = this.mode === MultipleChoiceUIFilterMode.Or ? 'of' : 'en';
+        const {mode, isSubjectPlural} = this.configuration;
+        const lastJoinWord = mode === MultipleChoiceUIFilterMode.Or ? 'of' : 'en';
 
         return [
             {
@@ -70,7 +64,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                 choices: [
                     {
                         id: 'is',
-                        text: this.isSubjectPlural ? 'zijn' : 'is',
+                        text: isSubjectPlural ? 'zijn' : 'is',
                         action: () => {
                             this.isInverted = false;
                         },
@@ -78,7 +72,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                     },
                     {
                         id: 'is not',
-                        text: this.isSubjectPlural ? 'zijn niet' : 'is niet',
+                        text: isSubjectPlural ? 'zijn niet' : 'is niet',
                         action: () => {
                             this.isInverted = true;
                         },
@@ -87,21 +81,31 @@ export class MultipleChoiceUIFilter extends UIFilter {
                 ]
             },
             {
-                text: Formatter.joinLast(this.options.map(o => o.name), ', ', ` ${lastJoinWord} `),
+                text: Formatter.joinLast(this.selectedOptions.map(o => o.name), ', ', ` ${lastJoinWord} `),
                 style: ''
             }
         ]
     }
 }
 
+export type MultipleChoiceUiFilterConfiguration = {
+    mode: MultipleChoiceUIFilterMode,
+    isSubjectPlural: boolean,
+    showOptionSelectAll: boolean
+};
+
 export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoiceUIFilter> {
     name = ""
-    options: MultipleChoiceUIFilterOption[] = []
     wrapper?: WrapperFilter;
     wrapFilter?: UIFilterWrapper | null | undefined;
     unwrapFilter?: UIFilterUnwrapper | null | undefined;
-    mode: MultipleChoiceUIFilterMode = MultipleChoiceUIFilterMode.Or;
-    isSubjectPlural = false;
+
+    multipleChoiceOptions: MultipleChoiceUIFilterOption[] = []
+    multipleChoiceConfiguration: MultipleChoiceUiFilterConfiguration = {
+        mode: MultipleChoiceUIFilterMode.Or,
+        isSubjectPlural: false,
+        showOptionSelectAll: false
+    }
 
     constructor(data: {
         name: string, 
@@ -109,21 +113,27 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
         wrapper?: WrapperFilter,
         wrapFilter?: UIFilterWrapper | null | undefined,
         unwrapFilter?: UIFilterUnwrapper | null | undefined,
-        mode?: MultipleChoiceUIFilterMode,
-        isSubjectPlural?: boolean
+        multipleChoiceConfiguration?: Partial<MultipleChoiceUiFilterConfiguration>
     }) {
         this.name = data.name;
-        this.options = data.options;
+        this.multipleChoiceOptions = data.options;
         this.wrapper = data.wrapper;
         this.wrapFilter = data.wrapFilter
         this.unwrapFilter = data.unwrapFilter
 
-        if(data.mode) {
-            this.mode = data.mode;
-        }
+        const multipleChoiceConfiguration = data.multipleChoiceConfiguration;
+        if(multipleChoiceConfiguration) {
+            const {mode, isSubjectPlural, showOptionSelectAll} = multipleChoiceConfiguration;
 
-        if(data.isSubjectPlural) {
-            this.isSubjectPlural = true;
+            if(mode !== undefined) {
+                this.multipleChoiceConfiguration.mode = mode;
+            }
+            if(isSubjectPlural !== undefined) {
+                this.multipleChoiceConfiguration.isSubjectPlural = isSubjectPlural;
+            }
+            if(showOptionSelectAll !== undefined) {
+                this.multipleChoiceConfiguration.showOptionSelectAll = showOptionSelectAll;
+            }
         }
     }
     
@@ -136,13 +146,13 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
         
         if (Array.isArray(response)) {
             // Check if all the options are valid
-            const options = this.options.filter(o => response.includes(o.value));
+            const options = this.multipleChoiceOptions.filter(o => response.includes(o.value));
             
             if (options.length === response.length) {
                 const uiFilter = new MultipleChoiceUIFilter({
                     builder: this
-                }, {mode: this.mode, isInverted: match.isInverted, isSubjectPlural: this.isSubjectPlural})
-                uiFilter.options = options;
+                }, {isInverted: match.isInverted}, this.multipleChoiceConfiguration)
+                uiFilter.selectedOptions = options;
 
                 return uiFilter;
             }
@@ -154,6 +164,6 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
     create(options: {isInverted?: boolean} = {}): MultipleChoiceUIFilter {
         return new MultipleChoiceUIFilter({
             builder: this
-        }, {...options, mode: this.mode, isSubjectPlural: this.isSubjectPlural})
+        }, options, this.multipleChoiceConfiguration)
     }
 }

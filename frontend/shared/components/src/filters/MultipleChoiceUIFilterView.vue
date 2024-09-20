@@ -1,61 +1,63 @@
 <template>
     <STList>
-        <STListItem v-for="option of options" :key="option.value" :selectable="true" element-name="label">
+        <STListItem v-if="filter.configuration.showOptionSelectAll" :selectable="true" element-name="label">
             <template #left>
-                <Checkbox :model-value="isOptionSelected(option)" @update:model-value="setOptionSelected(option, $event)" />
+                <Checkbox v-model="isSelectAll" />
             </template>
             <h3 class="style-title-list">
-                {{ option.name }}
+                {{ $t('Selecteer alles') }}
             </h3>
-            <p v-if="option.description" class="style-description-small">
-                {{ option.description }}
-            </p>
         </STListItem>
+        <template v-if="!isSelectAll">
+            <STListItem v-for="option of options" :key="option.value" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox :model-value="isOptionSelected(option)" @update:model-value="setOptionSelected(option, $event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ option.name }}
+                </h3>
+            </STListItem>
+        </template>
     </STList>
 </template>
 
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+<script lang="ts" setup>
+import { computed, ref, watch } from "vue";
 import Checkbox from "../inputs/Checkbox.vue";
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import { MultipleChoiceUIFilter, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        Checkbox,
-    }
-})
-export default class MultipleChoiceUIFilterView extends Mixins(NavigationMixin) {
-    @Prop({ required: true }) 
-        filter: MultipleChoiceUIFilter
+const props = defineProps<{filter: MultipleChoiceUIFilter}>();
 
-    get options() {
-        return this.filter.builder.options
-    }
+const isSelectAll = ref(false);
 
-    isOptionSelected(option: MultipleChoiceUIFilterOption) {
-        return !!this.filter.options.find(i => i.value === option.value)
+watch(isSelectAll, (isSelectAll) => {
+    if(isSelectAll) {
+        props.filter.selectedOptions = [...props.filter.builder.multipleChoiceOptions];
+    } else {
+        props.filter.selectedOptions = [];
     }
+});
 
-    setOptionSelected(option: MultipleChoiceUIFilterOption, selected: boolean) {
-        if (selected === this.isOptionSelected(option)) {
-            return
+const options = computed(() => props.filter.builder.multipleChoiceOptions);
+
+function isOptionSelected(option: MultipleChoiceUIFilterOption) {
+    return !!props.filter.selectedOptions.find(i => i.value === option.value)
+}
+
+function setOptionSelected(option: MultipleChoiceUIFilterOption, selected: boolean) {
+    if (selected === isOptionSelected(option)) {
+        return
+    }
+    if (!selected) {
+        const index = props.filter.selectedOptions.findIndex(i => i.value === option.value)
+        if (index != -1) {
+            props.filter.selectedOptions.splice(index, 1)
         }
-        if (!selected) {
-            const index = this.filter.options.findIndex(i => i.value === option.value)
-            if (index != -1) {
-                this.filter.options.splice(index, 1)
-            }
-        } else {
-            this.filter.options.push(option)
-        }
+    } else {
+        props.filter.selectedOptions.push(option)
     }
-
 }
 </script>
