@@ -222,4 +222,9 @@ function setFilterMode(mode: GroupUIFilterMode, index: number) {
     top: 30px;
     position: absolute;
 }
+
+.margin-space {
+    margin-left: 0.5ch;
+    margin-right: 0.5ch;
+}
 </style>
