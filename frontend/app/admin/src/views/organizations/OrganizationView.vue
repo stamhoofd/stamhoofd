@@ -161,6 +161,12 @@
                 </STListItem>
             </STList>
 
+            <div v-if="$steps.steps.size" class="container">
+                <hr>
+                <h2>{{ $t('Vlagmomenten') }}</h2>
+                <SetupStepRows :steps="$steps" list-type="review" />
+            </div>
+
             <hr>
             <h2>
                 {{ $t('f477755c-2d6e-473c-b9b9-2ebe0af173f3') }}
@@ -180,7 +186,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, MemberCountSpan, Toast, useAuth, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, MemberCountSpan, SetupStepRows, Toast, useAuth, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
@@ -229,6 +235,8 @@ const hasNext = computed(() => {
 const tagStringList = computed(() => {
     return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? 'onbekend').join(', ');
 });
+
+const $steps = computed(() => props.organization.period.setupSteps);
 
 const instance = getCurrentInstance();
 const auth = useAuth();

@@ -139,6 +139,14 @@ export class SetupSteps extends AutoEncoder {
         return result;
     }
 
+    isEmpty() {
+        return this.steps.size === 0;
+    }
+
+    areAllComplete(): boolean {
+        return Array.from(this.steps.values()).every(s => s.isComplete);
+    }
+
     getStepsToDoOverview(): {type: SetupStepType, step: SetupStep}[] {
         const result: {type: SetupStepType, step: SetupStep}[] = [];
 

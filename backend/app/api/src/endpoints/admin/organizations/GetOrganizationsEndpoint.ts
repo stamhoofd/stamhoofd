@@ -142,7 +142,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
         return new Response(
             new PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>({
-                results: await AuthenticatedStructures.adminOrganizations(organizations),
+                results: await AuthenticatedStructures.organizations(organizations),
                 next
             })
         );

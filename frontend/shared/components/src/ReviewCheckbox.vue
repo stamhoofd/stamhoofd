@@ -11,7 +11,7 @@
             </h2>
             <TransitionFade>
                 <p v-if="$review" class="style-description-small">
-                    Gemarkeerd als nagekeken op {{ Formatter.date($review.date, true) }} door {{ $review.userName }}
+                    {{ getDescription($review) }}
                 </p>
             </TransitionFade>
         </STListItem>
@@ -19,14 +19,14 @@
 </template>
 
 <script lang="ts" setup>
-import { TransitionFade, useSetupStepTranslations } from '@stamhoofd/components';
-import { Formatter } from '@stamhoofd/utility';
+import { TransitionFade, useSetupStepReviewDescription, useSetupStepTranslations } from '@stamhoofd/components';
 import { computed } from 'vue';
 import { ReviewCheckboxData } from './useReview';
 
 const props = defineProps<{data: ReviewCheckboxData}>();
 const $review = computed(() => props.data.step?.review);
 const setupStepTranslations = useSetupStepTranslations();
+const {getDescription} = useSetupStepReviewDescription();
 
 const checkboxTitle = computed(() => setupStepTranslations.getReviewCheckboxTitle(props.data.type));
 
