@@ -10,7 +10,7 @@
     },
     "codeQL.githubDatabase.update": "never",
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "never"
+        "source.fixAll.eslint": "explicit"
     },
     "github.copilot.enable": {
         "*": true,

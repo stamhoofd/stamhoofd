@@ -9,10 +9,10 @@
                 <div v-if="!isGroup(child)">
                     <template v-for="(s, i) in child.styledDescription" :key="i">
                         <span v-if="s.choices?.length" class="button text inline margin-space" :class="s.style" type="button" @click.stop.prevent="$event => showChoices($event, s.choices!)">
-                            <span v-text="getSelectedChoiceText(s.choices)"/>
+                            <span v-text="getSelectedChoiceText(s.choices)" />
                             <span class="icon arrow-down-small" />
                         </span>
-                        <span v-else class="styled-description" :class="s.style" v-text="s.text"/>
+                        <span v-else class="styled-description" :class="s.style" v-text="s.text" />
                     </template>
                 </div>
                 <div v-else>
