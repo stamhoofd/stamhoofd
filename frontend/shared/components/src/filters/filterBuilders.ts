@@ -477,7 +477,7 @@ export function useGetOrganizationUIFilterBuilders() {
                                                         reviewedAt: {
                                                             $neq: null,
                                                         },
-                                                        complete: { $eq: 1 },
+                                                        complete: true,
                                                     },
                                                 ];
                                             }),
@@ -498,7 +498,7 @@ export function useGetOrganizationUIFilterBuilders() {
                         const enumValues = Object.values(SetupStepType).filter(x => isNaN(Number(x)));
                         const stringifiedValueToMatch = JSON.stringify({
                             reviewedAt: {$neq: null},
-                            complete: {$eq: 1}
+                            complete: true
                         });
 
                         const results: SetupStepType[] = [];
