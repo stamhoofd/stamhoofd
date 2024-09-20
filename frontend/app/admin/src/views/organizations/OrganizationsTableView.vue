@@ -128,7 +128,7 @@ const allColumns: Column<ObjectType, any>[] = [
         recommendedWidth: 300
     }),
     new Column<ObjectType, {completed: number, total: number}>({
-        id: 'flagMoments',
+        id: 'setupSteps',
         name: 'Vlagmoment',
         allowSorting: false,
         getValue: (organization) => organization.period.setupSteps.getProgress(),

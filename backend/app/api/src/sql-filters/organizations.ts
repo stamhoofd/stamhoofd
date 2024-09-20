@@ -54,7 +54,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
         SQL.jsonValue(SQL.column("organizations", "meta"), "$.value.tags"),
         { isJSONValue: true, isJSONObject: true },
     ),
-    flagMoments: createSQLRelationFilterCompiler(
+    setupSteps: createSQLRelationFilterCompiler(
         SQL.select()
             .from(SQL.table("organization_registration_periods"))
             .where(

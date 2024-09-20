@@ -458,7 +458,7 @@ export function useGetOrganizationUIFilterBuilders() {
                         const choices = Array.isArray(f) ? f : [f];
 
                         return {
-                            flagMoments: {
+                            setupSteps: {
                                 $elemMatch: {
                                     periodId: {
                                         $eq: platform.value.period.id,
@@ -489,7 +489,7 @@ export function useGetOrganizationUIFilterBuilders() {
                     unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter|null => {
                         if(typeof f !== 'object') return null
 
-                        const elemMatch = (f as any).flagMoments?.$elemMatch;
+                        const elemMatch = (f as any).setupSteps?.$elemMatch;
                         if(!elemMatch) return null
 
                         const periodId = elemMatch.periodId?.$eq;
