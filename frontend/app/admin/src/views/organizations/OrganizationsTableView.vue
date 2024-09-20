@@ -97,7 +97,7 @@ const allColumns: Column<ObjectType, any>[] = [
         grow: true
     }),
 
-    new Column<ObjectType, string>({
+    new Column<ObjectType, boolean>({
         id: 'status',
         name: "Status", 
         getValue: (organization) => organization.active,
@@ -119,12 +119,42 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, string[]>({
         id: 'tags',
-        name: "Tags", 
+        name: "Tags",
+        allowSorting: false,
         getValue: (organization) => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? 'Onbekend'),
         format: (tags) => tags.length === 0 ? 'Geen' : tags.join(', '),
         getStyle: (tags) => tags.length === 0 ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 300
+    }),
+    new Column<ObjectType, {completed: number, total: number}>({
+        id: 'flagMoments',
+        name: 'Vlagmoment',
+        allowSorting: false,
+        getValue: (organization) => organization.period.setupSteps.getProgress(),
+        format: (progress) => {
+            const {completed, total} = progress;
+            if(total === 0) {
+                return 'Geen';
+            }
+            if(completed >= total) {
+                return 'Voltooid';
+            }
+            return `${progress.completed}/${progress.total}`
+        },
+        getStyle: (progress) => {
+            const {completed, total} = progress;
+            if(total === 0) {
+                return 'gray';
+            }
+            if(completed >= total) {
+                return 'success';
+            }
+            return 'gray';
+        },
+        minimumWidth: 50,
+        recommendedWidth: 100
+
     })
 ];
 

@@ -166,6 +166,13 @@ export class SetupSteps extends AutoEncoder {
         return result;
     }
 
+    getProgress(): {completed: number, total: number} {
+        const total = this.steps.size;
+        const completed = Array.from(this.steps.values()).filter(s => s.isComplete).length;
+        return {completed, total};
+
+    }
+
     markReviewed(stepType: SetupStepType, by: {userId: string, userName: string}) {
         const step = this.steps.get(stepType);
         if(step) {
