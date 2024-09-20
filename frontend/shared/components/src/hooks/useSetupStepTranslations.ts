@@ -27,7 +27,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Premises]: $t('03ffd28c-99d4-4bae-8494-5def382d826e'),
         [SetupStepType.Emails]: $t('9eb28669-42a5-4211-b72f-3335c0d4b329'),
         [SetupStepType.Payment]: $t('70894bb8-da5a-4f1a-929d-08f4479c4de3'),
-        [SetupStepType.Registrations]: $t('Schrijf minstens één lid in per standaard leeftijdsgroep.')
+        [SetupStepType.Registrations]: $t('Schrijf minstens één lid in per leeftijdsgroep.')
     }
 
     const reviewCheckboxTitleMap: Record<SetupStepType, string> = {
@@ -57,7 +57,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Premises]: $t('05afcd20-5dda-4e01-88a7-e58d46487d30'),
         [SetupStepType.Emails]: $t('9ef3cbb3-93bb-4f77-93af-3752ff869894'),
         [SetupStepType.Payment]: $t('953003c6-6653-4cef-a2ca-09723658b828'),
-        [SetupStepType.Registrations]: $t('Schrijf minstens één lid in per standaard leeftijdsgroep.')
+        [SetupStepType.Registrations]: $t('Schrijf minstens één lid in per leeftijdsgroep.')
     }
 
     const getReviewTitle = (type: SetupStepType): string => {
