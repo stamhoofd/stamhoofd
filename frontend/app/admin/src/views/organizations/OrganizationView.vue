@@ -236,7 +236,7 @@ const tagStringList = computed(() => {
     return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? 'onbekend').join(', ');
 });
 
-const $steps = computed(() => props.organization.period.setupSteps);
+const steps = computed(() => props.organization.period.setupSteps);
 
 const instance = getCurrentInstance();
 const auth = useAuth();
