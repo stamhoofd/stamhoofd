@@ -1,5 +1,6 @@
+import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { isEmptyFilter,PropertyFilter, StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
+import { isEmptyFilter, PropertyFilter, StamhoofdCompareValue, StamhoofdFilter, StamhoofdNotFilter } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 export type UIFilterWrapper = ((value: StamhoofdFilter) => StamhoofdFilter);
@@ -10,7 +11,7 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
     /**
      * Create a new default filter
      */
-    create(): F
+    create(options?: {isInverted?: boolean}): F
     name: string
     wrapper?: WrapperFilter
 
@@ -21,13 +22,46 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
     fromFilter(filter: StamhoofdFilter): UIFilter|null
 }
 
-export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): {match: boolean, markerValue?: StamhoofdFilter|undefined, leftOver?: StamhoofdFilter} {
+export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): {match: boolean, markerValue?: StamhoofdFilter|undefined, leftOver?: StamhoofdFilter, isInverted?: boolean} {
     if (builder.wrapper) {
-        return unwrapFilter(filter, builder.wrapper);
+        const result = unwrapFilter(filter, builder.wrapper);
+
+        if(!result.match) {
+            const invertedFilter = UIFilter.invertFilter(filter);
+
+            if(invertedFilter) {
+                const invertedResult = unwrapFilter(invertedFilter, builder.wrapper);
+
+                if(invertedResult.match) {
+                    return {
+                        ...invertedResult,
+                        isInverted: true
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     if (builder.unwrapFilter) {
         const r = builder.unwrapFilter(filter);
+
+        if(r === null) {
+            const invertedFilter = UIFilter.invertFilter(filter);
+
+            if(invertedFilter) {
+                const invertedResult = builder.unwrapFilter(invertedFilter)
+                if(invertedResult !== null) {
+                    return {
+                        match: true,
+                        markerValue: invertedResult,
+                        isInverted: true
+                    }
+                }
+            }
+        }
+
         return {
             match: true,
             markerValue: r
@@ -271,14 +305,21 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string|num
     return null;
 }
 
-export type StyledDescription = {text: string; style: string}[]
+export type StyledDescriptionChoice = {id: string; text: string; action: () => void; isSelected: () => boolean};
+export type StyledDescription = {text: string; style: string, choices?: StyledDescriptionChoice[]}[]
+export type UiFilterOptions = {isInverted?: boolean};
 
 export abstract class UIFilter {
     id = uuidv4();
     builder!: UIFilterBuilder
+    isInverted = false;
 
-    constructor(data: Partial<UIFilter>) {
+    constructor(data: Partial<UIFilter>, options: UiFilterOptions = {}) {
         Object.assign(this, data);
+
+        if(options.isInverted) {
+            this.isInverted = true;
+        }
     }
     
     /**
@@ -290,6 +331,16 @@ export abstract class UIFilter {
      * Returns the filter object to pass to the backend or to apply locally
      */
     build(): StamhoofdFilter|null {
+        const filter = this.buildFilter();
+
+        if(this.isInverted) {
+            return UIFilter.invertFilter(filter);
+        }
+
+        return filter;
+    }
+
+    private buildFilter(): StamhoofdFilter | null {
         const b = this.doBuild()
         if (b !== null && this.builder.wrapFilter) {
             return this.builder.wrapFilter(b)
@@ -300,6 +351,29 @@ export abstract class UIFilter {
         }
         
         return b
+    }
+
+    static invertFilter(filter: StamhoofdFilter | null) {
+        if(filter === null) {
+            return null;
+        }
+
+        if(typeof filter !== 'object') {
+            throw new SimpleError({
+                code: 'filter_invert_fail',
+                message: 'Inverteren van de filter is mislukt',
+            })
+        }
+
+        const keys = Object.keys(filter);
+
+        if(keys.length === 1 && keys[0] === '$not') {
+            return (filter as StamhoofdNotFilter).$not;
+        }
+
+        return {
+            $not: filter
+        }
     }
     
     clone(): UIFilter {

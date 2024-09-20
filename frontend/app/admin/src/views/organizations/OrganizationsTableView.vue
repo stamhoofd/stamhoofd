@@ -2,7 +2,7 @@
     <ModernTableView
         ref="modernTableView" 
         :table-object-fetcher="tableObjectFetcher" 
-        :filter-builders="organizationsUIFilterBuilders" 
+        :filter-builders="filterBuilders" 
         :title="title" 
         :column-configuration-id="configurationId" 
         :actions="actions"
@@ -19,10 +19,10 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, Toast, organizationsUIFilterBuilders, useAuth, useContext, useOrganizationsObjectFetcher, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, Toast, useAuth, useContext, useGetOrganizationUIFilterBuilders, useOrganizationsObjectFetcher, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { I18nController, useTranslate } from "@stamhoofd/frontend-i18n";
 import { useRequestOwner } from "@stamhoofd/networking";
-import { Address, Organization, OrganizationTag, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { Address, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
 import { Ref, computed, ref } from "vue";
 import EditOrganizationView from "./EditOrganizationView.vue";
 import OrganizationView from "./OrganizationView.vue";
@@ -50,11 +50,13 @@ const title = computed(() => {
 const context = useContext();
 const present = usePresent();
 const platform = usePlatform();
-const auth = useAuth()
+const auth = useAuth();
+const {getOrganizationUIFilterBuilders} = useGetOrganizationUIFilterBuilders();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 const configurationId = computed(() => {
     return 'organizations'
 })
+const filterBuilders = computed(() => getOrganizationUIFilterBuilders(auth.user));
 
 function getRequiredFilter(): StamhoofdFilter|null  {
     if (!props.tag) {
@@ -95,7 +97,7 @@ const allColumns: Column<ObjectType, any>[] = [
         grow: true
     }),
 
-    new Column<ObjectType, string>({
+    new Column<ObjectType, boolean>({
         id: 'status',
         name: "Status", 
         getValue: (organization) => organization.active,
@@ -117,12 +119,42 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, string[]>({
         id: 'tags',
-        name: "Tags", 
+        name: "Tags",
+        allowSorting: false,
         getValue: (organization) => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? 'Onbekend'),
         format: (tags) => tags.length === 0 ? 'Geen' : tags.join(', '),
         getStyle: (tags) => tags.length === 0 ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 300
+    }),
+    new Column<ObjectType, {completed: number, total: number}>({
+        id: 'setupSteps',
+        name: 'Vlagmoment',
+        allowSorting: false,
+        getValue: (organization) => organization.period.setupSteps.getProgress(),
+        format: (progress) => {
+            const {completed, total} = progress;
+            if(total === 0) {
+                return 'Geen';
+            }
+            if(completed >= total) {
+                return 'Voltooid';
+            }
+            return `${progress.completed}/${progress.total}`
+        },
+        getStyle: (progress) => {
+            const {completed, total} = progress;
+            if(total === 0) {
+                return 'gray';
+            }
+            if(completed >= total) {
+                return 'success';
+            }
+            return 'gray';
+        },
+        minimumWidth: 50,
+        recommendedWidth: 100
+
     })
 ];
 

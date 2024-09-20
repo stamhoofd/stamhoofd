@@ -139,6 +139,14 @@ export class SetupSteps extends AutoEncoder {
         return result;
     }
 
+    isEmpty() {
+        return this.steps.size === 0;
+    }
+
+    areAllComplete(): boolean {
+        return Array.from(this.steps.values()).every(s => s.isComplete);
+    }
+
     getStepsToDoOverview(): {type: SetupStepType, step: SetupStep}[] {
         const result: {type: SetupStepType, step: SetupStep}[] = [];
 
@@ -156,6 +164,13 @@ export class SetupSteps extends AutoEncoder {
         }
 
         return result;
+    }
+
+    getProgress(): {completed: number, total: number} {
+        const total = this.steps.size;
+        const completed = Array.from(this.steps.values()).filter(s => s.isComplete).length;
+        return {completed, total};
+
     }
 
     markReviewed(stepType: SetupStepType, by: {userId: string, userName: string}) {

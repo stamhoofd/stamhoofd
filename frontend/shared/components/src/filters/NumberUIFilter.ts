@@ -1,9 +1,9 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { StamhoofdFilter } from "@stamhoofd/structures";
 
-import NumberUIFilterView from "./NumberUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilter, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 import { Formatter } from "@stamhoofd/utility";
+import NumberUIFilterView from "./NumberUIFilterView.vue";
+import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 
 export enum UINumberFilterMode {
     GreaterThan = "GreaterThan",
@@ -17,8 +17,8 @@ export class NumberUIFilter extends UIFilter {
     value = 0
     mode: UINumberFilterMode = UINumberFilterMode.Equals
 
-    constructor(data: Partial<NumberUIFilter>) {
-        super(data)
+    constructor(data: Partial<NumberUIFilter>, options: {isInverted?: boolean} = {}) {
+        super(data, options)
         Object.assign(this, data);
     }
 
@@ -103,7 +103,7 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const {markerValue: unwrapped} = unwrapFilterForBuilder(this, filter)
+        const {markerValue: unwrapped, isInverted} = unwrapFilterForBuilder(this, filter)
         if (unwrapped === null || unwrapped === undefined) {
             return null;
         }
@@ -118,7 +118,7 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
                 builder: this,
                 value: equals,
                 mode: UINumberFilterMode.Equals
-            })
+            }, {isInverted})
         }
 
         const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']);
@@ -128,7 +128,7 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
                 builder: this,
                 value: notEquals,
                 mode: UINumberFilterMode.NotEquals
-            })
+            }, {isInverted})
         }
 
         const lessThan = unwrapFilterByPath(unwrapped, [this.key, '$lt']);
@@ -138,7 +138,7 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
                 builder: this,
                 value: lessThan,
                 mode: UINumberFilterMode.LessThan
-            })
+            }, {isInverted})
         }
 
         const greaterThan = unwrapFilterByPath(unwrapped, [this.key, '$gt']);
@@ -148,16 +148,16 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
                 builder: this,
                 value: greaterThan,
                 mode: UINumberFilterMode.GreaterThan
-            })
+            }, {isInverted})
         }
 
         return null;
     }
     
-    create(): NumberUIFilter {
+    create(options: {isInverted?: boolean} = {}): NumberUIFilter {
         return new NumberUIFilter({
             builder: this,
             value: 0
-        })
+        }, options)
     }
 }

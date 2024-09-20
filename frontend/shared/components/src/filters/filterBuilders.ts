@@ -1,8 +1,10 @@
-import { Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, StamhoofdFilter, User } from "@stamhoofd/structures";
+import { useTranslate } from "@stamhoofd/frontend-i18n";
+import { Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdFilter, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
+import { usePlatform } from "../hooks";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
 import { NumberFilterBuilder } from "./NumberUIFilter";
 import { StringFilterBuilder } from "./StringUIFilter";
 import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from "./UIFilter";
@@ -92,6 +94,9 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
         all.push(
             new MultipleChoiceFilterBuilder({
                 name: 'Functies',
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true
+                },
                 options: platform.config.responsibilities.map(responsibility => {
                     return new MultipleChoiceUIFilterOption(responsibility.name, responsibility.id);
                 }),
@@ -111,6 +116,9 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
         all.push(
             new MultipleChoiceFilterBuilder({
                 name: 'Tags',
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true
+                },
                 options: platform.config.tags.map(tag => {
                     return new MultipleChoiceUIFilterOption(tag.name, tag.id);
                 }),
@@ -390,40 +398,146 @@ const organizationMemberUIFilterBuilders: UIFilterBuilders = [
     }),
 ]
 
-export const organizationsUIFilterBuilders: UIFilterBuilders = [
-    new StringFilterBuilder({
-        name: 'Naam',
-        key: 'name'
-    }),
-    new GroupUIFilterBuilder({
-        name: 'Leden',
-        builders: organizationMemberUIFilterBuilders,
-        wrapper: {
-            members: {
-                $elemMatch: UIFilterWrapperMarker
-            }
-        }
-    }),
-    new MultipleChoiceFilterBuilder({
-        name: 'Actief',
-        options: [
-            new MultipleChoiceUIFilterOption('Actief', 1),
-            new MultipleChoiceUIFilterOption('Inactief', 0)
-        ],
-        wrapper: {
-            active: {
-                $in: UIFilterWrapperMarker
-            }
-        }
-    })
-];
+export function useGetOrganizationUIFilterBuilders() {
+    const $t = useTranslate();
+    const platform = usePlatform();
+     
+    const setupStepFilterNameMap: Record<SetupStepType, string> = {
+        [SetupStepType.Responsibilities]: $t('Functies'),
+        [SetupStepType.Companies]: $t('Facturatiegegevens'),
+        [SetupStepType.Groups]: $t('Leeftijdsgroepen'),
+        [SetupStepType.Premises]: $t('Lokalen'),
+        [SetupStepType.Emails]: $t('E-mailadressen'),
+        [SetupStepType.Payment]: $t('Betaalmethodes'),
+    }
 
-// Recursive: self referencing groups
-organizationsUIFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: organizationsUIFilterBuilders
-    })
-)
+    const getOrganizationUIFilterBuilders = (user: User | null) => {
+        const all = [new StringFilterBuilder({
+            name: 'Naam',
+            key: 'name'
+        }),
+        new GroupUIFilterBuilder({
+            name: 'Leden',
+            builders: organizationMemberUIFilterBuilders,
+            wrapper: {
+                members: {
+                    $elemMatch: UIFilterWrapperMarker
+                }
+            }
+        }),
+        new MultipleChoiceFilterBuilder({
+            name: 'Actief',
+            options: [
+                new MultipleChoiceUIFilterOption('Actief', 1),
+                new MultipleChoiceUIFilterOption('Inactief', 0)
+            ],
+            wrapper: {
+                active: {
+                    $in: UIFilterWrapperMarker
+                }
+            }
+        })];
+
+        if (user?.permissions?.platform !== null) {
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: "Voltooide vlagmomenten",
+                    multipleChoiceConfiguration: {
+                        isSubjectPlural: true,
+                        mode: MultipleChoiceUIFilterMode.And,
+                        showOptionSelectAll: true
+                    },
+                    options: Object.entries(setupStepFilterNameMap).map(
+                        ([k, v]) =>
+                            new MultipleChoiceUIFilterOption(
+                                v,
+                                k as SetupStepType,
+                            ),
+                    ),
+                    wrapFilter: (f: StamhoofdFilter) => {
+                        const choices = Array.isArray(f) ? f : [f];
+
+                        return {
+                            setupSteps: {
+                                $elemMatch: {
+                                    periodId: {
+                                        $eq: platform.value.period.id,
+                                    },
+                                    ...Object.fromEntries(
+                                        Object.values(SetupStepType)
+                                            .filter(
+                                                (x) => choices.includes(x),
+                                            )
+                                            .map((setupStep) => {
+                                                return [
+                                                    setupStep,
+                                                    {
+                                                        reviewedAt: {
+                                                            $neq: null,
+                                                        },
+                                                        complete: true,
+                                                    },
+                                                ];
+                                            }),
+                                    ),
+                                },
+                            },
+                        };
+                    },
+                    unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter|null => {
+                        if(typeof f !== 'object') return null
+
+                        const elemMatch = (f as any).setupSteps?.$elemMatch;
+                        if(!elemMatch) return null
+
+                        const periodId = elemMatch.periodId?.$eq;
+                        if(periodId !== platform.value.period.id) return null
+
+                        const enumValues = Object.values(SetupStepType);
+                        const stringifiedValueToMatch = JSON.stringify({
+                            reviewedAt: {$neq: null},
+                            complete: true
+                        });
+
+                        const results: SetupStepType[] = [];
+
+                        for(const [key, value] of Object.entries(elemMatch)) {
+                            if(enumValues.includes(key as SetupStepType)) {
+                                if(JSON.stringify(value) === stringifiedValueToMatch) {
+                                    results.push(key as SetupStepType)
+                                } else {
+                                    return null;
+                                }
+                            } else if(key !== 'periodId') {
+                                return null
+                            }
+                        }
+
+                        if(results.length) {
+                            return results;
+                        }
+                        
+                        return null;
+                    }
+                }
+                ),
+            );
+        }
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all
+            })
+        )
+    
+        return all;
+    }
+
+    return {getOrganizationUIFilterBuilders};
+}
+
+
 
 // Events
 export function getEventUIFilterBuilders(platform: Platform, organizations: Organization[]) {

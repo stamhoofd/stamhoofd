@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <p v-if="canPop" class="style-description-block">
-            Met een filtergroep kan je combinaties van 'en' en 'of' maken.
+            {{$t("Met een filtergroep kan je combinaties van 'en' en 'of' maken.")}}
         </p>
 
         <GroupUIFilterList v-if="filters.length" :filter="filter" @replace="copyFromChanged($event)"/>

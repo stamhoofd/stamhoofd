@@ -8,8 +8,8 @@ export class UnknownUIFilter extends UIFilter {
     builder!: UnknownFilterBuilder
     value: StamhoofdFilter
 
-    constructor(data: Partial<UnknownUIFilter>) {
-        super(data)
+    constructor(data: Partial<UnknownUIFilter>, options: {isInverted?: boolean} = {}) {
+        super(data, options)
         Object.assign(this, data);
     }
 
@@ -49,10 +49,10 @@ export class UnknownFilterBuilder implements UIFilterBuilder<UnknownUIFilter> {
         })
     }
     
-    create(): UnknownUIFilter {
+    create(options: {isInverted?: boolean} = {}): UnknownUIFilter {
         return new UnknownUIFilter({
             builder: this,
             value: {}
-        })
+        }, options)
     }
 }
