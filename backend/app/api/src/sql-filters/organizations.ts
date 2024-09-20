@@ -90,7 +90,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                                         getSQL: (
                                             _options?: SQLExpressionOptions,
                                         ): SQLQuery =>
-                                            `case when CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.Functions.finishedSteps")) AS unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.Functions.totalSteps")) AS unsigned) then 1 else 0 end`,
+                                            `case when CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.finishedSteps")) AS unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.totalSteps")) AS unsigned) then 1 else 0 end`,
                                     },
                                     { isJSONValue: false, isJSONObject: false },
                                 ),
