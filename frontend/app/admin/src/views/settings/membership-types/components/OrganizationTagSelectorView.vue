@@ -151,9 +151,3 @@ async function save() {
     await pop();
 }
 </script>
-
-<style lang="scss">
-form {
-    margin-top: 8px;
-}
-</style>
