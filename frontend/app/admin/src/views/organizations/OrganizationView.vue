@@ -161,10 +161,10 @@
                 </STListItem>
             </STList>
 
-            <div v-if="$steps.steps.size" class="container">
+            <div v-if="setupSteps.steps.size" class="container">
                 <hr>
                 <h2>{{ $t('Vlagmomenten') }}</h2>
-                <SetupStepRows :steps="$steps" list-type="review" />
+                <SetupStepRows :steps="setupSteps" list-type="review" />
             </div>
 
             <hr>
@@ -236,7 +236,7 @@ const tagStringList = computed(() => {
     return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? 'onbekend').join(', ');
 });
 
-const steps = computed(() => props.organization.period.setupSteps);
+const setupSteps = computed(() => props.organization.period.setupSteps);
 
 const instance = getCurrentInstance();
 const auth = useAuth();
