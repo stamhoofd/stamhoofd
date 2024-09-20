@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { SetupStepUpdater } from '../helpers/SetupStepsUpdater';
+import { SetupStepUpdater } from '@stamhoofd/models';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == "test") {

@@ -2,16 +2,15 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Platform, Registration, User } from '@stamhoofd/models';
+import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Platform, Registration, SetupStepUpdater, User } from '@stamhoofd/models';
 import { GroupType, MemberWithRegistrationsBlob, MembersBlob, PermissionLevel } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
+import { QueueHandler } from '@stamhoofd/queues';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
-import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
-import { SetupStepUpdater } from '../../../helpers/SetupStepsUpdater';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
-import { QueueHandler } from '@stamhoofd/queues';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 
 type Params = Record<string, never>;
 type Query = undefined;

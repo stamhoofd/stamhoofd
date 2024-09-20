@@ -1,11 +1,4 @@
-import {
-    Group,
-    Member,
-    MemberResponsibilityRecord,
-    Organization,
-    OrganizationRegistrationPeriod,
-    Platform
-} from "@stamhoofd/models";
+import { SimpleError } from "@simonbackx/simple-errors";
 import { QueueHandler } from "@stamhoofd/queues";
 import { SQL, SQLWhereSign } from "@stamhoofd/sql";
 import {
@@ -13,9 +6,18 @@ import {
     MemberResponsibility,
     Platform as PlatformStruct,
     SetupStepType,
-    SetupSteps
+    SetupSteps,
+    minimumRegistrationCount
 } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
+import {
+    Group,
+    Member,
+    MemberResponsibilityRecord,
+    Organization,
+    OrganizationRegistrationPeriod,
+    Platform
+} from "../models";
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
@@ -29,7 +31,8 @@ export class SetupStepUpdater {
         [SetupStepType.Groups]: this.updateStepGroups,
         [SetupStepType.Premises]: this.updateStepPremises,
         [SetupStepType.Emails]: this.updateStepEmails,
-        [SetupStepType.Payment]: this.updateStepPayment
+        [SetupStepType.Payment]: this.updateStepPayment,
+        [SetupStepType.Registrations]: this.updateStepRegistrations
     };
 
     static async updateSetupStepsForAllOrganizationsInCurrentPeriod({
@@ -100,6 +103,19 @@ export class SetupStepUpdater {
                     ].id;
             }
         });
+    }
+
+    static async updateForOrganizationId(id: string) {
+        const organization = await Organization.getByID(id);
+        if(!organization) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'Organization not found',
+                human: 'De organisatie werd niet gevonden',
+            })
+        }
+
+        await this.updateForOrganization(organization);
     }
 
     static async updateForOrganization(
@@ -218,13 +234,13 @@ export class SetupStepUpdater {
 
     private static updateStepCompanies(
         setupSteps: SetupSteps,
-        _organization: Organization,
+        organization: Organization,
         _platform: PlatformStruct
     ) {
         const totalSteps = 1;
         let finishedSteps = 0;
 
-        if(_organization.meta.companies.length) {
+        if(organization.meta.companies.length) {
             finishedSteps = 1;
         }
 
@@ -355,5 +371,30 @@ export class SetupStepUpdater {
                 totalSteps: 0,
                 finishedSteps: 0,
             });
+    }
+
+    private static async updateStepRegistrations(setupSteps: SetupSteps,
+        organization: Organization,
+        platform: PlatformStruct) {
+            const defaultAgeGroupIds = platform.config.defaultAgeGroups.map(x => x.id);
+
+            const groupsWithDefaultAgeGroupIdQuery = SQL.select().from(
+                SQL.table(Group.table)
+            )
+            .where(SQL.column('organizationId'), organization.id)
+            .where(SQL.column('periodId'), organization.periodId)
+            .where(SQL.column('defaultAgeGroupId'), defaultAgeGroupIds);
+
+            const totalSteps = await groupsWithDefaultAgeGroupIdQuery.count();
+            const finishedSteps = await groupsWithDefaultAgeGroupIdQuery
+            .where(SQL.jsonValue(SQL.column('settings'), '$.value.registeredMembers'), SQLWhereSign.GreaterEqual, minimumRegistrationCount)
+            .count();
+
+            setupSteps.update(SetupStepType.Registrations, {
+                totalSteps,
+                finishedSteps,
+            });
+
+            setupSteps.markReviewed(SetupStepType.Registrations, {userId: 'backend', userName: 'backend'});
     }
 }

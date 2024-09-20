@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder, isPatchableArray, patchObject } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Organization, Platform, RegistrationPeriod } from "@stamhoofd/models";
+import { Organization, Platform, RegistrationPeriod, SetupStepUpdater } from "@stamhoofd/models";
 import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct } from "@stamhoofd/structures";
 
 import { SimpleError } from "@simonbackx/simple-errors";
@@ -9,7 +9,6 @@ import { Context } from "../../../helpers/Context";
 import { MembershipCharger } from "../../../helpers/MembershipCharger";
 import { MembershipHelper } from "../../../helpers/MembershipHelper";
 import { PeriodHelper } from "../../../helpers/PeriodHelper";
-import { SetupStepUpdater } from "../../../helpers/SetupStepsUpdater";
 
 type Params = Record<string, never>;
 type Query = undefined;

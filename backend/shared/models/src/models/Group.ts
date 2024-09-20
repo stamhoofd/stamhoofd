@@ -1,11 +1,12 @@
 import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
+import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, minimumRegistrationCount, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { Formatter } from '@stamhoofd/utility';
-import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
-import { QueueHandler } from '@stamhoofd/queues';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { QueueHandler } from '@stamhoofd/queues';
+import { Formatter } from '@stamhoofd/utility';
+import { SetupStepUpdater } from '../helpers/SetupStepsUpdater';
+import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
 
 if (Member === undefined) {
     throw new Error("Import Member is undefined")
@@ -220,15 +221,30 @@ export class Group extends Model {
     }
 
     async updateOccupancy() {
-        this.settings.registeredMembers = await Group.getCount(
+        const registeredMembersBefore = this.settings.registeredMembers ?? 0;
+        
+
+        const registeredMembersAfter = await Group.getCount(
             "groupId = ? and registeredAt is not null AND deactivatedAt is null",
             [this.id]
         )
+
+        this.settings.registeredMembers = registeredMembersAfter;
 
         this.settings.reservedMembers = await Group.getCount(
             "groupId = ? and registeredAt is null AND (canRegister = 1 OR reservedUntil >= ?)",
             [this.id, new Date()]
         )
+
+        if(this.defaultAgeGroupId) {
+            const hasSufficientMembersBefore = registeredMembersBefore >= minimumRegistrationCount;
+            const hasSufficientMembersAfter = (registeredMembersAfter ?? 0) >= minimumRegistrationCount;
+
+            if(hasSufficientMembersAfter !== hasSufficientMembersBefore) {
+                SetupStepUpdater.updateForOrganizationId(this.organizationId)
+                    .catch(console.error)
+            }
+        }
     }
 
     static async deleteUnreachable(organizationId: string, period: OrganizationRegistrationPeriod, allGroups: Group[]) {
