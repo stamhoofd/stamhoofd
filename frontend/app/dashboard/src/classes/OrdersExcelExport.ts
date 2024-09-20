@@ -187,7 +187,21 @@ export class OrdersExcelExport {
                     const columnName = menu.name
                     const index = optionColumns.get(Formatter.slug(columnName))
                     if (index !== undefined) {
-                        options[index] = option.option.name
+                        if (options[index]) {
+                            const value = options[index]
+
+                            if (typeof value === 'object' && !(value instanceof Date)) {
+                                value.value = value.value + ", " + option.option.name
+                            } else {
+                                if (typeof value === 'string') {
+                                    options[index] = value + ", " + option.option.name
+                                } else {
+                                    // invalid!
+                                }
+                            }
+                        } else {
+                            options[index] = option.option.name
+                        }
                     }
                 }
 
