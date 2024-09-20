@@ -27,3 +27,20 @@ body:not(.light) {
         filter: contrast(0.7);
     }
 }
+
+
+body:not(.light) {
+    @media (prefers-color-scheme: dark) {
+        .st-color-directive {
+            // Colors need to be recalculated using the local color hue and saturation
+            @include dark-modus;
+        }
+    }
+}
+
+body.dark {
+    .st-color-directive {
+        // Colors need to be recalculated using the local color hue and saturation
+        @include dark-modus;
+    }
+}

@@ -72,13 +72,13 @@ $color-primary-background: var(--color-primary-background, #{changeHue($color-pr
 $color-primary-dark: var(--color-primary-dark, #{changeHue($color-primary-dark-original, $color-primary-hue)});
 $color-primary-gray-light: var(--color-primary-gray-light, #{changeHue($color-primary-gray-light-original, $color-primary-hue)});
 
-$dark-theme-color-primary-lighter: changeHueInvert($color-primary-lighter-original, $color-primary-hue);
-$dark-theme-color-primary-light: changeHueInvert($color-primary-light-original, $color-primary-hue);
+$dark-theme-color-primary-lighter: changeHueInvert($color-primary-lighter-original, $color-primary-hue, -5);
+$dark-theme-color-primary-light: changeHueInvert($color-primary-light-original, $color-primary-hue, -5);
 // The primary background color in dark mode should be adjusted a bit for contrast 
 // -> hence we don't invert the same color
-$dark-theme-color-primary-background: changeHueInvert($color-primary-background-original, $color-primary-hue, -3);
-$dark-theme-color-primary-dark: changeHueInvert($color-primary-dark-original, $color-primary-hue);
-$dark-theme-color-primary-gray-light: changeHueInvert($color-primary-gray-light-original, $color-primary-hue);
+$dark-theme-color-primary-background: changeHueInvert($color-primary-background-original, $color-primary-hue, -5);
+$dark-theme-color-primary-dark: changeHueInvert($color-primary-dark-original, $color-primary-hue, -5);
+$dark-theme-color-primary-gray-light: changeHueInvert($color-primary-gray-light-original, $color-primary-hue, -5);
 
 // -----------------------------------------------------------------------------
 // -------- Dark (black) -------------------------------------------------------
@@ -91,7 +91,7 @@ $dark-theme-color-dark: hsl(0deg, 0%, 90%);
 $color-dark-light-original: #4d4d4d;
 
 $color-dark-light: var(--color-dark-light, $color-dark-light-original);
-$dark-theme-color-dark-light: hsl(0deg, 0%, 80%);
+$dark-theme-color-dark-light: invertColor($color-dark-light-original); // hsl(0deg, 0%, 80%);
 
 // -----------------------------------------------------------------------------
 // -------- Background ---------------------------------------------------------
@@ -103,11 +103,11 @@ $dark-theme-color-background: black;
 
 $color-background-shade-original: #f5f5f5;
 $color-background-shade: var(--color-background-shade, $color-background-shade-original);
-$dark-theme-color-background-shade: hsl(#{$color-primary-hue}, 0%, 6%);
+$dark-theme-color-background-shade: invertColor($color-background-shade-original); //hsl(#{$color-primary-hue}, 0%, 6%);
 
 $color-background-shade-darker-original: #EBEBEB;
 $color-background-shade-darker: var(--color-background-shade-darker, $color-background-shade-darker-original);
-$dark-theme-color-background-shade-darker: hsl(#{$color-primary-hue}, 0%, 14%);
+$dark-theme-color-background-shade-darker: invertColor($color-background-shade-darker-original); //hsl(#{$color-primary-hue}, 0%, 14%);
 
 // Used for segmented control in dark mode: instead of darker, it should become lighter
 $color-background-highlight: var(--color-background-highlight, #ffffff);
@@ -134,9 +134,9 @@ $color-error-border-original: #FFCAD3;
 $color-error-background-original: #ffd6dd;
 $color-error-dark-original: #630012;
 
-$dark-theme-color-error-border: invertColor($color-error-border-original);
-$dark-theme-color-error-background: invertColor($color-error-background-original);
-$dark-theme-color-error-dark: invertColor($color-error-dark-original);
+$dark-theme-color-error-border: invertColor($color-error-border-original, -5);
+$dark-theme-color-error-background: invertColor($color-error-background-original, -5);
+$dark-theme-color-error-dark: invertColor($color-error-dark-original, -5);
 
 $color-error: var(--color-error, $color-error-original);
 $color-error-border: var(--color-error-border, $color-error-border-original);
@@ -153,9 +153,9 @@ $color-success-background-original: #D6FFEC;
 $color-success-dark-original: #006131;
 $color-success-border-original: #AEDBC6;
 
-$dark-theme-color-success-background: invertColor($color-success-background-original);
-$dark-theme-color-success-dark: invertColor($color-success-dark-original);
-$dark-theme-color-success-border: invertColor($color-success-border-original);
+$dark-theme-color-success-background: invertColor($color-success-background-original, -5);
+$dark-theme-color-success-dark: invertColor($color-success-dark-original, -5);
+$dark-theme-color-success-border: invertColor($color-success-border-original, -5);
 
 $color-success: var(--color-success, $color-success-original);
 $color-success-background: var(--color-success-background, $color-success-background-original);
@@ -167,15 +167,16 @@ $color-success-border-focus: $color-success;
 // -------- Warning (yellow) ----------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-warning: #ffc900;
+$color-warning-original: #ffc900;
 $color-warning-background-original: #fff6d6;
 $color-warning-dark-original: #634e00;
 $color-warning-border-original: #DBD1AE;
 
-$dark-theme-color-warning-background: invertColor($color-warning-background-original);
-$dark-theme-color-warning-dark: invertColor($color-warning-dark-original);
-$dark-theme-color-warning-border: invertColor($color-warning-border-original);
+$dark-theme-color-warning-background: invertColor($color-warning-background-original, -5);
+$dark-theme-color-warning-dark: invertColor($color-warning-dark-original, -5);
+$dark-theme-color-warning-border: invertColor($color-warning-border-original, -5);
 
+$color-warning: var(--color-warning, $color-warning-original);
 $color-warning-background: var(--color-warning-background, $color-warning-background-original);
 $color-warning-dark: var(--color-warning-dark, $color-warning-dark-original);
 $color-warning-border: var(--color-warning-border, $color-warning-border-original);
@@ -286,17 +287,17 @@ $color-discount-border-focus: $color-discount;
 
 // Aliasses
 
-$color-border-lighter-original: $color-gray-3; 
-$color-border-lighter: var(--color-border-lighter, $color-border-lighter-original);
-
+$color-border-lighter: $color-gray-3; 
 $color-border-original: $color-gray-2; 
-$color-border: var(--color-border, $color-border-original);
+$color-border: $color-gray-2; 
 
 $color-border-shade-original: #D1D1D1;
 $color-border-shade: var(--color-border-shade, $color-border-shade-original);
 $dark-theme-color-border-shade: invertColor($color-border-shade-original);
 
-$color-border-shade-darker: #C7C7C7;
+$color-border-shade-darker-original: #C7C7C7;
+$color-border-shade-darker: var(--color-border-shade-darker, $color-border-shade-darker-original);
+$dark-theme-color-border-shade-darker: invertColor($color-border-shade-darker-original);
 
 $color-shadow-original: rgba(0, 0, 0, 0.1);
 $color-shadow: var(--color-shadow, $color-shadow-original);
@@ -365,6 +366,7 @@ $color-current-background: var(--color-current-background, #{$color-background})
   --color-primary-contrast: #{$dark-theme-color-primary-contrast};
 
   --color-border-shade: #{$dark-theme-color-border-shade};
+  --color-border-shade-darker: #{$dark-theme-color-border-shade-darker};
 
   // Manual
   --color-shadow: rgba(255, 255, 255, 0.05);

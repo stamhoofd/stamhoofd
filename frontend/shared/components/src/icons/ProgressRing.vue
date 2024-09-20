@@ -5,8 +5,7 @@
         :style="`border-width: ${borderWidth}px`"
     >
         <circle
-            stroke="black"
-            opacity="0.1"
+            stroke="var(--color-gray-2, red)"
             fill="transparent"
             :stroke-width="stroke"
             :r="normalizedRadius"
@@ -14,7 +13,7 @@
             :cy="radius"
         />
         <circle
-            stroke="var(--color-primary, #0053ff)"
+            stroke="var(--color-primary, red)"
             fill="transparent"
             :stroke-dasharray="circumference + ' ' + circumference"
             :style="{ strokeDashoffset }"
@@ -45,8 +44,9 @@ svg {
 }
 
 circle {
-          transition: stroke-dashoffset 0.35s;
-          transform: rotate(-90deg);
-          transform-origin: 50% 50%;
-        }
+    transition: stroke-dashoffset 0.35s;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    stroke-linecap: round;
+}
 </style>

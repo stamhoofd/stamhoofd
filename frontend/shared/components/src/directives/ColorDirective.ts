@@ -9,6 +9,7 @@ export const ColorDirective: ObjectDirective<HTMLElement> = {
             return;
         }
         const id = typeof binding.value === "string" ? binding.value : binding.value.id;
+        el.classList.add("st-color-directive"); // Fixes dark mode colors
 
         if (id.startsWith("#")) {
             return ColorHelper.setColor(id, el)

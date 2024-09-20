@@ -26,7 +26,14 @@ export class ColorHelper {
         element.style.setProperty("--dark-theme-color-primary-contrast", contrastColor);
 
         element.style.setProperty("--color-primary", color);
-        element.style.setProperty("--dark-theme-color-primary", color);
+
+        const colorDark = Colors.hslToHex({
+            h: h,
+            s: s,
+            l: Math.min(100, l + 5)
+        });
+
+        element.style.setProperty("--dark-theme-color-primary", colorDark);
 
         // Invert dark or light colors depending on theme
         const blackContrast = Colors.getAPCAContrast(rgb, {r: 0, g: 0, b: 0});

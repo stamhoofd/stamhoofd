@@ -55,6 +55,53 @@
     @media (max-width: 350px) {
         --block-width: 25px;
     }
+
+    --color-background: #{$color-background-original};
+    --color-background-shade: #{$color-background-shade-original};
+    --color-background-shade-darker: #{$color-background-shade-darker-original};
+    --color-dark: #{$color-dark-original};
+    --color-dark-light: #{$color-dark-light-original};
+    --color-gray: #{$color-gray-original};
+    --color-gray-2: #{$color-gray-2-original};
+    --color-gray-3: #{$color-gray-3-original};
+    --color-gray-4: #{$color-gray-4-original};
+    --color-gray-5: #{$color-gray-5-original};
+
+    --color-secundary: #{$color-secundary-original};
+    --color-secundary-background: #{$color-secundary-background-original};
+    --color-secundary-dark: #{$color-secundary-dark-original};
+    --color-secundary-border: #{$color-secundary-border-original};
+
+    --color-tertiary: #{$color-tertiary-original};
+    --color-tertiary-background: #{$color-tertiary-background-original};
+    --color-tertiary-dark: #{$color-tertiary-dark-original};
+    --color-tertiary-border: #{$color-tertiary-border-original};
+
+    --color-warning: #{$color-warning-original};
+    --color-warning-background: #{$color-warning-background-original};
+    --color-warning-dark: #{$color-warning-dark-original};
+    --color-warning-border: #{$color-warning-border-original};
+
+    --color-success: #{$color-success-original};
+    --color-success-background: #{$color-success-background-original};
+    --color-success-dark: #{$color-success-dark-original};
+    --color-success-border: #{$color-success-border-original};
+
+    --color-payconiq: #{$color-payconiq-original};
+    --color-payconiq-background: #{$color-payconiq-background-original};
+    --color-payconiq-dark: #{$color-payconiq-dark-original};    
+    --color-payconiq-border: #{$color-payconiq-border-original};
+
+    --color-discount: #{$color-discount-original};
+    --color-discount-background: #{$color-discount-background-original};
+    --color-discount-dark: #{$color-discount-dark-original};
+    --color-discount-border: #{$color-discount-border-original};
+    
+    --color-error: #{$color-error-original};
+    --color-error-background: #{$color-error-background-original};
+    --color-error-dark: #{$color-error-dark-original};
+    --color-error-border: #{$color-error-border-original};
+
 }
 
 body {
