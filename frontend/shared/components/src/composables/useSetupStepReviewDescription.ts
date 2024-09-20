@@ -5,7 +5,7 @@ import { Formatter } from "@stamhoofd/utility";
 export function useSetupStepReviewDescription(): { getDescription: (review: SetupStepReview | null, short?: boolean, textIfNotReviewed?: string) => string } {
     const $t = useTranslate();
 
-    function getDescription(review: SetupStepReview | null, short = false, textIfNotReviewed = $t('Niet nagekeken')): string {
+    function getDescription(review: SetupStepReview | null, short = false, textIfNotReviewed = $t('586cb220-498a-496a-8db5-89a4f10ba3df')): string {
         if(review) {
             const reviewedAtString = Formatter.date(review.date, true);
             const userName = review.userName;

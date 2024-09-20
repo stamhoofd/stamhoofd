@@ -403,12 +403,12 @@ export function useGetOrganizationUIFilterBuilders() {
     const platform = usePlatform();
      
     const setupStepFilterNameMap: Record<SetupStepType, string> = {
-        [SetupStepType.Responsibilities]: $t('Functies'),
-        [SetupStepType.Companies]: $t('Facturatiegegevens'),
-        [SetupStepType.Groups]: $t('Leeftijdsgroepen'),
-        [SetupStepType.Premises]: $t('Lokalen'),
-        [SetupStepType.Emails]: $t('E-mailadressen'),
-        [SetupStepType.Payment]: $t('Betaalmethodes'),
+        [SetupStepType.Responsibilities]: $t('be92d7b0-92ad-42d6-b9e2-b414671ac57d'),
+        [SetupStepType.Companies]: $t('6313a021-6795-4b7e-842c-f4574e433324'),
+        [SetupStepType.Groups]: $t('b6458e9c-2ddf-4cb0-8051-fb6a220c4127'),
+        [SetupStepType.Premises]: $t('7f531562-9609-456e-a8c3-2b373cad3f29'),
+        [SetupStepType.Emails]: $t('36a44efc-4cb0-4180-8678-938cc51d3ae8'),
+        [SetupStepType.Payment]: $t('d951a3d6-58f6-4e56-a482-2b8652ddd3bf'),
     }
 
     const getOrganizationUIFilterBuilders = (user: User | null) => {

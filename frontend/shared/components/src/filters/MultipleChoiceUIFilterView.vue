@@ -5,7 +5,7 @@
                 <Checkbox v-model="isSelectAll" />
             </template>
             <h3 class="style-title-list">
-                {{ $t('Selecteer alles') }}
+                {{ $t('b183b823-481c-46b1-951d-8a68dccc2517') }}
             </h3>
         </STListItem>
         <template v-if="!isSelectAll">

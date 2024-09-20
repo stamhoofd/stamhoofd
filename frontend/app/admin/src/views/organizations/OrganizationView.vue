@@ -163,7 +163,7 @@
 
             <div v-if="setupSteps.steps.size" class="container">
                 <hr>
-                <h2>{{ $t('Vlagmomenten') }}</h2>
+                <h2>{{ $t('6355a1b9-7b98-48c4-9aca-91df9a22d66e') }}</h2>
                 <SetupStepRows :steps="setupSteps" list-type="review" />
             </div>
 
