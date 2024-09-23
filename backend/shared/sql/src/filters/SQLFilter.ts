@@ -119,7 +119,8 @@ export function createSQLFilterNamespace(definitions: SQLFilterDefinitions): SQL
 }
 
 export enum SQLValueType {
-    'JSONBoolean' = 'JSONBoolean'
+    'JSONBoolean' = 'JSONBoolean',
+    'JSONString' = 'JSONString'
 }
 
 type SQLExpressionFilterOptions = {
@@ -141,6 +142,26 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         const n = doNormalizeValue(guardFilterCompareValue(val), options);
         return normalizeValue(n);
     }
+
+    if(isJSONValue) {
+        const castJsonType = (expression: SQLExpression, type: SQLValueType | undefined): SQLExpression => {
+            if(type === undefined) {
+                return expression;
+            }
+    
+            switch(type) {
+                case SQLValueType.JSONBoolean: {
+                    return expression;
+                }
+                case SQLValueType.JSONString: {
+                    return new SQLCast(new SQLJsonUnquote(expression), 'CHAR');
+                }
+            }
+        }
+        
+        sqlExpression = castJsonType(sqlExpression, options.type);
+    }
+
     const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression
 
     return (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => {
@@ -174,6 +195,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                     convertToExpression(JSON.stringify(v))
                 );
             }
+
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, convertToExpression(norm(f.$eq)));
         }
 
@@ -212,6 +234,24 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 );
             }
 
+            const createSqlArray = (value: SQLScalarValue[]): SQLArray => {
+                if(isJSONValue) {
+                    const type = options.type;
+
+                    switch(type) {
+                        case SQLValueType.JSONBoolean: {
+                            // todo;
+                            break;
+                        }
+                        case SQLValueType.JSONString: {
+                            break;
+                        }
+                    }
+                }
+
+                return new SQLArray(value);
+            }
+
             if (nullIncluded) {
                 const remaining = v.filter(v => v !== null);
                 if (remaining.length === 0) {
@@ -219,10 +259,10 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 }
                 return new SQLWhereOr([
                     new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()),
-                    new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLArray(remaining))
+                    new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, createSqlArray(remaining))
                 ]);
             }
-            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLArray(v as SQLScalarValue[]));
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, createSqlArray(v as SQLScalarValue[]));
         }
 
         if ('$neq' in f) {

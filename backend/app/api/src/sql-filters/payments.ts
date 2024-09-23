@@ -1,4 +1,4 @@
-import { SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLScalar, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
+import { SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLScalar, SQLValueType, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
 import { balanceItemPaymentsCompilers } from "./balance-item-payments";
 
 /**
@@ -23,11 +23,11 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         ),
         firstName: createSQLExpressionFilterCompiler(
             SQL.jsonValue(SQL.column('customer'), '$.value.firstName'),
-            {isJSONValue: true}
+            {isJSONValue: true, type: SQLValueType.JSONString}
         ),
         lastName: createSQLExpressionFilterCompiler(
             SQL.jsonValue(SQL.column('customer'), '$.value.lastName'),
-            {isJSONValue: true}
+            {isJSONValue: true, type: SQLValueType.JSONString}
         ),
         name: createSQLExpressionFilterCompiler(
             new SQLCast(
@@ -42,19 +42,19 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         company: createSQLFilterNamespace({
             name: createSQLExpressionFilterCompiler(
                 SQL.jsonValue(SQL.column('customer'), '$.value.company.name'),
-                {isJSONValue: true}
+                {isJSONValue: true, type: SQLValueType.JSONString}
             ),
             VATNumber: createSQLExpressionFilterCompiler(
                 SQL.jsonValue(SQL.column('customer'), '$.value.company.VATNumber'),
-                {isJSONValue: true}
+                {isJSONValue: true, type: SQLValueType.JSONString}
             ),
             companyNumber: createSQLExpressionFilterCompiler(
                 SQL.jsonValue(SQL.column('customer'), '$.value.company.companyNumber'),
-                {isJSONValue: true}
+                {isJSONValue: true, type: SQLValueType.JSONString}
             ),
             administrationEmail: createSQLExpressionFilterCompiler(
                 SQL.jsonValue(SQL.column('customer'), '$.value.company.administrationEmail'),
-                {isJSONValue: true}
+                {isJSONValue: true, type: SQLValueType.JSONString}
             ),
         })
     }),

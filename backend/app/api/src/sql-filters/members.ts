@@ -1,4 +1,4 @@
-import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLScalar, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
+import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLScalar, SQLValueType, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
 import { Formatter } from "@stamhoofd/utility";
 import { organizationFilterCompilers } from "./organizations";
 import { registrationFilterCompilers } from "./registrations";
@@ -25,7 +25,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
     ),
     gender: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.gender'),
-        {isJSONValue: true}
+        {isJSONValue: true, type: SQLValueType.JSONString}
     ),
     birthDay: createSQLColumnFilterCompiler('birthDay', {
         normalizeValue: (d) => {
@@ -42,17 +42,17 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
 
     email: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.email'),
-        {isJSONValue: true}
+        {isJSONValue: true, type: SQLValueType.JSONString}
     ),
 
     parentEmail: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.parents[*].email'),
-        {isJSONValue: true, isJSONObject: true}
+        {isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString}
     ),
 
     unverifiedEmail: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.unverifiedEmails'),
-        {isJSONValue: true, isJSONObject: true}
+        {isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString}
     ),
 
     phone: createSQLExpressionFilterCompiler(

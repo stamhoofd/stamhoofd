@@ -7,6 +7,7 @@ import {
     SQLNull,
     SQLQuery,
     SQLScalar,
+    SQLValueType,
     SQLWhereEqual,
     SQLWhereOr,
     SQLWhereSign,
@@ -30,14 +31,14 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
     ),
     city: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column("organizations", "address"), "$.value.city"),
-        { isJSONValue: true },
+        { isJSONValue: true, type: SQLValueType.JSONString },
     ),
     country: createSQLExpressionFilterCompiler(
         SQL.jsonValue(
             SQL.column("organizations", "address"),
             "$.value.country",
         ),
-        { isJSONValue: true },
+        { isJSONValue: true, type: SQLValueType.JSONString },
     ),
     umbrellaOrganization: createSQLExpressionFilterCompiler(
         SQL.jsonValue(
