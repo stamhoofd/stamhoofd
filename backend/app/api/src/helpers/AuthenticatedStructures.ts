@@ -149,8 +149,9 @@ export class AuthenticatedStructures {
         }
         //#endregion
 
-        //#region get registration period for each organization
-        const organizationsWithRegistrationPeriods: [Organization, OrganizationRegistrationPeriod][] = [];
+        //#region get registration period and whether private data can be accessed for each organization
+        const organizationData: Map<string, {organizationRegistrationPeriod: OrganizationRegistrationPeriod, canAccessPrivateData: boolean}> = new Map();
+        const organizationIdsToGetWebshopsFor: string[] = [];
 
         for(const [periodId, organizations] of periodIdOrganizationsMap.entries()) {
             const organizationMap = new Map(organizations.map(o => [o.id, o]));
@@ -167,27 +168,13 @@ export class AuthenticatedStructures {
                 const organizationId = organizationRegistrationPeriod.organizationId;
                 const organization = organizationMap.get(organizationId);
                 if(organization) {
-                    organizationsWithRegistrationPeriods.push([organization, organizationRegistrationPeriod]);
+                    // check if private data can be accessed
+                    const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
+                    if(canAccessPrivateData) {
+                        organizationIdsToGetWebshopsFor.push(organizationId);
+                    }
+                    organizationData.set(organizationId, {organizationRegistrationPeriod, canAccessPrivateData});
                 }
-            }
-        }
-        //#endregion
-
-        //#region check if private data access
-        const organizationsWithoutPrivateDataAccess: [Organization, OrganizationRegistrationPeriod][] = [];
-        const organizationsWithPrivateDataAccess: [Organization, OrganizationRegistrationPeriod][] = [];
-
-        for(const item of organizationsWithRegistrationPeriods) {
-            const organization = item[0];
-
-            // This method is async but it should not call the database because the organization is already fetched.
-            const canAccess = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization);
-            if(canAccess) {
-                // If at least two organizations can be accessesed, than all organizations can be accessed,
-                // but code can change so it is better to keep checking all organizations.
-                organizationsWithPrivateDataAccess.push(item);
-            } else {
-                organizationsWithoutPrivateDataAccess.push(item);
             }
         }
         //#endregion
@@ -198,78 +185,75 @@ export class AuthenticatedStructures {
         const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map(p => [p.id, p]));
         //#endregion
 
+        //#region get webshop previews
+        const webshops = organizationIdsToGetWebshopsFor.length > 0 ? await Webshop.where(
+            {
+                organizationId: {
+                    sign: 'IN',
+                    value: organizationIdsToGetWebshopsFor
+                }
+            },
+            { select: Webshop.selectColumnsWithout(undefined, "products", "categories")}
+        ) : [];
+
+        const webshopPreviews = new Map<string, WebshopPreview[]>();
+
+        for (const w of webshops) {
+            if (!await Context.auth.canAccessWebshop(w)) {
+                continue
+            }
+
+            const organizationId = w.organizationId;
+            const array = webshopPreviews.get(organizationId);
+            const preview = WebshopPreview.create(w);
+
+            if(array) {
+                array.push(preview);
+            } else {
+                webshopPreviews.set(organizationId, [preview]);
+            }
+        }
+        //#endregion
+
         //#region create organization structs
         const results: OrganizationStruct[] = [];
 
-        for(const [organization, organizationRegistrationPeriod] of organizationsWithoutPrivateDataAccess) {
+        for(const organization of organizations) {
             const registrationPeriod = periodMap.get(organization.periodId);
             if(!registrationPeriod) {
                 console.error('Registration period is undefined.')
                 continue;
             }
 
-            const result = OrganizationStruct.create({
-                ...organization.getBaseStructure(),
-                period: await this.organizationRegistrationPeriod(organizationRegistrationPeriod, [registrationPeriod])
-            });
+            const organizationId = organization.id;
+            const data = organizationData.get(organizationId);
+            if(data === undefined) {
+                console.error('Organization data is undefined.')
+                continue;
+            }
+
+            let result: OrganizationStruct;
+
+            const period = await this.organizationRegistrationPeriod(data.organizationRegistrationPeriod, [registrationPeriod]);
+            const baseStruct = organization.getBaseStructure();
+
+            if(data.canAccessPrivateData) {
+                result = OrganizationStruct.create({
+                    ...baseStruct,
+                    period,
+                    privateMeta: organization.privateMeta,
+                    webshops: webshopPreviews.get(organization.id),
+                });
+            } else {
+                result = OrganizationStruct.create({
+                    ...baseStruct,
+                    period
+                });
+            }
 
             results.push(result);
         }
-
-        if(organizationsWithPrivateDataAccess.length > 0) {
-            //#region get webshop previews
-            const webshops = await Webshop.where(
-                {
-                    organizationId: {
-                        sign: 'IN',
-                        value: organizationsWithPrivateDataAccess.map(o => o[0].id)
-                    }
-                },
-                { select: Webshop.selectColumnsWithout(undefined, "products", "categories")}
-            );
-    
-            const webshopPreviews = new Map<string, WebshopPreview[]>();
-    
-            for (const w of webshops) {
-                if (!await Context.auth.canAccessWebshop(w)) {
-                    continue
-                }
-    
-                const organizationId = w.organizationId;
-                const array = webshopPreviews.get(organizationId);
-                const preview = WebshopPreview.create(w);
-    
-                if(array) {
-                    // todo: maybe check whether not double?
-                    array.push(preview);
-                } else {
-                    webshopPreviews.set(organizationId, [preview]);
-                }
-            }
-            //#endregion
-
-            for(const [organization, organizationRegistrationPeriod] of organizationsWithPrivateDataAccess) {
-                const registrationPeriod = periodMap.get(organization.periodId);
-                if(!registrationPeriod) {
-                    console.error('Registration period is undefined.')
-                    continue;
-                }
-
-                const result = OrganizationStruct.create({
-                    ...organization.getBaseStructure(),
-                    privateMeta: organization.privateMeta,
-                    webshops: webshopPreviews.get(organization.id),
-                    period: await this.organizationRegistrationPeriod(organizationRegistrationPeriod, [registrationPeriod])
-                });
-    
-                results.push(result);
-            }
-        }
         //#endregion
-
-        if(results.length !== organizations.length) {
-            console.error(`Result length (${results.length}) does not match organization length (${organizations.length})`);
-        }
 
         return results;
     }
