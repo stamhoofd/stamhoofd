@@ -164,17 +164,19 @@ export class AuthenticatedStructures {
                 }
             });
 
-            for(const organizationRegistrationPeriod of result) {
-                const organizationId = organizationRegistrationPeriod.organizationId;
-                const organization = organizationMap.get(organizationId);
-                if(organization) {
-                    // check if private data can be accessed
-                    const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
-                    if(canAccessPrivateData) {
-                        organizationIdsToGetWebshopsFor.push(organizationId);
-                    }
-                    organizationData.set(organizationId, {organizationRegistrationPeriod, canAccessPrivateData});
+            const organizationRegistrationPeriods = new Map(result.map(r => [r.organizationId, r]));
+
+            for(const organization of organizations) {
+                const organizationId = organization.id;
+                const organizationRegistrationPeriod = organizationRegistrationPeriods.get(organizationId) ?? await organization.getPeriod();
+
+                // check if private data can be accessed
+                const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
+                if(canAccessPrivateData) {
+                    organizationIdsToGetWebshopsFor.push(organizationId);
                 }
+
+                organizationData.set(organizationId, {organizationRegistrationPeriod, canAccessPrivateData});
             }
         }
         //#endregion
