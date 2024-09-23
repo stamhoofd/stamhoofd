@@ -61,13 +61,13 @@ export default class ProductSelectLocationInput extends VueComponent {
     internalValidator = new Validator()
     
     @Prop({ default: null })
-        value: ProductLocation | null
+        modelValue: ProductLocation | null
 
     selectedLocation: ProductLocation | null = null
     customLocation: ProductLocation | null = null
     editingLocation = false
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: ProductLocation | null) {
         if (val === (this.selectedLocation ?? this.customLocation ?? null)) {
             // Not changed
@@ -94,7 +94,7 @@ export default class ProductSelectLocationInput extends VueComponent {
     }
 
     mounted() {
-        const a = this.locations.find(aa => aa.id == this.value?.id)
+        const a = this.locations.find(aa => aa.id == this.modelValue?.id)
         if (a) {
             this.selectedLocation = a
             this.editingLocation = false
@@ -102,9 +102,9 @@ export default class ProductSelectLocationInput extends VueComponent {
         } else {
             this.selectedLocation = null
             this.editingLocation = false
-            this.customLocation = this.value
+            this.customLocation = this.modelValue
 
-            if (!this.value) {
+            if (!this.modelValue) {
                 if (this.locations.length > 0) {
                     this.$emit('update:modelValue', this.locations[0])
                 } else {

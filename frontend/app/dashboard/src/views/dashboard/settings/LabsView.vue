@@ -105,6 +105,10 @@
                 Activeer test-modus voor betalingen
             </Checkbox>
 
+            <Checkbox :model-value="getFeatureFlag('webshops')" @update:model-value="setFeatureFlag('webshops', !!$event)">
+                Webshops
+            </Checkbox>
+
             <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
                 Single-Sign-On
             </Checkbox>

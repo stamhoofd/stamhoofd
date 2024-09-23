@@ -61,13 +61,13 @@ export default class ProductSelectDateRangeInput extends VueComponent {
     internalValidator = new Validator()
     
     @Prop({ default: null })
-        value: ProductDateRange | null
+        modelValue: ProductDateRange | null
 
     selectedDateRange: ProductDateRange | null = null
     customDateRange: ProductDateRange | null = null
     editingDateRange = false
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: ProductDateRange | null) {
         if (val === (this.selectedDateRange ?? this.customDateRange ?? null)) {
             // Not changed
@@ -98,7 +98,7 @@ export default class ProductSelectDateRangeInput extends VueComponent {
     }
 
     mounted() {
-        const a = this.dateRanges.find(aa => aa.id == this.value?.id)
+        const a = this.dateRanges.find(aa => aa.id == this.modelValue?.id)
         if (a) {
             this.selectedDateRange = a
             this.editingDateRange = false
@@ -106,9 +106,9 @@ export default class ProductSelectDateRangeInput extends VueComponent {
         } else {
             this.selectedDateRange = null
             this.editingDateRange = false
-            this.customDateRange = this.value
+            this.customDateRange = this.modelValue
 
-            if (!this.value) {
+            if (!this.modelValue) {
                 if (this.dateRanges.length > 0) {
                     this.$emit('update:modelValue', this.dateRanges[0])
                 } else {
@@ -192,7 +192,7 @@ export default class ProductSelectDateRangeInput extends VueComponent {
         if (!this.customDateRange) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "invalid_field",
-                message: "Vul een locatie in",
+                message: "Kies een datum",
                 field: "dateRange"
             }))
             return false

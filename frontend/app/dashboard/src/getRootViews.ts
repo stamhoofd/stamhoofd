@@ -354,7 +354,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             }
                         }
 
-                        if (organization?.meta.packages.useWebshops) {
+                        if (organization?.meta.packages.useWebshops && (organization?.privateMeta?.featureFlags.includes('webshops') ?? false)) {
                             tabs.push(webshopsTab)
                         }
 

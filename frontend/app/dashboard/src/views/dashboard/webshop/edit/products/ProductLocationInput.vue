@@ -9,9 +9,9 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput,ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
-import { Address, ProductLocation} from "@stamhoofd/structures"
 import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { AddressInput, ErrorBox, STInputBox, Validator } from "@stamhoofd/components";
+import { Address, ProductLocation } from "@stamhoofd/structures";
 
 @Component({
     components: {
@@ -24,12 +24,12 @@ export default class ProductLocationInput extends VueComponent {
      * Assign a validator if you want to offload the validation to components
      */
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     errorBox: ErrorBox | null = null
     
     @Prop({ default: null })
-    value: ProductLocation | null
+        modelValue: ProductLocation | null
 
     mounted() {
         if (this.validator) {
@@ -46,22 +46,22 @@ export default class ProductLocationInput extends VueComponent {
     }
 
     get name() {
-        return this.value?.name ?? ""
+        return this.modelValue?.name ?? ""
     }
 
     set name(name: string) {
-        if (this.value) {
-            this.$emit('update:modelValue', this.value.patch({ name }))
+        if (this.modelValue) {
+            this.$emit('update:modelValue', this.modelValue.patch({ name }))
         }
     }
 
     get address() {
-        return this.value?.address ?? null
+        return this.modelValue?.address ?? null
     }
 
     set address(address: Address | null) {
-        if (this.value) {
-            this.$emit('update:modelValue', this.value.patch({ address }))
+        if (this.modelValue) {
+            this.$emit('update:modelValue', this.modelValue.patch({ address }))
         }
     }
 
