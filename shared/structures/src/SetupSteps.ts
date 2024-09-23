@@ -6,8 +6,11 @@ export enum SetupStepType {
     Groups = "Groups",
     Premises = "Premises",
     Emails = 'Emails',
-    Payment = 'Payment'
+    Payment = 'Payment',
+    Registrations = 'Registrations',
 }
+
+export const minimumRegistrationCount: number = 1;
 
 export class SetupStepReview extends AutoEncoder {
     @field({ decoder: DateDecoder })

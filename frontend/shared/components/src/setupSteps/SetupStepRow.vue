@@ -80,7 +80,8 @@ const icons: Record<SetupStepType, string> = {
     [SetupStepType.Responsibilities]: 'star',
     [SetupStepType.Companies]: 'file-filled',
     [SetupStepType.Emails]: 'email',
-    [SetupStepType.Payment]: 'bank'
+    [SetupStepType.Payment]: 'bank',
+    [SetupStepType.Registrations]: 'edit',
 }
 
 const icon = computed(() => icons[props.setupStepType]);

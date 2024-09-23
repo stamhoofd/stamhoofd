@@ -1,12 +1,11 @@
 
-import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
-import { AuthenticatedStructures } from "./AuthenticatedStructures";
-import { PatchOrganizationRegistrationPeriodsEndpoint } from "../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint";
-import { QueueHandler } from "@stamhoofd/queues";
-import { SetupStepUpdater } from "./SetupStepsUpdater";
-import { PermissionLevel, Group as GroupStruct } from "@stamhoofd/structures";
-import { MemberUserSyncer } from "./MemberUserSyncer";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, SetupStepUpdater } from "@stamhoofd/models";
+import { QueueHandler } from "@stamhoofd/queues";
+import { Group as GroupStruct, PermissionLevel } from "@stamhoofd/structures";
+import { PatchOrganizationRegistrationPeriodsEndpoint } from "../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint";
+import { AuthenticatedStructures } from "./AuthenticatedStructures";
+import { MemberUserSyncer } from "./MemberUserSyncer";
 
 export class PeriodHelper {
     static async moveOrganizationToPeriod(organization: Organization, period: RegistrationPeriod) {

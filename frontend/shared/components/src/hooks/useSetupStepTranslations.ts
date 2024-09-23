@@ -17,6 +17,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Premises]: $t('19cc6e71-9cd7-41d8-84d0-2c8828bd92c4'),
         [SetupStepType.Emails]: $t('7e68086e-0dcc-445a-a639-984f1a7298ad'),
         [SetupStepType.Payment]: $t('db69887c-b23a-4779-b945-cbe5d02856a7'),
+        [SetupStepType.Registrations]: $t('Schrijf leden in')
     }
 
     const reviewDescriptionMap: Record<SetupStepType, string> = {
@@ -26,6 +27,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Premises]: $t('03ffd28c-99d4-4bae-8494-5def382d826e'),
         [SetupStepType.Emails]: $t('9eb28669-42a5-4211-b72f-3335c0d4b329'),
         [SetupStepType.Payment]: $t('70894bb8-da5a-4f1a-929d-08f4479c4de3'),
+        [SetupStepType.Registrations]: $t('Schrijf minstens één lid in per leeftijdsgroep.')
     }
 
     const reviewCheckboxTitleMap: Record<SetupStepType, string> = {
@@ -35,6 +37,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Premises]: $t('0d7093d6-d3c0-412e-af8a-d44a5d2394d9'),
         [SetupStepType.Emails]: $t('c136101a-cd7e-4b04-9c81-e17f03a511d1'),
         [SetupStepType.Payment]: $t('b831d108-6aa9-4e6e-97ce-9f50a1cab9e1'),
+        [SetupStepType.Registrations]: $t('Schrijf leden in')
     }
 
     const todoTitleMap: Record<SetupStepType, string> = {
@@ -44,6 +47,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Premises]: $t('5c37d309-63da-44af-8eec-fb593b8bad31'),
         [SetupStepType.Emails]: $t('da415fb3-06f2-45eb-9230-ef56bcd52970'),
         [SetupStepType.Payment]: $t('8587ff64-b9b5-4e57-84b1-4afd342ffec3'),
+        [SetupStepType.Registrations]: $t('Schrijf leden in')
     }
 
     const todoDescriptionMap: Record<SetupStepType, string> = {
@@ -53,6 +57,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Premises]: $t('05afcd20-5dda-4e01-88a7-e58d46487d30'),
         [SetupStepType.Emails]: $t('9ef3cbb3-93bb-4f77-93af-3752ff869894'),
         [SetupStepType.Payment]: $t('953003c6-6653-4cef-a2ca-09723658b828'),
+        [SetupStepType.Registrations]: $t('Schrijf minstens één lid in per leeftijdsgroep.')
     }
 
     const getReviewTitle = (type: SetupStepType): string => {

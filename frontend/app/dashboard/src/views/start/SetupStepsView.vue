@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EmailSettingsView, GeneralSettingsView, SetupStepRows, TransitionFade, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
+import { EmailSettingsView, GeneralSettingsView, GlobalEventBus, SetupStepRows, TransitionFade, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed, onActivated, ref } from 'vue';
@@ -144,6 +144,10 @@ async function onClickStep(type: SetupStepType) {
         }
         case SetupStepType.Payment: {
             await $navigate(Routes.Payment);
+            break;
+        }
+        case SetupStepType.Registrations: {
+            await GlobalEventBus.sendEvent('selectTabByName', 'leden')
             break;
         }
     }

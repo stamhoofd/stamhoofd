@@ -409,6 +409,7 @@ export function useGetOrganizationUIFilterBuilders() {
         [SetupStepType.Premises]: $t('7f531562-9609-456e-a8c3-2b373cad3f29'),
         [SetupStepType.Emails]: $t('36a44efc-4cb0-4180-8678-938cc51d3ae8'),
         [SetupStepType.Payment]: $t('d951a3d6-58f6-4e56-a482-2b8652ddd3bf'),
+        [SetupStepType.Registrations]: $t('Inschrijvingen'),
     }
 
     const getOrganizationUIFilterBuilders = (user: User | null) => {
