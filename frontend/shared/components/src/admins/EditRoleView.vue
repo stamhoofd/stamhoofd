@@ -60,20 +60,20 @@
                         :role="patched" 
                         :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" 
                         :inherited-roles="inheritedRoles"
-                        :configurable-access-rights="[]"
-                        type="resource" 
+                        :configurable-access-rights="[AccessRight.EventWrite]"
+                        type="resource"
                         @patch:role="addPatch" 
                     />
 
                     <ResourcePermissionRow 
-                        v-for="tag in tags" 
-                        :key="tag.id" 
-                        :role="patched" 
+                        v-for="tag in tags"
+                        :key="tag.id"
+                        :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" 
-                        :configurable-access-rights="[]"
-                        type="resource" 
-                        @patch:role="addPatch" 
+                        :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }"
+                        :configurable-access-rights="[AccessRight.EventWrite]"
+                        type="resource"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </template>
@@ -115,13 +115,21 @@
                 </h2>
 
                 <STList>
+                    <ResourcePermissionRow
+                        :role="patched" 
+                        :inherited-roles="inheritedRoles"
+                        :resource="{id: '', name: 'Alle groepen', type: PermissionsResourceType.Groups }" 
+                        :configurable-access-rights="[AccessRight.EventWrite]"
+                        type="resource" 
+                        @patch:role="addPatch" 
+                    />
                     <ResourcePermissionRow 
                         v-for="group in groups" 
                         :key="group.id" 
                         :role="patched" 
                         :inherited-roles="inheritedRoles"
                         :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }" 
-                        :configurable-access-rights="[]"
+                        :configurable-access-rights="[AccessRight.EventWrite]"
                         type="resource" 
                         @patch:role="addPatch" 
                     />
