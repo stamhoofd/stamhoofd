@@ -76,7 +76,7 @@ type ObjectType = Event;
 const searchQuery = ref('');
 const present = usePresent();
 const context = useContext();
-const selectedUIFilter = ref(null) as Ref<null | UIFilter>;
+
 const selectedYear = ref(null) as Ref<number | null>;
 const years = computed(() => {
     const currentYear = Formatter.year(new Date());
@@ -91,6 +91,7 @@ const auth = useAuth();
 const eventPermissions = useEventPermissions();
 
 const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : []);
+const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
 
 const yearLabels = computed(() => {
     return years.value.map((y) => {
@@ -340,6 +341,45 @@ function getRequiredFilter(): StamhoofdFilter | null {
     }
 
     return filters;
+}
+
+function createDefaultUIFilter(): UIFilter | null {
+    let groupIds: string[] | undefined = undefined;
+    let organizationTagIds: string[] | undefined = undefined;
+
+    if (eventPermissions.hasGroupRestrictions()) {
+        const groupsToFilterEventsOn = eventPermissions.groupsToFilterEventsOn();
+        if (groupsToFilterEventsOn) {
+            groupIds = groupsToFilterEventsOn;
+        }
+    }
+
+    if (eventPermissions.hasTagRestrictions()) {
+        const tagsToFilterEventsOn = eventPermissions.tagsToFilterEventsOn();
+        if (tagsToFilterEventsOn) {
+            organizationTagIds = tagsToFilterEventsOn;
+        }
+    }
+
+    if (groupIds === undefined && organizationTagIds === undefined) {
+        return null;
+    }
+
+    const filter: StamhoofdFilter = {};
+
+    if (groupIds) {
+        filter.groupIds = {
+            $in: groupIds,
+        };
+    }
+
+    if (organizationTagIds) {
+        filter.organizationTagIds = {
+            $in: organizationTagIds,
+        };
+    }
+
+    return filterBuilders[0].fromFilter(filter);
 }
 
 useGlobalEventListener('event-deleted', async () => {
