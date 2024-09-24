@@ -7,7 +7,7 @@
         <h2 class="style-title-list">
             {{ AccessRightHelper.getName(props.accessRight) }}
         </h2>
-        <p class="style-description-small" v-if="AccessRightHelper.getLongDescription(props.accessRight)">
+        <p v-if="AccessRightHelper.getLongDescription(props.accessRight)" class="style-description-small">
             {{ AccessRightHelper.getLongDescription(props.accessRight) }}
         </p>
     </STListItem>

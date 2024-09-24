@@ -12,7 +12,7 @@
             </p>
         </template>
         <template v-else>
-            <h2 class="style-title-list">
+            <h2 v-if="role instanceof PermissionRoleDetailed" class="style-title-list">
                 {{ role.name }}
             </h2>
             <p v-if="isMe" class="style-description-small">
@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ContextMenu, ContextMenuItem, useAuth, useEmitPatch } from '@stamhoofd/components';
-import { maximumPermissionlevel, AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName } from '@stamhoofd/structures';
+import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
 import { Ref, computed } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -46,7 +46,6 @@ const props = withDefaults(defineProps<{
 }>(), {
     inheritedRoles: () => [],
 })
-
 
 const emit = defineEmits(['patch:role'])
 const {patched: role, addPatch, createPatch} = useEmitPatch<PermissionRoleDetailed|Permissions>(props, emit, 'role');
@@ -77,6 +76,11 @@ const lockedMinimumLevel = computed(() => {
     }
 
     return maximumPermissionlevel(...arr)
+})
+
+const lockedAccessRights = computed(() => {
+    const accessRights = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.accessRights ?? []) : [];
+    return accessRights;
 })
 
 const permissionLevel = computed({
@@ -131,7 +135,6 @@ const permissionLevel = computed({
     }
 })
 
-
 const accessRightsMap: Map<AccessRight, Ref<boolean>> = new Map()
 
 for (const accessRight of props.configurableAccessRights) {
@@ -170,10 +173,11 @@ for (const accessRight of props.configurableAccessRights) {
 }
 
 const locked = computed(() => {
-    return lockedMinimumLevel.value !== PermissionLevel.None
+    return lockedMinimumLevel.value !== PermissionLevel.None || lockedAccessRights.value.length > 0
 })
+
 const selected = computed({
-    get: () => lockedMinimumLevel.value !== PermissionLevel.None || (!!resourcePermissions.value && (resourcePermissions.value.level !== PermissionLevel.None || !!resourcePermissions.value?.accessRights.length)),
+    get: () => lockedMinimumLevel.value !== PermissionLevel.None || lockedAccessRights.value.length > 0 || (!!resourcePermissions.value && (resourcePermissions.value.level !== PermissionLevel.None || !!resourcePermissions.value?.accessRights.length)),
     set: (value: boolean) => {
         if (value === selected.value) {
             return
@@ -195,11 +199,17 @@ const selected = computed({
     }
 })
 
+const allAccessRights = computed(() => {
+    const specificAccessRights = resourcePermissions.value?.accessRights ?? []
+    const inheritedAccessRights = lockedAccessRights.value;
+    return [...new Set([...specificAccessRights, ...inheritedAccessRights])];
+})
+
 const levelText = computed(() => {
     switch(permissionLevel.value) {
         case PermissionLevel.None: {
             // Loop over all access rights
-            const accessRights = resourcePermissions.value?.accessRights ?? []
+            const accessRights = allAccessRights.value;
             if (accessRights.length) {
                 return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(" + ")
             }
@@ -207,7 +217,7 @@ const levelText = computed(() => {
         }
         case PermissionLevel.Read: {
             const rights = ['Lezen']
-            const accessRights = resourcePermissions.value?.accessRights ?? []
+            const accessRights = allAccessRights.value;
             
             for (const right of accessRights) {
                 const base = AccessRightHelper.autoGrantRightForLevel(right);
@@ -221,7 +231,7 @@ const levelText = computed(() => {
         }
         case PermissionLevel.Write: {
             const rights = ['Bewerken']
-            const accessRights = resourcePermissions.value?.accessRights ?? []
+            const accessRights = allAccessRights.value;
             
             for (const right of accessRights) {
                 const base = AccessRightHelper.autoGrantRightForLevel(right);
@@ -235,7 +245,7 @@ const levelText = computed(() => {
         }
         case PermissionLevel.Full: {
             const rights = ['Volledige toegang']
-            const accessRights = resourcePermissions.value?.accessRights ?? []
+            const accessRights = allAccessRights.value;
             
             for (const right of accessRights) {
                 const base = AccessRightHelper.autoGrantRightForLevel(right);
@@ -296,12 +306,26 @@ const choosePermissions = async (event: MouseEvent) => {
         ...(showAccessRights.length > 0 ? [
             showAccessRights.map((accessRight) => {
                 const baseLevel = AccessRightHelper.autoGrantRightForLevel(accessRight)
+                const isLocked = lockedAccessRights.value.includes(accessRight);
                 const included = !!baseLevel && getPermissionLevelNumber(permissionLevel.value) >= getPermissionLevelNumber(baseLevel)
+
+                //#region description
+                let description = undefined;
+
+                if(!isLocked) {
+                    if(included) {
+                        description = ('Inbegrepen bij ' + getPermissionLevelName(baseLevel));
+                    } else {
+                        description = ('Niet inbegrepen bij ' + getPermissionLevelName(permissionLevel.value))
+                    }
+                }
+                //#endregion
+
                 return new ContextMenuItem({
-                    selected: included || accessRightsMap.get(accessRight)!.value,
+                    selected: isLocked || included || accessRightsMap.get(accessRight)!.value,
                     name: AccessRightHelper.getName(accessRight),
-                    disabled: included,
-                    description: included ? ('Inbegrepen bij ' + getPermissionLevelName(baseLevel)) : ('Niet inbegrepen bij ' + getPermissionLevelName(permissionLevel.value)),
+                    disabled: isLocked || included,
+                    description,
                     action: () => {
                         accessRightsMap.get(accessRight)!.value = !accessRightsMap.get(accessRight)!.value
                     }
@@ -316,5 +340,4 @@ const choosePermissions = async (event: MouseEvent) => {
         yPlacement: "bottom",
     })
 }
-
 </script>
