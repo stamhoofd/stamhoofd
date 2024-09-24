@@ -6,7 +6,7 @@ export enum PermissionsResourceType {
     Groups = 'Groups',
     GroupCategories = 'GroupCategories',
     OrganizationTags = 'OrganizationTags',
-    RecordCategories = 'RecordCategory',
+    RecordCategories = 'RecordCategory'
 }
 
 export function getPermissionResourceTypeName(type: PermissionsResourceType, plural = true): string {
