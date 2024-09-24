@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Event, Group, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { Event as EventStruct, GroupType, NamedObject, PermissionLevel } from "@stamhoofd/structures";
+import { Event, Group, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Event as EventStruct, GroupType, NamedObject } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -48,46 +48,19 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const events: Event[] = [];
 
         for (const {put} of request.body.getPuts()) {
-            if (organization?.id && put.organizationId !== organization.id) {
-                throw new SimpleError({
-                    code: 'invalid_data',
-                    message: 'Invalid organizationId',
-                    human: 'Je kan geen activiteiten aanmaken voor een andere organisatie',
-                })
-            }
-
-            if (!organization?.id && !Context.auth.hasPlatformFullAccess()) {
-                throw new SimpleError({
-                    code: 'invalid_data',
-                    message: 'Invalid organizationId',
-                    human: 'Je kan activiteiten aanmaken via het administratieportaal als je geen platform hoofdbeheerder bent',
-                })
-            }
-            
-            const eventOrganization = put.organizationId ? (await Organization.getByID(put.organizationId)) : null
-            if (!eventOrganization && put.organizationId) {
-                throw new SimpleError({
-                    code: 'invalid_data',
-                    message: 'Invalid organizationId',
-                    human: 'De organisatie werd niet gevonden',
-                })
-            }
-
             const event = new Event()
-            event.id = put.id
             event.organizationId = put.organizationId
+            event.meta = put.meta;
+            const eventOrganization = await this.tryWriteEvent(event);
+            event.id = put.id
             event.name = put.name
             event.startDate = put.startDate
             event.endDate = put.endDate
-            event.meta = put.meta;
+            
             const type = await PatchEventsEndpoint.getEventType(put.typeId);
             event.typeId = type.id;
             event.meta.organizationCache = eventOrganization ? NamedObject.create({id: eventOrganization.id, name: eventOrganization.name}) : null
             await PatchEventsEndpoint.checkEventLimits(event)
-
-            if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
-                throw Context.auth.error()
-            }
 
             if (put.group) {
                 const period = await RegistrationPeriod.getByDate(event.startDate)
@@ -123,7 +96,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         for (const patch of request.body.getPatches()) {
             const event = await Event.getByID(patch.id)
 
-            if (!event || !(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
+            if (!event) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Event not found',
@@ -131,9 +104,15 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 })
             }
 
-            event.name = patch.name ?? event.name
-            event.startDate = patch.startDate ?? event.startDate
-            event.endDate = patch.endDate ?? event.endDate
+            try {
+                await this.tryWriteEvent(event);
+            } catch {
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Event not found',
+                    human: 'De activiteit werd niet gevonden',
+                })
+            }
 
             if (patch.meta?.organizationCache) {
                 throw new SimpleError({
@@ -143,45 +122,23 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     field: 'meta.organizationCache'
                 })
             }
+            
 
-            event.meta = patchObject(event.meta, patch.meta)
+            event.meta = patchObject(event.meta, patch.meta);
 
-            if (patch.organizationId !== undefined) {
-                if (organization?.id && patch.organizationId !== organization.id) {
-                    throw new SimpleError({
-                        code: 'invalid_data',
-                        message: 'Invalid organizationId',
-                        human: 'Je kan geen activiteiten aanmaken voor een andere organisatie',
-                    })
-                }
-    
-                if (!organization?.id && !Context.auth.hasPlatformFullAccess()) {
-                    throw new SimpleError({
-                        code: 'invalid_data',
-                        message: 'Invalid organizationId',
-                        human: 'Je kan geen activiteiten voor een specifieke organisatie aanmaken als je geen platform hoofdbeheerder bent',
-                    })
-                }
-    
-                const eventOrganization = patch.organizationId ? (await Organization.getByID(patch.organizationId)) : null
-                if (!eventOrganization && patch.organizationId) {
-                    throw new SimpleError({
-                        code: 'invalid_data',
-                        message: 'Invalid organizationId',
-                        human: 'De organisatie werd niet gevonden',
-                    })
-                }
+            if(patch.organizationId) {
                 event.organizationId = patch.organizationId
-                event.meta.organizationCache = eventOrganization ? NamedObject.create({id: eventOrganization.id, name: eventOrganization.name}) : null
-            } else {
-                // Update cache
-                if (event.organizationId) {
-                    const eventOrganization = await Organization.getByID(event.organizationId)
-                    if (eventOrganization) {
-                        event.meta.organizationCache = NamedObject.create({id: eventOrganization.id, name: eventOrganization.name})
-                    }
-                }
             }
+
+            // todo: prevent loading organization twice?
+            const eventOrganization = await this.tryWriteEvent(event);
+            if (eventOrganization) {
+                event.meta.organizationCache = NamedObject.create({id: eventOrganization.id, name: eventOrganization.name})
+            }
+
+            event.name = patch.name ?? event.name
+            event.startDate = patch.startDate ?? event.startDate
+            event.endDate = patch.endDate ?? event.endDate
 
             const type = await PatchEventsEndpoint.getEventType(patch.typeId ?? event.typeId);
 
@@ -262,9 +219,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({ code: "not_found", message: "Event not found", statusCode: 404 });
             }
 
-            if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
-                throw Context.auth.error()
-            }
+            await this.tryWriteEvent(event);
 
             if(event.groupId) {
                 await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
@@ -376,6 +331,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 })
             }
         }
+    }
+
+    private async tryWriteEvent(event: Event) {
+        return await Context.auth.tryWriteEvent(event);
     }
 
     private static throwIfAddressIsMissing(event: Event) {

@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
 import { BalanceItem, CachedOutstandingBalance, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from "@stamhoofd/models"
-import { AccessRight, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from "@stamhoofd/structures"
+import { AccessRight, FinancialSupportSettings, GroupCategory, GroupStatus, LoadedPermissions, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
 
 /**
@@ -187,26 +187,110 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async canAccessEvent(event: Event, permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
-        // Check permissions aren't scoped to a specific organization, and they mismatch
-        if (!this.checkScope(event.organizationId)) {
-            return false
-        }
+    /**
+     * Will throw error if not allowed to write this event
+     * @param event 
+     * @returns Organization if event for specific organization, else null
+     * @throws error if not allowed to write this event
+     */
+    async tryWriteEvent(event: Event): Promise<Organization | null> {
+        const accessRight: AccessRight = AccessRight.EventWrite;
+        const eventForTags = event.meta.organizationTagIds;
+        const eventForDefaultAgeGroupIds = event.meta.defaultAgeGroupIds;
 
-        if (permissionLevel !== PermissionLevel.Read) {
-            if (event.organizationId) {
-                // Need full access for now
-                if (!await this.hasFullAccess(event.organizationId)) {
-                    return false
+        //#region organization and groups
+        const eventForOrganization = event.organizationId;
+        const eventForGroups = event.meta.groups;
+
+        if(eventForOrganization !== null) {
+            let organization: Organization | null = null;
+            let organizationPermissions: LoadedPermissions | null = null;
+
+            try {
+                organization = await this.getOrganization(eventForOrganization);
+                organizationPermissions = await this.getOrganizationPermissions(organization);
+            } catch(error) {
+                console.error(error);
+                // throws if organization not found for example
+                // todo
+                throw new Error('todo');
+            }
+
+            if(organizationPermissions === null) {
+                // todo
+                throw new Error('todo');
+            }
+
+            if(eventForGroups === null) {
+                if(!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, '', accessRight)) {
+                    // todo
+                    throw new Error('todo');
                 }
             } else {
-                if (!this.hasPlatformFullAccess()) {
-                    return false
+                for(const group of eventForGroups) {
+                    if(!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, group.id, accessRight)) {
+                        // todo
+                        throw new Error('todo');
+                    }
+                }
+            }
+
+            if(eventForTags !== null) {
+                // not supported currently
+                // todo
+                throw new Error('todo');
+            }
+
+            if(eventForDefaultAgeGroupIds !== null) {
+                // not supported currently
+                // todo
+                throw new Error('todo');
+            }
+
+            return organization;
+        } else if(eventForGroups !== null) {
+            // not supported currently
+            // todo
+            throw new Error('todo');
+        }
+        //#endregion
+
+        //#region platform
+        const platformPermissions = this.platformPermissions;
+        if(!platformPermissions) {
+            // todo
+            throw new Error('todo');
+        }
+
+        if(eventForTags === null && eventForDefaultAgeGroupIds === null) {
+            // todo: add option to create event for all groups
+            if(!platformPermissions.hasAccessRight(accessRight)) {
+                throw new Error('todo');
+            }
+        } 
+
+        //organization tags
+        if(eventForTags !== null) {
+            for(const tagId of eventForTags) {
+                if(!platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tagId, accessRight)) {
+                    // todo
+                    throw new Error('todo');
                 }
             }
         }
+        //defaultAgeGroups
+        if(eventForDefaultAgeGroupIds !== null) {
+            for(const defaultAgeGroupId of eventForDefaultAgeGroupIds) {
+                // todo: make configurable in frontend
+                if(!platformPermissions.hasResourceAccessRight(PermissionsResourceType.DefaultAgeGroups, defaultAgeGroupId, accessRight)) {
+                    // todo
+                    throw new Error('todo');
+                }
+            }
+        }
+        //#endregion
 
-        return true;
+        return null;
     }
 
     async canAccessArchivedGroups(organizationId: string) {
@@ -1140,6 +1224,10 @@ export class AdminPermissionChecker {
 
     canAccessAllPlatformMembers(): boolean {
         return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs)
+    }
+
+    canAccess(accessRight: AccessRight): boolean {
+        return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(accessRight);
     }
 
     hasPlatformFullAccess(): boolean {
