@@ -24,6 +24,8 @@ export enum AccessRight {
 
     // Webshop level permissions
     WebshopScanTickets = "WebshopScanTickets",
+    
+    EventWrite = "EventWrite"
 }
 
 export class AccessRightHelper {
@@ -35,6 +37,7 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateWebshops: return 'Webshops maken'
             case AccessRight.OrganizationCreateGroups: return 'Groepen maken'
             case AccessRight.WebshopScanTickets: return 'Tickets scannen'
+            case AccessRight.EventWrite: return 'Activiteiten beheren'
 
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Bekijk rekening leden'
@@ -50,6 +53,7 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateWebshops: return 'Maken'
             case AccessRight.OrganizationCreateGroups: return 'Maken'
             case AccessRight.WebshopScanTickets: return 'Scannen'
+            case AccessRight.EventWrite: return 'Activiteiten'
 
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Lidgeld bekijken'
@@ -65,6 +69,7 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateWebshops: return 'webshops maken'
             case AccessRight.OrganizationCreateGroups: return 'groepen maken'
             case AccessRight.WebshopScanTickets: return 'scannen van tickets'
+            case AccessRight.EventWrite: return 'activiteiten beheren'
 
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Openstaande bedragen bekijken'
@@ -80,6 +85,7 @@ export class AccessRightHelper {
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Bekijk hoeveel een lid precies heeft betaald of nog moet betalen, en bekijk of het lid recht heeft op een verlaagd tarief.'
             case AccessRight.MemberWriteFinancialData: return 'Voeg openstaande bedragen toe of verwijder ze, en pas de betaalstatus van een lid aan.'
+            case AccessRight.EventWrite: return 'Maak nieuwe activiteiten aan, verwijder ze en wijzig ze.'
         }
         return null
     }
