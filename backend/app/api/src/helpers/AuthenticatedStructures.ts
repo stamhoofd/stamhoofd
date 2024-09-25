@@ -80,13 +80,15 @@ export class AuthenticatedStructures {
         return structs;
     }
 
-    static async organizationRegistrationPeriods(organizationRegistrationPeriods: OrganizationRegistrationPeriod[]) {
+    static async organizationRegistrationPeriods(organizationRegistrationPeriods: OrganizationRegistrationPeriod[], periods?: RegistrationPeriod[]) {
         if (organizationRegistrationPeriods.length === 0) {
             return [];
         }
 
-        const periodIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(p => p.periodId))
-        const periods = await RegistrationPeriod.getByIDs(...periodIds)
+        if(!periods) {
+            const periodIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(p => p.periodId));
+            periods = await RegistrationPeriod.getByIDs(...periodIds)
+        }
 
         const groupIds = Formatter.uniqueArray(organizationRegistrationPeriods.flatMap(p => p.settings.categories.flatMap(c => c.groupIds)))
         const groups = groupIds.length ? await Group.getByIDs(...groupIds) : []
@@ -113,8 +115,8 @@ export class AuthenticatedStructures {
         return structs
     }
 
-    static async organizationRegistrationPeriod(organizationRegistrationPeriod: OrganizationRegistrationPeriod) {
-        return (await this.organizationRegistrationPeriods([organizationRegistrationPeriod]))[0]
+    static async organizationRegistrationPeriod(organizationRegistrationPeriod: OrganizationRegistrationPeriod, periods?: RegistrationPeriod[]) {
+        return (await this.organizationRegistrationPeriods([organizationRegistrationPeriod], periods))[0]
     }
 
     static async webshop(webshop: Webshop) {
@@ -125,44 +127,137 @@ export class AuthenticatedStructures {
     }
 
     static async organization(organization: Organization): Promise<OrganizationStruct> {
-        const organizationPeriod = await organization.getPeriod()
-
-        if (await Context.optionalAuth?.canAccessPrivateOrganizationData(organization)) {
-            const webshops = await Webshop.where({ organizationId: organization.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
-            const webshopStructures: WebshopPreview[] = [] 
-
-            for (const w of webshops) {
-                if (!await Context.auth.canAccessWebshop(w)) {
-                    continue
-                }
-                webshopStructures.push(WebshopPreview.create(w))
-            }
-
-            return OrganizationStruct.create({
-                ...organization.getBaseStructure(),
-                privateMeta: organization.privateMeta,
-                webshops: webshopStructures,
-                period: await this.organizationRegistrationPeriod(organizationPeriod)
-            })
-        }
-        
-        return OrganizationStruct.create({
-            ...organization.getBaseStructure(),
-            period: await this.organizationRegistrationPeriod(organizationPeriod)
-        })
+        return (await this.organizations([organization]))[0];
     }
 
     static async organizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
-        // for now simple loop
-        if (organizations.length > 10) {
-            console.warn('Trying to load too many organizations at once: ' + organizations.length)
+        if(organizations.length === 0) {
+            return [];
         }
 
-        const structs: OrganizationStruct[] = [];
-        for (const organization of organizations) {
-            structs.push(await this.organization(organization))
+        //#region get period ids / organizations map
+        const periodIdOrganizationsMap = new Map<string, Organization[]>();
+
+        for(const organization of organizations) {
+            const periodId = organization.periodId;
+            const array = periodIdOrganizationsMap.get(periodId);
+            if(array !== undefined) {
+                array.push(organization);
+            } else {
+                periodIdOrganizationsMap.set(periodId, [organization]);
+            }
         }
-        return structs
+        //#endregion
+
+        //#region get registration period and whether private data can be accessed for each organization
+        const organizationData: Map<string, {organizationRegistrationPeriod: OrganizationRegistrationPeriod, canAccessPrivateData: boolean}> = new Map();
+        const organizationIdsToGetWebshopsFor: string[] = [];
+
+        for(const [periodId, organizations] of periodIdOrganizationsMap.entries()) {
+            const organizationMap = new Map(organizations.map(o => [o.id, o]));
+
+            const result = await OrganizationRegistrationPeriod.where({
+                periodId,
+                organizationId: {
+                    sign: 'IN',
+                    value: Array.from(organizationMap.keys())
+                }
+            });
+
+            const organizationRegistrationPeriods = new Map(result.map(r => [r.organizationId, r]));
+
+            for(const organization of organizations) {
+                const organizationId = organization.id;
+                const organizationRegistrationPeriod = organizationRegistrationPeriods.get(organizationId) ?? await organization.getPeriod();
+
+                // check if private data can be accessed
+                const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
+                if(canAccessPrivateData) {
+                    organizationIdsToGetWebshopsFor.push(organizationId);
+                }
+
+                organizationData.set(organizationId, {organizationRegistrationPeriod, canAccessPrivateData});
+            }
+        }
+        //#endregion
+        
+        //#region get periods
+        const allPeriodIds = periodIdOrganizationsMap.keys();
+        const allPeriods = await RegistrationPeriod.getByIDs(...allPeriodIds);
+        const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map(p => [p.id, p]));
+        //#endregion
+
+        //#region get webshop previews
+        const webshops = organizationIdsToGetWebshopsFor.length > 0 ? await Webshop.where(
+            {
+                organizationId: {
+                    sign: 'IN',
+                    value: organizationIdsToGetWebshopsFor
+                }
+            },
+            { select: Webshop.selectColumnsWithout(undefined, "products", "categories")}
+        ) : [];
+
+        const webshopPreviews = new Map<string, WebshopPreview[]>();
+
+        for (const w of webshops) {
+            if (!await Context.auth.canAccessWebshop(w)) {
+                continue
+            }
+
+            const organizationId = w.organizationId;
+            const array = webshopPreviews.get(organizationId);
+            const preview = WebshopPreview.create(w);
+
+            if(array) {
+                array.push(preview);
+            } else {
+                webshopPreviews.set(organizationId, [preview]);
+            }
+        }
+        //#endregion
+
+        //#region create organization structs
+        const results: OrganizationStruct[] = [];
+
+        for(const organization of organizations) {
+            const registrationPeriod = periodMap.get(organization.periodId);
+            if(!registrationPeriod) {
+                console.error('Registration period is undefined.')
+                continue;
+            }
+
+            const organizationId = organization.id;
+            const data = organizationData.get(organizationId);
+            if(data === undefined) {
+                console.error('Organization data is undefined.')
+                continue;
+            }
+
+            let result: OrganizationStruct;
+
+            const period = await this.organizationRegistrationPeriod(data.organizationRegistrationPeriod, [registrationPeriod]);
+            const baseStruct = organization.getBaseStructure();
+
+            if(data.canAccessPrivateData) {
+                result = OrganizationStruct.create({
+                    ...baseStruct,
+                    period,
+                    privateMeta: organization.privateMeta,
+                    webshops: webshopPreviews.get(organization.id),
+                });
+            } else {
+                result = OrganizationStruct.create({
+                    ...baseStruct,
+                    period
+                });
+            }
+
+            results.push(result);
+        }
+        //#endregion
+
+        return results;
     }
 
     static async adminOrganizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
@@ -262,7 +357,8 @@ export class AuthenticatedStructures {
             }
         }
 
-        const organizationStructs = await Promise.all([...organizations.values()].filter(o => o.active).map(o => this.organization(o)))
+        const activeOrganizations = [...organizations.values()].filter(o => o.active);
+        const organizationStructs = await this.organizations(activeOrganizations)
 
         // Load missing groups
         const allGroups = new Map<string, GroupStruct>()

@@ -120,7 +120,7 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (!await this.hasSomeAccess(organization.id)) {
+        if (!await this.hasSomeAccess(organization)) {
             return false;
         }
         return true;
@@ -836,8 +836,8 @@ export class AdminPermissionChecker {
     /**
      * Use this as a circuit breaker to avoid queries for non-admin users
      */
-    async hasSomeAccess(organizationId: string): Promise<boolean> {
-        const organizationPermissions = await this.getOrganizationPermissions(organizationId)
+    async hasSomeAccess(organizationOrId: string|Organization): Promise<boolean> {
+        const organizationPermissions = await this.getOrganizationPermissions(organizationOrId)
         return !!organizationPermissions;
     }
 
