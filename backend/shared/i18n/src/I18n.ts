@@ -36,7 +36,7 @@ export class I18n {
         const map = new Map()
         for (const key in messages) {
             const element = messages[key];
-            if (typeof (element) != "string") {
+            if (typeof (element) !== "string") {
                 const map2 = this.loadRecursive(element, (prefix ? prefix + "." : "")+key)
                 map2.forEach((val, key) => map.set(key, val));
             } else {

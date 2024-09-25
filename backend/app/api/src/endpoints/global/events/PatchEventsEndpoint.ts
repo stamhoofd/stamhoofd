@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Event, Group, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { Event as EventStruct, GroupType, NamedObject } from "@stamhoofd/structures";
+import { Event as EventStruct, GroupType, NamedObject } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -12,18 +12,18 @@ import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization
 
 type Params = { id: string };
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<EventStruct>
-type ResponseBody = EventStruct[]
+type Body = PatchableArrayAutoEncoder<EventStruct>;
+type ResponseBody = EventStruct[];
 
 export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(EventStruct as Decoder<EventStruct>, EventStruct.patchType() as Decoder<AutoEncoderPatchType<EventStruct>>, StringDecoder)
+    bodyDecoder = new PatchableArrayDecoder(EventStruct as Decoder<EventStruct>, EventStruct.patchType() as Decoder<AutoEncoderPatchType<EventStruct>>, StringDecoder);
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "PATCH") {
+        if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/events", { id: String });
+        const params = Endpoint.parseParameters(request.url, '/events', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -33,77 +33,78 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         if (organization) {
             if (!await Context.auth.hasSomeAccess(organization.id)) {
-                throw Context.auth.error()
+                throw Context.auth.error();
             }
-        } else {
+        }
+        else {
             if (!Context.auth.hasSomePlatformAccess()) {
-                throw Context.auth.error()
+                throw Context.auth.error();
             }
         }
 
         const events: Event[] = [];
 
-        for (const {put} of request.body.getPuts()) {
-            const event = new Event()
-            event.organizationId = put.organizationId
+        for (const { put } of request.body.getPuts()) {
+            const event = new Event();
+            event.organizationId = put.organizationId;
             event.meta = put.meta;
             const eventOrganization = await this.checkEventAccess(event);
-            event.id = put.id
-            event.name = put.name
-            event.startDate = put.startDate
-            event.endDate = put.endDate
-            
+            event.id = put.id;
+            event.name = put.name;
+            event.startDate = put.startDate;
+            event.endDate = put.endDate;
+
             const type = await PatchEventsEndpoint.getEventType(put.typeId);
             event.typeId = type.id;
-            event.meta.organizationCache = eventOrganization ? NamedObject.create({id: eventOrganization.id, name: eventOrganization.name}) : null
-            await PatchEventsEndpoint.checkEventLimits(event)
+            event.meta.organizationCache = eventOrganization ? NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name }) : null;
+            await PatchEventsEndpoint.checkEventLimits(event);
 
             if (put.group) {
-                const period = await RegistrationPeriod.getByDate(event.startDate)
+                const period = await RegistrationPeriod.getByDate(event.startDate);
 
                 if (!period) {
                     throw new SimpleError({
                         code: 'invalid_period',
                         message: 'No period found for this start date',
                         human: 'Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit werkjaar is nog niet aangemaakt in het systeem.',
-                        field: 'startDate'
-                    })
+                        field: 'startDate',
+                    });
                 }
 
-                put.group.type = GroupType.EventRegistration
+                put.group.type = GroupType.EventRegistration;
                 const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                     put.group,
                     put.group.organizationId,
-                    period
-                )
-                await event.syncGroupRequirements(group)
-                event.groupId = group.id
+                    period,
+                );
+                await event.syncGroupRequirements(group);
+                event.groupId = group.id;
             }
 
-            if(type.isLocationRequired === true) {
+            if (type.isLocationRequired === true) {
                 PatchEventsEndpoint.throwIfAddressIsMissing(event);
             }
 
-            await event.save()
+            await event.save();
 
-            events.push(event)
+            events.push(event);
         }
 
         for (const patch of request.body.getPatches()) {
-            const event = await Event.getByID(patch.id)
+            const event = await Event.getByID(patch.id);
 
             if (!event) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Event not found',
                     human: 'De activiteit werd niet gevonden',
-                })
+                });
             }
-            
+
             await this.checkEventAccess(event);
 
             if (patch.meta?.organizationCache) {
@@ -111,149 +112,151 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     code: 'invalid_field',
                     message: 'Cannot patch organizationCache',
                     human: 'Je kan de organizationCache niet aanpassen via een patch',
-                    field: 'meta.organizationCache'
-                })
+                    field: 'meta.organizationCache',
+                });
             }
 
             event.meta = patchObject(event.meta, patch.meta);
 
-            if(patch.organizationId !== undefined) {
-                event.organizationId = patch.organizationId
+            if (patch.organizationId !== undefined) {
+                event.organizationId = patch.organizationId;
             }
-            
+
             const eventOrganization = await this.checkEventAccess(event);
             if (eventOrganization) {
-                event.meta.organizationCache = NamedObject.create({id: eventOrganization.id, name: eventOrganization.name})
-            } else {
+                event.meta.organizationCache = NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name });
+            }
+            else {
                 event.meta.organizationCache = null;
             }
 
-            event.name = patch.name ?? event.name
-            event.startDate = patch.startDate ?? event.startDate
-            event.endDate = patch.endDate ?? event.endDate
+            event.name = patch.name ?? event.name;
+            event.startDate = patch.startDate ?? event.startDate;
+            event.endDate = patch.endDate ?? event.endDate;
 
             const type = await PatchEventsEndpoint.getEventType(patch.typeId ?? event.typeId);
 
-            if(patch.typeId) {
+            if (patch.typeId) {
                 event.typeId = type.id;
             }
 
-            await PatchEventsEndpoint.checkEventLimits(event)
+            await PatchEventsEndpoint.checkEventLimits(event);
 
             if (patch.group !== undefined) {
                 if (patch.group === null) {
                     // delete
                     if (event.groupId) {
-                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
+                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
                         event.groupId = null;
                     }
-
-                } else if (patch.group.isPatch()) {
+                }
+                else if (patch.group.isPatch()) {
                     if (!event.groupId) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             field: 'group',
-                            message: 'Cannot patch group before it is created'
-                        })
+                            message: 'Cannot patch group before it is created',
+                        });
                     }
-                    patch.group.id = event.groupId
-                    patch.group.type = GroupType.EventRegistration
+                    patch.group.id = event.groupId;
+                    patch.group.type = GroupType.EventRegistration;
 
-                    const period = await RegistrationPeriod.getByDate(event.startDate)
-                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period)
-                } else {
+                    const period = await RegistrationPeriod.getByDate(event.startDate);
+                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period);
+                }
+                else {
                     if (event.groupId) {
                         // need to delete old group first
-                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
+                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
                         event.groupId = null;
                     }
-                    patch.group.type = GroupType.EventRegistration
+                    patch.group.type = GroupType.EventRegistration;
 
-                    const period = await RegistrationPeriod.getByDate(event.startDate)
+                    const period = await RegistrationPeriod.getByDate(event.startDate);
 
                     if (!period) {
                         throw new SimpleError({
                             code: 'invalid_period',
                             message: 'No period found for this start date',
                             human: 'Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit werkjaar is nog niet aangemaakt in het systeem.',
-                            field: 'startDate'
-                        })
+                            field: 'startDate',
+                        });
                     }
 
                     const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                         patch.group,
                         patch.group.organizationId,
-                        period
-                    )
-                    event.groupId = group.id
+                        period,
+                    );
+                    event.groupId = group.id;
                 }
             }
 
-            if(type.isLocationRequired === true) {
+            if (type.isLocationRequired === true) {
                 PatchEventsEndpoint.throwIfAddressIsMissing(event);
             }
 
-            await event.save()
+            await event.save();
 
             if (event.groupId) {
-                const group = await Group.getByID(event.groupId)
+                const group = await Group.getByID(event.groupId);
                 if (group) {
-                    await event.syncGroupRequirements(group)
+                    await event.syncGroupRequirements(group);
                 }
             }
- 
-            events.push(event)
+
+            events.push(event);
         }
 
         for (const id of request.body.getDeletes()) {
             const event = await Event.getByID(id);
             if (!event) {
-                throw new SimpleError({ code: "not_found", message: "Event not found", statusCode: 404 });
+                throw new SimpleError({ code: 'not_found', message: 'Event not found', statusCode: 404 });
             }
 
             await this.checkEventAccess(event);
 
-            if(event.groupId) {
-                await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
+            if (event.groupId) {
+                await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
                 event.groupId = null;
             }
-            
+
             await event.delete();
         }
 
         return new Response(
-            await AuthenticatedStructures.events(events)
+            await AuthenticatedStructures.events(events),
         );
     }
 
     static async validateEventType(typeId: string) {
-        return (await this.getEventType(typeId)).id 
+        return (await this.getEventType(typeId)).id;
     }
 
     static async getEventType(typeId: string) {
         const platform = await Platform.getSharedStruct();
-        const type = platform.config.eventTypes.find(t => t.id == typeId)
+        const type = platform.config.eventTypes.find(t => t.id == typeId);
         if (!type) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid typeId',
                 human: 'Dit type activiteit wordt niet ondersteund',
-                field: 'typeId'
-            })
+                field: 'typeId',
+            });
         }
-        return type
+        return type;
     }
 
     static async checkEventLimits(event: Event) {
-        const type = await this.getEventType(event.typeId)
+        const type = await this.getEventType(event.typeId);
 
         if (event.name.length < 2) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Name is too short',
                 human: 'Vul een naam voor je activiteit in',
-                field: 'name'
-            })
+                field: 'name',
+            });
         }
 
         if (event.endDate < event.startDate) {
@@ -261,25 +264,25 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 code: 'invalid_dates',
                 message: 'End date is before start date',
                 human: 'De einddatum moet na de startdatum liggen',
-                field: 'endDate'
-            })
+                field: 'endDate',
+            });
         }
 
         if (type.maximumDays !== null || type.minimumDays !== null) {
-            const start = Formatter.luxon(event.startDate).startOf('day')
-            const end = Formatter.luxon(event.endDate).startOf('day')
+            const start = Formatter.luxon(event.startDate).startOf('day');
+            const end = Formatter.luxon(event.endDate).startOf('day');
 
             const days = end.diff(start, 'days').days + 1;
 
-            console.log('Detected days:', days)
+            console.log('Detected days:', days);
 
             if (type.minimumDays !== null && days < type.minimumDays) {
                 throw new SimpleError({
                     code: 'minimum_days',
                     message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
                     human: 'Een ' + type.name + ' moet minimum ' + Formatter.pluralText(type.minimumDays, 'dag', 'dagen') + ' duren',
-                    field: 'startDate'
-                })
+                    field: 'startDate',
+                });
             }
 
             if (type.maximumDays !== null && days > type.maximumDays) {
@@ -287,40 +290,41 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     code: 'maximum_days',
                     message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
                     human: 'Een ' + type.name + ' mag maximaal ' + Formatter.pluralText(type.maximumDays, 'dag', 'dagen') + ' duren',
-                    field: 'startDate'
-                })
+                    field: 'startDate',
+                });
             }
         }
 
-        if (type.maximum && (!event.existsInDatabase || ("typeId" in (await event.getChangedDatabaseProperties()).fields))) {
+        if (type.maximum && (!event.existsInDatabase || ('typeId' in (await event.getChangedDatabaseProperties()).fields))) {
             const currentPeriod = await RegistrationPeriod.getByDate(event.startDate);
-            console.log('event.startDate', event.startDate)
+            console.log('event.startDate', event.startDate);
             if (currentPeriod) {
                 const count = await SQL.select().from(
-                        SQL.table(Event.table)
-                    )
+                    SQL.table(Event.table),
+                )
                     .where(SQL.column('organizationId'), event.organizationId)
                     .where(SQL.column('typeId'), event.typeId)
                     .where(SQL.column('id'), SQLWhereSign.NotEqual, event.id)
                     .where(SQL.column('startDate'), SQLWhereSign.GreaterEqual, currentPeriod.startDate)
                     .where(SQL.column('endDate'), SQLWhereSign.LessEqual, currentPeriod.endDate)
-                    .count()
-                
+                    .count();
+
                 if (count >= type.maximum) {
                     throw new SimpleError({
                         code: 'type_maximum_reached',
                         message: 'Maximum number of events with this type reached',
                         human: 'Het maximum aantal voor ' + type.name + ' is bereikt (' + type.maximum + ')',
-                        field: 'typeId'
-                    })
+                        field: 'typeId',
+                    });
                 }
-            } else {
+            }
+            else {
                 throw new SimpleError({
                     code: 'invalid_period',
                     message: 'No period found for this start date',
                     human: 'Oeps, je kan nog geen evenementen van dit type aanmaken in deze periode',
-                    field: 'startDate'
-                })
+                    field: 'startDate',
+                });
             }
         }
     }
@@ -332,13 +336,13 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
     private static throwIfAddressIsMissing(event: Event) {
         const address = event.meta.location?.address;
 
-        if(!address) {
+        if (!address) {
             throw new SimpleError({
-                code: "invalid_field",
-                message: "Empty number",
-                human: "De locatie is verplicht voor deze soort activiteit.",
-                field: "event_required"
-            })
+                code: 'invalid_field',
+                message: 'Empty number',
+                human: 'De locatie is verplicht voor deze soort activiteit.',
+                field: 'event_required',
+            });
         }
 
         address.throwIfIncomplete();

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 export class StockReservation extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 'id' })
@@ -6,7 +6,7 @@ export class StockReservation extends AutoEncoder {
 
     /**
      * To identify for what object type this reservation happened.
-     * 
+     *
      * E.g. 'productPrice'
      */
     @field({ decoder: StringDecoder, field: 't' })
@@ -18,7 +18,7 @@ export class StockReservation extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StockReservation), field: 'c' })
     children: StockReservation[] = [];
 
-    static getAmount(type: string, id: string|null, list: StockReservation[]) {
+    static getAmount(type: string, id: string | null, list: StockReservation[]) {
         let amount = 0;
         for (const reservation of list) {
             if (reservation.objectType === type && (id === null || reservation.objectId === id)) {
@@ -34,10 +34,10 @@ export class StockReservation extends AutoEncoder {
 
     static add(base: StockReservation[], add: StockReservation) {
         const existingIndex = base.findIndex(r => r.objectType === add.objectType && r.objectId === add.objectId);
-        
+
         if (existingIndex !== -1) {
             const existing = base[existingIndex];
-            existing.amount += add.amount
+            existing.amount += add.amount;
             existing.children = StockReservation.added(existing.children, add.children);
 
             if (existing.amount == 0 && existing.children.length === 0) {
@@ -46,7 +46,8 @@ export class StockReservation extends AutoEncoder {
                 base.splice(existingIndex, 1);
                 return;
             }
-        } else {
+        }
+        else {
             base.push(add.clone());
         }
     }
@@ -60,8 +61,8 @@ export class StockReservation extends AutoEncoder {
     }
 
     static remove(base: StockReservation[], remove: StockReservation) {
-        const c = remove.clone()
-        c.invert()
+        const c = remove.clone();
+        c.invert();
         return this.add(base, c);
     }
 

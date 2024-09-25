@@ -7,63 +7,63 @@ import { CartItem } from './CartItem';
 
 export class Cart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(CartItem) })
-    items: CartItem[] = []
+    items: CartItem[] = [];
 
     clear() {
-        this.items = []
+        this.items = [];
     }
 
     addItem(item: CartItem, allowMerge = true) {
         if (item.amount === 0) {
-            return
+            return;
         }
-        const c = item.code
+        const c = item.code;
         for (const i of this.items) {
             if (i.code === c && allowMerge) {
-                i.amount += item.amount
-                i.seats.push(...item.seats)
-                return
+                i.amount += item.amount;
+                i.seats.push(...item.seats);
+                return;
             }
         }
-        this.items.push(item)
+        this.items.push(item);
     }
 
     removeItem(item: CartItem) {
-        const c = item.code
+        const c = item.code;
         for (const [index, i] of this.items.entries()) {
             if (i.code === c) {
-                this.items.splice(index, 1)
-                return
+                this.items.splice(index, 1);
+                return;
             }
         }
     }
 
     replaceItem(old: CartItem, item: CartItem) {
         // First check if code is already used
-        const c = item.code
-        const oldCode = old.code
-        
+        const c = item.code;
+        const oldCode = old.code;
+
         for (const i of this.items) {
             if (i.code === c && i.code !== oldCode) {
-                i.amount += item.amount
-                i.seats.push(...item.seats)
-                this.removeItem(old)
-                return
+                i.amount += item.amount;
+                i.seats.push(...item.seats);
+                this.removeItem(old);
+                return;
             }
         }
-        
+
         for (const [index, i] of this.items.entries()) {
             if (i.code === oldCode) {
-                this.items.splice(index, 1, item)
-                return
+                this.items.splice(index, 1, item);
+                return;
             }
         }
 
         if (item.amount === 0) {
-            return
+            return;
         }
-        this.removeItem(old)
-        this.addItem(item)
+        this.removeItem(old);
+        this.addItem(item);
     }
 
     /**
@@ -71,70 +71,74 @@ export class Cart extends AutoEncoder {
      * Be careful when to use the price with and without discounts
      */
     get price() {
-        return this.priceWithDiscounts
+        return this.priceWithDiscounts;
     }
 
     get priceWithDiscounts() {
-        return Math.max(0, this.items.reduce((c, item) => c + item.getPriceWithDiscounts(), 0))
+        return Math.max(0, this.items.reduce((c, item) => c + item.getPriceWithDiscounts(), 0));
     }
 
     get priceWithoutDiscounts() {
-        return Math.max(0, this.items.reduce((c, item) => c + item.getPriceWithoutDiscounts(), 0))
+        return Math.max(0, this.items.reduce((c, item) => c + item.getPriceWithoutDiscounts(), 0));
     }
 
     get count() {
-        return this.items.reduce((c, item) => c + item.amount, 0)
+        return this.items.reduce((c, item) => c + item.amount, 0);
     }
 
     get persons() {
-        return this.items.reduce((sum, item) => sum + (item.product.type === ProductType.Person ? item.amount : 0), 0)
+        return this.items.reduce((sum, item) => sum + (item.product.type === ProductType.Person ? item.amount : 0), 0);
     }
 
     /**
      * Refresh all items with the newest data, throw if something failed (at the end)
      */
     refresh(webshop: Webshop) {
-        const errors = new SimpleErrors()
+        const errors = new SimpleErrors();
         for (const item of this.items) {
             try {
-                item.refresh(webshop)
-            } catch (e) {
+                item.refresh(webshop);
+            }
+            catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
-                    errors.addError(e)
-                } else {
+                    errors.addError(e);
+                }
+                else {
                     throw e;
                 }
             }
         }
 
-        errors.throwIfNotEmpty()
+        errors.throwIfNotEmpty();
     }
 
     validate(webshop: Webshop, asAdmin = false) {
-        const newItems: CartItem[] = []
-        const errors = new SimpleErrors()
+        const newItems: CartItem[] = [];
+        const errors = new SimpleErrors();
         for (const item of this.items) {
             try {
                 item.validate(webshop, this, {
                     refresh: true,
-                    admin: asAdmin
-                })
-                newItems.push(item)
+                    admin: asAdmin,
+                });
+                newItems.push(item);
 
                 if (!webshop.meta.cartEnabled) {
                     break;
                 }
-            } catch (e) {
+            }
+            catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
-                    e.addNamespace('cart')
-                    errors.addError(e)
-                } else {
+                    e.addNamespace('cart');
+                    errors.addError(e);
+                }
+                else {
                     throw e;
                 }
 
                 if (isSimpleError(e) && (e.meta as any)?.recoverable) {
                     item.cartError = e;
-                    newItems.push(item)
+                    newItems.push(item);
 
                     if (!webshop.meta.cartEnabled) {
                         break;
@@ -143,7 +147,7 @@ export class Cart extends AutoEncoder {
             }
         }
 
-        this.items = newItems
-        errors.throwIfNotEmpty()
+        this.items = newItems;
+        errors.throwIfNotEmpty();
     }
 }

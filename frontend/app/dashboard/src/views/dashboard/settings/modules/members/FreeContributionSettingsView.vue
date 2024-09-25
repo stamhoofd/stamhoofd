@@ -30,7 +30,7 @@
                 </template>
             </STInputBox>
 
-            <p v-if="amountCount == 0" class="info-box">
+            <p v-if="amountCount === 0" class="info-box">
                 Er zijn geen voorgestelde bedragen. Een lid kan enkel zelf een bedrag ingeven.
             </p>
 

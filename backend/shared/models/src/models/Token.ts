@@ -1,8 +1,8 @@
-import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { ApiUser } from "@stamhoofd/structures";
-import crypto from "crypto";
+import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { ApiUser } from '@stamhoofd/structures';
+import crypto from 'crypto';
 
-import { RateLimiter } from "../helpers/RateLimiter";
+import { RateLimiter } from '../helpers/RateLimiter';
 import { User } from './';
 
 export type TokenWithUser = Token & { user: User };
@@ -21,85 +21,85 @@ async function randomBytes(size: number): Promise<Buffer> {
 
 export const apiUserRateLimiter = new RateLimiter({
     limits: [
-        {   
+        {
             // Block heavy bursts (5req/s for 5s)
             limit: 25,
-            duration: 5 * 1000
+            duration: 5 * 1000,
         },
-        {   
+        {
             // max 1req/s during 150s
             limit: 150,
-            duration: 150 * 1000
+            duration: 150 * 1000,
         },
-        {   
+        {
             // 1000 requests per hour
             limit: 1000,
-            duration: 60 * 1000 * 60
+            duration: 60 * 1000 * 60,
         },
-        {   
+        {
             // 2000 requests per day
             limit: 2000,
-            duration: 24 * 60 * 1000 * 60
-        }
-    ]
+            duration: 24 * 60 * 1000 * 60,
+        },
+    ],
 });
 
 export class Token extends Model {
-    static table = "tokens";
+    static table = 'tokens';
     static MAX_DEVICES = 15;
 
-    @column({ type: "string", foreignKey: Token.user })
+    @column({ type: 'string', foreignKey: Token.user })
     userId: string;
 
     // Columns
-    @column({ primary: true, type: "string" })
+    @column({ primary: true, type: 'string' })
     accessToken: string;
 
-    @column({ type: "string" })
+    @column({ type: 'string' })
     refreshToken: string;
 
-    @column({ type: "datetime" })
+    @column({ type: 'datetime' })
     accessTokenValidUntil: Date;
 
-    @column({ type: "datetime" })
+    @column({ type: 'datetime' })
     refreshTokenValidUntil: Date;
 
     @column({
-        type: "datetime", beforeSave(old?: any) {
+        type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
-        }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
     })
-    createdAt: Date
+    createdAt: Date;
 
     @column({
-        type: "datetime", beforeSave() {
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
         },
-        skipUpdate: true
+        skipUpdate: true,
     })
-    updatedAt: Date
+    updatedAt: Date;
 
-    static user = new ManyToOneRelation(User, "user");
+    static user = new ManyToOneRelation(User, 'user');
 
     isAccessTokenExpired(): boolean {
-        return this.accessTokenValidUntil < new Date() || this.refreshTokenValidUntil < new Date()
+        return this.accessTokenValidUntil < new Date() || this.refreshTokenValidUntil < new Date();
     }
 
     static async getAPIUserWithToken(user: User) {
         if (!user.isApiUser) {
-            throw new Error('Unexpected user type')
+            throw new Error('Unexpected user type');
         }
 
         const [lastToken] = await this.where({
-            userId: user.id
-        }, {limit: 1})
+            userId: user.id,
+        }, { limit: 1 });
 
         return ApiUser.create({
             id: user.id,
@@ -108,7 +108,7 @@ export class Token extends Model {
             permissions: user.permissions,
             expiresAt: lastToken?.accessTokenValidUntil ?? null,
             createdAt: user.createdAt,
-        })
+        });
     }
 
     /**
@@ -118,8 +118,8 @@ export class Token extends Model {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()}, user.*  FROM ${
                 this.table
-            } ${Token.user.joinQuery(this.table, "user")} WHERE ${this.primary.name} = ? LIMIT 1 `,
-            [accessToken]
+            } ${Token.user.joinQuery(this.table, 'user')} WHERE ${this.primary.name} = ? LIMIT 1 `,
+            [accessToken],
         );
 
         if (rows.length == 0) {
@@ -135,13 +135,13 @@ export class Token extends Model {
 
         if (!ignoreExpireDate && (token.accessTokenValidUntil < new Date() || token.refreshTokenValidUntil < new Date())) {
             // Also if the refresh token is invalid, the access token will always be invalid
-            return undefined
+            return undefined;
         }
 
-        const user = User.fromRow(rows[0]["user"]) || null;
+        const user = User.fromRow(rows[0]['user']) || null;
 
         if (!user) {
-            console.warn("Selected a token without a user!");
+            console.warn('Selected a token without a user!');
             return undefined;
         }
 
@@ -151,10 +151,10 @@ export class Token extends Model {
     // Methods
     static async getByRefreshToken(refreshToken: string): Promise<TokenWithUser | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect("user")}  FROM ${
-            this.table
-            } ${Token.user.joinQuery(this.table, "user")} WHERE \`refreshToken\` = ? LIMIT 1 `,
-            [refreshToken]
+            `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect('user')}  FROM ${
+                this.table
+            } ${Token.user.joinQuery(this.table, 'user')} WHERE \`refreshToken\` = ? LIMIT 1 `,
+            [refreshToken],
         );
 
         if (rows.length == 0) {
@@ -170,16 +170,16 @@ export class Token extends Model {
 
         if (token.refreshTokenValidUntil < new Date()) {
             // Refreh token invalid = can throw it away
-            token.delete().catch(e => {
-                console.error(e)
-            })
-            return undefined
+            token.delete().catch((e) => {
+                console.error(e);
+            });
+            return undefined;
         }
 
-        const user = User.fromRow(rows[0]["user"]) || null;
+        const user = User.fromRow(rows[0]['user']) || null;
 
         if (!user || user.isApiUser) {
-            console.warn("Selected a token without a user!");
+            console.warn('Selected a token without a user!');
             return undefined;
         }
 
@@ -189,13 +189,13 @@ export class Token extends Model {
     /**
      * Create a token that is expired. This can be usefull if renewing the token is restricted by some account state.
      * E.g. you cannot renew this token until the e-mail address has been verified.
-     * @param user 
+     * @param user
      */
     static async createExpiredToken<U extends User>(user: U): Promise<(Token & { user: U })> {
         const token = await this.createUnsavedToken(user);
 
         /// Expired a month ago (to prevent any timezone bugs)
-        token.accessTokenValidUntil = new Date(Date.now() - 24 * 60 * 60 * 1000 * 31 );
+        token.accessTokenValidUntil = new Date(Date.now() - 24 * 60 * 60 * 1000 * 31);
         token.accessTokenValidUntil.setMilliseconds(0);
 
         await token.save();
@@ -215,17 +215,18 @@ export class Token extends Model {
                 rows,
             ] = await Database.delete(
                 `DELETE FROM \`${this.table}\` WHERE ${this.primary.name} IN (SELECT ${this.primary.name} FROM (SELECT ${this.primary.name} FROM \`${this.table}\` WHERE \`userId\` = ? ORDER BY\`refreshTokenValidUntil\` DESC LIMIT ? OFFSET ?) x)`,
-                [user.id, this.MAX_DEVICES, this.MAX_DEVICES]
+                [user.id, this.MAX_DEVICES, this.MAX_DEVICES],
             );
 
             if (rows.affectedRows > 0) {
                 console.log(`Deleted ${rows.affectedRows} old tokens first`);
             }
-        } catch (e) {
-            // This is not a crucial operation, so don't fail when there is a deadlock problem in the query
-            console.error(e)
         }
-        
+        catch (e) {
+            // This is not a crucial operation, so don't fail when there is a deadlock problem in the query
+            console.error(e);
+        }
+
         const token = new Token().setRelation(Token.user, user);
         token.accessTokenValidUntil = new Date();
         token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 3600 * 1000);
@@ -235,8 +236,8 @@ export class Token extends Model {
         token.refreshTokenValidUntil.setTime(token.refreshTokenValidUntil.getTime() + 3600 * 1000 * 24 * 365);
         token.refreshTokenValidUntil.setMilliseconds(0);
 
-        token.accessToken = (await randomBytes(192)).toString("base64").toUpperCase();
-        token.refreshToken = (await randomBytes(192)).toString("base64").toUpperCase();
+        token.accessToken = (await randomBytes(192)).toString('base64').toUpperCase();
+        token.refreshToken = (await randomBytes(192)).toString('base64').toUpperCase();
         return token;
     }
 
@@ -248,7 +249,7 @@ export class Token extends Model {
 
     static async createApiToken<U extends User>(user: U): Promise<(Token & { user: U })> {
         const token = await this.createUnsavedToken(user);
-        
+
         // 5 year valid
         token.accessTokenValidUntil = new Date();
         token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 1000 * 60 * 60 * 24 * 365 * 5);
@@ -264,6 +265,6 @@ export class Token extends Model {
 
     static async clearFor(userId: string, currentToken: string) {
         const query = `DELETE from ${this.table} where userId = ? AND accessToken != ?`;
-        await Database.delete(query, [userId, currentToken])
+        await Database.delete(query, [userId, currentToken]);
     }
 }

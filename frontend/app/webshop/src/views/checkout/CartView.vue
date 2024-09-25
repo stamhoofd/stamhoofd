@@ -6,7 +6,7 @@
                 {{ title }}
             </h1>
 
-            <p v-if="cart.items.length == 0" class="info-box">
+            <p v-if="cart.items.length === 0" class="info-box">
                 Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.
             </p>
 
@@ -191,7 +191,7 @@ export default class CartView extends Mixins(NavigationMixin){
 
     countFor(cartItem: CartItem) {
         return this.$checkoutManager.cart.items.reduce((prev, item) => {
-            if (item.product.id != cartItem.product.id) {
+            if (item.product.id !== cartItem.product.id) {
                 return prev
             }
             return prev + item.amount

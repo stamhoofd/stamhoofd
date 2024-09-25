@@ -50,7 +50,7 @@
                 </p>
             </template>
             <template v-else>
-                <p v-if="webshop.meta.domainActive && originalWebshop.domain == webshop.domain" class="success-box">
+                <p v-if="webshop.meta.domainActive && originalWebshop.domain === webshop.domain" class="success-box">
                     Jouw domeinnaam is correct geconfigureerd.
                 </p>
                 <p v-else class="warning-box with-button selectable" @click="openDnsRecordSettings(false)">
@@ -60,7 +60,7 @@
                         Instellen
                     </button>
                 </p>
-                <p v-if="webshop.meta.domainActive && originalWebshop.domain == webshop.domain">
+                <p v-if="webshop.meta.domainActive && originalWebshop.domain === webshop.domain">
                     <button type="button" class="button text" @click="openDnsRecordSettings(false)">
                         Bekijk DNS-records instructies
                     </button>
@@ -100,7 +100,7 @@
                     Nakijken of deze link nog beschikbaar is...
                 </p>
 
-                <p v-else-if="uri.length == 0" class="error-box">
+                <p v-else-if="uri.length === 0" class="error-box">
                     Je moet verplicht iets na de domeinnaam invullen.
                 </p>
 
@@ -207,7 +207,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     doThrottledCheckUriAvailability = throttle(this.checkUriAvailability, 1000)
 
     quickValidate() {
-        if (Formatter.slug(this.uri).length == 0 ) {
+        if (Formatter.slug(this.uri).length === 0 ) {
             this.isAvailable = false
             this.checkedUri = ""
 
@@ -318,7 +318,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
                 shouldRetry: false
             })
 
-            if (this.availabilityCheckerCount !== c || uri != Formatter.slug(this.uri)) {
+            if (this.availabilityCheckerCount !== c || uri !== Formatter.slug(this.uri)) {
                 console.info("Ignored response, counter or uri has already changed")
                 // Ignore, because a new request has already started
                 return
@@ -342,7 +342,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     }
 
     get useNewDomain() {
-        if (this.selectedDomain == "") {
+        if (this.selectedDomain === "") {
             return true
         }
         return false
@@ -372,13 +372,13 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
         const split = customUrl.split("/")
 
         const patch = PrivateWebshop.patch({  })
-        if (split[0].length == 0) {
+        if (split[0].length === 0) {
             patch.domain = null
             patch.domainUri = ""
         } else {
             patch.domain = split[0].toLowerCase().replace(/[^a-zA-Z0-9-.]/g, '');
 
-            if (!split[1] || split[1].length == 0) {
+            if (!split[1] || split[1].length === 0) {
                 patch.domainUri = ""
             } else {
                 patch.domainUri = Formatter.slug(split[1])
@@ -440,12 +440,12 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     get didDNSRecordsChange(): boolean {
         const currently = this.webshop.privateMeta.dnsRecords
 
-        if (currently.length != this.dnsRecords.length) {
+        if (currently.length !== this.dnsRecords.length) {
             return true
         }
 
         for (let i = 0; i < currently.length; i++) {
-            if (currently[i].type != this.dnsRecords[i].type || currently[i].value != this.dnsRecords[i].value || currently[i].name != this.dnsRecords[i].name) {
+            if (currently[i].type !== this.dnsRecords[i].type || currently[i].value !== this.dnsRecords[i].value || currently[i].name !== this.dnsRecords[i].name) {
                 return true
             }
         }

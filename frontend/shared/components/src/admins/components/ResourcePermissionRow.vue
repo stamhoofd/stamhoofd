@@ -104,7 +104,7 @@ const permissionLevel = computed({
         }
 
         const patch = createPatch()
-        if (level == PermissionLevel.None) {
+        if (level === PermissionLevel.None) {
             // Delete the resource if no access rights
             if (resourcePermissions.value?.accessRights.length) {
                 // Keep it but set the level

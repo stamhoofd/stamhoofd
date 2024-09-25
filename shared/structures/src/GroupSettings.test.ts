@@ -1,17 +1,14 @@
-import { ObjectData } from "@simonbackx/simple-encoding";
+import { ObjectData } from '@simonbackx/simple-encoding';
 
-import { GroupGenderType } from "./GroupGenderType";
-import { GroupSettings, WaitingListType } from "./GroupSettings";
+import { GroupGenderType } from './GroupGenderType';
+import { GroupSettings, WaitingListType } from './GroupSettings';
 
-
-describe("GroupSettings v73 → v75 upgrade", () => {
-
-
-    it("should remove max members if not used", () => {
-        const pre = new Date()
+describe('GroupSettings v73 → v75 upgrade', () => {
+    it('should remove max members if not used', () => {
+        const pre = new Date();
         const data = {
-            name: "",
-            description: "",
+            name: '',
+            description: '',
             startDate: new Date().getTime(),
             endDate: new Date().getTime(),
             registrationStartDate: new Date().getTime(),
@@ -29,13 +26,11 @@ describe("GroupSettings v73 → v75 upgrade", () => {
             squarePhoto: null,
         };
 
-        const objectData = new ObjectData(data, { version: 73 })
+        const objectData = new ObjectData(data, { version: 73 });
         expect(objectData.decode(GroupSettings)).toMatchObject({
             preRegistrationsDate: null,
             maxMembers: null,
-            waitingListType: WaitingListType.None
-        })
+            waitingListType: WaitingListType.None,
+        });
     });
-
-    
 });

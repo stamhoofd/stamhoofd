@@ -59,7 +59,7 @@ export default class Checkbox extends VueComponent {
 
         // Add support for a model that doesn't change
         this.$nextTick(() => {
-            if (this.checkboxValue != value) {
+            if (this.checkboxValue !== value) {
                 if (this.$refs.checkbox) {
                     (this.$refs.checkbox as any).checked = this.checkboxValue;
                 }

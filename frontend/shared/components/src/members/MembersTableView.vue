@@ -249,7 +249,7 @@ if (props.group) {
                 name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'), 
                 getValue: (member) => member.filterRegistrations({groups: [props.group!]}).map(r => r.groupPrice), 
                 format: (prices) => Formatter.joinLast(prices.map(o => o.name).sort(), ', ', ' en ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
-                getStyle: (prices) => prices.length == 0 ? 'gray' : '',
+                getStyle: (prices) => prices.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
             })
@@ -270,12 +270,12 @@ if (props.group) {
                     return [option]
                 }),
                 format: (values) => {
-                    if (values.length == 0) {
+                    if (values.length === 0) {
                         return 'Geen'
                     }
                     return values.map(v => v.option.allowAmount || v.amount > 1 ? (v.amount + 'x ' + v.option.name) : v.option.name).join(', ')
                 }, 
-                getStyle: (values) => values.length == 0 ? 'gray' : '',
+                getStyle: (values) => values.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 200,
             })
@@ -283,7 +283,7 @@ if (props.group) {
     }
 }
 
-if (app == 'admin' || (props.group && props.group.settings.requireOrganizationIds.length !== 1 && props.group.type === GroupType.EventRegistration)) {
+if (app === 'admin' || (props.group && props.group.settings.requireOrganizationIds.length !== 1 && props.group.type === GroupType.EventRegistration)) {
     allColumns.push(
         new Column<ObjectType, Organization[]>({
             id: 'organization',
@@ -291,7 +291,7 @@ if (app == 'admin' || (props.group && props.group.settings.requireOrganizationId
             name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'), 
             getValue: (member) => member.filterOrganizations({periodId: props.periodId ?? props.group?.periodId ?? platform.value.period.id, types: [GroupType.Membership]}), 
             format: (organizations) => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' en ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
-            getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
+            getStyle: (organizations) => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
         })
@@ -304,7 +304,7 @@ if (app == 'admin' || (props.group && props.group.settings.requireOrganizationId
             name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'), 
             getValue: (member) => member.filterOrganizations({periodId: props.periodId ?? props.group?.periodId ?? platform.value.period.id, types: [GroupType.Membership]}), 
             format: (organizations) => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' en ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
-            getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
+            getStyle: (organizations) => organizations.length === 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
             enabled: false
@@ -318,13 +318,13 @@ if (app == 'admin' || (props.group && props.group.settings.requireOrganizationId
             getValue: (v) => {
                 const registrations = v.filterRegistrations({groups, periodId: props.periodId ?? props.group?.periodId ?? ''})
 
-                if (registrations.length == 0) {
+                if (registrations.length === 0) {
                     return null
                 }
 
                 const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime())
 
-                if (filtered.length == 0) {
+                if (filtered.length === 0) {
                     return null
                 }
                 return new Date(Math.min(...filtered))
@@ -392,7 +392,7 @@ if (app == 'admin' || (props.group && props.group.settings.requireOrganizationId
                     const groups = props.category.getAllGroups()
                     const registrations = member.filterRegistrations({groups: groups, periodId: props.periodId ?? props.group?.periodId ?? ''})
                     const memberGroups = registrations.flatMap(r => {
-                        const group = groups.find(g => g.id == r.groupId)
+                        const group = groups.find(g => g.id === r.groupId)
                         if (!group) {
                             return []
                         }
@@ -402,12 +402,12 @@ if (app == 'admin' || (props.group && props.group.settings.requireOrganizationId
                     return memberGroups.sort((a,b) => Sorter.byNumberValue(getIndex(b), getIndex(a)))
                 },
                 format: (groups) => {
-                    if (groups.length == 0) {
+                    if (groups.length === 0) {
                         return 'Geen'
                     }
                     return groups.map(g => g.settings.name).join(', ')
                 }, 
-                getStyle: (groups) => groups.length == 0 ? "gray" : "",
+                getStyle: (groups) => groups.length === 0 ? "gray" : "",
                 minimumWidth: 100,
                 recommendedWidth: 150
             })

@@ -41,7 +41,7 @@ export default class App extends VueComponent {
             })
 
             // Do we need to redirect?
-            if (response.data.resolvedRegisterDomain && window.location.hostname.toLowerCase() != response.data.resolvedRegisterDomain.toLowerCase()) {
+            if (response.data.resolvedRegisterDomain && window.location.hostname.toLowerCase() !== response.data.resolvedRegisterDomain.toLowerCase()) {
                 // Redirect
                 window.location.href = UrlHelper.initial.getFullHref({ host: response.data.resolvedRegisterDomain })
                 return new ComponentWithProperties(LoadingView, {})
@@ -66,7 +66,7 @@ export default class App extends VueComponent {
             const parts =  UrlHelper.shared.getParts()
             const queryString = UrlHelper.shared.getSearchParams()
 
-            if (parts.length == 1 && parts[0] == 'verify-email') {
+            if (parts.length === 1 && parts[0] === 'verify-email') {
 
                 const token = queryString.get('token')
                 const code = queryString.get('code')
@@ -117,7 +117,7 @@ export default class App extends VueComponent {
             document.documentElement.translate = true
         }
 
-        if (STAMHOOFD.environment == "development") {
+        if (STAMHOOFD.environment === "development") {
             ComponentWithProperties.debug = true
         }
         HistoryManager.activate();

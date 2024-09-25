@@ -1,4 +1,4 @@
-import fs from "fs/promises";
+import fs from 'fs/promises';
 
 const msIn22Hours = 79200000;
 let lastExcelClear: number | null = null;
@@ -10,29 +10,28 @@ export async function clearExcelCache() {
         lastExcelClear,
         now,
         cachePath: STAMHOOFD.CACHE_PATH,
-        environment: STAMHOOFD.environment
+        environment: STAMHOOFD.environment,
     });
 
-    if(didClear) {
+    if (didClear) {
         lastExcelClear = now.getTime();
     }
 }
 
-export async function clearExcelCacheHelper
-({lastExcelClear, now, cachePath, environment}: {lastExcelClear: number | null, now: Date, cachePath: string, environment: "production" | "development" | "staging" | "test"}): Promise<boolean> {
-    if (environment === "development") {
+export async function clearExcelCacheHelper({ lastExcelClear, now, cachePath, environment }: { lastExcelClear: number | null; now: Date; cachePath: string; environment: 'production' | 'development' | 'staging' | 'test' }): Promise<boolean> {
+    if (environment === 'development') {
         return false;
     }
 
     const hour = now.getHours();
 
     // between 3 and 6 AM
-    if(hour < 3 || hour > 5) {
+    if (hour < 3 || hour > 5) {
         return false;
     }
 
     // only run once each day
-    if(lastExcelClear !== null && lastExcelClear + msIn22Hours > now.getTime()) {
+    if (lastExcelClear !== null && lastExcelClear + msIn22Hours > now.getTime()) {
         return false;
     }
 
@@ -42,9 +41,9 @@ export async function clearExcelCacheHelper
 
     const maxDaysInCache = 2;
 
-    const dateLimit = new Date(currentYear, currentMonth, currentDay - maxDaysInCache, 0,0,0,0);
+    const dateLimit = new Date(currentYear, currentMonth, currentDay - maxDaysInCache, 0, 0, 0, 0);
 
-    const files = await fs.readdir(cachePath, {withFileTypes: true});
+    const files = await fs.readdir(cachePath, { withFileTypes: true });
 
     for (const file of files) {
         if (file.isDirectory()) {
@@ -52,12 +51,13 @@ export async function clearExcelCacheHelper
                 const date = getDateFromDirectoryName(file.name);
                 const shouldDelete = date < dateLimit;
 
-                if(shouldDelete) {
+                if (shouldDelete) {
                     const path = file.parentPath + '/' + file.name;
-                    await fs.rm(path, { recursive: true, force: true })
-                    console.log("Removed", path)
+                    await fs.rm(path, { recursive: true, force: true });
+                    console.log('Removed', path);
                 }
-            } catch(error) {
+            }
+            catch (error) {
                 console.error(error);
             }
         }
@@ -69,22 +69,22 @@ export async function clearExcelCacheHelper
 function getDateFromDirectoryName(file: string): Date {
     const parts = file.split('-');
 
-    if (parts.length != 3) {
+    if (parts.length !== 3) {
         throw new Error(`Invalid directory ${file} in cache.`);
     }
 
     const year = parseInt(parts[0]);
-    if(isNaN(year)) {
+    if (isNaN(year)) {
         throw new Error(`Year is NAN for directory ${file} in cache.`);
     }
 
     const month = parseInt(parts[1]);
-    if(isNaN(month)) {
+    if (isNaN(month)) {
         throw new Error(`Month is NAN for directory ${file} in cache.`);
     }
 
     const day = parseInt(parts[2]);
-    if(isNaN(day)) {
+    if (isNaN(day)) {
         throw new Error(`Day is NAN for directory ${file} in cache.`);
     }
 

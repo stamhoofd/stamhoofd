@@ -78,7 +78,7 @@ export class ExcelHelper {
             /* if the particular row did not contain data for the column, the cell will not be generated */
             if(!worksheet[ref]) continue;
             /* `.t == "n"` for number cells */
-            if(worksheet[ref].t != 'n' && worksheet[ref].t != 'd') continue;
+            if(worksheet[ref].t !== 'n' && worksheet[ref].t !== 'd') continue;
             /* assign the `.z` number format */
             worksheet[ref].z = fmt;
             delete worksheet[ref].w;

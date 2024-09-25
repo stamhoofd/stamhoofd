@@ -76,7 +76,7 @@ export default class TimeMinutesInput extends VueComponent {
     async validate() {
         this.timeRaw = this.timeRaw.trim().toLowerCase()
 
-        if (!this.required && this.timeRaw.length == 0) {
+        if (!this.required && this.timeRaw.length === 0) {
             this.errorBox = null
 
             if (this.modelValue !== null) {

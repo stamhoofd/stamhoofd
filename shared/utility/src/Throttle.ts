@@ -1,7 +1,7 @@
 export const throttle = (func: any, limit: any) => {
     let lastFunc: NodeJS.Timeout;
     let lastRan: any;
-    return function(this: any) {
+    return function (this: any) {
         const context = this;
         // eslint-disable-next-line prefer-rest-params
         const args = arguments;
@@ -9,8 +9,8 @@ export const throttle = (func: any, limit: any) => {
             clearTimeout(lastFunc);
         }
         lastRan = Date.now();
-            
-        lastFunc = setTimeout(function() {
+
+        lastFunc = setTimeout(function () {
             if (Date.now() - lastRan >= limit) {
                 func.apply(context, args);
                 lastRan = Date.now();

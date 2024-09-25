@@ -1,8 +1,8 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { OrganizationBillingStatus } from "@stamhoofd/structures";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { OrganizationBillingStatus } from '@stamhoofd/structures';
 
-import { Context } from "../../../../helpers/Context";
-import { GetUserBilingStatusEndpoint } from "../../../global/registration/GetUserBillingStatusEndpoint";
+import { Context } from '../../../../helpers/Context';
+import { GetUserBilingStatusEndpoint } from '../../../global/registration/GetUserBillingStatusEndpoint';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -11,11 +11,11 @@ type Body = undefined;
 
 export class GetDetailedBillingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/billing/status", {});
+        const params = Endpoint.parseParameters(request.url, '/organization/billing/status', {});
 
         if (params) {
             return [true, params as Params];
@@ -25,13 +25,13 @@ export class GetDetailedBillingStatusEndpoint extends Endpoint<Params, Query, Bo
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // If the user has permission, we'll also search if he has access to the organization's key
         if (!await Context.auth.canManageFinances(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
-        
+
         return new Response(await GetUserBilingStatusEndpoint.getBillingStatusForObjects([organization.id], null));
     }
 }

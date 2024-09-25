@@ -227,7 +227,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     }
 
     isSuggestionSelected(suggestion: DateRangeSuggestion) {
-        return Formatter.dateIso(this.startDate) == Formatter.dateIso(suggestion.startDate) && Formatter.dateIso(this.endDate) == Formatter.dateIso(suggestion.endDate)
+        return Formatter.dateIso(this.startDate) === Formatter.dateIso(suggestion.startDate) && Formatter.dateIso(this.endDate) === Formatter.dateIso(suggestion.endDate)
     }
 
     beforeUnmount() {
@@ -286,7 +286,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         ]
 
         // Force a given ordering
-        if (this.country == Country.Netherlands) {
+        if (this.country === Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 
@@ -294,12 +294,12 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         r.push(PaymentMethod.Bancontact)
 
         // Force a given ordering
-        if (this.country == Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
+        if (this.country === Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
             r.push(PaymentMethod.Payconiq)
         }
 
         // Force a given ordering
-        if (this.country != Country.Netherlands) {
+        if (this.country !== Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 
@@ -343,7 +343,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     }
 
     setPaymentMethod(method: PaymentMethod, enabled: boolean) {
-        this.methods = this.methods.filter(m => m != method)
+        this.methods = this.methods.filter(m => m !== method)
         if (enabled) {
             this.methods.push(method)
         }
@@ -354,7 +354,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     }
 
     setProvider(provider: PaymentProvider, enabled: boolean) {
-        this.providers = this.providers.filter(m => m != provider)
+        this.providers = this.providers.filter(m => m !== provider)
         if (enabled) {
             this.providers.push(provider)
         }

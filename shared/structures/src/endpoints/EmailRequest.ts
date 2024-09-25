@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 export class EmailInformation extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    email: string
+    email: string;
 
     @field({ decoder: BooleanDecoder })
     markedAsSpam = false;
@@ -20,38 +20,38 @@ export class EmailInformation extends AutoEncoder {
 }
 
 export class Replacement extends AutoEncoder {
-    @field({ decoder: StringDecoder})
-    token: string 
+    @field({ decoder: StringDecoder })
+    token: string;
 
     @field({ decoder: StringDecoder })
-    value: string 
+    value: string;
 
     @field({ decoder: StringDecoder, optional: true })
-    html?: string 
+    html?: string;
 }
 
 export class Recipient extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
-    firstName: string | null = null
+    firstName: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 112 })
-    lastName: string | null = null
+    lastName: string | null = null;
 
     @field({ decoder: EmailDecoder })
-    email: string
+    email: string;
 
     @field({ decoder: new ArrayDecoder(Replacement) })
-    replacements: Replacement[] = []
+    replacements: Replacement[] = [];
 
     @field({ decoder: new RecordDecoder(StringDecoder, StringDecoder), version: 209, nullable: true })
-    headers: Record<string, string> | null = null
+    headers: Record<string, string> | null = null;
 
     /**
      * Set this to create a replacement called signInUrl, which will auto sign in/sign up the user
      * Note: the e-mail is matched with the user id, if it doesn't match, the sign-in button will contain a simple (non smart) url
      */
     @field({ decoder: StringDecoder, nullable: true, version: 80 })
-    userId: string | null = null
+    userId: string | null = null;
 
     /// For reference and filtering
     /**
@@ -59,48 +59,49 @@ export class Recipient extends AutoEncoder {
      * Use types instead
      */
     @field({ decoder: StringDecoder, nullable: true, version: 96 })
-    type: string | null = null
+    type: string | null = null;
 
     /// For reference and filtering
     @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
-    types: string[] = []
+    types: string[] = [];
 
     getDefaultReplacements() {
         return [
             Replacement.create({
                 token: 'firstName',
-                value: this.firstName ?? ''
+                value: this.firstName ?? '',
             }),
             Replacement.create({
                 token: 'lastName',
-                value: this.lastName ?? ''
+                value: this.lastName ?? '',
             }),
             Replacement.create({
                 token: 'email',
-                value: this.email
+                value: this.email,
             }),
             Replacement.create({
                 token: 'greeting',
-                value: this.firstName ? `Dag ${this.firstName},` : 'Hallo!'
-            })
-        ]
+                value: this.firstName ? `Dag ${this.firstName},` : 'Hallo!',
+            }),
+        ];
     }
 
     merge(recipient: Recipient) {
-        this.firstName = this.firstName !== null && this.firstName.length > 0 ? this.firstName : recipient.firstName
-        this.lastName = this.lastName !== null && this.lastName.length > 0 ? this.lastName : recipient.lastName
+        this.firstName = this.firstName !== null && this.firstName.length > 0 ? this.firstName : recipient.firstName;
+        this.lastName = this.lastName !== null && this.lastName.length > 0 ? this.lastName : recipient.lastName;
         for (const replacement of recipient.replacements) {
-            const existing = this.replacements.find(r => r.token == replacement.token)
+            const existing = this.replacements.find(r => r.token == replacement.token);
             if (!existing) {
-                this.replacements.push(replacement)
-            } else {
+                this.replacements.push(replacement);
+            }
+            else {
                 if (existing.value.length == 0) {
-                    existing.value = replacement.value
+                    existing.value = replacement.value;
                 }
             }
         }
-        this.userId = this.userId ?? recipient.userId
-        this.types = Formatter.uniqueArray(this.types.concat(recipient.types))
+        this.userId = this.userId ?? recipient.userId;
+        this.types = Formatter.uniqueArray(this.types.concat(recipient.types));
     }
 
     /**
@@ -122,13 +123,13 @@ export class EmailAttachment extends AutoEncoder {
      * Silently added, incompatible change but shouldn't be a problem since this was only used temporarily
      */
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string
-
-    @field({ decoder: StringDecoder})
-    filename: string
+    id: string;
 
     @field({ decoder: StringDecoder })
-    contentType: string
+    filename: string;
+
+    @field({ decoder: StringDecoder })
+    contentType: string;
 
     /**
      * base64 encoded content
@@ -137,7 +138,7 @@ export class EmailAttachment extends AutoEncoder {
     content: string;
 
     get bytes() {
-        // Calculates bytes of base64 string 
+        // Calculates bytes of base64 string
         return Math.ceil((this.content.length / 4) * 3) - (this.content.endsWith('==') ? 2 : this.content.endsWith('=') ? 1 : 0);
     }
 }
@@ -147,23 +148,23 @@ export class EmailRequest extends AutoEncoder {
      * ID of the sender email address
      */
     @field({ decoder: StringDecoder })
-    emailId: string
+    emailId: string;
 
     @field({ decoder: StringDecoder })
-    subject: string
+    subject: string;
 
     @field({ decoder: new ArrayDecoder(Recipient) })
-    recipients: Recipient[]
+    recipients: Recipient[];
 
     @field({ decoder: StringDecoder, nullable: true })
-    text: string | null = null
+    text: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    html: string | null = null
+    html: string | null = null;
 
     @field({ decoder: new ArrayDecoder(EmailAttachment), version: 11 })
-    attachments: EmailAttachment[] = []
+    attachments: EmailAttachment[] = [];
 
     @field({ decoder: new ArrayDecoder(Replacement), version: 220 })
-    defaultReplacements: Replacement[] = []
+    defaultReplacements: Replacement[] = [];
 }

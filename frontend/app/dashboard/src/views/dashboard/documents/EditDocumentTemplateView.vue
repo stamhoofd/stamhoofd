@@ -192,7 +192,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     set editingType(type: string | null) {
         this.type = type
         if (type) {
-            const definition = this.availableTypes.find(t => t.value == type)?.definition
+            const definition = this.availableTypes.find(t => t.value === type)?.definition
             if (definition) {
                 console.log('set definition', definition)
                 this.patchDocument = this.patchDocument.patch({
@@ -613,7 +613,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
 
     recordCategoriesFor(field: RecordSettings) {
         const type = field.type
-        return RecordCategory.filterRecordsWith(this.$organization.meta.recordsConfiguration.recordCategories, (record) => record.type == type)
+        return RecordCategory.filterRecordsWith(this.$organization.meta.recordsConfiguration.recordCategories, (record) => record.type === type)
     }
 
     get hasChanges() {
@@ -681,13 +681,13 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
 
     getGroupName(group: DocumentTemplateGroup) {
         const groups = this.$organization.groups
-        const g = groups.find(g => g.id == group.groupId)
+        const g = groups.find(g => g.id === group.groupId)
         return g?.settings?.name ?? "Onbekende groep"
     }
 
     getGroupDescription(group: DocumentTemplateGroup) {
         const groups = this.$organization.groups
-        const g = groups.find(g => g.id == group.groupId)
+        const g = groups.find(g => g.id === group.groupId)
         const currentCycle = g?.cycle ?? 0
         const cycleOffset = currentCycle - group.cycle
 
@@ -768,7 +768,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     validate() {
         const errors = new SimpleErrors()
 
-        if (this.patchedDocument.settings.name.length == 0) {
+        if (this.patchedDocument.settings.name.length === 0) {
             errors.addError(new SimpleError({
                 code: 'invalid_field',
                 field: 'name',

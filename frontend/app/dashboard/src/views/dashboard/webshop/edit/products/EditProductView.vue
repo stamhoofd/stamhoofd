@@ -81,7 +81,7 @@
         </h2>
         <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Naast meerdere prijzen kan je ook meerdere keuzemenu's toevoegen (zie onder).</p>
 
-        <ProductPriceBox v-if="patchedProduct.prices.length == 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
+        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
 
         <STList v-else v-model="draggablePrices" :draggable="true">
             <template #item="{item: price}">
@@ -647,7 +647,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     set useDisableAfter(use: boolean) {
-        if (use == this.useDisableAfter) {
+        if (use === this.useDisableAfter) {
             return;
         }
         if (use) {
@@ -670,7 +670,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     set useEnableAfter(use: boolean) {
-        if (use == this.useEnableAfter) {
+        if (use === this.useEnableAfter) {
             return;
         }
         if (use) {
@@ -878,7 +878,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     movePriceUp(price: ProductPrice) {
         const index = this.patchedProduct.prices.findIndex(c => price.id === c.id)
-        if (index == -1 || index == 0) {
+        if (index === -1 || index === 0) {
             return;
         }
 
@@ -890,7 +890,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     movePriceDown(price: ProductPrice) {
         const index = this.patchedProduct.prices.findIndex(c => price.id === c.id)
-        if (index == -1 || index >= this.patchedProduct.prices.length - 1) {
+        if (index === -1 || index >= this.patchedProduct.prices.length - 1) {
             return;
         }
 
@@ -905,7 +905,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     set draggablePrices(prices: ProductPrice[]) {
-        if (prices.length != this.patchedProduct.prices.length) {
+        if (prices.length !== this.patchedProduct.prices.length) {
             return;
         }
 

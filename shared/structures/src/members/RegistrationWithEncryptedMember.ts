@@ -1,36 +1,36 @@
-import { AutoEncoder,BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Member } from "./Member"
+import { Member } from './Member';
 
-export class RegistrationWithEncryptedMember extends AutoEncoder  {
+export class RegistrationWithEncryptedMember extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string
+    id: string;
 
     /// You need to look up the group yourself in the organization
     @field({ decoder: StringDecoder })
-    groupId: string
+    groupId: string;
 
     @field({ decoder: IntegerDecoder })
-    cycle: number
+    cycle: number;
 
     @field({ decoder: DateDecoder, nullable: true })
-    registeredAt: Date | null = null
+    registeredAt: Date | null = null;
 
     @field({ decoder: DateDecoder, nullable: true })
-    deactivatedAt: Date | null = null
+    deactivatedAt: Date | null = null;
 
     @field({ decoder: DateDecoder })
-    createdAt: Date
+    createdAt: Date;
 
     @field({ decoder: DateDecoder })
-    updatedAt: Date
+    updatedAt: Date;
 
     @field({ decoder: BooleanDecoder, version: 16 })
-    waitingList = false
+    waitingList = false;
 
     @field({ decoder: BooleanDecoder, version: 20 })
-    canRegister = false
+    canRegister = false;
 
     @field({ decoder: Member })
-    member: Member
+    member: Member;
 }

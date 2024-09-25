@@ -122,7 +122,7 @@ const canCreateWebshops = computed(() =>
 
 const hasWebshopArchive = computed(() =>
     allWebshops.value.some(
-        (webshop) => webshop.meta.status == WebshopStatus.Archived
+        (webshop) => webshop.meta.status === WebshopStatus.Archived
     )
 );
 //#endregion

@@ -94,7 +94,7 @@ export default class SelectionAddressInput extends VueComponent {
             return
         }
         
-        const a = this.addresses.find(aa => aa.toString() == val.toString())
+        const a = this.addresses.find(aa => aa.toString() === val.toString())
         if (a) {
             this.selectedAddress = a
             this.editingAddress = false
@@ -111,7 +111,7 @@ export default class SelectionAddressInput extends VueComponent {
     }
 
     mounted() {
-        const a = this.addresses.find(aa => aa.toString() == this.modelValue?.toString())
+        const a = this.addresses.find(aa => aa.toString() === this.modelValue?.toString())
         if (a) {
             this.selectedAddress = a
             this.editingAddress = false

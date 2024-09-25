@@ -25,7 +25,7 @@
                     <p v-copyable class="style-definition-text">
                         {{ organization.address }}
                     </p>
-                    <p v-if="organization.meta.companyAddress && organization.meta.companyAddress != organization.address" class="style-description-small">
+                    <p v-if="organization.meta.companyAddress && organization.meta.companyAddress !== organization.address" class="style-description-small">
                         {{ $t('10c2c710-3c0d-445b-bb2e-c3f43cd6397b') }}: {{ organization.meta.companyAddress }}
                     </p>
                 </STListItem>
@@ -85,7 +85,7 @@
                     </p>
 
                     <template #right>
-                        <span class="icon edit gray" v-if="hasWrite" />
+                        <span v-if="hasWrite" class="icon edit gray" />
                     </template>
                 </STListItem>
 
@@ -114,7 +114,7 @@
 
             <p>Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.</p>
 
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri + '/instellingen'" target="_blank">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
@@ -182,7 +182,6 @@
     </div>
 </template>
 
-
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -195,23 +194,23 @@ import EditOrganizationView from './EditOrganizationView.vue';
 import SelectOrganizationTagsView from './tags/SelectOrganizationTagsView.vue';
 
 const props = defineProps<{
-    organization: Organization,
-    getNext: (current: Organization) => Organization | null,
-    getPrevious: (current: Organization) => Organization | null,
+    organization: Organization;
+    getNext: (current: Organization) => Organization | null;
+    getPrevious: (current: Organization) => Organization | null;
 }>();
 
 const show = useShow();
-const isPlatform = STAMHOOFD.userMode === 'platform'
+const isPlatform = STAMHOOFD.userMode === 'platform';
 const $t = useTranslate();
 const context = useContext();
-const owner = useRequestOwner()
+const owner = useRequestOwner();
 const pop = usePop();
 const platform = usePlatform();
 const present = usePresent();
 
 useKeyUpDown({
     up: goBack,
-    down: goNext
+    down: goNext,
 });
 
 const title = computed(() => {
@@ -220,14 +219,14 @@ const title = computed(() => {
 
 const hasPrevious = computed(() => {
     if (!props.getPrevious) {
-        return false
+        return false;
     }
     return !!props.getPrevious(props.organization);
 });
 
 const hasNext = computed(() => {
     if (!props.getNext) {
-        return false
+        return false;
     }
     return !!props.getNext(props.organization);
 });
@@ -242,21 +241,21 @@ const instance = getCurrentInstance();
 const auth = useAuth();
 
 async function seek(previous = true) {
-    const organization = previous ? props.getPrevious(props.organization) : props.getNext(props.organization)
+    const organization = previous ? props.getPrevious(props.organization) : props.getNext(props.organization);
     if (!organization) {
         return;
     }
     const component = new ComponentWithProperties(instance!.type, {
         ...props,
-        organization
+        organization,
     });
 
     await show({
         components: [component],
         replace: 1,
         reverse: previous,
-        animated: false
-    })
+        animated: false,
+    });
 }
 
 async function goBack() {
@@ -274,9 +273,9 @@ async function editTags() {
     await show({
         components: [
             new ComponentWithProperties(SelectOrganizationTagsView, {
-                organization: props.organization
-            })
-        ]
+                organization: props.organization,
+            }),
+        ],
     });
 }
 
@@ -287,20 +286,20 @@ async function editOrganization() {
             new ComponentWithProperties(EditOrganizationView, {
                 organization: props.organization,
                 isNew: false,
-                saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {                    
+                saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
                     const response = await context.value.getAuthenticatedServerForOrganization(props.organization.id).request({
                         method: 'PATCH',
                         path: '/organization',
                         body: patch,
                         shouldRetry: false,
                         owner,
-                        decoder: Organization as Decoder<Organization>
+                        decoder: Organization as Decoder<Organization>,
                     });
 
-                    props.organization.deepSet(response.data)
-                }
-            })
-        ]
+                    props.organization.deepSet(response.data);
+                },
+            }),
+        ],
     });
 }
 
@@ -337,7 +336,6 @@ async function deleteMe() {
 
     const patch: PatchableArrayAutoEncoder<Organization> = new PatchableArray();
     patch.addDelete(props.organization.id);
-    
 
     try {
         await context.value.authenticatedServer.request({
@@ -345,10 +343,11 @@ async function deleteMe() {
             path: '/admin/organizations',
             body: patch,
             shouldRetry: false,
-            owner
+            owner,
         });
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
     }
 

@@ -1,8 +1,7 @@
-import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from "./InMemoryFilter";
+import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from './InMemoryFilter';
 
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     age: createInMemoryFilterCompiler('details.defaultAge'),
-    gender: createInMemoryFilterCompiler('details.gender')
-}
-
+    gender: createInMemoryFilterCompiler('details.gender'),
+};

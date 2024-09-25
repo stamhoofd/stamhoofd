@@ -15,7 +15,7 @@
         <h3 class="style-title-list">
             {{ record.name }}
         </h3>
-        <p v-if="description && description != record.name" class="style-description">
+        <p v-if="description && description !== record.name" class="style-description">
             {{ description }}
         </p>
 
@@ -129,7 +129,7 @@ function addRootPatch(patch: AutoEncoderPatchType<RecordCategory>) {
 // Sends patch meant the root categories
 function addPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
     // Is category a root category or not?
-    const rootCategory = props.rootCategories.find(c => c.id == props.category.id)
+    const rootCategory = props.rootCategories.find(c => c.id === props.category.id)
     if (rootCategory) {
         const categoryPatch = RecordCategory.patch({
             id: rootCategory.id,
@@ -138,7 +138,7 @@ function addPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
         addRootPatch(categoryPatch)
     } else {
         // Find the root category that contains this category
-        const rootCategory = props.rootCategories.find(c => c.childCategories.find(r => r.id == props.category.id))
+        const rootCategory = props.rootCategories.find(c => c.childCategories.find(r => r.id === props.category.id))
         if (rootCategory) {
             const childCategoryPatch = RecordCategory.patch({
                 id: props.category.id,

@@ -1,30 +1,30 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from "@stamhoofd/structures";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 
-import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Member, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
-import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
-import { Context } from "../../../../helpers/Context";
+import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Group, Member, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>
-type ResponseBody = OrganizationRegistrationPeriodStruct[]
+type Body = PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+type ResponseBody = OrganizationRegistrationPeriodStruct[];
 
 /**
  * One endpoint to create, patch and delete members and their registrations and payments
  */
 
 export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(OrganizationRegistrationPeriodStruct as Decoder<OrganizationRegistrationPeriodStruct>, OrganizationRegistrationPeriodStruct.patchType() as Decoder<AutoEncoderPatchType<OrganizationRegistrationPeriodStruct>>, StringDecoder)
+    bodyDecoder = new PatchableArrayDecoder(OrganizationRegistrationPeriodStruct as Decoder<OrganizationRegistrationPeriodStruct>, OrganizationRegistrationPeriodStruct.patchType() as Decoder<AutoEncoderPatchType<OrganizationRegistrationPeriodStruct>>, StringDecoder);
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "PATCH") {
+        if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/registration-periods", {});
+        const params = Endpoint.parseParameters(request.url, '/organization/registration-periods', {});
 
         if (params) {
             return [true, params as Params];
@@ -34,17 +34,17 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         if (!await Context.auth.hasFullAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
         const periods: OrganizationRegistrationPeriod[] = [];
 
-        for (const {put} of request.body.getPuts()) {
+        for (const { put } of request.body.getPuts()) {
             if (!await Context.auth.hasFullAccess(organization.id)) {
-                throw Context.auth.error()
+                throw Context.auth.error();
             }
             periods.push(await PatchOrganizationRegistrationPeriodsEndpoint.createOrganizationPeriod(organization, put));
         }
@@ -53,143 +53,144 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             const organizationPeriod = await OrganizationRegistrationPeriod.getByID(patch.id);
             if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                 throw new SimpleError({
-                    code: "not_found",
-                    message: "Period not found",
-                    statusCode: 404
-                })
+                    code: 'not_found',
+                    message: 'Period not found',
+                    statusCode: 404,
+                });
             }
 
             const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
 
             if (!period) {
                 throw new SimpleError({
-                    code: "not_found",
-                    message: "Period not found",
-                    statusCode: 404
-                })
+                    code: 'not_found',
+                    message: 'Period not found',
+                    statusCode: 404,
+                });
             }
 
             if (period.locked) {
                 throw new SimpleError({
-                    code: "not_found",
-                    message: "Period not found",
+                    code: 'not_found',
+                    message: 'Period not found',
                     human: 'Je kan geen wijzigingen meer aanbrengen in ' + period.getStructure().name + ' omdat deze is afgesloten',
-                    statusCode: 404
-                })
+                    statusCode: 404,
+                });
             }
 
-            let deleteUnreachable = false
-            const allowedIds: string[] = []
+            let deleteUnreachable = false;
+            const allowedIds: string[] = [];
 
-            //#region prevent patch category lock if no full platform access
+            // #region prevent patch category lock if no full platform access
             const originalCategories = organizationPeriod.settings.categories;
 
             if (await Context.auth.hasFullAccess(organization.id)) {
                 if (patch.settings) {
-                    if(patch.settings.categories) {
+                    if (patch.settings.categories) {
                         deleteUnreachable = true;
                     }
                     organizationPeriod.settings.patchOrPut(patch.settings);
                 }
-            } else {
+            }
+            else {
                 /// Only allow editing category group ids
                 if (patch.settings) {
                     // Only allow adding groups if we have create permissions in a given category group
                     if (patch.settings.categories && !Array.isArray(patch.settings.categories)) {
                         for (const pp of patch.settings.categories.getPatches()) {
-                            const category = organizationPeriod.settings.categories.find(c => c.id === pp.id)
+                            const category = organizationPeriod.settings.categories.find(c => c.id === pp.id);
                             if (!category) {
                                 // Fail silently
-                                continue
+                                continue;
                             }
-    
+
                             if (!await Context.auth.canCreateGroupInCategory(organization.id, category)) {
-                                throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen in deze categorie')
+                                throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen in deze categorie');
                             }
-                                
+
                             // Only process puts
-                            const ids = pp.groupIds.getPuts().map(p => p.put)
-                            allowedIds.push(...ids)
-                            category.groupIds.push(...ids)
+                            const ids = pp.groupIds.getPuts().map(p => p.put);
+                            allowedIds.push(...ids);
+                            category.groupIds.push(...ids);
                         }
-    
+
                         if (allowedIds.length > 0) {
-                            deleteUnreachable = true
+                            deleteUnreachable = true;
                         }
                     }
                 }
             }
 
-            //#region handle locked categories
-            if(!Context.auth.hasPlatformFullAccess()) {
+            // #region handle locked categories
+            if (!Context.auth.hasPlatformFullAccess()) {
                 const categoriesAfterPatch = organizationPeriod.settings.categories;
 
-                for(const categoryBefore of originalCategories) {
+                for (const categoryBefore of originalCategories) {
                     const locked = categoryBefore.settings.locked;
 
-                    if(locked) {
+                    if (locked) {
                         // todo: use existing function, now a category could still be deleted if the category is moved to another category and that catetory is deleted
                         const categoryId = categoryBefore.id;
                         const refCountBefore = originalCategories.filter(c => c.categoryIds.includes(categoryId)).length;
                         const refCountAfter = categoriesAfterPatch.filter(c => c.categoryIds.includes(categoryId)).length;
                         const isDeleted = refCountAfter < refCountBefore;
 
-                        if(isDeleted) {
-                            throw Context.auth.error('Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.')
+                        if (isDeleted) {
+                            throw Context.auth.error('Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.');
                         }
                     }
 
                     const categoryAfter = categoriesAfterPatch.find(c => c.id === categoryBefore.id);
-                    
-                    if(!categoryAfter) {
-                        if(locked) {
-                            throw Context.auth.error('Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.')
+
+                    if (!categoryAfter) {
+                        if (locked) {
+                            throw Context.auth.error('Je hebt geen toegangsrechten om deze vergrendelde categorie te verwijderen.');
                         }
-                    } else if(locked !== categoryAfter.settings.locked) {
-                        throw Context.auth.error('Je hebt geen toegangsrechten om deze categorie te vergrendelen of ontgrendelen.')
+                    }
+                    else if (locked !== categoryAfter.settings.locked) {
+                        throw Context.auth.error('Je hebt geen toegangsrechten om deze categorie te vergrendelen of ontgrendelen.');
                     }
 
-                    if(!locked || !categoryAfter) {
+                    if (!locked || !categoryAfter) {
                         continue;
                     }
 
                     const settingsBefore = categoryBefore.settings;
                     const settingsAfter = categoryAfter.settings;
 
-                    if(settingsBefore.name !== settingsAfter.name) {
-                        throw Context.auth.error('Je hebt geen toegangsrechten de naam van deze vergrendelde categorie te wijzigen.')
+                    if (settingsBefore.name !== settingsAfter.name) {
+                        throw Context.auth.error('Je hebt geen toegangsrechten de naam van deze vergrendelde categorie te wijzigen.');
                     }
                 }
             }
-            //#endregion
+            // #endregion
 
             await organizationPeriod.save();
 
             // Check changes to groups
-            const deleteGroups = patch.groups.getDeletes()
+            const deleteGroups = patch.groups.getDeletes();
             if (deleteGroups.length > 0) {
                 for (const id of deleteGroups) {
-                    await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(id)
-                    deleteUnreachable = true
+                    await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(id);
+                    deleteUnreachable = true;
                 }
             }
 
             for (const groupPut of patch.groups.getPuts()) {
-                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, {allowedIds})
-                deleteUnreachable = true
+                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, { allowedIds });
+                deleteUnreachable = true;
             }
 
             for (const struct of patch.groups.getPatches()) {
-                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(struct, period)
+                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(struct, period);
             }
 
-
             if (deleteUnreachable) {
-                const groups = await Group.getAll(organization.id, organizationPeriod.periodId)
+                const groups = await Group.getAll(organization.id, organizationPeriod.periodId);
 
                 // Delete unreachable categories first
                 await organizationPeriod.cleanCategories(groups);
-                await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
+                await Group.deleteUnreachable(organization.id, organizationPeriod, groups);
             }
 
             periods.push(organizationPeriod);
@@ -200,22 +201,22 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         );
     }
 
-    static async validateDefaultGroupId(id: string|null): Promise<string|null> {
+    static async validateDefaultGroupId(id: string | null): Promise<string | null> {
         if (id === null) {
             return id;
         }
-        const platform = await Platform.getSharedStruct()
+        const platform = await Platform.getSharedStruct();
 
         if (platform.config.defaultAgeGroups.find(g => g.id === id)) {
             return id;
         }
 
         throw new SimpleError({
-            code: "invalid_default_age_group",
-            message: "Invalid default age group",
-            human: "De standaard leeftijdsgroep is ongeldig",
-            statusCode: 400
-        })
+            code: 'invalid_default_age_group',
+            message: 'Invalid default age group',
+            human: 'De standaard leeftijdsgroep is ongeldig',
+            statusCode: 400,
+        });
     }
 
     static async createOrganizationPeriod(organization: Organization, struct: OrganizationRegistrationPeriodStruct) {
@@ -223,10 +224,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         if (!period || period.locked) {
             throw new SimpleError({
-                code: "not_found",
-                message: "Period not found",
-                statusCode: 404
-            })
+                code: 'not_found',
+                message: 'Period not found',
+                statusCode: 404,
+            });
         }
 
         const organizationPeriod = new OrganizationRegistrationPeriod();
@@ -237,75 +238,75 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         await organizationPeriod.save();
 
         for (const s of struct.groups) {
-            await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period)
+            await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period);
         }
-        const groups = await Group.getAll(organization.id, organizationPeriod.periodId)
+        const groups = await Group.getAll(organization.id, organizationPeriod.periodId);
 
         // Delete unreachable categories first
         await organizationPeriod.cleanCategories(groups);
-        await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
+        await Group.deleteUnreachable(organization.id, organizationPeriod, groups);
 
-        return organizationPeriod
+        return organizationPeriod;
     }
 
     static async deleteGroup(id: string) {
-        const model = await Group.getByID(id)
+        const model = await Group.getByID(id);
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te verwijderen')
+            throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te verwijderen');
         }
 
-        model.deletedAt = new Date()
-        await model.save()
-        Member.updateMembershipsForGroupId(id)
+        model.deletedAt = new Date();
+        await model.save();
+        Member.updateMembershipsForGroupId(id);
     }
 
     static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null) {
-        const model = await Group.getByID(struct.id)
+        const model = await Group.getByID(struct.id);
 
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-            throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen')
+            throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen');
         }
 
         if (struct.settings) {
-            struct.settings.period = undefined // Not allowed to patch manually
-            model.settings.patchOrPut(struct.settings)
+            struct.settings.period = undefined; // Not allowed to patch manually
+            model.settings.patchOrPut(struct.settings);
         }
 
         if (struct.status) {
-            model.status = struct.status
+            model.status = struct.status;
         }
-        
+
         if (struct.privateSettings) {
-            model.privateSettings.patchOrPut(struct.privateSettings)
+            model.privateSettings.patchOrPut(struct.privateSettings);
 
             if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                 throw new SimpleError({
-                    code: "missing_permissions",
-                    message: "You cannot restrict your own permissions",
-                    human: "Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen. Vraag aan een hoofdbeheerder om jouw toegang te verwijderen."
-                })
+                    code: 'missing_permissions',
+                    message: 'You cannot restrict your own permissions',
+                    human: 'Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen. Vraag aan een hoofdbeheerder om jouw toegang te verwijderen.',
+                });
             }
         }
 
         if (struct.cycle !== undefined) {
-            model.cycle = struct.cycle
+            model.cycle = struct.cycle;
         }
 
         if (struct.deletedAt !== undefined) {
-            model.deletedAt = struct.deletedAt
+            model.deletedAt = struct.deletedAt;
         }
 
         if (struct.defaultAgeGroupId !== undefined) {
-            model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId)
+            model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId);
         }
 
         if (!period && !model.settings.period) {
-            period = await RegistrationPeriod.getByID(model.periodId)
+            period = await RegistrationPeriod.getByID(model.periodId);
         }
 
         if (period) {
-            model.periodId = period.id
-            model.settings.period = period.getBaseStructure()
+            model.periodId = period.id;
+            model.settings.period = period.getBaseStructure();
         }
 
         const patch = struct;
@@ -317,34 +318,35 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     // await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(model.waitingListId)
                     model.waitingListId = null;
                 }
-
-            } else if (patch.waitingList.isPatch()) {
+            }
+            else if (patch.waitingList.isPatch()) {
                 if (!model.waitingListId) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'waitingList',
-                        message: 'Cannot patch waiting list before it is created'
-                    })
+                        message: 'Cannot patch waiting list before it is created',
+                    });
                 }
-                patch.waitingList.id = model.waitingListId
-                patch.waitingList.type = GroupType.WaitingList
-                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList, period)
-            } else {
+                patch.waitingList.id = model.waitingListId;
+                patch.waitingList.type = GroupType.WaitingList;
+                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList, period);
+            }
+            else {
                 if (model.waitingListId) {
                     // for now don't delete, as waiting lists can be shared between multiple groups
                     // await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(model.waitingListId)
                     model.waitingListId = null;
                 }
-                patch.waitingList.type = GroupType.WaitingList
+                patch.waitingList.type = GroupType.WaitingList;
 
-                const existing = await Group.getByID(patch.waitingList.id)
+                const existing = await Group.getByID(patch.waitingList.id);
                 if (existing) {
                     if (existing.organizationId !== model.organizationId) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             field: 'waitingList',
-                            message: 'Waiting list group is already used in another organization'
-                        })
+                            message: 'Waiting list group is already used in another organization',
+                        });
                     }
 
                     if (existing.periodId !== model.periodId) {
@@ -352,111 +354,111 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             code: 'invalid_field',
                             field: 'waitingList',
                             message: 'Waiting list group is already used in another period',
-                            human: 'Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende werkjaren'
-                        })
+                            human: 'Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende werkjaren',
+                        });
                     }
 
-                    model.waitingListId = existing.id
-                } else {
-                    const requiredPeriod = period ?? await RegistrationPeriod.getByID(model.periodId)
+                    model.waitingListId = existing.id;
+                }
+                else {
+                    const requiredPeriod = period ?? await RegistrationPeriod.getByID(model.periodId);
 
                     if (!requiredPeriod) {
-                        throw new Error('Unexpected missing period when creating waiting list')
+                        throw new Error('Unexpected missing period when creating waiting list');
                     }
                     const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                         patch.waitingList,
                         model.organizationId,
-                        requiredPeriod
-                    )
-                    model.waitingListId = group.id
+                        requiredPeriod,
+                    );
+                    model.waitingListId = group.id;
                 }
             }
         }
 
-        
-        await model.updateOccupancy()
+        await model.updateOccupancy();
         await model.save();
 
         if (struct.deletedAt !== undefined || struct.defaultAgeGroupId !== undefined) {
-            Member.updateMembershipsForGroupId(model.id)
+            Member.updateMembershipsForGroupId(model.id);
         }
     }
 
-
-    static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: {allowedIds?: string[]}): Promise<Group> {
-        const allowedIds = options?.allowedIds ?? []
+    static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
+        const allowedIds = options?.allowedIds ?? [];
 
         if (!await Context.auth.hasFullAccess(organizationId)) {
             if (allowedIds.includes(struct.id)) {
                 // Ok
-            } else {
-                throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen')
+            }
+            else {
+                throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen');
             }
         }
 
-        const user = Context.auth.user
+        const user = Context.auth.user;
 
-        const model = new Group()
-        model.id = struct.id
-        model.organizationId = organizationId
-        model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId)
-        model.periodId = period.id
-        model.settings = struct.settings
-        model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
-        model.status = struct.status
-        model.type = struct.type
-        model.settings.period = period.getBaseStructure()
+        const model = new Group();
+        model.id = struct.id;
+        model.organizationId = organizationId;
+        model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId);
+        model.periodId = period.id;
+        model.settings = struct.settings;
+        model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({});
+        model.status = struct.status;
+        model.type = struct.type;
+        model.settings.period = period.getBaseStructure();
 
         if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
             // Create a temporary permission role for this user
-            const organizationPermissions = user.permissions?.organizationPermissions?.get(organizationId)
+            const organizationPermissions = user.permissions?.organizationPermissions?.get(organizationId);
             if (!organizationPermissions) {
-                throw new Error('Unexpected missing permissions')
+                throw new Error('Unexpected missing permissions');
             }
             const resourcePermissions = ResourcePermissions.create({
                 resourceName: model.settings.name,
-                level: PermissionLevel.Full
-            })
-            const patch = resourcePermissions.createInsertPatch(PermissionsResourceType.Groups, model.id, organizationPermissions)
-            user.permissions!.organizationPermissions.set(organizationId, organizationPermissions.patch(patch))
-            console.log('Automatically granted author full permissions to resource', 'group', model.id, 'user', user.id, 'patch', patch.encode({version: Version}))
-            await user.save()
+                level: PermissionLevel.Full,
+            });
+            const patch = resourcePermissions.createInsertPatch(PermissionsResourceType.Groups, model.id, organizationPermissions);
+            user.permissions!.organizationPermissions.set(organizationId, organizationPermissions.patch(patch));
+            console.log('Automatically granted author full permissions to resource', 'group', model.id, 'user', user.id, 'patch', patch.encode({ version: Version }));
+            await user.save();
         }
 
         // Check if current user has permissions to this new group -> else fail with error
         if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
             throw new SimpleError({
-                code: "missing_permissions",
-                message: "You cannot restrict your own permissions",
-                human: "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep"
-            })
+                code: 'missing_permissions',
+                message: 'You cannot restrict your own permissions',
+                human: 'Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep',
+            });
         }
 
         if (struct.waitingList) {
-            const existing = await Group.getByID(struct.waitingList.id)
+            const existing = await Group.getByID(struct.waitingList.id);
             if (existing) {
                 if (existing.organizationId !== model.organizationId) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'waitingList',
-                        message: 'Waiting list group is already used in another organization'
-                    })
+                        message: 'Waiting list group is already used in another organization',
+                    });
                 }
 
-                model.waitingListId = existing.id
-            } else {
-                struct.waitingList.type = GroupType.WaitingList
+                model.waitingListId = existing.id;
+            }
+            else {
+                struct.waitingList.type = GroupType.WaitingList;
                 const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                     struct.waitingList,
                     model.organizationId,
-                    period
-                )
-                model.waitingListId = group.id
+                    period,
+                );
+                model.waitingListId = group.id;
             }
         }
 
         await model.save();
         return model;
     }
-
 }

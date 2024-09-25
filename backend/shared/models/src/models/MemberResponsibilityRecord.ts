@@ -1,57 +1,57 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
 import { Group as GroupStruct, MemberResponsibilityRecordBase, MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 export class MemberResponsibilityRecord extends Model {
-    static table = "member_responsibility_records"
+    static table = 'member_responsibility_records';
 
     // Columns
     @column({
-        primary: true, type: "string", beforeSave(value) {
+        primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
-        }
+        },
     })
     id!: string;
 
-    @column({ type: "string", nullable: true })
-    organizationId: string|null = null;
+    @column({ type: 'string', nullable: true })
+    organizationId: string | null = null;
 
-    @column({ type: "string", nullable: true })
-    groupId: string|null = null;
+    @column({ type: 'string', nullable: true })
+    groupId: string | null = null;
 
-    @column({ type: "string" })
-    memberId: string
+    @column({ type: 'string' })
+    memberId: string;
 
-    @column({ type: "string" })
-    responsibilityId: string
+    @column({ type: 'string' })
+    responsibilityId: string;
 
     @column({
-        type: "datetime", beforeSave(old?: any) {
+        type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
-        }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
     })
-    startDate: Date
+    startDate: Date;
 
-    @column({ type: "datetime", nullable: true })
-    endDate: Date | null = null
+    @column({ type: 'datetime', nullable: true })
+    endDate: Date | null = null;
 
     getBaseStructure() {
         return MemberResponsibilityRecordBase.create({
-            ...this
-        })
+            ...this,
+        });
     }
 
-    getStructure(group: GroupStruct|null) {
+    getStructure(group: GroupStruct | null) {
         return MemberResponsibilityRecordStruct.create({
             ...this,
-            group
-        })
+            group,
+        });
     }
 
     /**
@@ -59,16 +59,16 @@ export class MemberResponsibilityRecord extends Model {
      */
     static select() {
         const transformer = (row: SQLResultNamespacedRow): MemberResponsibilityRecord => {
-            const d = (this as typeof MemberResponsibilityRecord & typeof Model).fromRow(row[this.table] as any) as MemberResponsibilityRecord|undefined
-    
+            const d = (this as typeof MemberResponsibilityRecord & typeof Model).fromRow(row[this.table] as any) as MemberResponsibilityRecord | undefined;
+
             if (!d) {
-                throw new Error("MemberResponsibilityRecord not found")
+                throw new Error('MemberResponsibilityRecord not found');
             }
 
             return d;
-        }
-        
-        const select = new SQLSelect(transformer, SQL.wildcard())
-        return select.from(SQL.table(this.table))
+        };
+
+        const select = new SQLSelect(transformer, SQL.wildcard());
+        return select.from(SQL.table(this.table));
     }
 }

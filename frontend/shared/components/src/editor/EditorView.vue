@@ -57,7 +57,7 @@
                             <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
                         </div>
                         <template #right><button class="button text" type="submit" @mousedown.prevent>
-                            {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
+                            {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                         </button></template>
                         <template v-if="editor.isActive('link')" #right><button v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" /></template>
                     </STListItem>
@@ -243,7 +243,7 @@ export default class EditorView extends Mixins(NavigationMixin) {
     saveLink() {
         let cleanedUrl = this.editLink.trim()
 
-        if (cleanedUrl.length == 0) {
+        if (cleanedUrl.length === 0) {
             this.clearLink()
             return
         }
@@ -456,10 +456,10 @@ export default class EditorView extends Mixins(NavigationMixin) {
      * Return true if node needs to be kept
      */
     warnInvalidNodes(node: JSONContent, newSmartVariables: EditorSmartVariable[], oldSmartVariables: EditorSmartVariable[]) {
-        if (node.type == "smartVariable") {
-            if (!newSmartVariables.find(smartVariable => smartVariable.id == node.attrs?.id)) {
+        if (node.type === "smartVariable") {
+            if (!newSmartVariables.find(smartVariable => smartVariable.id === node.attrs?.id)) {
                 // If did found in old?
-                const old = oldSmartVariables.find(smartVariable => smartVariable.id == node.attrs?.id)
+                const old = oldSmartVariables.find(smartVariable => smartVariable.id === node.attrs?.id)
                 if (old && old.deleteMessage) {
                     new Toast(old.deleteMessage, "warning yellow").setHide(30*1000).show()
                 }
@@ -476,11 +476,11 @@ export default class EditorView extends Mixins(NavigationMixin) {
      * Return true if node needs to be kept
      */
     deleteInvalidNodes(node: JSONContent) {
-        if (node.type == "smartButton" || node.type == "smartButtonInline") {
-            return !!this.smartButtons.find(smartButton => smartButton.id == node.attrs?.id)
+        if (node.type === "smartButton" || node.type === "smartButtonInline") {
+            return !!this.smartButtons.find(smartButton => smartButton.id === node.attrs?.id)
         }
-        if (node.type == "smartVariable") {
-            return !!this.smartVariables.find(v => v.id == node.attrs?.id)
+        if (node.type === "smartVariable") {
+            return !!this.smartVariables.find(v => v.id === node.attrs?.id)
         }
         if (node.content) {
             node.content = node.content.filter(childNode => {

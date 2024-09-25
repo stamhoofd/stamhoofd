@@ -10,13 +10,12 @@ type Body = undefined;
 type ResponseBody = UserWithMembers;
 
 export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/user", {});
+        const params = Endpoint.parseParameters(request.url, '/user', {});
 
         if (params) {
             return [true, params as Params];
@@ -25,11 +24,11 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope()
-        const {user} = await Context.authenticate({allowWithoutAccount: true})
+        await Context.setOptionalOrganizationScope();
+        const { user } = await Context.authenticate({ allowWithoutAccount: true });
 
         return new Response(
-            await AuthenticatedStructures.userWithMembers(user)
+            await AuthenticatedStructures.userWithMembers(user),
         );
     }
 }

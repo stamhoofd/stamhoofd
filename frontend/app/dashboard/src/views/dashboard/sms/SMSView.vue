@@ -11,7 +11,7 @@
             <div v-if="!isSupported" class="error-box">
                 SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone (Android of iOS) of Mac.
             </div>
-            <STInputBox v-if="customers.length == 0 && parentsEnabled" title="Naar wie?">
+            <STInputBox v-if="customers.length === 0 && parentsEnabled" title="Naar wie?">
                 <Dropdown id="sms-who" v-model="smsFilter">
                     <option value="parents">
                         Enkel naar ouders
@@ -40,7 +40,7 @@
                 }}
             </template>
             <template #right>
-                <button class="button primary" :disabled="!isSupported || phones.length == 0" type="button" @click="send">
+                <button class="button primary" :disabled="!isSupported || phones.length === 0" type="button" @click="send">
                     Versturen...
                 </button>
             </template>
@@ -78,11 +78,11 @@ export default class SMSView extends Mixins(NavigationMixin) {
     message = "";
 
     get isSupported() {
-        return this.getOS() != "unknown" && this.getOS() != "windows"
+        return this.getOS() !== "unknown" && this.getOS() !== "windows"
     }
 
     get canUseBody() {
-        return this.getOS() != "unknown" && this.getOS() != "windows" && this.getOS() != "macOS-old"
+        return this.getOS() !== "unknown" && this.getOS() !== "windows" && this.getOS() !== "macOS-old"
     }
 
     get parentsEnabled() {
@@ -157,7 +157,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
             }
             let arr: string[] = [];
 
-            if (this.smsFilter == "parents" || this.smsFilter == "all") {
+            if (this.smsFilter === "parents" || this.smsFilter === "all") {
                 for (const parent of member.details.parents) {
                     if (parent.phone) {
                         recipients.add(parent.phone)
@@ -165,7 +165,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
                 }
             }
 
-            if (member.details.phone && (this.smsFilter == "members" || this.smsFilter == "all")) {
+            if (member.details.phone && (this.smsFilter === "members" || this.smsFilter === "all")) {
                 recipients.add(member.details.phone)
             }
         }
@@ -174,7 +174,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
     }
 
     send() {
-        if (this.phones.length == 0) {
+        if (this.phones.length === 0) {
             return;
         }
         let url = "";
@@ -194,7 +194,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
                 break;
         }
 
-        if (this.getOS() == "whatsapp") {
+        if (this.getOS() === "whatsapp") {
             // Not working yet for multpile recipients
             url += this.phones.map((phone) => phone.replace(/(\s|\+)+/g, "")).join(",");
         } else {
@@ -221,7 +221,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if (this.message.length == 0) {
+        if (this.message.length === 0) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je dit scherm wilt sluiten?", "Sluiten")

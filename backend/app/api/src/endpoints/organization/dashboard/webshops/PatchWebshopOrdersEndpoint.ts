@@ -1,16 +1,16 @@
 import { ArrayDecoder, AutoEncoderPatchType, Data, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment,Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
 type Query = undefined;
-type Body = AutoEncoderPatchType<PrivateOrder>[] | PatchableArrayAutoEncoder<PrivateOrder>
-type ResponseBody = PrivateOrder[]
+type Body = AutoEncoderPatchType<PrivateOrder>[] | PatchableArrayAutoEncoder<PrivateOrder>;
+type ResponseBody = PrivateOrder[];
 
 class VersionSpecificDecoder<A, B> implements Decoder<A | B> {
     oldDecoder: Decoder<A>;
@@ -25,13 +25,13 @@ class VersionSpecificDecoder<A, B> implements Decoder<A | B> {
 
     decode(data: Data): A | B {
         // Set the version of the decoding context of "data"
-        const v = data.context.version
+        const v = data.context.version;
 
         if (v >= this.version) {
             return this.newerDecoder.decode(data);
         }
 
-       return this.oldDecoder.decode(data);
+        return this.oldDecoder.decode(data);
     }
 }
 
@@ -41,15 +41,15 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         new ArrayDecoder(PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>),
         159,
         // After or at version 159, accept a patchable array
-        new PatchableArrayDecoder(PrivateOrder as Decoder<PrivateOrder>, PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>, StringDecoder)
+        new PatchableArrayDecoder(PrivateOrder as Decoder<PrivateOrder>, PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>, StringDecoder),
     );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "PATCH") {
+        if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/webshop/@id/orders", { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/orders', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -59,22 +59,23 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
-        let body: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+        let body: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
         // Migrate old syntax
         if (Array.isArray(request.body)) {
             for (const p of request.body) {
                 body.addPatch(p);
             }
-        } else {
-            body = request.body
+        }
+        else {
+            body = request.body;
         }
 
         if (body.changes.length == 0) {
@@ -82,100 +83,103 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         // Need to happen in the queue because we are updating the webshop stock
-        const orders = await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
-            const webshop = await Webshop.getByID(request.params.id)
+        const orders = await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
+            const webshop = await Webshop.getByID(request.params.id);
             if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Write)) {
-                throw Context.auth.notFoundOrNoAccess()
+                throw Context.auth.notFoundOrNoAccess();
             }
 
-            const orders = body.getPatches().length > 0 ? await Order.where({
-                webshopId: webshop.id,
-                id: {
-                    sign: "IN",
-                    value: body.getPatches().map(o => o.id)
-                }
-            }) : []
+            const orders = body.getPatches().length > 0
+                ? await Order.where({
+                    webshopId: webshop.id,
+                    id: {
+                        sign: 'IN',
+                        value: body.getPatches().map(o => o.id),
+                    },
+                })
+                : [];
 
             // We use a getter because we need to have an up to date webshop struct
             // otherwise we won't validate orders on the latest webshop with the latest stock information
             const webshopGetter = {
                 get struct() {
                     return WebshopStruct.create(webshop);
-                }
-            }
+                },
+            };
 
             // TODO: handle order creation here
             for (const put of body.getPuts()) {
-                const struct = put.put
-                const model = new Order()
-                model.webshopId = webshop.id
-                model.organizationId = webshop.organizationId
-                model.status = struct.status
-                model.data = struct.data
+                const struct = put.put;
+                const model = new Order();
+                model.webshopId = webshop.id;
+                model.organizationId = webshop.organizationId;
+                model.status = struct.status;
+                model.data = struct.data;
 
                 // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
-                // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order) 
+                // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order)
                 // -> the user doesn't need to download the ticket again
                 // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
 
                 if (model.status === OrderStatus.Deleted) {
-                    model.data.removePersonalData()
+                    model.data.removePersonalData();
                 }
 
-                const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, organization))
+                const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, organization));
 
                 // TODO: validate before updating stock
                 order.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
-                
+
                 try {
-                    await order.updateStock()
-                    const totalPrice = order.data.totalPrice
+                    await order.updateStock();
+                    const totalPrice = order.data.totalPrice;
 
                     if (totalPrice == 0) {
                         // Force unknown payment method
-                        order.data.paymentMethod = PaymentMethod.Unknown
+                        order.data.paymentMethod = PaymentMethod.Unknown;
 
                         // Mark this order as paid
-                        await order.markPaid(null, organization, webshop)
-                        await order.save()
-                    } else {
-                        const payment = new Payment()
-                        payment.organizationId = organization.id
-                        payment.method = struct.data.paymentMethod
-                        payment.status = PaymentStatus.Created
-                        payment.price = totalPrice
-                        payment.paidAt = null
+                        await order.markPaid(null, organization, webshop);
+                        await order.save();
+                    }
+                    else {
+                        const payment = new Payment();
+                        payment.organizationId = organization.id;
+                        payment.method = struct.data.paymentMethod;
+                        payment.status = PaymentStatus.Created;
+                        payment.price = totalPrice;
+                        payment.paidAt = null;
 
                         // Determine the payment provider (always null because no online payments here)
-                        payment.provider = null
+                        payment.provider = null;
 
-                        await payment.save()
+                        await payment.save();
 
-                        order.paymentId = payment.id
-                        order.setRelation(Order.payment, payment)
+                        order.paymentId = payment.id;
+                        order.setRelation(Order.payment, payment);
 
                         // Create balance item
                         const balanceItem = new BalanceItem();
                         balanceItem.orderId = order.id;
                         balanceItem.type = BalanceItemType.Order;
-                        balanceItem.unitPrice = totalPrice
-                        balanceItem.description = webshop.meta.name
-                        balanceItem.pricePaid = 0
+                        balanceItem.unitPrice = totalPrice;
+                        balanceItem.description = webshop.meta.name;
+                        balanceItem.pricePaid = 0;
                         balanceItem.organizationId = organization.id;
                         balanceItem.status = BalanceItemStatus.Pending;
                         balanceItem.relations = new Map([
                             [
-                                BalanceItemRelationType.Webshop, 
+                                BalanceItemRelationType.Webshop,
                                 BalanceItemRelation.create({
                                     id: webshop.id,
                                     name: webshop.meta.name,
-                                })
-                            ]
-                        ])
+                                }),
+                            ],
+                        ]);
                         await balanceItem.save();
 
                         // Create one balance item payment to pay it in one payment
-                        const balanceItemPayment = new BalanceItemPayment()
+                        const balanceItemPayment = new BalanceItemPayment();
                         balanceItemPayment.balanceItemId = balanceItem.id;
                         balanceItemPayment.paymentId = payment.id;
                         balanceItemPayment.organizationId = organization.id;
@@ -183,50 +187,53 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         await balanceItemPayment.save();
 
                         if (payment.method == PaymentMethod.Transfer) {
-                            await order.markValid(payment, [])
-                            await payment.save()
-                            await order.save()
-                        } else if (payment.method == PaymentMethod.PointOfSale) {
+                            await order.markValid(payment, []);
+                            await payment.save();
+                            await order.save();
+                        }
+                        else if (payment.method == PaymentMethod.PointOfSale) {
                             // Not really paid, but needed to create the tickets if needed
-                            await order.markPaid(payment, organization, webshop)
-                            await payment.save()
-                            await order.save()
-                        } else {
-                            throw new Error("Unsupported payment method")
+                            await order.markPaid(payment, organization, webshop);
+                            await payment.save();
+                            await order.save();
+                        }
+                        else {
+                            throw new Error('Unsupported payment method');
                         }
 
-                        balanceItem.description = order.generateBalanceDescription(webshop)
-                        await balanceItem.save()
+                        balanceItem.description = order.generateBalanceDescription(webshop);
+                        await balanceItem.save();
                     }
-                } catch (e) {
-                    await order.deleteOrderBecauseOfCreationError()
+                }
+                catch (e) {
+                    await order.deleteOrderBecauseOfCreationError();
                     throw e;
                 }
-                
-                orders.push(order)
+
+                orders.push(order);
             }
 
             for (const patch of body.getPatches()) {
-                const model = orders.find(p => p.id == patch.id)
+                const model = orders.find(p => p.id == patch.id);
                 if (!model) {
                     throw new SimpleError({
-                        code: "not_found",
-                        message: "Order with id "+patch.id+" does not exist"
-                    })
+                        code: 'not_found',
+                        message: 'Order with id ' + patch.id + ' does not exist',
+                    });
                 }
                 const previousToPay = model.totalToPay;
-                const previousStatus = model.status
+                const previousStatus = model.status;
 
-                model.status = patch.status ?? model.status
+                model.status = patch.status ?? model.status;
 
                 // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
-                // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order) 
+                // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order)
                 // -> the user doesn't need to download the ticket again
                 // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
 
-                const previousData = model.data.clone()
+                const previousData = model.data.clone();
                 if (patch.data) {
-                    model.data.patchOrPut(patch.data)
+                    model.data.patchOrPut(patch.data);
 
                     if (model.status !== OrderStatus.Deleted) {
                         // Make sure all data is up to date and validated (= possible corrections happen here too)
@@ -235,59 +242,61 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 }
 
                 if (model.status === OrderStatus.Deleted) {
-                    model.data.removePersonalData()
+                    model.data.removePersonalData();
                 }
 
                 if (model.status === OrderStatus.Deleted || model.status === OrderStatus.Canceled) {
-                    model.markUpdated()
+                    model.markUpdated();
                     // Cancel payment if still pending
-                    await BalanceItem.deleteForDeletedOrders([model.id])
-                } else {
+                    await BalanceItem.deleteForDeletedOrders([model.id]);
+                }
+                else {
                     if (previousStatus === OrderStatus.Canceled || previousStatus === OrderStatus.Deleted) {
-                        model.markUpdated()
+                        model.markUpdated();
                         // Undo deletion
-                        await BalanceItem.undoForDeletedOrders([model.id])
+                        await BalanceItem.undoForDeletedOrders([model.id]);
                     }
                 }
 
                 // Update balance item prices for this order if price has changed
                 if (previousToPay !== model.totalToPay) {
-                    const items = await BalanceItem.where({ orderId: model.id })
+                    const items = await BalanceItem.where({ orderId: model.id });
                     if (items.length >= 1) {
-                        model.markUpdated()
-                        items[0].unitPrice = model.totalToPay
-                        items[0].description = model.generateBalanceDescription(webshop)
+                        model.markUpdated();
+                        items[0].unitPrice = model.totalToPay;
+                        items[0].description = model.generateBalanceDescription(webshop);
                         items[0].updateStatus();
-                        await items[0].save()
+                        await items[0].save();
 
                         // Zero out the other items
-                        const otherItems = items.slice(1)
-                        await BalanceItem.deleteItems(otherItems)
-                    } else if (items.length === 0
-                         && model.totalToPay > 0) {
-                        model.markUpdated()
+                        const otherItems = items.slice(1);
+                        await BalanceItem.deleteItems(otherItems);
+                    }
+                    else if (items.length === 0
+                        && model.totalToPay > 0) {
+                        model.markUpdated();
                         const balanceItem = new BalanceItem();
                         balanceItem.orderId = model.id;
-                        balanceItem.unitPrice = model.totalToPay
-                        balanceItem.description = model.generateBalanceDescription(webshop)
-                        balanceItem.pricePaid = 0
+                        balanceItem.unitPrice = model.totalToPay;
+                        balanceItem.description = model.generateBalanceDescription(webshop);
+                        balanceItem.pricePaid = 0;
                         balanceItem.organizationId = organization.id;
                         balanceItem.status = BalanceItemStatus.Pending;
                         await balanceItem.save();
                     }
                 }
 
-                await model.save()
-                await model.setRelation(Order.webshop, webshop).updateStock(previousData)
-                await model.setRelation(Order.webshop, webshop).updateTickets()
+                await model.save();
+                await model.setRelation(Order.webshop, webshop).updateStock(previousData);
+                await model.setRelation(Order.webshop, webshop).updateTickets();
             }
 
-            const mapped = orders.map(order => order.setRelation(Order.webshop, webshop))
-            return mapped
-        })
+            const mapped = orders.map(order => order.setRelation(Order.webshop, webshop));
+            return mapped;
+        });
 
         return new Response(
-            await Order.getPrivateStructures(orders)
+            await Order.getPrivateStructures(orders),
         );
     }
 }

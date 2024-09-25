@@ -10,8 +10,8 @@
                     {{ product.name }}
                 </h3>
 
-                <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.location" class="description" v-text="product.location.name" />
-                <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.dateRange" class="description" v-text="formatDateRange(product.dateRange)" />
+                <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.location" class="description" v-text="product.location.name" />
+                <p v-if="(product.type === 'Ticket' || product.type === 'Voucher') && product.dateRange" class="description" v-text="formatDateRange(product.dateRange)" />
                 <p v-else-if="product.description" class="description" v-text="product.description" />
 
                 <p class="price">
@@ -27,7 +27,7 @@
                 <img :src="imageSrc" :width="imgWidth" :height="imgHeight" :alt="product.name">
             </figure>
             <figure v-else>
-                <span v-if="product.type == 'Ticket' || product.type == 'Voucher'" class="icon ticket gray" />
+                <span v-if="product.type === 'Ticket' || product.type === 'Voucher'" class="icon ticket gray" />
                 <span class="icon arrow-right-small gray" />
             </figure>
             <hr>
@@ -83,7 +83,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
     get priceString() {
         const priceRanges = Formatter.uniqueArray(this.product.filteredPrices({admin: this.admin}).map(p => p.price))
-        if (priceRanges.length == 1) {
+        if (priceRanges.length === 1) {
             if (priceRanges[0] === 0) {
                 if (this.webshop.isAllFree) {
                     return "";
@@ -99,7 +99,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
     get count() {
         return this.cart.items.reduce((prev, item) => {
-            if (item.product.id != this.product.id) {
+            if (item.product.id !== this.product.id) {
                 return prev
             }
             return prev + item.amount
@@ -108,7 +108,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
     get pendingReservationCount() {
         return this.cart.items.reduce((prev, item) => {
-            if (item.product.id != this.product.id) {
+            if (item.product.id !== this.product.id) {
                 return prev
             }
             return prev + item.amount - item.reservedAmount
@@ -198,7 +198,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
     onClicked() {
         const editExisting = this.editExisting
-        const oldItem = editExisting ? this.cart.items.find(i => i.product.id == this.product.id) : undefined
+        const oldItem = editExisting ? this.cart.items.find(i => i.product.id === this.product.id) : undefined
 
         let cartItem = oldItem?.clone() ?? CartItem.createDefault(this.product, this.cart, this.webshop, {admin: this.admin})
 

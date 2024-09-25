@@ -25,7 +25,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
         }
 
         if (paid) {
-            if (payment.status != PaymentStatus.Succeeded) {
+            if (payment.status !== PaymentStatus.Succeeded) {
                 data.addPatch(Payment.patch({
                     id: payment.id,
                     status: PaymentStatus.Succeeded

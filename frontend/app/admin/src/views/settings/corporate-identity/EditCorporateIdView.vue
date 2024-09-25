@@ -66,7 +66,7 @@
 
         <hr>
         <h2>Footer</h2>
-        
+
         <STInputBox error-fields="footerText" :error-box="errors.errorBox" class="max">
             <WYSIWYGTextInput
                 v-model="footerText"
@@ -91,47 +91,47 @@ const errors = useErrors();
 const pop = usePop();
 const $t = useTranslate();
 
-const {patched, patch, hasChanges, addPatch} = usePatch(platform)
+const { patched, patch, hasChanges, addPatch } = usePatch(platform);
 const saving = ref(false);
 
-const title = 'Huisstijl'
+const title = 'Huisstijl';
 
 const $name = computed({
     get: () => patched.value.config.name,
-    set: (value: string) => addPatch(Platform.patch({config: PlatformConfig.patch({name: value})}))
-})
+    set: (value: string) => addPatch(Platform.patch({ config: PlatformConfig.patch({ name: value }) })),
+});
 
 const color = computed({
     get: () => patched.value.config.color,
-    set: (value: string | null) => addPatch(Platform.patch({config: PlatformConfig.patch({color: value})}))
-})
+    set: (value: string | null) => addPatch(Platform.patch({ config: PlatformConfig.patch({ color: value }) })),
+});
 
 const coverPhoto = computed({
     get: () => patched.value.config.coverPhoto,
-    set: (value: Image | null) => addPatch(Platform.patch({config: PlatformConfig.patch({coverPhoto: value})}))
-})
+    set: (value: Image | null) => addPatch(Platform.patch({ config: PlatformConfig.patch({ coverPhoto: value }) })),
+});
 
 const coverBottomLeftOverlayImage = computed({
     get: () => patched.value.config.coverBottomLeftOverlayImage,
-    set: (value: Image | null) => addPatch(Platform.patch({config: PlatformConfig.patch({coverBottomLeftOverlayImage: value})}))
-})
+    set: (value: Image | null) => addPatch(Platform.patch({ config: PlatformConfig.patch({ coverBottomLeftOverlayImage: value }) })),
+});
 
 const footerText = computed({
     get: () => patched.value.config.footerText,
-    set: (value) => addPatch(Platform.patch({config: PlatformConfig.patch({footerText: value})}))
-})
+    set: value => addPatch(Platform.patch({ config: PlatformConfig.patch({ footerText: value }) })),
+});
 
 const coverBottomLeftOverlayWidth = computed({
     get: () => patched.value.config.coverBottomLeftOverlayWidth,
     set: (value: number) => {
-        addPatch(Platform.patch({config: PlatformConfig.patch({coverBottomLeftOverlayWidth: value})}));
+        addPatch(Platform.patch({ config: PlatformConfig.patch({ coverBottomLeftOverlayWidth: value }) }));
 
         if (coverBottomLeftOverlayImage.value) {
             coverBottomLeftOverlayImage.value = null;
-            Toast.error('Upload een nieuwe overlay: je kan de breedte enkel aanpassen VOOR het uploaden - anders kunnen we de resolutie niet correct afstemmen op alle apparaten. Wil je jouw aanpassing ongedaan maken? Klik dan op het kruisje en sla niet op.').setHide(15 * 1000).show()
+            Toast.error('Upload een nieuwe overlay: je kan de breedte enkel aanpassen VOOR het uploaden - anders kunnen we de resolutie niet correct afstemmen op alle apparaten. Wil je jouw aanpassing ongedaan maken? Klik dan op het kruisje en sla niet op.').setHide(15 * 1000).show();
         }
-    }
-})
+    },
+});
 
 async function save() {
     if (saving.value) {
@@ -145,24 +145,24 @@ async function save() {
             saving.value = false;
             return;
         }
-        
-        await platformManager.value.patch(patch.value)
-        new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+
+        await platformManager.value.patch(patch.value);
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
         await pop({ force: true });
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
-
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 const resolutions = [
     ResolutionRequest.create({
@@ -181,12 +181,12 @@ const resolutions = [
         width: 600,
     }),
     ResolutionRequest.create({
-        width: 300
+        width: 300,
     }),
     ResolutionRequest.create({
-        width: 100
-    })
-]
+        width: 100,
+    }),
+];
 
 const overlayResolutions = computed(() => [
     ResolutionRequest.create({
@@ -197,11 +197,11 @@ const overlayResolutions = computed(() => [
     }),
     ResolutionRequest.create({
         width: coverBottomLeftOverlayWidth.value * 3,
-    })
-]
+    }),
+],
 );
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

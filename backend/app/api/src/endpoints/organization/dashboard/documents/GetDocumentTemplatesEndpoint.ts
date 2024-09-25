@@ -1,22 +1,22 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { DocumentTemplate, Token } from "@stamhoofd/models";
-import { DocumentTemplatePrivate } from "@stamhoofd/structures";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { DocumentTemplate, Token } from '@stamhoofd/models';
+import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 
-import { Context } from "../../../../helpers/Context";
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = undefined
-type ResponseBody = DocumentTemplatePrivate[]
+type Body = undefined;
+type ResponseBody = DocumentTemplatePrivate[];
 
 export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/document-templates", {});
+        const params = Endpoint.parseParameters(request.url, '/organization/document-templates', {});
 
         if (params) {
             return [true, params as Params];
@@ -26,25 +26,25 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         if (!await Context.auth.canManageDocuments(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
         const templates = await DocumentTemplate.where(
-            { 
-                organizationId: organization.id 
-            }, 
-            { 
+            {
+                organizationId: organization.id,
+            },
+            {
                 sort: [{
-                    column: "createdAt",
-                    direction: "ASC"
-                }] 
-            }
-        )
+                    column: 'createdAt',
+                    direction: 'ASC',
+                }],
+            },
+        );
         return new Response(
-            templates.map(t => t.getPrivateStructure())
+            templates.map(t => t.getPrivateStructure()),
         );
     }
 }

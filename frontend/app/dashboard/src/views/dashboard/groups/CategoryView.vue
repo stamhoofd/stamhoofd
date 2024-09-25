@@ -84,14 +84,14 @@
                 </p>
             </template>
 
-            <p v-if="categories.length == 0 && groups.length == 0 && canCreate" class="info-box">
+            <p v-if="categories.length === 0 && groups.length === 0 && canCreate" class="info-box">
                 Deze inschrijvingscategorie is leeg, maak zelf inschrijvingsgroepen aan waarin leden kunnen inschrijven.
             </p>
-            <p v-else-if="categories.length == 0 && groups.length == 0" class="info-box">
+            <p v-else-if="categories.length === 0 && groups.length === 0" class="info-box">
                 Deze inschrijvingscategorie is leeg. Vraag een hoofdbeheerder om groepen aan te maken.
             </p>
 
-            <p v-if="categories.length == 0 && groups.length == 0 && canCreate">
+            <p v-if="categories.length === 0 && groups.length === 0 && canCreate">
                 <button class="button text" type="button" @click="createGroup">
                     <span class="icon add" />
                     <span>Nieuwe groep</span>

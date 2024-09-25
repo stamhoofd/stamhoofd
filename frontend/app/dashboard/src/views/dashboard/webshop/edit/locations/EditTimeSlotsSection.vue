@@ -14,10 +14,10 @@
         </h2>
         <slot />
     
-        <p v-if="timeSlots.timeSlots.length == 0" class="info-box">
+        <p v-if="timeSlots.timeSlots.length === 0" class="info-box">
             Je hebt geen intervallen toegevoegd, dus er moet geen keuze gemaakt worden.
         </p>
-        <p v-if="timeSlots.timeSlots.length == 1" class="info-box">
+        <p v-if="timeSlots.timeSlots.length === 1" class="info-box">
             Er is maar één keuze, dus we communiceren dit interval i.v.p. een keuze te geven.
         </p>
 

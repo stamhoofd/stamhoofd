@@ -15,7 +15,7 @@
                 <span v-if="payment.isFailed" class="style-tag error">Mislukt</span>
             </h1>
 
-            <p v-if="payment && payment.method == 'Transfer' && payment.isFailed" class="error-box">
+            <p v-if="payment && payment.method === 'Transfer' && payment.isFailed" class="error-box">
                 Deze overschrijving werd geannuleerd en is niet langer zichtbaar. Ontvang je toch nog de betaling? Heractiveer de overschrijving dan terug.
             </p>
 
@@ -31,7 +31,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="payment.method == 'Transfer'">
+                <STListItem v-if="payment.method === 'Transfer'">
                     <h3 class="style-definition-label">
                         Mededeling
                     </h3>
@@ -40,7 +40,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="payment.method == 'Transfer' && payment.transferSettings">
+                <STListItem v-if="payment.method === 'Transfer' && payment.transferSettings">
                     <h3 v-if="payment.price >= 0" class="style-definition-label">
                         Betalen aan
                     </h3>
@@ -249,7 +249,7 @@
                         <h2 v-else class="style-title-list">
                             Toch niet terugbetaald
                         </h2>
-                        <p v-if="payment.method == 'Transfer'" class="style-description">
+                        <p v-if="payment.method === 'Transfer'" class="style-description">
                             Overschrijving per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.
                         </p>
                         <p v-else class="style-description">
@@ -268,7 +268,7 @@
                         <h2 class="style-title-list">
                             Annuleren
                         </h2>
-                        <p v-if="payment.method == 'Transfer'" class="style-description">
+                        <p v-if="payment.method === 'Transfer'" class="style-description">
                             Annuleer de overschrijving als je denkt dat deze niet meer betaald zal worden.
                         </p>
                         <p v-else class="style-description">

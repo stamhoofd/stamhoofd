@@ -1,46 +1,46 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 export class UsedRegisterCode extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string
+    id: string;
 
     @field({ decoder: StringDecoder })
-    organizationName: string
+    organizationName: string;
 
     @field({ decoder: DateDecoder })
-    createdAt: Date
+    createdAt: Date;
 
     @field({ decoder: IntegerDecoder, nullable: true })
-    creditValue: number | null = null
+    creditValue: number | null = null;
 }
 
 export class RegisterCodeStatus extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    code: string
+    code: string;
 
     @field({ decoder: new ArrayDecoder(UsedRegisterCode) })
-    usedCodes: UsedRegisterCode[] = []
+    usedCodes: UsedRegisterCode[] = [];
 
     @field({ decoder: IntegerDecoder, version: 231 })
-    value: number = 0
+    value: number = 0;
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 231 })
-    invoiceValue: number|null = null
+    invoiceValue: number | null = null;
 }
 
 export class RegisterCode extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    code: string
+    code: string;
 
     @field({ decoder: StringDecoder })
-    description: string
+    description: string;
 
     @field({ decoder: StringDecoder, nullable: true })
-    customMessage: string|null = null
+    customMessage: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    organizationName: string|null
+    organizationName: string | null;
 
     @field({ decoder: IntegerDecoder })
-    value: number = 0
+    value: number = 0;
 }

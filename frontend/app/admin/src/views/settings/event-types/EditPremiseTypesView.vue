@@ -37,20 +37,20 @@ const pop = usePop();
 const present = usePresent();
 const $t = useTranslate();
 const platform = usePlatform();
-const platformManager = usePlatformManager()
+const platformManager = usePlatformManager();
 
-const originalTypes = computed(() => platform.value.config.premiseTypes)
-const {patched: types, patch, addArrayPatch, hasChanges} = usePatchArray(originalTypes)
-const draggableTypes = useDraggableArray(() => types.value, addArrayPatch)
+const originalTypes = computed(() => platform.value.config.premiseTypes);
+const { patched: types, patch, addArrayPatch, hasChanges } = usePatchArray(originalTypes);
+const draggableTypes = useDraggableArray(() => types.value, addArrayPatch);
 
 const saving = ref(false);
 
-const title = $t('5d0062df-e595-4e28-b1e3-d399102dfadf')
+const title = $t('5d0062df-e595-4e28-b1e3-d399102dfadf');
 
 async function addType() {
-    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray()
-    const type = PlatformPremiseType.create({})
-    arr.addPut(type)
+    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray();
+    const type = PlatformPremiseType.create({});
+    arr.addPut(type);
 
     await present({
         modalDisplayStyle: 'popup',
@@ -59,13 +59,13 @@ async function addType() {
                 type,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformPremiseType>) => {
-                    patch.id = type.id
-                    arr.addPatch(patch)
-                    addArrayPatch(arr)
-                }
-            })
-        ]
-    })
+                    patch.id = type.id;
+                    arr.addPatch(patch);
+                    addArrayPatch(arr);
+                },
+            }),
+        ],
+    });
 }
 
 async function editType(type: PlatformPremiseType) {
@@ -76,18 +76,18 @@ async function editType(type: PlatformPremiseType) {
                 type,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformPremiseType>) => {
-                    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray()
-                    arr.addPatch(patch)
-                    addArrayPatch(arr)
+                    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray();
+                    arr.addPatch(patch);
+                    addArrayPatch(arr);
                 },
                 deleteHandler: () => {
-                    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray()
-                    arr.addDelete(type.id)
-                    addArrayPatch(arr)
-                }
-            })
-        ]
-    })
+                    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray();
+                    arr.addDelete(type.id);
+                    addArrayPatch(arr);
+                },
+            }),
+        ],
+    });
 }
 
 async function save() {
@@ -100,13 +100,14 @@ async function save() {
     try {
         await platformManager.value.patch(Platform.patch({
             config: PlatformConfig.patch({
-                premiseTypes: patch.value
-            })
-        }))
-        new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+                premiseTypes: patch.value,
+            }),
+        }));
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
         await pop({ force: true });
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
@@ -116,10 +117,10 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

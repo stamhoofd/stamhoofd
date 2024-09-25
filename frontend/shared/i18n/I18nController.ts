@@ -441,7 +441,7 @@ export class I18nController {
                 })
 
                 // Add og:locale:alternate
-                if (language != this.language || country !=this.country) {
+                if (language !== this.language || country !=this.country) {
                     // Only list if not the same as current
                     meta.push({
                         hid: `i18n-og-alt-${locale}`,
@@ -483,7 +483,7 @@ export class I18nController {
             const currentPath = this.transformUrlForLocale(path, this.language, this.country)
 
             let redirected = false
-            if (currentPath != UrlHelper.initial.path) {
+            if (currentPath !== UrlHelper.initial.path) {
                 redirected = true
             }
             meta.push({

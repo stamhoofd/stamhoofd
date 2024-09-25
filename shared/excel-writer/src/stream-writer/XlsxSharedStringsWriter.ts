@@ -1,4 +1,4 @@
-import { XlsxFileWriter } from "./XlsxFileWriter";
+import { XlsxFileWriter } from './XlsxFileWriter';
 
 export class XlsxSharedStringsWriter extends XlsxFileWriter {
     async close() {
@@ -6,4 +6,3 @@ export class XlsxSharedStringsWriter extends XlsxFileWriter {
         await super.close();
     }
 }
-

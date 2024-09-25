@@ -1,6 +1,6 @@
-import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType } from "./SeatingPlan";
+import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType } from './SeatingPlan';
 
-describe("SeatingPlan", () => {
+describe('SeatingPlan', () => {
     describe('adjustSeatsForBetterFit', () => {
         function expectAdjustedSeats(input: string, output: string) {
             const reserved: ReservedSeat[] = [];
@@ -15,37 +15,40 @@ describe("SeatingPlan", () => {
 
             for (const [i, char] of input.split('').entries()) {
                 if (char == 'R') {
-                     seats.push(SeatingPlanSeat.create({
-                        label: (i+1).toString()
-                    }))
+                    seats.push(SeatingPlanSeat.create({
+                        label: (i + 1).toString(),
+                    }));
                     reserved.push(ReservedSeat.create({
                         section: 'm',
                         row: 'A',
-                        seat: (i+1).toString()
+                        seat: (i + 1).toString(),
                     }));
-                } else if (char == 'X') {
+                }
+                else if (char == 'X') {
                     seats.push(SeatingPlanSeat.create({
-                        label: (i+1).toString()
-                    }))
+                        label: (i + 1).toString(),
+                    }));
                     selected.push(ReservedSeat.create({
                         section: 'm',
                         row: 'A',
-                        seat: (i+1).toString()
+                        seat: (i + 1).toString(),
                     }));
-                } else if (char == '-') {
+                }
+                else if (char == '-') {
                     // Available seat
                     seats.push(SeatingPlanSeat.create({
-                        label: (i+1).toString()
-                    }))
-
-                } else if (char == ' ') {
+                        label: (i + 1).toString(),
+                    }));
+                }
+                else if (char == ' ') {
                     // Hall
                     seats.push(SeatingPlanSeat.create({
                         type: SeatType.Space,
-                        label: ''
-                    }))
-                } else {
-                    throw new Error("Invalid character " + char)
+                        label: '',
+                    }));
+                }
+                else {
+                    throw new Error('Invalid character ' + char);
                 }
             }
 
@@ -54,9 +57,9 @@ describe("SeatingPlan", () => {
                     expectedResponse.push(ReservedSeat.create({
                         section: 'm',
                         row: 'A',
-                        seat: (i+1).toString()
+                        seat: (i + 1).toString(),
                     }));
-                } 
+                }
             }
 
             const seatingPlan = SeatingPlan.create({
@@ -66,11 +69,11 @@ describe("SeatingPlan", () => {
                         rows: [
                             SeatingPlanRow.create({
                                 label: 'A',
-                                seats
-                            })
-                        ]
-                    })
-                ]
+                                seats,
+                            }),
+                        ],
+                    }),
+                ],
             });
 
             const adjusted = seatingPlan.adjustSeatsForBetterFit(selected, reserved);
@@ -78,7 +81,8 @@ describe("SeatingPlan", () => {
             if (input === output) {
                 // Nothing should have changed
                 expect(adjusted).toBe(null);
-            } else {
+            }
+            else {
                 expect(adjusted).toIncludeAllMembers(expectedResponse);
             }
         }
@@ -86,146 +90,145 @@ describe("SeatingPlan", () => {
         // eslint-disable-next-line jest/expect-expect
         test('Seats move to the left is needed', () => {
             expectAdjustedSeats(
-                '-XX-----', 
-                'XX------'
+                '-XX-----',
+                'XX------',
             );
             expectAdjustedSeats(
-                '-XXX----', 
-                'XXX-----'
+                '-XXX----',
+                'XXX-----',
             );
             expectAdjustedSeats(
-                '-XX-R---', 
-                'XX--R---'
-            );
-
-            expectAdjustedSeats(
-                '-XXX-', 
-                'XXX--'
+                '-XX-R---',
+                'XX--R---',
             );
 
             expectAdjustedSeats(
-                'RR-X-RR', 
-                'RRX--RR'
-            );
-            expectAdjustedSeats(
-                'RR-XX-RR', 
-                'RRXX--RR'
-            );
-            expectAdjustedSeats(
-                'RR-XXX-RR', 
-                'RRXXX--RR'
+                '-XXX-',
+                'XXX--',
             );
 
             expectAdjustedSeats(
-                '--  -XXX-  --', 
-                '--  XXX--  --'
+                'RR-X-RR',
+                'RRX--RR',
+            );
+            expectAdjustedSeats(
+                'RR-XX-RR',
+                'RRXX--RR',
+            );
+            expectAdjustedSeats(
+                'RR-XXX-RR',
+                'RRXXX--RR',
             );
 
             expectAdjustedSeats(
-                '--XXX-XX---', 
-                '--XXXXX----'
+                '--  -XXX-  --',
+                '--  XXX--  --',
+            );
+
+            expectAdjustedSeats(
+                '--XXX-XX---',
+                '--XXXXX----',
             );
         });
-        
+
         // eslint-disable-next-line jest/expect-expect
         test('Seats remaing the same if needed', () => {
             expectAdjustedSeats(
-                '-XXR---', 
-                '-XXR---'
+                '-XXR---',
+                '-XXR---',
             );
             expectAdjustedSeats(
-                '-XXX', 
-                '-XXX'
+                '-XXX',
+                '-XXX',
             );
             expectAdjustedSeats(
-                'XXX-', 
-                'XXX-'
+                'XXX-',
+                'XXX-',
             );
             expectAdjustedSeats(
-                'XXX', 
-                'XXX'
-            );
- 
-            expectAdjustedSeats(
-                '--XXX--', 
-                '--XXX--'
-            );
-            expectAdjustedSeats(
-                '-RXXX-RR', 
-                '-RXXX-RR'
-            );
-            expectAdjustedSeats(
-                'RR-XRR', 
-                'RR-XRR'
+                'XXX',
+                'XXX',
             );
 
             expectAdjustedSeats(
-                '--  XXX  --', 
-                '--  XXX  --'
+                '--XXX--',
+                '--XXX--',
             );
             expectAdjustedSeats(
-                '--  XXX-  --', 
-                '--  XXX-  --'
+                '-RXXX-RR',
+                '-RXXX-RR',
+            );
+            expectAdjustedSeats(
+                'RR-XRR',
+                'RR-XRR',
+            );
+
+            expectAdjustedSeats(
+                '--  XXX  --',
+                '--  XXX  --',
+            );
+            expectAdjustedSeats(
+                '--  XXX-  --',
+                '--  XXX-  --',
             );
             expectAdjustedSeats(
                 '--  -XXX  --',
-                '--  -XXX  --'
+                '--  -XXX  --',
             );
 
             expectAdjustedSeats(
-                '--RRRRRXXXX-RRRRR', 
-                '--RRRRRXXXX-RRRRR'
+                '--RRRRRXXXX-RRRRR',
+                '--RRRRRXXXX-RRRRR',
             );
 
             expectAdjustedSeats(
-                '--RRRRRXXXX--RRRRR', 
-                '--RRRRRXXXX--RRRRR'
+                '--RRRRRXXXX--RRRRR',
+                '--RRRRRXXXX--RRRRR',
             );
 
             expectAdjustedSeats(
-                '--RRRRR--XXXX--RRRRR', 
-                '--RRRRR--XXXX--RRRRR'
+                '--RRRRR--XXXX--RRRRR',
+                '--RRRRR--XXXX--RRRRR',
             );
         });
-        
+
         // eslint-disable-next-line jest/expect-expect
         test('Seats move to the right if needed', () => {
             expectAdjustedSeats(
-                '------X-', 
-                '-------X'
+                '------X-',
+                '-------X',
             );
             expectAdjustedSeats(
-                '------XX-', 
-                '-------XX'
+                '------XX-',
+                '-------XX',
             );
             expectAdjustedSeats(
-                '------XXX-', 
-                '-------XXX'
-            );
-
-            expectAdjustedSeats(
-                '--  --XXX-  --', 
-                '--  ---XXX  --'
+                '------XXX-',
+                '-------XXX',
             );
 
             expectAdjustedSeats(
-                '--  --XXX-RRR  --', 
-                '--  ---XXXRRR  --'
+                '--  --XXX-  --',
+                '--  ---XXX  --',
+            );
+
+            expectAdjustedSeats(
+                '--  --XXX-RRR  --',
+                '--  ---XXXRRR  --',
             );
         });
-        
+
         // eslint-disable-next-line jest/expect-expect
         test('Combination of multiple moves in the same row', () => {
             expectAdjustedSeats(
-                '-X-----X-', 
-                'X-------X'
+                '-X-----X-',
+                'X-------X',
             );
 
             expectAdjustedSeats(
-                '--RRRRR-XX---X-RRRRR-X-', 
-                '--RRRRRXX-----XRRRRRX--'
+                '--RRRRR-XX---X-RRRRR-X-',
+                '--RRRRRXX-----XRRRRRX--',
             );
-        })
+        });
     });
-    
 });

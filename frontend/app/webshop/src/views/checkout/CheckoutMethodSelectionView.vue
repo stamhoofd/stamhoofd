@@ -15,13 +15,13 @@
                 <p class="style-description-small">
                     {{ checkoutMethod.description || checkoutMethod.address || "" }}
                 </p>
-                <p v-if="checkoutMethod.timeSlots.timeSlots.length == 1" class="style-description-small">
+                <p v-if="checkoutMethod.timeSlots.timeSlots.length === 1" class="style-description-small">
                     {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
                 </p>
 
-                <template v-if="checkoutMethod.timeSlots.timeSlots.length == 1">
+                <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1">
                     <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
-                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
         </STList>
@@ -71,7 +71,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
     get selectedMethod(): CheckoutMethod {
         if (this.$checkoutManager.checkout.checkoutMethod) {
             const search = this.$checkoutManager.checkout.checkoutMethod.id
-            const f = this.webshop.meta.checkoutMethods.find(c => c.id == search)
+            const f = this.webshop.meta.checkoutMethods.find(c => c.id === search)
             if (f) {
                 return f
             }

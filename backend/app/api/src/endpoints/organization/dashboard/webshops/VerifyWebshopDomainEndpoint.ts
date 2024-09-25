@@ -1,10 +1,10 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
+import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
-import { Context } from "../../../../helpers/Context";
+import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
 type Query = undefined;
@@ -16,13 +16,12 @@ type ResponseBody = PrivateWebshop;
  */
 
 export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "POST") {
+        if (request.method !== 'POST') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/webshop/@id/verify-domain", { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/verify-domain', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -32,28 +31,29 @@ export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, R
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
-        return await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
-            const webshop = await Webshop.getByID(request.params.id)
+        return await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
+            const webshop = await Webshop.getByID(request.params.id);
             if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
-                throw Context.auth.notFoundOrNoAccess()
-            }
-        
-            if (webshop.domain !== null) {
-                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(webshop.domain)
-                await webshop.updateDNSRecords()
-            } else {
-                webshop.privateMeta.dnsRecords = []
-                webshop.meta.domainActive = false
+                throw Context.auth.notFoundOrNoAccess();
             }
 
-            await webshop.save()
+            if (webshop.domain !== null) {
+                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(webshop.domain);
+                await webshop.updateDNSRecords();
+            }
+            else {
+                webshop.privateMeta.dnsRecords = [];
+                webshop.meta.domainActive = false;
+            }
+
+            await webshop.save();
             return new Response(PrivateWebshop.create(webshop));
         });
     }

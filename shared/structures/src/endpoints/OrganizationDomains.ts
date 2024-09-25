@@ -14,5 +14,5 @@ export class OrganizationDomains extends AutoEncoder {
      * Use shorter DKIM key (1024 bit) instead of 2048 bit
      */
     @field({ decoder: BooleanDecoder, optional: true, version: 177 })
-    useDkim1024bit = false
+    useDkim1024bit = false;
 }

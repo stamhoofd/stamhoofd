@@ -2,11 +2,11 @@
     <form class="centered-message-container" @submit.prevent @mousedown="onClickOutside" @touchdown="onClickOutside">
         <div class="centered-message" @mousedown.stop="" @touchdown.stop="">
             <div class="header">
-                <Spinner v-if="centeredMessage.type == 'loading'" class="" />
-                <img v-else-if="centeredMessage.type == 'clock'" class="center" src="@stamhoofd/assets/images/illustrations/clock.svg">
-                <img v-else-if="centeredMessage.type == 'health'" class="center" src="@stamhoofd/assets/images/illustrations/health-data.svg">
-                <img v-else-if="centeredMessage.type == 'sync'" class="center" src="@stamhoofd/assets/images/illustrations/sync.svg">
-                <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
+                <Spinner v-if="centeredMessage.type === 'loading'" class="" />
+                <img v-else-if="centeredMessage.type === 'clock'" class="center" src="@stamhoofd/assets/images/illustrations/clock.svg">
+                <img v-else-if="centeredMessage.type === 'health'" class="center" src="@stamhoofd/assets/images/illustrations/health-data.svg">
+                <img v-else-if="centeredMessage.type === 'sync'" class="center" src="@stamhoofd/assets/images/illustrations/sync.svg">
+                <span v-else-if="centeredMessage.type !== 'none'" :class="'center icon '+centeredMessage.type" />
             </div>
 
             <h1>
@@ -100,7 +100,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     }
 
     dismiss() {
-        const closeButton = this.centeredMessage.buttons.find(b => b.type == "secundary")
+        const closeButton = this.centeredMessage.buttons.find(b => b.type === "secundary")
         if (!closeButton) {
             return;
         }
@@ -140,7 +140,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     focusNextButton() {
         console.log('focusNextButton')
         let buttons = this.getButtons()
-        if (buttons.length == 0) {
+        if (buttons.length === 0) {
             console.log('no buttons')
             return
         }
@@ -174,7 +174,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         }
 
         const key = event.key || event.keyCode;
-        const closeButton = this.centeredMessage.buttons.find(b => b.type == "secundary")
+        const closeButton = this.centeredMessage.buttons.find(b => b.type === "secundary")
 
         if (key === "Tab") {
             this.focusNextButton();
@@ -199,7 +199,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
                 return;
             }
             // Do we have a default action?
-            const defaultButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type != "destructive")
+            const defaultButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type !== "destructive")
             if (defaultButton) {
                 this.onClickButton(defaultButton).catch(console.error)
                 event.preventDefault();

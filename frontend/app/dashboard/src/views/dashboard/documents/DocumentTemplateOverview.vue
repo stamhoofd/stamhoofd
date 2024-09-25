@@ -205,7 +205,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
                 owner: this
             })
             const documentTemplates = response.data
-            const template = documentTemplates.find(t => t.id == this.template.id)
+            const template = documentTemplates.find(t => t.id === this.template.id)
             if (template) {
                 this.template.deepSet(template)
             }

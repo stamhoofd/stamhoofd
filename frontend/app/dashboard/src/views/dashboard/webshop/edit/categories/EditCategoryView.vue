@@ -114,7 +114,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
     }
 
     get patchedCategory() {
-        const c = this.patchedWebshop.categories.find(c => c.id == this.category.id)
+        const c = this.patchedWebshop.categories.find(c => c.id === this.category.id)
         if (c) {
             return c
         }
@@ -123,7 +123,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
 
     get products() {
         return this.patchedCategory.productIds.flatMap(id => {
-            const product = this.patchedWebshop.products.find(p => p.id == id)
+            const product = this.patchedWebshop.products.find(p => p.id === id)
             if (product) {
                 return [product]
             }
@@ -177,7 +177,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
 
         // Delete all products that do not exist any longer
         const deleteIds = this.patchedCategory.productIds.flatMap(id => {
-            const product = this.patchedWebshop.products.find(p => p.id == id)
+            const product = this.patchedWebshop.products.find(p => p.id === id)
             if (product) {
                 // exists
                 return []
@@ -217,7 +217,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
 
     moveProductUp(product: Product) {
         const index = this.patchedCategory.productIds.findIndex(c => product.id === c)
-        if (index == -1 || index == 0) {
+        if (index === -1 || index === 0) {
             return;
         }
 
@@ -229,7 +229,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
 
     moveProductDown(product: Product) {
         const index = this.patchedCategory.productIds.findIndex(c => product.id === c)
-        if (index == -1 || index >= this.patchedCategory.productIds.length - 1) {
+        if (index === -1 || index >= this.patchedCategory.productIds.length - 1) {
             return;
         }
 
@@ -244,7 +244,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
     }
 
     set draggableProducts(products) {
-        if (products.length != this.products.length) {
+        if (products.length !== this.products.length) {
             return;
         }
 

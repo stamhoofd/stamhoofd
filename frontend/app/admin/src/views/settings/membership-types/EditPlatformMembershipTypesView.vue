@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList v-model="draggableTypes" :draggable="true">
@@ -39,17 +39,17 @@ const pop = usePop();
 const present = usePresent();
 const $t = useTranslate();
 
-const originalTypes = computed(() => platform.value.config.membershipTypes)
-const {patched: types, patch, addArrayPatch, hasChanges} = usePatchArray(originalTypes)
-const draggableTypes = useDraggableArray(() => types.value, addArrayPatch)
+const originalTypes = computed(() => platform.value.config.membershipTypes);
+const { patched: types, patch, addArrayPatch, hasChanges } = usePatchArray(originalTypes);
+const draggableTypes = useDraggableArray(() => types.value, addArrayPatch);
 const saving = ref(false);
 
-const title = $t('429e2447-3506-4828-bb08-a4cde355c78d')
+const title = $t('429e2447-3506-4828-bb08-a4cde355c78d');
 
 async function addType() {
-    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray()
+    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray();
     const type = PlatformMembershipType.create({});
-    arr.addPut(type)
+    arr.addPut(type);
 
     await present({
         modalDisplayStyle: 'popup',
@@ -58,13 +58,13 @@ async function addType() {
                 type,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformMembershipType>) => {
-                    patch.id = type.id
-                    arr.addPatch(patch)
-                    addArrayPatch(arr)
-                }
-            })
-        ]
-    })
+                    patch.id = type.id;
+                    arr.addPatch(patch);
+                    addArrayPatch(arr);
+                },
+            }),
+        ],
+    });
 }
 
 async function editType(type: PlatformMembershipType) {
@@ -75,18 +75,18 @@ async function editType(type: PlatformMembershipType) {
                 type,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformMembershipType>) => {
-                    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray()
-                    arr.addPatch(patch)
-                    addArrayPatch(arr)
+                    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray();
+                    arr.addPatch(patch);
+                    addArrayPatch(arr);
                 },
                 deleteHandler: () => {
-                    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray()
-                    arr.addDelete(type.id)
-                    addArrayPatch(arr)
-                }
-            })
-        ]
-    })
+                    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray();
+                    arr.addDelete(type.id);
+                    addArrayPatch(arr);
+                },
+            }),
+        ],
+    });
 }
 
 async function save() {
@@ -103,27 +103,27 @@ async function save() {
         }
         await platformManager.value.patch(Platform.patch({
             config: PlatformConfig.patch({
-                membershipTypes: patch.value
-            })
-        }))
-        new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+                membershipTypes: patch.value,
+            }),
+        }));
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
         await pop({ force: true });
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
-
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

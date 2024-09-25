@@ -1,36 +1,36 @@
 export enum ParentType {
-    Mother = "Mother",
-    Father = "Father",
+    Mother = 'Mother',
+    Father = 'Father',
 
-    Stepfather = "Stepfather",
-    Stepmother = "Stepmother",
+    Stepfather = 'Stepfather',
+    Stepmother = 'Stepmother',
 
-    Parent1 = "Parent1",
-    Parent2 = "Parent2",
-    Other = "Other",
+    Parent1 = 'Parent1',
+    Parent2 = 'Parent2',
+    Other = 'Other',
 }
 
 export class ParentTypeHelper {
     static getName(type: ParentType): string {
         switch (type) {
             case ParentType.Mother:
-                return "Mama";
+                return 'Mama';
             case ParentType.Father:
-                return "Papa";
+                return 'Papa';
             case ParentType.Stepmother:
-                return "Plusmama";
+                return 'Plusmama';
             case ParentType.Stepfather:
-                return "Pluspapa";
+                return 'Pluspapa';
             case ParentType.Parent1:
-                return "Ouder 1";
+                return 'Ouder 1';
             case ParentType.Parent2:
-                return "Ouder 2";
+                return 'Ouder 2';
             case ParentType.Other:
-                return "Voogd";
+                return 'Voogd';
         }
     }
 
     static getPublicTypes(): ParentType[] {
-        return [ParentType.Mother, ParentType.Father, ParentType.Stepmother, ParentType.Stepfather, ParentType.Other]
+        return [ParentType.Mother, ParentType.Father, ParentType.Stepmother, ParentType.Stepfather, ParentType.Other];
     }
 }

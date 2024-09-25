@@ -430,7 +430,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     get isArchive() {
-        return this.webshopManager.preview.meta.status == WebshopStatus.Archived
+        return this.webshopManager.preview.meta.status === WebshopStatus.Archived
     }
 
     get organization() {
@@ -785,7 +785,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
             })
             new Toast("Webshop verwijderd", "success green").show()
 
-            this.$organization.webshops = this.$organization.webshops.filter(w => w.id != this.webshopManager.preview.id)
+            this.$organization.webshops = this.$organization.webshops.filter(w => w.id !== this.webshopManager.preview.id)
 
             // Save updated organization to cache
             this.$organizationManager.save().catch(console.error)

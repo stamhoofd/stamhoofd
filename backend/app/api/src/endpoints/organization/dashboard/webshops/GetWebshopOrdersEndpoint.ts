@@ -1,24 +1,24 @@
-import { Decoder } from "@simonbackx/simple-encoding";
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { Decoder } from '@simonbackx/simple-encoding';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Order, Webshop } from '@stamhoofd/models';
-import { PaginatedResponse, PermissionLevel, PrivateOrder, WebshopOrdersQuery } from "@stamhoofd/structures";
+import { PaginatedResponse, PermissionLevel, PrivateOrder, WebshopOrdersQuery } from '@stamhoofd/structures';
 
-import { Context } from "../../../../helpers/Context";
+import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
-type Query = WebshopOrdersQuery
-type Body = undefined
-type ResponseBody = PaginatedResponse<PrivateOrder[], Query>
+type Query = WebshopOrdersQuery;
+type Body = undefined;
+type ResponseBody = PaginatedResponse<PrivateOrder[], Query>;
 
 export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = WebshopOrdersQuery as Decoder<WebshopOrdersQuery>
+    queryDecoder = WebshopOrdersQuery as Decoder<WebshopOrdersQuery>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/webshop/@id/orders", { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/orders', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -29,7 +29,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
     async handle(_: DecodedRequest<Params, Query, Body>): Promise<Response<ResponseBody>> {
         await Promise.resolve();
         throw new Error('Not implemented');
-        /*const organization = await Context.setOrganizationScope();
+        /* const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
@@ -71,15 +71,15 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         //}
 
         const structures = await Order.getPrivateStructures(orders)
-       
+
         return new Response(
-            new PaginatedResponse({ 
+            new PaginatedResponse({
                 results: structures,
                 next: orders.length >= limit ? WebshopOrdersQuery.create({
                     updatedSince: orders[orders.length - 1].updatedAt ?? undefined,
                     afterNumber: orders[orders.length - 1].number ?? undefined
                 }) : undefined
             })
-        );*/
+        ); */
     }
 }

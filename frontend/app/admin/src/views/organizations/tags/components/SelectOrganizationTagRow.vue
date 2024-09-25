@@ -19,9 +19,9 @@ const props = defineProps<{
     tag: OrganizationTag;
     organization: Organization;
 }>();
-const emit = defineEmits(['patch:organization'])
+const emit = defineEmits(['patch:organization']);
 
-const {patched, addPatch} = useEmitPatch<Organization>(props, emit, 'organization')
+const { patched, addPatch } = useEmitPatch<Organization>(props, emit, 'organization');
 
 const enabled = computed({
     get: () => patched.value.meta.tags.includes(props.tag.id),
@@ -30,17 +30,17 @@ const enabled = computed({
             return;
         }
 
-        const removed = patched.value.meta.tags.filter(id => id !== props.tag.id)
+        const removed = patched.value.meta.tags.filter(id => id !== props.tag.id);
         if (value) {
-            removed.push(props.tag.id)
+            removed.push(props.tag.id);
         }
 
         addPatch({
             meta: OrganizationMetaData.patch({
-                tags: removed as any
-            })
-        })
-    }
+                tags: removed as any,
+            }),
+        });
+    },
 });
 
 </script>

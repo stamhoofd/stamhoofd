@@ -70,7 +70,6 @@
     </div>
 </template>
 
-
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
@@ -81,7 +80,7 @@ import OrganizationTagSelectorView from './OrganizationTagSelectorView.vue';
 import PlatformMembershipTypeReduceablePriceEditRow from './PlatformMembershipTypeReduceablePriceEditRow.vue';
 
 const props = defineProps<{
-    priceConfig: PlatformMembershipTypeConfigPrice,
+    priceConfig: PlatformMembershipTypeConfigPrice;
     hasMultiplePrices: boolean;
     showStartDate: boolean;
     showPricePerDay: boolean;
@@ -89,31 +88,31 @@ const props = defineProps<{
     validator: Validator;
 }>();
 
-const emits = defineEmits<{(e: 'delete'): void, (e: 'patch:priceConfig'): AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>}>();
-const {patched, addPatch} = useEmitPatch<PlatformMembershipTypeConfigPrice>(props, emits, 'priceConfig');
+const emits = defineEmits<{ (e: 'delete'): void; (e: 'patch:priceConfig'): AutoEncoderPatchType<PlatformMembershipTypeConfigPrice> }>();
+const { patched, addPatch } = useEmitPatch<PlatformMembershipTypeConfigPrice>(props, emits, 'priceConfig');
 
 const present = usePresent();
 
 const $startDate = computed({
     get: () => patched.value.startDate,
-    set: (startDate) => addPatch({startDate}),
+    set: startDate => addPatch({ startDate }),
 });
 
 const $pricePerDay = computed({
     get: () => patched.value.pricePerDay,
-    set: (pricePerDay) => addPatch({pricePerDay}),
-})
+    set: pricePerDay => addPatch({ pricePerDay }),
+});
 
 function patchReduceablePrice(tagId: string, reduceablePrice: ReduceablePrice) {
     const map = new PatchMap<string, ReduceablePrice>();
     map.set(tagId, reduceablePrice);
-    addPatch({prices: map});
+    addPatch({ prices: map });
 }
 
 function deletePriceForTagId(tagId: string) {
     const map = new PatchMap<string, ReduceablePrice | null>();
     map.set(tagId, null);
-    addPatch({prices: map});
+    addPatch({ prices: map });
 }
 
 async function addPriceForTag() {
@@ -125,18 +124,18 @@ async function addPriceForTag() {
                 onAdd: async (_allTags: OrganizationTag[], addedTags: OrganizationTag[], deletedTags: OrganizationTag[]) => {
                     const map = new PatchMap<string, ReduceablePrice | null>();
 
-                    addedTags.forEach(tag => {
+                    addedTags.forEach((tag) => {
                         map.set(tag.id, ReduceablePrice.create({}));
                     });
-                    
-                    deletedTags.forEach(tag => {
-                        map.set(tag.id, null)
+
+                    deletedTags.forEach((tag) => {
+                        map.set(tag.id, null);
                     });
 
-                    addPatch({prices: map});
-                }
-            })
-        ]
+                    addPatch({ prices: map });
+                },
+            }),
+        ],
     });
 }
 </script>

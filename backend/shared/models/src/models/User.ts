@@ -1,84 +1,83 @@
+import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { EmailInterfaceRecipient } from '@stamhoofd/email';
+import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
+import argon2 from 'argon2';
+import { v4 as uuidv4 } from 'uuid';
 
-import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { EmailInterfaceRecipient } from "@stamhoofd/email";
-import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from "@stamhoofd/structures";
-import argon2 from "argon2";
-import { v4 as uuidv4 } from "uuid";
-
-import { Organization } from "./";
+import { Organization } from './';
 
 export class User extends Model {
-    static table = "users";
+    static table = 'users';
 
     // Columns
     @column({
-        primary: true, type: "string", beforeSave(value) {
+        primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
-        }
+        },
     })
     id!: string;
 
-    @column({ foreignKey: User.organization, type: "string", nullable: true })
-    organizationId: string|null;
+    @column({ foreignKey: User.organization, type: 'string', nullable: true })
+    organizationId: string | null;
 
-    @column({ type: "string", nullable: true })
-    memberId: string|null = null
+    @column({ type: 'string', nullable: true })
+    memberId: string | null = null;
 
-    @column({ type: "string", nullable: true })
+    @column({ type: 'string', nullable: true })
     firstName: string | null = null;
 
-    @column({ type: "string", nullable: true })
+    @column({ type: 'string', nullable: true })
     lastName: string | null = null;
 
-    @column({ type: "string" })
+    @column({ type: 'string' })
     email: string;
 
-    @column({ type: "string", nullable: true })
+    @column({ type: 'string', nullable: true })
     password: string | null = null;
 
-    @column({ type: "boolean" })
-    verified = false
+    @column({ type: 'boolean' })
+    verified = false;
 
-    @column({ type: "json", decoder: UserPermissions, nullable: true })
-    permissions: UserPermissions | null = null
+    @column({ type: 'json', decoder: UserPermissions, nullable: true })
+    permissions: UserPermissions | null = null;
 
     /**
      * @deprecated
      * use permissions
      */
-    @column({ type: "json", decoder: Permissions, nullable: true })
-    organizationPermissions: Permissions | null = null
+    @column({ type: 'json', decoder: Permissions, nullable: true })
+    organizationPermissions: Permissions | null = null;
 
-    @column({ type: "json", decoder: UserMeta, nullable: true })
-    meta: UserMeta | null = null
+    @column({ type: 'json', decoder: UserMeta, nullable: true })
+    meta: UserMeta | null = null;
 
     @column({
-        type: "datetime", beforeSave(old?: any) {
+        type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
-        }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
     })
-    createdAt: Date
+    createdAt: Date;
 
     @column({
-        type: "datetime", beforeSave() {
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
         },
-        skipUpdate: true
+        skipUpdate: true,
     })
-    updatedAt: Date
+    updatedAt: Date;
 
-    static organization = new ManyToOneRelation(Organization, "organization");
+    static organization = new ManyToOneRelation(Organization, 'organization');
 
     get name() {
         if (this.firstName && this.lastName) {
-            return this.firstName + " " + this.lastName;
+            return this.firstName + ' ' + this.lastName;
         }
 
         if (this.firstName) {
@@ -101,53 +100,53 @@ export class User extends Model {
                 ...replacements,
                 Replacement.create({
                     token: 'firstName',
-                    value: this.firstName ?? ''
+                    value: this.firstName ?? '',
                 }),
                 Replacement.create({
                     token: 'lastName',
-                    value: this.lastName ?? ''
+                    value: this.lastName ?? '',
                 }),
                 Replacement.create({
                     token: 'email',
-                    value: this.email
-                })
-            ]
-        })
+                    value: this.email,
+                }),
+            ],
+        });
     }
 
-    static async getAdmins(organizationIds: string[], options?: {verified?: boolean}) {
+    static async getAdmins(organizationIds: string[], options?: { verified?: boolean }) {
         if (organizationIds.length == 0) {
-            return []
+            return [];
         }
 
         if (STAMHOOFD.userMode === 'platform') {
             // Custom implementation
-            let global = (await User.where({ organizationId: null, permissions: { sign: "!=", value: null }}))
-            global = global.filter(u => organizationIds.find(organizationId => u.permissions?.organizationPermissions.has(organizationId)))
+            let global = (await User.where({ organizationId: null, permissions: { sign: '!=', value: null } }));
+            global = global.filter(u => organizationIds.find(organizationId => u.permissions?.organizationPermissions.has(organizationId)));
 
             // Hide api accounts
-            global = global.filter(a => !a.isApiUser)
+            global = global.filter(a => !a.isApiUser);
 
-            return global
+            return global;
         }
 
         const query: any = {
-            permissions: { sign: "!=", value: null }, 
-            organizationId: {sign: 'IN', value: organizationIds},
+            permissions: { sign: '!=', value: null },
+            organizationId: { sign: 'IN', value: organizationIds },
         };
 
         if (options?.verified !== undefined) {
-            query.verified = options.verified
+            query.verified = options.verified;
         }
 
         return (
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             await User.where(query)
-        ).filter(a => !a.isApiUser)
+        ).filter(a => !a.isApiUser);
     }
 
     static async getApiUsers(organizationIds: string[]) {
-        return organizationIds.length > 0 ? (await User.where({ permissions: { sign: "!=", value: null }, organizationId: {sign: 'IN', value: organizationIds}})).filter(a => a.isApiUser) : []
+        return organizationIds.length > 0 ? (await User.where({ permissions: { sign: '!=', value: null }, organizationId: { sign: 'IN', value: organizationIds } })).filter(a => a.isApiUser) : [];
     }
 
     async merge(other: User) {
@@ -155,7 +154,8 @@ export class User extends Model {
             // We are going to merge accounts!
             if (this.organizationPermissions && other.organizationPermissions) {
                 this.organizationPermissions.add(other.organizationPermissions);
-            } else {
+            }
+            else {
                 if (!this.organizationPermissions && other.organizationPermissions) {
                     this.organizationPermissions = other.organizationPermissions;
                 }
@@ -171,74 +171,75 @@ export class User extends Model {
             }
         }
 
-        const Member = (await import("./Member")).Member
+        const Member = (await import('./Member')).Member;
 
         // Delete placeholder account, but migrate members first
-        const members = await Member.getMembersWithRegistrationForUser(other)
+        const members = await Member.getMembersWithRegistrationForUser(other);
 
         if (members.length > 0) {
-            console.log("Moving members from user "+other.id+" to "+this.id)
-            await Member.users.reverse("members").link(this, members)
+            console.log('Moving members from user ' + other.id + ' to ' + this.id);
+            await Member.users.reverse('members').link(this, members);
         }
 
         // Update balance items
-        const query = "UPDATE balance_items SET userId = ? WHERE userId = ?"
-        await Database.update(query, [this.id, other.id])
+        const query = 'UPDATE balance_items SET userId = ? WHERE userId = ?';
+        await Database.update(query, [this.id, other.id]);
 
         // Update payments
-        const query2 = "UPDATE payments SET userId = ? WHERE userId = ?"
-        await Database.update(query2, [this.id, other.id])
+        const query2 = 'UPDATE payments SET userId = ? WHERE userId = ?';
+        await Database.update(query2, [this.id, other.id]);
 
         // Update orders
-        const query3 = "UPDATE webshop_orders SET userId = ? WHERE userId = ?"
-        await Database.update(query3, [this.id, other.id])
+        const query3 = 'UPDATE webshop_orders SET userId = ? WHERE userId = ?';
+        await Database.update(query3, [this.id, other.id]);
 
-        await other.delete()
+        await other.delete();
     }
 
-    static async login(organizationId: string|null, email: string, password: string): Promise<User | undefined> {
-        const user = await User.getForAuthentication(organizationId, email)
+    static async login(organizationId: string | null, email: string, password: string): Promise<User | undefined> {
+        const user = await User.getForAuthentication(organizationId, email);
         if (!user || !user.hasKeys() || user.isApiUser) {
-            return undefined
+            return undefined;
         }
 
         if (STAMHOOFD.environment === 'development') {
             if (password === 'stamhoofd') {
-                return user
+                return user;
             }
         }
 
         if (!user.password) {
-            console.log('Tried to login to a user without password', email)
-            return
+            console.log('Tried to login to a user without password', email);
+            return;
         }
 
         try {
             if (await argon2.verify(user.password, password)) {
-                return user
+                return user;
             }
-        } catch (e) {
+        }
+        catch (e) {
             // internal failure
-            console.error(e)
+            console.error(e);
         }
     }
 
     /// Delete users when we delete a member
     static async deleteForDeletedMember(memberId: string) {
         const [rows] = await Database.delete(`DELETE ${this.table} FROM ${this.table} JOIN _members_users a ON a.usersId = ${this.table}.id LEFT JOIN _members_users b ON b.usersId = ${this.table}.id AND b.membersId != a.membersId WHERE a.membersId = ? and b.membersId is null and users.permissions is null`, [memberId]);
-        return rows
+        return rows;
     }
 
     hasPasswordBasedAccount() {
         if (this.password) {
             return true;
         }
-        
-        return false
+
+        return false;
     }
 
     get isApiUser() {
-        return !this.email.includes('@') && this.email.endsWith('.api') && this.verified
+        return !this.email.includes('@') && this.email.endsWith('.api') && this.verified;
     }
 
     hasAccount() {
@@ -251,7 +252,7 @@ export class User extends Model {
         if (this.isApiUser) {
             return true;
         }
-        return false
+        return false;
     }
 
     protected hasKeys() {
@@ -263,51 +264,51 @@ export class User extends Model {
         return false;
     }
 
-    static async getForRegister(organizationId: string|null, email: string): Promise<User | undefined> {
-        return await this.getForAuthentication(organizationId, email, {allowWithoutAccount: true})
+    static async getForRegister(organizationId: string | null, email: string): Promise<User | undefined> {
+        return await this.getForAuthentication(organizationId, email, { allowWithoutAccount: true });
     }
 
     static async getOrganizationLevelUser(organizationId: string, email: string): Promise<User | undefined> {
         const users = await User.where({
             email,
-            organizationId: organizationId
+            organizationId: organizationId,
         }, {
-            limit: 1
-        })
+            limit: 1,
+        });
 
         if (users.length == 0) {
             return undefined;
         }
-        const user = users[0]
+        const user = users[0];
 
         if (!user) {
-            return undefined
+            return undefined;
         }
 
         return user;
     }
 
-    static async getForAuthentication(organizationId: string|null, email: string, {allowWithoutAccount = false}: {allowWithoutAccount?: boolean} = {}): Promise<User | undefined> {
+    static async getForAuthentication(organizationId: string | null, email: string, { allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {}): Promise<User | undefined> {
         const users = await User.where({
             email,
-            organizationId: STAMHOOFD.userMode === 'platform' ? null : organizationId
+            organizationId: STAMHOOFD.userMode === 'platform' ? null : organizationId,
         }, {
-            limit: 1
-        })
+            limit: 1,
+        });
 
         if (users.length == 0) {
             if (organizationId && STAMHOOFD.userMode === 'organization') {
-                return this.getForAuthentication(null, email, {allowWithoutAccount})
+                return this.getForAuthentication(null, email, { allowWithoutAccount });
             }
             return undefined;
         }
-        const user = users[0]
+        const user = users[0];
 
         if (!user || (!user.hasKeys() && !allowWithoutAccount)) {
             if (organizationId && STAMHOOFD.userMode === 'organization') {
-                return this.getForAuthentication(null, email, {allowWithoutAccount})
+                return this.getForAuthentication(null, email, { allowWithoutAccount });
             }
-            return undefined
+            return undefined;
         }
 
         // Read member + address from first row
@@ -315,37 +316,38 @@ export class User extends Model {
     }
 
     static async hash(password: string) {
-        const hash = await argon2.hash(password, { type: argon2.argon2id })
-        return hash
+        const hash = await argon2.hash(password, { type: argon2.argon2id });
+        return hash;
     }
 
     static async createInvited(
-        organization: Organization|null,
-        data: {firstName: string|null, lastName: string|null, email: string, allowPlatform?: boolean}
+        organization: Organization | null,
+        data: { firstName: string | null; lastName: string | null; email: string; allowPlatform?: boolean },
     ): Promise<User | undefined> {
         const {
             email,
             firstName,
-            lastName
+            lastName,
         } = data;
 
         if (!organization && STAMHOOFD.userMode !== 'platform' && !data.allowPlatform) {
-            throw new Error("Missing organization")
+            throw new Error('Missing organization');
         }
 
         const user = new User();
-        user.organizationId = STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null)
-        user.id = uuidv4()
+        user.organizationId = STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null);
+        user.id = uuidv4();
         user.email = email;
         user.verified = false;
-        user.firstName = firstName
-        user.lastName = lastName
+        user.firstName = firstName;
+        user.lastName = lastName;
 
         try {
             await user.save();
-        } catch (e) {
+        }
+        catch (e) {
             // Duplicate key probably
-            if (e.code && e.code == "ER_DUP_ENTRY") {
+            if (e.code && e.code == 'ER_DUP_ENTRY') {
                 return;
             }
             throw e;
@@ -355,44 +357,45 @@ export class User extends Model {
     }
 
     static async register(
-        organization: Organization|null,
-        data: NewUser
+        organization: Organization | null,
+        data: NewUser,
     ): Promise<User | undefined> {
         const {
             email,
             password,
             id,
             firstName,
-            lastName
+            lastName,
         } = data;
 
         if (!password) {
-            throw new Error("A password is required for new users")
+            throw new Error('A password is required for new users');
         }
 
         if (!organization && STAMHOOFD.userMode !== 'platform') {
-            throw new Error("Missing organization")
+            throw new Error('Missing organization');
         }
 
-        if (await User.getForAuthentication(organization?.id ?? null, email, {allowWithoutAccount: true})) {
+        if (await User.getForAuthentication(organization?.id ?? null, email, { allowWithoutAccount: true })) {
             // Already exists
             return;
         }
 
         const user = new User();
-        user.organizationId = STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null)
-        user.id = id ?? uuidv4()
+        user.organizationId = STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null);
+        user.id = id ?? uuidv4();
         user.email = email;
-        user.password = await this.hash(password)
+        user.password = await this.hash(password);
         user.verified = false;
-        user.firstName = firstName
-        user.lastName = lastName
+        user.firstName = firstName;
+        user.lastName = lastName;
 
         try {
             await user.save();
-        } catch (e) {
+        }
+        catch (e) {
             // Duplicate key probably
-            if (e.code && e.code == "ER_DUP_ENTRY") {
+            if (e.code && e.code == 'ER_DUP_ENTRY') {
                 return;
             }
             throw e;
@@ -403,44 +406,45 @@ export class User extends Model {
 
     linkLoginProvider(type: LoginProviderType, sub: string) {
         if (!this.meta) {
-            this.meta = UserMeta.create({})
+            this.meta = UserMeta.create({});
         }
-        this.meta.loginProviderIds.set(type, sub)
+        this.meta.loginProviderIds.set(type, sub);
     }
 
     static async registerSSO(
-        organization: Organization|null,
-        data: {email, id, firstName, lastName, type: LoginProviderType, sub: string}
+        organization: Organization | null,
+        data: { email; id; firstName; lastName; type: LoginProviderType; sub: string },
     ): Promise<User | undefined> {
         const {
             email,
             id,
             firstName,
-            lastName
+            lastName,
         } = data;
 
         if (STAMHOOFD.userMode === 'platform') {
-            throw new Error('SSO is disabled on platforms for now')
+            throw new Error('SSO is disabled on platforms for now');
         }
 
         if (!organization) {
-            throw new Error("Missing organization")
+            throw new Error('Missing organization');
         }
 
         const user = new User();
-        user.organizationId = organization.id
-        user.id = id ?? uuidv4()
+        user.organizationId = organization.id;
+        user.id = id ?? uuidv4();
         user.email = email;
         user.verified = false;
-        user.firstName = firstName
-        user.lastName = lastName
-        user.linkLoginProvider(data.type, data.sub)
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.linkLoginProvider(data.type, data.sub);
 
         try {
             await user.save();
-        } catch (e) {
+        }
+        catch (e) {
             // Duplicate key probably
-            if (e.code && e.code == "ER_DUP_ENTRY") {
+            if (e.code && e.code == 'ER_DUP_ENTRY') {
                 return;
             }
             throw e;
@@ -450,7 +454,7 @@ export class User extends Model {
     }
 
     async changePassword(password: string) {
-        this.password = await User.hash(password)
+        this.password = await User.hash(password);
     }
 
     getStructure() {
@@ -463,17 +467,16 @@ export class User extends Model {
             permissions: this.permissions,
             hasAccount: this.hasAccount(),
             memberId: this.memberId,
-            organizationId: this.organizationId
+            organizationId: this.organizationId,
         });
     }
 
     getEmailTo(): EmailInterfaceRecipient[] {
         return [
-           {
+            {
                 email: this.email,
-                name: this.name
-            }
-        ]
+                name: this.name,
+            },
+        ];
     }
-
 }

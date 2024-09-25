@@ -1,78 +1,78 @@
-import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { STInvoiceMeta } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 import { Organization, Payment } from './';
 
 export class STInvoice extends Model {
-    static table = "stamhoofd_invoices";
+    static table = 'stamhoofd_invoices';
 
-    private static numberCache: number | null = null
+    private static numberCache: number | null = null;
 
     // Columns
     @column({
-        primary: true, type: "string", beforeSave(value) {
+        primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
-        }
+        },
     })
     id!: string;
 
     /**
      * Is null for deleted organizations
      */
-    @column({ foreignKey: STInvoice.organization, type: "string", nullable: true })
+    @column({ foreignKey: STInvoice.organization, type: 'string', nullable: true })
     organizationId: string | null;
 
     /**
      * An associated STCredit, that was used to remove credits from the user's credits.
      * If the invoice is marked as failed, we need to delete this one
      */
-    @column({ type: "string", nullable: true })
-    creditId: string | null = null
+    @column({ type: 'string', nullable: true })
+    creditId: string | null = null;
 
     /**
      * Note: always create a new invoice for failed payments. We never create an actual invoice until we received the payment
      */
-    @column({ type: "string", nullable: true, foreignKey: STInvoice.payment })
-    paymentId: string | null = null
-    
-    @column({ type: "json", decoder: STInvoiceMeta })
-    meta: STInvoiceMeta
+    @column({ type: 'string', nullable: true, foreignKey: STInvoice.payment })
+    paymentId: string | null = null;
+
+    @column({ type: 'json', decoder: STInvoiceMeta })
+    meta: STInvoiceMeta;
 
     /**
      * If the number is null, no invoice is generated yet. Its still a WIP invoice (not an official one!)
      */
-    @column({ type: "integer", nullable: true })
-    number: number | null = null
+    @column({ type: 'integer', nullable: true })
+    number: number | null = null;
 
-    @column({ type: "datetime", nullable: true })
-    paidAt: Date | null = null
+    @column({ type: 'datetime', nullable: true })
+    paidAt: Date | null = null;
 
     @column({
-        type: "datetime", beforeSave(old?: any) {
+        type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
-        }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
     })
-    createdAt: Date
+    createdAt: Date;
 
     @column({
-        type: "datetime", beforeSave() {
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
         },
-        skipUpdate: true
+        skipUpdate: true,
     })
-    updatedAt: Date
+    updatedAt: Date;
 
-    @column({ type: "string", nullable: true })
-    reference: string | null = null
+    @column({ type: 'string', nullable: true })
+    reference: string | null = null;
 
-    static organization = new ManyToOneRelation(Organization, "organization");
-    static payment = new ManyToOneRelation(Payment, "payment");
+    static organization = new ManyToOneRelation(Organization, 'organization');
+    static payment = new ManyToOneRelation(Payment, 'payment');
 }

@@ -36,7 +36,7 @@
                             </span>
                         </p>
                     </STInputBox>
-                    
+
                     <STInputBox title="Totaal bedrag">
                         <p class="style-price-big">
                             <span v-if="!summary" class="style-placeholder-skeleton" />
@@ -45,7 +45,6 @@
                             </span>
                         </p>
                     </STInputBox>
-
 
                     <STInputBox title="Unieke groepen">
                         <p class="style-price-big">
@@ -136,7 +135,7 @@
                                 </span>
                             </p>
                         </STInputBox>
-                        
+
                         <STInputBox title="Totaal bedrag">
                             <p class="style-price-big">
                                 <span v-if="!summary" class="style-placeholder-skeleton" />
@@ -145,7 +144,6 @@
                                 </span>
                             </p>
                         </STInputBox>
-
 
                         <STInputBox title="Unieke groepen">
                             <p class="style-price-big">
@@ -170,54 +168,54 @@ import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembers
 import { computed, onActivated, Ref, ref } from 'vue';
 
 const errors = useErrors();
-const summary = ref(null) as Ref<null | ChargeMembershipsSummary>
-const context = useContext()
-const owner = useRequestOwner()
+const summary = ref(null) as Ref<null | ChargeMembershipsSummary>;
+const context = useContext();
+const owner = useRequestOwner();
 const platform = usePlatform();
-const {patch, patched, addPatch, hasChanges, reset} = usePatch(platform)
-const platformManager = usePlatformManager()
-const saving = ref(false)
-const charging = ref(false)
+const { patch, patched, addPatch, hasChanges, reset } = usePatch(platform);
+const platformManager = usePlatformManager();
+const saving = ref(false);
+const charging = ref(false);
 let loading = false;
 
-const {externalOrganization: membershipOrganization, choose: $chooseMembershipOrganization, loading: loadingOrganization, errorBox: loadingOrganizationErrorBox} = useExternalOrganization(
+const { externalOrganization: membershipOrganization, choose: $chooseMembershipOrganization, loading: loadingOrganization, errorBox: loadingOrganizationErrorBox } = useExternalOrganization(
     computed({
         get: () => patched.value.membershipOrganizationId,
-        set: (membershipOrganizationId) => addPatch({
-            membershipOrganizationId
-        })
-    })
-)
+        set: membershipOrganizationId => addPatch({
+            membershipOrganizationId,
+        }),
+    }),
+);
 
-useInterval(reload, 10 * 1000)
+useInterval(reload, 10 * 1000);
 
 onActivated(() => {
-    reload().catch(console.error)
-})
+    reload().catch(console.error);
+});
 
 const chooseMembershipOrganization = () => {
-    return $chooseMembershipOrganization('Kies een vereniging die verantwoordelijk is voor het verzamelen van de aansluitingskosten')
-}
+    return $chooseMembershipOrganization('Kies een vereniging die verantwoordelijk is voor het verzamelen van de aansluitingskosten');
+};
 
 async function save() {
     if (saving.value) {
-        return
+        return;
     }
-    saving.value = true
+    saving.value = true;
     try {
-        await platformManager.value.patch(patch.value, false)
-        reset()
-        Toast.success('Wijziging opgeslagen').show()
-    } catch (e) {
-        Toast.fromError(e).show()
+        await platformManager.value.patch(patch.value, false);
+        reset();
+        Toast.success('Wijziging opgeslagen').show();
     }
-    saving.value = false
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+    saving.value = false;
 }
-
 
 async function reload() {
     if (loading) {
-        return
+        return;
     }
 
     try {
@@ -227,43 +225,45 @@ async function reload() {
             path: '/admin/charge-memberships/summary',
             decoder: ChargeMembershipsSummary as Decoder<ChargeMembershipsSummary>,
             owner,
-            shouldRetry: true
-        })
+            shouldRetry: true,
+        });
         summary.value = response.data;
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     loading = false;
 }
 
 async function charge() {
     if (charging.value) {
-        return
+        return;
     }
     if (!await CenteredMessage.confirm('Weet je zeker dat je alle aansluitingen wilt aanrekenen?', 'Ja, aanrekenen')) {
-        return
+        return;
     }
 
-    charging.value = true
+    charging.value = true;
     try {
         await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/admin/charge-memberships',
-            owner
-        })
-        Toast.success('Aansluitingen worden aangerekend. Het kan even duren voor deze overal verschijnen.').show()
-        await reload()
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+            owner,
+        });
+        Toast.success('Aansluitingen worden aangerekend. Het kan even duren voor deze overal verschijnen.').show();
+        await reload();
     }
-    charging.value = false
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    charging.value = false;
 }
 
 function getSummaryForType(type: PlatformMembershipType): ChargeMembershipsTypeSummary {
     if (!summary.value) {
         return ChargeMembershipsTypeSummary.create({});
     }
-    return summary.value.membershipsPerType.get(type.id) ?? ChargeMembershipsTypeSummary.create({})
+    return summary.value.membershipsPerType.get(type.id) ?? ChargeMembershipsTypeSummary.create({});
 }
 
 </script>

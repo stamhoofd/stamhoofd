@@ -142,7 +142,7 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
     }
 
     isFromOtherWebshop(seatingPlan: SeatingPlan) {
-        return !this.patchedWebshop.meta.seatingPlans.find(p => p.id == seatingPlan.id)
+        return !this.patchedWebshop.meta.seatingPlans.find(p => p.id === seatingPlan.id)
     }
 
     async save() {
@@ -166,8 +166,8 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
 
     addSeatingPlanIfNotInWebshop(id: string|null) {
         // If seating plan is not yet added to webshop, add it.
-        if (id && !this.patchedWebshop.meta.seatingPlans.find(p => p.id == id)) {
-            let seatingPlan = this.allSeatingPlans.find(p => p.id == id)
+        if (id && !this.patchedWebshop.meta.seatingPlans.find(p => p.id === id)) {
+            let seatingPlan = this.allSeatingPlans.find(p => p.id === id)
             if (!seatingPlan) {
                 throw new Error("Seating plan not found")
             }
@@ -199,7 +199,7 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
     }
 
     get otherWebshopSeatingPlans() {
-        const seatingPlans = this.organization.webshops.filter(w => w.id != this.webshop.id).flatMap(w => w.meta.seatingPlans)
+        const seatingPlans = this.organization.webshops.filter(w => w.id !== this.webshop.id).flatMap(w => w.meta.seatingPlans)
 
         // If seating plans have the same name, only show the last changed one
         const map = new Map<string, SeatingPlan>()
@@ -349,7 +349,7 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
             return
         }
 
-        if (!event.target.files || event.target.files.length == 0) {
+        if (!event.target.files || event.target.files.length === 0) {
             return;
         }
 

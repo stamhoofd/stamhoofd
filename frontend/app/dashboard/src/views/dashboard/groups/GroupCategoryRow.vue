@@ -36,9 +36,9 @@ const emit = defineEmits(['patch:period'])
 const {addPatch} = useEmitPatch(props, emit, 'period')
 const parentCategory = computed(() => props.category.getParentCategories(props.period.settings.categories)[0])
 const grandParentCategory = computed(() => parentCategory.value?.getParentCategories(props.period.settings.categories)[0])
-const subCategories = computed(() => parentCategory.value.categoryIds.map(id => props.period.settings.categories.find(c => c.id == id)!).filter(c => c && c.id !== props.category.id))
-const childCategories = computed(() => props.category.categoryIds.map(id => props.period.settings.categories.find(c => c.id == id)!).filter(c => c))
-const childGroups = computed(() => props.category.groupIds.map(id => props.period.groups.find(g => g.id == id)!).filter(g => g))
+const subCategories = computed(() => parentCategory.value.categoryIds.map(id => props.period.settings.categories.find(c => c.id === id)!).filter(c => c && c.id !== props.category.id))
+const childCategories = computed(() => props.category.categoryIds.map(id => props.period.settings.categories.find(c => c.id === id)!).filter(c => c))
+const childGroups = computed(() => props.category.groupIds.map(id => props.period.groups.find(g => g.id === id)!).filter(g => g))
 const {up, down} = usePatchMoveUpDownIds(props.category.id, computed(() => parentCategory.value.categoryIds), (categoryIds) => {
     const patchCategory = GroupCategory.patch({id: parentCategory.value.id, categoryIds})
     const arr = new PatchableArray() as PatchableArrayAutoEncoder<GroupCategory>
@@ -51,7 +51,7 @@ const {up, down} = usePatchMoveUpDownIds(props.category.id, computed(() => paren
 })
 
 const description = computed(() => {
-    if (props.category.groupIds.length == 0 && props.category.categoryIds.length == 0) {
+    if (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0) {
         return "Leeg"
     }
 
@@ -109,14 +109,14 @@ function moveTo(category: GroupCategory) {
 }
 
 function mergeDisabledWith(category: GroupCategory): boolean | string {
-    if (props.category.groupIds.length == 0 && props.category.categoryIds.length == 0) {
+    if (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0) {
         return "Een lege categorie kan je niet samenvoegen met een andere. Dat is hetzelfde als verwijderen."
     }
 
     // Ignore own category id
     const filteredCategoryIds = category.categoryIds.filter(id => id !== props.category.id)
 
-    if (category.groupIds.length == 0 && filteredCategoryIds.length == 0) {
+    if (category.groupIds.length === 0 && filteredCategoryIds.length === 0) {
         return false;
     }
 
@@ -231,7 +231,7 @@ async function showContextMenu(event: MouseEvent) {
             }),
             new ContextMenuItem({
                 name: "Verwijder en verplaats inhoud naar",
-                disabled: !canDeleteOrRename.value || (props.category.groupIds.length == 0 && props.category.categoryIds.length == 0),
+                disabled: !canDeleteOrRename.value || (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0),
                 childMenu: new ContextMenu([
                     [
                         createMergeContextMenuItem(parentCategory.value, !!grandParentCategory.value)

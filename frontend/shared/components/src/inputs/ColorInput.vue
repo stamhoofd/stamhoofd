@@ -95,7 +95,7 @@ export default class ColorInput extends VueComponent {
     validate(final = true, silent = false) {
         this.colorRaw = this.colorRaw.trim().toUpperCase()
 
-        if (!this.required && this.colorRaw.length == 0) {
+        if (!this.required && this.colorRaw.length === 0) {
             if (!silent) {
                 this.errorBox = null
             }
@@ -107,7 +107,7 @@ export default class ColorInput extends VueComponent {
             return true
         }
 
-        if (this.colorRaw.length == 6 && !this.colorRaw.startsWith("#")) {
+        if (this.colorRaw.length === 6 && !this.colorRaw.startsWith("#")) {
             this.colorRaw = "#"+this.colorRaw;
         }
 

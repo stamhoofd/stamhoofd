@@ -19,7 +19,7 @@
         <div v-if="!valid">
             <span>{{ valueString }}</span>
         </div>
-        <div v-else-if="valueString != ''">
+        <div v-else-if="valueString !== ''">
             <span>{{ valueString }}</span> {{ descriptionText }}
         </div>
         <div v-else>{{ placeholder }}</div>
@@ -78,7 +78,7 @@ export default class AgeInput extends VueComponent {
     onValueChanged(value: string, _oldValue: string) {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
-        if (value == "") {
+        if (value === "") {
             this.valid = true;
             if (this.nullable) {
                 this.internalValue = null

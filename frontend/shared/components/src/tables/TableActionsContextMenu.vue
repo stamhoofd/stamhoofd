@@ -63,7 +63,7 @@ export default class TableActionsContextMenu extends VueComponent {
     }
 
     get isSingleSelection() {
-        return this.selection.markedRows.size == 1 && this.selection.markedRowsAreSelected === true
+        return this.selection.markedRows.size === 1 && this.selection.markedRowsAreSelected === true
     }
 
     handleAction(action: TableAction<any>, event) {
@@ -101,7 +101,7 @@ export default class TableActionsContextMenu extends VueComponent {
             })
             .reduce((acc, action) => {
                 const group = acc[acc.length - 1];
-                if (group && group[0].groupIndex == action.groupIndex) {
+                if (group && group[0].groupIndex === action.groupIndex) {
                     group.push(action);
                 } else {
                     acc.push([action]);

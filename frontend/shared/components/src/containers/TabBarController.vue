@@ -219,7 +219,7 @@ async function selectItem (item: TabBarItem, appendHistory: boolean = true) {
         if (mainElement.value) {
             const scrollElement = mainElement.value.querySelector(".st-view > main");
             if (scrollElement) {
-                if (scrollElement.scrollTop != 0) {
+                if (scrollElement.scrollTop !== 0) {
                     // Scroll to top animated
                     scrollElement.scrollTo({
                         top: 0,

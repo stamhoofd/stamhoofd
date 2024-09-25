@@ -9,7 +9,7 @@
                     {{ financialSupportWarningText }}
                 </p>
 
-                <p v-if="filteredBalanceItems.length == 0" class="info-box">
+                <p v-if="filteredBalanceItems.length === 0" class="info-box">
                     Geen openstaande rekening
                 </p>
                 

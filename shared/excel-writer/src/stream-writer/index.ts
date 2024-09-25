@@ -1,2 +1,2 @@
-export * from './XlsxWriter'
-export * from './adapters/ArchiverWriterAdapter'
+export * from './XlsxWriter';
+export * from './adapters/ArchiverWriterAdapter';

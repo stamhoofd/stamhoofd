@@ -1,30 +1,29 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQL, SQLAlias, SQLCalculation, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere } from '@stamhoofd/sql';
 import { BalanceItemStatus } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
 
-
-export type CachedOutstandingBalanceType = 'organization'|'member'|'user' 
+export type CachedOutstandingBalanceType = 'organization' | 'member' | 'user';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
  */
 export class CachedOutstandingBalance extends Model {
-    static table = "cached_outstanding_balances"
+    static table = 'cached_outstanding_balances';
 
     @column({
-        primary: true, type: "string", beforeSave(value) {
+        primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
-        }
+        },
     })
     id!: string;
 
-    @column({ type: "string" })
-    organizationId: string
+    @column({ type: 'string' })
+    organizationId: string;
 
-    @column({ type: "string" })
-    objectId: string 
+    @column({ type: 'string' })
+    objectId: string;
 
     /**
      * Defines which field to select
@@ -32,43 +31,43 @@ export class CachedOutstandingBalance extends Model {
      * member: member id
      * user: all balance items with that user id, but without a member id
      */
-    @column({ type: "string" })
-    objectType: CachedOutstandingBalanceType
+    @column({ type: 'string' })
+    objectType: CachedOutstandingBalanceType;
 
-    @column({ type: "integer" })
-    amount = 0
+    @column({ type: 'integer' })
+    amount = 0;
 
-    @column({ type: "integer" })
-    amountPending = 0
+    @column({ type: 'integer' })
+    amountPending = 0;
 
     @column({
-        type: "datetime", beforeSave(old?: any) {
+        type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
-        }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
     })
-    createdAt: Date
+    createdAt: Date;
 
     @column({
-        type: "datetime", beforeSave() {
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
         },
-        skipUpdate: true
+        skipUpdate: true,
     })
-    updatedAt: Date
+    updatedAt: Date;
 
-    static async getForObjects(objectIds: string[], limitOrganizationId?: string|null): Promise<CachedOutstandingBalance[]> {
+    static async getForObjects(objectIds: string[], limitOrganizationId?: string | null): Promise<CachedOutstandingBalance[]> {
         const query = this.select()
-            .where("objectId", objectIds);
+            .where('objectId', objectIds);
 
         if (limitOrganizationId) {
-            query.where("organizationId", limitOrganizationId);
+            query.where('organizationId', limitOrganizationId);
         }
 
         return await query.fetch();
@@ -90,97 +89,97 @@ export class CachedOutstandingBalance extends Model {
 
     private static async fetchForObjects(organizationId: string, objectIds: string[], columnName: string, customWhere?: SQLWhere) {
         const query = SQL.select(
-                SQL.column(columnName),
-                new SQLSelectAs(
-                    new SQLCalculation(
-                        new SQLSum(
-                            new SQLCalculation(
-                                SQL.column('unitPrice'),
-                                new SQLMultiplicationSign(),
-                                SQL.column('amount')
-                            )
-                        ), 
-                        new SQLMinusSign(),
-                        new SQLSum(
-                            SQL.column('pricePaid')
-                        ), 
-                    ),
-                    new SQLAlias('data__amount')
-                ),
-                new SQLSelectAs(
+            SQL.column(columnName),
+            new SQLSelectAs(
+                new SQLCalculation(
                     new SQLSum(
-                        SQL.column('pricePending')
+                        new SQLCalculation(
+                            SQL.column('unitPrice'),
+                            new SQLMultiplicationSign(),
+                            SQL.column('amount'),
+                        ),
                     ),
-                    new SQLAlias('data__amountPending')
-                )
-            )
+                    new SQLMinusSign(),
+                    new SQLSum(
+                        SQL.column('pricePaid'),
+                    ),
+                ),
+                new SQLAlias('data__amount'),
+            ),
+            new SQLSelectAs(
+                new SQLSum(
+                    SQL.column('pricePending'),
+                ),
+                new SQLAlias('data__amountPending'),
+            ),
+        )
             .from(BalanceItem.table)
-            .where("organizationId", organizationId)
+            .where('organizationId', organizationId)
             .where(columnName, objectIds)
-            .whereNot("status", BalanceItemStatus.Hidden)
+            .whereNot('status', BalanceItemStatus.Hidden)
             .groupBy(SQL.column(columnName));
-        
+
         if (customWhere) {
             query.where(customWhere);
         }
 
         const result = await query.fetch();
 
-        const results: [string, {amount: number, amountPending: number}][] = [];
+        const results: [string, { amount: number; amountPending: number }][] = [];
         for (const row of result) {
-            if (!row["data"]) {
-                throw new Error("Invalid data namespace");
+            if (!row['data']) {
+                throw new Error('Invalid data namespace');
             }
 
             if (!row[BalanceItem.table]) {
-                throw new Error("Invalid "+ BalanceItem.table +" namespace");
+                throw new Error('Invalid ' + BalanceItem.table + ' namespace');
             }
 
             const objectId = row[BalanceItem.table][columnName];
-            const amount = row["data"]["amount"];
-            const amountPending = row["data"]["amountPending"];
+            const amount = row['data']['amount'];
+            const amountPending = row['data']['amountPending'];
 
-            if (typeof objectId !== "string") {
-                throw new Error("Invalid objectId");
+            if (typeof objectId !== 'string') {
+                throw new Error('Invalid objectId');
             }
 
-            if (typeof amount !== "number") {
-                throw new Error("Invalid amount");
+            if (typeof amount !== 'number') {
+                throw new Error('Invalid amount');
             }
 
-            if (typeof amountPending !== "number") {
-                throw new Error("Invalid amountPending");
+            if (typeof amountPending !== 'number') {
+                throw new Error('Invalid amountPending');
             }
 
-            results.push([objectId, {amount, amountPending}]);
+            results.push([objectId, { amount, amountPending }]);
         }
 
         // Add missing object ids (with 0 amount, otherwise we don't reset the amounts back to zero when all the balance items are hidden)
         for (const objectId of objectIds) {
             if (!results.find(([id]) => id === objectId)) {
-                results.push([objectId, {amount: 0, amountPending: 0}]);
+                results.push([objectId, { amount: 0, amountPending: 0 }]);
             }
         }
-            
+
         return results;
     }
 
-    private static async setForResults(organizationId: string, result: [string, {amount: number, amountPending: number}][], objectType: CachedOutstandingBalanceType) {
+    private static async setForResults(organizationId: string, result: [string, { amount: number; amountPending: number }][], objectType: CachedOutstandingBalanceType) {
         if (result.length === 0) {
             return;
         }
         const query = SQL.insert(this.table)
             .columns(
-                "id",
-                "organizationId", 
-                "objectId", 
-                "objectType", 
-                "amount",
-                "amountPending",
-                "createdAt",
-                "updatedAt"
+                'id',
+                'organizationId',
+                'objectId',
+                'objectType',
+                'amount',
+                'amountPending',
+                'createdAt',
+                'updatedAt',
             )
-            .values(...result.map(([objectId, {amount, amountPending}]) => {
+            .values(...result.map(([objectId, { amount, amountPending }]) => {
                 return [
                     uuidv4(),
                     organizationId,
@@ -189,41 +188,41 @@ export class CachedOutstandingBalance extends Model {
                     amount,
                     amountPending,
                     new Date(),
-                    new Date()
-                ]
+                    new Date(),
+                ];
             }))
             .as('v')
             .onDuplicateKeyUpdate(
-                SQL.assignment("amount", SQL.column("v", "amount")),
-                SQL.assignment("amountPending", SQL.column("v", "amountPending")),
-                SQL.assignment("updatedAt", SQL.column("v", "updatedAt"))
-            )
+                SQL.assignment('amount', SQL.column('v', 'amount')),
+                SQL.assignment('amountPending', SQL.column('v', 'amountPending')),
+                SQL.assignment('updatedAt', SQL.column('v', 'updatedAt')),
+            );
 
-        await query.insert()
+        await query.insert();
     }
 
     static async updateForOrganizations(organizationId: string, organizationIds: string[]) {
         if (organizationIds.length === 0) {
             return;
         }
-        const results = await this.fetchForObjects(organizationId, organizationIds, "payingOrganizationId");
-        await this.setForResults(organizationId, results, "organization");
+        const results = await this.fetchForObjects(organizationId, organizationIds, 'payingOrganizationId');
+        await this.setForResults(organizationId, results, 'organization');
     }
 
     static async updateForMembers(organizationId: string, memberIds: string[]) {
         if (memberIds.length === 0) {
             return;
         }
-        const results = await this.fetchForObjects(organizationId, memberIds, "memberId");
-        await this.setForResults(organizationId, results, "member");
+        const results = await this.fetchForObjects(organizationId, memberIds, 'memberId');
+        await this.setForResults(organizationId, results, 'member');
     }
 
     static async updateForUsers(organizationId: string, userIds: string[]) {
         if (userIds.length === 0) {
             return;
         }
-        const results = await this.fetchForObjects(organizationId, userIds, "userId", SQL.where("memberId", null));
-        await this.setForResults(organizationId, results, "user");
+        const results = await this.fetchForObjects(organizationId, userIds, 'userId', SQL.where('memberId', null));
+        await this.setForResults(organizationId, results, 'user');
     }
 
     /**
@@ -231,16 +230,16 @@ export class CachedOutstandingBalance extends Model {
      */
     static select() {
         const transformer = (row: SQLResultNamespacedRow): CachedOutstandingBalance => {
-            const d = (this as typeof CachedOutstandingBalance & typeof Model).fromRow(row[this.table] as any) as CachedOutstandingBalance|undefined
+            const d = (this as typeof CachedOutstandingBalance & typeof Model).fromRow(row[this.table] as any) as CachedOutstandingBalance | undefined;
 
             if (!d) {
-                throw new Error("EmailTemplate not found")
+                throw new Error('EmailTemplate not found');
             }
 
             return d;
-        }
-        
-        const select = new SQLSelect(transformer, SQL.wildcard())
-        return select.from(SQL.table(this.table))
+        };
+
+        const select = new SQLSelect(transformer, SQL.wildcard());
+        return select.from(SQL.table(this.table));
     }
 }

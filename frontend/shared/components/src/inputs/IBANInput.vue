@@ -68,7 +68,7 @@ export default class IBANInput extends VueComponent {
     async validate() {
         this.ibanRaw = this.ibanRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
 
-        if (!this.required && this.ibanRaw.length == 0) {
+        if (!this.required && this.ibanRaw.length === 0) {
             this.errorBox = null
             this.$emit('update:modelValue', null)
             return true
@@ -78,7 +78,7 @@ export default class IBANInput extends VueComponent {
         const iban = ibantools.electronicFormatIBAN(this.ibanRaw); // 'NL91ABNA0517164300'
         
         if (iban === null || !ibantools.isValidIBAN(iban)) {
-            if (this.ibanRaw.length == 0) {
+            if (this.ibanRaw.length === 0) {
                 if (STAMHOOFD.environment === 'development') {
                     this.ibanRaw = "BE42631299159354"
                     this.errorBox = new ErrorBox(new SimpleError({

@@ -1,14 +1,14 @@
-import { XlsxTransformerColumn } from "@stamhoofd/excel-writer";
-import { Address, CountryHelper, MemberWithRegistrationsBlob, Parent, ParentTypeHelper } from "@stamhoofd/structures";
+import { XlsxTransformerColumn } from '@stamhoofd/excel-writer';
+import { Address, CountryHelper, MemberWithRegistrationsBlob, Parent, ParentTypeHelper } from '@stamhoofd/structures';
 
 export class XlsxTransformerColumnHelper {
     static formatBoolean(value: boolean | undefined | null): string {
-        if(value === true) {
-            return "Ja";
+        if (value === true) {
+            return 'Ja';
         }
 
-        if(value === false) {
-            return 'Nee'
+        if (value === false) {
+            return 'Nee';
         }
 
         return '';
@@ -18,13 +18,13 @@ export class XlsxTransformerColumnHelper {
         return [
             ...this.createColumnsForParent(0),
             ...this.createColumnsForParent(1),
-        ]
+        ];
     }
 
-    static createColumnsForAddresses<T>({limit, getAddresses, matchIdStart, identifier}: {limit: number, getAddresses: (object: T) => Address[], matchIdStart: string, identifier: string}): XlsxTransformerColumn<unknown>[] {
+    static createColumnsForAddresses<T>({ limit, getAddresses, matchIdStart, identifier }: { limit: number; getAddresses: (object: T) => Address[]; matchIdStart: string; identifier: string }): XlsxTransformerColumn<unknown>[] {
         const result: XlsxTransformerColumn<unknown>[] = [];
 
-        for(let i = 0; i <= limit; i++) {
+        for (let i = 0; i <= limit; i++) {
             const column = this.createAddressColumns({
                 matchId: `${matchIdStart}.${i}`,
                 getAddress: (object: T) => getAddresses(object)[i],
@@ -38,13 +38,13 @@ export class XlsxTransformerColumnHelper {
     }
 
     static createColumnsForParent(parentIndex: number): XlsxTransformerColumn<unknown>[] {
-        const getParent = (member: MemberWithRegistrationsBlob): Parent | null | undefined => member.details.parents[parentIndex]; 
+        const getParent = (member: MemberWithRegistrationsBlob): Parent | null | undefined => member.details.parents[parentIndex];
 
         const parentNumber = parentIndex + 1;
 
-        const identifier = `Ouder ${parentNumber}`
+        const identifier = `Ouder ${parentNumber}`;
         const getId = (value: string) => `parent.${parentIndex}.${value}`;
-        const getName = (value: string) => `${identifier} - ${value}`
+        const getName = (value: string) => `${identifier} - ${value}`;
 
         return [
             {
@@ -55,61 +55,61 @@ export class XlsxTransformerColumnHelper {
                     const parent = getParent(member);
 
                     return {
-                        value: parent ? ParentTypeHelper.getName(parent.type) : ''
-                    }
-                }
+                        value: parent ? ParentTypeHelper.getName(parent.type) : '',
+                    };
+                },
             },
             {
                 id: getId('firstName'),
                 name: getName('Voornaam'),
                 width: 20,
                 getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: getParent(member)?.firstName ?? ''
-                })
+                    value: getParent(member)?.firstName ?? '',
+                }),
             },
             {
                 id: getId('lastName'),
                 name: getName('Achternaam'),
                 width: 20,
                 getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: getParent(member)?.lastName ?? ''
-                })
+                    value: getParent(member)?.lastName ?? '',
+                }),
             },
             {
                 id: getId('phone'),
                 name: getName('Telefoonnummer'),
                 width: 20,
                 getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: getParent(member)?.phone ?? ''
-                })
+                    value: getParent(member)?.phone ?? '',
+                }),
             },
             {
                 id: getId('email'),
                 name: getName('E-mailadres'),
                 width: 20,
                 getValue: (member: MemberWithRegistrationsBlob) => ({
-                    value: getParent(member)?.email ?? ''
-                })
+                    value: getParent(member)?.email ?? '',
+                }),
             },
             XlsxTransformerColumnHelper.createAddressColumns<MemberWithRegistrationsBlob>({
                 matchId: getId('address'),
-                getAddress: (member) => getParent(member)?.address,
-                identifier: getName('Adres')
+                getAddress: member => getParent(member)?.address,
+                identifier: getName('Adres'),
             }),
-        ]
+        ];
     }
 
-    static createAddressColumns<T>({matchId, identifier, getAddress} : {matchId: string, identifier?: string, getAddress: (object: T) => Address | null | undefined}): XlsxTransformerColumn<T> {
+    static createAddressColumns<T>({ matchId, identifier, getAddress }: { matchId: string; identifier?: string; getAddress: (object: T) => Address | null | undefined }): XlsxTransformerColumn<T> {
         const getId = (value: string) => matchId + '.' + value;
         const identifierText = identifier ? `${identifier} - ` : '';
         const getName = (value: string) => {
-            const name =`${identifierText}${value}`;
+            const name = `${identifierText}${value}`;
             return name[0].toUpperCase() + name.slice(1);
         };
-    
+
         return {
             match: (id) => {
-                if(id === matchId) {
+                if (id === matchId) {
                     return [
                         {
                             id: getId('street'),
@@ -118,9 +118,9 @@ export class XlsxTransformerColumnHelper {
                             getValue: (object: T) => {
                                 const address = getAddress(object);
                                 return {
-                                    value: address?.street || ''
-                                }
-                            }
+                                    value: address?.street || '',
+                                };
+                            },
                         },
                         {
                             id: getId('number'),
@@ -129,9 +129,9 @@ export class XlsxTransformerColumnHelper {
                             getValue: (object: T) => {
                                 const address = getAddress(object);
                                 return {
-                                    value: address?.number || ''
-                                }
-                            }
+                                    value: address?.number || '',
+                                };
+                            },
                         },
                         {
                             id: getId('postalCode'),
@@ -140,9 +140,9 @@ export class XlsxTransformerColumnHelper {
                             getValue: (object: T) => {
                                 const address = getAddress(object);
                                 return {
-                                    value: address?.postalCode || ''
-                                }
-                            }
+                                    value: address?.postalCode || '',
+                                };
+                            },
                         },
                         {
                             id: getId('city'),
@@ -151,9 +151,9 @@ export class XlsxTransformerColumnHelper {
                             getValue: (object: T) => {
                                 const address = getAddress(object);
                                 return {
-                                    value: address?.city || ''
-                                }
-                            }
+                                    value: address?.city || '',
+                                };
+                            },
                         },
                         {
                             id: getId('country'),
@@ -163,15 +163,13 @@ export class XlsxTransformerColumnHelper {
                                 const address = getAddress(object);
                                 const country = address?.country;
                                 return {
-                                    value: country ? CountryHelper.getName(country) : ''
-                                }
-                            }
-                        }
-                    ]
+                                    value: country ? CountryHelper.getName(country) : '',
+                                };
+                            },
+                        },
+                    ];
                 }
-    
-            }
-        }
-    
-    }   
+            },
+        };
+    }
 }

@@ -1,15 +1,15 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
-import { Formatter, StringCompare } from "@stamhoofd/utility";
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 
-import { Address } from "../addresses/Address";
-import { STBillingStatus } from "../billing/STBillingStatus";
-import { Organization } from "../Organization";
-import { OrganizationEmail } from "../OrganizationEmail";
-import { OrganizationPackages } from "../OrganizationMetaData";
-import { AcquisitionType } from "../OrganizationPrivateMetaData";
-import { OrganizationType } from "../OrganizationType";
-import { UmbrellaOrganization } from "../UmbrellaOrganization";
-import { User } from "../User";
+import { Address } from '../addresses/Address';
+import { STBillingStatus } from '../billing/STBillingStatus';
+import { Organization } from '../Organization';
+import { OrganizationEmail } from '../OrganizationEmail';
+import { OrganizationPackages } from '../OrganizationMetaData';
+import { AcquisitionType } from '../OrganizationPrivateMetaData';
+import { OrganizationType } from '../OrganizationType';
+import { UmbrellaOrganization } from '../UmbrellaOrganization';
+import { User } from '../User';
 
 export class OrganizationStats extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -30,13 +30,13 @@ export class OrganizationStats extends AutoEncoder {
 
 export class OrganizationPaymentMandateDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
-    consumerName?: string
+    consumerName?: string;
 
     @field({ decoder: StringDecoder, optional: true })
-    consumerAccount?: string
+    consumerAccount?: string;
 
     @field({ decoder: StringDecoder, optional: true })
-    consumerBic?: string
+    consumerBic?: string;
 }
 
 export class OrganizationPaymentMandate extends AutoEncoder {
@@ -44,10 +44,10 @@ export class OrganizationPaymentMandate extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    method: "directdebit" | "creditcard" | "paypal";
+    method: 'directdebit' | 'creditcard' | 'paypal';
 
     @field({ decoder: StringDecoder })
-    status: "valid" | "pending" | "invalid";
+    status: 'valid' | 'pending' | 'invalid';
 
     @field({ decoder: OrganizationPaymentMandateDetails })
     details: OrganizationPaymentMandateDetails;
@@ -56,7 +56,7 @@ export class OrganizationPaymentMandate extends AutoEncoder {
      * The signature date of the mandate in YYYY-MM-DD format.
      */
     @field({ decoder: StringDecoder, nullable: true })
-    signatureDate: string|null = null;
+    signatureDate: string | null = null;
 
     /**
      * The mandate’s date and time of creation, in ISO 8601 format.
@@ -65,21 +65,21 @@ export class OrganizationPaymentMandate extends AutoEncoder {
     createdAt: Date;
 
     @field({ decoder: StringDecoder, nullable: true })
-    mandateReference: string | null = null
+    mandateReference: string | null = null;
 }
 
 export class OrganizationSummary extends Organization {
     @field({ decoder: STBillingStatus })
-    billingStatus: STBillingStatus
+    billingStatus: STBillingStatus;
 
     @field({ decoder: DateDecoder })
-    createdAt: Date
+    createdAt: Date;
 
     @field({ decoder: DateDecoder, nullable: true })
-    lastActiveAt: Date | null = null
+    lastActiveAt: Date | null = null;
 
     @field({ decoder: OrganizationStats })
-    stats: OrganizationStats
+    stats: OrganizationStats;
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), version: 130 })
     acquisitionTypes: AcquisitionType[] = [];
@@ -91,7 +91,7 @@ export class OrganizationSummary extends Organization {
     paymentMandates: OrganizationPaymentMandate[] = [];
 
     @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
-    features: string[] = []
+    features: string[] = [];
 }
 
 export class OrganizationOverview extends AutoEncoder {
@@ -120,16 +120,16 @@ export class OrganizationOverview extends AutoEncoder {
     packages: OrganizationPackages;
 
     @field({ decoder: new ArrayDecoder(User), optional: true, version: 90 })
-    admins: User[]
+    admins: User[];
 
     @field({ decoder: new ArrayDecoder(OrganizationEmail), version: 90 })
     emails: OrganizationEmail[] = [];
 
     @field({ decoder: OrganizationStats, version: 90 })
-    stats: OrganizationStats
+    stats: OrganizationStats;
 
     @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
-    features: string[] = []
+    features: string[] = [];
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), optional: true })
     acquisitionTypes: AcquisitionType[] = [];
@@ -138,9 +138,9 @@ export class OrganizationOverview extends AutoEncoder {
         if (q === this.id) {
             return true;
         }
-        
+
         const parts = q.split(/[ -]/);
-        const name = Formatter.slug(this.name)
+        const name = Formatter.slug(this.name);
         const orgParts = name.split(/[ -]/);
 
         if (q.includes('@')) {

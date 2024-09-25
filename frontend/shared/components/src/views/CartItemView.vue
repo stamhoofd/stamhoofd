@@ -49,7 +49,7 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <STList v-if="(cartItem.product.type == 'Ticket' || cartItem.product.type == 'Voucher') && cartItem.product.location" class="info">
+            <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
                         Locatie
@@ -84,7 +84,7 @@
                         </h4>
 
                         <p v-if="price.discountPrice" class="style-description-small">
-                            {{ formatPrice(price.discountPrice) }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount == 1 ? 'stuk' : 'stuks' }}
+                            {{ formatPrice(price.discountPrice) }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount === 1 ? 'stuk' : 'stuks' }}
                         </p>
 
                         <p v-if="getPriceStockText(price)" class="style-description-small">
@@ -336,17 +336,17 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get suffixSingular() {
-        if (this.cartItem.product.type == ProductType.Ticket) {
+        if (this.cartItem.product.type === ProductType.Ticket) {
             return "ticket"
         }
-        return this.cartItem.product.type == ProductType.Person ? 'persoon' : 'stuk'
+        return this.cartItem.product.type === ProductType.Person ? 'persoon' : 'stuk'
     }
 
     get suffix() {
-        if (this.cartItem.product.type == ProductType.Ticket) {
+        if (this.cartItem.product.type === ProductType.Ticket) {
             return "tickets"
         }
-        return this.cartItem.product.type == ProductType.Person ? 'personen' : 'stuks'
+        return this.cartItem.product.type === ProductType.Person ? 'personen' : 'stuks'
     }
 
     get image() {
@@ -377,7 +377,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
      */
     get count() {
         return this.cart.items.reduce((prev, item) => {
-            if (item.product.id != this.product.id) {
+            if (item.product.id !== this.product.id) {
                 return prev
             }
             return prev + item.amount

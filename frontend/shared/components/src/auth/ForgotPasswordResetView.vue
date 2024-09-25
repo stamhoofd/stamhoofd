@@ -192,7 +192,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
         
         const valid = await this.validator.validate()
 
-        if (this.password != this.passwordRepeat) {
+        if (this.password !== this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "",
                 message: "De ingevoerde wachtwoorden komen niet overeen"

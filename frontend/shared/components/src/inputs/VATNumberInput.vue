@@ -72,7 +72,7 @@ export default class VATNumberInput extends VueComponent {
     async validate() {
         this.VATNumberRaw = this.VATNumberRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
 
-        if (!this.required && this.VATNumberRaw.length == 0) {
+        if (!this.required && this.VATNumberRaw.length === 0) {
             this.errorBox = null
             this.$emit('update:modelValue', null)
             return true

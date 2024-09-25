@@ -48,7 +48,7 @@ export default class Radio extends VueComponent {
 
         // Add support for a model that doesn't change
         this.$nextTick(() => {
-            if (this.radioButtonValue != value) {
+            if (this.radioButtonValue !== value) {
                 if (this.$refs.radio) {
                     (this.$refs.radio as any).checked = (this.radioButtonValue === this.value);
                 }

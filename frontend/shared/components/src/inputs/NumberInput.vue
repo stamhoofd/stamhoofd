@@ -20,8 +20,8 @@
             <div v-if="!valid">
                 <span>{{ valueString }}</span>
             </div>
-            <div v-else-if="valueString != ''">
-                <span>{{ valueString }}</span> {{ internalValue == 1 && suffixSingular !== null ? suffixSingular : suffix }}
+            <div v-else-if="valueString !== ''">
+                <span>{{ valueString }}</span> {{ internalValue === 1 && suffixSingular !== null ? suffixSingular : suffix }}
             </div>
             <div v-else>{{ placeholder }}</div>
         </label>
@@ -110,7 +110,7 @@ export default class NumberInput extends VueComponent {
     onValueChanged(value: string, _oldValue: string) {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
-        if (value == "") {
+        if (value === "") {
             if (this.required) {
                 this.valid = true;
                 this.internalValue = Math.max(0, this.min ?? 0);
@@ -164,7 +164,7 @@ export default class NumberInput extends VueComponent {
         const decimals = float % 1;
         const abs = Math.abs(float);
 
-        if (decimals != 0) {
+        if (decimals !== 0) {
             // Include decimals
             this.valueString =
                 (float < 0 ? "-" : "") +

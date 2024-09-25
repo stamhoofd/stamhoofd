@@ -106,7 +106,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         const iso1 = this.modelValue ? Formatter.dateIso(this.modelValue) : ""
         const iso2 = currentDateValue ? Formatter.dateIso(currentDateValue) : ""
 
-        if (iso1 != iso2 || !this.hasFocusUnbounced) {
+        if (iso1 !== iso2 || !this.hasFocusUnbounced) {
             this.dayText = this.modelValue ? this.modelValue.getDate().toString() : ""
             this.monthText = this.modelValue ? (this.modelValue.getMonth() + 1).toString() : ""
             this.yearText = this.modelValue ? this.modelValue.getFullYear().toString() : ""
@@ -306,7 +306,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         const focusedInput = document.activeElement as HTMLInputElement
         const index = this.numberInputs.indexOf(focusedInput)
 
-        if (index != -1) {
+        if (index !== -1) {
             // TODO remove and split on special characters
             // todo: automatically move extra characters to the next field
 
@@ -355,7 +355,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         const year = parseInt(this.yearText.replace(/[^0-9]/g, ""))
         if (day && month && year && !isNaN(day) && !isNaN(month) && !isNaN(year)) {
             const date = new Date(year, month - 1, day)
-            if (date.getFullYear() == year && date.getMonth() == month - 1 && date.getDate() == day) {
+            if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
                 return date;
             }
 
@@ -453,7 +453,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         const focusedInput = document.activeElement as HTMLInputElement
         const index = this.numberInputs.indexOf(focusedInput)
 
-        if (index == -1) {
+        if (index === -1) {
             return;
         }
 

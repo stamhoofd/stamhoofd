@@ -1,7 +1,7 @@
 import { AutoEncoder, Data, Decoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { LegacyRecordType, OldRecordType } from "./LegacyRecordType";
+import { LegacyRecordType, OldRecordType } from './LegacyRecordType';
 
 // Temporary fix for space in enum....
 class TrimEnumDecoder<E extends { [key: number]: string | number }> implements Decoder<E[keyof E]> {
@@ -18,24 +18,26 @@ class TrimEnumDecoder<E extends { [key: number]: string | number }> implements D
             if (Object.values(this.enum).includes(str)) {
                 return str as E[keyof E];
             }
-        } catch (e) {
+        }
+        catch (e) {
             try {
                 str = data.number;
                 if (Object.values(this.enum).includes(str)) {
                     return str as E[keyof E];
                 }
-            } catch (e2) {
+            }
+            catch (e2) {
                 throw new SimpleError({
-                    code: "invalid_field",
-                    message: `Expected a number or string for enum: ` + Object.values(this.enum).join(", "),
+                    code: 'invalid_field',
+                    message: `Expected a number or string for enum: ` + Object.values(this.enum).join(', '),
                     field: data.currentField,
                 });
             }
         }
 
         throw new SimpleError({
-            code: "invalid_field",
-            message: "Unknown enum value " + str + " expected " + Object.values(this.enum).join(", "),
+            code: 'invalid_field',
+            message: 'Unknown enum value ' + str + ' expected ' + Object.values(this.enum).join(', '),
             field: data.currentField,
         });
     }
@@ -46,7 +48,7 @@ export class LegacyRecord extends AutoEncoder {
     type: LegacyRecordType;
 
     @field({ decoder: StringDecoder })
-    description = "";
+    description = '';
 
     /**
      * Sometimes it is necessary to know who created a record.
@@ -54,9 +56,8 @@ export class LegacyRecord extends AutoEncoder {
      * someone inside the organization modified records
      */
     @field({ decoder: StringDecoder, optional: true })
-    author?: string
+    author?: string;
 }
-
 
 /**
  * @deprecated only used for migration. Keep here for at least one year or create a migration that runs in the clients and saves
@@ -67,5 +68,5 @@ export class OldRecord extends AutoEncoder {
     type: OldRecordType;
 
     @field({ decoder: StringDecoder })
-    description = "";
+    description = '';
 }

@@ -8,7 +8,7 @@
                 Nakijken of deze nog beschikbaar is...
             </p>
 
-            <p v-else-if="uri.length == 0" class="error-box">
+            <p v-else-if="uri.length === 0" class="error-box">
                 Dit mag niet leeg zijn
             </p>
 
@@ -34,22 +34,22 @@ import { ref, watch } from 'vue';
 const uri = defineModel({ required: true, type: String });
 const props = withDefaults(
     defineProps<{
-        validator: Validator,
-        allowValue: string
+        validator: Validator;
+        allowValue: string;
     }>(),
-    {}
+    {},
 );
 
 const prefix = STAMHOOFD.domains.dashboard + '/';
 const checkingAvailability = ref(false);
 const isAvailable = ref<boolean | null>(null);
-const lastCheckedUri = ref<string|null>(null)
-const owner = useRequestOwner()
+const lastCheckedUri = ref<string | null>(null);
+const owner = useRequestOwner();
 let checkCount = 0;
-const errors = useErrors({validator: props.validator});
+const errors = useErrors({ validator: props.validator });
 
 useValidation(props.validator, async () => {
-    if (uri.value.length == 0) {
+    if (uri.value.length === 0) {
         return false;
     }
 
@@ -64,10 +64,10 @@ useValidation(props.validator, async () => {
     }
 
     return true;
-})
+});
 const doThrottledCheck = throttle(checkAvailable, 1000);
 
-watch(uri, () => {    
+watch(uri, () => {
     if (uri.value === props.allowValue && props.allowValue) {
         checkCount += 1;
         Request.cancelAll(owner);
@@ -77,7 +77,7 @@ watch(uri, () => {
         return true;
     }
 
-    if (uri.value.length == 0) {
+    if (uri.value.length === 0) {
         checkCount += 1;
         Request.cancelAll(owner);
         isAvailable.value = null;
@@ -93,12 +93,12 @@ watch(uri, () => {
     }
 
     checkingAvailability.value = true;
-    doThrottledCheck()
+    doThrottledCheck();
 });
 
 async function onBlur() {
-    uri.value = Formatter.slug(uri.value)
-    await checkAvailable()
+    uri.value = Formatter.slug(uri.value);
+    await checkAvailable();
 }
 
 async function checkAvailable(): Promise<boolean> {
@@ -112,7 +112,7 @@ async function checkAvailable(): Promise<boolean> {
         return true;
     }
 
-    if (uri.value.length == 0) {
+    if (uri.value.length === 0) {
         isAvailable.value = null;
         checkingAvailability.value = false;
         return false;
@@ -144,9 +144,10 @@ async function doCheckAvailable() {
                 uri: Formatter.slug(uri.value),
             },
             shouldRetry: true,
-            owner
+            owner,
         });
-    } catch (e) {
+    }
+    catch (e) {
         if (initialCheckCount !== checkCount) {
             return false;
         }
@@ -155,7 +156,7 @@ async function doCheckAvailable() {
         if (isSimpleError(e) || isSimpleErrors(e)) {
             if (e.hasCode('unknown_organization')) {
                 isAvailable.value = true;
-                lastCheckedUri.value = Formatter.slug(uri.value)
+                lastCheckedUri.value = Formatter.slug(uri.value);
                 return true;
             }
         }
@@ -169,7 +170,7 @@ async function doCheckAvailable() {
     }
     checkingAvailability.value = false;
     isAvailable.value = false;
-    lastCheckedUri.value = Formatter.slug(uri.value)
+    lastCheckedUri.value = Formatter.slug(uri.value);
     return false;
 }
 

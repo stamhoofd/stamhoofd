@@ -15,7 +15,7 @@
         <p v-if="!group.defaultMembershipTypeId" class="style-description">
             Geen automatische aansluiting
         </p>
-       
+
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />

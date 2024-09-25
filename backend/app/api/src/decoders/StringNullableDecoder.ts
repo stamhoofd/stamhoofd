@@ -1,4 +1,4 @@
-import { Decoder, Data } from "@simonbackx/simple-encoding";
+import { Decoder, Data } from '@simonbackx/simple-encoding';
 
 export class StringNullableDecoder<T> implements Decoder<T | null> {
     decoder: Decoder<T>;
@@ -15,4 +15,3 @@ export class StringNullableDecoder<T> implements Decoder<T | null> {
         return data.decode(this.decoder);
     }
 }
-

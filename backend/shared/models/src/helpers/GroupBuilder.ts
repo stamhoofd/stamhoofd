@@ -1,414 +1,414 @@
-
 import { Group as GroupStruct, GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Group, Organization } from '../models';
 
 export class GroupBuilder {
-    organization: Organization
+    organization: Organization;
 
     constructor(organization: Organization) {
-        this.organization = organization
+        this.organization = organization;
     }
 
     async build() {
-        const oldGroups = await Group.getAll(this.organization.id, this.organization.periodId)
+        const oldGroups = await Group.getAll(this.organization.id, this.organization.periodId);
 
         if (oldGroups.length === 0) {
             // Setup default groups if possible
             if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
-                await this.createSGVGroups()
-            } else if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ChiroNationaal) {
-                await this.createChiroGroups()
+                await this.createSGVGroups();
+            }
+            else if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ChiroNationaal) {
+                await this.createChiroGroups();
             }
         }
 
         // Reload
-        const groups = await Group.getAll(this.organization.id, this.organization.periodId)
-        
+        const groups = await Group.getAll(this.organization.id, this.organization.periodId);
+
         // Setup default root groups
         if (this.organization.meta.categories.length <= 2) {
-            const sortedGroupIds = groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id)
+            const sortedGroupIds = groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id);
 
-            const defaults = this.organization.meta.packages.useActivities ? OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined) : OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
+            const defaults = this.organization.meta.packages.useActivities ? OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined) : OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined);
 
             if (sortedGroupIds.length > 0 && defaults.length == 0) {
                 defaults.push(GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: "Leeftijdsgroepen",
-                        maximumRegistrations: 1
-                    })
-                }))
+                        name: 'Leeftijdsgroepen',
+                        maximumRegistrations: 1,
+                    }),
+                }));
             }
-            this.organization.meta.categories = [GroupCategory.create({ id: "root" }), ...defaults]
-            this.organization.meta.rootCategoryId = "root"
+            this.organization.meta.categories = [GroupCategory.create({ id: 'root' }), ...defaults];
+            this.organization.meta.rootCategoryId = 'root';
 
-             // Set category ID of the root category
-            const filter = defaults.flatMap(d => d.categoryIds)
-            this.organization.meta.rootCategory!.categoryIds = defaults.map(d => d.id).filter(id => !filter.includes(id))
+            // Set category ID of the root category
+            const filter = defaults.flatMap(d => d.categoryIds);
+            this.organization.meta.rootCategory!.categoryIds = defaults.map(d => d.id).filter(id => !filter.includes(id));
 
             if (defaults.length > 0) {
-                defaults[0].groupIds.push(...sortedGroupIds)
+                defaults[0].groupIds.push(...sortedGroupIds);
             }
 
-            await this.organization.save()
-        } else {
-            const newGroups = groups.filter(g => !oldGroups.find(gg => gg.id === g.id))
-            const sortedGroupIds = newGroups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id)
-            let root = this.organization.meta.rootCategory!
+            await this.organization.save();
+        }
+        else {
+            const newGroups = groups.filter(g => !oldGroups.find(gg => gg.id === g.id));
+            const sortedGroupIds = newGroups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id);
+            let root = this.organization.meta.rootCategory!;
             if (root.categoryIds.length > 0) {
                 for (const id of root.categoryIds) {
-                    const f = this.organization.meta.categories.find(c => c.id === id)
+                    const f = this.organization.meta.categories.find(c => c.id === id);
                     if (f) {
-                        root = f
-                        break
+                        root = f;
+                        break;
                     }
                 }
             }
 
             if (newGroups.length > 0) {
-                root.groupIds.push(...sortedGroupIds)
-                await this.organization.save()
+                root.groupIds.push(...sortedGroupIds);
+                await this.organization.save();
             }
         }
     }
-    
-    async createSGVGroups() {
-        const createdGroups: Group[] = []
-        const mixedType = this.organization.meta.genderType == OrganizationGenderType.OnlyMale ? 
-        GroupGenderType.OnlyMale : 
-            (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale ? 
-                GroupGenderType.OnlyFemale : 
-                GroupGenderType.Mixed)
 
-        const kapoenen = new Group()
-        kapoenen.organizationId = this.organization.id
-        kapoenen.periodId = this.organization.periodId
+    async createSGVGroups() {
+        const createdGroups: Group[] = [];
+        const mixedType = this.organization.meta.genderType == OrganizationGenderType.OnlyMale
+            ? GroupGenderType.OnlyMale
+            : (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale
+                    ? GroupGenderType.OnlyFemale
+                    : GroupGenderType.Mixed);
+
+        const kapoenen = new Group();
+        kapoenen.organizationId = this.organization.id;
+        kapoenen.periodId = this.organization.periodId;
         kapoenen.settings = GroupSettings.create({
-            name: "Kapoenen",
+            name: 'Kapoenen',
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
             minAge: 6,
-            maxAge: 7
-        })
+            maxAge: 7,
+        });
         await kapoenen.save();
         createdGroups.push(kapoenen);
 
-        const jin = new Group()
-        jin.organizationId = this.organization.id
-        jin.periodId = this.organization.periodId
+        const jin = new Group();
+        jin.organizationId = this.organization.id;
+        jin.periodId = this.organization.periodId;
         jin.settings = GroupSettings.create({
-            name: "Jin",
+            name: 'Jin',
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
             minAge: 17,
-            maxAge: 17
-        })
+            maxAge: 17,
+        });
         await jin.save();
         createdGroups.push(jin);
 
         if (this.organization.meta.genderType == OrganizationGenderType.Mixed) {
-            const wouters = new Group()
-            wouters.organizationId = this.organization.id
-            wouters.periodId = this.organization.periodId
+            const wouters = new Group();
+            wouters.organizationId = this.organization.id;
+            wouters.periodId = this.organization.periodId;
             wouters.settings = GroupSettings.create({
-                name: "Wouters",
+                name: 'Wouters',
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 8,
-                maxAge: 10
-            })
+                maxAge: 10,
+            });
             await wouters.save();
             createdGroups.push(wouters);
 
-            const jonggivers = new Group()
-            jonggivers.organizationId = this.organization.id
-            jonggivers.periodId = this.organization.periodId
+            const jonggivers = new Group();
+            jonggivers.organizationId = this.organization.id;
+            jonggivers.periodId = this.organization.periodId;
             jonggivers.settings = GroupSettings.create({
-                name: "Jonggivers",
+                name: 'Jonggivers',
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 11,
-                maxAge: 13
-            })
+                maxAge: 13,
+            });
             await jonggivers.save();
             createdGroups.push(jonggivers);
 
-            const givers = new Group()
-            givers.organizationId = this.organization.id
-            givers.periodId = this.organization.periodId
+            const givers = new Group();
+            givers.organizationId = this.organization.id;
+            givers.periodId = this.organization.periodId;
             givers.settings = GroupSettings.create({
-                name: "Givers",
+                name: 'Givers',
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 14,
-                maxAge: 16
-            })
+                maxAge: 16,
+            });
             await givers.save();
             createdGroups.push(givers);
         }
 
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
-            const wouters = new Group()
-            wouters.organizationId = this.organization.id
-            wouters.periodId = this.organization.periodId
+            const wouters = new Group();
+            wouters.organizationId = this.organization.id;
+            wouters.periodId = this.organization.periodId;
             wouters.settings = GroupSettings.create({
-                name: "Kabouters",
+                name: 'Kabouters',
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 8,
-                maxAge: 10
-            })
+                maxAge: 10,
+            });
             await wouters.save();
             createdGroups.push(wouters);
 
-            const jonggivers = new Group()
-            jonggivers.organizationId = this.organization.id
-            jonggivers.periodId = this.organization.periodId
+            const jonggivers = new Group();
+            jonggivers.organizationId = this.organization.id;
+            jonggivers.periodId = this.organization.periodId;
             jonggivers.settings = GroupSettings.create({
-                name: "Jonggidsen",
+                name: 'Jonggidsen',
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 11,
-                maxAge: 13
-            })
+                maxAge: 13,
+            });
             await jonggivers.save();
             createdGroups.push(jonggivers);
 
-            const givers = new Group()
-            givers.organizationId = this.organization.id
-            givers.periodId = this.organization.periodId
+            const givers = new Group();
+            givers.organizationId = this.organization.id;
+            givers.periodId = this.organization.periodId;
             givers.settings = GroupSettings.create({
-                name: "Gidsen",
+                name: 'Gidsen',
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 14,
-                maxAge: 16
-            })
+                maxAge: 16,
+            });
             await givers.save();
             createdGroups.push(givers);
         }
 
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyMale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
-            const wouters = new Group()
-            wouters.organizationId = this.organization.id
-            wouters.periodId = this.organization.periodId
+            const wouters = new Group();
+            wouters.organizationId = this.organization.id;
+            wouters.periodId = this.organization.periodId;
             wouters.settings = GroupSettings.create({
-                name: "Welpen",
+                name: 'Welpen',
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 8,
-                maxAge: 10
-            })
+                maxAge: 10,
+            });
             await wouters.save();
             createdGroups.push(wouters);
 
-            const jonggivers = new Group()
-            jonggivers.organizationId = this.organization.id
-            jonggivers.periodId = this.organization.periodId
+            const jonggivers = new Group();
+            jonggivers.organizationId = this.organization.id;
+            jonggivers.periodId = this.organization.periodId;
             jonggivers.settings = GroupSettings.create({
-                name: "Jongverkenners",
+                name: 'Jongverkenners',
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 11,
-                maxAge: 13
-            })
+                maxAge: 13,
+            });
             await jonggivers.save();
             createdGroups.push(jonggivers);
 
-            const givers = new Group()
-            givers.organizationId = this.organization.id
-            givers.periodId = this.organization.periodId
+            const givers = new Group();
+            givers.organizationId = this.organization.id;
+            givers.periodId = this.organization.periodId;
             givers.settings = GroupSettings.create({
-                name: "Verkenners",
+                name: 'Verkenners',
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 14,
-                maxAge: 16
-            })
+                maxAge: 16,
+            });
             await givers.save();
             createdGroups.push(givers);
         }
 
-        return createdGroups
+        return createdGroups;
     }
 
     async createChiroGroups() {
-        const mixedType = this.organization.meta.genderType == OrganizationGenderType.OnlyMale ? 
-        GroupGenderType.OnlyMale : 
-            (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale ? 
-                GroupGenderType.OnlyFemale : 
-                GroupGenderType.Mixed)
+        const mixedType = this.organization.meta.genderType == OrganizationGenderType.OnlyMale
+            ? GroupGenderType.OnlyMale
+            : (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale
+                    ? GroupGenderType.OnlyFemale
+                    : GroupGenderType.Mixed);
 
-        const ribbels = new Group()
-        ribbels.organizationId = this.organization.id
-        ribbels.periodId = this.organization.periodId
+        const ribbels = new Group();
+        ribbels.organizationId = this.organization.id;
+        ribbels.periodId = this.organization.periodId;
         ribbels.settings = GroupSettings.create({
-            name: "Ribbels",
+            name: 'Ribbels',
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
             minAge: 6,
-            maxAge: 7
-        })
+            maxAge: 7,
+        });
         await ribbels.save();
 
-        const speelclub = new Group()
-        speelclub.organizationId = this.organization.id
-        speelclub.periodId = this.organization.periodId
+        const speelclub = new Group();
+        speelclub.organizationId = this.organization.id;
+        speelclub.periodId = this.organization.periodId;
         speelclub.settings = GroupSettings.create({
-            name: "Speelclub",
+            name: 'Speelclub',
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
             minAge: 8,
-            maxAge: 9
-        })
+            maxAge: 9,
+        });
         await speelclub.save();
 
-
-        const aspis = new Group()
-        aspis.organizationId = this.organization.id
-        aspis.periodId = this.organization.periodId
+        const aspis = new Group();
+        aspis.organizationId = this.organization.id;
+        aspis.periodId = this.organization.periodId;
         aspis.settings = GroupSettings.create({
             name: "Aspi's",
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
             minAge: 16,
-            maxAge: 17
-        })
+            maxAge: 17,
+        });
         await aspis.save();
 
         if (this.organization.meta.genderType == OrganizationGenderType.Mixed) {
-            const rakwis = new Group()
-            rakwis.organizationId = this.organization.id
-            rakwis.periodId = this.organization.periodId
+            const rakwis = new Group();
+            rakwis.organizationId = this.organization.id;
+            rakwis.periodId = this.organization.periodId;
             rakwis.settings = GroupSettings.create({
                 name: "Rakwi's",
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 10,
-                maxAge: 11
-            })
+                maxAge: 11,
+            });
             await rakwis.save();
 
-            const titos = new Group()
-            titos.organizationId = this.organization.id
-            titos.periodId = this.organization.periodId
+            const titos = new Group();
+            titos.organizationId = this.organization.id;
+            titos.periodId = this.organization.periodId;
             titos.settings = GroupSettings.create({
                 name: "Tito's",
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 12,
-                maxAge: 13
-            })
+                maxAge: 13,
+            });
             await titos.save();
 
-            const ketis = new Group()
-            ketis.organizationId = this.organization.id
-            ketis.periodId = this.organization.periodId
+            const ketis = new Group();
+            ketis.organizationId = this.organization.id;
+            ketis.periodId = this.organization.periodId;
             ketis.settings = GroupSettings.create({
                 name: "Keti's",
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 14,
-                maxAge: 15
-            })
+                maxAge: 15,
+            });
             await ketis.save();
         }
 
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
-            const rakwis = new Group()
-            rakwis.organizationId = this.organization.id
-            rakwis.periodId = this.organization.periodId
+            const rakwis = new Group();
+            rakwis.organizationId = this.organization.id;
+            rakwis.periodId = this.organization.periodId;
             rakwis.settings = GroupSettings.create({
-                name: "Kwiks",
+                name: 'Kwiks',
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 10,
-                maxAge: 11
-            })
+                maxAge: 11,
+            });
             await rakwis.save();
 
-            const titos = new Group()
-            titos.organizationId = this.organization.id
-            titos.periodId = this.organization.periodId
+            const titos = new Group();
+            titos.organizationId = this.organization.id;
+            titos.periodId = this.organization.periodId;
             titos.settings = GroupSettings.create({
-                name: "Toppers",
+                name: 'Toppers',
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 12,
-                maxAge: 13
-            })
+                maxAge: 13,
+            });
             await titos.save();
 
-            const ketis = new Group()
-            ketis.organizationId = this.organization.id
-            ketis.periodId = this.organization.periodId
+            const ketis = new Group();
+            ketis.organizationId = this.organization.id;
+            ketis.periodId = this.organization.periodId;
             ketis.settings = GroupSettings.create({
-                name: "Tiptiens",
+                name: 'Tiptiens',
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 14,
-                maxAge: 15
-            })
+                maxAge: 15,
+            });
             await ketis.save();
         }
 
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyMale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
-            const rakwis = new Group()
-            rakwis.organizationId = this.organization.id
-            rakwis.periodId = this.organization.periodId
+            const rakwis = new Group();
+            rakwis.organizationId = this.organization.id;
+            rakwis.periodId = this.organization.periodId;
             rakwis.settings = GroupSettings.create({
-                name: "Rakkers",
+                name: 'Rakkers',
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 10,
-                maxAge: 11
-            })
+                maxAge: 11,
+            });
             await rakwis.save();
 
-            const titos = new Group()
-            titos.organizationId = this.organization.id
-            titos.periodId = this.organization.periodId
+            const titos = new Group();
+            titos.organizationId = this.organization.id;
+            titos.periodId = this.organization.periodId;
             titos.settings = GroupSettings.create({
-                name: "Tippers",
+                name: 'Tippers',
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 12,
-                maxAge: 13
-            })
+                maxAge: 13,
+            });
             await titos.save();
 
-            const ketis = new Group()
-            ketis.organizationId = this.organization.id
-            ketis.periodId = this.organization.periodId
+            const ketis = new Group();
+            ketis.organizationId = this.organization.id;
+            ketis.periodId = this.organization.periodId;
             ketis.settings = GroupSettings.create({
-                name: "Kerels",
+                name: 'Kerels',
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 minAge: 14,
-                maxAge: 15
-            })
+                maxAge: 15,
+            });
             await ketis.save();
         }
     }

@@ -1,9 +1,9 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DataValidator, Formatter,StringCompare } from '@stamhoofd/utility';
-import { v4 as uuidv4 } from "uuid";
+import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from "../addresses/Address";
-import { ParentType } from "./ParentType";
+import { Address } from '../addresses/Address';
+import { ParentType } from './ParentType';
 
 export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -13,20 +13,20 @@ export class Parent extends AutoEncoder {
     type: ParentType = ParentType.Mother;
 
     @field({ decoder: StringDecoder })
-    firstName = "";
+    firstName = '';
 
     @field({ decoder: StringDecoder })
-    lastName = "";
+    lastName = '';
 
     @field({ decoder: StringDecoder, nullable: true })
     phone: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, field: "mail" })
+    @field({ decoder: StringDecoder, nullable: true, field: 'mail' })
     @field({ decoder: StringDecoder, nullable: true, version: 5 })
     email: string | null = null;
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 278 })
-    alternativeEmails: string[] = []
+    alternativeEmails: string[] = [];
 
     @field({ decoder: Address, nullable: true })
     address: Address | null = null;
@@ -38,14 +38,14 @@ export class Parent extends AutoEncoder {
         if (!this.lastName) {
             return this.firstName;
         }
-        return this.firstName + " " + this.lastName;
+        return this.firstName + ' ' + this.lastName;
     }
 
     matchQuery(query: string): boolean {
         if (
-            StringCompare.typoCount(this.firstName, query) < 2 ||
-            StringCompare.typoCount(this.lastName, query) < 2 ||
-            StringCompare.typoCount(this.name, query) < 2
+            StringCompare.typoCount(this.firstName, query) < 2
+            || StringCompare.typoCount(this.lastName, query) < 2
+            || StringCompare.typoCount(this.name, query) < 2
         ) {
             return true;
         }
@@ -53,11 +53,11 @@ export class Parent extends AutoEncoder {
     }
 
     hasEmail(email: string): boolean {
-        const cleaned = email.toLowerCase().trim()
+        const cleaned = email.toLowerCase().trim();
         if (this.email === cleaned) {
             return true;
         }
-        return this.alternativeEmails.includes(cleaned)
+        return this.alternativeEmails.includes(cleaned);
     }
 
     /**
@@ -65,83 +65,84 @@ export class Parent extends AutoEncoder {
      */
     cleanData() {
         if (StringCompare.isFullCaps(this.firstName)) {
-            this.firstName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.firstName.toLowerCase()))
+            this.firstName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.firstName.toLowerCase()));
         }
         if (StringCompare.isFullCaps(this.lastName)) {
-            this.lastName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.lastName.toLowerCase()))
+            this.lastName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.lastName.toLowerCase()));
         }
 
         if (this.email) {
-            this.email = this.email.toLowerCase().trim()
+            this.email = this.email.toLowerCase().trim();
 
             if (!DataValidator.isEmailValid(this.email)) {
-                this.email = null
+                this.email = null;
             }
         }
 
-        this.alternativeEmails = this.alternativeEmails.map(e => e.toLowerCase().trim()).filter(email => {
+        this.alternativeEmails = this.alternativeEmails.map(e => e.toLowerCase().trim()).filter((email) => {
             if (this.email && email === this.email) {
-                return false
+                return false;
             }
             if (!DataValidator.isEmailValid(email)) {
-                return false
+                return false;
             }
 
-            return true
-        })
+            return true;
+        });
 
         if (this.phone) {
-            this.phone = Formatter.removeDuplicateSpaces(this.phone.trim())
+            this.phone = Formatter.removeDuplicateSpaces(this.phone.trim());
         }
 
-        this.firstName = Formatter.capitalizeFirstLetter(Formatter.removeDuplicateSpaces(this.firstName.trim()))
-        this.lastName = Formatter.removeDuplicateSpaces(this.lastName.trim())
+        this.firstName = Formatter.capitalizeFirstLetter(Formatter.removeDuplicateSpaces(this.firstName.trim()));
+        this.lastName = Formatter.removeDuplicateSpaces(this.lastName.trim());
 
         if (this.lastName === this.lastName.toLocaleLowerCase()) {
             // Add auto capitals
-            this.lastName = Formatter.capitalizeWords(this.lastName)
+            this.lastName = Formatter.capitalizeWords(this.lastName);
         }
 
-        this.address?.cleanData()
+        this.address?.cleanData();
     }
 
     isEqual(other: Parent) {
         this.cleanData();
         other.cleanData();
-        return this.firstName === other.firstName && this.lastName === other.lastName && this.email === other.email && this.phone === other.phone && this.address?.toString() === other.address?.toString()
+        return this.firstName === other.firstName && this.lastName === other.lastName && this.email === other.email && this.phone === other.phone && this.address?.toString() === other.address?.toString();
     }
 
     merge(other: Parent) {
         if (other.firstName.length > 0) {
-            this.firstName = other.firstName
+            this.firstName = other.firstName;
         }
         if (other.lastName.length > 0) {
-            this.lastName = other.lastName
+            this.lastName = other.lastName;
         }
 
         if (other.email) {
-            this.email = other.email
+            this.email = other.email;
         }
 
         if (other.address) {
-            this.address = other.address
+            this.address = other.address;
         }
 
         if (other.phone) {
-            this.phone = other.phone
+            this.phone = other.phone;
         }
 
         if (other.type) {
             if (other.type === ParentType.Parent1 || other.type === ParentType.Parent2) {
                 // Ignore if current type is also not one of those
                 if (this.type === ParentType.Parent1 || this.type === ParentType.Parent2) {
-                    this.type = other.type
+                    this.type = other.type;
                 }
-            } else {
-                this.type = other.type
+            }
+            else {
+                this.type = other.type;
             }
         }
 
-        this.alternativeEmails = Formatter.uniqueArray([...this.alternativeEmails, ...other.alternativeEmails])
+        this.alternativeEmails = Formatter.uniqueArray([...this.alternativeEmails, ...other.alternativeEmails]);
     }
 }

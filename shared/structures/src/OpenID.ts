@@ -1,18 +1,17 @@
-import { AutoEncoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { LoginProviderType } from "./User";
+import { LoginProviderType } from './User';
 
 export class OpenIDClientConfiguration extends AutoEncoder {
-    @field({decoder: StringDecoder})
-    issuer: string
+    @field({ decoder: StringDecoder })
+    issuer: string;
 
-    @field({decoder: StringDecoder})
-    clientId
+    @field({ decoder: StringDecoder })
+    clientId;
 
-    @field({decoder: StringDecoder})
-    clientSecret
+    @field({ decoder: StringDecoder })
+    clientSecret;
 }
-
 
 export class StartOpenIDFlowStruct extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, nullable: true })
@@ -31,14 +30,14 @@ export class StartOpenIDFlowStruct extends AutoEncoder {
      * sso (= use one configured in organization), google, apple, ... (for now only sso supported)
      */
     @field({ decoder: new EnumDecoder(LoginProviderType) })
-    provider = LoginProviderType.SSO
+    provider = LoginProviderType.SSO;
 
     /**
      * sso (= use one configured in organization), google, apple, ... (for now only sso supported)
      */
     @field({ decoder: StringDecoder, optional: true, nullable: true })
-    prompt: string | null = null
+    prompt: string | null = null;
 
     @field({ decoder: StringDecoder, optional: true, nullable: true })
-    redirectUri: string | null = null
+    redirectUri: string | null = null;
 }

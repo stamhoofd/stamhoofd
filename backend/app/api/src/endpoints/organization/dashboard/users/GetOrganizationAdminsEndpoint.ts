@@ -1,21 +1,21 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { User } from '@stamhoofd/models';
-import { OrganizationAdmins, User as UserStruct } from "@stamhoofd/structures";
+import { OrganizationAdmins, User as UserStruct } from '@stamhoofd/structures';
 
-import { Context } from "../../../../helpers/Context";
-import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
+import { Context } from '../../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = undefined
-type ResponseBody = OrganizationAdmins
+type Body = undefined;
+type ResponseBody = OrganizationAdmins;
 
 export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/admins", {});
+        const params = Endpoint.parseParameters(request.url, '/organization/admins', {});
 
         if (params) {
             return [true, params as Params];
@@ -25,18 +25,18 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.canManageAdmins(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
         // Get all admins
-        const admins = await User.getAdmins([organization.id])
+        const admins = await User.getAdmins([organization.id]);
 
         return new Response(OrganizationAdmins.create({
-            users: await AuthenticatedStructures.usersWithMembers(admins)
+            users: await AuthenticatedStructures.usersWithMembers(admins),
         }));
     }
 }

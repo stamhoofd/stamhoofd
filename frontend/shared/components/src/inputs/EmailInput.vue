@@ -88,7 +88,7 @@ export default class EmailInput extends VueComponent {
     validate(final = true, silent = false) {
         this.emailRaw = this.emailRaw.trim().toLowerCase()
 
-        if (!this.required && this.emailRaw.length == 0) {
+        if (!this.required && this.emailRaw.length === 0) {
             if (!silent) {
                 this.errorBox = null
             }
@@ -99,7 +99,7 @@ export default class EmailInput extends VueComponent {
             return true
         }
 
-        if (this.required && this.emailRaw.length == 0 && !final) {
+        if (this.required && this.emailRaw.length === 0 && !final) {
             // Ignore empty email if not final
             if (!silent) {
                 this.errorBox = null

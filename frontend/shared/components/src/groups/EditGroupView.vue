@@ -264,7 +264,7 @@
                 </STList>
             </STInputBox>
 
-            <button v-if="requireGroupIds.length == 0" type="button" class="button text only-icon-smartphone" @click="addRequireGroupIds">
+            <button v-if="requireGroupIds.length === 0" type="button" class="button text only-icon-smartphone" @click="addRequireGroupIds">
                 <span class="icon add" />
                 <span>Verplicht andere inschrijving</span>
             </button>
@@ -319,7 +319,7 @@
             <h2>Voorrangsregeling</h2>
             <p>Zorg ervoor dat bestaande leden voorrang krijgen op inschrijvingen (vooral als je met wachtlijsten werkt).</p>
 
-            <p v-if="waitingListType == WaitingListType.PreRegistrations || waitingListType == WaitingListType.ExistingMembersFirst" class="info-box">
+            <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
                 Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep. 
             </p>
 
@@ -351,7 +351,7 @@
                         Maak eerst een wachtlijst aan om deze optie te gebruiken.
                     </p>
 
-                    <div v-if="waitingListType == WaitingListType.ExistingMembersFirst" class="option">
+                    <div v-if="waitingListType === WaitingListType.ExistingMembersFirst" class="option">
                         <Checkbox v-model="priorityForFamily">
                             Ook gezinsleden van bestaande leden rechtstreeks laten inschrijven
                         </Checkbox>
@@ -393,7 +393,7 @@
                         Stel eerst een startdatum in voor de inschrijvingen om deze optie te kunnen gebruiken.
                     </p>
 
-                    <div v-if="waitingListType == WaitingListType.PreRegistrations" class="option">
+                    <div v-if="waitingListType === WaitingListType.PreRegistrations" class="option">
                         <div class="split-inputs">
                             <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="preRegistrationsDate" />

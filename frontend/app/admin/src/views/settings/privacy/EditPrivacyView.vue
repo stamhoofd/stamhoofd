@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
         <p>Voeg voorwaarden toe die bij het registereren staan vermeldt of geaccepteerd moeten worden.</p>
-        
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList v-model="draggablePolicies" :draggable="true">
@@ -40,24 +40,24 @@ const pop = usePop();
 const present = usePresent();
 const $t = useTranslate();
 
-const {patched, addPatch, hasChanges, patch} = usePatch(platform.value)
+const { patched, addPatch, hasChanges, patch } = usePatch(platform.value);
 const draggablePolicies = useDraggableArray(() => patched.value.config.privacy.policies, (arr) => {
     addPatch(Platform.patch({
         config: PlatformConfig.patch({
             privacy: PrivacySettings.patch({
-                policies: arr
-            })
-        })
-    }))
-})
+                policies: arr,
+            }),
+        }),
+    }));
+});
 const saving = ref(false);
 
-const title = 'Voorwaarden'
+const title = 'Voorwaarden';
 
 async function addPolicy() {
-    const privacyPatch = PrivacySettings.patch({})
+    const privacyPatch = PrivacySettings.patch({});
     const policy = PlatformPolicy.create({});
-    privacyPatch.policies.addPut(policy)
+    privacyPatch.policies.addPut(policy);
 
     await present({
         modalDisplayStyle: 'popup',
@@ -66,17 +66,17 @@ async function addPolicy() {
                 policy,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformPolicy>) => {
-                    patch.id = policy.id
-                    privacyPatch.policies.addPatch(patch)
+                    patch.id = policy.id;
+                    privacyPatch.policies.addPatch(patch);
                     addPatch(Platform.patch({
                         config: PlatformConfig.patch({
-                            privacy: privacyPatch
-                        })
-                    }))
-                }
-            })
-        ]
-    })
+                            privacy: privacyPatch,
+                        }),
+                    }));
+                },
+            }),
+        ],
+    });
 }
 
 async function editPolicy(policy: PlatformPolicy) {
@@ -87,27 +87,27 @@ async function editPolicy(policy: PlatformPolicy) {
                 policy,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<PlatformPolicy>) => {
-                    const privacyPatch = PrivacySettings.patch({})
-                    patch.id = policy.id
-                    privacyPatch.policies.addPatch(patch)
+                    const privacyPatch = PrivacySettings.patch({});
+                    patch.id = policy.id;
+                    privacyPatch.policies.addPatch(patch);
                     addPatch(Platform.patch({
                         config: PlatformConfig.patch({
-                            privacy: privacyPatch
-                        })
-                    }))
+                            privacy: privacyPatch,
+                        }),
+                    }));
                 },
                 deleteHandler: () => {
-                    const privacyPatch = PrivacySettings.patch({})
-                    privacyPatch.policies.addDelete(policy.id)
+                    const privacyPatch = PrivacySettings.patch({});
+                    privacyPatch.policies.addDelete(policy.id);
                     addPatch(Platform.patch({
                         config: PlatformConfig.patch({
-                            privacy: privacyPatch
-                        })
-                    }))
-                }
-            })
-        ]
-    })
+                            privacy: privacyPatch,
+                        }),
+                    }));
+                },
+            }),
+        ],
+    });
 }
 
 async function save() {
@@ -122,25 +122,25 @@ async function save() {
             saving.value = false;
             return;
         }
-        await platformManager.value.patch(patch.value)
-        new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+        await platformManager.value.patch(patch.value);
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
         await pop({ force: true });
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
-
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

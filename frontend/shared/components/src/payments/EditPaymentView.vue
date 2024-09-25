@@ -246,7 +246,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         let transferSettings = this.organization.meta.registrationPaymentConfiguration.transferSettings.fillMissing(TransferSettings.create({creditor: this.organization.name}));
         const webshopId = this.balanceItems.find(b => b.order)?.order?.webshopId
         if (webshopId) {
-            const webshop = this.organization.webshops.find(w => w.id == webshopId)
+            const webshop = this.organization.webshops.find(w => w.id === webshopId)
             if (webshop) {
                 transferSettings = webshop.meta.paymentConfiguration.transferSettings.fillMissing(transferSettings);
             }
@@ -266,7 +266,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     set status(status: PaymentStatus) {
         this.addPatch({
             status,
-            paidAt: status == PaymentStatus.Succeeded ? new Date() : null
+            paidAt: status === PaymentStatus.Succeeded ? new Date() : null
         })
     }
 
@@ -319,7 +319,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     }
 
     isItemSelected(item: BalanceItem) {
-        return this.balanceItemPayments.find(p => p.balanceItem.id == item.id) != null
+        return this.balanceItemPayments.find(p => p.balanceItem.id === item.id) !== null
     }
 
     setItemSelected(item: BalanceItem, selected: boolean) {
@@ -334,7 +334,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
                 balanceItemPayments: arr
             })
         } else {
-            const id = this.balanceItemPayments.find(p => p.balanceItem.id == item.id)?.id
+            const id = this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.id
 
             if (id) {
                 const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray()
@@ -352,11 +352,11 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     }
 
     getItemPrice(item: BalanceItem) {
-        return this.balanceItemPayments.find(p => p.balanceItem.id == item.id)?.price
+        return this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.price
     }
 
     setItemPrice(item: BalanceItem, price: number) {
-        const id = this.balanceItemPayments.find(p => p.balanceItem.id == item.id)?.id
+        const id = this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.id
 
         if (id) {
             const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray()

@@ -53,7 +53,7 @@ function setOptionSelected(option: MultipleChoiceUIFilterOption, selected: boole
     }
     if (!selected) {
         const index = props.filter.selectedOptions.findIndex(i => i.value === option.value)
-        if (index != -1) {
+        if (index !== -1) {
             props.filter.selectedOptions.splice(index, 1)
         }
     } else {

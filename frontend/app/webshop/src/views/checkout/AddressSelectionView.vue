@@ -5,9 +5,9 @@
             Bestel minimum {{ formatPrice(deliveryMethod.price.minimumPrice) }} om van een verlaagde leveringskost van {{ formatPrice(deliveryMethod.price.discountPrice) }} te genieten.
         </div>
 
-        <p v-if="checkout.deliveryPrice == 0" class="success-box">
+        <p v-if="checkout.deliveryPrice === 0" class="success-box">
             Levering is gratis
-            <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0" class="info-box">
+            <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price !== 0" class="info-box">
                 vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
             </template>
         </p>

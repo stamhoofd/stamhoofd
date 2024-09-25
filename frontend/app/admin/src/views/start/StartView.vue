@@ -1,6 +1,6 @@
 <template>
     <section class="st-view">
-        <STNavigationBar title="Administratieportaal"></STNavigationBar>
+        <STNavigationBar title="Administratieportaal" />
         <main class="center">
             <h1>
                 Administratieportaal
@@ -12,6 +12,5 @@
 </template>
 
 <script setup lang="ts">
-
 
 </script>

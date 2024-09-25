@@ -1,20 +1,20 @@
-import { field } from "@simonbackx/simple-encoding";
-import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from "@stamhoofd/excel-writer";
-import { StripeAccount } from "@stamhoofd/models";
-import { BalanceItemPaymentDetailed, BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { ExportToExcelEndpoint } from "../endpoints/global/files/ExportToExcelEndpoint";
-import { GetPaymentsEndpoint } from "../endpoints/organization/dashboard/payments/GetPaymentsEndpoint";
-import { XlsxTransformerColumnHelper } from "../helpers/xlsxAddressTransformerColumnFactory";
+import { field } from '@simonbackx/simple-encoding';
+import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
+import { StripeAccount } from '@stamhoofd/models';
+import { BalanceItemPaymentDetailed, BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
+import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint';
+import { XlsxTransformerColumnHelper } from '../helpers/xlsxAddressTransformerColumnFactory';
 
 type PaymentWithItem = {
-    payment: PaymentGeneral,
-    balanceItemPayment: BalanceItemPaymentDetailed
-}
+    payment: PaymentGeneral;
+    balanceItemPayment: BalanceItemPaymentDetailed;
+};
 
 export class PaymentGeneralWithStripeAccount extends PaymentGeneral {
     @field({ decoder: StripeAccountStruct, nullable: true })
-    stripeAccount: StripeAccountStruct|null = null
+    stripeAccount: StripeAccountStruct | null = null;
 }
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
@@ -31,12 +31,12 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
 
         return new PaginatedResponse({
             ...data,
-            results: data.results.map(p => {
+            results: data.results.map((p) => {
                 const payment = PaymentGeneralWithStripeAccount.create(p);
                 payment.stripeAccount = p.stripeAccountId ? (accounts.find(a => a.id === p.stripeAccountId) ?? null) : null;
                 return payment;
-            })
-        })
+            }),
+        });
     },
     sheets: [
         {
@@ -48,14 +48,14 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
                 ...getSettlementColumns(),
                 ...getStripeColumns(),
                 ...getTransferColumns(),
-            ]
+            ],
         },
         {
             id: 'balanceItemPayments',
             name: 'Betaallijnen',
             transform: (data: PaymentGeneral): PaymentWithItem[] => data.balanceItemPayments.map(p => ({
                 payment: data,
-                balanceItemPayment: p
+                balanceItemPayment: p,
             })),
             columns: [
                 ...getBalanceItemColumns(),
@@ -64,12 +64,12 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
                 ...[
                     ...getGeneralColumns(),
                     ...getInvoiceColumns(),
-                ].map(c => {
+                ].map((c) => {
                     if ('match' in c) {
                         return {
                             ...c,
                             match: (id: string) => {
-                                const result = c.match(id)
+                                const result = c.match(id);
                                 if (!result) {
                                     return result;
                                 }
@@ -77,24 +77,24 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
                                 return result.map(cc => ({
                                     ...cc,
                                     getValue: (object: PaymentWithItem) => {
-                                        return cc.getValue(object.payment)
+                                        return cc.getValue(object.payment);
                                     },
-                                }))
+                                }));
                             },
-                        }
+                        };
                     }
 
                     return {
                         ...c,
                         getValue: (object: PaymentWithItem) => {
-                            return c.getValue(object.payment)
+                            return c.getValue(object.payment);
                         },
-                    }
-                })
-            ]
-        }
-    ]
-})
+                    };
+                }),
+            ],
+        },
+    ],
+});
 
 function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
     return [
@@ -106,34 +106,34 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
                 value: object.balanceItemPayment.id,
                 style: {
                     font: {
-                        bold: true
-                    }
-                }
-            })
+                        bold: true,
+                    },
+                },
+            }),
         },
         {
             id: 'paymentId',
             name: 'Betaling ID',
             width: 40,
             getValue: (object: PaymentWithItem) => ({
-                value: object.payment.id
-            })
+                value: object.payment.id,
+            }),
         },
         {
             id: 'balanceItem.type',
             name: 'Type',
             width: 30,
             getValue: (object: PaymentWithItem) => ({
-                value: getBalanceItemTypeName(object.balanceItemPayment.balanceItem.type)
-            })
+                value: getBalanceItemTypeName(object.balanceItemPayment.balanceItem.type),
+            }),
         },
         {
             id: 'balanceItem.description',
             name: 'Beschrijving',
             width: 40,
             getValue: (object: PaymentWithItem) => ({
-                value: object.balanceItemPayment.balanceItem.description
-            })
+                value: object.balanceItemPayment.balanceItem.description,
+            }),
         },
         {
             match: (id) => {
@@ -146,13 +146,13 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
                                 name: getBalanceItemRelationTypeName(type),
                                 width: 35,
                                 getValue: (object: PaymentWithItem) => ({
-                                    value: object.balanceItemPayment.balanceItem.relations.get(type)?.name || ''
-                                })
-                            }
-                        ]
+                                    value: object.balanceItemPayment.balanceItem.relations.get(type)?.name || '',
+                                }),
+                            },
+                        ];
                     }
                 }
-            }
+            },
         },
         {
             id: 'amount',
@@ -162,10 +162,10 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
                 value: object.balanceItemPayment.amount,
                 style: {
                     numberFormat: {
-                        id: XlsxBuiltInNumberFormat.Number
-                    }
-                }
-            })
+                        id: XlsxBuiltInNumberFormat.Number,
+                    },
+                },
+            }),
         },
         {
             id: 'unitPrice',
@@ -175,10 +175,10 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
                 value: object.balanceItemPayment.unitPrice / 100,
                 style: {
                     numberFormat: {
-                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed
-                    }
-                }
-            })
+                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                    },
+                },
+            }),
         },
         {
             id: 'price',
@@ -188,14 +188,13 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
                 value: object.balanceItemPayment.price / 100,
                 style: {
                     numberFormat: {
-                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed
-                    }
-                }
-            })
+                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                    },
+                },
+            }),
         },
-    ]
+    ];
 }
-
 
 function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
     return [
@@ -207,10 +206,10 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
                 value: object.id,
                 style: {
                     font: {
-                        bold: true
-                    }
-                }
-            })
+                        bold: true,
+                    },
+                },
+            }),
         },
         {
             id: 'price',
@@ -220,34 +219,34 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
                 value: object.price / 100,
                 style: {
                     numberFormat: {
-                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed
-                    }
-                }
-            })
+                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                    },
+                },
+            }),
         },
         {
             id: 'status',
             name: 'Status',
             width: 18,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
-                value: PaymentStatusHelper.getNameCapitalized(object.status)
-            })
+                value: PaymentStatusHelper.getNameCapitalized(object.status),
+            }),
         },
         {
             id: 'method',
             name: 'Betaalmethode',
             width: 18,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
-                value: PaymentMethodHelper.getNameCapitalized(object.method)
-            })
+                value: PaymentMethodHelper.getNameCapitalized(object.method),
+            }),
         },
         {
             id: 'provider',
             name: 'Betaalprovider',
             width: 16,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
-                value: object.provider
-            })
+                value: object.provider,
+            }),
         },
         {
             id: 'createdAt',
@@ -257,10 +256,10 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
                 value: object.createdAt,
                 style: {
                     numberFormat: {
-                        id: XlsxBuiltInNumberFormat.DateTimeSlash
-                    }
-                }
-            })
+                        id: XlsxBuiltInNumberFormat.DateTimeSlash,
+                    },
+                },
+            }),
         },
         {
             id: 'paidAt',
@@ -270,10 +269,10 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
                 value: object.paidAt,
                 style: {
                     numberFormat: {
-                        id: XlsxBuiltInNumberFormat.DateTimeSlash
-                    }
-                }
-            })
+                        id: XlsxBuiltInNumberFormat.DateTimeSlash,
+                    },
+                },
+            }),
         },
         {
             id: 'description',
@@ -283,12 +282,12 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
                 value: object.balanceItemPayments.map(p => p.toString()).join('\n'),
                 style: {
                     alignment: {
-                        wrapText: true
-                    }
-                }
-            })
+                        wrapText: true,
+                    },
+                },
+            }),
         },
-    ]
+    ];
 }
 
 function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
@@ -299,9 +298,9 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 21,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.settlement?.reference || ''
-                }
-            }
+                    value: object.settlement?.reference || '',
+                };
+            },
         },
         {
             id: 'settlement.settledAt',
@@ -312,11 +311,11 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                     value: object.settlement?.settledAt ?? null,
                     style: {
                         numberFormat: {
-                            id: XlsxBuiltInNumberFormat.DateSlash
-                        }
-                    }
-                }
-            }
+                            id: XlsxBuiltInNumberFormat.DateSlash,
+                        },
+                    },
+                };
+            },
         },
         {
             id: 'settlement.amount',
@@ -327,11 +326,11 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                     value: object.settlement?.amount !== undefined ? (object.settlement?.amount / 100) : null,
                     style: {
                         numberFormat: {
-                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed
-                        }
-                    }
-                }
-            }
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
+                };
+            },
         },
         {
             id: 'settlement.fee',
@@ -342,13 +341,13 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                     value: object.settlement?.fee !== undefined ? (object.settlement?.fee / 100) : null,
                     style: {
                         numberFormat: {
-                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed
-                        }
-                    }
-                }
-            }
-        }
-    ]
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
+                };
+            },
+        },
+    ];
 }
 
 function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
@@ -362,11 +361,11 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                     value: object.transferFee / 100,
                     style: {
                         numberFormat: {
-                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed
-                        }
-                    }
-                }
-            }
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
+                };
+            },
         },
         {
             id: 'stripeAccountId',
@@ -374,9 +373,9 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 20,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.stripeAccount?.accountId || ''
-                }
-            }
+                    value: object.stripeAccount?.accountId || '',
+                };
+            },
         },
         {
             id: 'iban',
@@ -384,9 +383,9 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 20,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.iban || ''
-                }
-            }
+                    value: object.iban || '',
+                };
+            },
         },
         {
             id: 'ibanName',
@@ -394,11 +393,11 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 20,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.ibanName || ''
-                }
-            }
-        }
-    ]
+                    value: object.ibanName || '',
+                };
+            },
+        },
+    ];
 }
 
 function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
@@ -409,9 +408,9 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 25,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.transferDescription || ''
-                }
-            }
+                    value: object.transferDescription || '',
+                };
+            },
         },
         {
             id: 'transferSettings.creditor',
@@ -420,14 +419,14 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 if (!object.transferSettings && object.stripeAccount && object.stripeAccount?.meta.bank_account_bank_name) {
                     return {
-                        value: (object.stripeAccount.meta.bank_account_name || object.stripeAccount.meta.business_profile?.name || object.stripeAccount.meta.company?.name) + ' (' + (object.stripeAccount?.meta.bank_account_bank_name || '') + ')'
-                    }
+                        value: (object.stripeAccount.meta.bank_account_name || object.stripeAccount.meta.business_profile?.name || object.stripeAccount.meta.company?.name) + ' (' + (object.stripeAccount?.meta.bank_account_bank_name || '') + ')',
+                    };
                 }
 
                 return {
-                    value: object.transferSettings?.creditor || ''
-                }
-            }
+                    value: object.transferSettings?.creditor || '',
+                };
+            },
         },
         {
             id: 'transferSettings.iban',
@@ -436,16 +435,16 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 if (!object.transferSettings && object.stripeAccount && object.stripeAccount?.meta.bank_account_last4) {
                     return {
-                        value: 'xxxx ' + object.stripeAccount?.meta.bank_account_last4
-                    }
+                        value: 'xxxx ' + object.stripeAccount?.meta.bank_account_last4,
+                    };
                 }
 
                 return {
-                    value: object.transferSettings?.iban || ''
-                }
-            }
+                    value: object.transferSettings?.iban || '',
+                };
+            },
         },
-    ]
+    ];
 }
 
 function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
@@ -456,9 +455,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.customer?.name || ''
-                }
-            }
+                    value: object.customer?.name || '',
+                };
+            },
         },
         {
             id: 'customer.email',
@@ -466,9 +465,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 40,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.customer?.email || ''
-                }
-            }
+                    value: object.customer?.email || '',
+                };
+            },
         },
         {
             id: 'customer.company.name',
@@ -476,9 +475,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.customer?.company?.name || ''
-                }
-            }
+                    value: object.customer?.company?.name || '',
+                };
+            },
         },
         {
             id: 'customer.company.VATNumber',
@@ -486,9 +485,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 20,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.customer?.company?.VATNumber || ''
-                }
-            }
+                    value: object.customer?.company?.VATNumber || '',
+                };
+            },
         },
         {
             id: 'customer.company.companyNumber',
@@ -496,14 +495,14 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 20,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.customer?.company?.companyNumber || ''
-                }
-            }
+                    value: object.customer?.company?.companyNumber || '',
+                };
+            },
         },
         XlsxTransformerColumnHelper.createAddressColumns<PaymentGeneralWithStripeAccount>({
             matchId: 'customer.company.address',
-            getAddress: (object) => object.customer?.company?.address,
-            identifier: 'Adres'
+            getAddress: object => object.customer?.company?.address,
+            identifier: 'Adres',
         }),
         {
             id: 'customer.company.administrationEmail',
@@ -511,9 +510,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.customer?.company?.administrationEmail || ''
-                }
-            }
+                    value: object.customer?.company?.administrationEmail || '',
+                };
+            },
         },
-    ]
+    ];
 }

@@ -242,7 +242,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         // Delete these orders from the loaded orders instead of doing a full reload
         for (const order of orders) {
             const index = this.orders.findIndex(o => o.id === order.id)
-            if (index != -1) {
+            if (index !== -1) {
                 this.orders.splice(index, 1)
             }
         }
@@ -358,7 +358,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
             // Initiate a refresh
             // don't wait
             this.isRefreshingOrders = true
-            this.isLoadingOrders = this.orders.length == 0
+            this.isLoadingOrders = this.orders.length === 0
 
             if (reset) {
                 this.orders = []

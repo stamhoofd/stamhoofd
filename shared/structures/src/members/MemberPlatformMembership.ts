@@ -1,5 +1,5 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, IntegerDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
-import { v4 as uuidv4 } from "uuid";
+import { AutoEncoder, BooleanDecoder, DateDecoder, IntegerDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { v4 as uuidv4 } from 'uuid';
 
 export class MemberPlatformMembership extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -18,13 +18,13 @@ export class MemberPlatformMembership extends AutoEncoder {
     periodId: string;
 
     @field({ decoder: DateDecoder })
-    startDate = new Date()
+    startDate = new Date();
 
     @field({ decoder: DateDecoder })
-    endDate = new Date()
+    endDate = new Date();
 
     @field({ decoder: DateDecoder, nullable: true })
-    expireDate: Date|null = null
+    expireDate: Date | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
     balanceItemId: string | null = null;
@@ -42,12 +42,12 @@ export class MemberPlatformMembership extends AutoEncoder {
     generated = false;
 
     @field({ decoder: DateDecoder })
-    createdAt = new Date()
+    createdAt = new Date();
 
     @field({ decoder: DateDecoder })
-    updatedAt = new Date()
+    updatedAt = new Date();
 
     isActive(date: Date = new Date()) {
-        return this.startDate <= date && this.endDate >= date
+        return this.startDate <= date && this.endDate >= date;
     }
 }

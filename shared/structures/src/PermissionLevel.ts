@@ -3,19 +3,17 @@
  */
 export enum PermissionLevel {
     /** No access */
-    None = "None",
+    None = 'None',
 
     /** Read all data, but not allowed to write */
-    Read = "Read",
-    
+    Read = 'Read',
+
     /** Read, write, add, delete child data, but not allowed to modify settings */
-    Write = "Write",
-    
+    Write = 'Write',
+
     /** Full access */
-    Full = "Full",
+    Full = 'Full',
 }
-
-
 
 export function getPermissionLevelNumber(level: PermissionLevel): number {
     switch (level) {
@@ -25,31 +23,29 @@ export function getPermissionLevelNumber(level: PermissionLevel): number {
         case PermissionLevel.Full: return 3;
         default: {
             const l: never = level; // will throw compile error if new levels are added without editing this method
-            throw new Error("Unknown permission level "+l);
+            throw new Error('Unknown permission level ' + l);
         }
     }
 }
 
 export function maximumPermissionlevel(...levels: PermissionLevel[]): PermissionLevel {
-    let max = PermissionLevel.None
+    let max = PermissionLevel.None;
     for (const level of levels) {
         if (getPermissionLevelNumber(level) > getPermissionLevelNumber(max)) {
-            max = level
+            max = level;
         }
     }
-    return max
-
+    return max;
 }
 
 export function minimumPermissionLevel(...levels: PermissionLevel[]): PermissionLevel {
-    let min: PermissionLevel = levels[0]
+    let min: PermissionLevel = levels[0];
     for (const level of levels) {
         if (getPermissionLevelNumber(level) < getPermissionLevelNumber(min)) {
-            min = level
+            min = level;
         }
     }
-    return min
-
+    return min;
 }
 
 export function getPermissionLevelName(level: PermissionLevel): string {
@@ -60,7 +56,7 @@ export function getPermissionLevelName(level: PermissionLevel): string {
         case PermissionLevel.Full: return 'Volledige toegang';
         default: {
             const l: never = level; // will throw compile error if new levels are added without editing this method
-            throw new Error("Unknown permission level "+l);
+            throw new Error('Unknown permission level ' + l);
         }
     }
 }

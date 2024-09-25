@@ -269,7 +269,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
     validateQR(result: string) {
         console.log("QR-code result: "+result)
-        if (this.checkingTicket || (this.cooldown && this.cooldownResult == result && this.cooldown > new Date()) || !result) {
+        if (this.checkingTicket || (this.cooldown && this.cooldownResult === result && this.cooldown > new Date()) || !result) {
             // Skip. Already working.
             return
         }
@@ -341,7 +341,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         try {
             const deviceId = this.stream.getVideoTracks()[0].getSettings().deviceId
             const index = this.cameras.findIndex(c => c.deviceId === deviceId)
-            if (index != -1) {
+            if (index !== -1) {
                 this.cameraIndex = index
                 console.log("Found camera index ", index)
             }

@@ -1,14 +1,14 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Email } from '@stamhoofd/models';
-import { EmailPreview, EmailStatus, Email as EmailStruct } from "@stamhoofd/structures";
+import { EmailPreview, EmailStatus, Email as EmailStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../../helpers/Context';
-import { AutoEncoderPatchType, Decoder, patchObject } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 
-type Params = {id: string};
+type Params = { id: string };
 type Query = undefined;
-type Body = AutoEncoderPatchType<EmailStruct>
+type Body = AutoEncoderPatchType<EmailStruct>;
 type ResponseBody = EmailPreview;
 
 /**
@@ -16,14 +16,14 @@ type ResponseBody = EmailPreview;
  */
 
 export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = EmailStruct.patchType() as Decoder<AutoEncoderPatchType<EmailStruct>>
+    bodyDecoder = EmailStruct.patchType() as Decoder<AutoEncoderPatchType<EmailStruct>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "PATCH") {
+        if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/email/@id", {id: String});
+        const params = Endpoint.parseParameters(request.url, '/email/@id', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -33,29 +33,29 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const {user} = await Context.authenticate()
+        const { user } = await Context.authenticate();
 
         if (!Context.auth.canSendEmails()) {
-            throw Context.auth.error()
-        }  
+            throw Context.auth.error();
+        }
 
         const model = await Email.getByID(request.params.id);
         if (!model || model.userId !== user.id || (model.organizationId !== (organization?.id ?? null))) {
             throw new SimpleError({
-                code: "not_found",
-                human: "Email not found",
+                code: 'not_found',
+                human: 'Email not found',
                 message: 'Deze e-mail bestaat niet of is verwijderd',
-                statusCode: 404
-            })
+                statusCode: 404,
+            });
         }
 
         if (model.status !== EmailStatus.Draft) {
             throw new SimpleError({
-                code: "not_draft",
-                human: "Email is not a draft",
+                code: 'not_draft',
+                human: 'Email is not a draft',
                 message: 'Deze e-mail is al verzonden en kan niet meer aangepast worden',
-                statusCode: 400
-            })
+                statusCode: 400,
+            });
         }
 
         let rebuild = false;
@@ -92,22 +92,22 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         // Attachments
         if (request.body.attachments !== undefined) {
             model.attachments = patchObject(model.attachments, request.body.attachments);
-            model.validateAttachments()
+            model.validateAttachments();
         }
 
         await model.save();
 
         if (rebuild) {
-            await model.buildExampleRecipient()
-            model.updateCount()
+            await model.buildExampleRecipient();
+            model.updateCount();
 
             // Force null - because we have stale data
-            model.recipientCount = null
+            model.recipientCount = null;
         }
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {
-            model.throwIfNotReadyToSend()
-            model.send().catch(console.error)
+            model.throwIfNotReadyToSend();
+            model.send().catch(console.error);
         }
 
         return new Response(await model.getPreviewStructure());

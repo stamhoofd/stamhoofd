@@ -24,7 +24,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="goNext">
-                        <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Bevestigen</span>
+                        <span v-if="needsPay && (selectedPaymentMethod === 'Transfer' || selectedPaymentMethod === 'PointOfSale')">Bevestigen</span>
                         <span v-else-if="needsPay">Betalen</span>
                         <span v-else>Bevestigen</span>
                         <span class="icon arrow-right" />

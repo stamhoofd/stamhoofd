@@ -78,7 +78,7 @@
         </h2>
         <p>Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.</p>
 
-        <p v-if="policies.length == 0" class="info-box">
+        <p v-if="policies.length === 0" class="info-box">
             Je hebt momenteel geen externe links toegevoegd.
         </p>
         <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">

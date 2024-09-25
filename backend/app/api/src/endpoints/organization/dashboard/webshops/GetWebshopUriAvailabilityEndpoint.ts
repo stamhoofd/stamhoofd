@@ -1,7 +1,7 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Webshop } from '@stamhoofd/models';
-import { PermissionLevel, WebshopUriAvailabilityResponse } from "@stamhoofd/structures";
+import { PermissionLevel, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 
@@ -18,14 +18,14 @@ type ResponseBody = WebshopUriAvailabilityResponse;
  */
 
 export class GetWebshopUriAvailabilityEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = Query as Decoder<Query>
+    queryDecoder = Query as Decoder<Query>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/webshop/@id/check-uri", { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/check-uri', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -35,35 +35,35 @@ export class GetWebshopUriAvailabilityEndpoint extends Endpoint<Params, Query, B
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
-        const webshop = await Webshop.getByID(request.params.id)
+        const webshop = await Webshop.getByID(request.params.id);
         if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
-            throw Context.auth.notFoundOrNoAccess()
+            throw Context.auth.notFoundOrNoAccess();
         }
-        
-        const q = await Webshop.where({ 
-            uri: request.query.uri, 
-            id: {
-                sign: "!=",
-                value: request.params.id
-            } 
-        }, { 
-            limit: 1, 
-            select: "id" 
-        })
 
-        const available = q.length == 0
-        
+        const q = await Webshop.where({
+            uri: request.query.uri,
+            id: {
+                sign: '!=',
+                value: request.params.id,
+            },
+        }, {
+            limit: 1,
+            select: 'id',
+        });
+
+        const available = q.length == 0;
+
         return new Response(
             WebshopUriAvailabilityResponse.create({
-                available
-            })
+                available,
+            }),
         );
     }
 }

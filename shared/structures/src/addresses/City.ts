@@ -5,10 +5,10 @@ import { Province } from './Province';
 
 export class City extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string
+    id: string;
 
     @field({ decoder: StringDecoder })
-    name: string
+    name: string;
 
     @field({ decoder: Province })
     province: Province;

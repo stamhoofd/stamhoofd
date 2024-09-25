@@ -27,15 +27,15 @@ const owner = useRequestOwner();
 const context = useContext();
 
 const props = defineProps<{
-    organization: Organization
-}>()
+    organization: Organization;
+}>();
 
-const tags = computed(() => platform.value.config.tags)
-const {patched, hasChanges, addPatch, patch} = usePatch(props.organization)
+const tags = computed(() => platform.value.config.tags);
+const { patched, hasChanges, addPatch, patch } = usePatch(props.organization);
 
 const saving = ref(false);
 
-const title = 'Tags wijzigen'
+const title = 'Tags wijzigen';
 
 async function save() {
     if (saving.value) {
@@ -48,40 +48,40 @@ async function save() {
         const arr: PatchableArrayAutoEncoder<Organization> = new PatchableArray();
         patch.value.id = props.organization.id;
         arr.addPatch(patch.value);
-        
+
         const response = await context.value.authenticatedServer.request({
             method: 'PATCH',
             path: '/admin/organizations',
             body: arr,
             shouldRetry: false,
             owner,
-            decoder: new ArrayDecoder(Organization as Decoder<Organization>)
+            decoder: new ArrayDecoder(Organization as Decoder<Organization>),
         });
-        new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
 
         // Copy updated data into already loaded objects in the system
-        const updatedData = response.data.find(d => d.id === props.organization.id)
-        
+        const updatedData = response.data.find(d => d.id === props.organization.id);
+
         if (updatedData) {
-            props.organization.deepSet(updatedData)
+            props.organization.deepSet(updatedData);
         }
         await pop({ force: true });
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
-
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

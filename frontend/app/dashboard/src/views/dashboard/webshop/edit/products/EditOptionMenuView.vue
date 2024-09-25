@@ -98,7 +98,7 @@ export default class EditOptionMenuView extends Mixins(NavigationMixin) {
     }
 
     get patchedOptionMenu() {
-        const c = this.patchedProduct.optionMenus.find(c => c.id == this.optionMenu.id)
+        const c = this.patchedProduct.optionMenus.find(c => c.id === this.optionMenu.id)
         if (c) {
             return c
         }

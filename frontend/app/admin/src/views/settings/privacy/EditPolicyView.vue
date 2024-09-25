@@ -52,7 +52,6 @@
     </SaveView>
 </template>
 
-
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -69,14 +68,14 @@ const deleting = ref(false);
 const props = defineProps<{
     policy: PlatformPolicy;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<PlatformPolicy>) => Promise<void>,
-    deleteHandler: (() => Promise<void>)|null
+    saveHandler: (p: AutoEncoderPatchType<PlatformPolicy>) => Promise<void>;
+    deleteHandler: (() => Promise<void>) | null;
 }>();
 const title = computed(() => props.isNew ? 'Nieuwe voorwaarden' : 'Voorwaarden bewerken');
 const pop = usePop();
 const $t = useTranslate();
 
-const {patched, addPatch, hasChanges, patch} = usePatch(props.policy);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.policy);
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -86,16 +85,17 @@ const save = async () => {
     try {
         if (name.value.length === 0) {
             throw new SimpleError({
-                code: "invalid_field",
-                message: "Gelieve een naam in te vullen",
-                field: "name"
-            })
+                code: 'invalid_field',
+                message: 'Gelieve een naam in te vullen',
+                field: 'name',
+            });
         }
 
-        await props.saveHandler(patch.value)
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
 };
@@ -109,16 +109,17 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm("Ben je zeker dat je deze voorwaarden wilt verwijderen?", "Verwijderen")) {
-        return
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze voorwaarden wilt verwijderen?', 'Verwijderen')) {
+        return;
     }
-        
+
     deleting.value = true;
     try {
-        await props.deleteHandler()
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.deleteHandler();
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     deleting.value = false;
@@ -126,37 +127,37 @@ const doDelete = async () => {
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name}),
+    set: name => addPatch({ name }),
 });
 
 const url = computed({
     get: () => patched.value.url,
-    set: (url) => addPatch({url}),
+    set: url => addPatch({ url }),
 });
 
 const richText = computed({
     get: () => patched.value.richText,
-    set: (richText) => addPatch({richText}),
+    set: richText => addPatch({ richText }),
 });
 
 const checkbox = computed({
     get: () => patched.value.checkbox,
-    set: (checkbox) => addPatch({checkbox}),
+    set: checkbox => addPatch({ checkbox }),
 });
 
 const enableAtSignup = computed({
     get: () => patched.value.enableAtSignup,
-    set: (enableAtSignup) => addPatch({enableAtSignup}),
+    set: enableAtSignup => addPatch({ enableAtSignup }),
 });
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

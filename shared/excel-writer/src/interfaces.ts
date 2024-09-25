@@ -4,11 +4,11 @@ export type XlsxTransformerConcreteColumn<T> = {
     name: string;
     width: number;
     getValue(object: T): CellValue;
-}
+};
 
 export type XlsxTransformerColumn<T> = XlsxTransformerConcreteColumn<T> | {
     match: (id: string) => (XlsxTransformerConcreteColumn<T>[] | undefined);
-}
+};
 
 export interface XlsxTransformerSheet<A, B = A> {
     id: string;
@@ -35,14 +35,14 @@ export interface CellValue {
  * that can write Excel files, given input CellValues
  */
 export interface XlsxWriterAdapter {
-    addSheet(name: string): Promise<symbol>|symbol;
-    addRow(sheet: symbol, values: CellValue[]): Promise<void>|void;
+    addSheet(name: string): Promise<symbol> | symbol;
+    addRow(sheet: symbol, values: CellValue[]): Promise<void> | void;
 
     /**
      * Called when all sheets have been added and all files are ready to be written
      */
     ready(): Promise<void>;
-    
+
     // Depends on environment
     // the adapter should handle this (e.g. by saving to a file, which file location is set in the constructor)
     close(): Promise<void>;
@@ -53,9 +53,8 @@ export type XlsxWorkbookFilter = {
     sheets: {
         id: string;
         columns: string[];
-    }[]
-}
-
+    }[];
+};
 
 export enum XlsxBuiltInNumberFormat {
     None = 0,
@@ -159,9 +158,8 @@ export enum XlsxBuiltInNumberFormat {
     Text = 49,
 }
 
-
 export type NumberFormatOptions = {
-    id?: XlsxBuiltInNumberFormat|number; // When using built in number formats
+    id?: XlsxBuiltInNumberFormat | number; // When using built in number formats
     formatCode?: string; // If overwriting a built in number format
 
     /**
@@ -174,7 +172,7 @@ export type NumberFormatOptions = {
      * 6 $#,##0_);[Red]($#,##0)  // This ones needs replacing with the default currency of the user
      * 7 $#,##0.00_);($#,##0.00)  // This ones needs replacing with the default currency of the user
      * 8 $#,##0.00_);[Red]($#,##0.00)  // This ones needs replacing with the default currency of the user
-     *                  
+     *
      * 9 0%
      * 10 0.00%
      * 11 0.00E+00
@@ -198,12 +196,12 @@ export type NumberFormatOptions = {
      * 47 mm:ss.0
      * 48 ##0.0E+0
      * 49 @
-     * 
-     * 
+     *
+     *
      * Overrides:
      * 8: "€"\ #,##0.00;[Red]"€"\ \-#,##0.00
     */
-}
+};
 
 export enum CellType {
     Boolean = 'b',
@@ -218,16 +216,16 @@ export enum CellType {
 export type FontOptions = {
     size?: number; // sz
     bold?: boolean; // b
-}
+};
 
 export type CellAlignmentOptions = {
-    horizontal?: 'general' | 'center' | 'centerContinuous' | 'distributed' | 'justify' | 'fill' | 'left' | 'right',
-    vertical?: 'bottom' | 'center' | 'distributed' | 'justify' | 'top',
+    horizontal?: 'general' | 'center' | 'centerContinuous' | 'distributed' | 'justify' | 'fill' | 'left' | 'right';
+    vertical?: 'bottom' | 'center' | 'distributed' | 'justify' | 'top';
     wrapText?: boolean;
-}
+};
 
 export type CellStyleRequest = {
     font?: FontOptions;
     numberFormat?: NumberFormatOptions;
     alignment?: CellAlignmentOptions;
-}
+};

@@ -16,59 +16,59 @@ import {
     createSQLExpressionFilterCompiler,
     createSQLFilterNamespace,
     createSQLRelationFilterCompiler,
-} from "@stamhoofd/sql";
-import { SetupStepType } from "@stamhoofd/structures";
+} from '@stamhoofd/sql';
+import { SetupStepType } from '@stamhoofd/structures';
 
 export const organizationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
-    id: createSQLExpressionFilterCompiler(SQL.column("organizations", "id")),
-    uri: createSQLExpressionFilterCompiler(SQL.column("organizations", "uri")),
+    id: createSQLExpressionFilterCompiler(SQL.column('organizations', 'id')),
+    uri: createSQLExpressionFilterCompiler(SQL.column('organizations', 'uri')),
     name: createSQLExpressionFilterCompiler(
-        SQL.column("organizations", "name"),
+        SQL.column('organizations', 'name'),
     ),
     active: createSQLExpressionFilterCompiler(
-        SQL.column("organizations", "active"),
+        SQL.column('organizations', 'active'),
     ),
     city: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column("organizations", "address"), "$.value.city"),
+        SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
     country: createSQLExpressionFilterCompiler(
         SQL.jsonValue(
-            SQL.column("organizations", "address"),
-            "$.value.country",
+            SQL.column('organizations', 'address'),
+            '$.value.country',
         ),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
     umbrellaOrganization: createSQLExpressionFilterCompiler(
         SQL.jsonValue(
-            SQL.column("organizations", "meta"),
-            "$.value.umbrellaOrganization",
+            SQL.column('organizations', 'meta'),
+            '$.value.umbrellaOrganization',
         ),
         { isJSONValue: true },
     ),
     type: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column("organizations", "meta"), "$.value.type"),
+        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.type'),
         { isJSONValue: true },
     ),
     tags: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column("organizations", "meta"), "$.value.tags"),
+        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.tags'),
         { isJSONValue: true, isJSONObject: true },
     ),
     setupSteps: createSQLRelationFilterCompiler(
         SQL.select()
-            .from(SQL.table("organization_registration_periods"))
+            .from(SQL.table('organization_registration_periods'))
             .where(
                 SQL.column(
-                    "organization_registration_periods",
-                    "organizationId",
+                    'organization_registration_periods',
+                    'organizationId',
                 ),
-                SQL.column("organizations", "id"),
+                SQL.column('organizations', 'id'),
             ),
         {
             ...baseSQLFilterCompilers,
             periodId: createSQLColumnFilterCompiler(
-                SQL.column("organization_registration_periods", "periodId"),
+                SQL.column('organization_registration_periods', 'periodId'),
             ),
             ...Object.fromEntries(
                 Object.values(SetupStepType)
@@ -79,8 +79,8 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                                 reviewedAt: createSQLExpressionFilterCompiler(
                                     SQL.jsonValue(
                                         SQL.column(
-                                            "organization_registration_periods",
-                                            "setupSteps",
+                                            'organization_registration_periods',
+                                            'setupSteps',
                                         ),
                                         `$.value.steps.${setupStep}.review.date`,
                                     ),
@@ -103,21 +103,21 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
     ),
     packages: createSQLRelationFilterCompiler(
         SQL.select()
-            .from(SQL.table("stamhoofd_packages"))
+            .from(SQL.table('stamhoofd_packages'))
             .where(
-                SQL.column("organizationId"),
-                SQL.column("organizations", "id"),
+                SQL.column('organizationId'),
+                SQL.column('organizations', 'id'),
             )
-            .where(SQL.column("validAt"), SQLWhereSign.NotEqual, new SQLNull())
+            .where(SQL.column('validAt'), SQLWhereSign.NotEqual, new SQLNull())
             .where(
                 new SQLWhereOr([
                     new SQLWhereEqual(
-                        SQL.column("validUntil"),
+                        SQL.column('validUntil'),
                         SQLWhereSign.Equal,
                         new SQLNull(),
                     ),
                     new SQLWhereEqual(
-                        SQL.column("validUntil"),
+                        SQL.column('validUntil'),
                         SQLWhereSign.Greater,
                         new SQLNow(),
                     ),
@@ -126,12 +126,12 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
             .where(
                 new SQLWhereOr([
                     new SQLWhereEqual(
-                        SQL.column("removeAt"),
+                        SQL.column('removeAt'),
                         SQLWhereSign.Equal,
                         new SQLNull(),
                     ),
                     new SQLWhereEqual(
-                        SQL.column("removeAt"),
+                        SQL.column('removeAt'),
                         SQLWhereSign.Greater,
                         new SQLNow(),
                     ),
@@ -143,37 +143,37 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
         {
             ...baseSQLFilterCompilers,
             type: createSQLExpressionFilterCompiler(
-                SQL.jsonValue(SQL.column("meta"), "$.value.type"),
+                SQL.jsonValue(SQL.column('meta'), '$.value.type'),
                 { isJSONValue: true },
             ),
         },
     ),
     members: createSQLRelationFilterCompiler(
         SQL.select()
-            .from(SQL.table("members"))
+            .from(SQL.table('members'))
             .join(
-                SQL.join(SQL.table("registrations")).where(
-                    SQL.column("members", "id"),
-                    SQL.column("registrations", "memberId"),
+                SQL.join(SQL.table('registrations')).where(
+                    SQL.column('members', 'id'),
+                    SQL.column('registrations', 'memberId'),
                 ),
             )
             .where(
-                SQL.column("registrations", "organizationId"),
-                SQL.column("organizations", "id"),
+                SQL.column('registrations', 'organizationId'),
+                SQL.column('organizations', 'id'),
             ),
 
         {
             ...baseSQLFilterCompilers,
             name: createSQLExpressionFilterCompiler(
                 new SQLConcat(
-                    SQL.column("firstName"),
-                    new SQLScalar(" "),
-                    SQL.column("lastName"),
+                    SQL.column('firstName'),
+                    new SQLScalar(' '),
+                    SQL.column('lastName'),
                 ),
             ),
-            firstName: createSQLColumnFilterCompiler("firstName"),
-            lastName: createSQLColumnFilterCompiler("lastName"),
-            email: createSQLColumnFilterCompiler("email"),
+            firstName: createSQLColumnFilterCompiler('firstName'),
+            lastName: createSQLColumnFilterCompiler('lastName'),
+            email: createSQLColumnFilterCompiler('email'),
         },
     ),
 };

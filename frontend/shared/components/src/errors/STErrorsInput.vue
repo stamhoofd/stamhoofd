@@ -36,7 +36,7 @@ export default class STErrorsInput extends VueComponent {
         }
         let errors: SimpleErrors
         
-        if (this.errorFields == "*") {
+        if (this.errorFields === "*") {
             errors = val.remaining
         } else {
             errors = val.forFields(this.errorFields.split(","))

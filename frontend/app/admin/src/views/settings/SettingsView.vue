@@ -7,7 +7,7 @@
                 Instellingen
             </h1>
 
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.CorporateIdentity)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/palette.svg">
@@ -52,7 +52,6 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
-
 
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
                     <template #left>
@@ -198,7 +197,7 @@
             <hr>
             <h2>E-mails</h2>
 
-            <STList class="illustration-list">  
+            <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/email.svg">
@@ -262,11 +261,11 @@ enum Routes {
     Premises = 'lokalen',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
-    Terms = 'voorwaarden'
+    Terms = 'voorwaarden',
 }
 
-const platform = usePlatform()
-const platformManager = usePlatformManager()
+const platform = usePlatform();
+const platformManager = usePlatformManager();
 
 defineRoutes([
     {
@@ -283,13 +282,13 @@ defineRoutes([
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
                     await platformManager.value.patch(Platform.patch({
                         config: PlatformConfig.patch({
-                            recordsConfiguration: patch
-                        })
-                    }))
-                    Toast.success("De aanpassingen zijn opgeslagen").show();
-                }
-            }
-        }
+                            recordsConfiguration: patch,
+                        }),
+                    }));
+                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                },
+            };
+        },
     },
     {
         name: Routes.FinancialSupport,
@@ -299,17 +298,17 @@ defineRoutes([
             return {
                 financialSupport: platform.value.config.financialSupport ?? FinancialSupportSettings.create({}),
                 saveHandler: async (patch: AutoEncoderPatchType<FinancialSupportSettings>) => {
-                    const isNew = !platform.value.config.financialSupport
+                    const isNew = !platform.value.config.financialSupport;
                     await platformManager.value.patch(Platform.patch({
                         config: PlatformConfig.patch({
-                            financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch
-                        })
-                    }))
-                    Toast.success("De aanpassingen zijn opgeslagen").show();
-                }
-            }
+                            financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
+                        }),
+                    }));
+                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                },
+            };
         },
-        present: 'popup'
+        present: 'popup',
     },
     {
         name: Routes.DataPermissions,
@@ -319,17 +318,17 @@ defineRoutes([
             return {
                 dataPermission: platform.value.config.dataPermission ?? DataPermissionsSettings.create({}),
                 saveHandler: async (patch: AutoEncoderPatchType<DataPermissionsSettings>) => {
-                    const isNew = !platform.value.config.dataPermission
+                    const isNew = !platform.value.config.dataPermission;
                     await platformManager.value.patch(Platform.patch({
                         config: PlatformConfig.patch({
-                            dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch
-                        })
-                    }))
-                    Toast.success("De aanpassingen zijn opgeslagen").show();
-                }
-            }
+                            dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
+                        }),
+                    }));
+                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                },
+            };
         },
-        present: 'popup'
+        present: 'popup',
     },
     {
         url: Routes.CorporateIdentity,
@@ -380,7 +379,7 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: EditPremiseTypesView as ComponentOptions,
-    }
-])
-const $navigate = useNavigate()
+    },
+]);
+const $navigate = useNavigate();
 </script>

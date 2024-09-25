@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save"  v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -12,7 +12,7 @@
                 class="input"
                 type="text"
                 autocomplete=""
-                :value="getName(n - 1)" :placeholder="'Synoniem '+n" @input="setName(n - 1, ($event as any).target.value)" 
+                :value="getName(n - 1)" :placeholder="'Synoniem '+n" @input="setName(n - 1, ($event as any).target.value)"
             >
 
             <template #right>
@@ -78,7 +78,6 @@
     </SaveView>
 </template>
 
-
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -95,16 +94,16 @@ const deleting = ref(false);
 const props = defineProps<{
     group: DefaultAgeGroup;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<DefaultAgeGroup>) => Promise<void>,
-    deleteHandler: (() => Promise<void>)|null
+    saveHandler: (p: AutoEncoderPatchType<DefaultAgeGroup>) => Promise<void>;
+    deleteHandler: (() => Promise<void>) | null;
 }>();
 const title = computed(() => props.isNew ? 'Nieuwe standaard leeftijdsgroep' : 'Standaard leeftijdsgroep bewerken');
 const pop = usePop();
 const $t = useTranslate();
 const platform = usePlatform();
-const membershipTypes = computed(() => platform.value.config.membershipTypes.filter(t => t.behaviour === PlatformMembershipTypeBehaviour.Period))
+const membershipTypes = computed(() => platform.value.config.membershipTypes.filter(t => t.behaviour === PlatformMembershipTypeBehaviour.Period));
 
-const {patched, addPatch, hasChanges, patch} = usePatch(props.group);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.group);
 let startYear = new Date().getFullYear();
 const month = new Date().getMonth();
 
@@ -120,23 +119,24 @@ const save = async () => {
     try {
         if (names.value.length === 0) {
             throw new SimpleError({
-                code: "invalid_field",
-                message: "Gelieve een naam in te vullen",
-                field: "name"
-            })
+                code: 'invalid_field',
+                message: 'Gelieve een naam in te vullen',
+                field: 'name',
+            });
         }
 
         if (names.value[0].length === 0) {
             throw new SimpleError({
-                code: "invalid_field",
-                message: "Gelieve een naam in te vullen",
-                field: "name"
-            })
+                code: 'invalid_field',
+                message: 'Gelieve een naam in te vullen',
+                field: 'name',
+            });
         }
-        await props.saveHandler(patch.value)
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
 };
@@ -150,16 +150,17 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm("Ben je zeker dat je deze standaard leeftijdsgroep wilt verwijderen?", "Verwijderen", 'Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde inschrijvingsgroepen.')) {
-        return
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze standaard leeftijdsgroep wilt verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde inschrijvingsgroepen.')) {
+        return;
     }
-        
+
     deleting.value = true;
     try {
-        await props.deleteHandler()
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.deleteHandler();
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     deleting.value = false;
@@ -167,45 +168,44 @@ const doDelete = async () => {
 
 const names = computed({
     get: () => patched.value.names,
-    set: (names) => addPatch({names: names as any}),
+    set: names => addPatch({ names: names as any }),
 });
 
 const description = computed({
     get: () => patched.value.description,
-    set: (description) => addPatch({description}),
+    set: description => addPatch({ description }),
 });
 
 const minAge = computed({
     get: () => patched.value.minAge,
-    set: (minAge) => addPatch({minAge}),
+    set: minAge => addPatch({ minAge }),
 });
 
 const maxAge = computed({
     get: () => patched.value.maxAge,
-    set: (maxAge) => addPatch({maxAge}),
+    set: maxAge => addPatch({ maxAge }),
 });
 
 const defaultMembershipTypeId = computed({
     get: () => patched.value.defaultMembershipTypeId,
-    set: (defaultMembershipTypeId) => addPatch({defaultMembershipTypeId}),
+    set: defaultMembershipTypeId => addPatch({ defaultMembershipTypeId }),
 });
 
 const recordsConfiguration = computed(() => patched.value.recordsConfiguration);
 const patchRecordsConfiguration = (recordsConfiguration: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
     addPatch({
-        recordsConfiguration
-    })
-}
+        recordsConfiguration,
+    });
+};
 
 const inheritedRecordsConfiguration = computed(() => {
     return OrganizationRecordsConfiguration.build({
-        platform: platform.value
-    })
-
+        platform: platform.value,
+    });
 });
 
 function getName(index: number) {
-    return names.value[index] ?? "";
+    return names.value[index] ?? '';
 }
 
 function setName(index: number, value: string) {
@@ -221,17 +221,17 @@ function deleteName(index: number) {
 }
 
 function addName() {
-    names.value = [...names.value, ""];
+    names.value = [...names.value, ''];
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

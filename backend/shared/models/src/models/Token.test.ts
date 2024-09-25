@@ -3,11 +3,11 @@ import { Database } from '@simonbackx/simple-database';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { UserFactory } from '../factories/UserFactory';
 import { Organization } from './Organization';
-import { Token } from "./Token";
-import { User } from "./User";
+import { Token } from './Token';
+import { User } from './User';
 
-describe("Model.Token", () => {
-    const existingToken = "ABCDEFG";
+describe('Model.Token', () => {
+    const existingToken = 'ABCDEFG';
     let user: User;
     let organization: Organization;
 
@@ -15,22 +15,22 @@ describe("Model.Token", () => {
         organization = await new OrganizationFactory({}).create();
         user = await new UserFactory({ organization }).create();
 
-        await Database.insert("INSERT INTO " + Token.table + " SET ?", [
+        await Database.insert('INSERT INTO ' + Token.table + ' SET ?', [
             {
                 accessToken: existingToken,
-                refreshToken: "refreshtoken",
+                refreshToken: 'refreshtoken',
 
-                accessTokenValidUntil: "2050-08-29 14:30:15",
-                refreshTokenValidUntil: "2050-08-29 14:30:15",
+                accessTokenValidUntil: '2050-08-29 14:30:15',
+                refreshTokenValidUntil: '2050-08-29 14:30:15',
                 userId: user.id,
                 // = "myPassword"
-                createdAt: "2020-03-29 14:30:15",
-                updatedAt: "2020-03-29 14:30:15",
+                createdAt: '2020-03-29 14:30:15',
+                updatedAt: '2020-03-29 14:30:15',
             },
         ]);
     });
 
-    test("Get token", async () => {
+    test('Get token', async () => {
         const token: any = await Token.getByAccessToken(existingToken);
         expect(token).toBeDefined();
         expect(token).toBeInstanceOf(Token);
@@ -39,7 +39,7 @@ describe("Model.Token", () => {
         expect(token.userId).toEqual(user.id);
     });
 
-    test("Create a token", async () => {
+    test('Create a token', async () => {
         const token = await Token.createToken(user);
         expect(token).toBeDefined();
         if (!token) return;
@@ -63,7 +63,7 @@ describe("Model.Token", () => {
             refreshToken: token.refreshToken,
             userId: token.userId,
             accessTokenValidUntil: token.accessTokenValidUntil,
-            refreshTokenValidUntil: token.refreshTokenValidUntil
+            refreshTokenValidUntil: token.refreshTokenValidUntil,
         });
     });
 });

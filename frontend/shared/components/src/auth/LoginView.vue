@@ -186,7 +186,7 @@ async function openSignup() {
 }
 
 onMounted(() => {
-    if (props.initialEmail.length == 0) {
+    if (props.initialEmail.length === 0) {
         setTimeout(() => {
             animating.value = false;
             // Needed the any here because typescript is getting mad only in production mode

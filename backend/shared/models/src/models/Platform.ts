@@ -1,31 +1,30 @@
-import { column, Model } from "@simonbackx/simple-database";
-import { QueueHandler } from "@stamhoofd/queues";
-import { Platform as PlatformStruct,PlatformConfig, PlatformPrivateConfig } from "@stamhoofd/structures";
-import { v4 as uuidv4 } from "uuid";
-import { RegistrationPeriod } from "./RegistrationPeriod";
-
+import { column, Model } from '@simonbackx/simple-database';
+import { QueueHandler } from '@stamhoofd/queues';
+import { Platform as PlatformStruct, PlatformConfig, PlatformPrivateConfig } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from 'uuid';
+import { RegistrationPeriod } from './RegistrationPeriod';
 
 export class Platform extends Model {
-    static table = "platform";
+    static table = 'platform';
 
     @column({
-        primary: true, type: "string", beforeSave(value) {
+        primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
-        }
+        },
     })
     id!: string;
 
-    @column({ type: "json", decoder: PlatformConfig })
-    config: PlatformConfig = PlatformConfig.create({})
+    @column({ type: 'json', decoder: PlatformConfig })
+    config: PlatformConfig = PlatformConfig.create({});
 
-    @column({ type: "string" })
-    periodId: string
-    
-    @column({ type: "string", nullable: true })
-    membershipOrganizationId: string | null = null
+    @column({ type: 'string' })
+    periodId: string;
 
-    @column({ type: "json", decoder: PlatformPrivateConfig })
-    privateConfig: PlatformPrivateConfig = PlatformPrivateConfig.create({})
+    @column({ type: 'string', nullable: true })
+    membershipOrganizationId: string | null = null;
+
+    @column({ type: 'json', decoder: PlatformPrivateConfig })
+    privateConfig: PlatformPrivateConfig = PlatformPrivateConfig.create({});
 
     static sharedStruct: PlatformStruct | null = null;
 
@@ -38,7 +37,7 @@ export class Platform extends Model {
         return clone;
     }
 
-    static async getSharedPrivateStruct(): Promise<PlatformStruct & {privateConfig: PlatformPrivateConfig}> {
+    static async getSharedPrivateStruct(): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
         if (this.sharedStruct && this.sharedStruct.privateConfig) {
             return this.sharedStruct as any;
         }
@@ -48,7 +47,7 @@ export class Platform extends Model {
             const period = await RegistrationPeriod.getByID(model.periodId);
             const struct = PlatformStruct.create({
                 ...model,
-                period: period?.getStructure() ?? undefined
+                period: period?.getStructure() ?? undefined,
             });
             this.sharedStruct = struct;
 
@@ -77,8 +76,8 @@ export class Platform extends Model {
     }
 
     async save() {
-        Platform.clearCache()
-        const s = await super.save()
+        Platform.clearCache();
+        const s = await super.save();
 
         // Force update cache immediately
         await Platform.getSharedStruct();

@@ -1,4 +1,4 @@
-import stamhoofdEslint from "eslint-plugin-stamhoofd";
+import stamhoofdEslint from 'eslint-plugin-stamhoofd';
 
 export default [
     ...stamhoofdEslint.configs.backend,

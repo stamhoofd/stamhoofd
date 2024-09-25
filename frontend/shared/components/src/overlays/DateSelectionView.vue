@@ -116,13 +116,13 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         const year = start.getFullYear()
 
         // Make sure first day is 1
-        while (start.getDay() != 1) {
+        while (start.getDay() !== 1) {
             start.setDate(start.getDate() - 1)
         }
 
         // loop days
-        while ((start.getMonth() <= month && start.getFullYear() == year) || start.getFullYear() < year || start.getDay() != 1) {
-            if (start.getDay() == 1) {
+        while ((start.getMonth() <= month && start.getFullYear() === year) || start.getFullYear() < year || start.getDay() !== 1) {
+            if (start.getDay() === 1) {
                 // Start new week
                 weeks.push([])
             }
@@ -130,8 +130,8 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
             weeks[weeks.length - 1].push({
                 number: start.getDate(),
                 value: new Date(start.getTime()),
-                otherMonth: start.getMonth() != month,
-                selected: this.selectedDay && start.getDate() == this.selectedDay.getDate() && start.getFullYear() == this.selectedDay.getFullYear() && start.getMonth() == this.selectedDay.getMonth()
+                otherMonth: start.getMonth() !== month,
+                selected: this.selectedDay && start.getDate() === this.selectedDay.getDate() && start.getFullYear() === this.selectedDay.getFullYear() && start.getMonth() === this.selectedDay.getMonth()
             })
 
             start.setDate(start.getDate() + 1)
@@ -250,7 +250,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         d.setDate(this.currentMonth.getDate())
 
         // If date overflowed
-        if (d.getDate() != this.currentMonth.getDate()) {
+        if (d.getDate() !== this.currentMonth.getDate()) {
             d.setTime(this.currentMonth.getTime())
             d.setDate(1)
             d.setMonth(month)

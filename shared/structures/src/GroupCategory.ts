@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 import { AccessRight } from './AccessRight';
 import { Group } from './Group';
@@ -7,7 +7,6 @@ import { PermissionRole } from './PermissionRole';
 import { PermissionsByRole } from './PermissionsByRole';
 import { PermissionsResourceType } from './PermissionsResourceType';
 import { OrganizationRegistrationPeriod } from './RegistrationPeriod';
-
 
 /**
  * Give access to a given resouce based by the roles of a user
@@ -18,45 +17,45 @@ export class GroupCategoryPermissions extends AutoEncoder {
      * Can create new groups in this category or subcategories
      */
     @field({ decoder: new ArrayDecoder(PermissionRole) })
-    create: PermissionRole[] = []
+    create: PermissionRole[] = [];
 
     /**
      * @deprecated
      * Permissions automatically for all groups in this category
      */
-    @field({decoder: PermissionsByRole, version: 203, optional: true})
-    groupPermissions = PermissionsByRole.create({})
+    @field({ decoder: PermissionsByRole, version: 203, optional: true })
+    groupPermissions = PermissionsByRole.create({});
 }
 
 export class GroupCategorySettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    name = ""
+    name = '';
 
     /**
      * Small text below the category title
      */
     @field({ decoder: StringDecoder })
-    description = ""
+    description = '';
 
     @field({ decoder: BooleanDecoder })
-    public = true
+    public = true;
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 59 })
-    maximumRegistrations: number | null = null
+    maximumRegistrations: number | null = null;
 
     /**
      * @deprecated
      */
     @field({ decoder: GroupCategoryPermissions, version: 61 })
-    permissions = GroupCategoryPermissions.create({})
+    permissions = GroupCategoryPermissions.create({});
 
     /**
      * Whether the category can be deleted / moved by non admins.
      */
-    @field({ 
-        decoder: BooleanDecoder, version: 330, 
+    @field({
+        decoder: BooleanDecoder, version: 330,
     })
-    locked = false
+    locked = false;
 }
 
 export class GroupCategory extends AutoEncoder {
@@ -64,41 +63,41 @@ export class GroupCategory extends AutoEncoder {
     id: string;
 
     @field({ decoder: GroupCategorySettings })
-    settings = GroupCategorySettings.create({})
+    settings = GroupCategorySettings.create({});
 
     /**
      * We only save the ID of groups because these are stored separately. To prevent that a group will be deleted when we simply move the group to a different category
      */
     @field({ decoder: new ArrayDecoder(StringDecoder) })
-    groupIds: string[] = []
+    groupIds: string[] = [];
 
-    /** 
+    /**
      * Child category IDS
      * We use ID's to allow more flexible changes in the future
      */
     @field({ decoder: new ArrayDecoder(StringDecoder) })
-    categoryIds: string[] = []
+    categoryIds: string[] = [];
 
     /**
      * Returns all parent and grandparents of this group
      */
     getParentCategories(all: GroupCategory[]): GroupCategory[] {
-        const map = new Map<string, GroupCategory>()
+        const map = new Map<string, GroupCategory>();
 
         // Avoid recursive loop: can never call getParentCategories on itself again
-        const filteredAll = all.filter(g => g.id !== this.id)
-        
-        const parents = filteredAll.filter(g => g.categoryIds.includes(this.id))
-        for (const parent of parents) {
-            map.set(parent.id, parent)
+        const filteredAll = all.filter(g => g.id !== this.id);
 
-            const hisParents = parent.getParentCategories(filteredAll)
+        const parents = filteredAll.filter(g => g.categoryIds.includes(this.id));
+        for (const parent of parents) {
+            map.set(parent.id, parent);
+
+            const hisParents = parent.getParentCategories(filteredAll);
             for (const pp of hisParents) {
-                 map.set(pp.id, pp)
+                map.set(pp.id, pp);
             }
         }
 
-        return [...map.values()]
+        return [...map.values()];
     }
 
     isPublic(allCategories: GroupCategory[]): boolean {
@@ -107,101 +106,101 @@ export class GroupCategory extends AutoEncoder {
         }
         for (const parent of this.getParentCategories(allCategories)) {
             if (!parent.settings.public) {
-                return false
+                return false;
             }
         }
         return true;
     }
 
-    canEdit(permissions: import('./LoadedPermissions').LoadedPermissions|null): boolean {
+    canEdit(permissions: import('./LoadedPermissions').LoadedPermissions | null): boolean {
         if (permissions?.hasFullAccess()) {
-            return true
+            return true;
         }
-        return false
+        return false;
     }
 
-    canCreate(permissions: import('./LoadedPermissions').LoadedPermissions|null, categories: GroupCategory[] = []): boolean {
+    canCreate(permissions: import('./LoadedPermissions').LoadedPermissions | null, categories: GroupCategory[] = []): boolean {
         if (!permissions) {
-            return false
+            return false;
         }
 
         if (permissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, this.id, AccessRight.OrganizationCreateGroups)) {
             return true;
         }
-        
-        const parents = this.getParentCategories(categories)
+
+        const parents = this.getParentCategories(categories);
         for (const parent of parents) {
             if (permissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, parent.id, AccessRight.OrganizationCreateGroups)) {
-                return true
+                return true;
             }
         }
-        return false
+        return false;
     }
 }
 
 export class GroupCategoryTree extends GroupCategory {
     @field({ decoder: new ArrayDecoder(Group) })
-    groups: Group[] = []
+    groups: Group[] = [];
 
     @field({ decoder: new ArrayDecoder(GroupCategoryTree) })
-    categories: GroupCategoryTree[] = []
+    categories: GroupCategoryTree[] = [];
 
     get depth(): number {
         if (this.groups.length > 0) {
-            return 0
+            return 0;
         }
         if (this.categories.length == 0) {
-            return 0
+            return 0;
         }
 
-        return Math.max(...this.categories.map(c => c.depth)) + 1
+        return Math.max(...this.categories.map(c => c.depth)) + 1;
     }
 
     getAllGroups(): Group[] {
-        return [...this.groups, ...this.categories.flatMap(c => c.getAllGroups())]
+        return [...this.groups, ...this.categories.flatMap(c => c.getAllGroups())];
     }
 
     getAllCategories(): GroupCategoryTree[] {
-        return [...this.categories, ...this.categories.flatMap(c => c.getAllCategories())]
+        return [...this.categories, ...this.categories.flatMap(c => c.getAllCategories())];
     }
 
-    getMemberCount({waitingList}: {waitingList?: boolean} = {}) {
+    getMemberCount({ waitingList }: { waitingList?: boolean } = {}) {
         if (this.getAllGroups().length == 0) {
-            return null
+            return null;
         }
 
-        let count = 0
+        let count = 0;
         for (const group of this.getAllGroups()) {
-            const c = group.getMemberCount({waitingList});
+            const c = group.getMemberCount({ waitingList });
             if (c === null) {
-                return null
+                return null;
             }
-            count += c
+            count += c;
         }
-        return count
+        return count;
     }
 
-    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod, options: {permissions?: import('./LoadedPermissions').LoadedPermissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
-        const categories = organizationPeriod.settings.categories
-        const groups = options?.groups ?? organizationPeriod.groups
+    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod, options: { permissions?: import('./LoadedPermissions').LoadedPermissions | null; maxDepth?: number | null; smartCombine?: boolean; groups?: Group[] } = {}): GroupCategoryTree {
+        const categories = organizationPeriod.settings.categories;
+        const groups = options?.groups ?? organizationPeriod.groups;
 
-        const permissions = options.permissions ?? null
-        const maxDepth = options.maxDepth ?? null
-        const smartCombine = options.smartCombine ?? false
+        const permissions = options.permissions ?? null;
+        const maxDepth = options.maxDepth ?? null;
+        const smartCombine = options.smartCombine ?? false;
 
-        return GroupCategoryTree.create({ 
+        return GroupCategoryTree.create({
             ...root,
-            categories: root.categoryIds.flatMap(id => {
-                const f = categories.find(c => c.id === id)
+            categories: root.categoryIds.flatMap((id) => {
+                const f = categories.find(c => c.id === id);
                 if (f) {
                     const t = GroupCategoryTree.build(f, organizationPeriod, {
                         ...options,
-                        maxDepth: maxDepth !== null ? maxDepth - 1 : null
-                    })
+                        maxDepth: maxDepth !== null ? maxDepth - 1 : null,
+                    });
 
                     if (t.categories.length == 0 && t.groups.length == 0 && (smartCombine || (permissions !== null && !permissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, t.id, AccessRight.OrganizationCreateGroups)))) {
                         // Hide empty categories where we cannot create new groups or when smart combine is enabled
-                        return []
+                        return [];
                     }
 
                     // if (smartCombine && !t.categories.find(c => c.categories.length || c.groups.length > 1)) {
@@ -209,38 +208,38 @@ export class GroupCategoryTree extends GroupCategory {
                     //     t.groups = t.getAllGroups()
                     //     t.categories = []
                     // }
-                    
+
                     if (maxDepth !== null && t.depth >= maxDepth && t.categories.length > 0) {
-                        const categories: GroupCategoryTree[] = []
+                        const categories: GroupCategoryTree[] = [];
                         for (const cat of t.categories) {
                             if (smartCombine && cat.groups.length === 0 && cat.categories.length === 0) {
-                                continue
+                                continue;
                             }
                             // Clone reference
-                            cat.settings = GroupCategorySettings.create(cat.settings)
-                            cat.settings.name = t.settings.name + " - " + cat.settings.name
-                            cat.settings.public = t.settings.public && cat.settings.public
-                            categories.push(cat)
+                            cat.settings = GroupCategorySettings.create(cat.settings);
+                            cat.settings.name = t.settings.name + ' - ' + cat.settings.name;
+                            cat.settings.public = t.settings.public && cat.settings.public;
+                            categories.push(cat);
                         }
                         // Concat here
-                        return categories
+                        return categories;
                     }
-                    return [t]
+                    return [t];
                 }
-                return []
+                return [];
             }),
-            groups: root.groupIds.flatMap(id => {
-                const g = groups.find(c => c.id === id)
+            groups: root.groupIds.flatMap((id) => {
+                const g = groups.find(c => c.id === id);
                 if (g) {
                     // Hide groups we don't have permissions for
                     if (permissions && (!g.hasReadAccess(permissions, categories))) {
-                        return []
+                        return [];
                     }
-                    return [g]
+                    return [g];
                 }
-                return []
-            })
-        })
+                return [];
+            }),
+        });
     }
 
     /**
@@ -248,20 +247,20 @@ export class GroupCategoryTree extends GroupCategory {
      */
     filter(keep: (group: Group) => boolean): GroupCategoryTree {
         const categories = this.categories.flatMap((category) => {
-            const filtered = category.filter(keep)
+            const filtered = category.filter(keep);
             if (filtered.groups.length == 0 && filtered.categories.length == 0) {
-                return []
+                return [];
             }
-            return [filtered]
-        })
+            return [filtered];
+        });
 
-        const groups = this.groups.filter(keep)
+        const groups = this.groups.filter(keep);
         return GroupCategoryTree.create(
             Object.assign({}, this, {
                 categories,
-                groups
-            })
-        )
+                groups,
+            }),
+        );
     }
 
     /**
@@ -271,20 +270,19 @@ export class GroupCategoryTree extends GroupCategory {
     filterForDisplay(admin = false, useActivities = true, smartCombine = false): GroupCategoryTree {
         const categories = this.categories.flatMap((category) => {
             if (!admin && !category.settings.public) {
-                return []
+                return [];
             }
-            const filtered = category.filterForDisplay(admin, useActivities)
+            const filtered = category.filterForDisplay(admin, useActivities);
             if (smartCombine && filtered.groups.length == 0 && filtered.categories.length == 0) {
-                return []
+                return [];
             }
-            return [filtered]
-        })
-        
+            return [filtered];
+        });
 
         return GroupCategoryTree.create(
             Object.assign({}, this, {
-                categories: (useActivities || categories.length == 0) ? categories : [categories[0]]
-            })
-        )
+                categories: (useActivities || categories.length == 0) ? categories : [categories[0]],
+            }),
+        );
     }
 }

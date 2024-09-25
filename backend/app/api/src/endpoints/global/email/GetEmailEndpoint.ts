@@ -1,13 +1,13 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Email } from '@stamhoofd/models';
-import { EmailPreview } from "@stamhoofd/structures";
+import { EmailPreview } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../../helpers/Context';
 
-type Params = {id: string};
+type Params = { id: string };
 type Query = undefined;
-type Body = undefined
+type Body = undefined;
 type ResponseBody = EmailPreview;
 
 /**
@@ -16,11 +16,11 @@ type ResponseBody = EmailPreview;
 
 export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/email/@id", {id: String});
+        const params = Endpoint.parseParameters(request.url, '/email/@id', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -30,20 +30,20 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const {user} = await Context.authenticate()
+        const { user } = await Context.authenticate();
 
         if (!Context.auth.canSendEmails()) {
-            throw Context.auth.error()
-        }  
+            throw Context.auth.error();
+        }
 
         const model = await Email.getByID(request.params.id);
         if (!model || model.userId !== user.id || (model.organizationId !== (organization?.id ?? null))) {
             throw new SimpleError({
-                code: "not_found",
-                human: "Email not found",
+                code: 'not_found',
+                human: 'Email not found',
                 message: 'Deze e-mail bestaat niet of is verwijderd',
-                statusCode: 404
-            })
+                statusCode: 404,
+            });
         }
 
         return new Response(await model.getPreviewStructure());

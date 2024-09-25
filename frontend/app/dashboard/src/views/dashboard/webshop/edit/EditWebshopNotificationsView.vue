@@ -12,7 +12,7 @@
             </template>
         </EmailInput>
 
-        <p v-if="emailCount == 0" class="info-box">
+        <p v-if="emailCount === 0" class="info-box">
             Er zijn nog geen e-mailadressen ingesteld die een e-mail ontvangen bij nieuwe bestellingen.
         </p>
 

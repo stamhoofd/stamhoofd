@@ -180,7 +180,7 @@ export default class Slider extends VueComponent {
             }
         }
 
-        if (_value != this.modelValue) {
+        if (_value !== this.modelValue) {
             this.internalValue = _value
         }
 
@@ -216,7 +216,7 @@ export default class Slider extends VueComponent {
             this.internalValue = newValue
         }
 
-        if (oldValue == newValue) {
+        if (oldValue === newValue) {
             this.animate = false;
         }
 

@@ -27,10 +27,10 @@ const app = useAppContext()
 const organization = useOrganization();
 
 const owningOrganization = computed(() => {
-    return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id == props.category.id))
+    return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id === props.category.id))
 })
 const titleSuffix = computed(() => {
-    if (app == 'registration') {
+    if (app === 'registration') {
         return ""
     }
 

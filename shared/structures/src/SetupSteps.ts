@@ -1,10 +1,10 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
+import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 
 export enum SetupStepType {
-    Responsibilities = "Functions",
-    Companies = "Companies",
-    Groups = "Groups",
-    Premises = "Premises",
+    Responsibilities = 'Functions',
+    Companies = 'Companies',
+    Groups = 'Groups',
+    Premises = 'Premises',
     Emails = 'Emails',
     Payment = 'Payment',
     Registrations = 'Registrations',
@@ -16,10 +16,10 @@ export class SetupStepReview extends AutoEncoder {
     @field({ decoder: DateDecoder })
     date: Date;
 
-    @field({ decoder: StringDecoder})
+    @field({ decoder: StringDecoder })
     userName: string;
 
-    @field({ decoder: StringDecoder})
+    @field({ decoder: StringDecoder })
     userId: string;
 }
 
@@ -29,28 +29,28 @@ export class SetupStep extends AutoEncoder {
      * Removed
      */
     @field({ decoder: DateDecoder, nullable: true, field: 'reviewedAt', optional: true })
-    __reviewedAt: Date | null = null
+    __reviewedAt: Date | null = null;
 
     /**
      * When the item was marked as reviewed.
      */
     @field({ decoder: SetupStepReview, nullable: true, version: 326 })
-    review: SetupStepReview | null = null
+    review: SetupStepReview | null = null;
 
     /**
      * When the finished and total steps last have been updated.
      */
-    @field({ decoder: DateDecoder})
+    @field({ decoder: DateDecoder })
     updatedAt: Date = new Date();
 
     @field({ decoder: NumberDecoder })
-    finishedSteps: number = 0
+    finishedSteps: number = 0;
 
     @field({ decoder: NumberDecoder })
-    totalSteps: number = 1
+    totalSteps: number = 1;
 
     get isDone() {
-        return this.finishedSteps >= this.totalSteps
+        return this.finishedSteps >= this.totalSteps;
     }
 
     get isReviewed() {
@@ -63,7 +63,7 @@ export class SetupStep extends AutoEncoder {
 
     get progress() {
         if (!this.totalSteps) return 1;
-        return this.finishedSteps / this.totalSteps
+        return this.finishedSteps / this.totalSteps;
     }
 
     get priority() {
@@ -77,7 +77,7 @@ export class SetupStep extends AutoEncoder {
         if (isDone && !isReviewed) {
             return 1;
         }
-        
+
         if (!isDone && isReviewed) {
             return 2;
         }
@@ -85,13 +85,13 @@ export class SetupStep extends AutoEncoder {
         return 3;
     }
 
-    markReviewed({userId, userName}: {userId: string, userName: string}) {
+    markReviewed({ userId, userName }: { userId: string; userName: string }) {
         const now = new Date();
         if (this.review === null || (now.getTime() > this.review.date.getTime())) {
             this.review = SetupStepReview.create({
                 date: now,
                 userName,
-                userId
+                userId,
             });
         }
     }
@@ -104,7 +104,7 @@ export class SetupStep extends AutoEncoder {
         if (finishedSteps === this.finishedSteps && totalSteps === this.totalSteps) {
             return;
         }
-        
+
         const now = new Date();
 
         if (totalSteps === 0) {
@@ -122,20 +122,20 @@ export class SetupStep extends AutoEncoder {
 
 export class SetupSteps extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(SetupStepType), SetupStep), version: 324 })
-    steps: Map<SetupStepType, SetupStep> = new Map()
+    steps: Map<SetupStepType, SetupStep> = new Map();
 
     get(type: SetupStepType) {
         return this.steps.get(type);
     }
 
-    getAll(): {type: SetupStepType, step: SetupStep}[] {
-        const result: {type: SetupStepType, step: SetupStep}[] = [];
+    getAll(): { type: SetupStepType; step: SetupStep }[] {
+        const result: { type: SetupStepType; step: SetupStep }[] = [];
 
         for (const value of Object.values(SetupStepType)) {
             const step = this.steps.get(value);
 
             if (step) {
-                result.push({type: value, step});
+                result.push({ type: value, step });
             }
         }
 
@@ -150,8 +150,8 @@ export class SetupSteps extends AutoEncoder {
         return Array.from(this.steps.values()).every(s => s.isComplete);
     }
 
-    getStepsToDoOverview(): {type: SetupStepType, step: SetupStep}[] {
-        const result: {type: SetupStepType, step: SetupStep}[] = [];
+    getStepsToDoOverview(): { type: SetupStepType; step: SetupStep }[] {
+        const result: { type: SetupStepType; step: SetupStep }[] = [];
 
         for (const value of Object.values(SetupStepType)) {
             const step = this.steps.get(value);
@@ -162,21 +162,20 @@ export class SetupSteps extends AutoEncoder {
                     continue;
                 }
 
-                result.push({type: value, step});
+                result.push({ type: value, step });
             }
         }
 
         return result;
     }
 
-    getProgress(): {completed: number, total: number} {
+    getProgress(): { completed: number; total: number } {
         const total = this.steps.size;
         const completed = Array.from(this.steps.values()).filter(s => s.isComplete).length;
-        return {completed, total};
-
+        return { completed, total };
     }
 
-    markReviewed(stepType: SetupStepType, by: {userId: string, userName: string}) {
+    markReviewed(stepType: SetupStepType, by: { userId: string; userName: string }) {
         const step = this.steps.get(stepType);
         if (step) {
             step.markReviewed(by);
@@ -190,12 +189,13 @@ export class SetupSteps extends AutoEncoder {
         }
     }
 
-    update(stepType: SetupStepType, {finishedSteps, totalSteps}: {finishedSteps: number, totalSteps: number}) {
+    update(stepType: SetupStepType, { finishedSteps, totalSteps }: { finishedSteps: number; totalSteps: number }) {
         const step = this.steps.get(stepType);
         if (step) {
             step.update(finishedSteps, totalSteps);
-        } else {
-            this.steps.set(stepType, SetupStep.create({finishedSteps, totalSteps}));
+        }
+        else {
+            this.steps.set(stepType, SetupStep.create({ finishedSteps, totalSteps }));
         }
     }
 }

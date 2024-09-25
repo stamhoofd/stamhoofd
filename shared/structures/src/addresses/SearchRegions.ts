@@ -6,10 +6,10 @@ import { Province } from './Province';
 
 export class SearchRegions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(City) })
-    cities: City[] = []
+    cities: City[] = [];
 
     @field({ decoder: new ArrayDecoder(Province) })
-    provinces: Province[] = []
+    provinces: Province[] = [];
 
     @field({ decoder: new ArrayDecoder(CountryDecoder) })
     countries: Country[] = [];

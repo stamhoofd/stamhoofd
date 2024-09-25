@@ -16,7 +16,7 @@
                 Reken eerst jouw huidige winkelmandje af. Je kan de huidige inhoud van jouw winkelmandje niet samen afrekenen met een inschrijving bij {{ selectedOrganization.name }}.
             </p>
             
-            <p v-else-if="tree.categories.length == 0" class="info-box">
+            <p v-else-if="tree.categories.length === 0" class="info-box">
                 {{ member.patchedMember.firstName }} kan je op dit moment niet inschrijven bij {{ selectedOrganization.name }}. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
             </p>
 
@@ -90,7 +90,7 @@ const items = computed(() => {
 const labels = computed(() => {
     return items.value.map(o => o.name)
 });
-const allowChangingOrganization = STAMHOOFD.userMode === 'platform' && (app === 'registration' || app == 'admin');
+const allowChangingOrganization = STAMHOOFD.userMode === 'platform' && (app === 'registration' || app === 'admin');
 
 const tree = computed(() => {
     if (!selectedOrganization.value) {

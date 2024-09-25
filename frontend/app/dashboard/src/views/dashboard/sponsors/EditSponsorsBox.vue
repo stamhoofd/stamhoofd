@@ -112,7 +112,7 @@ export default class EditSponsorsBox extends Mixins(NavigationMixin) {
     }
 
     set draggableSponsors(sponsors: Sponsor[]) {
-        if (sponsors.length != this.sponsors.length) {
+        if (sponsors.length !== this.sponsors.length) {
             return;
         }
 

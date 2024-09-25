@@ -21,7 +21,7 @@
             </STList>
         </template>
                 
-        <p v-if="webshop.categories.length == 0">
+        <p v-if="webshop.categories.length === 0">
             <button class="button text" type="button" @click="addProduct">
                 <span class="icon add" />
                 <span v-if="isTickets">Ticket toevoegen</span>
@@ -32,7 +32,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory">
                 <span class="icon add" />
-                <span v-if="webshop.categories.length == 0 && webshop.products.length > 0">Opdelen in categorieën</span>
+                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">Opdelen in categorieën</span>
                 <span v-else>Categorie toevoegen</span>
             </button>
         </p>
@@ -126,7 +126,7 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
     addCategory() {
         const category = Category.create({})
        
-        if (this.webshop.categories.length == 0) {
+        if (this.webshop.categories.length === 0) {
             // Also inherit all products (only on save)
             category.productIds = this.webshop.products.map(p => p.id)
         }
@@ -142,7 +142,7 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
 
     moveCategoryUp(category: Category) {
         const index = this.webshop.categories.findIndex(c => category.id === c.id)
-        if (index == -1 || index == 0) {
+        if (index === -1 || index === 0) {
             return;
         }
 
@@ -154,7 +154,7 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
 
     moveCategoryDown(category: Category) {
         const index = this.webshop.categories.findIndex(c => category.id === c.id)
-        if (index == -1 || index >= this.webshop.categories.length - 1) {
+        if (index === -1 || index >= this.webshop.categories.length - 1) {
             return;
         }
 
@@ -166,7 +166,7 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
 
     moveProductUp(product: Product) {
         const index = this.webshop.products.findIndex(c => product.id === c.id)
-        if (index == -1 || index == 0) {
+        if (index === -1 || index === 0) {
             return;
         }
 
@@ -178,7 +178,7 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
 
     moveProductDown(product: Product) {
         const index = this.webshop.products.findIndex(c => product.id === c.id)
-        if (index == -1 || index >= this.webshop.products.length - 1) {
+        if (index === -1 || index >= this.webshop.products.length - 1) {
             return;
         }
 
@@ -193,7 +193,7 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
     }
 
     set draggableProducts(products) {
-        if (products.length != this.webshop.products.length) {
+        if (products.length !== this.webshop.products.length) {
             return;
         }
 
@@ -209,7 +209,7 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
     }
 
     set draggableCategories(categories) {
-        if (categories.length != this.webshop.categories.length) {
+        if (categories.length !== this.webshop.categories.length) {
             return;
         }
 

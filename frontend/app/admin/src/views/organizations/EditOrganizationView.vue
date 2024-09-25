@@ -35,7 +35,7 @@
             <OrganizationUriInput
                 v-model="uri"
                 :validator="errors.validator"
-                :allowValue="props.organization.uri"
+                :allow-value="props.organization.uri"
             />
         </STInputBox>
         <p class="style-description-small">
@@ -51,9 +51,9 @@
         <template v-if="auth.hasFullPlatformAccess()">
             <hr>
             <h2>{{ $t('97475ade-4e97-4989-b2f4-fecd534db3c4') }}</h2>
-            
+
             <STList>
-                <CheckboxListItem v-model="active" :label="$t('97475ade-4e97-4989-b2f4-fecd534db3c4')" description="Leden kunnen geen inactieve groepen vinden of erbij inloggen."/>
+                <CheckboxListItem v-model="active" :label="$t('97475ade-4e97-4989-b2f4-fecd534db3c4')" description="Leden kunnen geen inactieve groepen vinden of erbij inloggen." />
             </STList>
         </template>
     </SaveView>
@@ -74,15 +74,15 @@ import SelectOrganizationTagRow from './tags/components/SelectOrganizationTagRow
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
-const auth = useAuth()
+const auth = useAuth();
 
 const props = defineProps<{
-    organization: Organization,
-    isNew: boolean,
-    saveHandler: (patch: AutoEncoderPatchType<Organization>) => Promise<void>
-}>()
+    organization: Organization;
+    isNew: boolean;
+    saveHandler: (patch: AutoEncoderPatchType<Organization>) => Promise<void>;
+}>();
 
-const {patched, hasChanges, addPatch, patch} = usePatch(props.organization)
+const { patched, hasChanges, addPatch, patch } = usePatch(props.organization);
 const $t = useTranslate();
 
 const saving = ref(false);
@@ -92,35 +92,35 @@ const title = computed(() => props.isNew ? $t('7066aee7-9e51-4767-b288-460646cec
 const name = computed({
     get: () => patched.value.name,
     set: (value) => {
-        addPatch({name: value})
+        addPatch({ name: value });
 
         if (props.isNew && !props.organization.uri) {
-            addPatch({uri: Formatter.slug(value)})
+            addPatch({ uri: Formatter.slug(value) });
         }
-    }
-})
+    },
+});
 
 const uri = computed({
     get: () => patched.value.uri,
-    set: (value) => addPatch({uri: value})
-})
+    set: value => addPatch({ uri: value }),
+});
 
 const address = computed({
     get: () => patched.value.address,
-    set: (value) => addPatch({address: value})
-})
+    set: value => addPatch({ address: value }),
+});
 
 const website = computed({
     get: () => patched.value.website,
-    set: (value) => addPatch({website: value})
-})
+    set: value => addPatch({ website: value }),
+});
 
 const active = computed({
     get: () => patched.value.active,
-    set: (value) => addPatch({active: value})
-})
+    set: value => addPatch({ active: value }),
+});
 
-const tags = computed(() => platform.value.config.tags)
+const tags = computed(() => platform.value.config.tags);
 
 async function save() {
     if (saving.value) {
@@ -139,13 +139,14 @@ async function save() {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'name',
-                message: $t('11b55f40-f3d4-4ce7-9831-57d188367b9f')
-            })
+                message: $t('11b55f40-f3d4-4ce7-9831-57d188367b9f'),
+            });
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
@@ -155,10 +156,10 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

@@ -216,7 +216,7 @@ export class SessionContext implements RequestMiddleware {
                     await Storage.secure.removeItem('user-' + this.organization.id)
                 }
 
-                if (suffix != 'platform') {
+                if (suffix !== 'platform') {
                     await Storage.secure.removeItem('token-platform')
                     await Storage.secure.removeItem('user-platform')
                 }
@@ -847,12 +847,12 @@ export class SessionContext implements RequestMiddleware {
             return false;
         }
 
-        if (response.status != 401) {
+        if (response.status !== 401) {
             return false;
         }
 
         if (error.hasCode("expired_access_token")) {
-            if (request.headers.Authorization != "Bearer " + this.token.token.accessToken) {
+            if (request.headers.Authorization !== "Bearer " + this.token.token.accessToken) {
                 console.log("This request started with an old token that might not be valid anymore. Retry with new token before doing a refresh")
                 return true
             }
@@ -882,7 +882,7 @@ export class SessionContext implements RequestMiddleware {
             }
             return true
         } else {
-            if (request.headers.Authorization != "Bearer " + this.token.token.accessToken) {
+            if (request.headers.Authorization !== "Bearer " + this.token.token.accessToken) {
                 console.log("This request started with an old token that might not be valid anymore. Retry with new token")
                 return true
             } else {

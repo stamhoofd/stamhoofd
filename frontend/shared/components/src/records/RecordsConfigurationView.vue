@@ -39,10 +39,10 @@
             Extra persoonsgegevens
         </h2>
 
-        <p v-if="app == 'dashboard'">
+        <p v-if="app === 'dashboard'">
             Breid het aantal persoonsgegevens zelf nog uit. Vervolgens kan je per inschrijvingsgroep (of gewoon voor alle leden) de persoonsgegevens inschakelen.
         </p>
-        <p v-if="app == 'admin'">
+        <p v-if="app === 'admin'">
             Voeg zelf nog persoonsgegevens toe die voor alle lokale groepen beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen kunnen deze ook nog inschakelen volgens hun wensen.
         </p>
         <p class="style-description-block">

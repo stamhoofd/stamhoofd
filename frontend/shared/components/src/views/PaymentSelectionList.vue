@@ -9,13 +9,13 @@
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
-                    <span v-if="paymentMethod == 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">Meest gebruikt</span>
+                    <span v-if="paymentMethod === 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">Meest gebruikt</span>
                 </h2>
                 <p v-if="getDescription(paymentMethod)" class="style-description-small">
                     {{ getDescription(paymentMethod) }}
                 </p>
 
-                <div v-if="paymentMethod == 'Payconiq'" class="payment-app-banner">
+                <div v-if="paymentMethod === 'Payconiq'" class="payment-app-banner">
                     <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/payconiq/app.svg">
                     <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg">
                     <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg">
@@ -94,7 +94,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         const r: PaymentMethod[] = []
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country == Country.Netherlands) {
+        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country === Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 
@@ -109,7 +109,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country != Country.Netherlands) {
+        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country !== Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 
@@ -124,7 +124,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         }
 
         // Others
-        r.push(...methods.filter(p => p != PaymentMethod.Payconiq && p != PaymentMethod.Bancontact && p != PaymentMethod.iDEAL && p != PaymentMethod.CreditCard && p != PaymentMethod.Transfer))
+        r.push(...methods.filter(p => p !== PaymentMethod.Payconiq && p !== PaymentMethod.Bancontact && p !== PaymentMethod.iDEAL && p !== PaymentMethod.CreditCard && p !== PaymentMethod.Transfer))
 
         return r
     }

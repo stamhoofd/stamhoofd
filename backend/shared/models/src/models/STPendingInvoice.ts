@@ -1,6 +1,6 @@
-import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { STInvoiceMeta } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 import { Organization } from './';
 
@@ -8,56 +8,56 @@ import { Organization } from './';
  * Things that should get paid, but are not yet invoiced yet because:
  * - total price is too low
  * - auto renewals waiting for payment
- * 
+ *
  * When they are about to get paid, we create a new invoice model
  * and if that model is marked as paid, it will remove the corresponding
  * items in this pending invoice.
- * 
+ *
  * So please make sure you don't edit existing items, unless you change the id
  */
 export class STPendingInvoice extends Model {
-    static table = "stamhoofd_pending_invoices";
+    static table = 'stamhoofd_pending_invoices';
 
     // Columns
     @column({
-        primary: true, type: "string", beforeSave(value) {
+        primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
-        }
+        },
     })
     id!: string;
 
-    @column({ foreignKey: STPendingInvoice.organization, type: "string", nullable: true })
+    @column({ foreignKey: STPendingInvoice.organization, type: 'string', nullable: true })
     organizationId: string | null;
-    
-    @column({ type: "json", decoder: STInvoiceMeta })
-    meta: STInvoiceMeta
+
+    @column({ type: 'json', decoder: STInvoiceMeta })
+    meta: STInvoiceMeta;
 
     /// We can only have one invoice at a time for the pending invoice items
     /// So until this invoice is marked as 'failed', we don't create new invoices for this pending invoice
-    @column({ type: "string", nullable: true })
-    invoiceId: string | null = null
+    @column({ type: 'string', nullable: true })
+    invoiceId: string | null = null;
 
     @column({
-        type: "datetime", beforeSave(old?: any) {
+        type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
-        }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
     })
-    createdAt: Date
+    createdAt: Date;
 
     @column({
-        type: "datetime", beforeSave() {
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
         },
-        skipUpdate: true
+        skipUpdate: true,
     })
-    updatedAt: Date
+    updatedAt: Date;
 
-    static organization = new ManyToOneRelation(Organization, "organization");
+    static organization = new ManyToOneRelation(Organization, 'organization');
 }

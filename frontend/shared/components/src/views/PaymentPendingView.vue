@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar title="Betaling" />
 
-        <main v-if="!payment || payment.status != 'Failed'">
+        <main v-if="!payment || payment.status !== 'Failed'">
             <h1>Wachten op betaalbevestiging...</h1>
             <p>We wachten op de betaalbevestiging van de bank. Verlaat deze pagina niet. Dit duurt hooguit 5 minuten.</p>
 
@@ -14,7 +14,7 @@
             <p>De betaling werd geannuleerd of door de bank geweigerd.</p>
         </main>
 
-        <STToolbar v-if="payment && (payment.status == 'Failed' || payment.method == 'Payconiq')">
+        <STToolbar v-if="payment && (payment.status === 'Failed' || payment.method === 'Payconiq')">
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="retry">
                     <span>Opnieuw proberen</span>
@@ -113,7 +113,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
                 if (this.didFinish) {
                     return;
                 }
-                if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
+                if (this.payment && (this.payment.status === PaymentStatus.Succeeded || this.payment.status === PaymentStatus.Failed)) {
                     this.didFinish = true
                     this.finishedHandler.call(this, this.payment);
                     return;

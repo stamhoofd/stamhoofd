@@ -150,7 +150,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
             errors.throwIfNotEmpty()
 
-            if (this.password != this.passwordRepeat) {
+            if (this.password !== this.passwordRepeat) {
                 plausible('passwordsNotMatching'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
                     code: "password_do_not_match",

@@ -25,7 +25,7 @@
                 </STListItem>
             </STList>
 
-            <p v-if="emails.length == 0" class="info-box">
+            <p v-if="emails.length === 0" class="info-box">
                 Je hebt nog geen e-mailadressen toegevoegd. 
             </p>
         </main>

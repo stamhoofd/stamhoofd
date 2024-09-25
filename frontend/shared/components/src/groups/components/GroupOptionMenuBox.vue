@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <template v-if="level == 2">
+        <template v-if="level === 2">
             <h2 class="style-with-button">
                 <div @contextmenu.prevent="showContextMenu">
                     {{ name }}
@@ -13,7 +13,7 @@
             <p v-if="description" class="style-description pre-wrap" v-text="description" />
         </template>
 
-        <template v-if="level == 1">
+        <template v-if="level === 1">
             <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
                 <input
                     v-model="name"

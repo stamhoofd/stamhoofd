@@ -15,7 +15,7 @@
                 <span class="icon help" />
                 <span>Het lukt niet</span>
             </button></template>
-            <LoadingButton slot="right" :loading="payment && payment.status == 'Pending'">
+            <LoadingButton slot="right" :loading="payment && payment.status === 'Pending'">
                 <a :href="paymentUrl" class="button primary open-app">
                     <span class="icon external" /><span>Open de app</span>
                 </a>
@@ -85,11 +85,11 @@ export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
     }
 
     get isIOS() {
-        return this.getOS() == "iOS"
+        return this.getOS() === "iOS"
     }
 
     helpMe() {
-        if (this.getOS() == "iOS") {
+        if (this.getOS() === "iOS") {
             new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.")
                 .addCloseButton()
                 .show()

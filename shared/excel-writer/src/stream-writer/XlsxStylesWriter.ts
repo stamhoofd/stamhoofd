@@ -1,15 +1,15 @@
-import { CellAlignmentOptions, CellStyleRequest, FontOptions, NumberFormatOptions, XlsxBuiltInNumberFormat } from "../interfaces";
-import { escapeXml } from "./escapeXml";
-import { XlsxFileWriter } from "./XlsxFileWriter";
+import { CellAlignmentOptions, CellStyleRequest, FontOptions, NumberFormatOptions, XlsxBuiltInNumberFormat } from '../interfaces';
+import { escapeXml } from './escapeXml';
+import { XlsxFileWriter } from './XlsxFileWriter';
 
 type CellStyle = {
     fontId?: number;
     numberFormatId?: number;
-    alignment?: CellAlignmentOptions,
+    alignment?: CellAlignmentOptions;
     applyNumberFormat?: boolean;
     applyFont?: boolean;
     applyAlignment?: boolean;
-}
+};
 
 export class XlsxStylesWriter extends XlsxFileWriter {
     numberFormats: Required<NumberFormatOptions>[] = [];
@@ -56,7 +56,7 @@ export class XlsxStylesWriter extends XlsxFileWriter {
 
         // Generate a new id
         const id = this.numberFormats.length + 164;
-        this.numberFormats.push({id, formatCode: options.formatCode});
+        this.numberFormats.push({ id, formatCode: options.formatCode });
 
         return id;
     }
@@ -89,7 +89,7 @@ export class XlsxStylesWriter extends XlsxFileWriter {
             applyNumberFormat: style.numberFormat ? true : undefined,
             applyFont: style.font ? true : false,
             applyAlignment: style.alignment ? true : false,
-        }
+        };
     }
 
     alignmentEquals(a: CellAlignmentOptions, b: CellAlignmentOptions): boolean {
@@ -97,19 +97,19 @@ export class XlsxStylesWriter extends XlsxFileWriter {
     }
 
     styleEquals(a: CellStyle, b: CellStyle): boolean {
-        return a.fontId === b.fontId &&
-            a.numberFormatId === b.numberFormatId &&
-            a.applyNumberFormat === b.applyNumberFormat &&
-            a.applyFont === b.applyFont &&
-            this.alignmentEquals(a.alignment || {}, b.alignment || {}) &&
-            a.applyAlignment === b.applyAlignment
+        return a.fontId === b.fontId
+            && a.numberFormatId === b.numberFormatId
+            && a.applyNumberFormat === b.applyNumberFormat
+            && a.applyFont === b.applyFont
+            && this.alignmentEquals(a.alignment || {}, b.alignment || {})
+            && a.applyAlignment === b.applyAlignment;
     }
 
     async requestCellStyleId(request: CellStyleRequest): Promise<number> {
         const style = await this.getCellStyle(request);
 
         for (const [id, s] of this.cellStyles.entries()) {
-            if (this.styleEquals(style ,s)) {
+            if (this.styleEquals(style, s)) {
                 return id;
             }
         }
@@ -165,7 +165,7 @@ export class XlsxStylesWriter extends XlsxFileWriter {
 
         for (const style of this.cellStyles) {
             const attrs = `numFmtId="${style.numberFormatId}" fontId="${style.fontId}" fillId="0" borderId="0" xfId="0" applyNumberFormat="${style.applyNumberFormat ? 1 : 0}" applyFont="${style.applyFont ? 1 : 0}" applyAlignment="${style.applyAlignment ? 1 : 0}"`;
-            
+
             if (style.alignment) {
                 await this.write(`<xf ${attrs}>`);
                 await this.write(`<alignment`);
@@ -180,7 +180,8 @@ export class XlsxStylesWriter extends XlsxFileWriter {
                 }
                 await this.write(` />`);
                 await this.write(`</xf>`);
-            } else {
+            }
+            else {
                 await this.write(`<xf ${attrs} />`);
             }
         }
@@ -199,4 +200,3 @@ export class XlsxStylesWriter extends XlsxFileWriter {
         await super.close();
     }
 }
-

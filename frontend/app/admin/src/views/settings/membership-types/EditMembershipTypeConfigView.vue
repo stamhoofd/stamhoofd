@@ -70,7 +70,6 @@
     </SaveView>
 </template>
 
-
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -89,15 +88,15 @@ const $t = useTranslate();
 const props = defineProps<{
     type: PlatformMembershipType;
     config: PlatformMembershipTypeConfig;
-    period: RegistrationPeriod
+    period: RegistrationPeriod;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<PlatformMembershipTypeConfig>) => Promise<void>,
-    deleteHandler: (() => Promise<void>)|null
+    saveHandler: (p: AutoEncoderPatchType<PlatformMembershipTypeConfig>) => Promise<void>;
+    deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => $t('8301bf8b-569b-4a66-8985-455392098279', {periodName: props.period.name}));
+const title = computed(() => $t('8301bf8b-569b-4a66-8985-455392098279', { periodName: props.period.name }));
 const pop = usePop();
 
-const {patched, addPatch, hasChanges, patch} = usePatch(props.config);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.config);
 
 const $showPricePerDay = computed(() => props.type.behaviour === PlatformMembershipTypeBehaviour.Days);
 
@@ -108,35 +107,36 @@ const save = async () => {
     saving.value = true;
 
     try {
-        if (! await errors.validator.validate()) {
+        if (!await errors.validator.validate()) {
             saving.value = false;
             return;
         }
 
-        const startDateInPeriod = props.period.startDate.getTime() <= patched.value.startDate.getTime() && props.period.endDate.getTime() >= patched.value.startDate.getTime()
-        const endDate = patched.value.expireDate || patched.value.endDate
-        const endDateInPeriod = props.period.startDate.getTime() <= endDate.getTime() && props.period.endDate.getTime() >= endDate.getTime()
+        const startDateInPeriod = props.period.startDate.getTime() <= patched.value.startDate.getTime() && props.period.endDate.getTime() >= patched.value.startDate.getTime();
+        const endDate = patched.value.expireDate || patched.value.endDate;
+        const endDateInPeriod = props.period.startDate.getTime() <= endDate.getTime() && props.period.endDate.getTime() >= endDate.getTime();
 
         if (!startDateInPeriod || !endDateInPeriod) {
             throw new SimpleError({
                 code: 'invalid_date_range',
                 message: 'De aansluitingsperiode moet binnen de periode van het gekozen werkjaar liggen',
-                field: 'startDate'
-            })
+                field: 'startDate',
+            });
         }
 
         if (patched.value.expireDate && (patched.value.expireDate.getTime() > patched.value.endDate.getTime() || patched.value.expireDate.getTime() < patched.value.startDate.getTime())) {
             throw new SimpleError({
                 code: 'invalid_date_range',
                 message: 'De vervaldatum moet tussen de start- en einddatum liggen',
-                field: 'expireDate'
-            })
+                field: 'expireDate',
+            });
         }
-        
-        await props.saveHandler(patch.value)
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
@@ -152,15 +152,16 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm($t('0d0147f0-f42e-4f6b-bf04-16c21fb8ae7d'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'))) {
-        return
+        return;
     }
-        
+
     deleting.value = true;
     try {
-        await props.deleteHandler()
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.deleteHandler();
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     deleting.value = false;
@@ -168,42 +169,42 @@ const doDelete = async () => {
 
 const startDate = computed({
     get: () => patched.value.startDate,
-    set: (startDate) => addPatch({startDate}),
+    set: startDate => addPatch({ startDate }),
 });
 
 const endDate = computed({
     get: () => patched.value.endDate,
-    set: (endDate) => addPatch({endDate}),
+    set: endDate => addPatch({ endDate }),
 });
 
 const expireDate = computed({
     get: () => patched.value.expireDate,
-    set: (expireDate) => addPatch({expireDate}),
+    set: expireDate => addPatch({ expireDate }),
 });
 
 const prices = computed({
     get: () => patched.value.prices,
-    set: (prices) => addPatch({prices: prices as any}),
+    set: prices => addPatch({ prices: prices as any }),
 });
 
 const amountFree = computed({
     get: () => patched.value.amountFree,
-    set: (amountFree) => addPatch({amountFree}),
+    set: amountFree => addPatch({ amountFree }),
 });
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 function patchPrice(priceConfig: PlatformMembershipTypeConfigPrice, patch: AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>) {
     patch.id = priceConfig.id;
     const array: PatchableArrayAutoEncoder<PlatformMembershipTypeConfigPrice> = new PatchableArray();
     array.addPatch(patch);
-    addPatch({prices: array});
+    addPatch({ prices: array });
 }
 
 function addPrice() {
@@ -211,20 +212,20 @@ function addPrice() {
         startDate: new Date(),
     })].sort((a, b) => {
         if (!a.startDate) {
-            return -1
+            return -1;
         }
         if (!b.startDate) {
-            return 1
+            return 1;
         }
-        return a.startDate.getTime() - b.startDate.getTime()
-    })
+        return a.startDate.getTime() - b.startDate.getTime();
+    });
 }
 
 function deletePrice(price: PlatformMembershipTypeConfigPrice) {
-    prices.value = prices.value.filter(p => p.id !== price.id)
+    prices.value = prices.value.filter(p => p.id !== price.id);
 }
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

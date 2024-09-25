@@ -30,7 +30,9 @@
         <hr>
         <h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
 
-        <p class="style-description-small">Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.</p>
+        <p class="style-description-small">
+            Stel optioneel limieten voor het aantal lokalen van deze soort per groep in.
+        </p>
 
         <div class="split-inputs">
             <STInputBox :title="$t('87bd59dd-77fa-4519-9fab-abf46707e51f')" error-fields="minimumDays" :error-box="errors.errorBox">
@@ -43,7 +45,6 @@
         </div>
     </SaveView>
 </template>
-
 
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
@@ -61,13 +62,13 @@ const $t = useTranslate();
 const props = defineProps<{
     type: PlatformPremiseType;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<PlatformPremiseType>) => Promise<void>,
-    deleteHandler: (() => Promise<void>)|null
+    saveHandler: (p: AutoEncoderPatchType<PlatformPremiseType>) => Promise<void>;
+    deleteHandler: (() => Promise<void>) | null;
 }>();
 const title = computed(() => props.isNew ? $t('58949c21-cefa-4818-b643-72b41b6e0449') : $t('595705ee-d41e-474a-8180-17b94cd0a3cc'));
 const pop = usePop();
 
-const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.type);
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -75,10 +76,11 @@ const save = async () => {
     }
     saving.value = true;
     try {
-        await props.saveHandler(patch.value)
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
 };
@@ -93,15 +95,16 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm($t('0388e538-52e1-421e-baac-6d788adf44d3'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('78cf134f-d4fb-4da4-b077-0419f29e4268'))) {
-        return
+        return;
     }
-        
+
     deleting.value = true;
     try {
-        await props.deleteHandler()
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.deleteHandler();
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     deleting.value = false;
@@ -109,33 +112,33 @@ const doDelete = async () => {
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name}),
+    set: name => addPatch({ name }),
 });
 
 const description = computed({
     get: () => patched.value.description,
-    set: (description) => addPatch({description})
+    set: description => addPatch({ description }),
 });
 
 const min = computed({
     get: () => patched.value.min,
-    set: (min) => addPatch({min}),
+    set: min => addPatch({ min }),
 });
 
 const max = computed({
     get: () => patched.value.max,
-    set: (max) => addPatch({max}),
+    set: max => addPatch({ max }),
 });
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

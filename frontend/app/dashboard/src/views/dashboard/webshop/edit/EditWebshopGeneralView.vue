@@ -94,7 +94,7 @@
             <p v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" class="warning-box">
                 Je kan de bestelnummering niet meer wijzigen van willekeurig naar opeenvolgend (dupliceer de webshop als je dat toch nog wilt doen). 
             </p>
-            <p v-else-if="numberingType == WebshopNumberingType.Random" class="warning-box">
+            <p v-else-if="numberingType === WebshopNumberingType.Random" class="warning-box">
                 Je kan de bestelnummering achteraf niet meer wijzigen van willekeurig naar opeenvolgend. 
             </p>
 
@@ -229,7 +229,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     }
 
     get canChangeType() {
-        return true; //this.webshop.products.length == 0 && this.webshop.meta.checkoutMethods.length == 0
+        return true; //this.webshop.products.length === 0 && this.webshop.meta.checkoutMethods.length === 0
     }
     
     get viewTitle() {
@@ -365,7 +365,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     }
 
     set useAvailableUntil(use: boolean) {
-        if (use == this.useAvailableUntil) {
+        if (use === this.useAvailableUntil) {
             return;
         }
         const p = PrivateWebshop.patch({})

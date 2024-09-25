@@ -1,6 +1,6 @@
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder, patchObject } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { RegistrationPeriod as RegistrationPeriodStruct } from "@stamhoofd/structures";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Platform, RegistrationPeriod } from '@stamhoofd/models';
@@ -9,8 +9,8 @@ import { PeriodHelper } from '../../../helpers/PeriodHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<RegistrationPeriodStruct>
-type ResponseBody = RegistrationPeriodStruct[]
+type Body = PatchableArrayAutoEncoder<RegistrationPeriodStruct>;
+type ResponseBody = RegistrationPeriodStruct[];
 
 /**
  * One endpoint to create, patch and delete members and their registrations and payments
@@ -18,14 +18,14 @@ type ResponseBody = RegistrationPeriodStruct[]
 
 export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    bodyDecoder = new PatchableArrayDecoder(RegistrationPeriodStruct as any, RegistrationPeriodStruct.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<RegistrationPeriodStruct[]>>
+    bodyDecoder = new PatchableArrayDecoder(RegistrationPeriodStruct as any, RegistrationPeriodStruct.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<RegistrationPeriodStruct[]>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "PATCH") {
+        if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/registration-periods", {});
+        const params = Endpoint.parseParameters(request.url, '/registration-periods', {});
 
         if (params) {
             return [true, params as Params];
@@ -35,22 +35,23 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setUserOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (organization) {
             if (!await Context.auth.hasFullAccess(organization.id)) {
-                throw Context.auth.error()
-            } 
-        } else {
+                throw Context.auth.error();
+            }
+        }
+        else {
             if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error()
-            } 
+                throw Context.auth.error();
+            }
         }
 
         const periods: RegistrationPeriod[] = [];
 
-        for (const {put} of request.body.getPuts()) {
+        for (const { put } of request.body.getPuts()) {
             const period = new RegistrationPeriod();
             period.id = put.id;
             period.startDate = put.startDate;
@@ -68,9 +69,9 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             if (!model || model.organizationId !== (organization?.id ?? null)) {
                 throw new SimpleError({
-                    code: "not_found",
+                    code: 'not_found',
                     statusCode: 404,
-                    message: "Registration period not found",
+                    message: 'Registration period not found',
                 });
             }
 
@@ -101,9 +102,9 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             if (!model || model.organizationId !== (organization?.id ?? null)) {
                 throw new SimpleError({
-                    code: "not_found",
+                    code: 'not_found',
                     statusCode: 404,
-                    message: "Registration period not found",
+                    message: 'Registration period not found',
                 });
             }
 
@@ -111,11 +112,10 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
         }
 
         // Clear platform cache
-        Platform.clearCache()
+        Platform.clearCache();
 
         return new Response(
-            periods.map(p => p.getStructure())
+            periods.map(p => p.getStructure()),
         );
     }
-
 }

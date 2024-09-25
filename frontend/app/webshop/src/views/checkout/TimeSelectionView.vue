@@ -4,11 +4,11 @@
             {{ title }}
         </h1>
 
-        <p v-if="checkoutMethod.type == 'Takeout'">
+        <p v-if="checkoutMethod.type === 'Takeout'">
             Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
         </p>
 
-        <p v-if="checkoutMethod.type == 'OnSite'">
+        <p v-if="checkoutMethod.type === 'OnSite'">
             Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
         </p>
                 
@@ -28,7 +28,7 @@
 
                 <template #right>
                     <span v-if="slot.listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
         </STList>
@@ -88,7 +88,7 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
 
     get selectedSlot(): WebshopTimeSlot {
         if (this.$checkoutManager.checkout.timeSlot) {
-            return this.timeSlots.find(t => t.id == this.$checkoutManager.checkout.timeSlot!.id) ?? this.timeSlots[0]
+            return this.timeSlots.find(t => t.id === this.$checkoutManager.checkout.timeSlot!.id) ?? this.timeSlots[0]
         }
         return this.timeSlots[0]
     }

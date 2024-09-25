@@ -1,23 +1,23 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Payment } from "@stamhoofd/models";
-import { PaymentGeneral } from "@stamhoofd/structures";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Payment } from '@stamhoofd/models';
+import { PaymentGeneral } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from "../../../helpers/AuthenticatedStructures";
-import { Context } from "../../../helpers/Context";
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../helpers/Context';
 
 type Params = { id: string };
-type Query = undefined
-type Body = undefined
-type ResponseBody = PaymentGeneral
+type Query = undefined;
+type Body = undefined;
+type ResponseBody = PaymentGeneral;
 
 export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/payments/@id", { id: String});
+        const params = Endpoint.parseParameters(request.url, '/payments/@id', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -26,20 +26,20 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope()
-        await Context.authenticate()
+        await Context.setOptionalOrganizationScope();
+        await Context.authenticate();
 
         const payment = await Payment.getByID(request.params.id);
         if (!payment) {
             throw new SimpleError({
-                code: "not_found",
-                message: "Payment not found",
-                human: "Je hebt geen toegang tot deze betaling"
-            })
+                code: 'not_found',
+                message: 'Payment not found',
+                human: 'Je hebt geen toegang tot deze betaling',
+            });
         }
 
         return new Response(
-            await AuthenticatedStructures.paymentGeneral(payment, true)
+            await AuthenticatedStructures.paymentGeneral(payment, true),
         );
     }
 }

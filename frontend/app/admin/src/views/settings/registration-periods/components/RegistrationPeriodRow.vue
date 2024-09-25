@@ -20,11 +20,11 @@ import { Platform, RegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    period: RegistrationPeriod,
-    platform: Platform
+    period: RegistrationPeriod;
+    platform: Platform;
 }>();
 
 const isCurrent = computed(() => {
     return props.period.id === props.platform.period.id;
-})
+});
 </script>

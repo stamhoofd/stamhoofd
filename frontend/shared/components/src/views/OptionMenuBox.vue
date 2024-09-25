@@ -19,7 +19,7 @@
                     {{ getOptionStockText(option) }}
                 </p>
 
-                <template v-if="option.price != 0" slot="right">
+                <template v-if="option.price !== 0" slot="right">
                     {{ formatPriceChange(option.price) }}
                 </template>
             </STListItem>
@@ -68,11 +68,11 @@ export default class OptionMenuBox extends Mixins(NavigationMixin){
         admin: boolean
         
     isOptionSelected(option: Option) {
-        return !!this.cartItem.options.find(o => o.optionMenu.id == this.optionMenu.id && o.option.id == option.id)
+        return !!this.cartItem.options.find(o => o.optionMenu.id === this.optionMenu.id && o.option.id === option.id)
     }
 
     selectOption(option: Option, selected: boolean) {
-        const filtered = this.cartItem.options.filter(o => o.optionMenu.id != this.optionMenu.id || o.option.id != option.id)
+        const filtered = this.cartItem.options.filter(o => o.optionMenu.id !== this.optionMenu.id || o.option.id !== option.id)
         if (selected) {
             filtered.push(CartItemOption.create({ optionMenu: this.optionMenu, option }))
         }
@@ -80,7 +80,7 @@ export default class OptionMenuBox extends Mixins(NavigationMixin){
     }
 
     get selectedOption() {
-        return this.cartItem.options.find(o => o.optionMenu.id == this.optionMenu.id)?.option?.id ?? ""
+        return this.cartItem.options.find(o => o.optionMenu.id === this.optionMenu.id)?.option?.id ?? ""
     }
 
     set selectedOption(id: string) {
@@ -88,7 +88,7 @@ export default class OptionMenuBox extends Mixins(NavigationMixin){
         if (!option) {
             return
         }
-        const filtered = this.cartItem.options.filter(o => o.optionMenu.id != this.optionMenu.id)
+        const filtered = this.cartItem.options.filter(o => o.optionMenu.id !== this.optionMenu.id)
         filtered.push(CartItemOption.create({ optionMenu: this.optionMenu, option }))
         this.cartItem.options = filtered
     }

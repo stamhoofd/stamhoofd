@@ -47,9 +47,9 @@ const root = new ComponentWithProperties(PromiseView, {
             let component: ComponentWithProperties
             if (app === 'auto') {
                 component = (await getScopedAutoRootFromUrl())
-            } else if (app == 'dashboard') {
+            } else if (app === 'dashboard') {
                 component =  (await getScopedDashboardRootFromUrl())
-            } else if (app == 'admin') {
+            } else if (app === 'admin') {
                 component =  (await getScopedAdminRootFromUrl())
             } else {
                 component =  (await getScopedRegistrationRootFromUrl())
@@ -76,7 +76,7 @@ async function checkGlobalRoutes() {
     const queryString = UrlHelper.initial.getSearchParams()
     console.log('check global routes', parts, queryString, currentPath)
 
-    if (parts.length == 1 && parts[0] == 'unsubscribe') {
+    if (parts.length === 1 && parts[0] === 'unsubscribe') {
         const id = queryString.get('id')
         const token = queryString.get('token')
         const type = queryString.get('type') ?? 'all'
@@ -86,7 +86,7 @@ async function checkGlobalRoutes() {
         }
     }
 
-    if (parts.length >= 1 && parts[0] == 'verify-email') {
+    if (parts.length >= 1 && parts[0] === 'verify-email') {
         const token = queryString.get('token')
         const code = queryString.get('code')
             

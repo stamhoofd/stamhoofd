@@ -1,64 +1,64 @@
-import { column, Model } from "@simonbackx/simple-database";
+import { column, Model } from '@simonbackx/simple-database';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Discount, DiscountCode } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 export class WebshopDiscountCode extends Model {
-    static table = "webshop_discount_codes";
+    static table = 'webshop_discount_codes';
 
     // Columns
     @column({
-        primary: true, type: "string", beforeSave(value) {
+        primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
-        }
+        },
     })
     id!: string;
 
-    @column({ type: "string" })
+    @column({ type: 'string' })
     organizationId: string;
 
-    @column({ type: "string" })
+    @column({ type: 'string' })
     webshopId: string;
 
-    @column({ type: "string" })
+    @column({ type: 'string' })
     code: string;
 
-    @column({ type: "string" })
-    description = ''
-    
-    @column({ type: "json", decoder: new ArrayDecoder(Discount) })
-    discounts: Discount[] = []
+    @column({ type: 'string' })
+    description = '';
 
-    @column({ type: "integer" })
-    usageCount = 0
+    @column({ type: 'json', decoder: new ArrayDecoder(Discount) })
+    discounts: Discount[] = [];
 
-    @column({ type: "integer", nullable: true })
-    maximumUsage: number|null = null
+    @column({ type: 'integer' })
+    usageCount = 0;
+
+    @column({ type: 'integer', nullable: true })
+    maximumUsage: number | null = null;
 
     @column({
-        type: "datetime", beforeSave(old?: any) {
+        type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
-        }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
     })
-    createdAt: Date
+    createdAt: Date;
 
     @column({
-        type: "datetime", beforeSave() {
-            const date = new Date()
-            date.setMilliseconds(0)
-            return date
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
         },
-        skipUpdate: true
+        skipUpdate: true,
     })
-    updatedAt: Date
+    updatedAt: Date;
 
     getStructure(): DiscountCode {
-        return DiscountCode.create(this)
+        return DiscountCode.create(this);
     }
 
     static async getActiveCodes(webshopId: string, codes: string[]) {
@@ -70,12 +70,12 @@ export class WebshopDiscountCode extends Model {
             webshopId,
             code: {
                 sign: 'IN',
-                value: codes
-            }
+                value: codes,
+            },
         });
 
         // Remove used discount codes
-        models = models.filter(c => c.maximumUsage === null || c.maximumUsage > c.usageCount)
+        models = models.filter(c => c.maximumUsage === null || c.maximumUsage > c.usageCount);
         return models;
     }
 }

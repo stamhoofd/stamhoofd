@@ -77,7 +77,7 @@ export default class PropertyFilterView extends Mixins(NavigationMixin) {
     }
 
     isChanged() {
-        return JSON.stringify(this.editingConfiguration.encode({ version: Version })) != JSON.stringify(this.configuration.encode({ version: Version }))
+        return JSON.stringify(this.editingConfiguration.encode({ version: Version })) !== JSON.stringify(this.configuration.encode({ version: Version }))
     }
 
     async shouldNavigateAway() {

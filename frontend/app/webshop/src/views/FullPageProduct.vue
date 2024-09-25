@@ -60,7 +60,7 @@ export default class FullPageProduct extends Mixins(NavigationMixin){
 
     get oldItem() {
         if (this.updateItem) {
-            const item = this.cart.items.find(i => i.product.id == this.product.id)
+            const item = this.cart.items.find(i => i.product.id === this.product.id)
             if (item) {
                 try {
                     item.validate(this.webshop, this.cart, {

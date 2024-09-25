@@ -17,8 +17,8 @@
                     @keyup.right="selectNext(index)"
                     @change="updateValue"
                 >
-                <span v-if="index%spaceLength == 0 && index !== codeLength" class="bump">-</span>
-                <span v-if="index%(spaceLength*2) == 0 && index !== codeLength" class="break"></span>
+                <span v-if="index%spaceLength === 0 && index !== codeLength" class="bump">-</span>
+                <span v-if="index%(spaceLength*2) === 0 && index !== codeLength" class="break"></span>
             </template>
         </div>
     </div>
@@ -47,10 +47,10 @@ export default class CodeInput extends VueComponent {
 
     @Watch("modelValue")
     onValueChanged(value: string, _oldValue: string) {
-        if (value == _oldValue) {
+        if (value === _oldValue) {
             return
         }
-        if (value == this.getInternalValue()) {
+        if (value === this.getInternalValue()) {
             return
         }
         if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
@@ -93,7 +93,7 @@ export default class CodeInput extends VueComponent {
 
         // Move everything one to the left
         const input = this.$refs.numberInput[index] as HTMLInputElement;
-        if (input.value.length == 0 && index < this.codeLength - 1) {
+        if (input.value.length === 0 && index < this.codeLength - 1) {
             input.value = (this.$refs.numberInput[index + 1] as HTMLInputElement).value;
             (this.$refs.numberInput[index + 1] as HTMLInputElement).value = ""
             this.clearInput(index + 1, false)
@@ -166,7 +166,7 @@ export default class CodeInput extends VueComponent {
             const element = this.$refs.numberInput[index] as HTMLInputElement;
             const letter = element.value.substr(0, 1).toUpperCase()
             val += letter
-            if (letter.length == 0) {
+            if (letter.length === 0) {
                 break
             }
         }

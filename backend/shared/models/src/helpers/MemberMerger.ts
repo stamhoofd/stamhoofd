@@ -1,5 +1,5 @@
-import { Model } from "@simonbackx/simple-database";
-import { SQL } from "@stamhoofd/sql";
+import { Model } from '@simonbackx/simple-database';
+import { SQL } from '@stamhoofd/sql';
 import {
     Address,
     BooleanStatus,
@@ -8,8 +8,8 @@ import {
     Parent,
     ParentType,
     RecordAnswer,
-} from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+} from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import {
     BalanceItem,
     Document,
@@ -19,13 +19,13 @@ import {
     MergedMember,
     Registration,
     User,
-} from "../models";
+} from '../models';
 
 export async function mergeMultipleMembers(members: Member[]) {
     const { base, others } = selectBaseMember(members);
 
     if (!base.existsInDatabase) {
-        throw Error("Base member does not exist in database")
+        throw Error('Base member does not exist in database');
     }
 
     for (const other of others) {
@@ -50,14 +50,14 @@ export async function findEqualMembers({
 }
 
 export async function mergeTwoMembers(base: Member, other: Member): Promise<void> {
-    console.log('Merging two member', base.id, other.id, base.details.name, other.details.name)
+    console.log('Merging two member', base.id, other.id, base.details.name, other.details.name);
 
     if (base.id === other.id) {
-        throw new Error('Cannot merge the same member')
+        throw new Error('Cannot merge the same member');
     }
 
     if (!base.existsInDatabase) {
-        throw new Error('Cannot merge to base member that does not exist in database')
+        throw new Error('Cannot merge to base member that does not exist in database');
     }
 
     mergeMemberDetails(base, other);
@@ -75,7 +75,7 @@ export async function mergeTwoMembers(base: Member, other: Member): Promise<void
     await base.save();
 
     if (other.existsInDatabase) {
-        console.log('Deleting duplicate member', other.id, other.details.name)
+        console.log('Deleting duplicate member', other.id, other.details.name);
 
         // store other member in merged_member table
         const mergedMember = MergedMember.fromMember(other, base.id);
@@ -97,12 +97,12 @@ async function mergeResponsibilities(base: Member, other: Member) {
     async function getResponsibilities(memberId: string) {
         const rows = await SQL.select()
             .from(SQL.table(MemberResponsibilityRecord.table))
-            .where(SQL.column("memberId"), memberId)
+            .where(SQL.column('memberId'), memberId)
             .fetch();
 
         return MemberResponsibilityRecord.fromRows(
             rows,
-            MemberResponsibilityRecord.table
+            MemberResponsibilityRecord.table,
         );
     }
 
@@ -112,22 +112,22 @@ async function mergeResponsibilities(base: Member, other: Member) {
     // Delete duplicate responsibilities where endDate is null -> keep responsibility with oldest start date
     for (const otherResponsibility of otherResponsibilities) {
         // check if equal responsibilities exist
-        const otherResponsibilitiesWithoutCurrent =
-            otherResponsibilities.filter(
-                (o) => o.id !== otherResponsibility.id
+        const otherResponsibilitiesWithoutCurrent
+            = otherResponsibilities.filter(
+                o => o.id !== otherResponsibility.id,
             );
         const equalResponsibilities = baseResponsibilities
             .concat(otherResponsibilitiesWithoutCurrent)
             .filter((baseResponsibility) => {
                 return (
-                    baseResponsibility.responsibilityId ===
-                        otherResponsibility.responsibilityId &&
-                    baseResponsibility.organizationId ===
-                        otherResponsibility.organizationId &&
-                    baseResponsibility.groupId ===
-                        otherResponsibility.groupId &&
-                    baseResponsibility.endDate === null &&
-                    otherResponsibility.endDate === null
+                    baseResponsibility.responsibilityId
+                    === otherResponsibility.responsibilityId
+                    && baseResponsibility.organizationId
+                    === otherResponsibility.organizationId
+                    && baseResponsibility.groupId
+                    === otherResponsibility.groupId
+                    && baseResponsibility.endDate === null
+                    && otherResponsibility.endDate === null
                 );
             });
 
@@ -139,22 +139,22 @@ async function mergeResponsibilities(base: Member, other: Member) {
                 // sort on startDate
                 .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
 
-            const responsibilityWithOldestStartDate =
-                allEqualResponsibilities[0];
+            const responsibilityWithOldestStartDate
+                = allEqualResponsibilities[0];
 
             const responsibilitiesToDelete = allEqualResponsibilities.slice(
                 1,
-                undefined
+                undefined,
             );
 
             for (const responsibilityToDelete of responsibilitiesToDelete) {
                 const baseIndex = baseResponsibilities.indexOf(
-                    responsibilityToDelete
+                    responsibilityToDelete,
                 );
                 if (baseIndex !== -1) baseResponsibilities.splice(baseIndex, 1);
                 else {
                     const otherIndex = otherResponsibilities.indexOf(
-                        responsibilityToDelete
+                        responsibilityToDelete,
                     );
                     if (otherIndex !== -1)
                         otherResponsibilities.splice(otherIndex, 1);
@@ -169,7 +169,8 @@ async function mergeResponsibilities(base: Member, other: Member) {
                 responsibilityWithOldestStartDate.memberId = base.id;
                 await responsibilityWithOldestStartDate.save();
             }
-        } else {
+        }
+        else {
             otherResponsibility.memberId = base.id;
             await otherResponsibility.save();
         }
@@ -195,7 +196,7 @@ class ModelWithMemberId extends Model {
 async function mergeModels<M extends typeof ModelWithMemberId>(
     base: Member,
     other: Member,
-    model: M
+    model: M,
 ) {
     const baseId = base.id;
     const otherModels = await model.where({
@@ -215,11 +216,11 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     otherDetails.cleanData();
 
     // string details
-    mergeStringIfBaseNotSet(baseDetails, otherDetails, "firstName");
-    mergeStringIfBaseNotSet(baseDetails, otherDetails, "lastName");
+    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'firstName');
+    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'lastName');
 
-    mergeStringIfBaseNotSet(baseDetails, otherDetails, "memberNumber");
-    mergeStringIfBaseNotSet(baseDetails, otherDetails, "uitpasNumber");
+    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'memberNumber');
+    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'uitpasNumber');
 
     // email
     mergeEmail(baseDetails, otherDetails);
@@ -236,19 +237,19 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     mergeNotes(baseDetails, otherDetails);
 
     // date
-    mergeIfBaseNotSet(baseDetails, otherDetails, "birthDay");
+    mergeIfBaseNotSet(baseDetails, otherDetails, 'birthDay');
 
     // boolean status
     mergeBooleanStatusIfBaseNotSet(
         baseDetails,
         otherDetails,
-        "requiresFinancialSupport"
+        'requiresFinancialSupport',
     );
 
     mergeBooleanStatusIfBaseNotSet(
         baseDetails,
         otherDetails,
-        "dataPermissions"
+        'dataPermissions',
     );
 
     // address
@@ -261,11 +262,11 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     baseDetails.emergencyContacts = baseDetails.emergencyContacts.concat(
         // add contacts that are not yet in the list
         otherDetails.emergencyContacts.filter(
-            (otherContact) =>
-                !baseDetails.emergencyContacts.some((baseContact) =>
-                    baseContact.isEqual(otherContact)
-                )
-        )
+            otherContact =>
+                !baseDetails.emergencyContacts.some(baseContact =>
+                    baseContact.isEqual(otherContact),
+                ),
+        ),
     );
 
     // review times
@@ -279,21 +280,21 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     baseDetails.unverifiedEmails = Formatter.uniqueArray(
         baseDetails.unverifiedEmails.concat(
             otherDetails.unverifiedEmails.filter(
-                (email) => !isNullOrEmpty(email)
-            )
-        )
+                email => !isNullOrEmpty(email),
+            ),
+        ),
     );
     baseDetails.unverifiedPhones = Formatter.uniqueArray(
         baseDetails.unverifiedPhones.concat(
             otherDetails.unverifiedPhones.filter(
-                (phone) => !isNullOrEmpty(phone)
-            )
-        )
+                phone => !isNullOrEmpty(phone),
+            ),
+        ),
     );
 
     // unverified addresses
     for (const address of otherDetails.unverifiedAddresses) {
-        if (!baseDetails.unverifiedAddresses.some((a) => a.id === address.id)) {
+        if (!baseDetails.unverifiedAddresses.some(a => a.id === address.id)) {
             baseDetails.unverifiedAddresses.push(address);
         }
     }
@@ -304,10 +305,10 @@ export function selectBaseMember(members: Member[]): {
     others: Member[];
 } {
     if (members.length < 2) {
-        throw Error("Members array length is less than 2.");
+        throw Error('Members array length is less than 2.');
     }
     const sorted = members.sort(
-        (m1, m2) => (m2.existsInDatabase ? 0 : m2.createdAt.getTime()) - (m1.existsInDatabase ? 0 : m1.createdAt.getTime())
+        (m1, m2) => (m2.existsInDatabase ? 0 : m2.createdAt.getTime()) - (m1.existsInDatabase ? 0 : m1.createdAt.getTime()),
     );
 
     return { base: sorted[0], others: sorted.slice(1, undefined) };
@@ -321,9 +322,11 @@ function mergeAnswers(base: MemberDetails, other: MemberDetails) {
 
         if (!baseAnswer) {
             newAnswers.set(otherId, otherAnswer);
-        } else if (otherAnswer.date >= baseAnswer.date) {
+        }
+        else if (otherAnswer.date >= baseAnswer.date) {
             newAnswers.set(otherId, otherAnswer);
-        } else {
+        }
+        else {
             // keep existing, this one is more up-to-date, don't add the other answer
         }
     }
@@ -333,9 +336,11 @@ function mergeAnswers(base: MemberDetails, other: MemberDetails) {
 function mergeNotes(base: MemberDetails, other: MemberDetails) {
     if (base.notes && other.notes) {
         base.notes = `${base.notes}\n${other.notes}`;
-    } else if (base.notes) {
+    }
+    else if (base.notes) {
         return;
-    } else {
+    }
+    else {
         base.notes = other.notes;
     }
 }
@@ -348,9 +353,9 @@ function mergeParents(base: MemberDetails, other: MemberDetails) {
     for (const otherParent of otherParents) {
         // equal if same first and last name
         const equalBaseParent = baseParents.find(
-            (baseParent) =>
-                hasEqualStringValue(baseParent, otherParent, "firstName") &&
-                hasEqualStringValue(baseParent, otherParent, "lastName")
+            baseParent =>
+                hasEqualStringValue(baseParent, otherParent, 'firstName')
+                && hasEqualStringValue(baseParent, otherParent, 'lastName'),
         );
 
         if (!equalBaseParent) {
@@ -368,8 +373,8 @@ function mergeParent(base: Parent, other: Parent, baseDetails: MemberDetails) {
     if (base.type === ParentType.Other) {
         base.type = other.type;
     }
-    mergeStringIfBaseNotSet(base, other, "firstName");
-    mergeStringIfBaseNotSet(base, other, "lastName");
+    mergeStringIfBaseNotSet(base, other, 'firstName');
+    mergeStringIfBaseNotSet(base, other, 'lastName');
     // add other emails to alternative emails
     mergeEmail(base, other);
     mergePhone(base, other, baseDetails);
@@ -377,14 +382,14 @@ function mergeParent(base: Parent, other: Parent, baseDetails: MemberDetails) {
 }
 
 function mergeEmail(
-    base: { email: string | null, alternativeEmails: string[] },
-    other: { email: string | null, alternativeEmails: string[] }
+    base: { email: string | null; alternativeEmails: string[] },
+    other: { email: string | null; alternativeEmails: string[] },
 ) {
-    const isEmailMerged = mergeStringIfBaseNotSet(base, other, "email");
+    const isEmailMerged = mergeStringIfBaseNotSet(base, other, 'email');
     base.alternativeEmails = Formatter.uniqueArray([...base.alternativeEmails, ...other.alternativeEmails]);
 
     if (!isEmailMerged && !isNullOrEmpty(other.email)) {
-        if (!base.alternativeEmails.some((email) => email === other.email!)) {
+        if (!base.alternativeEmails.some(email => email === other.email!)) {
             base.alternativeEmails.push(other.email!);
         }
     }
@@ -393,13 +398,13 @@ function mergeEmail(
 function mergePhone(
     base: { phone: string | null | undefined },
     other: { phone: string | null | undefined },
-    baseDetails: MemberDetails
+    baseDetails: MemberDetails,
 ) {
-    const isPhoneMerged = mergeStringIfBaseNotSet(base, other, "phone");
+    const isPhoneMerged = mergeStringIfBaseNotSet(base, other, 'phone');
     const otherPhone = other.phone;
     if (!isPhoneMerged && !isNullOrEmpty(otherPhone)) {
         if (
-            !baseDetails.unverifiedPhones.some((phone) => phone === otherPhone)
+            !baseDetails.unverifiedPhones.some(phone => phone === otherPhone)
         ) {
             baseDetails.unverifiedPhones.push(otherPhone!);
         }
@@ -409,18 +414,19 @@ function mergePhone(
 function mergeAddress(
     base: { address: Address | null | undefined },
     other: { address: Address | null | undefined },
-    baseDetails: MemberDetails
+    baseDetails: MemberDetails,
 ) {
     const baseAddress = base.address;
     const otherAddress = other.address;
 
     if (!baseAddress) {
         base.address = otherAddress;
-    } else if (otherAddress && baseAddress.id !== otherAddress.id) {
+    }
+    else if (otherAddress && baseAddress.id !== otherAddress.id) {
         // add other address to unverified addresses
         if (
             !baseDetails.unverifiedAddresses.some(
-                (address) => address.id === otherAddress.id
+                address => address.id === otherAddress.id,
             )
         ) {
             baseDetails.unverifiedAddresses.push(otherAddress);
@@ -431,7 +437,7 @@ function mergeAddress(
 function mergeStringIfBaseNotSet<T, K extends keyof T>(
     base: T,
     other: T,
-    key: K & (T[K] extends string | null | undefined ? K : never)
+    key: K & (T[K] extends string | null | undefined ? K : never),
 ): boolean {
     const baseValue = base[key] as string | null | undefined;
     if (!isNullOrEmpty(baseValue)) {
@@ -451,7 +457,7 @@ function mergeIfBaseNotSet<T, K extends keyof T>(
     base: T,
     other: T,
     key: K &
-        (T[K] extends number | Date | boolean | null | undefined ? K : never)
+        (T[K] extends number | Date | boolean | null | undefined ? K : never),
 ): boolean {
     const baseValue = base[key] as number | Date | boolean | null | undefined;
     if (!(baseValue === null || baseValue === undefined)) return false;
@@ -464,7 +470,7 @@ function mergeIfBaseNotSet<T, K extends keyof T>(
 function mergeBooleanStatusIfBaseNotSet<T, K extends keyof T>(
     base: T,
     other: T,
-    key: K & (T[K] extends BooleanStatus | null | undefined ? K : never)
+    key: K & (T[K] extends BooleanStatus | null | undefined ? K : never),
 ): boolean {
     const otherValue = other[key] as BooleanStatus | null | undefined;
     if (otherValue === null || otherValue === undefined) return false;
@@ -493,17 +499,17 @@ function mergeBooleanStatusIfBaseNotSet<T, K extends keyof T>(
 function hasEqualStringValue<T, K extends keyof T>(
     a: T,
     b: T,
-    key: K & (T[K] extends string | null | undefined ? K : never)
+    key: K & (T[K] extends string | null | undefined ? K : never),
 ) {
     return hasValueAndIsEqual(
         a[key] as string | null | undefined,
-        b[key] as string | null | undefined
+        b[key] as string | null | undefined,
     );
 }
 
 function hasValueAndIsEqual(
     a: string | null | undefined,
-    b: string | null | undefined
+    b: string | null | undefined,
 ): boolean {
     if (isNullOrEmpty(a) || isNullOrEmpty(b)) return false;
     return isStringEqual(a as string, b as string);
@@ -518,5 +524,5 @@ function toLowerTrim(name: string) {
 }
 
 function isNullOrEmpty(value: string | null | undefined) {
-    return value === null || value === undefined || value.trim() === "";
+    return value === null || value === undefined || value.trim() === '';
 }

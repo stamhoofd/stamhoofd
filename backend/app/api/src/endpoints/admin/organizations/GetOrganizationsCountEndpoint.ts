@@ -11,14 +11,14 @@ type Body = undefined;
 type ResponseBody = CountResponse;
 
 export class GetOrganizationsCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>
+    queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/admin/organizations/count", {});
+        const params = Endpoint.parseParameters(request.url, '/admin/organizations/count', {});
 
         if (params) {
             return [true, params as Params];
@@ -27,16 +27,16 @@ export class GetOrganizationsCountEndpoint extends Endpoint<Params, Query, Body,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.authenticate()
-        const query = GetOrganizationsEndpoint.buildQuery(request.query)
-        
+        await Context.authenticate();
+        const query = GetOrganizationsEndpoint.buildQuery(request.query);
+
         const count = await query
             .count();
 
         return new Response(
             CountResponse.create({
-                count
-            })
+                count,
+            }),
         );
     }
 }

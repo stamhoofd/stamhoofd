@@ -51,7 +51,7 @@ export default class Steps extends VueComponent {
         this.$nextTick(() => {
             this.canPop = (this.navigationController.mainComponent?.componentInstance() as any)?.isStepsPoppable ?? (this.navigationController.components.length > 1);
             this.step = (this.navigationController.mainComponent?.componentInstance() as any)?.step ?? -1;
-            if (this.step == -1) {
+            if (this.step === -1) {
                 this.step = this.navigationController.components.length 
             }
         })

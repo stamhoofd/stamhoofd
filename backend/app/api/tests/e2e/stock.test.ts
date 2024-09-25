@@ -1,33 +1,33 @@
 /* eslint-disable jest/expect-expect */
- 
-/* eslint-disable jest/no-standalone-expect */
-import { PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { Request } from "@simonbackx/simple-endpoints";
-import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFactory, Webshop, WebshopFactory } from "@stamhoofd/models";
-import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
-import { v4 as uuidv4 } from "uuid";
 
-import { PatchWebshopOrdersEndpoint } from "../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint";
+/* eslint-disable jest/no-standalone-expect */
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-endpoints';
+import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from 'uuid';
+
+import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint';
 import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint';
-import { StripeMocker } from "../helpers/StripeMocker";
-import { testServer } from "../helpers/TestServer";
+import { StripeMocker } from '../helpers/StripeMocker';
+import { testServer } from '../helpers/TestServer';
 
 const address = Address.create({
     street: 'Demostraat',
     number: '15',
     postalCode: '9000',
     city: 'Gent',
-    country: Country.Belgium
-})
+    country: Country.Belgium,
+});
 
 const customer = Customer.create({
     firstName: 'John',
     lastName: 'Doe',
     email: 'john@example.com',
-    phone: '+32412345678'
+    phone: '+32412345678',
 });
 
-describe("E2E.Stock", () => {
+describe('E2E.Stock', () => {
     // Test endpoint
     const endpoint = new PlaceOrderEndpoint();
     const patchWebshopOrdersEndpoint = new PatchWebshopOrdersEndpoint();
@@ -58,8 +58,8 @@ describe("E2E.Stock", () => {
     let checkboxOption2: Option;
     let radioOption1: Option;
     let radioOption2: Option;
-    let stripeMocker: StripeMocker
-    let stripeAccount: StripeAccount
+    let stripeMocker: StripeMocker;
+    let stripeAccount: StripeAccount;
     let token: Token;
 
     async function refreshAll() {
@@ -110,7 +110,7 @@ describe("E2E.Stock", () => {
         const products = [product, seatProduct, personProduct];
         for (const product of products) {
             let used = 0;
-            const seats: ReservedSeat[] = []
+            const seats: ReservedSeat[] = [];
 
             for (const item of cartItems) {
                 if (item.product.id == product.id) {
@@ -152,11 +152,12 @@ describe("E2E.Stock", () => {
         // Now check reserved for each item
         for (const item of cartItems) {
             expect(item.reservedAmount).toBe(item.amount);
-            
+
             for (const price of productPrices) {
                 if (item.productPrice.id == price.id) {
                     expect(item.reservedPrices.get(price.id)).toBe(item.amount);
-                } else {
+                }
+                else {
                     expect(item.reservedPrices.get(price.id) ?? 0).toBe(0);
                 }
             }
@@ -175,7 +176,7 @@ describe("E2E.Stock", () => {
         for (const item of excludedCartItems) {
             expect(item.reservedAmount).toBe(0);
             expect(item.reservedSeats.length).toBe(0);
-            
+
             for (const price of productPrices) {
                 expect(item.reservedPrices.get(price.id) ?? 0).toBe(0);
             }
@@ -187,7 +188,7 @@ describe("E2E.Stock", () => {
 
         // Check order stock
         for (const order of orders) {
-            const filteredItems = cartItems.filter(i => !!order.data.cart.items.find(c => c.id === i.id))
+            const filteredItems = cartItems.filter(i => !!order.data.cart.items.find(c => c.id === i.id));
             let persons = 0;
             for (const item of filteredItems) {
                 if (item.product.type === ProductType.Person) {
@@ -206,7 +207,7 @@ describe("E2E.Stock", () => {
             for (const order of orders) {
                 if (order.data.timeSlot?.id === slot.id) {
                     let persons = 0;
-                    const filteredItems = cartItems.filter(i => !!order.data.cart.items.find(c => c.id === i.id))
+                    const filteredItems = cartItems.filter(i => !!order.data.cart.items.find(c => c.id === i.id));
 
                     for (const item of filteredItems) {
                         if (item.product.type === ProductType.Person) {
@@ -214,7 +215,7 @@ describe("E2E.Stock", () => {
                         }
                     }
 
-                    ordersCount += filteredItems.length > 0 ? 1 : 0
+                    ordersCount += filteredItems.length > 0 ? 1 : 0;
                     personsCount += persons;
                 }
             }
@@ -227,15 +228,15 @@ describe("E2E.Stock", () => {
     }
 
     async function checkStock(orderId: string, cartItems: CartItem[], excludedCartItems: CartItem[] = []) {
-        const otherOrders = (await Order.where({webshopId: webshop.id})).filter(o => o.id !== orderId)
-        return (await checkStocks([orderId, ...otherOrders.map(o => o.id)], [...cartItems, ...otherOrders.flatMap(o => o.data.cart.items)], excludedCartItems))[0]
+        const otherOrders = (await Order.where({ webshopId: webshop.id })).filter(o => o.id !== orderId);
+        return (await checkStocks([orderId, ...otherOrders.map(o => o.id)], [...cartItems, ...otherOrders.flatMap(o => o.data.cart.items)], excludedCartItems))[0];
     }
 
     /** Allows to change the stock */
     async function saveChanges() {
         // Set products
         webshop = (await Webshop.getByID(webshop.id))!;
-        webshop.products = [product, seatProduct, personProduct]
+        webshop.products = [product, seatProduct, personProduct];
         await webshop.save();
         await refreshAll();
     }
@@ -243,16 +244,16 @@ describe("E2E.Stock", () => {
     beforeAll(async () => {
         stripeMocker = new StripeMocker();
         stripeMocker.start();
-        organization = await new OrganizationFactory({}).create()
+        organization = await new OrganizationFactory({}).create();
         stripeAccount = await stripeMocker.createStripeAccount(organization.id);
 
         const user = await new UserFactory({
             organization,
             permissions: Permissions.create({
-                level: PermissionLevel.Full
-            })
-        }).create()
-        token = await Token.createToken(user)
+                level: PermissionLevel.Full,
+            }),
+        }).create();
+        token = await Token.createToken(user);
     });
 
     afterAll(() => {
@@ -266,70 +267,70 @@ describe("E2E.Stock", () => {
         productPrice1 = ProductPrice.create({
             name: 'productPrice1',
             price: 100,
-            stock: 100
-        })
+            stock: 100,
+        });
 
         productPrice2 = ProductPrice.create({
             name: 'productPrice2',
             price: 150,
-            stock: 100
-        })
+            stock: 100,
+        });
 
         freeProductPrice = ProductPrice.create({
             name: 'freeProductPrice',
             price: 0,
-            stock: 100
-        })
+            stock: 100,
+        });
 
         checkboxOption1 = Option.create({
             name: 'checkboxOption1',
             price: 10,
-            stock: 100
-        })
+            stock: 100,
+        });
 
         checkboxOption2 = Option.create({
             name: 'checkboxOption2',
             price: 0,
-            stock: 100
-        })
+            stock: 100,
+        });
 
         radioOption1 = Option.create({
             name: 'radioOption1',
             price: 10,
-            stock: 100
-        })
+            stock: 100,
+        });
 
         radioOption2 = Option.create({
             name: 'radioOption2',
             price: 0,
-            stock: 100
-        })
+            stock: 100,
+        });
 
         multipleChoiceOptionMenu = OptionMenu.create({
             name: 'multipleChoiceOptionMenu',
             multipleChoice: true,
-            options: [checkboxOption1, checkboxOption2]
-        })
+            options: [checkboxOption1, checkboxOption2],
+        });
 
         chooseOneOptionMenu = OptionMenu.create({
             name: 'chooseOneOptionMenu',
             multipleChoice: false,
-            options: [radioOption1, radioOption2]
-        })
+            options: [radioOption1, radioOption2],
+        });
 
         product = Product.create({
             name: 'product',
             stock: 100,
             prices: [productPrice1, productPrice2, freeProductPrice],
-            optionMenus: [multipleChoiceOptionMenu, chooseOneOptionMenu]
-        })
+            optionMenus: [multipleChoiceOptionMenu, chooseOneOptionMenu],
+        });
 
         personProduct = Product.create({
             name: 'personProduct',
             type: ProductType.Person,
-            stock: 100
-        })
-        personProductPrice = personProduct.prices[0]
+            stock: 100,
+        });
+        personProductPrice = personProduct.prices[0];
 
         seatingPlan = SeatingPlan.create({
             name: 'Testzaal',
@@ -340,135 +341,134 @@ describe("E2E.Stock", () => {
                             label: 'A',
                             seats: [
                                 SeatingPlanSeat.create({
-                                    label: '1'
+                                    label: '1',
                                 }),
                                 SeatingPlanSeat.create({
-                                    label: '2'
+                                    label: '2',
                                 }),
                                 SeatingPlanSeat.create({
-                                    label: '3'
+                                    label: '3',
                                 }),
                                 SeatingPlanSeat.create({
-                                    label: '4'
-                                })
-                            ]
+                                    label: '4',
+                                }),
+                            ],
                         }),
                         SeatingPlanRow.create({
                             label: 'B',
                             seats: [
                                 SeatingPlanSeat.create({
-                                    label: '1'
+                                    label: '1',
                                 }),
                                 SeatingPlanSeat.create({
-                                    label: '2'
+                                    label: '2',
                                 }),
                                 SeatingPlanSeat.create({
-                                    label: '3'
+                                    label: '3',
                                 }),
                                 SeatingPlanSeat.create({
-                                    label: '4'
-                                })
-                            ]
-                        })
-                    ]
-                })
-            ]
-        })
-        meta.seatingPlans.addPut(seatingPlan)
+                                    label: '4',
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+            ],
+        });
+        meta.seatingPlans.addPut(seatingPlan);
 
         seatProduct = Product.create({
             name: 'seatProduct',
             type: ProductType.Ticket,
-            seatingPlanId: seatingPlan.id
-        })
-        seatProductPrice = seatProduct.prices[0]
+            seatingPlanId: seatingPlan.id,
+        });
+        seatProductPrice = seatProduct.prices[0];
 
         // Takeout
         takeoutMethod = WebshopTakeoutMethod.create({
             name: 'Bakkerij Test',
-            address
-        })
+            address,
+        });
 
         slot1 = WebshopTimeSlot.create({
             date: new Date(),
             maxPersons: 100,
-            maxOrders: 100
+            maxOrders: 100,
         });
-        takeoutMethod.timeSlots.timeSlots.push(slot1)
+        takeoutMethod.timeSlots.timeSlots.push(slot1);
 
         slot2 = WebshopTimeSlot.create({
             date: new Date(),
             maxPersons: 100,
             maxOrders: 100,
-            startTime: 14*60,
-            endTime: 15*60
-        })
-        takeoutMethod.timeSlots.timeSlots.push(slot2)
-        meta.checkoutMethods.addPut(takeoutMethod)
-
+            startTime: 14 * 60,
+            endTime: 15 * 60,
+        });
+        takeoutMethod.timeSlots.timeSlots.push(slot2);
+        meta.checkoutMethods.addPut(takeoutMethod);
 
         // Delivery
         deliveryMethod = WebshopDeliveryMethod.create({
             name: 'Delivery',
-            countries: [Country.Belgium]
-        })
+            countries: [Country.Belgium],
+        });
 
         slot3 = WebshopTimeSlot.create({
             date: new Date(),
             maxPersons: 100,
-            maxOrders: 100
+            maxOrders: 100,
         });
 
-        deliveryMethod.timeSlots.timeSlots.push(slot3)
-        meta.checkoutMethods.addPut(deliveryMethod)
+        deliveryMethod.timeSlots.timeSlots.push(slot3);
+        meta.checkoutMethods.addPut(deliveryMethod);
 
         // OnSite
         onSiteMethod = WebshopOnSiteMethod.create({
             name: 'Onsite',
-            address
-        })
+            address,
+        });
 
         slot4 = WebshopTimeSlot.create({
             date: new Date(),
             maxPersons: 100,
-            maxOrders: 100
+            maxOrders: 100,
         });
 
-        onSiteMethod.timeSlots.timeSlots.push(slot4)
-        meta.checkoutMethods.addPut(onSiteMethod)
-        
+        onSiteMethod.timeSlots.timeSlots.push(slot4);
+        meta.checkoutMethods.addPut(onSiteMethod);
+
         const paymentConfigurationPatch = PaymentConfiguration.patch({
             transferSettings: TransferSettings.create({
-                iban: 'BE56587127952688' // = random IBAN
+                iban: 'BE56587127952688', // = random IBAN
             }),
-        })
-        paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.PointOfSale)
-        paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.Transfer)
-        paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.Bancontact)
+        });
+        paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.PointOfSale);
+        paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.Transfer);
+        paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.Bancontact);
 
         const privatePaymentConfiguration = PrivatePaymentConfiguration.patch({
-            stripeAccountId: stripeAccount.id
-        })
+            stripeAccountId: stripeAccount.id,
+        });
 
         meta = meta.patch({
-            paymentConfiguration: paymentConfigurationPatch
-        })
+            paymentConfiguration: paymentConfigurationPatch,
+        });
 
         const privateMeta = WebshopPrivateMetaData.patch({
-            paymentConfiguration: privatePaymentConfiguration
-        })
+            paymentConfiguration: privatePaymentConfiguration,
+        });
 
         webshop = await new WebshopFactory({
             organizationId: organization.id,
             name: 'Test webshop',
             meta,
             privateMeta,
-            products: [product, seatProduct, personProduct]
-        }).create()
+            products: [product, seatProduct, personProduct],
+        }).create();
     });
 
     describe('Reserving stock', () => {
-        test("Online payments reserve the stock and remain if they succeed", async () => {
+        test('Online payments reserve the stock and remain if they succeed', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Bancontact,
                 checkoutMethod: onSiteMethod,
@@ -482,24 +482,24 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption1
+                                    option: checkboxOption1,
                                 }),
-                                 CartItemOption.create({
+                                CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption2
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption2,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -508,14 +508,14 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
 
             // Cancel the payment
-            await stripeMocker.succeedPayment(stripeMocker.getLastIntent())
+            await stripeMocker.succeedPayment(stripeMocker.getLastIntent());
 
             const updatedOrder = await checkStock(order.id, order.data.cart.items);
             expect(updatedOrder.status).toBe(OrderStatus.Created);
             expect(updatedOrder.number).toBeDefined();
         });
 
-        test("Online payments do not reserve the stock if creation fails", async () => {
+        test('Online payments do not reserve the stock if creation fails', async () => {
             stripeMocker.forceFailure();
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Bancontact,
@@ -530,30 +530,30 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption1
+                                    option: checkboxOption1,
                                 }),
-                                 CartItemOption.create({
+                                CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption2
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption2,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             await expect(testServer.test(endpoint, r)).toReject();
             await checkStocks([], []);
         });
 
-        test("Free payments reserve the stock", async () => {
+        test('Free payments reserve the stock', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Unknown,
                 checkoutMethod: onSiteMethod,
@@ -567,20 +567,20 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption2
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption2,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -589,7 +589,7 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
         });
 
-        test("Transfer payments reserve the stock", async () => {
+        test('Transfer payments reserve the stock', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Transfer,
                 checkoutMethod: onSiteMethod,
@@ -603,24 +603,24 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption1
+                                    option: checkboxOption1,
                                 }),
-                                 CartItemOption.create({
+                                CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption2
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption2,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -629,10 +629,10 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
         });
 
-        test("Transfer payments do not reserve the stock if iban is missing and throws on validating", async () => {
+        test('Transfer payments do not reserve the stock if iban is missing and throws on validating', async () => {
             webshop.meta.paymentConfiguration.transferSettings.iban = null;
             await webshop.save();
-            
+
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Transfer,
                 checkoutMethod: onSiteMethod,
@@ -646,30 +646,30 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption1
+                                    option: checkboxOption1,
                                 }),
-                                 CartItemOption.create({
+                                CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption2
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption2,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             await expect(testServer.test(endpoint, r)).rejects.toThrow('Missing IBAN');
             await checkStocks([], []);
         });
 
-        test("POS payments reserve the stock", async () => {
+        test('POS payments reserve the stock', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
                 checkoutMethod: takeoutMethod,
@@ -683,20 +683,20 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption1
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption1,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -705,7 +705,7 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
         });
 
-        test("Orders placed by an admin reserve the stock", async () => {
+        test('Orders placed by an admin reserve the stock', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
                 checkoutMethod: takeoutMethod,
@@ -719,31 +719,31 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption1
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption1,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
+                customer,
+            });
 
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const orderPatch = PrivateOrder.create({
                 id: uuidv4(),
                 data: orderData,
-                webshopId: webshop.id
+                webshopId: webshop.id,
             });
             patchArray.addPut(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             const response = await testServer.test(patchWebshopOrdersEndpoint, r);
             expect(response.body).toBeDefined();
@@ -751,8 +751,7 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
         });
 
-        test("Orders placed by an admin do not reserve the stock if IBAN is missing", async () => {
-
+        test('Orders placed by an admin do not reserve the stock if IBAN is missing', async () => {
             webshop.meta.paymentConfiguration.transferSettings.iban = null;
             await webshop.save();
 
@@ -769,37 +768,37 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption1
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption1,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
+                customer,
+            });
 
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const orderPatch = PrivateOrder.create({
                 id: uuidv4(),
                 data: orderData,
-                webshopId: webshop.id
+                webshopId: webshop.id,
             });
             patchArray.addPut(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await expect(testServer.test(patchWebshopOrdersEndpoint, r)).rejects.toThrow('Missing IBAN');
             await checkStocks([], []);
         });
 
-        test("Chosen seats reserve the stock for POS order", async () => {
+        test('Chosen seats reserve the stock for POS order', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
                 checkoutMethod: takeoutMethod,
@@ -814,21 +813,21 @@ describe("E2E.Stock", () => {
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '1'
+                                    seat: '1',
                                 }),
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '2'
-                                })
-                            ]
-                        })
-                    ]
+                                    seat: '2',
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -837,7 +836,7 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
         });
 
-        test("Chosen seats reserve the stock for an admin order", async () => {
+        test('Chosen seats reserve the stock for an admin order', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
                 checkoutMethod: takeoutMethod,
@@ -852,31 +851,31 @@ describe("E2E.Stock", () => {
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '1'
+                                    seat: '1',
                                 }),
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '2'
-                                })
-                            ]
-                        })
-                    ]
+                                    seat: '2',
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                customer,
+            });
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const orderPatch = PrivateOrder.create({
                 id: uuidv4(),
                 data: orderData,
-                webshopId: webshop.id
+                webshopId: webshop.id,
             });
             patchArray.addPut(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             const response = await testServer.test(patchWebshopOrdersEndpoint, r);
             expect(response.body).toBeDefined();
@@ -884,7 +883,7 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
         });
 
-        test("Amount of a cart item should match the amount of chosen seats", async () => {
+        test('Amount of a cart item should match the amount of chosen seats', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
                 checkoutMethod: takeoutMethod,
@@ -899,27 +898,26 @@ describe("E2E.Stock", () => {
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '1'
-                                })
-                            ]
-                        })
-                    ]
+                                    seat: '1',
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
             await expect(testServer.test(endpoint, r)).rejects.toThrow('Invalid seats');
         });
 
-        test.todo("Amount of persons and orders for a takeout method is calculated correctly");
+        test.todo('Amount of persons and orders for a takeout method is calculated correctly');
 
-        test.todo("Amount of persons and orders for a delivery method is calculated correctly");
-
+        test.todo('Amount of persons and orders for a delivery method is calculated correctly');
     });
 
     describe('Full stock', () => {
-        test("Cannot place an order when product stock is full", async () => {
+        test('Cannot place an order when product stock is full', async () => {
             // Set stock
             product.stock = 2;
             await saveChanges();
@@ -937,25 +935,25 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption1
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption1,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             await expect(testServer.test(endpoint, r)).rejects.toThrow('Product unavailable');
         });
 
-        test("Cannot place an order when product price stock is full", async () => {
+        test('Cannot place an order when product price stock is full', async () => {
             // Set stock
             productPrice1.stock = 2;
             await saveChanges();
@@ -973,25 +971,25 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption1
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption1,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
 
-            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van productPrice1 beschikbaar');
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human', 'Er zijn nog maar 2 stuks van productPrice1 beschikbaar');
         });
 
-        test("Cannot place an order when option stock is full", async () => {
+        test('Cannot place an order when option stock is full', async () => {
             // Set stock
             radioOption1.stock = 2;
             await saveChanges();
@@ -1009,25 +1007,25 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption1
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption1,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
 
-            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van radioOption1 beschikbaar');
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human', 'Er zijn nog maar 2 stuks van radioOption1 beschikbaar');
         });
 
-        test("Cannot place an order when multiple choice option stock is full", async () => {
+        test('Cannot place an order when multiple choice option stock is full', async () => {
             // Set stock
             checkboxOption2.stock = 2;
             await saveChanges();
@@ -1045,37 +1043,37 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption1
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption1,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
 
-            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van checkboxOption2 beschikbaar');
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human', 'Er zijn nog maar 2 stuks van checkboxOption2 beschikbaar');
         });
 
-        test.todo("Cannot place an order when takeout persons stock is full");
+        test.todo('Cannot place an order when takeout persons stock is full');
 
-        test.todo("Cannot place an order when takeout orders stock is full");
+        test.todo('Cannot place an order when takeout orders stock is full');
 
-        test("Cannot place an order for a reserved seat", async () => {
+        test('Cannot place an order for a reserved seat', async () => {
             // Set stock
             seatProduct.reservedSeats = [
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '1'
-                })
-            ]
+                    seat: '1',
+                }),
+            ];
             await saveChanges();
 
             const orderData = OrderData.create({
@@ -1092,35 +1090,35 @@ describe("E2E.Stock", () => {
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '1'
+                                    seat: '1',
                                 }),
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '2'
-                                })
-                            ]
-                        })
-                    ]
+                                    seat: '2',
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
             await expect(testServer.test(endpoint, r)).rejects.toThrow('Seats unavailable');
         });
 
-        test("Admin cannot place an order for a reserved seat", async () => {
+        test('Admin cannot place an order for a reserved seat', async () => {
             // Set stock
             seatProduct.reservedSeats = [
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '1'
-                })
-            ]
+                    seat: '1',
+                }),
+            ];
             await saveChanges();
-            
+
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
                 checkoutMethod: takeoutMethod,
@@ -1135,39 +1133,39 @@ describe("E2E.Stock", () => {
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '1'
+                                    seat: '1',
                                 }),
                                 CartReservedSeat.create({
                                     section: seatingPlan.sections[0].id,
                                     row: 'A',
-                                    seat: '2'
-                                })
-                            ]
-                        })
-                    ]
+                                    seat: '2',
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                customer,
+            });
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const orderPatch = PrivateOrder.create({
                 id: uuidv4(),
                 data: orderData,
-                webshopId: webshop.id
+                webshopId: webshop.id,
             });
             patchArray.addPut(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
             await expect(testServer.test(patchWebshopOrdersEndpoint, r)).rejects.toThrow('Seats unavailable');
         });
 
-        test.todo("Admin cannot edit an an order to a reserved seat");
+        test.todo('Admin cannot edit an an order to a reserved seat');
     });
 
     describe('Cleaning up stock', () => {
-        test("Stock is returned when a payment failed", async () => {
+        test('Stock is returned when a payment failed', async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Bancontact,
                 checkoutMethod: onSiteMethod,
@@ -1181,24 +1179,24 @@ describe("E2E.Stock", () => {
                             options: [
                                 CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption1
+                                    option: checkboxOption1,
                                 }),
-                                 CartItemOption.create({
+                                CartItemOption.create({
                                     optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
+                                    option: checkboxOption2,
                                 }),
                                 CartItemOption.create({
                                     optionMenu: chooseOneOptionMenu,
-                                    option: radioOption2
-                                })
-                            ]
-                        })
-                    ]
+                                    option: radioOption2,
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -1207,7 +1205,7 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
 
             // Cancel the payment
-            await stripeMocker.failPayment(stripeMocker.getLastIntent())
+            await stripeMocker.failPayment(stripeMocker.getLastIntent());
 
             const updatedOrder = await checkStock(order.id, [], order.data.cart.items);
             expect(updatedOrder.status).toBe(OrderStatus.Deleted);
@@ -1217,8 +1215,8 @@ describe("E2E.Stock", () => {
     describe('Modifying orders', () => {
         let order: Order;
         let baseOrder: Order;
-        let productCartItem: CartItem|undefined;
-        let personCartItem: CartItem|undefined;
+        let productCartItem: CartItem | undefined;
+        let personCartItem: CartItem | undefined;
 
         beforeEach(async () => {
             productCartItem = CartItem.create({
@@ -1228,20 +1226,20 @@ describe("E2E.Stock", () => {
                 options: [
                     CartItemOption.create({
                         optionMenu: multipleChoiceOptionMenu,
-                        option: checkboxOption1
+                        option: checkboxOption1,
                     }),
                     CartItemOption.create({
                         optionMenu: chooseOneOptionMenu,
-                        option: radioOption1
-                    })
-                ]
-            })
+                        option: radioOption1,
+                    }),
+                ],
+            });
 
             personCartItem = CartItem.create({
                 product: personProduct,
                 productPrice: personProductPrice,
-                amount: 2
-            })
+                amount: 2,
+            });
 
             {
                 const orderData = OrderData.create({
@@ -1251,24 +1249,23 @@ describe("E2E.Stock", () => {
                     cart: Cart.create({
                         items: [
                             productCartItem,
-                            personCartItem
-                        ]
+                            personCartItem,
+                        ],
                     }),
-                    customer
-                })
-                
-                const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                    customer,
+                });
+
+                const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
                 const response = await testServer.test(endpoint, r);
                 expect(response.body).toBeDefined();
                 const orderStruct = response.body.order;
 
-
                 // Now check the stock has changed for the product
                 order = await checkStock(orderStruct.id, [productCartItem, personCartItem]);
             }
 
-            // Make sure all items in the cart, options etc, have at least a usedStock of 1, to also test they don't decrease when making 
+            // Make sure all items in the cart, options etc, have at least a usedStock of 1, to also test they don't decrease when making
             // changes to roders
             {
                 const orderData = OrderData.create({
@@ -1284,13 +1281,13 @@ describe("E2E.Stock", () => {
                                 options: [
                                     CartItemOption.create({
                                         optionMenu: multipleChoiceOptionMenu,
-                                        option: checkboxOption1
+                                        option: checkboxOption1,
                                     }),
                                     CartItemOption.create({
                                         optionMenu: chooseOneOptionMenu,
-                                        option: radioOption1
-                                    })
-                                ]
+                                        option: radioOption1,
+                                    }),
+                                ],
                             }),
                             CartItem.create({
                                 product,
@@ -1299,49 +1296,48 @@ describe("E2E.Stock", () => {
                                 options: [
                                     CartItemOption.create({
                                         optionMenu: multipleChoiceOptionMenu,
-                                        option: checkboxOption2
+                                        option: checkboxOption2,
                                     }),
                                     CartItemOption.create({
                                         optionMenu: chooseOneOptionMenu,
-                                        option: radioOption2
-                                    })
-                                ]
+                                        option: radioOption2,
+                                    }),
+                                ],
                             }),
                             CartItem.create({
                                 product: personProduct,
                                 productPrice: personProductPrice,
-                                amount: 1
-                            })
-                        ]
+                                amount: 1,
+                            }),
+                        ],
                     }),
-                    customer
-                })
-                
-                const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                    customer,
+                });
+
+                const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
                 const response = await testServer.test(endpoint, r);
                 expect(response.body).toBeDefined();
                 const orderStruct = response.body.order;
 
-
                 // Now check the stock has changed for the product
                 const orders = await checkStocks([order.id, orderStruct.id], [productCartItem, personCartItem, ...orderStruct.data.cart.items]);
-                baseOrder = orders.find(o => o.id === orderStruct.id)!
+                baseOrder = orders.find(o => o.id === orderStruct.id)!;
             }
         });
 
-        test("Stock is removed when a product is removed or added in two steps", async () => {
+        test('Stock is removed when a product is removed or added in two steps', async () => {
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
-                const cartPatch = Cart.patch({})
-                cartPatch.items.addDelete(productCartItem!.id)
-                const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+                const cartPatch = Cart.patch({});
+                cartPatch.items.addDelete(productCartItem!.id);
+                const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1349,10 +1345,10 @@ describe("E2E.Stock", () => {
             }
 
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
-                const cartPatch = Cart.patch({})
-                cartPatch.items.addDelete(personCartItem!.id)
+                const cartPatch = Cart.patch({});
+                cartPatch.items.addDelete(personCartItem!.id);
                 const newItem = CartItem.create({
                     product,
                     productPrice: productPrice2,
@@ -1360,21 +1356,21 @@ describe("E2E.Stock", () => {
                     options: [
                         CartItemOption.create({
                             optionMenu: chooseOneOptionMenu,
-                            option: radioOption2
-                        })
-                    ]
+                            option: radioOption2,
+                        }),
+                    ],
                 });
 
                 cartPatch.items.addPut(
-                    newItem
-                )
+                    newItem,
+                );
 
-                const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+                const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1382,14 +1378,14 @@ describe("E2E.Stock", () => {
             }
         });
 
-        test("Stock is removed when a product is removed or added in single step", async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+        test('Stock is removed when a product is removed or added in single step', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
-            const cartPatch = Cart.patch({})
-            cartPatch.items.addDelete(productCartItem!.id)
-            cartPatch.items.addDelete(personCartItem!.id)
-            cartPatch.items.addPut(personCartItem!)
-            
+            const cartPatch = Cart.patch({});
+            cartPatch.items.addDelete(productCartItem!.id);
+            cartPatch.items.addDelete(personCartItem!.id);
+            cartPatch.items.addPut(personCartItem!);
+
             const newItem = CartItem.create({
                 product,
                 productPrice: productPrice2,
@@ -1397,65 +1393,65 @@ describe("E2E.Stock", () => {
                 options: [
                     CartItemOption.create({
                         optionMenu: chooseOneOptionMenu,
-                        option: radioOption2
-                    })
-                ]
+                        option: radioOption2,
+                    }),
+                ],
             });
 
             cartPatch.items.addPut(
-                newItem
-            )
+                newItem,
+            );
 
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
             order = await checkStock(order.id, [personCartItem!, newItem]);
         });
 
-        test("Stock is adjusted if product amount is changed", async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+        test('Stock is adjusted if product amount is changed', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
-            const cartPatch = Cart.patch({})
+            const cartPatch = Cart.patch({});
             cartPatch.items.addPatch(CartItem.patch({
                 id: productCartItem!.id,
-                amount: 6
-            }))
+                amount: 6,
+            }));
             cartPatch.items.addPatch(CartItem.patch({
                 id: personCartItem!.id,
-                amount: 13
-            }))
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+                amount: 13,
+            }));
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
 
-        test("Stock is changed if timeslot is changed", async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+        test('Stock is changed if timeslot is changed', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const orderPatch = PrivateOrder.patch({
-                id: order.id, 
+                id: order.id,
                 data: OrderData.patch({
-                    timeSlot: slot2
-                })
+                    timeSlot: slot2,
+                }),
             });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1463,20 +1459,20 @@ describe("E2E.Stock", () => {
         });
 
         test('Stock is changed if productPrice is changed', async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
-            
-            const cartPatch = Cart.patch({})
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
+
+            const cartPatch = Cart.patch({});
             cartPatch.items.addPatch(CartItem.patch({
                 id: productCartItem!.id,
-                productPrice: productPrice2
-            }))
+                productPrice: productPrice2,
+            }));
 
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1484,25 +1480,25 @@ describe("E2E.Stock", () => {
         });
 
         test('Stock is changed when option is removed', async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
-            
-            const cartPatch = Cart.patch({})
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
+
+            const cartPatch = Cart.patch({});
             cartPatch.items.addPatch(CartItem.patch({
                 id: productCartItem!.id,
                 options: [
                     CartItemOption.create({
                         optionMenu: chooseOneOptionMenu,
-                        option: radioOption1
-                    })
-                ]
-            }))
+                        option: radioOption1,
+                    }),
+                ],
+            }));
 
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1510,29 +1506,29 @@ describe("E2E.Stock", () => {
         });
 
         test('Stock is changed when option is changed', async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
-            
-            const cartPatch = Cart.patch({})
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
+
+            const cartPatch = Cart.patch({});
             cartPatch.items.addPatch(CartItem.patch({
                 id: productCartItem!.id,
                 options: [
                     CartItemOption.create({
                         optionMenu: chooseOneOptionMenu,
-                        option: radioOption2
+                        option: radioOption2,
                     }),
                     CartItemOption.create({
                         optionMenu: multipleChoiceOptionMenu,
-                        option: checkboxOption2
-                    })
-                ]
-            }))
+                        option: checkboxOption2,
+                    }),
+                ],
+            }));
 
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1540,44 +1536,44 @@ describe("E2E.Stock", () => {
         });
 
         test('Stock is changed when option is added', async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
-            
-            const cartPatch = Cart.patch({})
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
+
+            const cartPatch = Cart.patch({});
             cartPatch.items.addPatch(CartItem.patch({
                 id: productCartItem!.id,
                 options: [
                     CartItemOption.create({
                         optionMenu: chooseOneOptionMenu,
-                        option: radioOption1
+                        option: radioOption1,
                     }),
                     CartItemOption.create({
                         optionMenu: multipleChoiceOptionMenu,
-                        option: checkboxOption1
+                        option: checkboxOption1,
                     }),
                     CartItemOption.create({
                         optionMenu: multipleChoiceOptionMenu,
-                        option: checkboxOption2
-                    })
-                ]
-            }))
+                        option: checkboxOption2,
+                    }),
+                ],
+            }));
 
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
 
-        test("Stock is changed if delivery method is changed", async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+        test('Stock is changed if delivery method is changed', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const orderPatch = PrivateOrder.patch({
-                id: order.id, 
+                id: order.id,
                 data: OrderData.patch({
                     checkoutMethod: deliveryMethod,
                     timeSlot: slot3,
@@ -1585,33 +1581,33 @@ describe("E2E.Stock", () => {
                         ...address,
                         cityId: '',
                         parentCityId: null,
-                        provinceId: ''
-                    })
-                })
+                        provinceId: '',
+                    }),
+                }),
             });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
 
-        test("Stock is returned when an order is canceled and added when uncanceled again", async () => {
+        test('Stock is returned when an order is canceled and added when uncanceled again', async () => {
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Canceled
+                    id: order.id,
+                    status: OrderStatus.Canceled,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1620,17 +1616,17 @@ describe("E2E.Stock", () => {
 
             // Uncancel
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Created
+                    id: order.id,
+                    status: OrderStatus.Created,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1638,19 +1634,19 @@ describe("E2E.Stock", () => {
             }
         });
 
-        test("Stock is returned when an order is deleted and added when undeleted", async () => {
+        test('Stock is returned when an order is deleted and added when undeleted', async () => {
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Deleted
+                    id: order.id,
+                    status: OrderStatus.Deleted,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1659,17 +1655,17 @@ describe("E2E.Stock", () => {
 
             // Undelete
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Created
+                    id: order.id,
+                    status: OrderStatus.Created,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1680,7 +1676,7 @@ describe("E2E.Stock", () => {
 
     describe('Modifying seat orders', () => {
         let order: Order;
-        let seatCartItem: CartItem|undefined;
+        let seatCartItem: CartItem | undefined;
 
         beforeEach(async () => {
             seatCartItem = CartItem.create({
@@ -1691,15 +1687,15 @@ describe("E2E.Stock", () => {
                     CartReservedSeat.create({
                         section: seatingPlan.sections[0].id,
                         row: 'A',
-                        seat: '1'
+                        seat: '1',
                     }),
                     CartReservedSeat.create({
                         section: seatingPlan.sections[0].id,
                         row: 'A',
-                        seat: '2'
-                    })
-                ]
-            })
+                        seat: '2',
+                    }),
+                ],
+            });
 
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
@@ -1707,13 +1703,13 @@ describe("E2E.Stock", () => {
                 timeSlot: slot1,
                 cart: Cart.create({
                     items: [
-                        seatCartItem
-                    ]
+                        seatCartItem,
+                    ],
                 }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -1723,11 +1719,11 @@ describe("E2E.Stock", () => {
             order = await checkStock(orderStruct.id, [seatCartItem]);
         });
 
-        test("Stock is removed when a product is removed and another is added", async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+        test('Stock is removed when a product is removed and another is added', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
-            const cartPatch = Cart.patch({})
-            cartPatch.items.addDelete(seatCartItem!.id)
+            const cartPatch = Cart.patch({});
+            cartPatch.items.addDelete(seatCartItem!.id);
 
             const newItem = CartItem.create({
                 product: seatProduct,
@@ -1737,32 +1733,31 @@ describe("E2E.Stock", () => {
                     CartReservedSeat.create({
                         section: seatingPlan.sections[0].id,
                         row: 'B',
-                        seat: '1'
-                    })
-                ]
+                        seat: '1',
+                    }),
+                ],
             });
 
             cartPatch.items.addPut(
-                newItem
-            )
+                newItem,
+            );
 
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [newItem]);
-            
         });
 
-        test("Stock is adjusted if extra seat is selected", async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+        test('Stock is adjusted if extra seat is selected', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
-            const cartPatch = Cart.patch({})
+            const cartPatch = Cart.patch({});
             const c = CartItem.patch({
                 id: seatCartItem!.id,
                 amount: 3,
@@ -1770,78 +1765,78 @@ describe("E2E.Stock", () => {
                     CartReservedSeat.create({
                         section: seatingPlan.sections[0].id,
                         row: 'A',
-                        seat: '1'
+                        seat: '1',
                     }),
                     CartReservedSeat.create({
                         section: seatingPlan.sections[0].id,
                         row: 'A',
-                        seat: '2'
+                        seat: '2',
                     }),
                     CartReservedSeat.create({
                         section: seatingPlan.sections[0].id,
                         row: 'A',
-                        seat: '3'
-                    })
-                ]
+                        seat: '3',
+                    }),
+                ],
             });
-            cartPatch.items.addPatch(c)
+            cartPatch.items.addPatch(c);
 
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
-
-            await testServer.test(patchWebshopOrdersEndpoint, r);
-
-            await checkStock(order.id, [seatCartItem!]);
-        });        
-
-        test("Reserved seats are changed when seats are moved", async () => {
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
-
-            const cartPatch = Cart.patch({})
-            cartPatch.items.addPatch(CartItem.patch({
-                id: seatCartItem?.id,
-                seats: [
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'B',
-                        seat: '1'
-                    }),
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'B',
-                        seat: '2'
-                    })
-                ]
-            }))
-            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
-            patchArray.addPatch(orderPatch);
-
-            // Send a patch
-            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r.headers.authorization = "Bearer " + token.accessToken
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [seatCartItem!]);
         });
 
-        test("Stock is returned when an order is canceled and added when uncanceled again", async () => {
+        test('Reserved seats are changed when seats are moved', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
+
+            const cartPatch = Cart.patch({});
+            cartPatch.items.addPatch(CartItem.patch({
+                id: seatCartItem?.id,
+                seats: [
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'B',
+                        seat: '1',
+                    }),
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'B',
+                        seat: '2',
+                    }),
+                ],
+            }));
+            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            patchArray.addPatch(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
+
+            await testServer.test(patchWebshopOrdersEndpoint, r);
+
+            await checkStock(order.id, [seatCartItem!]);
+        });
+
+        test('Stock is returned when an order is canceled and added when uncanceled again', async () => {
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Canceled
+                    id: order.id,
+                    status: OrderStatus.Canceled,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1850,17 +1845,17 @@ describe("E2E.Stock", () => {
 
             // Uncancel
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Created
+                    id: order.id,
+                    status: OrderStatus.Created,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1868,19 +1863,19 @@ describe("E2E.Stock", () => {
             }
         });
 
-        test("Stock is returned when an order is deleted and added when undeleted", async () => {
+        test('Stock is returned when an order is deleted and added when undeleted', async () => {
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Deleted
+                    id: order.id,
+                    status: OrderStatus.Deleted,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1889,17 +1884,17 @@ describe("E2E.Stock", () => {
 
             // Undelete
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Created
+                    id: order.id,
+                    status: OrderStatus.Created,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1907,19 +1902,19 @@ describe("E2E.Stock", () => {
             }
         });
 
-        test("Correctly handles duplicate seat booking recovery", async () => {
+        test('Correctly handles duplicate seat booking recovery', async () => {
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Canceled
+                    id: order.id,
+                    status: OrderStatus.Canceled,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1935,15 +1930,15 @@ describe("E2E.Stock", () => {
                     CartReservedSeat.create({
                         section: seatingPlan.sections[0].id,
                         row: 'A',
-                        seat: '1'
+                        seat: '1',
                     }),
                     CartReservedSeat.create({
                         section: seatingPlan.sections[0].id,
                         row: 'A',
-                        seat: '2'
-                    })
-                ]
-            })
+                        seat: '2',
+                    }),
+                ],
+            });
 
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
@@ -1951,15 +1946,15 @@ describe("E2E.Stock", () => {
                 timeSlot: slot1,
                 cart: Cart.create({
                     items: [
-                        newItem
-                    ]
+                        newItem,
+                    ],
                 }),
-                customer
-            })
+                customer,
+            });
             let orders: Order[];
 
             {
-                const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
                 const response = await testServer.test(endpoint, r);
                 expect(response.body).toBeDefined();
@@ -1971,17 +1966,17 @@ describe("E2E.Stock", () => {
 
             // Uncancel
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Created
+                    id: order.id,
+                    status: OrderStatus.Created,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -1991,58 +1986,58 @@ describe("E2E.Stock", () => {
             // Now we are in a duplicate seat selected situation.
             // To recover, move seats of one of the orders
             // and check in the final result, all seats are still correctly reserved (once)
-            
+
             // Manual check
             expect(seatProduct.reservedSeats).toHaveLength(4);
             expect(seatProduct.reservedSeats).toIncludeSameMembers([
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '1'
+                    seat: '1',
                 }),
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '1'
+                    seat: '1',
                 }),
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '2'
+                    seat: '2',
                 }),
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '2'
+                    seat: '2',
                 }),
-            ])
+            ]);
 
             // Move seats of first order
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
-                const cartPatch = Cart.patch({})
+                const cartPatch = Cart.patch({});
                 cartPatch.items.addPatch(CartItem.patch({
                     id: seatCartItem?.id,
                     seats: [
                         CartReservedSeat.create({
                             section: seatingPlan.sections[0].id,
                             row: 'B',
-                            seat: '1'
+                            seat: '1',
                         }),
                         CartReservedSeat.create({
                             section: seatingPlan.sections[0].id,
                             row: 'B',
-                            seat: '2'
-                        })
-                    ]
-                }))
-                const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+                            seat: '2',
+                        }),
+                    ],
+                }));
+                const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -2055,46 +2050,46 @@ describe("E2E.Stock", () => {
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '1'
+                    seat: '1',
                 }),
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'B',
-                    seat: '1'
+                    seat: '1',
                 }),
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '2'
+                    seat: '2',
                 }),
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'B',
-                    seat: '2'
+                    seat: '2',
                 }),
-            ])
+            ]);
         });
 
-        test("Patching an order triggers an auto recovery of not reserved seats", async () => {
+        test('Patching an order triggers an auto recovery of not reserved seats', async () => {
             // This is required to recover from bugs in stock changes.
             // Simply patching all orders will fix the stock.
 
             // Manually remove all reserved seats = caused by a past bug
-            seatProduct.reservedSeats = []
+            seatProduct.reservedSeats = [];
             await saveChanges();
 
             {
-                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const orderPatch = PrivateOrder.patch({
-                    id: order.id, 
-                    status: OrderStatus.Completed
+                    id: order.id,
+                    status: OrderStatus.Completed,
                 });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-                r.headers.authorization = "Bearer " + token.accessToken
+                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -2107,14 +2102,14 @@ describe("E2E.Stock", () => {
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '1'
+                    seat: '1',
                 }),
                 ReservedSeat.create({
                     section: seatingPlan.sections[0].id,
                     row: 'A',
-                    seat: '2'
+                    seat: '2',
                 }),
-            ])
+            ]);
         });
     });
 });

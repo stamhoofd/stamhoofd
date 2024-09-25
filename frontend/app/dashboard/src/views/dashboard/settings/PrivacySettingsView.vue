@@ -23,7 +23,7 @@
             </RadioGroup>
         </STInputBox>
 
-        <STInputBox v-if="selectedPrivacyType == 'website'" key="website" title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox">
+        <STInputBox v-if="selectedPrivacyType === 'website'" key="website" title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox">
             <input
                 v-model="privacyPolicyUrl"
                 class="input"
@@ -32,7 +32,7 @@
             >
         </STInputBox>
 
-        <FileInput v-if="selectedPrivacyType == 'file'" key="file" v-model="privacyPolicyFile" title="Kies een bestand" :validator="validator" :required="false" />
+        <FileInput v-if="selectedPrivacyType === 'file'" key="file" v-model="privacyPolicyFile" title="Kies een bestand" :validator="validator" :required="false" />
     </SaveView>
 </template>
 
@@ -103,15 +103,15 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
 
         const errors = new SimpleErrors()
        
-        if (this.selectedPrivacyType == "none") {
+        if (this.selectedPrivacyType === "none") {
             this.privacyPolicyFile = null;
             this.privacyPolicyUrl = null;
-        } else if (this.selectedPrivacyType == "file") {
+        } else if (this.selectedPrivacyType === "file") {
             this.privacyPolicyUrl = null;
             // We don't clear the file if url is selected, since url has priority over the file. So we don't need to reupload the file
         }
 
-        if (this.selectedPrivacyType == "website" && this.organization.meta.privacyPolicyUrl && this.organization.meta.privacyPolicyUrl.length > 0 && !this.organization.meta.privacyPolicyUrl.startsWith("http://") && !this.organization.meta.privacyPolicyUrl.startsWith("https://")) {
+        if (this.selectedPrivacyType === "website" && this.organization.meta.privacyPolicyUrl && this.organization.meta.privacyPolicyUrl.length > 0 && !this.organization.meta.privacyPolicyUrl.startsWith("http://") && !this.organization.meta.privacyPolicyUrl.startsWith("https://")) {
             this.privacyPolicyUrl = "http://"+this.organization.meta.privacyPolicyUrl
         }
 

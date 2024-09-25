@@ -1,11 +1,11 @@
-import { PlainObject } from "@simonbackx/simple-encoding";
-import { SortItemDirection, SortList } from "./SortList";
+import { PlainObject } from '@simonbackx/simple-encoding';
+import { SortItemDirection, SortList } from './SortList';
 
 export type SortDefinition<T, B extends PlainObject = PlainObject> = {
-    getValue(a: T): B
+    getValue(a: T): B;
 };
 
-export type SortDefinitions<T> = Record<string, SortDefinition<T>>
+export type SortDefinitions<T> = Record<string, SortDefinition<T>>;
 
 function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<O>, list: SortList) {
     if (!lastObject) {
@@ -16,29 +16,29 @@ function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<
     if (!first) {
         return null;
     }
-    
+
     const definition = sortDefinitions[first.key];
     if (!definition) {
-        throw new Error('Unknown sort key ' + first.key)
+        throw new Error('Unknown sort key ' + first.key);
     }
 
-    const lastValue = definition.getValue(lastObject)
-    const remaining = list.slice(1)
+    const lastValue = definition.getValue(lastObject);
+    const remaining = list.slice(1);
 
     const baseFilter = {
-        // Either the object is plainly larger than this. 
+        // Either the object is plainly larger than this.
         [first.key]: {
-            [first.order === SortItemDirection.ASC ? '$gt' : '$lt']: lastValue
-        }
+            [first.order === SortItemDirection.ASC ? '$gt' : '$lt']: lastValue,
+        },
     };
 
     if (remaining.length === 0) {
-        return baseFilter
+        return baseFilter;
     }
 
     const remainingFilter = sorterGetNextFilter(lastObject, sortDefinitions, remaining);
     if (!remainingFilter) {
-        throw new Error('Unexpected remaining filter at ' + first.key)
+        throw new Error('Unexpected remaining filter at ' + first.key);
     }
 
     return {
@@ -48,12 +48,12 @@ function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<
                 // OR, it is the same, but the following sorters are larger
                 $and: [
                     {
-                        [first.key]: lastValue
+                        [first.key]: lastValue,
                     },
-                    remainingFilter
-                ]
-            }
-        ]
+                    remainingFilter,
+                ],
+            },
+        ],
     };
 }
 
@@ -63,5 +63,5 @@ export function getSortFilter<O>(lastObject: O, sortDefinitions: SortDefinitions
     }
 
     // We always add id
-    return sorterGetNextFilter(lastObject, sortDefinitions, list)
+    return sorterGetNextFilter(lastObject, sortDefinitions, list);
 }

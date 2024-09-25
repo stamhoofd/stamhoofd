@@ -175,7 +175,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
     }
 
     get isBelgium() {
-        return this.organization.address.country == Country.Belgium
+        return this.organization.address.country === Country.Belgium
     }
 
     get isStamhoofd() {
@@ -227,14 +227,14 @@ export default class LabsView extends Mixins(NavigationMixin) {
     }
 
     get useTestPayments() {
-        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment != 'production'
+        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment !== 'production'
     }
 
     set useTestPayments(useTestPayments: boolean) {
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 // Only save non default value
-                useTestPayments: STAMHOOFD.environment != 'production' === useTestPayments ? null : useTestPayments
+                useTestPayments: STAMHOOFD.environment !== 'production' === useTestPayments ? null : useTestPayments
             })
         })
     }
@@ -331,7 +331,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
         input.type = 'file';
         input.accept = '.json';
         input.onchange = (event: any) => {
-            if (!event || !event.target || !event.target.files || event.target.files.length != 1) {
+            if (!event || !event.target || !event.target.files || event.target.files.length !== 1) {
                 return;
             }
             const file = event.target.files[0] as File;

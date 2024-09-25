@@ -30,7 +30,6 @@
     </SaveView>
 </template>
 
-
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -46,13 +45,13 @@ const deleting = ref(false);
 const props = defineProps<{
     tag: OrganizationTag;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<OrganizationTag>) => Promise<void>,
-    deleteHandler: (() => Promise<void>)|null
+    saveHandler: (p: AutoEncoderPatchType<OrganizationTag>) => Promise<void>;
+    deleteHandler: (() => Promise<void>) | null;
 }>();
 const title = computed(() => props.isNew ? 'Nieuwe tag' : 'Tag bewerken');
 const pop = usePop();
 
-const {patched, addPatch, hasChanges, patch} = usePatch(props.tag);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.tag);
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -62,15 +61,16 @@ const save = async () => {
     try {
         if (name.value.length === 0) {
             throw new SimpleError({
-                code: "invalid_field",
-                message: "Gelieve een naam in te vullen",
-                field: "name"
-            })
+                code: 'invalid_field',
+                message: 'Gelieve een naam in te vullen',
+                field: 'name',
+            });
         }
-        await props.saveHandler(patch.value)
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
 };
@@ -84,16 +84,17 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm("Ben je zeker dat je deze tag wilt verwijderen?", "Verwijderen")) {
-        return
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze tag wilt verwijderen?', 'Verwijderen')) {
+        return;
     }
-        
+
     deleting.value = true;
     try {
-        await props.deleteHandler()
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.deleteHandler();
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     deleting.value = false;
@@ -101,17 +102,17 @@ const doDelete = async () => {
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name}),
+    set: name => addPatch({ name }),
 });
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

@@ -1,16 +1,16 @@
-import { Request } from "@simonbackx/simple-endpoints";
-import { StripeAccount } from "@stamhoofd/models";
-import nock from "nock";
+import { Request } from '@simonbackx/simple-endpoints';
+import { StripeAccount } from '@stamhoofd/models';
+import nock from 'nock';
 import qs from 'qs';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
-import { StripeWebookEndpoint } from "../../src/endpoints/global/payments/StripeWebhookEndpoint";
-import { StripeHelper } from "../../src/helpers/StripeHelper";
-import { testServer } from "./TestServer";
+import { StripeWebookEndpoint } from '../../src/endpoints/global/payments/StripeWebhookEndpoint';
+import { StripeHelper } from '../../src/helpers/StripeHelper';
+import { testServer } from './TestServer';
 
 export class StripeMocker {
-    paymentIntents: {id: string}[] = []
-    charges: {id: string}[] = [];
+    paymentIntents: { id: string }[] = [];
+    charges: { id: string }[] = [];
     #forceFailure = false;
 
     reset() {
@@ -55,7 +55,7 @@ export class StripeMocker {
                     return [500];
                 }
 
-                if (this.#forceFailure ) {
+                if (this.#forceFailure) {
                     return [400];
                 }
 
@@ -63,8 +63,8 @@ export class StripeMocker {
                     // Ignore: this is just creating a saved payment method for Bancontact/iDEAL
                     return [200, {
                         object: 'payment_method',
-                        id: this.createId('pm')
-                    }]
+                        id: this.createId('pm'),
+                    }];
                 }
 
                 if (resource === 'payment_intents') {
@@ -73,8 +73,6 @@ export class StripeMocker {
 
                 return [500];
             });
-
-
     }
 
     clear() {
@@ -89,7 +87,7 @@ export class StripeMocker {
     #getPaymentIntent(id: string) {
         const intent = this.paymentIntents.find(i => i.id === id);
         if (!intent) {
-            return [404]
+            return [404];
         }
         return [200, intent];
     }
@@ -97,7 +95,7 @@ export class StripeMocker {
     #getCharge(id: string) {
         const intent = this.charges.find(i => i.id === id);
         if (!intent) {
-            return [404]
+            return [404];
         }
         return [200, intent];
     }
@@ -109,16 +107,16 @@ export class StripeMocker {
             status: 'requires_action',
             next_action: {
                 redirect_to_url: {
-                    url: 'https://paymenturl'
-                }
-            }
+                    url: 'https://paymenturl',
+                },
+            },
         };
         this.paymentIntents.push(intent);
         return [200, intent];
     }
 
     getLastIntent() {
-        return this.paymentIntents[this.paymentIntents.length - 1]
+        return this.paymentIntents[this.paymentIntents.length - 1];
     }
 
     async succeedPayment(intent) {
@@ -127,9 +125,9 @@ export class StripeMocker {
             payment_method_details: {
                 bancontact: {
                     iban_last4: 1234,
-                    verified_name: 'John Doe'
-                }
-            }
+                    verified_name: 'John Doe',
+                },
+            },
         };
 
         this.charges.push(charge);
@@ -140,9 +138,9 @@ export class StripeMocker {
         await this.#sendWebhook({
             type: 'payment_intent.succeeded',
             data: {
-                object: intent
-            }
-        })
+                object: intent,
+            },
+        });
     }
 
     async failPayment(intent) {
@@ -151,22 +149,22 @@ export class StripeMocker {
         await this.#sendWebhook({
             type: 'payment_intent.payment_failed',
             data: {
-                object: intent
-            }
-        })
+                object: intent,
+            },
+        });
     }
 
-    async #sendWebhook(payload: {[key: string]: unknown}) {
+    async #sendWebhook(payload: { [key: string]: unknown }) {
         payload.id = this.createId('wh');
 
-        const stripe = StripeHelper.getInstance()
-        const endpoint = new StripeWebookEndpoint()
-        
-        const r = Request.buildJson("POST", `/stripe/webhooks`, undefined, payload);
+        const stripe = StripeHelper.getInstance();
+        const endpoint = new StripeWebookEndpoint();
+
+        const r = Request.buildJson('POST', `/stripe/webhooks`, undefined, payload);
         r.headers['stripe-signature'] = stripe.webhooks.generateTestHeaderString({
             payload: JSON.stringify(payload),
-            secret: STAMHOOFD.STRIPE_ENDPOINT_SECRET
-        })
+            secret: STAMHOOFD.STRIPE_ENDPOINT_SECRET,
+        });
         await testServer.test(endpoint, r);
     }
 
@@ -182,7 +180,7 @@ export class StripeMocker {
                 const keywords = {
                     true: true,
                     false: false,
-                    null: null
+                    null: null,
                 };
                 if (typeof value === 'string' && value in keywords) {
                     return keywords[value];
@@ -193,170 +191,170 @@ export class StripeMocker {
                 }
 
                 return value;
-            }
+            },
         });
     }
 
     async createStripeAccount(organizationId: string): Promise<StripeAccount> {
-        const account = new StripeAccount()
-        account.organizationId = organizationId
+        const account = new StripeAccount();
+        account.organizationId = organizationId;
         account.accountId = this.createId('acct');
-        account.setMetaFromStripeAccount(defaultBlobData)
+        account.setMetaFromStripeAccount(defaultBlobData);
         await account.save();
         return account;
     }
 
     stop() {
-        nock.cleanAll()
+        nock.cleanAll();
     }
 }
 
 const defaultBlobData = {
-    "business_profile": {
-        "annual_revenue": null,
-        "estimated_worker_count": null,
-        "mcc": "8641",
-        "name": "Demo vereniging",
-        "support_address": null,
-        "support_email": null,
-        "support_phone": null,
-        "support_url": null,
-        "url": "www.stamhoofd.be"
+    business_profile: {
+        annual_revenue: null,
+        estimated_worker_count: null,
+        mcc: '8641',
+        name: 'Demo vereniging',
+        support_address: null,
+        support_email: null,
+        support_phone: null,
+        support_url: null,
+        url: 'www.stamhoofd.be',
     },
-    "capabilities": {
-        "bancontact_payments": "active",
-        "card_payments": "active",
-        "ideal_payments": "active",
-        "transfers": "active"
+    capabilities: {
+        bancontact_payments: 'active',
+        card_payments: 'active',
+        ideal_payments: 'active',
+        transfers: 'active',
     },
-    "charges_enabled": true,
-    "country": "BE",
-    "created": 0,
-    "default_currency": "eur",
-    "details_submitted": true,
-    "email": "tests@stamhoofd.be",
-    "external_accounts": {
-    "data": [
-        {
-            "account": "acct_test",
-            "account_holder_name": null,
-            "account_holder_type": null,
-            "account_type": null,
-            "available_payout_methods": [
-                "standard"
-            ],
-            "bank_name": "KBC BANK NV",
-            "country": "BE",
-            "currency": "eur",
-            "default_for_currency": true,
-            "fingerprint": "xxxxxxxxxxxx",
-            "future_requirements": {
-                "currently_due": [],
-                "errors": [],
-                "past_due": [],
-                "pending_verification": []
+    charges_enabled: true,
+    country: 'BE',
+    created: 0,
+    default_currency: 'eur',
+    details_submitted: true,
+    email: 'tests@stamhoofd.be',
+    external_accounts: {
+        data: [
+            {
+                account: 'acct_test',
+                account_holder_name: null,
+                account_holder_type: null,
+                account_type: null,
+                available_payout_methods: [
+                    'standard',
+                ],
+                bank_name: 'KBC BANK NV',
+                country: 'BE',
+                currency: 'eur',
+                default_for_currency: true,
+                fingerprint: 'xxxxxxxxxxxx',
+                future_requirements: {
+                    currently_due: [],
+                    errors: [],
+                    past_due: [],
+                    pending_verification: [],
+                },
+                id: 'ba_xxxxxxxxxxx',
+                last4: '1111',
+                metadata: {},
+                object: 'bank_account',
+                requirements: {
+                    currently_due: [],
+                    errors: [],
+                    past_due: [],
+                    pending_verification: [],
+                },
+                routing_number: 'KREDBEBB',
+                status: 'new',
             },
-            "id": "ba_xxxxxxxxxxx",
-            "last4": "1111",
-            "metadata": {},
-            "object": "bank_account",
-            "requirements": {
-                "currently_due": [],
-                "errors": [],
-                "past_due": [],
-                "pending_verification": []
+        ],
+        has_more: false,
+        object: 'list',
+        total_count: 1,
+        url: '/v1/accounts/acct_test/external_accounts',
+    },
+    future_requirements: {
+        alternatives: [],
+        current_deadline: null,
+        currently_due: [],
+        disabled_reason: null,
+        errors: [],
+        eventually_due: [],
+        past_due: [],
+        pending_verification: [],
+    },
+    id: 'acct_text',
+    login_links: {
+        data: [],
+        has_more: false,
+        object: 'list',
+        total_count: 0,
+        url: '/v1/accounts/acct_test/login_links',
+    },
+    metadata: {},
+    object: 'account',
+    payouts_enabled: true,
+    requirements: {
+        alternatives: [],
+        current_deadline: null,
+        currently_due: [],
+        disabled_reason: null,
+        errors: [],
+        eventually_due: [],
+        past_due: [],
+        pending_verification: [],
+    },
+    settings: {
+        bacs_debit_payments: {
+            display_name: null,
+            service_user_number: null,
+        },
+        branding: {
+            icon: 'file_test',
+            logo: null,
+            primary_color: '#000000',
+            secondary_color: '#000000',
+        },
+        card_issuing: {
+            tos_acceptance: {
+                date: null,
+                ip: null,
             },
-            "routing_number": "KREDBEBB",
-            "status": "new"
-        }
-    ],
-    "has_more": false,
-    "object": "list",
-    "total_count": 1,
-    "url": "/v1/accounts/acct_test/external_accounts"
-    },
-    "future_requirements": {
-        "alternatives": [],
-        "current_deadline": null,
-        "currently_due": [],
-        "disabled_reason": null,
-        "errors": [],
-        "eventually_due": [],
-        "past_due": [],
-        "pending_verification": []
-    },
-    "id": "acct_text",
-    "login_links": {
-        "data": [],
-        "has_more": false,
-        "object": "list",
-        "total_count": 0,
-        "url": "/v1/accounts/acct_test/login_links"
-    },
-    "metadata": {},
-    "object": "account",
-    "payouts_enabled": true,
-    "requirements": {
-        "alternatives": [],
-        "current_deadline": null,
-        "currently_due": [],
-        "disabled_reason": null,
-        "errors": [],
-        "eventually_due": [],
-        "past_due": [],
-        "pending_verification": []
-    },
-    "settings": {
-    "bacs_debit_payments": {
-        "display_name": null,
-        "service_user_number": null
-    },
-    "branding": {
-        "icon": "file_test",
-        "logo": null,
-        "primary_color": "#000000",
-        "secondary_color": "#000000"
-    },
-    "card_issuing": {
-        "tos_acceptance": {
-            "date": null,
-            "ip": null
-        }
-    },
-    "card_payments": {
-        "decline_on": {
-            "avs_failure": false,
-            "cvc_failure": false
         },
-        "statement_descriptor_prefix": null,
-        "statement_descriptor_prefix_kana": null,
-        "statement_descriptor_prefix_kanji": null
-    },
-    "dashboard": {
-        "display_name": "Stamhoofd",
-        "timezone": "Etc/UTC"
-    },
-    "invoices": {
-        "default_account_tax_ids": null
-    },
-    "payments": {
-        "statement_descriptor": "WWW.STAMHOOFD.BE",
-        "statement_descriptor_kana": null,
-        "statement_descriptor_kanji": null
-    },
-    "payouts": {
-        "debit_negative_balances": true,
-        "schedule": {
-        "delay_days": 7,
-        "interval": "weekly",
-        "weekly_anchor": "monday"
+        card_payments: {
+            decline_on: {
+                avs_failure: false,
+                cvc_failure: false,
+            },
+            statement_descriptor_prefix: null,
+            statement_descriptor_prefix_kana: null,
+            statement_descriptor_prefix_kanji: null,
         },
-        "statement_descriptor": null
+        dashboard: {
+            display_name: 'Stamhoofd',
+            timezone: 'Etc/UTC',
+        },
+        invoices: {
+            default_account_tax_ids: null,
+        },
+        payments: {
+            statement_descriptor: 'WWW.STAMHOOFD.BE',
+            statement_descriptor_kana: null,
+            statement_descriptor_kanji: null,
+        },
+        payouts: {
+            debit_negative_balances: true,
+            schedule: {
+                delay_days: 7,
+                interval: 'weekly',
+                weekly_anchor: 'monday',
+            },
+            statement_descriptor: null,
+        },
+        sepa_debit_payments: {},
     },
-    "sepa_debit_payments": {}
+    tos_acceptance: {
+        date: 0,
     },
-    "tos_acceptance": {
-     "date": 0
-    },
-    "type": "express"
+    type: 'express',
 };

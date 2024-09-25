@@ -78,7 +78,7 @@ export default class ProductSelectLocationInput extends VueComponent {
             return
         }
         
-        const a = this.locations.find(aa => aa.id == val.id)
+        const a = this.locations.find(aa => aa.id === val.id)
         if (a) {
             this.selectedLocation = a
             if (this.editingLocation) {
@@ -94,7 +94,7 @@ export default class ProductSelectLocationInput extends VueComponent {
     }
 
     mounted() {
-        const a = this.locations.find(aa => aa.id == this.modelValue?.id)
+        const a = this.locations.find(aa => aa.id === this.modelValue?.id)
         if (a) {
             this.selectedLocation = a
             this.editingLocation = false

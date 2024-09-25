@@ -102,7 +102,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
         return this.organization.getCategoryTree({
             admin: true, 
             permissions: this.$context.auth.permissions
-        }).getAllCategories().filter(c => c.categories.length == 0)
+        }).getAllCategories().filter(c => c.categories.length === 0)
     }
 
     async restoreGroup(event, group: Group) {
@@ -112,7 +112,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
             return;
         }
 
-        if (this.allCategories.length == 1) {
+        if (this.allCategories.length === 1) {
             await this.restoreTo(group, this.allCategories[0])
             return
         }
@@ -140,9 +140,9 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
         const settings = OrganizationRegistrationPeriodSettings.patch({})
         const catPatch = GroupCategory.patch({id: cat.id})
         
-        if (cat.groupIds.filter(id => id == group.id).length > 1) {
+        if (cat.groupIds.filter(id => id === group.id).length > 1) {
             // Not fixable, we need to set the ids manually
-            const cleaned = cat.groupIds.filter(id => id != group.id)
+            const cleaned = cat.groupIds.filter(id => id !== group.id)
             cleaned.push(group.id)
             catPatch.groupIds = cleaned as any
         } else {

@@ -15,14 +15,14 @@
                 Er werd te veel betaald voor de bestelling (waarschijnlijk gewijzigd na betaling). Er is een terugbetaling nodig.
             </p>
 
-            <p v-if="order.status == 'Completed'" class="warning-box">
+            <p v-if="order.status === 'Completed'" class="warning-box">
                 Deze bestelling werd al als voltooid gemarkeerd
             </p>
-            <p v-if="order.status == 'Canceled'" class="error-box">
+            <p v-if="order.status === 'Canceled'" class="error-box">
                 Deze bestelling werd geannuleerd
             </p>
 
-            <button v-if="order.pricePaid != order.totalToPay && hasPaymentsWrite && isMissingPayments" class="button text" type="button" @click="createPayment">
+            <button v-if="order.pricePaid !== order.totalToPay && hasPaymentsWrite && isMissingPayments" class="button text" type="button" @click="createPayment">
                 <span class="icon add" />
                 <span>Betaling / terugbetaling registreren</span>
             </button>
@@ -91,16 +91,16 @@
                 <STListItem
                     v-for="(payment, index) in order.payments"
                     :key="payment.id"
-                    v-long-press="(e) => (hasPaymentsWrite && (payment.method == 'Transfer' || payment.method == 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                    v-long-press="(e) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
                     class="right-description" @click="openPayment(payment)"
-                    @contextmenu.prevent="hasPaymentsWrite && (payment.method == 'Transfer' || payment.method == 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
+                    @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
                 >
                     <h3 class="style-definition-label">
                         {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ getName(payment.method) }}</span>
-                        <span v-if="payment.status == 'Succeeded'" class="icon primary success" />
+                        <span v-if="payment.status === 'Succeeded'" class="icon primary success" />
                         <span v-else class="icon clock" />
                     </p>
 
@@ -113,13 +113,13 @@
 
             <template v-if="order.data.checkoutMethod">
                 <hr>
-                <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                     Afhalen
                 </h2>
-                <h2 v-else-if="order.data.checkoutMethod.type == 'Delivery'">
+                <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
                     Levering
                 </h2>
-                <h2 v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                     Ter plaatse consumeren
                 </h2>
                 <h2 v-else>
@@ -129,10 +129,10 @@
                 <STList class="info">
                     <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                         <h3 class="style-definition-label">
-                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                            <template v-if="order.data.checkoutMethod.type === 'Takeout'">
                                 Afhaallocatie
                             </template>
-                            <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                                 Locatie
                             </template>
                             <template v-else>
@@ -164,10 +164,10 @@
                     </STListItem>
                     <STListItem v-if="order.data.timeSlot" class="right-description">
                         <h3 class="style-definition-label">
-                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                            <template v-if="order.data.checkoutMethod.type === 'Takeout'">
                                 Wanneer afhalen?
                             </template>
-                            <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                                 Wanneer?
                             </template>
                             <template v-else>
@@ -261,7 +261,7 @@
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                 <hr>
-                <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                     Afhaalopmerkingen
                 </h2>
                 <h2 v-else>
@@ -281,11 +281,11 @@
                 {{ ticket.secret }}
             </p>
 
-            <p v-if="order.status == 'Canceled'" class="error-box">
+            <p v-if="order.status === 'Canceled'" class="error-box">
                 Deze bestelling werd geannuleerd
             </p>
             
-            <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
+            <p v-if="order.payment && order.payment.status !== 'Succeeded'" class="warning-box">
                 Opgelet: deze bestelling werd nog niet betaald.
             </p>
 

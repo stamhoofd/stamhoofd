@@ -59,7 +59,7 @@
                         <h3 class="style-title-list">
                             {{ _type.name }}
                         </h3>
-                        <p v-if="transferType == _type.value" class="style-description pre-wrap" v-text="_type.description" />
+                        <p v-if="transferType === _type.value" class="style-description pre-wrap" v-text="_type.description" />
                     </STListItem>
                 </STList>
             </STInputBox>
@@ -68,12 +68,12 @@
                 <span>De mededeling kan niet gewijzigd worden door <span v-if="type === 'webshop'">bestellers</span><span v-else>leden</span>. Voorzie dus zelf geen eigen vervangingen zoals <em class="style-em">bestelling + naam</em> waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.</span>
             </p>
 
-            <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
+            <STInputBox v-if="transferType !== 'Structured'" :title="transferType === 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
                 <input
                     v-model="prefix"
                     class="input"
                     type="text"
-                    :placeholder="transferType == 'Fixed' ? 'Mededeling' : (type === 'registration' ? 'Optioneel. Bv. Inschrijving' : 'Optioneel. Bv. Bestelling')"
+                    :placeholder="transferType === 'Fixed' ? 'Mededeling' : (type === 'registration' ? 'Optioneel. Bv. Inschrijving' : 'Optioneel. Bv. Bestelling')"
                     autocomplete=""
                 >
             </STInputBox>
@@ -253,7 +253,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
     }
 
     setDefaultSelection() {
-        if (this.config.paymentMethods.length == 0) {
+        if (this.config.paymentMethods.length === 0) {
             const ignore = [
                 PaymentMethod.Unknown,
                 PaymentMethod.Transfer,
@@ -307,7 +307,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
     }
 
     get stripeAccountObject() {
-        return this.stripeAccounts.find(a => a.id == this.stripeAccountId) ?? null
+        return this.stripeAccounts.find(a => a.id === this.stripeAccountId) ?? null
     }
 
     get sortedPaymentMethods() {
@@ -318,12 +318,12 @@ export default class EditPaymentMethodsBox extends VueComponent {
         const r: PaymentMethod[] = []
 
         // Force a given ordering
-        if (this.country == Country.Netherlands) {
+        if (this.country === Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 
         // Force a given ordering
-        if (this.country == Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
+        if (this.country === Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
             r.push(PaymentMethod.Payconiq)
         }
 
@@ -331,7 +331,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
         r.push(PaymentMethod.Bancontact)
 
         // Force a given ordering
-        if (this.country != Country.Netherlands) {
+        if (this.country !== Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 
@@ -350,7 +350,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
     }
     
     providerText(provider: PaymentProvider | null, map: {[key: string]: string}): string {
-        if (provider == null) {
+        if (provider === null) {
             return ""
         } else {
             return map[provider]
@@ -410,7 +410,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
             }
             arr.addPut(method)
         } else {
-            if (!force && this.choices === null && this.config.paymentMethods.length == 1) {
+            if (!force && this.choices === null && this.config.paymentMethods.length === 1) {
                 new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
                 return
             }
@@ -454,7 +454,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
 
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: {
-                if ((this.organization.privateMeta?.payconiqApiKey ?? "").length == 0) {
+                if ((this.organization.privateMeta?.payconiqApiKey ?? "").length === 0) {
                     return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie."
                 }
                 break
@@ -565,7 +565,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
     set creditor(creditor: string | null ) {
         this.patchConfig(PaymentConfiguration.patch({ 
             transferSettings: TransferSettings.patch({
-                creditor: !creditor || creditor.length == 0 || creditor == this.organization.name ? null : creditor
+                creditor: !creditor || creditor.length === 0 || creditor === this.organization.name ? null : creditor
             })
         }))
     }
@@ -577,7 +577,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
     set iban(iban: string | null ) {
         this.patchConfig(PaymentConfiguration.patch({ 
             transferSettings: TransferSettings.patch({
-                iban: !iban || iban.length == 0 ? null : iban
+                iban: !iban || iban.length === 0 ? null : iban
             })
         }))
     }
@@ -607,7 +607,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
     }
 
     get isBelgium() {
-        return this.organization.address.country == Country.Belgium
+        return this.organization.address.country === Country.Belgium
     }
 
     get transferExample() {

@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Event } from '@stamhoofd/models';
-import { SQL, SQLFilterDefinitions, SQLSortDefinitions, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
+import { SQL, SQLFilterDefinitions, SQLSortDefinitions, compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
 import { CountFilteredRequest, Event as EventStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -14,20 +13,20 @@ import { eventSorters } from '../../../sql-sorters/events';
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<EventStruct[], LimitedFilteredRequest>
+type ResponseBody = PaginatedResponse<EventStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLFilterDefinitions = eventFilterCompilers
-const sorters: SQLSortDefinitions<Event> = eventSorters
+const filterCompilers: SQLFilterDefinitions = eventFilterCompilers;
+const sorters: SQLSortDefinitions<Event> = eventSorters;
 
 export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>
+    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/events", {});
+        const params = Endpoint.parseParameters(request.url, '/events', {});
 
         if (params) {
             return [true, params as Params];
@@ -35,74 +34,74 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         return [false];
     }
 
-    static buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
-        const organization = Context.organization
-        let scopeFilter: StamhoofdFilter|undefined = undefined;
+    static buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+        const organization = Context.organization;
+        let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (organization) {
             scopeFilter = {
                 $or: [
                     {
-                        organizationId: organization.id
+                        organizationId: organization.id,
                     },
                     {
-                        organizationId: null
-                    }
+                        organizationId: null,
+                    },
                 ],
             };
         }
 
         const query = SQL
             .select(
-                SQL.wildcard(Event.table)
+                SQL.wildcard(Event.table),
             )
             .from(
-                SQL.table(Event.table)
+                SQL.table(Event.table),
             );
-            
+
         if (scopeFilter) {
-            query.where(compileToSQLFilter(scopeFilter, filterCompilers))
+            query.where(compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers))
+            query.where(compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
-            let searchFilter: StamhoofdFilter|null = null
+            let searchFilter: StamhoofdFilter | null = null;
 
             // todo: detect special search patterns and adjust search filter if needed
             searchFilter = {
                 name: {
-                    $contains: q.search
-                }
-            }
+                    $contains: q.search,
+                },
+            };
 
             if (searchFilter) {
-                query.where(compileToSQLFilter(searchFilter, filterCompilers))
+                query.where(compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
+                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
-            q.sort = assertSort(q.sort, [{key: 'id'}])
-            query.orderBy(compileToSQLSorter(q.sort, sorters))
-            query.limit(q.limit)
+            q.sort = assertSort(q.sort, [{ key: 'id' }]);
+            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            query.limit(q.limit);
         }
-       
-        return query
+
+        return query;
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
-        const query = GetEventsEndpoint.buildQuery(requestQuery)
-        const data = await query.fetch()
-        
+        const query = GetEventsEndpoint.buildQuery(requestQuery);
+        const data = await query.fetch();
+
         const events = Event.fromRows(data, Event.table);
 
-        let next: LimitedFilteredRequest|undefined;
+        let next: LimitedFilteredRequest | undefined;
 
         if (events.length >= requestQuery.limit) {
             const lastObject = events[events.length - 1];
@@ -113,8 +112,8 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 pageFilter: nextFilter,
                 sort: requestQuery.sort,
                 limit: requestQuery.limit,
-                search: requestQuery.search
-            })
+                search: requestQuery.search,
+            });
 
             if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
                 console.error('Found infinite loading loop for', requestQuery);
@@ -124,13 +123,13 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         return new PaginatedResponse<EventStruct[], LimitedFilteredRequest>({
             results: await AuthenticatedStructures.events(events),
-            next
+            next,
         });
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
 
@@ -138,20 +137,20 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'limit',
-                message: 'Limit can not be more than ' + maxLimit
-            })
+                message: 'Limit can not be more than ' + maxLimit,
+            });
         }
 
         if (request.query.limit < 1) {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'limit',
-                message: 'Limit can not be less than 1'
-            })
+                message: 'Limit can not be less than 1',
+            });
         }
-        
+
         return new Response(
-            await GetEventsEndpoint.buildData(request.query)
+            await GetEventsEndpoint.buildData(request.query),
         );
     }
 }

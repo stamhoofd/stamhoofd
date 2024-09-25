@@ -74,8 +74,8 @@
                                         v-if="sortBy === column"
                                         class="sort-arrow icon"
                                         :class="{
-                                            'arrow-up-small': sortDirection == 'ASC',
-                                            'arrow-down-small': sortDirection == 'DESC',
+                                            'arrow-up-small': sortDirection === 'ASC',
+                                            'arrow-down-small': sortDirection === 'DESC',
                                         }"
                                     />
                                 </button>
@@ -1203,7 +1203,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
         updateColumns()
 
         while (distributeWidth !== 0 && (columns.length > 0 || columnPriorityIndex < columnPriorities.length - 1)) {
-            if (columns.length == 0) {
+            if (columns.length === 0) {
                 columnPriorityIndex++
                     
                 updateColumns()
@@ -1227,7 +1227,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
             // We'll make sure we never grow or shrink more than the distribute width
 
             for (const col of columns) {
-                if (col.width == null) {
+                if (col.width === null) {
                     throw new Error("Impossible. Typescript type checking error")
                 } 
 
@@ -1272,7 +1272,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
         // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
 
         for (const column of affectedColumns) {
-            if (column.width == null) {
+            if (column.width === null) {
                 continue;
             }
 
@@ -1297,7 +1297,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
 
         // Now same with minimum
         for (const column of affectedColumns) {
-            if (column.width == null) {
+            if (column.width === null) {
                 continue;
             }
 
@@ -1516,13 +1516,13 @@ watch(values, () => {
 function getScrollElement(element: HTMLElement): HTMLElement {
     const style = window.getComputedStyle(element);
     if (
-        style.overflowY == "scroll" ||
-        style.overflow == "scroll" ||
-        style.overflow == "auto" ||
-        style.overflowY == "auto" ||
+        style.overflowY === "scroll" ||
+        style.overflow === "scroll" ||
+        style.overflow === "auto" ||
+        style.overflowY === "auto" ||
         // Windows fix
-        style.overflow == "overlay" ||
-        style.overflowY == "overlay"
+        style.overflow === "overlay" ||
+        style.overflowY === "overlay"
     ) {
         return element;
     } else {
@@ -1631,8 +1631,8 @@ const totalHeight = computed(() => {
 function getPrevious(value: Value): Value | null {
     for (let index = 0; index < values.value.length; index++) {
         const _value = values.value[index];
-        if (_value.id == value.id) {
-            if (index == 0) {
+        if (_value.id === value.id) {
+            if (index === 0) {
                 return null;
             }
             return values.value[index - 1];
@@ -1644,8 +1644,8 @@ function getPrevious(value: Value): Value | null {
 function getNext(value: Value): Value | null {
     for (let index = 0; index < values.value.length; index++) {
         const _value = values.value[index];
-        if (_value.id == value.id) {
-            if (index == values.value.length - 1) {
+        if (_value.id === value.id) {
+            if (index === values.value.length - 1) {
                 return null;
             }
             return values.value[index + 1];

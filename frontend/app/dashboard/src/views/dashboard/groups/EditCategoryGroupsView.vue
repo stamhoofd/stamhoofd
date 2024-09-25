@@ -32,7 +32,7 @@
         </template>
 
         <template v-if="enableActivities">
-            <Checkbox v-if="categories.length == 0" v-model="limitRegistrations">
+            <Checkbox v-if="categories.length === 0" v-model="limitRegistrations">
                 Een lid kan maar in één groep inschrijven
             </Checkbox>
 
@@ -55,7 +55,7 @@
             </STList>
         </template>
 
-        <template v-if="groups.length > 0 || categories.length == 0">
+        <template v-if="groups.length > 0 || categories.length === 0">
             <hr>
             <h2>Groepen</h2>
             <STList v-model="draggableGroups" :draggable="true">
@@ -65,7 +65,7 @@
             </STList>
         </template>
 
-        <p v-if="categories.length == 0">
+        <p v-if="categories.length === 0">
             <button class="button text" type="button" @click="createGroup">
                 <span class="icon add" />
                 <span>Nieuwe groep</span>
@@ -74,7 +74,7 @@
         <p v-if="enableActivities">
             <button class="button text" type="button" @click="createCategory">
                 <span class="icon add" />
-                <span v-if="groups.length == 0">Nieuwe categorie</span>
+                <span v-if="groups.length === 0">Nieuwe categorie</span>
                 <span v-else>Opdelen in categorieën</span>
             </button>
         </p>
@@ -135,7 +135,7 @@ const auth = useAuth();
 const isPlatformAdmin = auth.hasFullPlatformAccess();
 
 const patchedCategory = computed(() => {
-    const c = patchedPeriod.value.settings.categories.find(c => c.id == props.category.id)
+    const c = patchedPeriod.value.settings.categories.find(c => c.id === props.category.id)
     if (c) {
         return c
     }
@@ -261,7 +261,7 @@ async function createGroup() {
         periodId: props.organization.period.period.id,
         settings: GroupSettings.create({
             name: "",
-            genderType: props.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
+            genderType: props.organization.meta.genderType === OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
         }),
         privateSettings: GroupPrivateSettings.create({}),
         status: GroupStatus.Closed
@@ -296,7 +296,7 @@ async function createGroup() {
 
 async function createCategory() {
     const category = GroupCategory.create({})
-    category.groupIds = patchedCategory.value.categoryIds.length == 0 ? patchedCategory.value.groupIds : []
+    category.groupIds = patchedCategory.value.categoryIds.length === 0 ? patchedCategory.value.groupIds : []
     
     const settings = OrganizationRegistrationPeriodSettings.patch({})
     settings.categories.addPut(category)

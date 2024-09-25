@@ -20,7 +20,7 @@
             </STListItem>
         </STList>
 
-        <p v-if="roles.length == 0" class="info-box">
+        <p v-if="roles.length === 0" class="info-box">
             Je hebt nog geen rollen aangemaakt. Maak een rol aan om beheerders op te delen.
         </p>
 

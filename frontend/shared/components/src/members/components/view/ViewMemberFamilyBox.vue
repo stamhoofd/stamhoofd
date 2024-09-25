@@ -47,7 +47,7 @@ const present = usePresent();
 const familyMembers = computed(() => props.member.family.members.filter(m => m.id !== props.member.id))
 const maxFamilyAge = computed(() => {
     const ages = familyMembers.value.map(m => m.patchedMember.details.age ?? 99)
-    if (ages.length == 0) {
+    if (ages.length === 0) {
         return 99
     }
     return Math.max(...ages)

@@ -33,7 +33,7 @@
             </RadioGroup>
         </STInputBox>
 
-        <STInputBox v-if="selectedType == 'website'" key="website" title="Volledige link" error-fields="url" :error-box="errorBox">
+        <STInputBox v-if="selectedType === 'website'" key="website" title="Volledige link" error-fields="url" :error-box="errorBox">
             <input
                 v-model="url"
                 class="input"
@@ -42,7 +42,7 @@
             >
         </STInputBox>
 
-        <FileInput v-if="selectedType == 'file'" key="file" v-model="file" title="Kies een bestand" :validator="validator" :required="false" />
+        <FileInput v-if="selectedType === 'file'" key="file" v-model="file" title="Kies een bestand" :validator="validator" :required="false" />
     </div>
 </template>
 
@@ -119,7 +119,7 @@ export default class EditPolicyBox extends Mixins(NavigationMixin) {
 
     validate() {
         // TODO: add validator
-        if (this.selectedType == "file") {
+        if (this.selectedType === "file") {
             this.url = null;
             // We don't clear the file if url is selected, since url has priority over the file. So we don't need to reupload the file
             if (!this.file) {
@@ -137,7 +137,7 @@ export default class EditPolicyBox extends Mixins(NavigationMixin) {
             }
         }
 
-        if (this.selectedType == "website" && this.policy.url && this.policy.url.length > 0 && !this.policy.url.startsWith("http://") && !this.policy.url.startsWith("https://") && !this.policy.url.startsWith("mailto:") && !this.policy.url.startsWith("tel:")) {
+        if (this.selectedType === "website" && this.policy.url && this.policy.url.length > 0 && !this.policy.url.startsWith("http://") && !this.policy.url.startsWith("https://") && !this.policy.url.startsWith("mailto:") && !this.policy.url.startsWith("tel:")) {
             this.url = "http://"+this.policy.url
         }
         return true

@@ -3,7 +3,7 @@
         <STNavigationBar title="Overschrijven" :disablePop="true" :disableDismiss="!isPopup" />
 
         <main>
-            <h1 v-if="created && type == 'order'">
+            <h1 v-if="created && type === 'order'">
                 Bestelling geplaatst! Schrijf nu over.
             </h1>
             <h1 v-else-if="created">
@@ -15,13 +15,13 @@
             <h1 v-else>
                 Bedrag overschrijven
             </h1>
-            <p v-if="payment.price > 0 && payment.status != 'Succeeded' && created">
+            <p v-if="payment.price > 0 && payment.status !== 'Succeeded' && created">
                 Voer de overschrijving meteen uit. Vermeld zeker “{{ formattedTransferDescription }}” in je overschrijving.
             </p>
-            <p v-if="payment.price > 0 && payment.status != 'Succeeded' && !created">
+            <p v-if="payment.price > 0 && payment.status !== 'Succeeded' && !created">
                 We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
             </p>
-            <p v-if="payment.price < 0 && payment.status != 'Succeeded' && !created">
+            <p v-if="payment.price < 0 && payment.status !== 'Succeeded' && !created">
                 Je ontvangt dit bedrag binnenkort terug op jouw rekening.
             </p>
             <p v-if="payment.price < 0 && payment.status === 'Succeeded'" class="success-box">
@@ -83,7 +83,7 @@
                 </div>
             </div>
 
-            <div v-if="false && isBelgium && getOS() == 'iOS' && payment.price > 0 && payment.status != 'Succeeded'" class="only-smartphone container">
+            <div v-if="false && isBelgium && getOS() === 'iOS' && payment.price > 0 && payment.status !== 'Succeeded'" class="only-smartphone container">
                 <hr>
                 <h2>Snel app openen</h2>
                 <p>Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.</p>
@@ -155,7 +155,7 @@
                 </p>
             </div>
 
-            <p v-if="payment.price > 0 && payment.status == 'Succeeded'" class="success-box">
+            <p v-if="payment.price > 0 && payment.status === 'Succeeded'" class="success-box">
                 We hebben de betaling ontvangen.
             </p>
             <template v-else-if="payment.price > 0 && created">
@@ -169,7 +169,7 @@
         </main>
 
         <STToolbar v-if="!isPopup">
-            <button v-if="payment.price > 0 && payment.status != 'Succeeded'" slot="right" class="button secundary hide-smartphone" type="button" @click="helpMe">
+            <button v-if="payment.price > 0 && payment.status !==  'Succeeded'" slot="right" class="button secundary hide-smartphone" type="button" @click="helpMe">
                 <span class="icon help" />
                 <span>Het lukt niet</span>
             </button>
@@ -326,11 +326,11 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     }
 
     get isBelgium() {
-        return this.organization.address.country == Country.Belgium
+        return this.organization.address.country === Country.Belgium
     }
 
     get isStructured() {
-        return this.settings?.type == TransferDescriptionType.Structured
+        return this.settings?.type === TransferDescriptionType.Structured
     }
 
     get iban() {

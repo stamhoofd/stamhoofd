@@ -8,7 +8,6 @@
             {{ formatStartDate(config.startDate, false, true) }} - {{ formatEndDate(config.endDate, false, true) }} {{ config.expireDate ? '(verloopt op ' + formatEndDate(config.expireDate, false, true)+')' : '' }}
         </p>
 
-
         <template #right>
             <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">{{ formatPrice(config.prices[0].pricePerDay) }} per dag</span>
             <span v-if="config.prices[0] && type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">{{ $price !== undefined ? formatPrice($price) : '?' }}</span>
@@ -24,8 +23,8 @@ import { computed } from 'vue';
 const props = defineProps<{
     type: PlatformMembershipType;
     config: PlatformMembershipTypeConfig;
-    period: RegistrationPeriod
+    period: RegistrationPeriod;
 }>();
 
-const $price = computed(() => props.config.prices[0].prices.get('')?.price)
+const $price = computed(() => props.config.prices[0].prices.get('')?.price);
 </script>

@@ -1,88 +1,88 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { v4 as uuidv4 } from "uuid";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { v4 as uuidv4 } from 'uuid';
 
-import { ResolutionRequest } from "../../files/ResolutionRequest";
-import { type RecordAnswer } from "./RecordAnswer";
+import { ResolutionRequest } from '../../files/ResolutionRequest';
+import { type RecordAnswer } from './RecordAnswer';
 
 export enum RecordType {
     /**
      * Show a checkbox to the user so they can check the value on/off
      * It is possible to add a textarea as soon as the checkbox is selected if the extra property is set.
      */
-    Checkbox = "Checkbox",
+    Checkbox = 'Checkbox',
 
     /**
      * Select one (or none if not required)
      */
-    ChooseOne = "ChooseOne",
+    ChooseOne = 'ChooseOne',
 
     /**
      * Select one, zero or more from a menu
-     * The way this is shown will differ depending on the minimum or maximum setting. e.g. when exactly one 
+     * The way this is shown will differ depending on the minimum or maximum setting. e.g. when exactly one
      * item should be selected, we could show it with a dropdown menu
      */
-    MultipleChoice = "MultipleChoice",
+    MultipleChoice = 'MultipleChoice',
 
     /**
      * Small text input
      */
-    Text = "Text",
+    Text = 'Text',
 
     /**
      * Big text input
      */
-    Textarea = "Textarea",
+    Textarea = 'Textarea',
 
     /**
      * Address input
      */
-    Address = "Address",
+    Address = 'Address',
 
-    Phone = "Phone",
-    Email = "Email",
+    Phone = 'Phone',
+    Email = 'Email',
 
-    Date = "Date",
-    Price = "Price",
-    Image = "Image",
-    Integer = "Integer"
+    Date = 'Date',
+    Price = 'Price',
+    Image = 'Image',
+    Integer = 'Integer',
 }
 
 export enum RecordWarningType {
-    Info = "Info",
-    Warning = "Warning",
-    Error = "Error",
+    Info = 'Info',
+    Warning = 'Warning',
+    Error = 'Error',
 }
 
 export class RecordWarning extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string
+    id: string;
 
     @field({ decoder: StringDecoder })
-    text = ""
+    text = '';
 
     @field({ decoder: new EnumDecoder(RecordWarningType) })
-    type = RecordWarningType.Info
+    type = RecordWarningType.Info;
 
     /**
      * Show a warning if the associated value is falsy
      */
     @field({ decoder: BooleanDecoder })
-    inverted = false
+    inverted = false;
 
     static get sort() {
         return (warning1: RecordWarning, warning2: RecordWarning) => {
-            const priority1 = warning1.type
-            const priority2 = warning2.type
+            const priority1 = warning1.type;
+            const priority2 = warning2.type;
 
-            if (priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Warning ||
-                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Info ||
-                priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Info) {
+            if ((priority1 === RecordWarningType.Error && priority2 === RecordWarningType.Warning)
+                || (priority1 === RecordWarningType.Warning && priority2 === RecordWarningType.Info)
+                || (priority1 === RecordWarningType.Error && priority2 === RecordWarningType.Info)) {
                 return -1;
             }
-            else if (priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Warning ||
-                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Error ||
-                priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Error) {
+            else if ((priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Warning)
+                || (priority1 === RecordWarningType.Warning && priority2 === RecordWarningType.Error)
+                || (priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Error)) {
                 return 1;
             }
             else {
@@ -93,39 +93,39 @@ export class RecordWarning extends AutoEncoder {
 
     get icon() {
         switch (this.type) {
-            case RecordWarningType.Error: return " exclamation-two red"
-            case RecordWarningType.Warning: return " exclamation yellow"
-            case RecordWarningType.Info: return " info-text"
+            case RecordWarningType.Error: return ' exclamation-two red';
+            case RecordWarningType.Warning: return ' exclamation yellow';
+            case RecordWarningType.Info: return ' info-text';
         }
     }
 }
 
 export class RecordChoice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string
+    id: string;
 
     @field({ decoder: StringDecoder })
-    name = ""
+    name = '';
 
     @field({ decoder: StringDecoder, version: 118 })
-    description = ""
+    description = '';
 
     /**
      * Show a warning if selected (or not selected if inverted)
      */
     @field({ decoder: RecordWarning, version: 122, nullable: true })
-    warning: RecordWarning | null = null
+    warning: RecordWarning | null = null;
 }
 
 export class RecordSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string
+    id: string;
 
     /**
      * Short name (used mainly for displaying the information)
      */
     @field({ decoder: StringDecoder })
-    name = ""
+    name = '';
 
     /**
      * When used with checkbox: checkbox needs to get checked (e.g accept terms, confirm age...)
@@ -133,19 +133,19 @@ export class RecordSettings extends AutoEncoder {
      * Text: required input
      */
     @field({ decoder: BooleanDecoder })
-    required = true
+    required = true;
 
     /**
      * Whether you need permission to collect this information
      */
     @field({ decoder: BooleanDecoder, version: 123 })
-    sensitive = false
+    sensitive = false;
 
     /**
      * Only used for checkboxes
      */
     @field({ decoder: BooleanDecoder, version: 119 })
-    askComments = false
+    askComments = false;
 
     /**
      * Future idea:
@@ -156,63 +156,63 @@ export class RecordSettings extends AutoEncoder {
     // visibleForMembers = true
 
     @field({ decoder: new EnumDecoder(RecordType) })
-    type = RecordType.Text
+    type = RecordType.Text;
 
     /**
      * In case of multiple choice: the values you can choose from with optional additional information
      */
     @field({ decoder: new ArrayDecoder(RecordChoice) })
-    choices: RecordChoice[] = []
+    choices: RecordChoice[] = [];
 
-     /**
+    /**
      * Label used for input (depending on the type)
      * Checkbox: text next to checkbox
      * Text inputs: label field above the input
      * If empty: name is used
      */
     @field({ decoder: StringDecoder })
-    label = ""
+    label = '';
 
     /**
      * Text underneath the label in case of a checkbox.
      * For other types: below the input
      */
     @field({ decoder: StringDecoder })
-    description = ""
+    description = '';
 
     /// In case of textboxes or comments for checked checkboxes
     @field({ decoder: StringDecoder })
-    inputPlaceholder = ""
+    inputPlaceholder = '';
 
     /// Text below the input field for comments (if any)
     @field({ decoder: StringDecoder, version: 120 })
-    commentsDescription = ""
+    commentsDescription = '';
 
     /**
      * Show a warning if selected / entered (or not selected/entered if inverted)
      */
     @field({ decoder: RecordWarning, version: 122, nullable: true })
-    warning: RecordWarning | null = null
+    warning: RecordWarning | null = null;
 
     /**
      * Only for images
      */
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
-    resolutions?: ResolutionRequest[]
+    resolutions?: ResolutionRequest[];
 
     validate(answers: Map<string, RecordAnswer>) {
-        const answer = answers.get(this.id)
+        const answer = answers.get(this.id);
 
         if (this.required && !answer) {
             throw new SimpleError({
-                code: "invalid_field",
-                message: "Dit veld is verplicht",
-                field: this.id
-            })
+                code: 'invalid_field',
+                message: 'Dit veld is verplicht',
+                field: this.id,
+            });
         }
 
         if (answer) {
-            answer.validate()
+            answer.validate();
         }
     }
 
@@ -222,9 +222,9 @@ export class RecordSettings extends AutoEncoder {
                 this.name + ' - Straat en nummer',
                 this.name + ' - Postcode',
                 this.name + ' - Gemeente',
-                this.name + ' - Land'
-            ]
+                this.name + ' - Land',
+            ];
         }
-        return [this.name]
+        return [this.name];
     }
 }

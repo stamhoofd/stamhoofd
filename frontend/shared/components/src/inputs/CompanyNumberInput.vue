@@ -82,13 +82,13 @@ export default class CompanyNumberInput extends VueComponent {
     validate() {
         this.companyNumberRaw = this.companyNumberRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
 
-        if (!this.required && this.companyNumberRaw.length == 0) {
+        if (!this.required && this.companyNumberRaw.length === 0) {
             this.errorBox = null
             this.$emit('update:modelValue', null)
             return true
         }
 
-        if (this.companyNumberRaw.length == 0) {
+        if (this.companyNumberRaw.length === 0) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
                 "message": "Verplicht in te vullen",

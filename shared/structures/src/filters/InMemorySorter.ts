@@ -1,84 +1,84 @@
-import { PlainObject } from "@simonbackx/simple-encoding";
-import { Sorter } from "@stamhoofd/utility";
+import { PlainObject } from '@simonbackx/simple-encoding';
+import { Sorter } from '@stamhoofd/utility';
 
-import { MemberSummary } from "../admin/MemberSummary";
-import { SortDefinition } from "./Sorters";
-import { SortItemDirection, SortList } from "./SortList";
+import { MemberSummary } from '../admin/MemberSummary';
+import { SortDefinition } from './Sorters';
+import { SortItemDirection, SortList } from './SortList';
 
 export type InMemorySorter<T> = (a: T, b: T) => number;
 export type InMemorySortDefinition<T, B extends PlainObject = PlainObject> = SortDefinition<T, B> & {
-    sort: InMemorySorter<T>
+    sort: InMemorySorter<T>;
 };
 
-export type InMemorySortDefinitions<T> = Record<string, InMemorySortDefinition<T>>
-
+export type InMemorySortDefinitions<T> = Record<string, InMemorySortDefinition<T>>;
 
 export function compileToInMemorySorter<T>(sortBy: SortList, definitions: InMemorySortDefinitions<T>): InMemorySorter<T> {
     const sorters: InMemorySorter<T>[] = [];
     for (const s of sortBy) {
         const d = definitions[s.key];
         if (!d) {
-            throw new Error('Unknown sort key ' + s.key)
+            throw new Error('Unknown sort key ' + s.key);
         }
 
         if (s.order === SortItemDirection.DESC) {
             sorters.push((a, b) => {
-                return - d.sort(a, b)
+                return -d.sort(a, b);
             });
-        } else {
+        }
+        else {
             sorters.push(d.sort);
         }
     }
 
     if (sorters.length === 0) {
-        throw new Error('No sortBy passed')
+        throw new Error('No sortBy passed');
     }
 
-    return (a , b) => {
-        return Sorter.stack(...sorters.map(s => s(a, b)))
-    }
+    return (a, b) => {
+        return Sorter.stack(...sorters.map(s => s(a, b)));
+    };
 }
 
 // EXAMPLE (should move)
 export const memberInMemorySorters: InMemorySortDefinitions<MemberSummary> = {
-    'id': {
+    id: {
         getValue(a) {
-            return a.id
+            return a.id;
         },
         sort: (a, b) => {
             return Sorter.byStringValue(a.id, b.id);
-        }
+        },
     },
-    'name': {
+    name: {
         getValue(a) {
-            return a.name
+            return a.name;
         },
         sort: (a, b) => {
             return Sorter.byStringValue(a.name, b.name);
-        }
+        },
     },
-    'birthDay': {
+    birthDay: {
         getValue(a) {
-            return a.birthDay?.getTime() ?? 0
+            return a.birthDay?.getTime() ?? 0;
         },
         sort: (a, b) => {
             return Sorter.byNumberValue(b.birthDay?.getTime() ?? 0, a.birthDay?.getTime() ?? 0);
-        }
+        },
     },
-    'organizationName': {
+    organizationName: {
         getValue(a) {
-            return a.organizationName
+            return a.organizationName;
         },
         sort: (a, b) => {
             return Sorter.byStringValue(b.organizationName, a.organizationName);
-        }
+        },
     },
     email: {
         getValue(a) {
-            return a.email
+            return a.email;
         },
         sort: (a, b) => {
             return Sorter.byStringValue(b.email ?? '', a.email ?? '');
         },
-    }
-}
+    },
+};

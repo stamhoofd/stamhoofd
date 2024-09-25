@@ -541,10 +541,10 @@ async function deleteGroup() {
     }
 }
 
-const allCategories = computed(() => organization.value ? organization.value.getCategoryTree({admin: true, permissions: auth.permissions}).getAllCategories().filter(c => c.categories.length == 0) : [])
+const allCategories = computed(() => organization.value ? organization.value.getCategoryTree({admin: true, permissions: auth.permissions}).getAllCategories().filter(c => c.categories.length === 0) : [])
 
 async function restoreGroup(event: MouseEvent) {
-    if (allCategories.value.length == 1) {
+    if (allCategories.value.length === 1) {
         await unarchiveGroupTo(props.group, allCategories.value[0])
         return
     }
@@ -575,9 +575,9 @@ async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
         const settingsPatch = OrganizationRegistrationPeriodSettings.patch({})
         const catPatch = GroupCategory.patch({id: cat.id})
 
-        if (cat.groupIds.filter(id => id == group.id).length > 1) {
+        if (cat.groupIds.filter(id => id === group.id).length > 1) {
             // Not fixable, we need to set the ids manually
-            const cleaned = cat.groupIds.filter(id => id != group.id)
+            const cleaned = cat.groupIds.filter(id => id !== group.id)
             cleaned.push(group.id)
             catPatch.groupIds = cleaned as any
         } else {
@@ -602,7 +602,7 @@ async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
             await organizationManager.value.patchPeriod(patch)
             
             // Manually update this group
-            const foundGroup = props.period.groups.find(g => g.id == group.id)
+            const foundGroup = props.period.groups.find(g => g.id === group.id)
             if (foundGroup) {
                 // Bit ugly, but only reliable way
                 props.group.set(foundGroup)

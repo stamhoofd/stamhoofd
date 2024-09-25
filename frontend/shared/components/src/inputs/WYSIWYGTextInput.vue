@@ -13,7 +13,7 @@
                         </div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
-                                {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
+                                {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
                             <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
                         </template>
@@ -278,7 +278,7 @@ export default class WYSIWYGTextInput extends VueComponent {
     saveLink() {
         let cleanedUrl = this.editLink.trim()
 
-        if (cleanedUrl.length == 0) {
+        if (cleanedUrl.length === 0) {
             this.clearLink()
             return
         }

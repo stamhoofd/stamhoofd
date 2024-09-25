@@ -43,7 +43,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     get estimatedRows() {
         if (this.isLoadingOrders) {
-            return this.orders.length == 0 ? 30 : this.orders.length
+            return this.orders.length === 0 ? 30 : this.orders.length
         }
        
         return 0
@@ -185,7 +185,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
         if (hasDelivery || nonDeliveryCount > 1) {
             cols.push(new Column<PrivateOrder, string | undefined>({
-                name: hasDelivery && nonDeliveryCount == 0 ? "Adres" : "Locatie", 
+                name: hasDelivery && nonDeliveryCount === 0 ? "Adres" : "Locatie", 
                 enabled: true,
                 getValue: (order) => {
                     if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
@@ -566,7 +566,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         // Delete these orders from the loaded orders instead of doing a full reload
         for (const order of orders) {
             const index = this.orders.findIndex(o => o.id === order.id)
-            if (index != -1) {
+            if (index !== -1) {
                 this.orders.splice(index, 1)
             }
         }
@@ -643,7 +643,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             // Initiate a refresh
             // don't wait
             this.isRefreshingOrders = true
-            this.isLoadingOrders = this.orders.length == 0
+            this.isLoadingOrders = this.orders.length === 0
 
             if (reset) {
                 this.orders = []
@@ -702,7 +702,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     get deliveryCities(): [string, string][] {
         const cities = new Map<string, string>()
         for (const order of this.orders) {
-            if (order.data.checkoutMethod &&  order.data.checkoutMethod.type == CheckoutMethodType.Delivery && order.data.address) {
+            if (order.data.checkoutMethod &&  order.data.checkoutMethod.type === CheckoutMethodType.Delivery && order.data.address) {
                 cities.set(Formatter.slug(order.data.address.postalCode+" "+order.data.address.city), order.data.address.postalCode+" "+order.data.address.city)
             }
         }

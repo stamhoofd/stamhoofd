@@ -1,13 +1,13 @@
-import { AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 export class RichText extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    html = ""
+    html = '';
 
     @field({ decoder: StringDecoder })
-    text = ""
+    text = '';
 
     toString() {
-        return this.text
+        return this.text;
     }
 }

@@ -4,7 +4,7 @@
             v-for="(item, index) in items"
             :key="index"
             class="item"
-            :class="{ selected: item == modelValue }"
+            :class="{ selected: item === modelValue }"
             @click="selectItem(index)"
         >
             <div :data-text="labels ? labels[index] : item" />

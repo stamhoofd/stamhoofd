@@ -91,7 +91,7 @@ export default class ProductRow extends Mixins(NavigationMixin) {
         // while name is in use
         // Remove and get number at end of duplicated product, default to 1
         let counter = 0;
-        while (this.webshop.products.find(p => p.name == duplicatedProduct.name) && counter < 100) {
+        while (this.webshop.products.find(p => p.name === duplicatedProduct.name) && counter < 100) {
             const endNumber = parseInt(duplicatedProduct.name.match(/\d+$/)?.[0] ?? "1")
             duplicatedProduct.name = duplicatedProduct.name.replace(/\d+$/, "") + (endNumber + 1)
             counter++
@@ -169,7 +169,7 @@ export default class ProductRow extends Mixins(NavigationMixin) {
                         name: "Verplaatsen naar",
                         childMenu: new ContextMenu([
                             this.webshop.categories.flatMap(c => {
-                                if (!this.category || c.id == this.category.id) {
+                                if (!this.category || c.id === this.category.id) {
                                     return []
                                 }
                                 return [new ContextMenuItem({

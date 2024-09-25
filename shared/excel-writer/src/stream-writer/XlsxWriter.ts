@@ -1,37 +1,35 @@
-import { CellValue, XlsxWriterAdapter } from "../interfaces";
-import { ZipWriterAdapter } from "./interfaces";
-import { XlsxAppPropsWriter } from "./XlsxAppPropsWriter";
-import { XlsxContentTypesWriter } from "./XlsxContentTypesWriter";
-import { XlsxCorePropsWriter } from "./XlsxCorePropsWriter";
-import { XlsxRelationsWriter } from "./XlsxRelationsWriter";
-import { XlsxSharedStringsWriter } from "./XlsxSharedStringsWriter";
-import { XlsxSheetWriter } from "./XlsxSheetWriter";
-import { XlsxStylesWriter } from "./XlsxStylesWriter";
-import { XlsxThemeWriter } from "./XlsxThemeWriter";
-import { XlsxWorkbookWriter } from "./XlsxWorkbookWriter";
+import { CellValue, XlsxWriterAdapter } from '../interfaces';
+import { ZipWriterAdapter } from './interfaces';
+import { XlsxAppPropsWriter } from './XlsxAppPropsWriter';
+import { XlsxContentTypesWriter } from './XlsxContentTypesWriter';
+import { XlsxCorePropsWriter } from './XlsxCorePropsWriter';
+import { XlsxRelationsWriter } from './XlsxRelationsWriter';
+import { XlsxSharedStringsWriter } from './XlsxSharedStringsWriter';
+import { XlsxSheetWriter } from './XlsxSheetWriter';
+import { XlsxStylesWriter } from './XlsxStylesWriter';
+import { XlsxThemeWriter } from './XlsxThemeWriter';
+import { XlsxWorkbookWriter } from './XlsxWorkbookWriter';
 
 export class XlsxWriter implements XlsxWriterAdapter {
     sheetWriters: Map<symbol, XlsxSheetWriter> = new Map();
-    
+
     styles: XlsxStylesWriter;
     globalRelations: XlsxRelationsWriter;
     workbookRelations: XlsxRelationsWriter;
     workbook: XlsxWorkbookWriter;
-    coreProps: XlsxCorePropsWriter
-    appProps: XlsxAppPropsWriter
+    coreProps: XlsxCorePropsWriter;
+    appProps: XlsxAppPropsWriter;
     contentTypes: XlsxContentTypesWriter;
-    theme: XlsxThemeWriter
+    theme: XlsxThemeWriter;
     sharedStrings: XlsxSharedStringsWriter;
 
-
     // Writes to the zip file
-    zipWriter: ZipWriterAdapter
-
+    zipWriter: ZipWriterAdapter;
 
     constructor(zipWriter: ZipWriterAdapter) {
         this.zipWriter = zipWriter;
-        
-        this.styles = new XlsxStylesWriter()
+
+        this.styles = new XlsxStylesWriter();
         this.globalRelations = new XlsxRelationsWriter();
         this.workbook = new XlsxWorkbookWriter();
         this.workbookRelations = new XlsxRelationsWriter();
@@ -49,7 +47,7 @@ export class XlsxWriter implements XlsxWriterAdapter {
         await this.zipWriter.addDirectory('xl/worksheets');
         await this.zipWriter.addDirectory('docProps');
         await this.zipWriter.addDirectory('xl/theme');
-        
+
         this.styles.writeStream = await this.zipWriter.addFile('xl/styles.xml');
         this.sharedStrings.writeStream = await this.zipWriter.addFile('xl/sharedStrings.xml');
         this.globalRelations.writeStream = await this.zipWriter.addFile('_rels/.rels');
@@ -63,70 +61,69 @@ export class XlsxWriter implements XlsxWriterAdapter {
 
         await this.globalRelations.addRelation({
             target: 'docProps/app.xml',
-            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties'
+            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties',
         });
 
         await this.contentTypes.addOverride({
             partName: '/docProps/app.xml',
-            contentType: 'application/vnd.openxmlformats-officedocument.extended-properties+xml'
+            contentType: 'application/vnd.openxmlformats-officedocument.extended-properties+xml',
         });
 
         await this.globalRelations.addRelation({
             target: 'docProps/core.xml',
-            type: 'http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties'
+            type: 'http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties',
         });
 
         await this.contentTypes.addOverride({
             partName: '/docProps/core.xml',
-            contentType: 'application/vnd.openxmlformats-package.core-properties+xml'
+            contentType: 'application/vnd.openxmlformats-package.core-properties+xml',
         });
 
         await this.globalRelations.addRelation({
             target: 'xl/workbook.xml',
-            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument'
+            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument',
         });
 
         await this.contentTypes.addOverride({
             partName: '/xl/workbook.xml',
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml'
+            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml',
         });
 
         // Wire up styles relation
         await this.workbookRelations.addRelation({
             target: 'styles.xml',
-            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles'
+            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles',
         });
 
         // Add sheet to content types
         await this.contentTypes.addOverride({
             partName: `/xl/styles.xml`,
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml'
+            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml',
         });
 
         // Theme relation: todo
         await this.workbookRelations.addRelation({
             target: 'theme/theme1.xml',
-            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme'
+            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme',
         });
 
         // Add theme to content types: todo
         await this.contentTypes.addOverride({
             partName: `/xl/theme/theme1.xml`,
-            contentType: 'application/vnd.openxmlformats-officedocument.theme+xml'
+            contentType: 'application/vnd.openxmlformats-officedocument.theme+xml',
         });
 
         // Shared strings relation: todo
         await this.workbookRelations.addRelation({
             target: 'sharedStrings.xml',
-            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings'
+            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings',
         });
 
         // Add shared strings to content types: todo
         await this.contentTypes.addOverride({
             partName: `/xl/sharedStrings.xml`,
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml'
+            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml',
         });
-
     }
 
     async addSheet(name: string): Promise<symbol> {
@@ -137,16 +134,16 @@ export class XlsxWriter implements XlsxWriterAdapter {
         // Write relationship
         const relationId = await this.workbookRelations.addRelation({
             target: path,
-            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet'
+            type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet',
         });
 
         // Add sheet to workbook file
-        await this.workbook.addSheet({name, relationId});
+        await this.workbook.addSheet({ name, relationId });
 
         // Add sheet to content types
         await this.contentTypes.addOverride({
             partName: `/xl/${path}`,
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml'
+            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml',
         });
 
         sheet.writeStream = await this.zipWriter.addFile(`xl/${path}`);
@@ -216,7 +213,8 @@ export class XlsxWriter implements XlsxWriterAdapter {
         for (const writer of this.sheetWriters.values()) {
             try {
                 await writer.abort();
-            } catch (e) {
+            }
+            catch (e) {
                 console.error('Error closing sheet writer', e);
             }
         }
@@ -224,73 +222,81 @@ export class XlsxWriter implements XlsxWriterAdapter {
         // Close styles
         try {
             await this.styles.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing styles', e);
         }
 
         // Close shared strings
         try {
             await this.sharedStrings.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing shared strings', e);
         }
 
         // Close workbook
         try {
             await this.workbook.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing workbook', e);
         }
 
         // Close workbook relations
         try {
             await this.workbookRelations.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing workbook relations', e);
         }
 
         // Close global relations
         try {
             await this.globalRelations.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing global relations', e);
         }
 
         // Close core props
         try {
             await this.coreProps.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing core props', e);
         }
 
         // Close app props
         try {
             await this.appProps.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing app props', e);
         }
 
         // Close theme
         try {
             await this.theme.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing theme', e);
         }
 
         // Close content types
         try {
             await this.contentTypes.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing content types', e);
         }
 
         // All write streams should be closed now
         try {
             await this.zipWriter.abort();
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Error closing zip writer', e);
         }
-        
     }
-    
 }

@@ -14,7 +14,7 @@
 import { PlatformPolicy } from '@stamhoofd/structures';
 
 defineProps<{
-    policy: PlatformPolicy
+    policy: PlatformPolicy;
 }>();
 
 </script>

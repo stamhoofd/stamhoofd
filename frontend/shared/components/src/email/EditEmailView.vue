@@ -241,7 +241,7 @@ async function save() {
             for (const webshop of webshops.value) {
                 // Check if changed
                 const prev = webshop.webshop.privateMeta !== null && webshop.webshop.privateMeta.defaultEmailId !== null && webshop.webshop.privateMeta.defaultEmailId === props.email.id
-                if (prev != webshop.selected) {
+                if (prev !== webshop.selected) {
                     organizationPatch.webshops.addPatch(WebshopPreview.patch({
                         id: webshop.webshop.id,
                         privateMeta: WebshopPrivateMetaData.patch({
@@ -263,7 +263,7 @@ async function save() {
             for (const group of groups.value) {
                 // Check if changed
                 const prev = group.group.privateSettings !== null && group.group.privateSettings.defaultEmailId !== null && group.group.privateSettings.defaultEmailId === props.email.id
-                if (prev != group.selected) {
+                if (prev !== group.selected) {
                     organizationPeriodPatch.groups.addPatch(Group.patch({
                         id: group.group.id,
                         privateSettings: GroupPrivateSettings.patch({
@@ -300,7 +300,7 @@ const hasChangesFull = computed(() => {
         for (const group of groups.value) {
             // Check if changed
             const prev = group.group.privateSettings !== null && group.group.privateSettings.defaultEmailId !== null && group.group.privateSettings.defaultEmailId === props.email.id
-            if (prev != group.selected) {
+            if (prev !== group.selected) {
                 otherChanges = true
                 break
             }
@@ -309,7 +309,7 @@ const hasChangesFull = computed(() => {
         for (const webshop of webshops.value) {
             // Check if changed
             const prev = webshop.webshop.privateMeta !== null && webshop.webshop.privateMeta.defaultEmailId !== null && webshop.webshop.privateMeta.defaultEmailId === props.email.id
-            if (prev != webshop.selected) {
+            if (prev !== webshop.selected) {
                 otherChanges = true
                 break
             }

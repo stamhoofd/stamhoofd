@@ -1,8 +1,8 @@
-import { AutoEncoder, Data, DateDecoder, Decoder, Encodeable, EncodeContext, field, IntegerDecoder, PlainObject, StringDecoder } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { AutoEncoder, Data, DateDecoder, Decoder, Encodeable, EncodeContext, field, IntegerDecoder, PlainObject, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 
-import { encodeSortList, SortList, SortListDecoder } from "./SortList";
-import { StamhoofdCompareValue, StamhoofdFilter } from "./StamhoofdFilter";
+import { encodeSortList, SortList, SortListDecoder } from './SortList';
+import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter';
 
 export class StamhoofdFilterJSONDecoder {
     static encode(context: EncodeContext, filter: StamhoofdFilter): string {
@@ -13,10 +13,11 @@ export class StamhoofdFilterJSONDecoder {
         const str = data.string;
         try {
             const decoded = JSON.parse(str);
-            return StamhoofdFilterDecoder.decode(data.clone({data: decoded, field: data.currentField, context: data.context}));
-        } catch (e) {
+            return StamhoofdFilterDecoder.decode(data.clone({ data: decoded, field: data.currentField, context: data.context }));
+        }
+        catch (e) {
             throw new SimpleError({
-                code: "invalid_field",
+                code: 'invalid_field',
                 message: `Expected JSON at ${data.currentField}`,
                 field: data.currentField,
             });
@@ -62,10 +63,10 @@ export class StamhoofdFilterDecoder {
         if (Array.isArray(value)) {
             return value.map((v, index) => this.decode(
                 data.clone({
-                    data: v, 
-                    field: data.addToCurrentField(index), 
-                    context: data.context
-                })
+                    data: v,
+                    field: data.addToCurrentField(index),
+                    context: data.context,
+                }),
             ));
         }
 
@@ -74,10 +75,10 @@ export class StamhoofdFilterDecoder {
             if ('$' in value && value.$ === '$date' && 'value' in value) {
                 return DateDecoder.decode(
                     data.clone({
-                        data: value.value, 
-                        field: data.addToCurrentField('value'), 
-                        context: data.context
-                    })
+                        data: value.value,
+                        field: data.addToCurrentField('value'),
+                        context: data.context,
+                    }),
                 );
             }
 
@@ -85,9 +86,9 @@ export class StamhoofdFilterDecoder {
             const c = {} as Record<string, StamhoofdFilter>;
             for (const [key, v] of Object.entries(value)) {
                 c[key] = this.decode(data.clone({
-                    data: v, 
-                    field: data.addToCurrentField(key), 
-                    context: data.context
+                    data: v,
+                    field: data.addToCurrentField(key),
+                    context: data.context,
                 }));
             }
             return c;
@@ -96,41 +97,41 @@ export class StamhoofdFilterDecoder {
         if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
             return value;
         }
-        
+
         throw new SimpleError({
-            code: "invalid_field",
+            code: 'invalid_field',
             message: `Invalid filter at ${data.currentField}`,
-            field: data.currentField
+            field: data.currentField,
         });
     }
 }
 
 export class CountResponse extends AutoEncoder {
-    @field({decoder: IntegerDecoder})
-    count: number
+    @field({ decoder: IntegerDecoder })
+    count: number;
 }
 
 export class CountFilteredRequest implements Encodeable {
-    filter: StamhoofdFilter|null
-    search: string|null
+    filter: StamhoofdFilter | null;
+    search: string | null;
 
-    constructor(data: {filter?: StamhoofdFilter|null, search?: string|null}) {
+    constructor(data: { filter?: StamhoofdFilter | null; search?: string | null }) {
         this.filter = data.filter ?? null;
-        this.search = data.search ?? null
+        this.search = data.search ?? null;
     }
 
     static decode(data: Data): CountFilteredRequest {
         return new CountFilteredRequest({
             filter: data.optionalField('filter')?.nullable(StamhoofdFilterJSONDecoder),
-            search: data.optionalField('search')?.nullable(StringDecoder)
-        })
+            search: data.optionalField('search')?.nullable(StringDecoder),
+        });
     }
 
     encode(context: EncodeContext): PlainObject {
         return {
             filter: this.filter ? JSON.stringify(this.filter) : undefined,
-            search: this.search ?? undefined
-        }
+            search: this.search ?? undefined,
+        };
     }
 }
 
@@ -138,23 +139,23 @@ export class LimitedFilteredRequest implements Encodeable {
     /**
      * This is the base filter
      */
-    filter: StamhoofdFilter|null
+    filter: StamhoofdFilter | null;
 
     /**
      * This is a filter than get extended to fetch the next page
      */
-    pageFilter: StamhoofdFilter|null
+    pageFilter: StamhoofdFilter | null;
 
-    sort: SortList
-    limit: number
-    search: string|null
+    sort: SortList;
+    limit: number;
+    search: string | null;
 
-    constructor(data: {filter?: StamhoofdFilter|null, pageFilter?: StamhoofdFilter|null, sort?: SortList, limit: number, search?: string|null}) {
+    constructor(data: { filter?: StamhoofdFilter | null; pageFilter?: StamhoofdFilter | null; sort?: SortList; limit: number; search?: string | null }) {
         this.filter = data.filter ?? null;
         this.pageFilter = data.pageFilter ?? null;
         this.sort = data.sort ?? [];
-        this.limit = data.limit
-        this.search = data.search ?? null
+        this.limit = data.limit;
+        this.search = data.search ?? null;
     }
 
     static decode(data: Data): LimitedFilteredRequest {
@@ -163,8 +164,8 @@ export class LimitedFilteredRequest implements Encodeable {
             pageFilter: data.optionalField('pageFilter')?.nullable(StamhoofdFilterJSONDecoder),
             sort: data.field('sort').decode(SortListDecoder as Decoder<SortList>),
             limit: data.field('limit').integer,
-            search: data.optionalField('search')?.nullable(StringDecoder)
-        })
+            search: data.optionalField('search')?.nullable(StringDecoder),
+        });
     }
 
     encode(context: EncodeContext): PlainObject {
@@ -173,7 +174,7 @@ export class LimitedFilteredRequest implements Encodeable {
             pageFilter: this.pageFilter ? StamhoofdFilterJSONDecoder.encode(context, this.pageFilter) : undefined,
             sort: encodeSortList(this.sort),
             limit: this.limit,
-            search: this.search ?? undefined
-        }
+            search: this.search ?? undefined,
+        };
     }
 }

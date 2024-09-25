@@ -68,7 +68,7 @@ export default class InputSheet extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return this.value != this.defaultValue
+        return this.value !== this.defaultValue
     }
 
     async shouldNavigateAway() {

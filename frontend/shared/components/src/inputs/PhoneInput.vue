@@ -86,7 +86,7 @@ export default class PhoneInput extends VueComponent {
 
     async validate(final: boolean, silent = false) {
 
-        if (this.phoneRaw.length == 0) {
+        if (this.phoneRaw.length === 0) {
 
             if (!this.required) {
                 if (!silent) {

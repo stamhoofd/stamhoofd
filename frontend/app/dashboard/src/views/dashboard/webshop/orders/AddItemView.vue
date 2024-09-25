@@ -7,7 +7,7 @@
             </h1>
 
             <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :is-last="index === webshop.categories.length - 1" :admin="true" />
-            <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="true" />
+            <ProductGrid v-if="webshop.categories.length === 0" :products="webshop.products" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="true" />
         </main>
     </div>
 </template>

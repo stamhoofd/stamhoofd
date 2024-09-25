@@ -16,53 +16,54 @@ import { MemberResponsibilityRecord } from './MemberResponsibilityRecord';
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(Registration) })
-    registrations: Registration[] = []
+    registrations: Registration[] = [];
 
     @field({ decoder: new ArrayDecoder(User), version: 32 })
-    users: User[] = []
+    users: User[] = [];
 
     @field({ decoder: new ArrayDecoder(MemberResponsibilityRecord), version: 263 })
-    responsibilities: MemberResponsibilityRecord[] = []
+    responsibilities: MemberResponsibilityRecord[] = [];
 
     @field({ decoder: new ArrayDecoder(MemberPlatformMembership), version: 270 })
-    platformMemberships: MemberPlatformMembership[] = []
+    platformMemberships: MemberPlatformMembership[] = [];
 
-    doesMatchFilter(filter: StamhoofdFilter)  {
+    doesMatchFilter(filter: StamhoofdFilter) {
         try {
-            const compiledFilter = compileToInMemoryFilter(filter, memberWithRegistrationsBlobInMemoryFilterCompilers)
-            return compiledFilter(this)
-        } catch (e) {
+            const compiledFilter = compileToInMemoryFilter(filter, memberWithRegistrationsBlobInMemoryFilterCompilers);
+            return compiledFilter(this);
+        }
+        catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;
     }
 
     outstandingBalanceFor(organizationId: string) {
-        return this.registrations.filter(r => r.organizationId == organizationId).reduce((sum, r) => sum + (r.price - r.pricePaid), 0)
+        return this.registrations.filter(r => r.organizationId == organizationId).reduce((sum, r) => sum + (r.price - r.pricePaid), 0);
     }
 
     hasAccount(email: string) {
-        return !!this.users.find(u => u.hasAccount && u.email === email)
+        return !!this.users.find(u => u.hasAccount && u.email === email);
     }
 
-    getEmailRecipients(subtypes: ('member'|'parents'|'unverified')[]|null = null): EmailRecipient[] {
-        const recipients: EmailRecipient[] = []
+    getEmailRecipients(subtypes: ('member' | 'parents' | 'unverified')[] | null = null): EmailRecipient[] {
+        const recipients: EmailRecipient[] = [];
 
-        const shared: Replacement[] = []
+        const shared: Replacement[] = [];
         shared.push(Replacement.create({
-            token: "firstNameMember",
-            value: this.firstName
-        }))
-
-        shared.push(Replacement.create({
-            token: "lastNameMember",
-            value: this.details.lastName ?? ''
-        }))
+            token: 'firstNameMember',
+            value: this.firstName,
+        }));
 
         shared.push(Replacement.create({
-            token: "outstandingBalance",
-            value: Formatter.price(this.outstandingBalance)
-        }))
+            token: 'lastNameMember',
+            value: this.details.lastName ?? '',
+        }));
+
+        shared.push(Replacement.create({
+            token: 'outstandingBalance',
+            value: Formatter.price(this.outstandingBalance),
+        }));
 
         const createLoginDetailsReplacement = (email: string) => {
             const formattedEmail = Formatter.escapeHtml(email);
@@ -70,14 +71,14 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             let suffix = '';
 
             if (this.details.securityCode) {
-                suffix = ` De beveiligingscode voor ${Formatter.escapeHtml(this.firstName)} is <span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(this.details.securityCode, 4, '-'))}</span>.`
+                suffix = ` De beveiligingscode voor ${Formatter.escapeHtml(this.firstName)} is <span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(this.details.securityCode, 4, '-'))}</span>.`;
             }
 
             return Replacement.create({
-                token: "loginDetails",
-                value: "",
-                html: this.hasAccount(email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${formattedEmail}</strong>.${suffix}</em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${formattedEmail}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.${suffix}</em></p>`
-            })
+                token: 'loginDetails',
+                value: '',
+                html: this.hasAccount(email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${formattedEmail}</strong>.${suffix}</em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${formattedEmail}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.${suffix}</em></p>`,
+            });
         };
 
         if (this.details.email && (subtypes === null || subtypes.includes('member'))) {
@@ -88,10 +89,10 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     email: this.details.email,
                     replacements: [
                         createLoginDetailsReplacement(this.details.email),
-                        ...shared
-                    ]
-                })
-            )
+                        ...shared,
+                    ],
+                }),
+            );
         }
 
         if (subtypes === null || subtypes.includes('parents')) {
@@ -104,10 +105,10 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                             email: parent.email,
                             replacements: [
                                 createLoginDetailsReplacement(parent.email),
-                                ...shared
-                            ]
-                        })
-                    )
+                                ...shared,
+                            ],
+                        }),
+                    );
                 }
             }
         }
@@ -119,47 +120,47 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                         email: unverifiedEmail,
                         replacements: [
                             Replacement.create({
-                                token: "email",
-                                value: unverifiedEmail.toLowerCase()
+                                token: 'email',
+                                value: unverifiedEmail.toLowerCase(),
                             }),
                             createLoginDetailsReplacement(unverifiedEmail),
-                            ...shared
-                        ]
-                    })
-                )
+                            ...shared,
+                        ],
+                    }),
+                );
             }
         }
 
-        return recipients
+        return recipients;
     }
 }
 
 export class MembersBlob extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(MemberWithRegistrationsBlob) })
-    members: MemberWithRegistrationsBlob[] = []
+    members: MemberWithRegistrationsBlob[] = [];
 
     @field({ decoder: new ArrayDecoder(Organization) })
-    organizations: Organization[] = []
+    organizations: Organization[] = [];
 
     /**
      * Timestamp on which the backend constructed this blob
-     * 
+     *
      * This is encoded, so it can be stored locally
      */
     @field({ decoder: DateDecoder, version: 329 })
-    receivedAt = new Date()
+    receivedAt = new Date();
 
     markReceivedFromBackend() {
-        this.receivedAt = new Date()
+        this.receivedAt = new Date();
     }
 
     get isStale() {
-        return MembersBlob.lastPatchedMembersDate !== null && this.receivedAt < MembersBlob.lastPatchedMembersDate
+        return MembersBlob.lastPatchedMembersDate !== null && this.receivedAt < MembersBlob.lastPatchedMembersDate;
     }
 
-    static lastPatchedMembersDate: Date | null = null
+    static lastPatchedMembersDate: Date | null = null;
 
     static markAllStale() {
-        MembersBlob.lastPatchedMembersDate = new Date()
+        MembersBlob.lastPatchedMembersDate = new Date();
     }
 }

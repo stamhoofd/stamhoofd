@@ -95,7 +95,7 @@ export default class ToastBox extends VueComponent {
     }
 
     get withOffset() {
-        if (this.components.length == 0) {
+        if (this.components.length === 0) {
             return this.lastOffset
         }
 

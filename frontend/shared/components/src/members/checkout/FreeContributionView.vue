@@ -16,7 +16,7 @@
             </Radio>
             
             <Radio v-model="amountOption" :value="null">
-                {{ amounts.length == 0 ? 'Bedrag kiezen' : 'Ander bedrag kiezen' }}
+                {{ amounts.length === 0 ? 'Bedrag kiezen' : 'Ander bedrag kiezen' }}
             </Radio>
 
             <div v-if="amountOption === null" class="textarea-container">

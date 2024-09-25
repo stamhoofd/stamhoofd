@@ -9,11 +9,11 @@ type ResponseBody = undefined;
 
 export class DeleteTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "DELETE") {
+        if (request.method !== 'DELETE') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/oauth/token", {});
+        const params = Endpoint.parseParameters(request.url, '/oauth/token', {});
 
         if (params) {
             return [true, params as Params];
@@ -22,10 +22,10 @@ export class DeleteTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope()
-        const {token} = await Context.authenticate({allowWithoutAccount: true})
-        await token.delete()
-        
-        return new Response(undefined)
+        await Context.setOptionalOrganizationScope();
+        const { token } = await Context.authenticate({ allowWithoutAccount: true });
+        await token.delete();
+
+        return new Response(undefined);
     }
 }

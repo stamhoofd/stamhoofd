@@ -96,7 +96,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
         this.loadingSearch = true
         this.searchCount++;
 
-        if (this.searchQuery.length == 0) {
+        if (this.searchQuery.length === 0) {
             this.searchResults = null
             this.loadingSearch = false
             return
@@ -109,7 +109,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
     }
 
     async doSearch() {
-        if (this.searchQuery.length == 0) {
+        if (this.searchQuery.length === 0) {
             this.searchResults = null
             this.loadingSearch = false
             return
@@ -159,7 +159,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
     }
    
     hasCity(city: City) {
-        return !!this.deliveryMethod.cities.find(c => c.id == city.id)
+        return !!this.deliveryMethod.cities.find(c => c.id === city.id)
     }
 
     toggleCity(city: City) {
@@ -176,7 +176,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
     }
 
     hasProvince(province: Province) {
-        return !!this.deliveryMethod.provinces.find(c => c.id == province.id)
+        return !!this.deliveryMethod.provinces.find(c => c.id === province.id)
     }
 
     toggleProvince(province: Province) {
@@ -193,7 +193,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
     }
 
     hasCountry(country: Country) {
-        return !!this.deliveryMethod.countries.find(c => c == country)
+        return !!this.deliveryMethod.countries.find(c => c === country)
     }
 
     toggleCountry(country: Country) {

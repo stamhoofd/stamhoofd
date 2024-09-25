@@ -61,13 +61,13 @@
                         <p class="style-description-small">
                             {{ checkoutMethod.description || checkoutMethod.address || "" }}
                         </p>
-                        <p v-if="checkoutMethod.timeSlots.timeSlots.length == 1" class="style-description-small">
+                        <p v-if="checkoutMethod.timeSlots.timeSlots.length === 1" class="style-description-small">
                             {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
                         </p>
 
-                        <template v-if="checkoutMethod.timeSlots.timeSlots.length == 1 && checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" #right>
+                        <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1 && checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" #right>
                             <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                            <span v-else class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                            <span v-else class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                         </template>
                     </STListItem>
                 </STList>
@@ -75,21 +75,21 @@
 
             <template v-if="selectedMethod && timeSlots.length > 0">
                 <hr>
-                <h2 v-if="selectedMethod.type == 'Takeout'">
+                <h2 v-if="selectedMethod.type === 'Takeout'">
                     Afhaaltijdstip
                 </h2>
-                <h2 v-else-if="selectedMethod.type == 'Delivery'">
+                <h2 v-else-if="selectedMethod.type === 'Delivery'">
                     Leveringstijdstip
                 </h2>
-                <h2 v-else-if="selectedMethod.type == 'OnSite'">
+                <h2 v-else-if="selectedMethod.type === 'OnSite'">
                     Tijdstip
                 </h2>
 
-                <p v-if="selectedMethod.type == 'Takeout'">
+                <p v-if="selectedMethod.type === 'Takeout'">
                     Afhaallocatie: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ selectedMethod.address }}
                 </p>
 
-                <p v-if="selectedMethod.type == 'OnSite'">
+                <p v-if="selectedMethod.type === 'OnSite'">
                     Locatie: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ selectedMethod.address }}
                 </p>
                 
@@ -110,22 +110,22 @@
 
                         <template #right v-if="slot.listedRemainingStock !== null" >
                             <span v-if="slot.listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                            <span v-else class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                            <span v-else class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                         </template>
                     </STListItem>
                 </STList>
             </template>
 
-            <template v-if="selectedMethod && selectedMethod.type == 'Delivery'">
+            <template v-if="selectedMethod && selectedMethod.type === 'Delivery'">
                 <hr>
                 <h2>Leveringsadres</h2>
                 <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== patchedOrder.data.deliveryPrice" class="info-box">
                     Bestel minimum {{ formatPrice(deliveryMethod.price.minimumPrice) }} om van een verlaagde leveringskost van {{ formatPrice(deliveryMethod.price.discountPrice) }} te genieten.
                 </div>
 
-                <p v-if="patchedOrder.data.deliveryPrice == 0" class="success-box">
+                <p v-if="patchedOrder.data.deliveryPrice === 0" class="success-box">
                     Levering is gratis
-                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0">
+                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price !== 0">
                         vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
                     </template>
                 </p>
@@ -433,7 +433,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     get selectedMethod(): CheckoutMethod|null {
         if (this.patchedOrder.data.checkoutMethod) {
             const search = this.patchedOrder.data.checkoutMethod.id
-            const f = this.webshop.meta.checkoutMethods.find(c => c.id == search)
+            const f = this.webshop.meta.checkoutMethods.find(c => c.id === search)
             if (f) {
                 return f
             }
@@ -491,12 +491,12 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     get selectedSlot(): WebshopTimeSlot|null {
         if (this.patchedOrder.data.timeSlot) {
             const search = this.patchedOrder.data.timeSlot
-            const f = this.timeSlots.find(c => c.id == search.id)
+            const f = this.timeSlots.find(c => c.id === search.id)
             if (f) {
                 return f
             }
 
-            const f2 = this.timeSlots.find(c => c.toString() == search.toString())
+            const f2 = this.timeSlots.find(c => c.toString() === search.toString())
             if (f2) {
                 return f2
             }
@@ -597,7 +597,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                         clone.cart.addItem(cartItem)
                     }
 
-                    if (!this.isNew && clone.totalPrice != this.patchedOrder.data.totalPrice) {
+                    if (!this.isNew && clone.totalPrice !== this.patchedOrder.data.totalPrice) {
                         new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
                     }
 
@@ -638,7 +638,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                                 clone.cart.addItem(cartItem)
                             }
 
-                            if (clone.totalPrice != this.patchedOrder.data.totalPrice) {
+                            if (clone.totalPrice !== this.patchedOrder.data.totalPrice) {
                                 new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
                             }
 
@@ -660,7 +660,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         let clone = this.patchedOrder.data.cart.clone()
         clone.removeItem(cartItem)
 
-        if (clone.price != this.patchedOrder.data.cart.price) {
+        if (clone.price !== this.patchedOrder.data.cart.price) {
             new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
         }
 

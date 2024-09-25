@@ -209,10 +209,10 @@
                     Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
                 </p>
 
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
+                <p v-if="organization.privateMeta.mollieOnboarding.status === 'NeedsData'" class="st-list-description">
                     Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
                 </p>
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
+                <p v-if="organization.privateMeta.mollieOnboarding.status === 'InReview'" class="st-list-description">
                     Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
                 </p>
 
@@ -366,7 +366,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         return this.organization.privateMeta?.mollieProfile?.id ?? null
     }
     set selectedMollieProfile(id: string | null) {
-        const profile = this.mollieProfiles.find(p => p.id == id)
+        const profile = this.mollieProfiles.find(p => p.id === id)
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 mollieProfile: profile ?? null
@@ -380,7 +380,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
 
     get isBelgium() {
-        return this.organization.address.country == Country.Belgium
+        return this.organization.address.country === Country.Belgium
     }
 
     get isStamhoofd() {
@@ -418,13 +418,13 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     set payconiqApiKey(payconiqApiKey: string) {
-        if (this.payconiqApiKey && payconiqApiKey.length == 0) {
+        if (this.payconiqApiKey && payconiqApiKey.length === 0) {
             this.forcePayconiq = true;
         }
 
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
-                payconiqAccounts: (payconiqApiKey.length == 0 ? [] : [PayconiqAccount.create({ apiKey: payconiqApiKey })]) as any
+                payconiqAccounts: (payconiqApiKey.length === 0 ? [] : [PayconiqAccount.create({ apiKey: payconiqApiKey })]) as any
             })
         })
     }
@@ -536,14 +536,14 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get useTestPayments() {
-        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment != 'production'
+        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment !== 'production'
     }
 
     set useTestPayments(useTestPayments: boolean) {
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 // Only save non default value
-                useTestPayments: STAMHOOFD.environment != 'production' === useTestPayments ? null : useTestPayments
+                useTestPayments: STAMHOOFD.environment !== 'production' === useTestPayments ? null : useTestPayments
             })
         })
     }
@@ -674,7 +674,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
         console.log(urlParams);
 
-        if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
+        if (parts.length === 2 && parts[0] === 'oauth' && parts[1] === 'mollie') {
             const code = urlParams.get('code');
             const state = urlParams.get('state');
 

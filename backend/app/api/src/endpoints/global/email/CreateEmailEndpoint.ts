@@ -1,44 +1,44 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Email, EmailTemplate, RateLimiter } from '@stamhoofd/models';
-import { EmailPreview, EmailStatus, Email as EmailStruct, Version, EmailTemplate as EmailTemplateStruct } from "@stamhoofd/structures";
+import { EmailPreview, EmailStatus, Email as EmailStruct, Version, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context';
 import { SQL } from '@stamhoofd/sql';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = EmailStruct
+type Body = EmailStruct;
 type ResponseBody = EmailPreview;
 
 export const paidEmailRateLimiter = new RateLimiter({
     limits: [
-        {   
+        {
             // Max 5.000 emails a day
             limit: 5000,
-            duration: 24 * 60 * 1000 * 60
+            duration: 24 * 60 * 1000 * 60,
         },
-        {   
+        {
             // 10.000 requests per week
             limit: 10000,
-            duration: 24 * 60 * 1000 * 60 * 7
-        }
-    ]
+            duration: 24 * 60 * 1000 * 60 * 7,
+        },
+    ],
 });
 
 export const freeEmailRateLimiter = new RateLimiter({
     limits: [
-        {   
+        {
             // Max 100 a day
             limit: 100,
-            duration: 24 * 60 * 1000 * 60
+            duration: 24 * 60 * 1000 * 60,
         },
-        {   
+        {
             // Max 200 a week
             limit: 200,
-            duration: 7 * 24 * 60 * 1000 * 60
-        }
-    ]
+            duration: 7 * 24 * 60 * 1000 * 60,
+        },
+    ],
 });
 
 /**
@@ -46,14 +46,14 @@ export const freeEmailRateLimiter = new RateLimiter({
  */
 
 export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = EmailStruct as Decoder<EmailStruct>
+    bodyDecoder = EmailStruct as Decoder<EmailStruct>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "POST") {
+        if (request.method !== 'POST') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/email", {});
+        const params = Endpoint.parseParameters(request.url, '/email', {});
 
         if (params) {
             return [true, params as Params];
@@ -63,10 +63,10 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const {user} = await Context.authenticate()
+        const { user } = await Context.authenticate();
 
         if (!Context.auth.canSendEmails()) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
         const model = new Email();
@@ -83,24 +83,25 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         model.fromAddress = request.body.fromAddress;
         model.fromName = request.body.fromName;
 
-        model.validateAttachments()
+        model.validateAttachments();
 
         // Check default
         if (JSON.stringify(model.json).length < 3 && model.recipientFilter.filters[0].type && EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)) {
-            const type = EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)
-             
+            const type = EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type);
+
             // Most specific template: for specific group
-            let templates = (await EmailTemplate.where({ type, organizationId: organization?.id ?? null, groupId: null }))
+            let templates = (await EmailTemplate.where({ type, organizationId: organization?.id ?? null, groupId: null }));
 
             // Then default
             if (templates.length == 0 && organization) {
-                templates = (await EmailTemplate.where({ type, organizationId: null, groupId: null }))
+                templates = (await EmailTemplate.where({ type, organizationId: null, groupId: null }));
             }
 
             if (templates.length == 0) {
                 // No default
-            } else {
-                const defaultTemplate = templates[0]
+            }
+            else {
+                const defaultTemplate = templates[0];
                 model.html = defaultTemplate.html;
                 model.text = defaultTemplate.text;
                 model.subject = defaultTemplate.subject;
@@ -109,13 +110,12 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         await model.save();
-        await model.buildExampleRecipient()
+        await model.buildExampleRecipient();
         model.updateCount();
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {
-            model.send().catch(console.error)
+            model.send().catch(console.error);
         }
-
 
         return new Response(await model.getPreviewStructure());
     }

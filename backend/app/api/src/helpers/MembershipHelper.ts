@@ -8,38 +8,37 @@ export class MembershipHelper {
 
         let c = 0;
         let id: string = '';
-        const tag = "updateAllMemberships";
+        const tag = 'updateAllMemberships';
         const batch = 100;
 
         QueueHandler.cancel(tag);
 
         await QueueHandler.schedule(tag, async () => {
             console.log('Starting updateAllMemberships');
-            await logger.setContext({tags: ['silent-seed', 'seed']}, async () => {
-                while(true) {
+            await logger.setContext({ tags: ['silent-seed', 'seed'] }, async () => {
+                while (true) {
                     const rawMembers = await Member.where({
                         id: {
                             value: id,
-                            sign: '>'
-                        }
-                    }, {limit: batch, sort: ['id']});
+                            sign: '>',
+                        },
+                    }, { limit: batch, sort: ['id'] });
 
                     if (rawMembers.length === 0) {
                         break;
                     }
 
                     const promises: Promise<any>[] = [];
-                    
 
                     for (const member of rawMembers) {
                         promises.push((async () => {
                             await Member.updateMembershipsForId(member.id, true);
                             c++;
-                
-                            if (c%10000 === 0) {
+
+                            if (c % 10000 === 0) {
                                 process.stdout.write(c + ' members updated\n');
                             }
-                        })())
+                        })());
                     }
 
                     await Promise.all(promises);
@@ -49,7 +48,7 @@ export class MembershipHelper {
                         break;
                     }
                 }
-            })
-        })
+            });
+        });
     }
 }

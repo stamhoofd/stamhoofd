@@ -1,8 +1,8 @@
-import { CellType, CellValue } from "../interfaces";
-import { escapeXml } from "./escapeXml";
-import { XlsxFileWriter } from "./XlsxFileWriter";
-import { XlsxStylesWriter } from "./XlsxStylesWriter";
-import { DateTime } from "luxon";
+import { CellType, CellValue } from '../interfaces';
+import { escapeXml } from './escapeXml';
+import { XlsxFileWriter } from './XlsxFileWriter';
+import { XlsxStylesWriter } from './XlsxStylesWriter';
+import { DateTime } from 'luxon';
 
 function numberToAlpha(num: number) {
     // 1 = a
@@ -12,20 +12,20 @@ function numberToAlpha(num: number) {
     // 28 = ab
     // 52 = az
     // 53 = ba
-    const aCharCode = 'a'.charCodeAt(0)
+    const aCharCode = 'a'.charCodeAt(0);
 
     // Convert into an array with min-max values aCharCode - zCharCode
-    const chars: number[] = []
+    const chars: number[] = [];
 
     // Calculate numeric value of this string
     let val = num;
     while (val > 0) {
-        const char = (val - 1) % 26
-        chars.unshift(char + aCharCode)
-        val = Math.floor((val - 1)/ 26)
+        const char = (val - 1) % 26;
+        chars.unshift(char + aCharCode);
+        val = Math.floor((val - 1) / 26);
     }
 
-    return chars.map(c => String.fromCharCode(c)).join("")
+    return chars.map(c => String.fromCharCode(c)).join('');
 }
 
 class ColumnInfo {
@@ -40,7 +40,7 @@ class ColumnInfo {
 
 export class XlsxSheetWriter extends XlsxFileWriter {
     /**
-     * The sheet writer will write 
+     * The sheet writer will write
      */
     styles: XlsxStylesWriter;
     didWriteHeader = false;
@@ -55,20 +55,20 @@ export class XlsxSheetWriter extends XlsxFileWriter {
     rowCount = 0;
 
     async writeHeader(columnCount = 0) {
-        await this.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-        await this.write(`<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`)
-        
+        await this.write('<?xml version="1.0" encoding="UTF-8"?>\n');
+        await this.write(`<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`);
+
         // Sadly <cols> must be before <sheetData> - so we cant calculate the best widths on the fly
         await this.write('<cols>');
 
         for (const [index, column] of this.columns.entries()) {
             const width = column.width ?? 20;
-            await this.write(`<col min="${index + 1}" max="${index + 1}" width="${width}" />`)
+            await this.write(`<col min="${index + 1}" max="${index + 1}" width="${width}" />`);
         }
-        
+
         await this.write('</cols>');
 
-        await this.write('<sheetData>')
+        await this.write('<sheetData>');
         this.didWriteHeader = true;
     }
 
@@ -77,11 +77,9 @@ export class XlsxSheetWriter extends XlsxFileWriter {
             await this.writeHeader(0);
         }
 
-        await this.write('</sheetData>')
+        await this.write('</sheetData>');
 
-
-
-        await this.write('</worksheet>')
+        await this.write('</worksheet>');
     }
 
     async writeRow(cells: CellValue[]) {
@@ -92,7 +90,7 @@ export class XlsxSheetWriter extends XlsxFileWriter {
                 const info = new ColumnInfo();
 
                 if (cell.width !== undefined) {
-                    info.width = cell.width
+                    info.width = cell.width;
                 }
                 this.columns.push(info);
             }
@@ -101,18 +99,18 @@ export class XlsxSheetWriter extends XlsxFileWriter {
         }
 
         this.rowCount++;
-        let str = `<row r="${this.rowCount}">`
-        
+        let str = `<row r="${this.rowCount}">`;
+
         for (const [index, cell] of cells.entries()) {
-            str += await this.getCellString(cell, {row: this.rowCount, column: index + 1});
+            str += await this.getCellString(cell, { row: this.rowCount, column: index + 1 });
         }
-        
-        str +='</row>';
+
+        str += '</row>';
         await this.write(str);
     }
 
-    async getCellString(cell: CellValue, {row, column}: {row: number, column: number}) {
-        let type = CellType.InlineString
+    async getCellString(cell: CellValue, { row, column }: { row: number; column: number }) {
+        let type = CellType.InlineString;
         let str = '';
 
         switch (typeof cell.value) {
@@ -125,7 +123,8 @@ export class XlsxSheetWriter extends XlsxFileWriter {
                 if (isNaN(cell.value) || !isFinite(cell.value)) {
                     type = CellType.Error;
                     str = '#VALUE!';
-                } else {
+                }
+                else {
                     str = cell.value.toString();
                 }
                 break;
@@ -139,10 +138,9 @@ export class XlsxSheetWriter extends XlsxFileWriter {
                     // Excel has this funny thing where they ALWAYS interpret dates as the local timezone
                     // This has the advantage that if you write a date in a cell, it will always contain the same value, regardless of the timezone of the user.
                     const dateTime = DateTime.fromJSDate(cell.value).setZone(this.timezone);
-                    
 
                     type = CellType.Number;
-                    str = ((cell.value.getTime() + dateTime.offset * 60 * 1000)/1000/24/60/60+25569).toFixed(6);
+                    str = ((cell.value.getTime() + dateTime.offset * 60 * 1000) / 1000 / 24 / 60 / 60 + 25569).toFixed(6);
                 }
 
                 // Null
@@ -160,7 +158,7 @@ export class XlsxSheetWriter extends XlsxFileWriter {
         if (type === CellType.InlineString) {
             return `<c r="${escapeXml(r)}" s="${escapeXml(styleId)}" t="${escapeXml(type)}"><is><t>${escapeXml(str)}</t></is></c>`;
         }
-        
+
         return `<c r="${escapeXml(r)}" s="${escapeXml(styleId)}" t="${escapeXml(type)}"><v>${escapeXml(str)}</v></c>`;
     }
 

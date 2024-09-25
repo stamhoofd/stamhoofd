@@ -14,9 +14,9 @@
                 <STInputBox title="Relatie*" error-fields="title" :error-box="errors.errorBox">
                     <input v-model="contactTitle" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. buurman">
                     <datalist id="emergency-contact-types">
-                        <option v-if="details && details.parents.length == 0" value="Vader" />
-                        <option v-if="details && details.parents.length == 0" value="Moeder" />
-                        <option v-if="details && details.parents.length == 0" value="Ouder" />
+                        <option v-if="details && details.parents.length === 0" value="Vader" />
+                        <option v-if="details && details.parents.length === 0" value="Moeder" />
+                        <option v-if="details && details.parents.length === 0" value="Ouder" />
                         <option v-if="details && details.defaultAge < 30" value="Oma" />
                         <option v-if="details && details.defaultAge < 30" value="Opa" />
                         <option v-if="details && details.defaultAge < 30" value="Tante" />

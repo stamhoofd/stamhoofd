@@ -32,7 +32,7 @@ export default class WebshopFieldsBox extends Mixins(NavigationMixin) {
 
     moveFieldUp(field: WebshopField) {
         const index = this.fields.findIndex(c => field.id === c.id)
-        if (index == -1 || index == 0) {
+        if (index === -1 || index === 0) {
             return;
         }
 
@@ -44,7 +44,7 @@ export default class WebshopFieldsBox extends Mixins(NavigationMixin) {
 
     moveFieldDown(field: WebshopField) {
         const index = this.fields.findIndex(c => field.id === c.id)
-        if (index == -1 || index >= this.fields.length - 1) {
+        if (index === -1 || index >= this.fields.length - 1) {
             return;
         }
 

@@ -1,39 +1,39 @@
-import { STPackage, STPackageMeta, STPackageType, STPricingType } from "./STPackage"
+import { STPackage, STPackageMeta, STPackageType, STPricingType } from './STPackage';
 
 /**
  * Package bundle are packages that you can buy
  */
 export enum STPackageBundle {
     // Full members package
-    "Members" = "Members",
+    Members = 'Members',
 
     // Webshop package (max 10 webshops)
-    "Webshops" = "Webshops",
+    Webshops = 'Webshops',
 
     // One webshop package (max 1 webshop)
-    "SingleWebshop" = "SingleWebshop",
+    SingleWebshop = 'SingleWebshop',
 
-    "TrialMembers" = "TrialMembers",
-    "TrialWebshops" = "TrialWebshops",
+    TrialMembers = 'TrialMembers',
+    TrialWebshops = 'TrialWebshops',
 }
 
 export class STPackageBundleHelper {
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return "Ledenadministratie voor één jaar"
-            case STPackageBundle.Webshops: return "Webshops (max. 10) voor één jaar"
-            case STPackageBundle.SingleWebshop: return "Eén webshop voor twee maanden"
+            case STPackageBundle.Members: return 'Ledenadministratie voor één jaar';
+            case STPackageBundle.Webshops: return 'Webshops (max. 10) voor één jaar';
+            case STPackageBundle.SingleWebshop: return 'Eén webshop voor twee maanden';
         }
-        return "?"
+        return '?';
     }
 
     static getDescription(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return "€ 1 per jaar, per lid. Minimum € 79 per jaar, waarbij 79 leden inbegrepen (minder leden kan uiteraard)"
-            case STPackageBundle.Webshops: return "€ 79 per jaar (inclusief ticketverkoop-functie) indien minder dan 50.000 euro omzet per jaar (zie website voor hogere omzet)"
-            case STPackageBundle.SingleWebshop: return "Eénmalig € 49 (inclusief ticketverkoop-functie)"
+            case STPackageBundle.Members: return '€ 1 per jaar, per lid. Minimum € 79 per jaar, waarbij 79 leden inbegrepen (minder leden kan uiteraard)';
+            case STPackageBundle.Webshops: return '€ 79 per jaar (inclusief ticketverkoop-functie) indien minder dan 50.000 euro omzet per jaar (zie website voor hogere omzet)';
+            case STPackageBundle.SingleWebshop: return 'Eénmalig € 49 (inclusief ticketverkoop-functie)';
         }
-        return "?"
+        return '?';
     }
 
     static isPublic(bundle: STPackageBundle): boolean {
@@ -42,7 +42,7 @@ export class STPackageBundleHelper {
             case STPackageBundle.Webshops: return true;
             case STPackageBundle.SingleWebshop: return true;
         }
-        return false
+        return false;
     }
 
     /**
@@ -52,14 +52,14 @@ export class STPackageBundleHelper {
         switch (bundle) {
             case STPackageBundle.TrialMembers: {
                 // Not allowed to start a trial even if pack is expired
-                return false
+                return false;
             }
             case STPackageBundle.TrialWebshops: {
                 // Not allowed to start a trial again if pack is expired
-                return false
+                return false;
             }
         }
-        return true
+        return true;
     }
 
     static isCombineable(bundle: STPackageBundle, pack: STPackage): boolean {
@@ -67,40 +67,40 @@ export class STPackageBundleHelper {
             case STPackageBundle.Members: {
                 if (pack.meta.type === STPackageType.Members) {
                     // Already bought
-                    return false
+                    return false;
                 }
-                return true
+                return true;
             }
             case STPackageBundle.Webshops: {
                 if (pack.meta.type === STPackageType.Webshops) {
                     // Already bought
-                    return false
+                    return false;
                 }
-                return true
+                return true;
             }
             case STPackageBundle.SingleWebshop: {
                 if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
                     // Already bought
-                    return false
+                    return false;
                 }
-                return true
+                return true;
             }
             case STPackageBundle.TrialMembers: {
                 if (pack.meta.type === STPackageType.Members || pack.meta.type === STPackageType.TrialMembers) {
                     // Already bought
-                    return false
+                    return false;
                 }
-                return true
+                return true;
             }
             case STPackageBundle.TrialWebshops: {
                 if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops || pack.meta.type === STPackageType.TrialWebshops) {
                     // Already bought
-                    return false
+                    return false;
                 }
-                return true
+                return true;
             }
         }
-        return false
+        return false;
     }
 
     /**
@@ -110,12 +110,12 @@ export class STPackageBundleHelper {
         switch (bundle) {
             case STPackageBundle.Members: {
                 // 1 year valid
-                const validUntil = new Date(date)
-                validUntil.setFullYear(validUntil.getFullYear() + 1)
+                const validUntil = new Date(date);
+                validUntil.setFullYear(validUntil.getFullYear() + 1);
 
                 // Remove (= not renewable) if not renewed after 1 month
-                const removeAt = new Date(validUntil)
-                removeAt.setMonth(removeAt.getMonth() + 1)
+                const removeAt = new Date(validUntil);
+                removeAt.setMonth(removeAt.getMonth() + 1);
 
                 return STPackage.create({
                     validUntil,
@@ -127,18 +127,18 @@ export class STPackageBundleHelper {
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
                         startDate: new Date(date),
-                    })
-                })
+                    }),
+                });
             }
 
             case STPackageBundle.Webshops: {
                 // 1 year valid
-                const validUntil = new Date(date)
-                validUntil.setFullYear(validUntil.getFullYear() + 1)
+                const validUntil = new Date(date);
+                validUntil.setFullYear(validUntil.getFullYear() + 1);
 
                 // Remove (= not renewable) if not renewed after 1 month
-                const removeAt = new Date(validUntil)
-                removeAt.setMonth(removeAt.getMonth() + 1)
+                const removeAt = new Date(validUntil);
+                removeAt.setMonth(removeAt.getMonth() + 1);
 
                 return STPackage.create({
                     validUntil,
@@ -149,18 +149,18 @@ export class STPackageBundleHelper {
                         minimumAmount: 1,
                         allowRenew: true,
                         pricingType: STPricingType.PerYear,
-                        startDate: new Date(date)
-                    })
-                })
+                        startDate: new Date(date),
+                    }),
+                });
             }
 
             case STPackageBundle.SingleWebshop: {
                 // Disable functions after two months
-                const validUntil = new Date(date)
-                validUntil.setMonth(validUntil.getMonth() + 2)
+                const validUntil = new Date(date);
+                validUntil.setMonth(validUntil.getMonth() + 2);
 
                 // Remove if not valid anymore
-                const removeAt = new Date(validUntil)
+                const removeAt = new Date(validUntil);
 
                 return STPackage.create({
                     validUntil,
@@ -171,18 +171,18 @@ export class STPackageBundleHelper {
                         minimumAmount: 1,
                         allowRenew: true,
                         pricingType: STPricingType.Fixed,
-                        startDate: new Date(date)
-                    })
-                })
+                        startDate: new Date(date),
+                    }),
+                });
             }
 
             case STPackageBundle.TrialMembers: {
                 // Disable functions after two weeks, manual reenable required
-                const validUntil = new Date(date)
-                validUntil.setDate(validUntil.getDate() + 14)
+                const validUntil = new Date(date);
+                validUntil.setDate(validUntil.getDate() + 14);
 
                 // Remove if not valid anymore
-                const removeAt = new Date(validUntil)
+                const removeAt = new Date(validUntil);
 
                 return STPackage.create({
                     validUntil,
@@ -194,18 +194,18 @@ export class STPackageBundleHelper {
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
                         startDate: new Date(date),
-                        canDeactivate: true
-                    })
-                })
+                        canDeactivate: true,
+                    }),
+                });
             }
 
             case STPackageBundle.TrialWebshops: {
-                 // Disable functions after two weeks, manual reenable required
-                const validUntil = new Date(date)
-                validUntil.setDate(validUntil.getDate() + 14)
+                // Disable functions after two weeks, manual reenable required
+                const validUntil = new Date(date);
+                validUntil.setDate(validUntil.getDate() + 14);
 
                 // Remove if not valid anymore
-                const removeAt = new Date(validUntil)
+                const removeAt = new Date(validUntil);
 
                 return STPackage.create({
                     validUntil,
@@ -217,12 +217,12 @@ export class STPackageBundleHelper {
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
                         startDate: new Date(date),
-                        canDeactivate: true
-                    })
-                })
+                        canDeactivate: true,
+                    }),
+                });
             }
         }
 
-        throw new Error("Package not available")
+        throw new Error('Package not available');
     }
 }

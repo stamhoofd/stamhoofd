@@ -3,7 +3,7 @@
         <h2 class="style-title-list">
             {{ tag.name }}
         </h2>
-       
+
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />

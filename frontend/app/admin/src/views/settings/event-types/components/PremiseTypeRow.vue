@@ -18,6 +18,6 @@
 import { PlatformPremiseType } from '@stamhoofd/structures';
 
 defineProps<{
-    type: PlatformPremiseType
+    type: PlatformPremiseType;
 }>();
 </script>

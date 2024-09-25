@@ -54,7 +54,7 @@ export default class PasswordStrength extends VueComponent {
 
     @Watch('modelValue')
     onValueChanged(val: string | null) {
-        if (val === null || val.length == 0) {
+        if (val === null || val.length === 0) {
             this.calculateCounter++
             this.strength = 0;
             this.duration = 0;
@@ -73,12 +73,12 @@ export default class PasswordStrength extends VueComponent {
 
         try {
             const calculator = await import(/* webpackChunkName: "PasswordStrengthCalculator" */ "./PasswordStrengthCalculator")
-            if (saved != this.calculateCounter) {
+            if (saved !== this.calculateCounter) {
                 // skip
                 return
             }
             const result = calculator.checkPassword(password)
-            if (saved != this.calculateCounter) {
+            if (saved !== this.calculateCounter) {
                 // skip
                 return
             }
@@ -97,7 +97,7 @@ export default class PasswordStrength extends VueComponent {
 
     get type() {
         const strength = this.strength
-        if (strength == 0) {
+        if (strength === 0) {
             return "none"
         }
 

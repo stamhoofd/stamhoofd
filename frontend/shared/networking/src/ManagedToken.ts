@@ -40,7 +40,7 @@ export class ManagedToken {
     }
 
     isRefreshing(): boolean {
-        return this.refreshPromise != undefined
+        return this.refreshPromise !== undefined
     }
 
     /**

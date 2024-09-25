@@ -156,7 +156,7 @@ export default class EditWebshopCheckoutMethodsView extends Mixins(EditWebshopMi
 
     moveCheckoutUp(location: CheckoutMethod) {
         const index = this.webshop.meta.checkoutMethods.findIndex(c => location.id === c.id)
-        if (index == -1 || index == 0) {
+        if (index === -1 || index === 0) {
             return;
         }
 
@@ -170,7 +170,7 @@ export default class EditWebshopCheckoutMethodsView extends Mixins(EditWebshopMi
 
     moveCheckoutDown(location: CheckoutMethod) {
         const index = this.webshop.meta.checkoutMethods.findIndex(c => location.id === c.id)
-        if (index == -1 || index >= this.webshop.meta.checkoutMethods.length - 1) {
+        if (index === -1 || index >= this.webshop.meta.checkoutMethods.length - 1) {
             return;
         }
 

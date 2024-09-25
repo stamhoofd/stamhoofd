@@ -1,9 +1,9 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Order, Webshop } from '@stamhoofd/models';
-import { PermissionLevel } from "@stamhoofd/structures";
+import { PermissionLevel } from '@stamhoofd/structures';
 
-import { Context } from "../../../../helpers/Context";
+import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
 type Query = undefined;
@@ -15,13 +15,12 @@ type ResponseBody = undefined;
  */
 
 export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "DELETE") {
+        if (request.method !== 'DELETE') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/webshop/@id", { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -31,21 +30,21 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
-        const webshop = await Webshop.getByID(request.params.id)
+        const webshop = await Webshop.getByID(request.params.id);
         if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
-            throw Context.auth.notFoundOrNoAccess()
+            throw Context.auth.notFoundOrNoAccess();
         }
 
         const orders = await Order.where({ webshopId: webshop.id });
-        await BalanceItem.deleteForDeletedOrders(orders.map(o => o.id))
-        await webshop.delete()
+        await BalanceItem.deleteForDeletedOrders(orders.map(o => o.id));
+        await webshop.delete();
         return new Response(undefined);
     }
 }

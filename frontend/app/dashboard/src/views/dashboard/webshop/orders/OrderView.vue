@@ -68,16 +68,16 @@
                 <STListItem
                     v-for="(payment, index) in order.payments"
                     :key="payment.id"
-                    v-long-press="(e) => (hasPaymentsWrite && (payment.method == 'Transfer' || payment.method == 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                    v-long-press="(e) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
                     class="right-description" @click="openPayment(payment)"
-                    @contextmenu.prevent="hasPaymentsWrite && (payment.method == 'Transfer' || payment.method == 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
+                    @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
                 >
                     <h3 class="style-definition-label">
                         {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ getName(payment.method) }}</span>
-                        <span v-if="payment.status == 'Succeeded'" class="icon primary success" />
+                        <span v-if="payment.status === 'Succeeded'" class="icon primary success" />
                         <span v-else class="icon clock" />
                     </p>
 
@@ -88,7 +88,7 @@
                 </STListItem>
 
                 <STListItem v-if="hasTickets" class="right-description right-stack" :selectable="tickets.length > 0" @click="tickets.length > 0 ? openTickets($event) : null">
-                    <h3 v-if="tickets.length > 1 || (!hasSingleTickets && tickets.length == 0)" class="style-definition-label">
+                    <h3 v-if="tickets.length > 1 || (!hasSingleTickets && tickets.length === 0)" class="style-definition-label">
                         Tickets
                     </h3>
                     <h3 v-else class="style-definition-label">
@@ -99,16 +99,16 @@
                         <template v-if="loadingTickets">
                             -
                         </template>
-                        <span v-else-if="hasSingleTickets && tickets.length == 0" class="gray">
+                        <span v-else-if="hasSingleTickets && tickets.length === 0" class="gray">
                             Geen ticket
                         </span>
-                        <span v-else-if="tickets.length == 0" class="gray">
+                        <span v-else-if="tickets.length === 0" class="gray">
                             Geen tickets
                         </span>
-                        <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 1">
+                        <span v-else-if="hasSingleTickets && tickets.length === 1 && scannedCount === 1">
                             Gescand
                         </span>
-                        <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 0">
+                        <span v-else-if="hasSingleTickets && tickets.length === 1 && scannedCount === 0">
                             Niet gescand
                         </span>
                         <span v-else>
@@ -135,13 +135,13 @@
             
             <template v-if="order.data.checkoutMethod">
                 <hr>
-                <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                     Afhalen
                 </h2>
-                <h2 v-else-if="order.data.checkoutMethod.type == 'Delivery'">
+                <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
                     Levering
                 </h2>
-                <h2 v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                     Ter plaatse consumeren
                 </h2>
                 <h2 v-else>
@@ -151,10 +151,10 @@
                 <STList class="info">
                     <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                         <h3 class="style-definition-label">
-                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                            <template v-if="order.data.checkoutMethod.type === 'Takeout'">
                                 Afhaallocatie
                             </template>
-                            <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                                 Locatie
                             </template>
                             <template v-else>
@@ -186,10 +186,10 @@
                     </STListItem>
                     <STListItem v-if="order.data.timeSlot" class="right-description">
                         <h3 class="style-definition-label">
-                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                            <template v-if="order.data.checkoutMethod.type === 'Takeout'">
                                 Wanneer afhalen?
                             </template>
-                            <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                                 Wanneer?
                             </template>
                             <template v-else>
@@ -282,7 +282,7 @@
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                 <hr>
-                <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                     Afhaalopmerkingen
                 </h2>
                 <h2 v-else>

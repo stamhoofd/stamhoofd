@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { v4 as uuidv4 } from "uuid";
-import { Address } from "./Address";
+import { v4 as uuidv4 } from 'uuid';
+import { Address } from './Address';
 import { Country } from './CountryDecoder';
 
 export class Premise extends AutoEncoder {
@@ -10,16 +10,16 @@ export class Premise extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 323 })
     name: string = '';
 
-    @field({ decoder: StringDecoder, version: 323})
+    @field({ decoder: StringDecoder, version: 323 })
     description: string = '';
 
-    @field({ decoder: new ArrayDecoder(StringDecoder)})
+    @field({ decoder: new ArrayDecoder(StringDecoder) })
     premiseTypeIds: string[] = [];
 
-    @field({ decoder: Address})
+    @field({ decoder: Address })
     address: Address = Address.createDefault();
 
     static createDefault(country?: Country): Premise {
-        return Premise.create({address: Address.createDefault(country)})
+        return Premise.create({ address: Address.createDefault(country) });
     }
 }

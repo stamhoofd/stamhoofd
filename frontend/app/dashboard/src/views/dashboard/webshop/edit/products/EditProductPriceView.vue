@@ -68,7 +68,7 @@ export default class EditProductPriceView extends Mixins(NavigationMixin) {
     }
 
     get patchedProductPrice() {
-        const c = this.patchedProduct.prices.find(c => c.id == this.productPrice.id)
+        const c = this.patchedProduct.prices.find(c => c.id === this.productPrice.id)
         if (c) {
             return c
         }

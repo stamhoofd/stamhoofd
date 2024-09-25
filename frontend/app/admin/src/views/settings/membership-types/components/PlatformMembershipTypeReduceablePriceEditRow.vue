@@ -12,10 +12,10 @@ import { ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    tagId: string,
-    showPricePerDay: boolean,
-    validator: Validator,
-    errorBox?: ErrorBox | null
+    tagId: string;
+    showPricePerDay: boolean;
+    validator: Validator;
+    errorBox?: ErrorBox | null;
 }>();
 
 const model = defineModel<ReduceablePrice>({ required: true });
@@ -25,9 +25,9 @@ const tag = platform.value.config.tags.find(t => t.id === props.tagId);
 const priceTitle = computed(() => format(props.showPricePerDay ? 'Vaste prijs' : 'Prijs'));
 
 function format(base: string) {
-    if(!props.tagId) {
+    if (!props.tagId) {
         return base;
     }
-    return `${base} voor ${tag?.name ?? 'Onbekend'}`
+    return `${base} voor ${tag?.name ?? 'Onbekend'}`;
 }
 </script>

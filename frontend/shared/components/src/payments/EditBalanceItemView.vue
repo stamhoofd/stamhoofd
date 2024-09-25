@@ -73,7 +73,7 @@
             <h2>Betalingen</h2>
             <p>Een openstaand bedrag kan door een lid betaald worden via het ledenportaal. Daar kan men via één van de ingestelde betaalmethodes afrekenen. Meerdere openstaande bedragen (ook over meerdere leden heen als een account meerdere leden beheert) kunnen in één keer betaald worden, vandaar dat het bedrag van een betaling vaak hoger is dan het bedrag van een individuele afrekening.</p>
 
-            <p v-if="patchedBalanceItem.payments.length == 0" class="info-box">
+            <p v-if="patchedBalanceItem.payments.length === 0" class="info-box">
                 Er werd nog geen betaling aangemaakt voor deze afrekening
             </p>
 
@@ -164,7 +164,7 @@ const member = computed(() => {
     if (!family.value || !memberId.value) {
         return null;
     }
-    return family.value.members.find(m => m.id == memberId.value)
+    return family.value.members.find(m => m.id === memberId.value)
 })
 
 const outstanding = computed(() => {

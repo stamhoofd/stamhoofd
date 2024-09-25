@@ -1,27 +1,27 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
-import { Formatter, StringCompare } from "@stamhoofd/utility";
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 
-import { Address } from "../addresses/Address";
-import { Recipient, Replacement } from "../endpoints/EmailRequest";
-import { Gender } from "../members/Gender";
-import { Parent } from "../members/Parent";
+import { Address } from '../addresses/Address';
+import { Recipient, Replacement } from '../endpoints/EmailRequest';
+import { Gender } from '../members/Gender';
+import { Parent } from '../members/Parent';
 
 export class MemberSummary extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
 
     @field({ decoder: StringDecoder })
-    firstName: string
+    firstName: string;
 
     @field({ decoder: StringDecoder })
-    lastName: string
+    lastName: string;
 
     get name() {
-        return this.firstName + " " + this.lastName
+        return this.firstName + ' ' + this.lastName;
     }
 
     @field({ decoder: StringDecoder, nullable: true })
-    email: string | null = null
+    email: string | null = null;
 
     @field({ decoder: new EnumDecoder(Gender) })
     gender: Gender = Gender.Other;
@@ -30,23 +30,23 @@ export class MemberSummary extends AutoEncoder {
     phone: string | null = null;
 
     @field({ decoder: DateDecoder, nullable: true })
-    birthDay: Date | null = null
+    birthDay: Date | null = null;
 
     @field({ decoder: Address, nullable: true })
     address: Address | null = null;
 
-    @field({ decoder: new ArrayDecoder(Parent)})
+    @field({ decoder: new ArrayDecoder(Parent) })
     parents: Parent[] = [];
 
     @field({ decoder: StringDecoder })
-    organizationName: string
+    organizationName: string;
 
     @field({ decoder: StringDecoder })
-    organizationId: string
+    organizationId: string;
 
     matchQuery(query: string) {
-        const parts = query.split(" ");
-        const nameParts = [...this.firstName.split(" "), ...this.lastName.split(" ")];
+        const parts = query.split(' ');
+        const nameParts = [...this.firstName.split(' '), ...this.lastName.split(' ')];
 
         // Each part should at least match a namepart
         for (const part of parts) {
@@ -56,29 +56,29 @@ export class MemberSummary extends AutoEncoder {
         }
         return parts.length > 0;
 
-        //return StringCompare.contains(this.firstName, query) || StringCompare.contains(this.lastName, query)
+        // return StringCompare.contains(this.firstName, query) || StringCompare.contains(this.lastName, query)
     }
 
     get addresses() {
-        const addresses = this.parents.map(p => p.address).filter(a => a !== null) as Address[]
+        const addresses = this.parents.map(p => p.address).filter(a => a !== null) as Address[];
         if (this.address) {
-            addresses.push(this.address)
+            addresses.push(this.address);
         }
 
         // Remove duplicates by toString()
-        return addresses.filter((a, i, self) => self.findIndex(b => b.toString() === a.toString()) === i)
+        return addresses.filter((a, i, self) => self.findIndex(b => b.toString() === a.toString()) === i);
     }
 
     get age(): number | null {
         if (!this.birthDay) {
-            return null
+            return null;
         }
 
         // For now calculate based on Brussels timezone (we'll need to correct this later)
         const today = new Date();
         const birthDay = Formatter.luxon(this.birthDay);
         let age = today.getFullYear() - birthDay.year;
-        const m = today.getMonth() - (birthDay.month - 1)
+        const m = today.getMonth() - (birthDay.month - 1);
         if (m < 0 || (m === 0 && today.getDate() < birthDay.day)) {
             age--;
         }
@@ -87,7 +87,7 @@ export class MemberSummary extends AutoEncoder {
 
     get emailRecipients(): Recipient[] {
         // for each parent
-        const recipients: Recipient[] = []
+        const recipients: Recipient[] = [];
         for (const parent of this.parents) {
             if (parent.email) {
                 recipients.push(Recipient.create({
@@ -97,11 +97,11 @@ export class MemberSummary extends AutoEncoder {
                     types: ['parent'],
                     replacements: [
                         Replacement.create({
-                            token: "organization",
-                            value: this.organizationName
+                            token: 'organization',
+                            value: this.organizationName,
                         }),
-                    ]
-                }))
+                    ],
+                }));
             }
         }
 
@@ -113,23 +113,23 @@ export class MemberSummary extends AutoEncoder {
                 types: ['member'],
                 replacements: [
                     Replacement.create({
-                        token: "organization",
-                        value: this.organizationName
+                        token: 'organization',
+                        value: this.organizationName,
                     }),
-                ]
-            }))
+                ],
+            }));
         }
 
-        return recipients
+        return recipients;
     }
 
     get emailaddresses() {
-        const emails = this.parents.map(p => p.email).filter(e => e !== null) as string[]
+        const emails = this.parents.map(p => p.email).filter(e => e !== null) as string[];
         if (this.email && (!this.age || this.age >= 18)) {
-            emails.push(this.email)
+            emails.push(this.email);
         }
 
         // Remove duplicates
-        return emails.filter((a, i, self) => self.indexOf(a) === i)
+        return emails.filter((a, i, self) => self.indexOf(a) === i);
     }
 }

@@ -40,7 +40,7 @@
                     <p v-else-if="almostClosed" class="info-box">
                         Bestellen kan tot {{ formatTime(webshop.meta.availableUntil) }}
                     </p>
-                    <p v-if="categories.length == 0 && products.length == 0" class="info-box">
+                    <p v-if="categories.length === 0 && products.length === 0" class="info-box">
                         Momenteel is er niets beschikbaar.
                     </p>
                 </header>
@@ -49,7 +49,7 @@
                     <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
                     <div v-else class="products">
                         <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
-                        <ProductGrid v-if="categories.length == 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
+                        <ProductGrid v-if="categories.length === 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
                     </div>
                 </template>
             </div>
@@ -234,7 +234,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     openCart(animated = true, components: ComponentWithProperties[] = [], url?: string) {
-        if (!this.cartEnabled && components.length == 0) {
+        if (!this.cartEnabled && components.length === 0) {
             this.openCheckout(animated).catch(console.error)
             return
         }
@@ -361,14 +361,14 @@ export default class WebshopView extends Mixins(NavigationMixin){
         UrlHelper.setUrl("/")
         this.check().catch(console.error)
 
-        if (path.length == 2 && path[0] == 'code') {
+        if (path.length === 2 && path[0] === 'code') {
             if (this.cartEnabled) {
                 this.openCart(false)
             }
             
             const code = path[1];
             this.$checkoutManager.applyCode(code).catch(console.error);
-        } else if (path.length == 2 && path[0] == 'order') {
+        } else if (path.length === 2 && path[0] === 'order') {
             const orderId = path[1];
             this.present({
                 animated: false,
@@ -377,7 +377,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                     new ComponentWithProperties(OrderView, { orderId })
                 ]
             })
-        } else if (path.length == 2 && path[0] == 'tickets') {
+        } else if (path.length === 2 && path[0] === 'tickets') {
             const secret = path[1];
             this.present({
                 animated: false,
@@ -386,7 +386,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                     new ComponentWithProperties(TicketView, { secret })
                 ]
             })
-        } else if (path.length == 1 && path[0] == 'payment' && params.get("id")) {
+        } else if (path.length === 1 && path[0] === 'payment' && params.get("id")) {
             const paymentId = params.get("id")
             const cancel = params.get("cancel") === "true"
             const me = this
@@ -401,7 +401,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                         paymentId,
                         cancel,
                         finishedHandler: function(this: InstanceType<typeof NavigationMixin>, payment: Payment | null) {
-                            if (payment && payment.status == PaymentStatus.Succeeded) {
+                            if (payment && payment.status === PaymentStatus.Succeeded) {
                                 if (!this.popup) {
                                     console.log("Presenting order by replacing current view")
 
@@ -442,11 +442,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 ],
                 modalDisplayStyle: "sheet" // warning: if changing to popup: this.present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
             })
-        } else if (path.length == 2 && path[0] == 'checkout') {
+        } else if (path.length === 2 && path[0] === 'checkout') {
             this.resumeStep('/' + path.join('/'), false).catch(e => {
                 console.error(e)
             })
-        } else if (path.length == 1 && path[0] == 'cart' && this.cartEnabled) {
+        } else if (path.length === 1 && path[0] === 'cart' && this.cartEnabled) {
             this.openCart(false)
         }
     }

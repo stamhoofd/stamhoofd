@@ -1,21 +1,21 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Order } from '@stamhoofd/models';
-import { Order as OrderStruct } from "@stamhoofd/structures";
+import { Order as OrderStruct } from '@stamhoofd/structures';
 
-import { Context } from "../../../helpers/Context";
+import { Context } from '../../../helpers/Context';
 type Params = { id: string; orderId: string };
 type Query = undefined;
-type Body = undefined
-type ResponseBody = OrderStruct
+type Body = undefined;
+type ResponseBody = OrderStruct;
 
 export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/webshop/@id/order/@orderId", { id: String, orderId: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/order/@orderId', { id: String, orderId: String });
 
         if (params) {
             return [true, params as Params];
@@ -24,15 +24,15 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope()
-        const order = await Order.getByID(request.params.orderId)
+        const organization = await Context.setOrganizationScope();
+        const order = await Order.getByID(request.params.orderId);
 
-        if (!order || order.webshopId != request.params.id || order.organizationId != organization.id) {
+        if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
             throw new SimpleError({
-                code: "not_found",
-                message: "Order not found",
-                human: "Deze bestelling bestaat niet (meer)"
-            })
+                code: 'not_found',
+                message: 'Order not found',
+                human: 'Deze bestelling bestaat niet (meer)',
+            });
         }
 
         return new Response(await order.getStructure());

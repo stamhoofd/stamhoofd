@@ -1,4 +1,4 @@
-import { XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWriterAdapter } from "./interfaces";
+import { XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWriterAdapter } from './interfaces';
 
 /**
  * Transforms data into an excel file using
@@ -30,17 +30,17 @@ export class XlsxTransformer<T> {
             if (!sheetSymbol) {
                 throw new Error('Sheet not found');
             }
-            
-            await this.writer.addRow(sheetSymbol, sheet.columns.map(col => {
+
+            await this.writer.addRow(sheetSymbol, sheet.columns.map((col) => {
                 return {
                     value: col.name,
                     width: col.width,
                     style: {
                         font: {
-                            bold: true
-                        }
-                    }
-                }
+                            bold: true,
+                        },
+                    },
+                };
             }));
         }
     }
@@ -51,7 +51,7 @@ export class XlsxTransformer<T> {
             if (!sheetSymbol) {
                 throw new Error('Sheet not found');
             }
-            
+
             for (const item of data) {
                 for (const transformedItem of sheet.transform ? sheet.transform(item) : [item]) {
                     await this.writer.addRow(sheetSymbol, sheet.columns.map(col => col.getValue(transformedItem)));

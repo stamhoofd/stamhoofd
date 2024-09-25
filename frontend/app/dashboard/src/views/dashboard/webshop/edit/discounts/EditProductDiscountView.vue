@@ -23,7 +23,7 @@
 
                 <div class="split-inputs">
                     <div>
-                        <PriceInput v-if="getDiscountType(d) == 'discountPerPiece'" :modelValue="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @update:modelValue="setDiscountDiscountPerPiece(d, $event)" />
+                        <PriceInput v-if="getDiscountType(d) === 'discountPerPiece'" :modelValue="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @update:modelValue="setDiscountDiscountPerPiece(d, $event)" />
                         <PermyriadInput v-else :modelValue="getDiscountPercentageDiscount(d)" :required="true" @update:modelValue="setDiscountPercentageDiscount(d, $event)" />
                     </div>
                     <div>
@@ -74,7 +74,7 @@
                 <template #left>
                     <Radio v-model="repeatBehaviour" value="RepeatLast" />
                 </template>
-                <h3 v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'" class="style-title-list">
+                <h3 v-if="discounts.length > 1 || repeatBehaviour === 'RepeatPattern'" class="style-title-list">
                     Laatste korting herhalen
                 </h3>
                 <h3 v-else>
@@ -85,7 +85,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'" :selectable="true" element-name="label" class="left-center">
+            <STListItem v-if="discounts.length > 1 || repeatBehaviour === 'RepeatPattern'" :selectable="true" element-name="label" class="left-center">
                 <template #left>
                     <Radio v-model="repeatBehaviour" value="RepeatPattern" />
                 </template>

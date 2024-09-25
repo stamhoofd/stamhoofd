@@ -20,7 +20,7 @@
         <div v-if="!valid">
             <span>{{ valueString }}</span>
         </div>
-        <div v-else-if="valueString != ''">
+        <div v-else-if="valueString !== ''">
             <span>{{ valueString }}</span> {{ currency }}
         </div>
         <div v-else class="placeholder">{{ placeholder }}</div>
@@ -103,7 +103,7 @@ export default class PriceInput extends VueComponent {
     stringToValue(str: string) {
         // We need the modelValue string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
-        if (str == "") {
+        if (str === "") {
             if (this.required) {
                 return {
                     value: Math.max(0, this.min ?? 0),
@@ -169,7 +169,7 @@ export default class PriceInput extends VueComponent {
         const decimals = float % 1;
         const abs = Math.abs(float);
 
-        if (decimals != 0) {
+        if (decimals !== 0) {
             // Include decimals
             this.valueString =
                 (float < 0 ? "-" : "") +

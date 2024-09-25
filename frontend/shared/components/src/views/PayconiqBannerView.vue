@@ -5,11 +5,11 @@
 
         <div class="payconiq-logo" />
 
-        <div class="qr-code" :class="{ scanned: payment.status == 'Pending'}">
-            <img v-if="payment.status == 'Pending' || payment.status == 'Created'" :src="qrCodeSrc">
+        <div class="qr-code" :class="{ scanned: payment.status === 'Pending'}">
+            <img v-if="payment.status === 'Pending' || payment.status === 'Created'" :src="qrCodeSrc">
         </div>
 
-        <LoadingButton :loading="payment && payment.status == 'Pending'" class="price-loading">
+        <LoadingButton :loading="payment && payment.status === 'Pending'" class="price-loading">
             <p class="price">
                 {{ formatPrice(price) }}
             </p>
@@ -115,12 +115,12 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
                 const payment = response.data
                 this.payment = payment
 
-                if (payment.status == PaymentStatus.Succeeded) {
+                if (payment.status === PaymentStatus.Succeeded) {
                     this.finishedHandler(payment)
                     this.dismiss({ force: true })
                 }
 
-                if (payment.status == PaymentStatus.Failed) {
+                if (payment.status === PaymentStatus.Failed) {
                     // TODO: temporary message
                     this.finishedHandler(payment)
                     this.dismiss({ force: true })
@@ -130,7 +130,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
                 console.error(e)
             }).finally(() => {
                 this.pollCount++;
-                if (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed) {
+                if (this.payment.status === PaymentStatus.Succeeded || this.payment.status === PaymentStatus.Failed) {
                     return;
                 }
                 this.timer = setTimeout(this.poll.bind(this), 3000);
@@ -143,7 +143,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             this.timer = null
         }
 
-        if (this.payment.status != PaymentStatus.Succeeded && this.payment.status != PaymentStatus.Failed) {
+        if (this.payment.status !== PaymentStatus.Succeeded && this.payment.status !== PaymentStatus.Failed) {
             this.finishedHandler(this.payment)
         }
     }

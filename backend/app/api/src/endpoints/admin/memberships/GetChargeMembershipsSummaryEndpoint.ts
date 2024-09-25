@@ -6,7 +6,6 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { Platform } from '@stamhoofd/models';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-
 type Params = Record<string, never>;
 type Query = Record<string, never>;
 type Body = undefined;
@@ -14,11 +13,11 @@ type ResponseBody = ChargeMembershipsSummary;
 
 export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/admin/charge-memberships/summary", {});
+        const params = Endpoint.parseParameters(request.url, '/admin/charge-memberships/summary', {});
 
         if (params) {
             return [true, params as Params];
@@ -27,60 +26,60 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.authenticate()
+        await Context.authenticate();
 
         if (!Context.auth.hasPlatformFullAccess()) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
         if (QueueHandler.isRunning('charge-memberships')) {
             return new Response(
                 ChargeMembershipsSummary.create({
-                    running: true
-                })
+                    running: true,
+                }),
             );
         }
-        
-        const platform = await Platform.getShared()
-        const chargeVia = platform.membershipOrganizationId
+
+        const platform = await Platform.getShared();
+        const chargeVia = platform.membershipOrganizationId;
 
         const query = SQL
             .select(
                 new SQLSelectAs(
                     new SQLCount(
                         new SQLDistinct(
-                            SQL.column('member_platform_memberships', 'id')
-                        )
+                            SQL.column('member_platform_memberships', 'id'),
+                        ),
                     ),
-                    new SQLAlias('data__memberships')
+                    new SQLAlias('data__memberships'),
                 ),
                 new SQLSelectAs(
                     new SQLCount(
                         new SQLDistinct(
-                            SQL.column('member_platform_memberships', 'memberId')
-                        )
+                            SQL.column('member_platform_memberships', 'memberId'),
+                        ),
                     ),
-                    new SQLAlias('data__members')
+                    new SQLAlias('data__members'),
                 ),
                 new SQLSelectAs(
                     new SQLCount(
                         new SQLDistinct(
-                            SQL.column('member_platform_memberships', 'organizationId')
-                        )
+                            SQL.column('member_platform_memberships', 'organizationId'),
+                        ),
                     ),
-                    new SQLAlias('data__organizations')
+                    new SQLAlias('data__organizations'),
                 ),
                 new SQLSelectAs(
                     new SQLSum(
-                        SQL.column('member_platform_memberships', 'price')
+                        SQL.column('member_platform_memberships', 'price'),
                     ),
-                    new SQLAlias('data__price')
-                )
+                    new SQLAlias('data__price'),
+                ),
             )
             .from('member_platform_memberships')
             .where('balanceItemId', null)
             .where('deletedAt', null)
-            .whereNot('organizationId', chargeVia)
+            .whereNot('organizationId', chargeVia);
 
         const result = await query.fetch();
         const members = result[0]['data']['members'] as number;
@@ -95,52 +94,52 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                 members: members ?? 0,
                 price: price ?? 0,
                 organizations: organizations ?? 0,
-                membershipsPerType: await this.fetchPerType(chargeVia)
-            })
+                membershipsPerType: await this.fetchPerType(chargeVia),
+            }),
         );
     }
 
-    async fetchPerType(chargeVia: string|null) {
+    async fetchPerType(chargeVia: string | null) {
         const query = SQL
             .select(
                 SQL.column('member_platform_memberships', 'membershipTypeId'),
                 new SQLSelectAs(
                     new SQLCount(
                         new SQLDistinct(
-                            SQL.column('member_platform_memberships', 'id')
-                        )
+                            SQL.column('member_platform_memberships', 'id'),
+                        ),
                     ),
-                    new SQLAlias('data__memberships')
+                    new SQLAlias('data__memberships'),
                 ),
                 new SQLSelectAs(
                     new SQLCount(
                         new SQLDistinct(
-                            SQL.column('member_platform_memberships', 'memberId')
-                        )
+                            SQL.column('member_platform_memberships', 'memberId'),
+                        ),
                     ),
-                    new SQLAlias('data__members')
+                    new SQLAlias('data__members'),
                 ),
                 new SQLSelectAs(
                     new SQLCount(
                         new SQLDistinct(
-                            SQL.column('member_platform_memberships', 'organizationId')
-                        )
+                            SQL.column('member_platform_memberships', 'organizationId'),
+                        ),
                     ),
-                    new SQLAlias('data__organizations')
+                    new SQLAlias('data__organizations'),
                 ),
                 new SQLSelectAs(
                     new SQLSum(
-                        SQL.column('member_platform_memberships', 'price')
+                        SQL.column('member_platform_memberships', 'price'),
                     ),
-                    new SQLAlias('data__price')
-                )
+                    new SQLAlias('data__price'),
+                ),
             )
             .from('member_platform_memberships')
             .where('balanceItemId', null)
             .where('deletedAt', null)
             .whereNot('organizationId', chargeVia)
             .groupBy(
-                SQL.column('member_platform_memberships', 'membershipTypeId')
+                SQL.column('member_platform_memberships', 'membershipTypeId'),
             );
 
         const result = await query.fetch();
@@ -151,7 +150,7 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                 memberships: row['data']['memberships'] as number,
                 members: row['data']['members'] as number,
                 price: row['data']['price'] as number,
-                organizations: row['data']['organizations'] as number
+                organizations: row['data']['organizations'] as number,
             }));
         }
 

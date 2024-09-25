@@ -164,7 +164,7 @@ export default class AddressInput extends VueComponent {
     }
 
     async isValid(isFinal: boolean, silent = false): Promise<boolean> {
-        if (!this.required && this.addressLine1.length == 0 && this.postalCode.length == 0 && this.city.length == 0) {
+        if (!this.required && this.addressLine1.length === 0 && this.postalCode.length === 0 && this.city.length === 0) {
             if (!silent) {
                 this.errorBox = null
             }
@@ -175,7 +175,7 @@ export default class AddressInput extends VueComponent {
             return true
         }
 
-        if (this.required && this.addressLine1.length == 0 && this.postalCode.length == 0 && this.city.length == 0) {
+        if (this.required && this.addressLine1.length === 0 && this.postalCode.length === 0 && this.city.length === 0) {
             if (!isFinal) {
                 if (!silent) {
                     this.errorBox = null
@@ -193,7 +193,7 @@ export default class AddressInput extends VueComponent {
         try {
             address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country)
 
-            if (!this.modelValue || (this.validateServer && !(this.modelValue instanceof ValidatedAddress) && !silent && isFinal) || address.toString() != this.modelValue.toString()) {
+            if (!this.modelValue || (this.validateServer && !(this.modelValue instanceof ValidatedAddress) && !silent && isFinal) || address.toString() !== this.modelValue.toString()) {
                 // Do we need to validate on the server?
                 if (this.validateServer && !silent && isFinal) {
                     const response = await this.validateServer.request({

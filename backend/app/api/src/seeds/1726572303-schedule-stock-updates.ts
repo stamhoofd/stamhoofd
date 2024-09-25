@@ -2,13 +2,13 @@ import { Migration } from '@simonbackx/simple-database';
 import { Registration } from '@stamhoofd/models';
 
 export default new Migration(async () => {
-    if (STAMHOOFD.environment == "test") {
-        console.log("skipped in tests")
+    if (STAMHOOFD.environment == 'test') {
+        console.log('skipped in tests');
         return;
     }
 
-    if(STAMHOOFD.userMode !== "platform") {
-        console.log("skipped seed schedule-stock-updates because usermode not platform")
+    if (STAMHOOFD.userMode !== 'platform') {
+        console.log('skipped seed schedule-stock-updates because usermode not platform');
         return;
     }
 
@@ -16,13 +16,13 @@ export default new Migration(async () => {
     let c = 0;
     let id: string = '';
 
-    while(true) {
+    while (true) {
         const rawRegistrations = await Registration.where({
             id: {
                 value: id,
-                sign: '>'
-            }
-        }, {limit: 100, sort: ['id']});
+                sign: '>',
+            },
+        }, { limit: 100, sort: ['id'] });
 
         const registrations = await Registration.getByIDs(...rawRegistrations.map(g => g.id));
 
@@ -31,10 +31,10 @@ export default new Migration(async () => {
 
             c++;
 
-            if (c%1000 === 0) {
+            if (c % 1000 === 0) {
                 process.stdout.write('.');
             }
-            if (c%10000 === 0) {
+            if (c % 10000 === 0) {
                 process.stdout.write('\n');
             }
         }
@@ -47,5 +47,5 @@ export default new Migration(async () => {
     }
 
     // Do something here
-    return Promise.resolve()
-})
+    return Promise.resolve();
+});

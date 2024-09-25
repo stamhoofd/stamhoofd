@@ -167,7 +167,7 @@
                             <p class="style-definition-text">
                                 <span>{{ getName(payment.method) }}</span>
 
-                                <span v-if="payment.status == 'Succeeded'" class="icon green success" />
+                                <span v-if="payment.status === 'Succeeded'" class="icon green success" />
                                 <span v-else-if="isPaymentTransfer(payment)" class="icon help" />
                                 <span v-else class="icon clock" />
                             </p>
@@ -208,10 +208,10 @@
                         <template v-if="order.data.checkoutMethod">
                             <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                                 <h3 class="style-definition-label">
-                                    <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                    <template v-if="order.data.checkoutMethod.type === 'Takeout'">
                                         Afhaallocatie
                                     </template>
-                                    <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                    <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                                         Locatie
                                     </template>
                                     <template v-else>
@@ -243,10 +243,10 @@
                             </STListItem>
                             <STListItem v-if="order.data.timeSlot" class="right-description">
                                 <h3 class="style-definition-label">
-                                    <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                    <template v-if="order.data.checkoutMethod.type === 'Takeout'">
                                         Wanneer afhalen?
                                     </template>
-                                    <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                    <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                                         Wanneer?
                                     </template>
                                     <template v-else>
@@ -298,10 +298,10 @@
 
                     <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                         <hr>
-                        <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                        <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                             Afhaalopmerkingen
                         </h2>
-                        <h2 v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                        <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
                             Opmerkingen
                         </h2>
                         <h2 v-else>
@@ -413,7 +413,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get singleTicket() {
-        return this.tickets.length == 1 || this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
+        return this.tickets.length === 1 || this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
     }
 
     get canShare() {
@@ -450,7 +450,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get hasTickets() {
-        return (this.order && this.order.status != OrderStatus.Canceled && this.order.status != OrderStatus.Deleted) && (this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket))
+        return (this.order && this.order.status !== OrderStatus.Canceled && this.order.status !== OrderStatus.Deleted) && (this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket))
     }
 
     get hasSingleTicket() {
@@ -506,7 +506,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     openTransferView(payment: Payment) {
-        if (payment.method == PaymentMethod.Transfer) {
+        if (payment.method === PaymentMethod.Transfer) {
             this.present(new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(TransferPaymentView, {
                     type: "order",

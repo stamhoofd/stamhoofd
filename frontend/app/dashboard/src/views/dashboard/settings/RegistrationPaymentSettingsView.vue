@@ -80,7 +80,7 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
     }
 
     get isBelgium() {
-        return this.organization.address.country == Country.Belgium
+        return this.organization.address.country === Country.Belgium
     }
 
     get hasTransfers() {

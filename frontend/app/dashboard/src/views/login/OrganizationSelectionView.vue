@@ -40,7 +40,7 @@
                     </button>
                 </template>
 
-                <p v-if="!loadingResults && visibleOptions.length == 0 && query" class="info-box">
+                <p v-if="!loadingResults && visibleOptions.length === 0 && query" class="info-box">
                     Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
                 </p>
 
@@ -81,7 +81,7 @@ const results: Ref<Option[]> = shallowRef([]);
 const owner = useRequestOwner()
 const input = ref<HTMLInputElement | null>(null)
 const resultElements = reactive<HTMLElement[]>([])
-const visibleOptions = computed(() => query.value.length == 0 ? defaultOptions.value : results.value)
+const visibleOptions = computed(() => query.value.length === 0 ? defaultOptions.value : results.value)
 const isPlatform = STAMHOOFD.userMode === 'platform'
 const instance = getCurrentInstance();
 const platform = usePlatform();
@@ -125,7 +125,7 @@ const setResults = async (cachedCount: number, organizations: Organization[]) =>
         return
     }
 
-    if (organizations.length == 0) {
+    if (organizations.length === 0) {
         results.value = []
         return;
     }
@@ -148,7 +148,7 @@ const updateResults = async () => {
     const q = query.value
     const cachedCount = counter
 
-    if (q.length == 0) {
+    if (q.length === 0) {
         await setResults(cachedCount, [])
         loadingResults.value = false
         return
@@ -201,7 +201,7 @@ const startUpdateResults = async () => {
 
     Request.cancelAll(owner)
 
-    if (value.length == 0) {
+    if (value.length === 0) {
         await setResults(counter, [])
         loadingResults.value = false
         return

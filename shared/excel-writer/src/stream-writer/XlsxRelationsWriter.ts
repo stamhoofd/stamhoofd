@@ -1,14 +1,14 @@
-import { escapeXml } from "./escapeXml";
-import { XlsxFileWriter } from "./XlsxFileWriter";
+import { escapeXml } from './escapeXml';
+import { XlsxFileWriter } from './XlsxFileWriter';
 
 export class XlsxRelationsWriter extends XlsxFileWriter {
-    relations: {target: string, type: string, id: string}[] = [];
+    relations: { target: string; type: string; id: string }[] = [];
 
-    async addRelation({target, type}: {target: string, type: string}): Promise<string> {
+    async addRelation({ target, type }: { target: string; type: string }): Promise<string> {
         const id = `rId${this.relations.length + 1}`;
         this.relations.push({ target, type, id });
         return Promise.resolve(id);
-    }   
+    }
 
     /**
      * Write remaining data to the file

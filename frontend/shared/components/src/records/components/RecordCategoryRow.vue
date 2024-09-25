@@ -15,13 +15,13 @@
         </p>
         <p v-else class="style-description-small">
             <template v-if="category.records.length">
-                {{ category.records.length }} {{ category.records.length == 1 ? "vraag" : "vragen" }}
+                {{ category.records.length }} {{ category.records.length === 1 ? "vraag" : "vragen" }}
             </template>
             <template v-if="category.childCategories.length && category.records.length">
                 en
             </template>
             <template v-if="category.childCategories.length">
-                {{ category.childCategories.length }} {{ category.childCategories.length == 1 ? "categorie" : "categorieën" }}
+                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? "categorie" : "categorieën" }}
             </template>
         </p>
 

@@ -67,7 +67,7 @@
                         Hiermee stellen we automatisch al enkele instellingen goed in.
                     </p>
 
-                    <STInputBox v-if="type == 'Youth' && isBelgium" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
+                    <STInputBox v-if="type === 'Youth' && isBelgium" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
                         <Dropdown v-model="umbrellaOrganization">
                             <option :value="null" disabled>
                                 Maak een keuze
@@ -294,7 +294,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         }
         
         try {
-            if (this.name.length == 0) {
+            if (this.name.length === 0) {
                 throw new SimpleError({
                     code: "invalid_field",
                     message: "",
@@ -319,7 +319,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 })
             }
 
-            if (this.type == OrganizationType.Youth && this.isBelgium) {
+            if (this.type === OrganizationType.Youth && this.isBelgium) {
                 if (this.umbrellaOrganization === null) {
                     throw new SimpleError({
                         code: "invalid_field",
@@ -434,7 +434,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if (this.name == "" && this.address == null && this.type == null) {
+        if (this.name === "" && this.address === null && this.type === null) {
             return true
         }
         if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten?", "Sluiten")) {
@@ -448,12 +448,12 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     // Helpers ---
 
     getBooleanType(type: AcquisitionType) {
-        return !!this.acquisitionTypes.find(r => r == type)
+        return !!this.acquisitionTypes.find(r => r === type)
     }
 
     setBooleanType(type: AcquisitionType, enabled: boolean) {
-        const index = this.acquisitionTypes.findIndex(r => r == type)
-        if ((index != -1) === enabled) {
+        const index = this.acquisitionTypes.findIndex(r => r === type)
+        if ((index !== -1) === enabled) {
             return
         }
         

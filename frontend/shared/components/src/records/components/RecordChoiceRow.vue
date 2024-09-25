@@ -56,7 +56,7 @@ export default class ChoiceRow extends Mixins(NavigationMixin) {
 
     moveUp() {
         const index = this.choices.findIndex(c => c.id === this.choice.id)
-        if (index == -1 || index == 0) {
+        if (index === -1 || index === 0) {
             return;
         }
 
@@ -68,7 +68,7 @@ export default class ChoiceRow extends Mixins(NavigationMixin) {
      
     moveDown() {
         const index = this.choices.findIndex(c => c.id === this.choice.id)
-        if (index == -1 || index >= this.choices.length - 1) {
+        if (index === -1 || index >= this.choices.length - 1) {
             return;
         }
 

@@ -7,89 +7,89 @@ import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
-    return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
+    return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
 }
 
 export async function getScopedAdminRootFromUrl() {
-    const session = new SessionContext(null)
-    await session.loadFromStorage()
+    const session = new SessionContext(null);
+    await session.loadFromStorage();
     await SessionManager.prepareSessionForUsage(session, false);
 
-    return await getScopedAdminRoot(session)
+    return await getScopedAdminRoot(session);
 }
 
 export function getNoPermissionsView() {
-    return  wrapWithModalStack(new ComponentWithProperties(TabBarController, {
+    return wrapWithModalStack(new ComponentWithProperties(TabBarController, {
         tabs: [
             new TabBarItem({
                 icon: 'key',
                 name: 'Geen toegang',
                 component: new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(NoPermissionsView, {})
-                })
-            })
-        ]
-    }))
+                    root: new ComponentWithProperties(NoPermissionsView, {}),
+                }),
+            }),
+        ],
+    }));
 }
 
-export async function getScopedAdminRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+export async function getScopedAdminRoot(reactiveSession: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     const startView = new ComponentWithProperties(NavigationController, {
-        root: AsyncComponent(() => import('./views/start/StartView.vue'), {})
-    })
+        root: AsyncComponent(() => import('./views/start/StartView.vue'), {}),
+    });
 
     const settingsView = new ComponentWithProperties(NavigationController, {
-        root: AsyncComponent(() => import('./views/settings/SettingsView.vue'), {})
-    })
+        root: AsyncComponent(() => import('./views/settings/SettingsView.vue'), {}),
+    });
 
     const membersTableView = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(MembersTableView, {})
-    })
+        root: new ComponentWithProperties(MembersTableView, {}),
+    });
 
     const organizationsTableView = new ComponentWithProperties(SplitViewController, {
-        root: new ComponentWithProperties(OrganizationsMenu, {})
-    })
+        root: new ComponentWithProperties(OrganizationsMenu, {}),
+    });
 
     setTitleSuffix('Administratie');
 
-    const startTab =  new TabBarItem({
+    const startTab = new TabBarItem({
         icon: 'home',
         name: 'Start',
-        component: startView
+        component: startView,
     });
 
-    const membersTab =  new TabBarItem({
+    const membersTab = new TabBarItem({
         icon: 'group',
         name: 'Leden',
-        component: membersTableView
+        component: membersTableView,
     });
 
-    const groupsTab =  new TabBarItem({
+    const groupsTab = new TabBarItem({
         icon: 'location',
         name: 'Groepen',
-        component: organizationsTableView
+        component: organizationsTableView,
     });
 
     const calendarTab = new TabBarItem({
         icon: 'calendar',
         name: 'Activiteiten',
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(ManageEventsView, {})
-        })
+            root: new ComponentWithProperties(ManageEventsView, {}),
+        }),
     });
 
-    const financesTab =  new TabBarItem({
+    const financesTab = new TabBarItem({
         icon: 'calculator',
         name: 'Aansluitingen aanrekenen',
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(ChargeMembershipsView, {})
-        })
+            root: new ComponentWithProperties(ChargeMembershipsView, {}),
+        }),
     });
 
-    const settingsTab =  new TabBarItem({
+    const settingsTab = new TabBarItem({
         icon: 'settings',
         name: 'Instellingen',
-        component: settingsView
+        component: settingsView,
     });
 
     const moreTab = new TabBarItemGroup({
@@ -97,36 +97,35 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
         name: 'Meer',
         items: [
             settingsTab,
-            financesTab
-        ]
+            financesTab,
+        ],
     });
-
 
     return wrapContext(reactiveSession, 'admin', wrapWithModalStack(
         new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {
                     tabs: computed(() => {
-                        const tabs: (TabBarItem|TabBarItemGroup)[] = [
+                        const tabs: (TabBarItem | TabBarItemGroup)[] = [
                             startTab,
                             membersTab,
                             groupsTab,
-                            calendarTab
-                        ]
+                            calendarTab,
+                        ];
 
                         if (reactiveSession.auth.hasFullPlatformAccess()) {
-                            tabs.push(moreTab)
+                            tabs.push(moreTab);
                         }
 
                         return tabs;
-                    })
-                })
+                    }),
+                }),
             ),
             loginRoot: wrapWithModalStack(
-                getNonAutoLoginRoot(reactiveSession, options)
+                getNonAutoLoginRoot(reactiveSession, options),
             ),
-            noPermissionsRoot: getNoPermissionsView()
-        }), 
-        options.initialPresents
+            noPermissionsRoot: getNoPermissionsView(),
+        }),
+        options.initialPresents,
     ));
 }

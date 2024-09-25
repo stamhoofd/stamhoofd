@@ -1,15 +1,14 @@
 import { Migration } from '@simonbackx/simple-database';
 
-
 export default new Migration(async () => {
-    if (STAMHOOFD.environment == "test") {
-        console.log("skipped in tests")
+    if (STAMHOOFD.environment == 'test') {
+        console.log('skipped in tests');
         return;
     }
 
-    return Promise.resolve()
+    return Promise.resolve();
 
-    /*let lastId = ""
+    /* let lastId = ""
 
     while(true) {
         const members = await Member.where({
@@ -37,7 +36,7 @@ export default new Migration(async () => {
                         const validatedAddress = await AddressValidator.validate(address)
                         const s = address.toString()
                         const e = validatedAddress.toString()
-                        if (s != e) {
+                        if (s !== e) {
                             if (StringCompare.typoCount(address.street, validatedAddress.street) > 4) {
                                 console.log("Updated street: " + s + " => " + e)
                             }
@@ -54,7 +53,5 @@ export default new Migration(async () => {
         }
     }
 
-    throw new Error("WIP")*/
+    throw new Error("WIP") */
 });
-
-

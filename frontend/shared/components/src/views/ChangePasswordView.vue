@@ -56,7 +56,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
 
         // Request the key constants
 
-        if (this.password != this.passwordRepeat) {
+        if (this.password !== this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "",
                 message: "De ingevoerde wachtwoorden komen niet overeen"

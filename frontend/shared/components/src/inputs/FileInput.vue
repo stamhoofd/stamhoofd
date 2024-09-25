@@ -2,7 +2,7 @@
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
         <label class="file-input-box" :class="{ center: !modelValue }" @click="onClick">
             <Spinner v-if="uploading" />
-            <span v-else-if="modelValue == null" class="icon center upload" />
+            <span v-else-if="modelValue === null" class="icon center upload" />
 
             <span v-if="modelValue" :class="'icon '+getFileIcon(modelValue)" />
             <span v-if="modelValue">{{ modelValue.name }}</span>
@@ -81,7 +81,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
     }
 
     changedFile(event) {
-        if (!event.target.files || event.target.files.length != 1) {
+        if (!event.target.files || event.target.files.length !== 1) {
             return;
         }
         if (this.uploading) {

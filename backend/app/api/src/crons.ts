@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Database } from '@simonbackx/simple-database';
-import { logger, StyledText } from "@simonbackx/simple-logging";
+import { logger, StyledText } from '@simonbackx/simple-logging';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { Group, Organization, Payment, Registration, STPackage, Webshop } from '@stamhoofd/models';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
@@ -16,150 +16,150 @@ import { ForwardHandler } from './helpers/ForwardHandler';
 
 // Importing postmark returns undefined (this is a bug, so we need to use require)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const postmark = require("postmark")
+const postmark = require('postmark');
 
-let lastDNSCheck: Date | null = null
-let lastDNSId = ""
+let lastDNSCheck: Date | null = null;
+let lastDNSId = '';
 async function checkDNS() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment === 'development') {
         return;
     }
 
     // Wait 6 hours between every complete check
     if (lastDNSCheck && lastDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
-        console.log("[DNS] Skip DNS check")
-        return
+        console.log('[DNS] Skip DNS check');
+        return;
     }
-    
+
     const organizations = await Organization.where({ id: { sign: '>', value: lastDNSId } }, {
         limit: 50,
-        sort: ["id"]
-    })
+        sort: ['id'],
+    });
 
     if (organizations.length == 0) {
         // Wait an half hour before starting again
-        lastDNSId = ""
-        lastDNSCheck = new Date()
-        return
+        lastDNSId = '';
+        lastDNSCheck = new Date();
+        return;
     }
 
-    console.log("[DNS] Checking DNS...")
+    console.log('[DNS] Checking DNS...');
 
     for (const organization of organizations) {
-        if (STAMHOOFD.environment === "production") {
-            console.log("[DNS] "+organization.name)
+        if (STAMHOOFD.environment === 'production') {
+            console.log('[DNS] ' + organization.name);
         }
         try {
-            await organization.updateDNSRecords()
-        } catch (e) {
+            await organization.updateDNSRecords();
+        }
+        catch (e) {
             console.error(e);
         }
     }
 
-    lastDNSId = organizations[organizations.length - 1].id
-    
+    lastDNSId = organizations[organizations.length - 1].id;
 }
 
-let lastExpirationCheck: Date | null = null
+let lastExpirationCheck: Date | null = null;
 async function checkExpirationEmails() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment === 'development') {
         return;
     }
 
     // Wait 1 hour between every complete check
     if (lastExpirationCheck && lastExpirationCheck > new Date(new Date().getTime() - 1 * 60 * 60 * 1000)) {
-        console.log("[EXPIRATION EMAILS] Skip checkExpirationEmails")
-        return
+        console.log('[EXPIRATION EMAILS] Skip checkExpirationEmails');
+        return;
     }
-    
+
     // Get all packages that expire between now and 31 days
-    const packages = await STPackage.where({ 
+    const packages = await STPackage.where({
         validUntil: [
             { sign: '!=', value: null },
             { sign: '>', value: new Date() },
-            { sign: '<', value: new Date(Date.now() + 1000 * 60 * 60 * 24 * 31) }
+            { sign: '<', value: new Date(Date.now() + 1000 * 60 * 60 * 24 * 31) },
         ],
         validAt: [
             { sign: '!=', value: null },
         ],
-        emailCount: 0
-    })
+        emailCount: 0,
+    });
 
-    console.log("[EXPIRATION EMAILS] Sending expiration emails...")
+    console.log('[EXPIRATION EMAILS] Sending expiration emails...');
 
     for (const pack of packages) {
-        await pack.sendExpiryEmail()
-    }   
-    lastExpirationCheck = new Date() 
+        await pack.sendExpiryEmail();
+    }
+    lastExpirationCheck = new Date();
 }
 
-let lastWebshopDNSCheck: Date | null = null
-let lastWebshopDNSId = ""
+let lastWebshopDNSCheck: Date | null = null;
+let lastWebshopDNSId = '';
 async function checkWebshopDNS() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment === 'development') {
         return;
     }
 
     // Wait 6 hours between every complete check
     if (lastWebshopDNSCheck && lastWebshopDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
-        console.log("[DNS] Skip webshop DNS check")
-        return
+        console.log('[DNS] Skip webshop DNS check');
+        return;
     }
-    
-    const webshops = await Webshop.where({ 
+
+    const webshops = await Webshop.where({
         id: { sign: '>', value: lastWebshopDNSId },
-        domain: { sign: '!=', value: null }
+        domain: { sign: '!=', value: null },
     }, {
         limit: 10,
-        sort: ["id"]
-    })
+        sort: ['id'],
+    });
 
     if (webshops.length == 0) {
         // Wait an half hour before starting again
-        lastWebshopDNSId = ""
-        lastWebshopDNSCheck = new Date()
-        return
+        lastWebshopDNSId = '';
+        lastWebshopDNSCheck = new Date();
+        return;
     }
 
-    console.log("[DNS] Checking webshop DNS...")
+    console.log('[DNS] Checking webshop DNS...');
 
     for (const webshop of webshops) {
-        console.log("[DNS] Webshop "+webshop.meta.name+" ("+webshop.id+")"+" ("+webshop.domain+")")
-        await webshop.updateDNSRecords()
+        console.log('[DNS] Webshop ' + webshop.meta.name + ' (' + webshop.id + ')' + ' (' + webshop.domain + ')');
+        await webshop.updateDNSRecords();
     }
 
-    lastWebshopDNSId = webshops[webshops.length - 1].id
+    lastWebshopDNSId = webshops[webshops.length - 1].id;
 }
 
 async function checkReplies() {
-    if (STAMHOOFD.environment !== "production" || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
-        return
+    if (STAMHOOFD.environment !== 'production' || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
+        return;
     }
-    
-    console.log("Checking replies from AWS SQS")
+
+    console.log('Checking replies from AWS SQS');
     const sqs = new AWS.SQS();
-    const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding", MaxNumberOfMessages: 10 }).promise()
+    const messages = await sqs.receiveMessage({ QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding', MaxNumberOfMessages: 10 }).promise();
     if (messages.Messages) {
         for (const message of messages.Messages) {
-            console.log("Received message from forwarding queue");
+            console.log('Received message from forwarding queue');
 
             if (message.ReceiptHandle) {
-                if (STAMHOOFD.environment === "production") {
+                if (STAMHOOFD.environment === 'production') {
                     await sqs.deleteMessage({
-                        QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding",
-                        ReceiptHandle: message.ReceiptHandle
-                    }).promise()
-                    console.log("Deleted from queue");
+                        QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding',
+                        ReceiptHandle: message.ReceiptHandle,
+                    }).promise();
+                    console.log('Deleted from queue');
                 }
             }
 
             try {
                 if (message.Body) {
                     // decode the JSON value
-                    const bounce = JSON.parse(message.Body)
+                    const bounce = JSON.parse(message.Body);
 
                     if (bounce.Message) {
-                        const message = JSON.parse(bounce.Message)
+                        const message = JSON.parse(bounce.Message);
 
                         // Read message content
                         if (message.mail && message.content && message.receipt) {
@@ -171,247 +171,258 @@ async function checkReplies() {
                                 spfVerdict: { status: 'PASS' | string };
                                 dkimVerdict: { status: 'PASS' | string };
                                 dmarcVerdict: { status: 'PASS' | string };
-                            }
+                            };
 
-                            const options = await ForwardHandler.handle(content, receipt)
+                            const options = await ForwardHandler.handle(content, receipt);
                             if (options) {
-                                if (STAMHOOFD.environment === "production") {
-                                    Email.send(options)
+                                if (STAMHOOFD.environment === 'production') {
+                                    Email.send(options);
                                 }
                             }
                         }
                     }
                 }
-            } catch (e) {
-                console.error(e)
+            }
+            catch (e) {
+                console.error(e);
             }
         }
     }
 }
 
-let lastPostmarkCheck: Date | null = null
-let lastPostmarkId: string | null = null
+let lastPostmarkCheck: Date | null = null;
+let lastPostmarkId: string | null = null;
 async function checkPostmarkBounces() {
-    if (STAMHOOFD.environment !== "production") {
+    if (STAMHOOFD.environment !== 'production') {
         return;
     }
-    
-    const token = STAMHOOFD.POSTMARK_SERVER_TOKEN
+
+    const token = STAMHOOFD.POSTMARK_SERVER_TOKEN;
     if (!token) {
-        console.log("[POSTMARK BOUNCES] No postmark token, skipping postmark bounces")
-        return
+        console.log('[POSTMARK BOUNCES] No postmark token, skipping postmark bounces');
+        return;
     }
-    const fromDate = (lastPostmarkCheck ?? new Date(new Date().getTime() - 24 * 60 * 60 * 1000 * 2))
-    const ET = DateTime.fromJSDate(fromDate).setZone('EST').toISO({ includeOffset: false})
-    console.log("[POSTMARK BOUNCES] Checking bounces from Postmark since", fromDate, ET)
+    const fromDate = (lastPostmarkCheck ?? new Date(new Date().getTime() - 24 * 60 * 60 * 1000 * 2));
+    const ET = DateTime.fromJSDate(fromDate).setZone('EST').toISO({ includeOffset: false });
+    console.log('[POSTMARK BOUNCES] Checking bounces from Postmark since', fromDate, ET);
     const client = new postmark.ServerClient(token);
 
     const bounces = await client.getBounces({
         fromdate: ET,
-        todate: DateTime.now().setZone('EST').toISO({ includeOffset: false}),
+        todate: DateTime.now().setZone('EST').toISO({ includeOffset: false }),
         count: 500,
-        offset: 0
-    })
+        offset: 0,
+    });
 
     if (bounces.TotalCount == 0) {
-        console.log("[POSTMARK BOUNCES] No Postmark bounces at this time")
-        return
+        console.log('[POSTMARK BOUNCES] No Postmark bounces at this time');
+        return;
     }
 
-    let lastId: string | null = null
+    let lastId: string | null = null;
 
     for (const bounce of bounces.Bounces) {
         // Try to get the organization, if possible, else default to global blocking: "null", which is not visible for an organization, but it is applied
-        const source = bounce.From
-        const organization = source ? await Organization.getByEmail(source) : undefined
+        const source = bounce.From;
+        const organization = source ? await Organization.getByEmail(source) : undefined;
 
-        if (bounce.Type === "HardBounce" || bounce.Type === "BadEmailAddress" || bounce.Type === "Blocked") {
+        if (bounce.Type === 'HardBounce' || bounce.Type === 'BadEmailAddress' || bounce.Type === 'Blocked') {
             // Block for everyone, but not visible
-            console.log("[POSTMARK BOUNCES] Postmark "+bounce.Type+" for: ", bounce.Email, "from", source, "organization", organization?.name)
-            const emailAddress = await EmailAddress.getOrCreate(bounce.Email, organization?.id ?? null)
-            emailAddress.hardBounce = true
-            await emailAddress.save()
-        } else if (bounce.Type === "SpamComplaint" || bounce.Type === "SpamNotification" || bounce.Type === "VirusNotification") {
-            console.log("[POSTMARK BOUNCES] Postmark "+bounce.Type+" for: ", bounce.Email, "from", source, "organization", organization?.name)
-            const emailAddress = await EmailAddress.getOrCreate(bounce.Email, organization?.id ?? null)
-            emailAddress.markedAsSpam = true
-            await emailAddress.save()
-        } else {
-            console.log("[POSTMARK BOUNCES] Unhandled Postmark "+bounce.Type+": ", bounce.Email, "from", source, "organization", organization?.name)
-            console.error("[POSTMARK BOUNCES] Unhandled Postmark "+bounce.Type+": ", bounce.Email, "from", source, "organization", organization?.name)
+            console.log('[POSTMARK BOUNCES] Postmark ' + bounce.Type + ' for: ', bounce.Email, 'from', source, 'organization', organization?.name);
+            const emailAddress = await EmailAddress.getOrCreate(bounce.Email, organization?.id ?? null);
+            emailAddress.hardBounce = true;
+            await emailAddress.save();
+        }
+        else if (bounce.Type === 'SpamComplaint' || bounce.Type === 'SpamNotification' || bounce.Type === 'VirusNotification') {
+            console.log('[POSTMARK BOUNCES] Postmark ' + bounce.Type + ' for: ', bounce.Email, 'from', source, 'organization', organization?.name);
+            const emailAddress = await EmailAddress.getOrCreate(bounce.Email, organization?.id ?? null);
+            emailAddress.markedAsSpam = true;
+            await emailAddress.save();
+        }
+        else {
+            console.log('[POSTMARK BOUNCES] Unhandled Postmark ' + bounce.Type + ': ', bounce.Email, 'from', source, 'organization', organization?.name);
+            console.error('[POSTMARK BOUNCES] Unhandled Postmark ' + bounce.Type + ': ', bounce.Email, 'from', source, 'organization', organization?.name);
         }
 
-        const bouncedAt = new Date(bounce.BouncedAt)
-        lastPostmarkCheck = lastPostmarkCheck ? new Date(Math.max(bouncedAt.getTime(), lastPostmarkCheck.getTime())) : bouncedAt
+        const bouncedAt = new Date(bounce.BouncedAt);
+        lastPostmarkCheck = lastPostmarkCheck ? new Date(Math.max(bouncedAt.getTime(), lastPostmarkCheck.getTime())) : bouncedAt;
 
-        lastId = bounce.ID
+        lastId = bounce.ID;
     }
 
     if (lastId && lastPostmarkId) {
         if (lastId === lastPostmarkId) {
-            console.log("[POSTMARK BOUNCES] Postmark has no new bounces")
+            console.log('[POSTMARK BOUNCES] Postmark has no new bounces');
             // Increase timestamp by one second to avoid refetching it every time
             if (lastPostmarkCheck) {
-                lastPostmarkCheck = new Date(lastPostmarkCheck.getTime() + 1000)
+                lastPostmarkCheck = new Date(lastPostmarkCheck.getTime() + 1000);
             }
         }
     }
-    lastPostmarkId = lastId
+    lastPostmarkId = lastId;
 }
 
 async function checkBounces() {
-    if (STAMHOOFD.environment !== "production" || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
-        return
+    if (STAMHOOFD.environment !== 'production' || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
+        return;
     }
-    
-    console.log("[AWS BOUNCES] Checking bounces from AWS SQS")
+
+    console.log('[AWS BOUNCES] Checking bounces from AWS SQS');
     const sqs = new AWS.SQS();
-    const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue", MaxNumberOfMessages: 10 }).promise()
+    const messages = await sqs.receiveMessage({ QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue', MaxNumberOfMessages: 10 }).promise();
     if (messages.Messages) {
         for (const message of messages.Messages) {
-            console.log("[AWS BOUNCES] Received bounce message");
-            console.log("[AWS BOUNCES]", message);
+            console.log('[AWS BOUNCES] Received bounce message');
+            console.log('[AWS BOUNCES]', message);
 
             if (message.ReceiptHandle) {
-                if (STAMHOOFD.environment === "production") {
+                if (STAMHOOFD.environment === 'production') {
                     await sqs.deleteMessage({
-                        QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue",
-                        ReceiptHandle: message.ReceiptHandle
-                    }).promise()
-                    console.log("[AWS BOUNCES] Deleted from queue");
+                        QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue',
+                        ReceiptHandle: message.ReceiptHandle,
+                    }).promise();
+                    console.log('[AWS BOUNCES] Deleted from queue');
                 }
             }
 
             try {
                 if (message.Body) {
                     // decode the JSON value
-                    const bounce = JSON.parse(message.Body)
+                    const bounce = JSON.parse(message.Body);
 
                     if (bounce.Message) {
-                        const message = JSON.parse(bounce.Message)
+                        const message = JSON.parse(bounce.Message);
 
                         if (message.bounce) {
-                            const b = message.bounce
+                            const b = message.bounce;
                             // Block all receivers that generate a permanent bounce
-                            const type = b.bounceType
+                            const type = b.bounceType;
 
-                            const source = message.mail.source
+                            const source = message.mail.source;
 
                             // try to find organization that is responsible for this e-mail address
 
                             for (const recipient of b.bouncedRecipients) {
-                                const email = recipient.emailAddress
+                                const email = recipient.emailAddress;
 
                                 if (
-                                    type === "Permanent" 
+                                    type === 'Permanent'
                                     || (
                                         recipient.diagnosticCode && (
-                                            (recipient.diagnosticCode as string).toLowerCase().includes("invalid domain") 
+                                            (recipient.diagnosticCode as string).toLowerCase().includes('invalid domain')
                                             || (recipient.diagnosticCode as string).toLowerCase().includes('unable to lookup dns')
                                         )
                                     )
                                 ) {
-                                    const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined
+                                    const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
                                     if (organization) {
-                                        const emailAddress = await EmailAddress.getOrCreate(email, organization.id)
-                                        emailAddress.hardBounce = true
-                                        await emailAddress.save()
-                                    } else {
-                                        console.error("[AWS BOUNCES] Unknown organization for email address "+source)
+                                        const emailAddress = await EmailAddress.getOrCreate(email, organization.id);
+                                        emailAddress.hardBounce = true;
+                                        await emailAddress.save();
+                                    }
+                                    else {
+                                        console.error('[AWS BOUNCES] Unknown organization for email address ' + source);
                                     }
                                 }
-
                             }
-                            console.log("[AWS BOUNCES] For domain "+source)
-                        } else {
-                            console.log("[AWS BOUNCES] 'bounce' field missing in bounce message")
+                            console.log('[AWS BOUNCES] For domain ' + source);
                         }
-                    } else {
-                        console.log("[AWS BOUNCES] 'Message' field missing in bounce message")
+                        else {
+                            console.log("[AWS BOUNCES] 'bounce' field missing in bounce message");
+                        }
                     }
-                } else {
-                    console.log("[AWS BOUNCES] Message Body missing in bounce")
+                    else {
+                        console.log("[AWS BOUNCES] 'Message' field missing in bounce message");
+                    }
                 }
-            } catch (e) {
-                console.log("[AWS BOUNCES] Bounce message processing failed:")
-                console.error("[AWS BOUNCES] Bounce message processing failed:")
-                console.error("[AWS BOUNCES]", e)
+                else {
+                    console.log('[AWS BOUNCES] Message Body missing in bounce');
+                }
+            }
+            catch (e) {
+                console.log('[AWS BOUNCES] Bounce message processing failed:');
+                console.error('[AWS BOUNCES] Bounce message processing failed:');
+                console.error('[AWS BOUNCES]', e);
             }
         }
     }
 }
 
 async function checkComplaints() {
-    if (STAMHOOFD.environment !== "production" || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
-        return
+    if (STAMHOOFD.environment !== 'production' || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
+        return;
     }
 
-    console.log("[AWS COMPLAINTS] Checking complaints from AWS SQS")
+    console.log('[AWS COMPLAINTS] Checking complaints from AWS SQS');
     const sqs = new AWS.SQS();
-    const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue", MaxNumberOfMessages: 10 }).promise()
+    const messages = await sqs.receiveMessage({ QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue', MaxNumberOfMessages: 10 }).promise();
     if (messages.Messages) {
         for (const message of messages.Messages) {
-            console.log("[AWS COMPLAINTS] Received complaint message");
-            console.log("[AWS COMPLAINTS]", message)
+            console.log('[AWS COMPLAINTS] Received complaint message');
+            console.log('[AWS COMPLAINTS]', message);
 
             if (message.ReceiptHandle) {
-                if (STAMHOOFD.environment === "production") {
+                if (STAMHOOFD.environment === 'production') {
                     await sqs.deleteMessage({
-                        QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue",
-                        ReceiptHandle: message.ReceiptHandle
-                    }).promise()
-                    console.log("[AWS COMPLAINTS] Deleted from queue");
+                        QueueUrl: 'https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue',
+                        ReceiptHandle: message.ReceiptHandle,
+                    }).promise();
+                    console.log('[AWS COMPLAINTS] Deleted from queue');
                 }
             }
 
             try {
                 if (message.Body) {
                     // decode the JSON value
-                    const complaint = JSON.parse(message.Body)
-                    console.log("[AWS COMPLAINTS]", complaint)
+                    const complaint = JSON.parse(message.Body);
+                    console.log('[AWS COMPLAINTS]', complaint);
 
                     if (complaint.Message) {
-                        const message = JSON.parse(complaint.Message)
+                        const message = JSON.parse(complaint.Message);
 
                         if (message.complaint) {
-                            const b = message.complaint
-                            const source = message.mail.source
-                            const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined
+                            const b = message.complaint;
+                            const source = message.mail.source;
+                            const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
 
-                            const type: "abuse" | "auth-failure" | "fraud" | "not-spam" | "other" | "virus" = b.complaintFeedbackType
+                            const type: 'abuse' | 'auth-failure' | 'fraud' | 'not-spam' | 'other' | 'virus' = b.complaintFeedbackType;
 
                             if (organization) {
                                 for (const recipient of b.complainedRecipients) {
-                                    const email = recipient.emailAddress
-                                    const emailAddress = await EmailAddress.getOrCreate(email, organization.id)
-                                    emailAddress.markedAsSpam = type !== "not-spam"
-                                    await emailAddress.save()
+                                    const email = recipient.emailAddress;
+                                    const emailAddress = await EmailAddress.getOrCreate(email, organization.id);
+                                    emailAddress.markedAsSpam = type !== 'not-spam';
+                                    await emailAddress.save();
                                 }
-                            } else {
-                                console.error("[AWS COMPLAINTS] Unknown organization for email address "+source)
+                            }
+                            else {
+                                console.error('[AWS COMPLAINTS] Unknown organization for email address ' + source);
                             }
 
-                             if (type == "virus" || type == "fraud") {
-                                console.error("[AWS COMPLAINTS] Received virus / fraud complaint!")
-                                console.error("[AWS COMPLAINTS]", complaint)
-                                if (STAMHOOFD.environment === "production") {
+                            if (type == 'virus' || type == 'fraud') {
+                                console.error('[AWS COMPLAINTS] Received virus / fraud complaint!');
+                                console.error('[AWS COMPLAINTS]', complaint);
+                                if (STAMHOOFD.environment === 'production') {
                                     Email.sendWebmaster({
-                                        subject: "Received a "+type+" email notification",
-                                        text: "We received a "+type+" notification for an e-mail from the organization: "+organization?.name+". Please check and adjust if needed.\n"
-                                    })
+                                        subject: 'Received a ' + type + ' email notification',
+                                        text: 'We received a ' + type + ' notification for an e-mail from the organization: ' + organization?.name + '. Please check and adjust if needed.\n',
+                                    });
                                 }
                             }
-                        } else {
-                            console.log("[AWS COMPLAINTS] Missing complaint field")
                         }
-                    }  else {
-                        console.log("[AWS COMPLAINTS] Missing message field in complaint")
+                        else {
+                            console.log('[AWS COMPLAINTS] Missing complaint field');
+                        }
+                    }
+                    else {
+                        console.log('[AWS COMPLAINTS] Missing message field in complaint');
                     }
                 }
-            } catch (e) {
-                console.log("[AWS COMPLAINTS] Complain message processing failed:")
-                console.error("[AWS COMPLAINTS] Complain message processing failed:")
-                console.error("[AWS COMPLAINTS]", e)
+            }
+            catch (e) {
+                console.log('[AWS COMPLAINTS] Complain message processing failed:');
+                console.error('[AWS COMPLAINTS] Complain message processing failed:');
+                console.error('[AWS COMPLAINTS]', e);
             }
         }
     }
@@ -419,26 +430,26 @@ async function checkComplaints() {
 
 // Keep checking pending paymetns for 3 days
 async function checkPayments() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment === 'development') {
         return;
     }
 
-    const timeout = 60*1000*31;
-    
+    const timeout = 60 * 1000 * 31;
+
     // TODO: only select the ID + organizationId
     const payments = await Payment.where({
         status: {
-            sign: "IN",
-            value: [PaymentStatus.Created, PaymentStatus.Pending]
+            sign: 'IN',
+            value: [PaymentStatus.Created, PaymentStatus.Pending],
         },
         method: {
-            sign: "IN",
-            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
+            sign: 'IN',
+            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard],
         },
         // Check all payments that are 11 minutes old and are still pending
         createdAt: {
-            sign: "<",
-            value: new Date(new Date().getTime() - timeout)
+            sign: '<',
+            value: new Date(new Date().getTime() - timeout),
         },
     }, {
         limit: 100,
@@ -447,32 +458,34 @@ async function checkPayments() {
         // If at some point, they are still pending after 1 day, their status should change to failed
         sort: [{
             column: 'createdAt',
-            direction: 'ASC'
-        }]
-    })
+            direction: 'ASC',
+        }],
+    });
 
-    console.log("[DELAYED PAYMENTS] Checking pending payments: "+payments.length)
+    console.log('[DELAYED PAYMENTS] Checking pending payments: ' + payments.length);
 
     for (const payment of payments) {
         try {
             if (payment.organizationId) {
-                const organization = await Organization.getByID(payment.organizationId)
+                const organization = await Organization.getByID(payment.organizationId);
                 if (organization) {
-                    await ExchangePaymentEndpoint.pollStatus(payment.id, organization)
+                    await ExchangePaymentEndpoint.pollStatus(payment.id, organization);
                     continue;
                 }
-            } else {
+            }
+            else {
                 // deprecated
             }
 
             // Check expired
             if (ExchangePaymentEndpoint.isManualExpired(payment.status, payment)) {
-                console.error('[DELAYED PAYMENTS] Could not resolve handler for expired payment, marking as failed', payment.id)
-                payment.status = PaymentStatus.Failed
-                await payment.save()
+                console.error('[DELAYED PAYMENTS] Could not resolve handler for expired payment, marking as failed', payment.id);
+                payment.status = PaymentStatus.Failed;
+                await payment.save();
             }
-        } catch (e) {
-            console.error(e)
+        }
+        catch (e) {
+            console.error(e);
         }
     }
 }
@@ -481,118 +494,120 @@ let didCheckBuckaroo = false;
 let lastBuckarooId = '';
 
 // Time to start checking (needs to be consistent to avoid weird jumps)
-const startBuckarooDate = new Date(new Date().getTime() - 60*1000*60*24*7*4);
+const startBuckarooDate = new Date(new Date().getTime() - 60 * 1000 * 60 * 24 * 7 * 4);
 
 // Keep checking pending paymetns for 3 days
 async function checkFailedBuckarooPayments() {
-    if (STAMHOOFD.environment !== "production") {
-        return
+    if (STAMHOOFD.environment !== 'production') {
+        return;
     }
 
     if (didCheckBuckaroo) {
-        return
+        return;
     }
 
-    console.log('Checking failed Buckaroo payments')
-    
+    console.log('Checking failed Buckaroo payments');
+
     // TODO: only select the ID + organizationId
     const payments = await Payment.where({
         status: {
-            sign: "IN",
-            value: [PaymentStatus.Failed]
+            sign: 'IN',
+            value: [PaymentStatus.Failed],
         },
         provider: PaymentProvider.Buckaroo,
 
         // Only check payments of last 4 weeks
         createdAt: {
-            sign: ">",
-            value: startBuckarooDate
+            sign: '>',
+            value: startBuckarooDate,
         },
         id: {
-            sign: ">",
-            value: lastBuckarooId
-        }
+            sign: '>',
+            value: lastBuckarooId,
+        },
     }, {
         limit: 100,
 
         // Sort by ID
         sort: [{
             column: 'id',
-            direction: 'ASC'
-        }]
-    })
+            direction: 'ASC',
+        }],
+    });
 
-    console.log("[BUCKAROO PAYMENTS] Checking failed payments: "+payments.length)
+    console.log('[BUCKAROO PAYMENTS] Checking failed payments: ' + payments.length);
 
     for (const payment of payments) {
         try {
             if (payment.organizationId) {
-                const organization = await Organization.getByID(payment.organizationId)
+                const organization = await Organization.getByID(payment.organizationId);
                 if (organization) {
-                    await ExchangePaymentEndpoint.pollStatus(payment.id, organization)
+                    await ExchangePaymentEndpoint.pollStatus(payment.id, organization);
                     continue;
                 }
             }
-        } catch (e) {
-            console.error(e)
+        }
+        catch (e) {
+            console.error(e);
         }
     }
 
     if (payments.length === 0) {
-        didCheckBuckaroo = true
-        lastBuckarooId = ''
-    } else {
-        lastBuckarooId = payments[payments.length - 1].id
+        didCheckBuckaroo = true;
+        lastBuckarooId = '';
+    }
+    else {
+        lastBuckarooId = payments[payments.length - 1].id;
     }
 }
 
 // Unreserve reserved registrations
 async function checkReservedUntil() {
-    if (STAMHOOFD.environment !== "development") {
-        console.log("Check reserved until...")
+    if (STAMHOOFD.environment !== 'development') {
+        console.log('Check reserved until...');
     }
 
     const registrations = await Registration.where({
         reservedUntil: {
-            sign: "<",
-            value: new Date()
+            sign: '<',
+            value: new Date(),
         },
     }, {
-        limit: 200
-    })
+        limit: 200,
+    });
 
     if (registrations.length === 0) {
-        return
+        return;
     }
 
     // Clear reservedUntil
-    const q = `UPDATE ${Registration.table} SET reservedUntil = NULL where id IN (?) AND reservedUntil < ?`
-    await Database.update(q, [registrations.map(r => r.id), new Date()])
+    const q = `UPDATE ${Registration.table} SET reservedUntil = NULL where id IN (?) AND reservedUntil < ?`;
+    await Database.update(q, [registrations.map(r => r.id), new Date()]);
 
     // Get groups
-    const groupIds = registrations.map(r => r.groupId)
+    const groupIds = registrations.map(r => r.groupId);
     const groups = await Group.where({
         id: {
-            sign: "IN",
-            value: groupIds
-        }
-    })
+            sign: 'IN',
+            value: groupIds,
+        },
+    });
 
     for (const registration of registrations) {
-        registration.scheduleStockUpdate()
+        registration.scheduleStockUpdate();
     }
 
     // Update occupancy
     for (const group of groups) {
-        await group.updateOccupancy()
-        await group.save()
+        await group.updateOccupancy();
+        await group.save();
     }
 }
 
-let lastDripCheck: Date | null = null
-let lastDripId = ""
+let lastDripCheck: Date | null = null;
+let lastDripId = '';
 async function checkDrips() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment === 'development') {
         return;
     }
 
@@ -601,146 +616,148 @@ async function checkDrips() {
     }
 
     if (lastDripCheck && lastDripCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
-        console.log("Skip Drip check")
-        return
+        console.log('Skip Drip check');
+        return;
     }
 
     // Only send emails between 8:00 - 18:00 CET
-    const CETTime = Formatter.timeIso(new Date())
-    if ((CETTime < "08:00" || CETTime > "18:00") && STAMHOOFD.environment === "production") {
-        console.log("Skip Drip check: outside hours")
+    const CETTime = Formatter.timeIso(new Date());
+    if ((CETTime < '08:00' || CETTime > '18:00') && STAMHOOFD.environment === 'production') {
+        console.log('Skip Drip check: outside hours');
         return;
     }
-    
+
     const organizations = await Organization.where({ id: { sign: '>', value: lastDripId } }, {
-        limit: STAMHOOFD.environment === "production" ? 30 : 100,
-        sort: ["id"]
-    })
+        limit: STAMHOOFD.environment === 'production' ? 30 : 100,
+        sort: ['id'],
+    });
 
     if (organizations.length == 0) {
         // Wait before starting again
-        lastDripId = ""
-        lastDripCheck = new Date()
-        return
+        lastDripId = '';
+        lastDripCheck = new Date();
+        return;
     }
 
-    console.log("Checking drips...")
+    console.log('Checking drips...');
 
     for (const organization of organizations) {
-        console.log(organization.name)
+        console.log(organization.name);
         try {
-            await organization.checkDrips()
-        } catch (e) {
+            await organization.checkDrips();
+        }
+        catch (e) {
             console.error(e);
         }
     }
 
-    lastDripId = organizations[organizations.length - 1].id
-    
+    lastDripId = organizations[organizations.length - 1].id;
 }
 
 type CronJobDefinition = {
-    name: string,
-    method: () => Promise<void>,
-    running: boolean
-}
+    name: string;
+    method: () => Promise<void>;
+    running: boolean;
+};
 
-const registeredCronJobs: CronJobDefinition[] = []
+const registeredCronJobs: CronJobDefinition[] = [];
 
 registeredCronJobs.push({
     name: 'checkSettlements',
     method: checkSettlements,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkFailedBuckarooPayments',
     method: checkFailedBuckarooPayments,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkExpirationEmails',
     method: checkExpirationEmails,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkPostmarkBounces',
     method: checkPostmarkBounces,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkReservedUntil',
     method: checkReservedUntil,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkComplaints',
     method: checkComplaints,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkReplies',
     method: checkReplies,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkBounces',
     method: checkBounces,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkDNS',
     method: checkDNS,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkWebshopDNS',
     method: checkWebshopDNS,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkPayments',
     method: checkPayments,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'checkDrips',
     method: checkDrips,
-    running: false
+    running: false,
 });
 
 registeredCronJobs.push({
     name: 'clearExcelCache',
     method: clearExcelCache,
-    running: false
-})
+    running: false,
+});
 
 async function run(name: string, handler: () => Promise<void>) {
     try {
         await logger.setContext({
             prefixes: [
-                new StyledText(`[${name}] `).addClass('crons', 'tag')
+                new StyledText(`[${name}] `).addClass('crons', 'tag'),
             ],
-            tags: ['crons']
+            tags: ['crons'],
         }, async () => {
             try {
-                await handler()
-            } catch (e) {
-                console.error(new StyledText(e).addClass('error'))
+                await handler();
             }
-        })
-    } catch (e) {
-        console.error(new StyledText(e).addClass('error'))
+            catch (e) {
+                console.error(new StyledText(e).addClass('error'));
+            }
+        });
+    }
+    catch (e) {
+        console.error(new StyledText(e).addClass('error'));
     }
 }
 
@@ -752,23 +769,23 @@ export function stopCronScheduling() {
 let schedulingJobs = false;
 export function areCronsRunning(): boolean {
     if (schedulingJobs && !stopCrons) {
-        return true
+        return true;
     }
 
     for (const job of registeredCronJobs) {
         if (job.running) {
-            return true
+            return true;
         }
     }
-    return false
+    return false;
 }
 
 export const crons = async () => {
     if (STAMHOOFD.CRONS_DISABLED) {
-        console.log("Crons are disabled. Make sure to enable them in the environment variables.")
+        console.log('Crons are disabled. Make sure to enable them in the environment variables.');
         return;
     }
-    
+
     schedulingJobs = true;
     for (const job of registeredCronJobs) {
         if (stopCrons) {
@@ -777,15 +794,15 @@ export const crons = async () => {
         if (job.running) {
             continue;
         }
-        job.running = true
+        job.running = true;
         run(job.name, job.method).finally(() => {
-            job.running = false
-        }).catch(e => {
-            console.error(e)
+            job.running = false;
+        }).catch((e) => {
+            console.error(e);
         });
 
         // Prevent starting too many jobs at once
-        if (STAMHOOFD.environment !== "development") {
+        if (STAMHOOFD.environment !== 'development') {
             await sleep(10 * 1000);
         }
     }

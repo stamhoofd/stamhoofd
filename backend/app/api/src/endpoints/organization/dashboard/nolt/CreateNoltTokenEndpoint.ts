@@ -10,13 +10,12 @@ type Query = undefined;
 type Body = undefined;
 class ResponseBody extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    jwt: string
+    jwt: string;
 }
 
 export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "POST") {
+        if (request.method !== 'POST') {
             return [false];
         }
 
@@ -24,7 +23,7 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/nolt/create-token", {});
+        const params = Endpoint.parseParameters(request.url, '/nolt/create-token', {});
 
         if (params) {
             return [true, params as Params];
@@ -34,13 +33,13 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        const {user} = await Context.authenticate()
+        const { user } = await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
-        
+
         // Create token
         const payload = {
             // The ID that you use in your app for this user
@@ -49,14 +48,13 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
             // Nolt should use for notifications
             email: user.email,
             // The display name for this user
-            name: user.firstName+" "+user.lastName,
+            name: user.firstName + ' ' + user.lastName,
 
             // Optional: The URL to the user's avatar picture
-            imageUrl: organization.meta.squareLogo?.getPublicPath() ?? organization.meta.horizontalLogo?.getPublicPath() ?? undefined
-        }
+            imageUrl: organization.meta.squareLogo?.getPublicPath() ?? organization.meta.horizontalLogo?.getPublicPath() ?? undefined,
+        };
 
         const str = jwt.sign(payload, STAMHOOFD.NOLT_SSO_SECRET_KEY, { algorithm: 'HS256' });
-        return new Response(ResponseBody.create({ "jwt": str }));      
-    
+        return new Response(ResponseBody.create({ jwt: str }));
     }
 }

@@ -16,10 +16,10 @@
             <span class="button icon arrow-right-small" />
         </button>
         <template v-else>
-            <p v-if="visibleRegistrations.length == 0 && period.id === defaultPeriod.id" class="info-box">
+            <p v-if="visibleRegistrations.length === 0 && period.id === defaultPeriod.id" class="info-box">
                 {{ member.patchedMember.firstName }} is niet ingeschreven
             </p>
-            <p v-else-if="visibleRegistrations.length == 0" class="info-box">
+            <p v-else-if="visibleRegistrations.length === 0" class="info-box">
                 {{ member.patchedMember.firstName }} was niet ingeschreven
             </p>
         </template>

@@ -2,11 +2,11 @@
  * More granular access rights to specific things in the system
  */
 export enum PermissionsResourceType {
-    Webshops = "Webshops",
-    Groups = "Groups",
-    GroupCategories = "GroupCategories",
-    OrganizationTags = "OrganizationTags",
-    RecordCategories = "RecordCategory"
+    Webshops = 'Webshops',
+    Groups = 'Groups',
+    GroupCategories = 'GroupCategories',
+    OrganizationTags = 'OrganizationTags',
+    RecordCategories = 'RecordCategory',
 }
 
 export function getPermissionResourceTypeName(type: PermissionsResourceType, plural = true): string {

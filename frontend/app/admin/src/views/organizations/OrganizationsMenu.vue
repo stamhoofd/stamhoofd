@@ -48,7 +48,7 @@ import EditOrganizationTagsView from './tags/EditOrganizationTagsView.vue';
 enum Routes {
     All = 'all',
     Tag = 'tag',
-    Tags = 'tags'
+    Tags = 'tags',
 }
 const auth = useAuth();
 const hasFullAccess = auth.hasFullPlatformAccess();
@@ -60,8 +60,8 @@ defineRoutes([
         show: 'detail',
         component: OrganizationsTableView as unknown as ComponentOptions,
         isDefault: {
-            properties: {}
-        }
+            properties: {},
+        },
     },
     {
         url: 'tag/@slug',
@@ -69,36 +69,38 @@ defineRoutes([
         show: 'detail',
         component: OrganizationsTableView as unknown as ComponentOptions,
         params: {
-            slug: String
+            slug: String,
         },
-        paramsToProps(params: {slug: string}) {
+        paramsToProps(params: { slug: string }) {
             const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
             if (!tag) {
                 throw new Error('Tag not found');
             }
 
             return {
-                tag
-            }
+                tag,
+            };
         },
         propsToParams(props) {
-            if (!("tag" in props) || !(props.tag instanceof OrganizationTag)) {
-                throw new Error('Missing tag')
+            if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
+                throw new Error('Missing tag');
             }
             return {
                 params: {
-                    slug: Formatter.slug(props.tag.name)
-                }
-            }
+                    slug: Formatter.slug(props.tag.name),
+                },
+            };
         },
     },
-    ...(hasFullAccess ? [{
-        url: 'tags',
-        name: Routes.Tags,
-        present: 'popup',
-        component: EditOrganizationTagsView as unknown as ComponentOptions,
-    } as Route<any, undefined>] : [])
-])
+    ...(hasFullAccess
+        ? [{
+                url: 'tags',
+                name: Routes.Tags,
+                present: 'popup',
+                component: EditOrganizationTagsView as unknown as ComponentOptions,
+            } as Route<any, undefined>]
+        : []),
+]);
 const checkRoute = useCheckRoute();
 const navigate = useNavigate();
 const platform = usePlatform();

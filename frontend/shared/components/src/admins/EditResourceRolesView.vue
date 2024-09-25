@@ -30,7 +30,7 @@
         <h2>Externe beheerdersrollen</h2>
         <p>Je kan toegang geven aan externe beheerders (beheerders die geen lid zijn) via externe beheerdersrollen.</p>
 
-        <p v-if="roles.length == 0" class="info-box">
+        <p v-if="roles.length === 0" class="info-box">
             Je hebt nog geen beheerdersrollen aangemaakt. Hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders. Daarna kan je de toegang hier verdelen.
         </p>
 
@@ -138,7 +138,7 @@ function patchInheritedResponsibilityRole(patch: AutoEncoderPatchType<Permission
         throw new Error("Responsibility not found")
     }
 
-    const inheritedRole = inheritedResponsibilityRoles.value.find(r => r.responsibilityId == responsibilityId && r.responsibilityGroupId === groupId);
+    const inheritedRole = inheritedResponsibilityRoles.value.find(r => r.responsibilityId === responsibilityId && r.responsibilityGroupId === groupId);
     const arr = createInheritedResponsibilityRolePatchArray()
 
     if (!inheritedRole) {
@@ -154,7 +154,7 @@ function patchInheritedResponsibilityRole(patch: AutoEncoderPatchType<Permission
 }
 
 function patchResponsibilityRole(patch: AutoEncoderPatchType<PermissionRoleForResponsibility>, responsibilityId: string) {
-    const responsibility = responsibilities.value.find(r => r.id == responsibilityId);
+    const responsibility = responsibilities.value.find(r => r.id === responsibilityId);
     if (!responsibility) {
         throw new Error("Responsibility not found")
     }

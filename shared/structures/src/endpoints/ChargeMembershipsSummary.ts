@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
+import { AutoEncoder, BooleanDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 
 export class ChargeMembershipsTypeSummary extends AutoEncoder {
     @field({ decoder: IntegerDecoder })

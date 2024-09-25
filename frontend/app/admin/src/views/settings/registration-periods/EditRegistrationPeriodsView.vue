@@ -61,7 +61,7 @@ const present = usePresent();
 const $t = useTranslate();
 const context = useContext();
 const platform = usePlatform();
-const platformManager = usePlatformManager()
+const platformManager = usePlatformManager();
 
 const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
 const loading = ref(true);
@@ -69,27 +69,27 @@ const owner = useRequestOwner();
 
 loadData().catch(console.error);
 
-const {patched, patch, addArrayPatch, hasChanges: hasChangesPeriods} = usePatchArray(originalPeriods)
-const {patched: patchedPlatform, patch: platformPatch, addPatch: addPlatformPatch, hasChanges: hasChangesPlatform} = usePatch(platform)
-const hasChanges = computed(() => hasChangesPeriods.value || hasChangesPlatform.value)
+const { patched, patch, addArrayPatch, hasChanges: hasChangesPeriods } = usePatchArray(originalPeriods);
+const { patched: patchedPlatform, patch: platformPatch, addPatch: addPlatformPatch, hasChanges: hasChangesPlatform } = usePatch(platform);
+const hasChanges = computed(() => hasChangesPeriods.value || hasChangesPlatform.value);
 
 const saving = ref(false);
 
 const sortedPeriods = computed(() => {
-    return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime())
-})
+    return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime());
+});
 
-const title = 'Werkjaren'
+const title = 'Werkjaren';
 
 async function addPeriod() {
-    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray()
-    const period = platform.value.period.clone()
-    period.id = RegistrationPeriod.create({}).id
+    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
+    const period = platform.value.period.clone();
+    period.id = RegistrationPeriod.create({}).id;
 
-    period.startDate.setFullYear(period.startDate.getFullYear() + 1)
-    period.endDate.setFullYear(period.endDate.getFullYear() + 1)
-    
-    arr.addPut(period)
+    period.startDate.setFullYear(period.startDate.getFullYear() + 1);
+    period.endDate.setFullYear(period.endDate.getFullYear() + 1);
+
+    arr.addPut(period);
 
     await present({
         modalDisplayStyle: 'popup',
@@ -98,13 +98,13 @@ async function addPeriod() {
                 period,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<RegistrationPeriod>) => {
-                    patch.id = period.id
-                    arr.addPatch(patch)
-                    addArrayPatch(arr)
-                }
-            })
-        ]
-    })
+                    patch.id = period.id;
+                    arr.addPatch(patch);
+                    addArrayPatch(arr);
+                },
+            }),
+        ],
+    });
 }
 
 async function editPeriod(period: RegistrationPeriod) {
@@ -115,18 +115,18 @@ async function editPeriod(period: RegistrationPeriod) {
                 period,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<RegistrationPeriod>) => {
-                    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray()
-                    arr.addPatch(patch)
-                    addArrayPatch(arr)
+                    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
+                    arr.addPatch(patch);
+                    addArrayPatch(arr);
                 },
                 deleteHandler: () => {
-                    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray()
-                    arr.addDelete(period.id)
-                    addArrayPatch(arr)
-                }
-            })
-        ]
-    })
+                    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
+                    arr.addDelete(period.id);
+                    addArrayPatch(arr);
+                },
+            }),
+        ],
+    });
 }
 
 async function save() {
@@ -141,7 +141,7 @@ async function save() {
             saving.value = false;
             return;
         }
-        
+
         if (hasChangesPeriods.value) {
             await context.value.authenticatedServer.request({
                 method: 'PATCH',
@@ -149,44 +149,45 @@ async function save() {
                 path: '/registration-periods',
                 decoder: new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
                 owner,
-                shouldRetry: false
-            })
+                shouldRetry: false,
+            });
         }
 
         const changedPeriod = hasChangesPlatform.value;
 
         if (changedPeriod) {
-            await platformManager.value.patch(platformPatch.value, false)
+            await platformManager.value.patch(platformPatch.value, false);
         }
 
-        new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
 
         if (changedPeriod) {
-            new Toast('Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.', "info").setHide(20 * 1000).show()
+            new Toast('Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.', 'info').setHide(20 * 1000).show();
         }
 
         await pop({ force: true });
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
-
 }
 
 function setCurrent(period: RegistrationPeriod) {
-    addPlatformPatch({period})
+    addPlatformPatch({ period });
 }
 
 async function loadData() {
     loading.value = true;
-    
+
     try {
-        originalPeriods.value = await platformManager.value.loadPeriods(true, true, owner)
+        originalPeriods.value = await platformManager.value.loadPeriods(true, true, owner);
         loading.value = false;
-    } catch (e) {
+    }
+    catch (e) {
         Toast.fromError(e).show();
-        await pop({force: true})
+        await pop({ force: true });
         return;
     }
 }
@@ -195,10 +196,10 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

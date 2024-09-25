@@ -1,24 +1,24 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, User } from '@stamhoofd/models';
-import { ApiUser, ApiUserWithToken, UserPermissions } from "@stamhoofd/structures";
+import { ApiUser, ApiUserWithToken, UserPermissions } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = ApiUser
-type ResponseBody = ApiUser
+type Body = ApiUser;
+type ResponseBody = ApiUser;
 
 export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = ApiUser as Decoder<ApiUser>
+    bodyDecoder = ApiUser as Decoder<ApiUser>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "POST") {
+        if (request.method !== 'POST') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/api-keys", {});
+        const params = Endpoint.parseParameters(request.url, '/api-keys', {});
 
         if (params) {
             return [true, params as Params];
@@ -28,22 +28,22 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.canManageAdmins(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
         const admin = new User();
         admin.organizationId = organization.id;
         admin.firstName = request.body.name;
-        admin.lastName = null
-        admin.email = 'creating.api'
-        admin.verified = true
+        admin.lastName = null;
+        admin.email = 'creating.api';
+        admin.verified = true;
 
         if (!admin.isApiUser) {
-            throw new Error('Unexpectedly created normal user while trying to create API-user')
+            throw new Error('Unexpectedly created normal user while trying to create API-user');
         }
 
         // Merge permissions
@@ -51,15 +51,15 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'missing_field',
                 message: 'When creating API-users, you are required to specify permissions in the request',
-                field: 'permissions'
-            })
+                field: 'permissions',
+            });
         }
 
-        admin.permissions = UserPermissions.limitedAdd(null, request.body.permissions, organization.id)
+        admin.permissions = UserPermissions.limitedAdd(null, request.body.permissions, organization.id);
         await admin.save();
 
         // Set id
-        admin.email = admin.id + '.api'
+        admin.email = admin.id + '.api';
         await admin.save();
 
         const createdToken = await Token.createApiToken(admin);
@@ -67,7 +67,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return new Response(ApiUserWithToken.create({
             ...(await Token.getAPIUserWithToken(admin)),
             token: createdToken.accessToken,
-            expiresAt: createdToken.accessTokenValidUntil
+            expiresAt: createdToken.accessTokenValidUntil,
         }));
     }
 }

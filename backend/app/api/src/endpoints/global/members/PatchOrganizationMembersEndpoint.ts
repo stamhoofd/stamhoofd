@@ -1,9 +1,9 @@
 import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Platform, Registration, SetupStepUpdater, User } from '@stamhoofd/models';
-import { GroupType, MemberWithRegistrationsBlob, MembersBlob, PermissionLevel } from "@stamhoofd/structures";
+import { GroupType, MemberWithRegistrationsBlob, MembersBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { QueueHandler } from '@stamhoofd/queues';
@@ -14,8 +14,8 @@ import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
-type ResponseBody = MembersBlob
+type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+type ResponseBody = MembersBlob;
 
 /**
  * One endpoint to create, patch and delete members and their registrations and payments
@@ -23,14 +23,14 @@ type ResponseBody = MembersBlob
 
 export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    bodyDecoder = new PatchableArrayDecoder(MemberWithRegistrationsBlob as any, MemberWithRegistrationsBlob.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<MemberWithRegistrationsBlob[]>>
+    bodyDecoder = new PatchableArrayDecoder(MemberWithRegistrationsBlob as any, MemberWithRegistrationsBlob.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<MemberWithRegistrationsBlob[]>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "PATCH") {
+        if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/members", {});
+        const params = Endpoint.parseParameters(request.url, '/organization/members', {});
 
         if (params) {
             return [true, params as Params];
@@ -40,240 +40,241 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (organization) {
             if (!await Context.auth.hasSomeAccess(organization.id)) {
-                throw Context.auth.error()
-            } 
-        } else {
+                throw Context.auth.error();
+            }
+        }
+        else {
             if (!Context.auth.hasSomePlatformAccess()) {
-                throw Context.auth.error()
-            } 
+                throw Context.auth.error();
+            }
         }
 
-        const members: MemberWithRegistrations[] = []
+        const members: MemberWithRegistrations[] = [];
 
-        const platform = await Platform.getShared()
+        const platform = await Platform.getShared();
 
         // Cache
-        const groups: Group[] = []
-        
+        const groups: Group[] = [];
+
         async function getGroup(id: string) {
-            const f = groups.find(g => g.id === id)
+            const f = groups.find(g => g.id === id);
             if (f) {
-                return f
+                return f;
             }
-            const group = await Group.getByID(id)
+            const group = await Group.getByID(id);
             if (group) {
-                groups.push(group)
-                return group
+                groups.push(group);
+                return group;
             }
-            return null
+            return null;
         }
 
-        const updateMembershipMemberIds = new Set<string>()
-        const updateMembershipsForOrganizations = new Set<string>()
+        const updateMembershipMemberIds = new Set<string>();
+        const updateMembershipsForOrganizations = new Set<string>();
 
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
-            const struct = put.put
+            const struct = put.put;
             let member = new Member()
-                .setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, Registration & {group: Group}>, [])
-                .setManyRelation(Member.users, [])
-            member.id = struct.id
+                .setManyRelation(Member.registrations as any as OneToManyRelation<'registrations', Member, Registration & { group: Group }>, [])
+                .setManyRelation(Member.users, []);
+            member.id = struct.id;
 
             if (organization && STAMHOOFD.userMode !== 'platform') {
-                member.organizationId = organization.id
+                member.organizationId = organization.id;
             }
 
-            struct.details.cleanData()
-            member.details = struct.details
+            struct.details.cleanData();
+            member.details = struct.details;
 
             const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member);
             if (duplicate) {
                 // Merge data
-                duplicate.details.merge(member.details)
-                member = duplicate
+                duplicate.details.merge(member.details);
+                member = duplicate;
 
                 // You need write permissions, because a user can potentially earn write permissions on a member
                 // by registering it
                 if (!await Context.auth.canAccessMember(duplicate, PermissionLevel.Write)) {
                     throw new SimpleError({
-                        code: "known_member_missing_rights",
-                        message: "Creating known member without sufficient access rights",
-                        human: "Dit lid is al bekend in het systeem, maar je hebt er geen toegang tot. Vraag iemand met de juiste toegangsrechten om dit lid voor jou toe te voegen, of vraag het lid om zelf in te schrijven via het ledenportaal.",
-                        statusCode: 400
-                    })
+                        code: 'known_member_missing_rights',
+                        message: 'Creating known member without sufficient access rights',
+                        human: 'Dit lid is al bekend in het systeem, maar je hebt er geen toegang tot. Vraag iemand met de juiste toegangsrechten om dit lid voor jou toe te voegen, of vraag het lid om zelf in te schrijven via het ledenportaal.',
+                        statusCode: 400,
+                    });
                 }
             }
 
             // We risk creating a new member without being able to access it manually afterwards
             if ((organization && !await Context.auth.hasFullAccess(organization.id)) || (!organization && !Context.auth.hasPlatformFullAccess())) {
                 throw new SimpleError({
-                    code: "missing_group",
-                    message: "Missing group",
-                    human: "Je moet hoofdbeheerder zijn om een lid toe te voegen in het systeem",
-                    statusCode: 400
-                })
+                    code: 'missing_group',
+                    message: 'Missing group',
+                    human: 'Je moet hoofdbeheerder zijn om een lid toe te voegen in het systeem',
+                    statusCode: 400,
+                });
             }
 
             if (STAMHOOFD.userMode !== 'platform' && !member.organizationId) {
                 throw new SimpleError({
-                    code: "missing_organization",
-                    message: "Missing organization",
-                    human: "Je moet een organisatie selecteren voor dit lid",
-                    statusCode: 400
-                })
+                    code: 'missing_organization',
+                    message: 'Missing organization',
+                    human: 'Je moet een organisatie selecteren voor dit lid',
+                    statusCode: 400,
+                });
             }
 
             /**
              * In development mode, we allow some secret usernames to create fake data
              */
-            if ((STAMHOOFD.environment == "development" || STAMHOOFD.environment == "staging") && organization) {
-                if (member.details.firstName.toLocaleLowerCase() == "create" && parseInt(member.details.lastName) > 0) {
+            if ((STAMHOOFD.environment == 'development' || STAMHOOFD.environment == 'staging') && organization) {
+                if (member.details.firstName.toLocaleLowerCase() == 'create' && parseInt(member.details.lastName) > 0) {
                     const count = parseInt(member.details.lastName);
-                    await this.createDummyMembers(organization, count)
+                    await this.createDummyMembers(organization, count);
 
                     // Skip creating this member
                     continue;
                 }
             }
 
-            await member.save()
-            members.push(member)
-            updateMembershipMemberIds.add(member.id)
+            await member.save();
+            members.push(member);
+            updateMembershipMemberIds.add(member.id);
 
             // Auto link users based on data
-            await MemberUserSyncer.onChangeMember(member)
+            await MemberUserSyncer.onChangeMember(member);
         }
 
         let shouldUpdateSetupSteps = false;
 
         // Loop all members one by one
         for (let patch of request.body.getPatches()) {
-            const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id)
+            const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id);
             if (!member || !await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
-                throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot dit lid of het bestaat niet")
+                throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang tot dit lid of het bestaat niet');
             }
-            patch = await Context.auth.filterMemberPatch(member, patch)
+            patch = await Context.auth.filterMemberPatch(member, patch);
 
             if (patch.details) {
                 if (patch.details.isPut()) {
                     throw new SimpleError({
-                        code: "not_allowed",
-                        message: "Cannot override details",
-                        human: "Er ging iets mis bij het aanpassen van de gegevens van dit lid. Probeer het later opnieuw en neem contact op als het probleem zich blijft voordoen.",
-                        field: "details"
-                    })
+                        code: 'not_allowed',
+                        message: 'Cannot override details',
+                        human: 'Er ging iets mis bij het aanpassen van de gegevens van dit lid. Probeer het later opnieuw en neem contact op als het probleem zich blijft voordoen.',
+                        field: 'details',
+                    });
                 }
-                
-                const wasReduced = member.details.shouldApplyReducedPrice
-                member.details.patchOrPut(patch.details)
-                member.details.cleanData()
+
+                const wasReduced = member.details.shouldApplyReducedPrice;
+                member.details.patchOrPut(patch.details);
+                member.details.cleanData();
 
                 if (wasReduced !== member.details.shouldApplyReducedPrice) {
-                    updateMembershipMemberIds.add(member.id)
+                    updateMembershipMemberIds.add(member.id);
                 }
             }
-            
+
             await member.save();
 
             // Update documents
-            await Document.updateForMember(member.id)
+            await Document.updateForMember(member.id);
 
             // Update responsibilities
             for (const patchResponsibility of patch.responsibilities.getPatches()) {
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
-                    throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden aan te passen")
+                    throw Context.auth.error('Je hebt niet voldoende rechten om functies van leden aan te passen');
                 }
 
-                const responsibilityRecord = await MemberResponsibilityRecord.getByID(patchResponsibility.id)
-                if (!responsibilityRecord || responsibilityRecord.memberId != member.id || (organization && responsibilityRecord.organizationId !== organization.id)) {
+                const responsibilityRecord = await MemberResponsibilityRecord.getByID(patchResponsibility.id);
+                if (!responsibilityRecord || responsibilityRecord.memberId !== member.id || (organization && responsibilityRecord.organizationId !== organization.id)) {
                     throw new SimpleError({
-                        code: "permission_denied",
+                        code: 'permission_denied',
                         message: "You don't have permissions to access this endpoint",
-                        human: "Je hebt geen toegang om deze functie te wijzigen"
-                    })
+                        human: 'Je hebt geen toegang om deze functie te wijzigen',
+                    });
                 }
 
-                const platform = await Platform.getShared()
-                const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId)
+                const platform = await Platform.getShared();
+                const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId);
 
                 if (responsibility && !responsibility.organizationBased && !Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error("Je hebt niet voldoende rechten om deze functie aan te passen")
+                    throw Context.auth.error('Je hebt niet voldoende rechten om deze functie aan te passen');
                 }
-                
+
                 // Allow patching begin and end date
                 if (patchResponsibility.endDate !== undefined) {
                     if (responsibilityRecord.endDate) {
                         if (!Context.auth.hasPlatformFullAccess()) {
-                            throw Context.auth.error("Je hebt niet voldoende rechten om reeds beëindigde functies aan te passen")
+                            throw Context.auth.error('Je hebt niet voldoende rechten om reeds beëindigde functies aan te passen');
                         }
                     }
-                    responsibilityRecord.endDate = patchResponsibility.endDate
+                    responsibilityRecord.endDate = patchResponsibility.endDate;
                 }
 
                 if (patchResponsibility.startDate !== undefined) {
                     if (patchResponsibility.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
-                        throw Context.auth.error("Je kan de startdatum van een functie niet in de toekomst zetten")
+                        throw Context.auth.error('Je kan de startdatum van een functie niet in de toekomst zetten');
                     }
                     if (patchResponsibility.startDate.getTime() > Date.now()) {
-                        patchResponsibility.startDate = new Date() // force now
+                        patchResponsibility.startDate = new Date(); // force now
                     }
 
-                    const daysDiff = Math.abs((new Date().getTime() - patchResponsibility.startDate.getTime()) / (1000 * 60 * 60 * 24))
+                    const daysDiff = Math.abs((new Date().getTime() - patchResponsibility.startDate.getTime()) / (1000 * 60 * 60 * 24));
 
                     if (daysDiff > 60 && !Context.auth.hasPlatformFullAccess()) {
-                        throw Context.auth.error("Je kan de startdatum van een functie niet zoveel verplaatsen")
+                        throw Context.auth.error('Je kan de startdatum van een functie niet zoveel verplaatsen');
                     }
-                    responsibilityRecord.startDate = patchResponsibility.startDate
+                    responsibilityRecord.startDate = patchResponsibility.startDate;
                 }
 
-                await responsibilityRecord.save()
+                await responsibilityRecord.save();
                 shouldUpdateSetupSteps = true;
             }
 
             // Create responsibilities
-            for (const {put} of patch.responsibilities.getPuts()) {
+            for (const { put } of patch.responsibilities.getPuts()) {
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
-                    throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden aan te passen")
+                    throw Context.auth.error('Je hebt niet voldoende rechten om functies van leden aan te passen');
                 }
 
-                const platform = await Platform.getShared()
-                const platformResponsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId)
-                const org = organization ?? (put.organizationId ? await Organization.getByID(put.organizationId) : null)
+                const platform = await Platform.getShared();
+                const platformResponsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId);
+                const org = organization ?? (put.organizationId ? await Organization.getByID(put.organizationId) : null);
 
                 if (!org && put.organizationId) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid organization",
-                        human: "Deze vereniging bestaat niet",
-                        field: "organizationId"
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid organization',
+                        human: 'Deze vereniging bestaat niet',
+                        field: 'organizationId',
+                    });
                 }
-                const responsibility = platformResponsibility ?? org?.privateMeta.responsibilities.find(r => r.id === put.responsibilityId)
+                const responsibility = platformResponsibility ?? org?.privateMeta.responsibilities.find(r => r.id === put.responsibilityId);
 
                 if (!responsibility) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid responsibility",
-                        human: "Deze functie bestaat niet",
-                        field: "responsibilityId"
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid responsibility',
+                        human: 'Deze functie bestaat niet',
+                        field: 'responsibilityId',
+                    });
                 }
 
                 if (!org && responsibility.organizationBased) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid organization",
-                        human: "Deze functie kan niet worden toegewezen aan deze vereniging",
-                        field: "organizationId"
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid organization',
+                        human: 'Deze functie kan niet worden toegewezen aan deze vereniging',
+                        field: 'organizationId',
+                    });
                 }
 
-                const hasRegistration = member.registrations.some(registration => {
+                const hasRegistration = member.registrations.some((registration) => {
                     if (platformResponsibility) {
                         if (registration.group.defaultAgeGroupId === null) {
                             return false;
@@ -284,95 +285,96 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         if (registration.periodId !== org.periodId) {
                             return false;
                         }
-                    } else {
+                    }
+                    else {
                         if (registration.periodId !== platform.periodId) {
                             return false;
                         }
                     }
-                    return registration.deactivatedAt === null && registration.registeredAt !== null && registration.group.type === GroupType.Membership
-                })
+                    return registration.deactivatedAt === null && registration.registeredAt !== null && registration.group.type === GroupType.Membership;
+                });
 
                 if (!hasRegistration) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid organization",
-                        human: "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar",
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid organization',
+                        human: 'Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar',
+                    });
                 }
 
-                const model = new MemberResponsibilityRecord()
-                model.memberId = member.id
-                model.responsibilityId = responsibility.id
-                model.organizationId = org?.id ?? null
+                const model = new MemberResponsibilityRecord();
+                model.memberId = member.id;
+                model.responsibilityId = responsibility.id;
+                model.organizationId = org?.id ?? null;
 
                 if (responsibility.organizationTagIds !== null && (!org || !org.meta.matchTags(responsibility.organizationTagIds))) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid organization",
-                        human: "Deze functie is niet beschikbaar voor deze vereniging",
-                        field: "organizationId"
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid organization',
+                        human: 'Deze functie is niet beschikbaar voor deze vereniging',
+                        field: 'organizationId',
+                    });
                 }
 
                 if (responsibility.defaultAgeGroupIds !== null) {
                     if (!put.groupId) {
                         throw new SimpleError({
-                            code: "invalid_field",
-                            message: "Missing groupId",
-                            human: "Kies een leeftijdsgroep waarvoor je deze functie wilt toekennen",
-                            field: "groupId"
-                        })
+                            code: 'invalid_field',
+                            message: 'Missing groupId',
+                            human: 'Kies een leeftijdsgroep waarvoor je deze functie wilt toekennen',
+                            field: 'groupId',
+                        });
                     }
 
-                    const group = await Group.getByID(put.groupId)
+                    const group = await Group.getByID(put.groupId);
                     if (!group || group.organizationId !== model.organizationId) {
                         throw new SimpleError({
-                            code: "invalid_field",
-                            message: "Invalid groupId",
-                            human: "Deze leeftijdsgroep bestaat niet",
-                            field: "groupId"
-                        })
+                            code: 'invalid_field',
+                            message: 'Invalid groupId',
+                            human: 'Deze leeftijdsgroep bestaat niet',
+                            field: 'groupId',
+                        });
                     }
 
                     if (group.defaultAgeGroupId === null || !responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)) {
                         throw new SimpleError({
-                            code: "invalid_field",
-                            message: "Invalid groupId",
-                            human: "Deze leeftijdsgroep komt niet in aanmerking voor deze functie",
-                            field: "groupId"
-                        })
+                            code: 'invalid_field',
+                            message: 'Invalid groupId',
+                            human: 'Deze leeftijdsgroep komt niet in aanmerking voor deze functie',
+                            field: 'groupId',
+                        });
                     }
 
-                    model.groupId = group.id
+                    model.groupId = group.id;
                 }
-                
+
                 // Allow patching begin and end date
-                model.endDate = put.endDate
+                model.endDate = put.endDate;
 
                 if (put.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
-                    throw Context.auth.error("Je kan de startdatum van een functie niet in de toekomst zetten")
+                    throw Context.auth.error('Je kan de startdatum van een functie niet in de toekomst zetten');
                 }
 
                 if (put.startDate.getTime() > Date.now()) {
-                    put.startDate = new Date() // force now
+                    put.startDate = new Date(); // force now
                 }
 
-                if (put.endDate && put.endDate > new Date(Date.now() + 60*1000)) {
-                    throw Context.auth.error("Je kan de einddatum van een functie niet in de toekomst zetten - kijk indien nodig je systeemtijd na")
+                if (put.endDate && put.endDate > new Date(Date.now() + 60 * 1000)) {
+                    throw Context.auth.error('Je kan de einddatum van een functie niet in de toekomst zetten - kijk indien nodig je systeemtijd na');
                 }
 
-                model.startDate = put.startDate
+                model.startDate = put.startDate;
 
-                await model.save()
+                await model.save();
                 shouldUpdateSetupSteps = true;
             }
 
             // Auto link users based on data
-            await MemberUserSyncer.onChangeMember(member)
+            await MemberUserSyncer.onChangeMember(member);
 
             // Allow to remove access for certain users
             for (const id of patch.users.getDeletes()) {
-                const user = member.users.find(u => u.id === id)
+                const user = member.users.find(u => u.id === id);
                 if (!user) {
                     // Ignore silently
                     continue;
@@ -380,138 +382,138 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 if (MemberUserSyncer.doesEmailHaveAccess(member.details, user.email)) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid email",
-                        human: "Je kan een account niet de toegang ontzeggen tot een lid als het e-mailadres nog steeds is opgeslagen als onderdeel van de gegevens van dat lid. Verwijder eerst het e-mailadres uit de gegevens van het lid en ontkoppel daarna het account."
+                        code: 'invalid_field',
+                        message: 'Invalid email',
+                        human: 'Je kan een account niet de toegang ontzeggen tot een lid als het e-mailadres nog steeds is opgeslagen als onderdeel van de gegevens van dat lid. Verwijder eerst het e-mailadres uit de gegevens van het lid en ontkoppel daarna het account.',
                     });
                 }
 
                 // Remove access
-                await MemberUserSyncer.unlinkUser(user, member)
+                await MemberUserSyncer.unlinkUser(user, member);
             }
 
             // Add platform memberships
-            for (const {put} of patch.platformMemberships.getPuts()) {
+            for (const { put } of patch.platformMemberships.getPuts()) {
                 if (put.periodId !== platform.periodId) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid period",
-                        human: "Je kan geen aansluitingen maken voor een andere werkjaar dan het actieve werkjaar",
-                        field: "periodId"
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid period',
+                        human: 'Je kan geen aansluitingen maken voor een andere werkjaar dan het actieve werkjaar',
+                        field: 'periodId',
+                    });
                 }
 
                 if (organization && put.organizationId !== organization.id) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid organization",
-                        human: "Je kan geen aansluitingen maken voor een andere vereniging",
-                        field: "organizationId"
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid organization',
+                        human: 'Je kan geen aansluitingen maken voor een andere vereniging',
+                        field: 'organizationId',
+                    });
                 }
 
                 if (!await Context.auth.hasFullAccess(put.organizationId)) {
-                    throw Context.auth.error("Je hebt niet voldoende rechten om deze aansluiting toe te voegen")
+                    throw Context.auth.error('Je hebt niet voldoende rechten om deze aansluiting toe te voegen');
                 }
 
                 if (!platform.config.membershipTypes.find(t => t.id === put.membershipTypeId)) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        field: "membershipTypeId",
-                        message: "Invalid membership type",
-                        human: "Dit aansluitingstype bestaat niet"
-                    })
+                        code: 'invalid_field',
+                        field: 'membershipTypeId',
+                        message: 'Invalid membership type',
+                        human: 'Dit aansluitingstype bestaat niet',
+                    });
                 }
-                
+
                 // Check duplicate memberships
 
                 // Check dates
 
                 // Calculate prices
 
-                const membership = new MemberPlatformMembership()
-                membership.id = put.id
-                membership.memberId = member.id
-                membership.membershipTypeId = put.membershipTypeId
-                membership.organizationId = put.organizationId
-                membership.periodId = put.periodId
+                const membership = new MemberPlatformMembership();
+                membership.id = put.id;
+                membership.memberId = member.id;
+                membership.membershipTypeId = put.membershipTypeId;
+                membership.organizationId = put.organizationId;
+                membership.periodId = put.periodId;
 
-                membership.startDate = put.startDate
-                membership.endDate = put.endDate
-                membership.expireDate = put.expireDate
+                membership.startDate = put.startDate;
+                membership.endDate = put.endDate;
+                membership.expireDate = put.expireDate;
 
-                await membership.calculatePrice(member)
-                await membership.save()
+                await membership.calculatePrice(member);
+                await membership.save();
 
-                updateMembershipMemberIds.add(member.id)           
+                updateMembershipMemberIds.add(member.id);
             }
 
             // Delete platform memberships
             for (const id of patch.platformMemberships.getDeletes()) {
-                const membership = await MemberPlatformMembership.getByID(id)
+                const membership = await MemberPlatformMembership.getByID(id);
 
                 if (!membership || membership.memberId !== member.id) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        field: "id",
-                        message: "Invalid id",
-                        human: "Deze aansluiting bestaat niet"
-                    })
+                        code: 'invalid_field',
+                        field: 'id',
+                        message: 'Invalid id',
+                        human: 'Deze aansluiting bestaat niet',
+                    });
                 }
 
                 if (!await Context.auth.hasFullAccess(membership.organizationId)) {
-                    throw Context.auth.error("Je hebt niet voldoende rechten om deze aansluiting te verwijderen")
+                    throw Context.auth.error('Je hebt niet voldoende rechten om deze aansluiting te verwijderen');
                 }
 
                 if (membership.periodId !== platform.periodId) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid period",
-                        human: "Je kan geen aansluitingen meer verwijderen voor een ander werkjaar dan het actieve werkjaar",
-                        field: "periodId"
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid period',
+                        human: 'Je kan geen aansluitingen meer verwijderen voor een ander werkjaar dan het actieve werkjaar',
+                        field: 'periodId',
+                    });
                 }
 
                 if (!membership.canDelete() && !Context.auth.hasPlatformFullAccess()) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Invalid invoice",
-                        human: "Je kan geen aansluiting verwijderen die al werd gefactureerd",
-                    })
+                        code: 'invalid_field',
+                        message: 'Invalid invoice',
+                        human: 'Je kan geen aansluiting verwijderen die al werd gefactureerd',
+                    });
                 }
 
                 await membership.doDelete();
-                updateMembershipsForOrganizations.add(membership.organizationId) // can influence free memberships in other members of same organization
-                updateMembershipMemberIds.add(member.id)
+                updateMembershipsForOrganizations.add(membership.organizationId); // can influence free memberships in other members of same organization
+                updateMembershipMemberIds.add(member.id);
             }
 
             if (!members.find(m => m.id === member.id)) {
-                members.push(member)
+                members.push(member);
             }
         }
 
-        await PatchOrganizationMembersEndpoint.deleteMembers(request.body.getDeletes())
-        
+        await PatchOrganizationMembersEndpoint.deleteMembers(request.body.getDeletes());
+
         for (const member of members) {
             if (updateMembershipMemberIds.has(member.id)) {
-                await member.updateMemberships()
+                await member.updateMemberships();
             }
         }
 
         if (updateMembershipsForOrganizations.size) {
             QueueHandler.schedule('update-membership-prices', async () => {
                 for (const id of updateMembershipsForOrganizations) {
-                    await MembershipCharger.updatePrices(id)
+                    await MembershipCharger.updatePrices(id);
                 }
             }).catch(console.error);
         }
 
-        if(shouldUpdateSetupSteps && organization) {
+        if (shouldUpdateSetupSteps && organization) {
             SetupStepUpdater.updateForOrganization(organization).catch(console.error);
         }
 
         return new Response(
-            await AuthenticatedStructures.membersBlob(members)
+            await AuthenticatedStructures.membersBlob(members),
         );
     }
 
@@ -519,20 +521,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         const updateGroups = new Set<string>();
         const updateRegistrations = new Map<string, Registration>();
         const updateSteps = new Set<string>();
-        
+
         // Loop all members one by one
         for (const id of ids) {
-            const member = await Member.getWithRegistrations(id)
+            const member = await Member.getWithRegistrations(id);
             if (!member || !await Context.auth.canDeleteMember(member)) {
-                throw Context.auth.error("Je hebt niet voldoende rechten om dit lid te verwijderen")
+                throw Context.auth.error('Je hebt niet voldoende rechten om dit lid te verwijderen');
             }
 
-            await MemberUserSyncer.onDeleteMember(member)
-            await User.deleteForDeletedMember(member.id)
-            await BalanceItem.deleteForDeletedMember(member.id)
-            await member.delete()
+            await MemberUserSyncer.onDeleteMember(member);
+            await User.deleteForDeletedMember(member.id);
+            await BalanceItem.deleteForDeletedMember(member.id);
+            await member.delete();
 
-            for(const registration of member.registrations) {
+            for (const registration of member.registrations) {
                 const groupId = registration.groupId;
                 updateRegistrations.set(registration.id, registration);
                 updateGroups.add(groupId);
@@ -540,7 +542,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
         }
 
-        for(const registration of updateRegistrations.values()) {
+        for (const registration of updateRegistrations.values()) {
             registration.scheduleStockUpdate();
         }
 
@@ -548,12 +550,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         // Loop all groups and update occupancy if needed
         for (const group of groups) {
-            await group.updateOccupancy()
-            await group.save()
+            await group.updateOccupancy();
+            await group.save();
         }
 
         const organizations = await Organization.getByIDs(...Array.from(updateSteps));
-        
+
         for (const organization of organizations) {
             SetupStepUpdater.updateForOrganization(organization).catch(console.error);
         }
@@ -561,31 +563,31 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
     static async checkDuplicate(member: Member) {
         if (!member.details.birthDay) {
-            return
+            return;
         }
         let existingMembers = await Member.where({ organizationId: member.organizationId, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
 
         if (member.existsInDatabase) {
-            existingMembers = existingMembers.filter(e => e.id !== member.id)
+            existingMembers = existingMembers.filter(e => e.id !== member.id);
         }
-        
+
         if (existingMembers.length > 0) {
-            const withRegistrations = await Member.getBlobByIds(...existingMembers.map(m => m.id))
+            const withRegistrations = await Member.getBlobByIds(...existingMembers.map(m => m.id));
             for (const m of withRegistrations) {
                 if (m.registrations.length > 0) {
-                    return m
+                    return m;
                 }
             }
 
             if (withRegistrations.length > 0) {
-                return withRegistrations[0]
+                return withRegistrations[0];
             }
         }
     }
 
     async createDummyMembers(organization: Organization, count: number) {
-        await new MemberFactory({ 
-            organization
-        }).createMultiple(count)
+        await new MemberFactory({
+            organization,
+        }).createMultiple(count);
     }
 }

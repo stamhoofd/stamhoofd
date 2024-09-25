@@ -3,7 +3,7 @@
         <template #right>
             <button v-if="modelValue.length" class="button text icon add" type="button" @click="openContextMenu" />
         </template>
-        <div v-if="modelValue.length == 0" class="multi-select-container input-icon-container right icon arrow-down-small gray">
+        <div v-if="modelValue.length === 0" class="multi-select-container input-icon-container right icon arrow-down-small gray">
             <div class="input selectable placeholder" @click="openContextMenu">
                 {{ placeholder }}
             </div>
@@ -62,7 +62,7 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
     }
 
     set draggableValues(arr: T[]) {
-        if (arr.length != this.modelValue.length) {
+        if (arr.length !== this.modelValue.length) {
             return;
         }
         this.$emit('update:modelValue', arr)

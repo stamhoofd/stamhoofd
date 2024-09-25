@@ -1,14 +1,14 @@
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { RegistrationPeriodList, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct } from "@stamhoofd/structures";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { RegistrationPeriodList, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct } from '@stamhoofd/structures';
 
 import { Group, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/models';
-import { Context } from "../../../../helpers/Context";
-import { Sorter } from "@stamhoofd/utility";
+import { Context } from '../../../../helpers/Context';
+import { Sorter } from '@stamhoofd/utility';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = undefined
-type ResponseBody = RegistrationPeriodList
+type Body = undefined;
+type ResponseBody = RegistrationPeriodList;
 
 /**
  * One endpoint to create, patch and delete members and their registrations and payments
@@ -16,11 +16,11 @@ type ResponseBody = RegistrationPeriodList
 
 export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/registration-periods", {});
+        const params = Endpoint.parseParameters(request.url, '/organization/registration-periods', {});
 
         if (params) {
             return [true, params as Params];
@@ -30,15 +30,15 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
-        } 
-        
+            throw Context.auth.error();
+        }
+
         const organizationPeriods = await OrganizationRegistrationPeriod.where({ organizationId: organization.id });
         const periods = await RegistrationPeriod.all();
-        const groups = await Group.getAll(organization.id, null)
+        const groups = await Group.getAll(organization.id, null);
 
         const structs: OrganizationRegistrationPeriodStruct[] = [];
 
@@ -53,14 +53,13 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
         }
 
         // Sort
-        periods.sort((a, b) => Sorter.byDateValue(a.startDate, b.startDate))
+        periods.sort((a, b) => Sorter.byDateValue(a.startDate, b.startDate));
 
         return new Response(
             RegistrationPeriodList.create({
                 organizationPeriods: structs,
-                periods: periods.map(p => p.getStructure())
-            })
+                periods: periods.map(p => p.getStructure()),
+            }),
         );
     }
-
 }

@@ -12,32 +12,32 @@ export class Permissions extends AutoEncoder {
      * Also allows creating new groups
      */
     @field({ decoder: new EnumDecoder(PermissionLevel) })
-    level: PermissionLevel = PermissionLevel.None
+    level: PermissionLevel = PermissionLevel.None;
 
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
-    roles: PermissionRole[] = []
+    roles: PermissionRole[] = [];
 
     @field({ decoder: new ArrayDecoder(MemberResponsibilityRecordBase), version: 274 })
-    responsibilities: MemberResponsibilityRecordBase[] = []
+    responsibilities: MemberResponsibilityRecordBase[] = [];
 
     /**
      * Mostly for temporary access
      */
-    @field({ 
+    @field({
         decoder: new MapDecoder(
-            new EnumDecoder(PermissionsResourceType), 
+            new EnumDecoder(PermissionsResourceType),
             new MapDecoder(
                 // ID
-                StringDecoder, 
-                ResourcePermissions
-            )
-        ), 
-        version: 249
+                StringDecoder,
+                ResourcePermissions,
+            ),
+        ),
+        version: 249,
     })
-    resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map()
+    resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
 
     hasRole(role: PermissionRole): boolean {
-        return this.roles.find(r => r.id === role.id) !== undefined
+        return this.roles.find(r => r.id === role.id) !== undefined;
     }
 
     add(other: Permissions) {
@@ -59,7 +59,6 @@ export class Permissions extends AutoEncoder {
     }
 
     get isEmpty() {
-        return this.level === PermissionLevel.None && this.roles.length === 0 && this.responsibilities.length === 0 && this.resources.size === 0
+        return this.level === PermissionLevel.None && this.roles.length === 0 && this.responsibilities.length === 0 && this.resources.size === 0;
     }
 }
-

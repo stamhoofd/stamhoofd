@@ -33,7 +33,7 @@
             <hr>
             <h2>Alle API-keys</h2>
 
-            <p v-if="apiUsers.length == 0" class="info-box">
+            <p v-if="apiUsers.length === 0" class="info-box">
                 Nog geen API-keys aangemaakt
             </p>
             <STList v-else>

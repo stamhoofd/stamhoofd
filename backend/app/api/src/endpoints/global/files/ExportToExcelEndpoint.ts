@@ -6,7 +6,7 @@ import { ArchiverWriterAdapter, exportToExcel, XlsxTransformerSheet, XlsxWriter 
 import { Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, IPaginatedResponse, LimitedFilteredRequest, Replacement, Version } from '@stamhoofd/structures';
-import { sleep } from "@stamhoofd/utility";
+import { sleep } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
 import { FileCache } from '../../../helpers/FileCache';
@@ -17,32 +17,32 @@ type Body = ExcelExportRequest;
 type ResponseBody = ExcelExportResponse;
 
 type ExcelExporter<T> = {
-    fetch(request: LimitedFilteredRequest): Promise<IPaginatedResponse<T[], LimitedFilteredRequest>>
-    sheets: XlsxTransformerSheet<T, unknown>[]
-}
+    fetch(request: LimitedFilteredRequest): Promise<IPaginatedResponse<T[], LimitedFilteredRequest>>;
+    sheets: XlsxTransformerSheet<T, unknown>[];
+};
 
 export const limiter = new RateLimiter({
     limits: [
-        {   
+        {
             // Max 200 per day
             limit: 200,
-            duration: 60 * 1000 * 60 * 24
-        }
-    ]
+            duration: 60 * 1000 * 60 * 24,
+        },
+    ],
 });
 
 export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = ExcelExportRequest as Decoder<ExcelExportRequest>
+    bodyDecoder = ExcelExportRequest as Decoder<ExcelExportRequest>;
 
     // Other endpoints can register exports here
-    static loaders: Map<ExcelExportType, ExcelExporter<unknown>> = new Map()
+    static loaders: Map<ExcelExportType, ExcelExporter<unknown>> = new Map();
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "POST") {
+        if (request.method !== 'POST') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/export/excel/@type", {type: String});
+        const params = Endpoint.parseParameters(request.url, '/export/excel/@type', { type: String });
 
         if (params) {
             return [true, params as Params];
@@ -52,33 +52,33 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
-        const {user} = await Context.authenticate()
+        const { user } = await Context.authenticate();
 
         if (user.isApiUser) {
             throw new SimpleError({
-                code: "not_allowed",
-                message: "API users are not allowed to export to Excel. The Excel export endpoint has a side effect of sending e-mails. Please use normal API endpoints to get the data you need.",
-                statusCode: 403
-            })
+                code: 'not_allowed',
+                message: 'API users are not allowed to export to Excel. The Excel export endpoint has a side effect of sending e-mails. Please use normal API endpoints to get the data you need.',
+                statusCode: 403,
+            });
         }
 
         if (QueueHandler.isRunning('user-export-to-excel-' + user.id)) {
             throw new SimpleError({
-                code: "not_allowed",
-                message: "Export is pending",
+                code: 'not_allowed',
+                message: 'Export is pending',
                 human: 'Je hebt momenteel al een Excel export lopen. Wacht tot die klaar is voor je een nieuwe export start.',
-                statusCode: 403
-            })
+                statusCode: 403,
+            });
         }
 
         const loader = ExportToExcelEndpoint.loaders.get(request.params.type as ExcelExportType);
-        
+
         if (!loader) {
             throw new SimpleError({
-                code: "invalid_type",
-                message: "Invalid type " + request.params.type,
-                statusCode: 400
-            })
+                code: 'invalid_type',
+                message: 'Invalid type ' + request.params.type,
+                statusCode: 400,
+            });
         }
 
         limiter.track(user.id, 1);
@@ -91,17 +91,16 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 if (sendEmail) {
                     await sendEmailTemplate(null, {
                         template: {
-                            type: EmailTemplateType.ExcelExportSucceeded
+                            type: EmailTemplateType.ExcelExportSucceeded,
                         },
                         recipients: [
                             user.createRecipient(Replacement.create({
                                 token: 'downloadUrl',
-                                value: url
-                            }))
+                                value: url,
+                            })),
                         ],
-                        type: 'transactional'
-                    })
-
+                        type: 'transactional',
+                    });
                 }
 
                 return url;
@@ -109,32 +108,32 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 if (sendEmail) {
                     await sendEmailTemplate(null, {
                         template: {
-                            type: EmailTemplateType.ExcelExportFailed
+                            type: EmailTemplateType.ExcelExportFailed,
                         },
                         recipients: [
-                            user.createRecipient()
+                            user.createRecipient(),
                         ],
-                        type: 'transactional'
-                    })
+                        type: 'transactional',
+                    });
                 }
-                throw error
+                throw error;
             }),
-            sleep(3000)
-        ])
+            sleep(3000),
+        ]);
 
         if (typeof result === 'string') {
             return new Response(ExcelExportResponse.create({
-                url: result
-            }))
+                url: result,
+            }));
         }
-        
+
         // We'll send an e-mail
         // Let the job know to send an e-mail when it is done
         sendEmail = true;
 
         return new Response(ExcelExportResponse.create({
-            url: null
-        }))
+            url: null,
+        }));
     }
 
     async job(loader: ExcelExporter<unknown>, request: ExcelExportRequest, type: string): Promise<string> {
@@ -145,7 +144,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 // Estimate how long it will take.
                 // If too long, we'll schedule it and write it to Digitalocean Spaces
                 // Otherwise we'll just return the file directly
-                const {file, stream} = await FileCache.getWriteStream('.xlsx');
+                const { file, stream } = await FileCache.getWriteStream('.xlsx');
 
                 const zipWriterAdapter = new ArchiverWriterAdapter(stream);
                 const writer = new XlsxWriter(zipWriterAdapter);
@@ -157,14 +156,14 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                     definitions: loader.sheets,
                     writer,
                     dataGenerator: fetchToAsyncIterator(request.filter, loader),
-                    filter: request.workbookFilter
-                })
+                    filter: request.workbookFilter,
+                });
 
-                console.log('Done writing excel file')
+                console.log('Done writing excel file');
 
-                const url = 'https://'+ STAMHOOFD.domains.api + '/v'+ Version +'/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(type)
+                const url = 'https://' + STAMHOOFD.domains.api + '/v' + Version + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(type);
                 return url;
-            }, 2)
+            }, 2);
         });
     }
 }

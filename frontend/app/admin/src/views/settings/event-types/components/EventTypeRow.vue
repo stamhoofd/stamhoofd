@@ -22,8 +22,7 @@
 import { PlatformEventType } from '@stamhoofd/structures';
 
 defineProps<{
-    type: PlatformEventType
+    type: PlatformEventType;
 }>();
-
 
 </script>

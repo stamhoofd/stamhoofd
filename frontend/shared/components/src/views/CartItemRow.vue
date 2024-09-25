@@ -22,7 +22,7 @@
             </p>
             <div @click.stop>
                 <span v-if="cartItem.formattedAmount" class="amount">{{ cartItem.formattedAmount }}</span>
-                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length == 0 && (maximumRemaining === null || maximumRemaining > 1)" v-model="amount" :min="1" :max="maximumRemaining" @click.native.stop />
+                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1)" v-model="amount" :min="1" :max="maximumRemaining" @click.native.stop />
                 <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
             </div>
         </footer>

@@ -40,11 +40,11 @@
         <Checkbox v-model="required">
             {{ requiredText }}
         </Checkbox>
-        <Checkbox v-if="type == RecordType.Checkbox" v-model="askComments">
+        <Checkbox v-if="type === RecordType.Checkbox" v-model="askComments">
             Voeg tekstvak toe indien aangevinkt
         </Checkbox>
         
-        <div v-if="type == RecordType.MultipleChoice || type == RecordType.ChooseOne" class="container">
+        <div v-if="type === RecordType.MultipleChoice || type === RecordType.ChooseOne" class="container">
             <hr>
             <h2 class="style-with-button with-list">
                 <div>Keuzeopties</div>

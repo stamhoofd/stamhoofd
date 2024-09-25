@@ -2,7 +2,7 @@
     <div class="toast-view-container">
         <component class="toast-view" :class="(toast.icon ?? '') + (toast.button && toast.forceButtonClick ? ' button' : '')" @click="clicked" @mousedown.prevent :is="!toast.button || !toast.forceButtonClick ? 'div' : (toast.button.href ? 'a' : 'button')"  :href="toast.forceButtonClick ? (toast.button?.href ?? undefined) : undefined" :download="toast.forceButtonClick ? (toast.button?.download ?? undefined) : undefined">
             <div v-if="toast.progress !== null" class="progress" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
-            <Spinner v-if="toast.icon == 'spinner'" />
+            <Spinner v-if="toast.icon === 'spinner'" />
             <span v-else-if="toast.icon" class="first icon" :class="toast.icon" />
             <div>
                 <div>{{ message }}</div>

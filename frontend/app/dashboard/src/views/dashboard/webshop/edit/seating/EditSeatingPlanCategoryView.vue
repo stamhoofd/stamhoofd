@@ -96,7 +96,7 @@ export default class EditSeatingPlanCategoryView extends Mixins(NavigationMixin)
     }
 
     get patchedCategory() {
-        const c = this.patchedSeatingPlan.categories.find(c => c.id == this.category.id)
+        const c = this.patchedSeatingPlan.categories.find(c => c.id === this.category.id)
         if (c) {
             return c
         }

@@ -144,7 +144,7 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if (this.groupIds.join(",") == this.initialGroupIds.join(",")) {
+        if (this.groupIds.join(",") === this.initialGroupIds.join(",")) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

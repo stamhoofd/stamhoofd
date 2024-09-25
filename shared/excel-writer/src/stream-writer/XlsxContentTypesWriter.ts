@@ -1,10 +1,10 @@
-import { XlsxFileWriter } from "./XlsxFileWriter";
+import { XlsxFileWriter } from './XlsxFileWriter';
 
 export class XlsxContentTypesWriter extends XlsxFileWriter {
-    overrides: {partName: string, contentType: string}[] = []
+    overrides: { partName: string; contentType: string }[] = [];
 
-    async addOverride({partName, contentType}: {partName: string, contentType: string}) {
-        this.overrides.push({partName, contentType});
+    async addOverride({ partName, contentType }: { partName: string; contentType: string }) {
+        this.overrides.push({ partName, contentType });
         return Promise.resolve();
     }
 
@@ -17,10 +17,9 @@ export class XlsxContentTypesWriter extends XlsxFileWriter {
         for (const override of this.overrides) {
             await this.write(`<Override PartName="${override.partName}" ContentType="${override.contentType}" />`);
         }
-        
+
         await this.write(`</Types>`);
 
         await super.close();
     }
 }
-

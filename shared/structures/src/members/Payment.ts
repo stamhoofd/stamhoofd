@@ -1,6 +1,6 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../addresses/Address';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod';
@@ -11,65 +11,65 @@ import { PaymentCustomer } from '../PaymentCustomer';
 
 export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string
+    id: string;
 
     /// Last selected payment method. Nullable if none has been selected
     @field({ decoder: new EnumDecoder(PaymentMethodV150), nullable: true })
-    @field({ 
-        decoder: new EnumDecoder(PaymentMethod), 
-        version: 151, 
-        downgrade: downgradePaymentMethodV150
+    @field({
+        decoder: new EnumDecoder(PaymentMethod),
+        version: 151,
+        downgrade: downgradePaymentMethodV150,
     })
-    method: PaymentMethod
+    method: PaymentMethod;
 
     @field({ decoder: new EnumDecoder(PaymentStatus) })
-    status: PaymentStatus = PaymentStatus.Created
+    status: PaymentStatus = PaymentStatus.Created;
 
     @field({ decoder: new EnumDecoder(PaymentProvider), nullable: true, version: 152 })
-    provider: PaymentProvider | null = null
+    provider: PaymentProvider | null = null;
 
-    @field({ decoder: PaymentCustomer, nullable: true, version: 321})
-    customer: PaymentCustomer | null = null
+    @field({ decoder: PaymentCustomer, nullable: true, version: 321 })
+    customer: PaymentCustomer | null = null;
 
     @field({ decoder: IntegerDecoder })
-    price = 0
+    price = 0;
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 92 })
-    freeContribution: number | null = null
+    freeContribution: number | null = null;
 
     // Transfer description if paid via transfer
     @field({ decoder: StringDecoder, nullable: true })
-    transferDescription: string | null = null
+    transferDescription: string | null = null;
 
     @field({ decoder: TransferSettings, nullable: true, version: 160 })
-    transferSettings: TransferSettings | null = null
+    transferSettings: TransferSettings | null = null;
 
     @field({ decoder: DateDecoder, nullable: true })
-    paidAt: Date | null = null
+    paidAt: Date | null = null;
 
     @field({ decoder: DateDecoder })
-    createdAt: Date = new Date()
+    createdAt: Date = new Date();
 
     @field({ decoder: DateDecoder })
-    updatedAt: Date = new Date()
+    updatedAt: Date = new Date();
 
     @field({ decoder: StringDecoder, nullable: true, version: 324 })
-    organizationId: string | null = null
+    organizationId: string | null = null;
 
     get isPending() {
-        return this.status !== PaymentStatus.Succeeded && this.status !== PaymentStatus.Failed
+        return this.status !== PaymentStatus.Succeeded && this.status !== PaymentStatus.Failed;
     }
 
     get isSucceeded() {
-        return this.status === PaymentStatus.Succeeded
+        return this.status === PaymentStatus.Succeeded;
     }
 
     get isFailed() {
-        return this.status === PaymentStatus.Failed
+        return this.status === PaymentStatus.Failed;
     }
 
     get canChangeStatus() {
-        return this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown
+        return this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown;
     }
 
     matchQuery(query: string): boolean {
@@ -83,8 +83,7 @@ export class Payment extends AutoEncoder {
     }
 
     getHTMLTable(): string {
-        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`
-
+        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
 
         /**
          * Replacement.create({
@@ -110,76 +109,76 @@ export class Payment extends AutoEncoder {
          */
         const data = [
             {
-                title: "Betaalmethode",
-                value: this.method ? Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method)) : ""
+                title: 'Betaalmethode',
+                value: this.method ? Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method)) : '',
             },
             {
-                title: "Te betalen",
-                value: this.status !== PaymentStatus.Succeeded ? Formatter.price(this?.price ?? 0) : Formatter.price(0)
+                title: 'Te betalen',
+                value: this.status !== PaymentStatus.Succeeded ? Formatter.price(this?.price ?? 0) : Formatter.price(0),
             },
             ...(
-                this.method === PaymentMethod.Transfer ? [
-                    {
-                        title: "Mededeling",
-                        value: this.transferDescription ?? ""
-                    },
-                    {
-                        title: "Rekeningnummer",
-                        value: this.transferSettings?.iban ?? ""
-                    },
-                    {
-                        title: "Begunstigde",
-                        value: this.transferSettings?.creditor ?? ""
-                    }
-                ] 
-                : []
-            )
-            
-        ]
+                this.method === PaymentMethod.Transfer
+                    ? [
+                            {
+                                title: 'Mededeling',
+                                value: this.transferDescription ?? '',
+                            },
+                            {
+                                title: 'Rekeningnummer',
+                                value: this.transferSettings?.iban ?? '',
+                            },
+                            {
+                                title: 'Begunstigde',
+                                value: this.transferSettings?.creditor ?? '',
+                            },
+                        ]
+                    : []
+            ),
+
+        ];
 
         for (const replacement of data) {
             if (replacement.value.length == 0) {
                 continue;
             }
-            str += `<tr><td><h4>${Formatter.escapeHtml(replacement.title)}</h4></td><td>${Formatter.escapeHtml(replacement.value)}</td></tr>`
+            str += `<tr><td><h4>${Formatter.escapeHtml(replacement.title)}</h4></td><td>${Formatter.escapeHtml(replacement.value)}</td></tr>`;
         }
 
-        return str+"</tbody></table>";
+        return str + '</tbody></table>';
     }
 }
 
 export class Settlement extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string
+    id: string;
 
     @field({ decoder: StringDecoder })
-    reference: string
+    reference: string;
 
     @field({ decoder: DateDecoder })
-    settledAt: Date
+    settledAt: Date;
 
     @field({ decoder: IntegerDecoder })
-    amount: number
+    amount: number;
 
     /**
      * Fee for the payment provider for the individual payment
      * Only set if it is witheld from the settlement/payout
      */
     @field({ decoder: IntegerDecoder, version: 195 })
-    fee = 0
+    fee = 0;
 }
 
 export class PrivatePayment extends Payment {
     @field({ decoder: Settlement, nullable: true })
-    settlement: Settlement | null = null
+    settlement: Settlement | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 153 })
-    iban: string | null = null
+    iban: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 153 })
-    ibanName: string | null = null
+    ibanName: string | null = null;
 
     @field({ decoder: IntegerDecoder, version: 197 })
-    transferFee = 0
+    transferFee = 0;
 }
-

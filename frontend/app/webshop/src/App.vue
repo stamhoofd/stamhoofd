@@ -68,7 +68,7 @@ export default class App extends VueComponent {
                     try {
                         const url = new URL("https://" + response.data.webshop.getUrl(response.data.organization));
 
-                        if (window.location.hostname.toLowerCase() != url.hostname.toLowerCase()) {
+                        if (window.location.hostname.toLowerCase() !== url.hostname.toLowerCase()) {
                             // Redirect
                             const prefix = url.pathname.replace(/^\/+|\/+$/g, '');
                             // Remove starting and trailing slash
@@ -162,7 +162,7 @@ export default class App extends VueComponent {
             document.documentElement.translate = true
         }
 
-        if (STAMHOOFD.environment == "development") {
+        if (STAMHOOFD.environment === "development") {
             //ComponentWithProperties.debug = true
         }
         HistoryManager.activate();

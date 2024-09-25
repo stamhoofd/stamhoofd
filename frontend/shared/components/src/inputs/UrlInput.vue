@@ -76,7 +76,7 @@ export default class UrlInput extends VueComponent {
     }
 
     validate(final: boolean, silent = false) {
-        if (this.urlRaw.length == 0) {
+        if (this.urlRaw.length === 0) {
 
             if (!this.required) {
                 if (!silent) {

@@ -53,7 +53,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
     }
 
     changedFile(event) {
-        if (!event.target.files || event.target.files.length != 1) {
+        if (!event.target.files || event.target.files.length !== 1) {
             return;
         }
         if (this.uploading) {

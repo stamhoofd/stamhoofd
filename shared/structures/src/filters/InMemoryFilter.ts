@@ -1,12 +1,11 @@
-import { StringCompare } from "@stamhoofd/utility";
+import { StringCompare } from '@stamhoofd/utility';
 
-import { StamhoofdCompareValue, StamhoofdFilter } from "./StamhoofdFilter";
+import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter';
 
 export type InMemoryFilterRunner = (object: any) => boolean;
 
 export type InMemoryFilterCompiler = (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => InMemoryFilterRunner;
-export type InMemoryFilterDefinitions = Record<string, InMemoryFilterCompiler>
-
+export type InMemoryFilterDefinitions = Record<string, InMemoryFilterCompiler>;
 
 function $andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
     const runners = compileInMemoryFilter(filter, filters);
@@ -21,7 +20,7 @@ function $andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFi
 }
 
 function $orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
-    const runners = compileInMemoryFilter(filter, filters)
+    const runners = compileInMemoryFilter(filter, filters);
     return (object) => {
         for (const runner of runners) {
             if (runner(object)) {
@@ -46,7 +45,7 @@ function $lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
         if (a === null || b === null) {
             return a !== null && b === null;
         }
-        return a < b
+        return a < b;
     };
 }
 
@@ -69,7 +68,7 @@ function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterR
         }
 
         const a = normalizeValue(guardFilterCompareValue(val));
-        return a === b
+        return a === b;
     };
 }
 
@@ -79,7 +78,7 @@ function invertFilterCompiler(compiler: InMemoryFilterCompiler): InMemoryFilterC
         return (val) => {
             return !runner(val);
         };
-    }
+    };
 }
 
 function $containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
@@ -90,19 +89,19 @@ function $containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
         if (typeof a !== 'string' || typeof needle !== 'string') {
             return false;
         }
-        return StringCompare.contains(a, needle)
+        return StringCompare.contains(a, needle);
     };
 }
 
 function $inInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         if (!Array.isArray(filter)) {
-            throw new Error('Invalid filter: expected array as value for $in filter')
+            throw new Error('Invalid filter: expected array as value for $in filter');
         }
 
         if (Array.isArray(val)) {
             // To match backend logic (JSON_OVERLAPS in MySQL) where these things are required for optimizations
-            // + also match MongoDB behavior 
+            // + also match MongoDB behavior
 
             for (const v of val) {
                 const a = normalizeValue(guardFilterCompareValue(v));
@@ -135,36 +134,35 @@ function $lengthInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemor
 
     return (val) => {
         if (typeof val === 'string' || Array.isArray(val)) {
-            return runner(val.length)
+            return runner(val.length);
         }
 
-        throw new Error('Invalid filter: expected string or array as value for $length filter')
+        throw new Error('Invalid filter: expected string or array as value for $length filter');
     };
 }
 
-
 function objectPathValue(object: any, path: string[]) {
-    if (path.length === 0)  {
+    if (path.length === 0) {
         return object;
     }
 
     const nextSearched = path[0];
     if (nextSearched in object) {
-        return objectPathValue(object[nextSearched], path.slice(1))
+        return objectPathValue(object[nextSearched], path.slice(1));
     }
 }
 
 function guardFilterCompareValue(val: any): StamhoofdCompareValue {
     if (val instanceof Date) {
-        return val
+        return val;
     }
 
     if (typeof val === 'string') {
-        return val
+        return val;
     }
 
     if (typeof val === 'number') {
-        return val
+        return val;
     }
 
     if (typeof val === 'boolean') {
@@ -175,22 +173,22 @@ function guardFilterCompareValue(val: any): StamhoofdCompareValue {
         return null;
     }
 
-    if (typeof val === 'object' && "$" in val) {
-        if (val["$"] === '$now') {
+    if (typeof val === 'object' && '$' in val) {
+        if (val['$'] === '$now') {
             return val;
         }
     }
 
-    throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.')
+    throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.');
 }
 
-function normalizeValue(val: StamhoofdCompareValue): string|number|null {
+function normalizeValue(val: StamhoofdCompareValue): string | number | null {
     if (val instanceof Date) {
-        return val.getTime()
+        return val.getTime();
     }
 
     if (typeof val === 'string') {
-        return val.toLocaleLowerCase()
+        return val.toLocaleLowerCase();
     }
 
     if (typeof val === 'boolean') {
@@ -201,14 +199,14 @@ function normalizeValue(val: StamhoofdCompareValue): string|number|null {
         return null;
     }
 
-    if (typeof val === 'object' && "$" in val) {
-        const specialValue = val["$"];
+    if (typeof val === 'object' && '$' in val) {
+        const specialValue = val['$'];
 
         switch (specialValue) {
             case '$now':
-                return normalizeValue(new Date())
+                return normalizeValue(new Date());
             default:
-                throw new Error('Unsupported magic value ' + specialValue)
+                throw new Error('Unsupported magic value ' + specialValue);
         }
     }
 
@@ -218,8 +216,8 @@ function normalizeValue(val: StamhoofdCompareValue): string|number|null {
 function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, StamhoofdCompareValue> {
     if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined || filter instanceof Date) {
         return {
-            $eq: filter
-        }
+            $eq: filter,
+        };
     }
     return filter;
 }
@@ -228,34 +226,34 @@ export function createInMemoryFilterCompiler(path: string): InMemoryFilterCompil
     const splitted = path.split('.');
 
     return (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
-        const runner = $andInMemoryFilterCompiler(filter, filters)
+        const runner = $andInMemoryFilterCompiler(filter, filters);
 
         return (object) => {
             const value = objectPathValue(object, splitted);
             return runner(value);
         };
-    }
+    };
 }
 
 export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = {
-    '$and': $andInMemoryFilterCompiler,
-    '$or': $orInMemoryFilterCompiler,
-    '$not': $notInMemoryFilterCompiler,
-    '$eq': $equalsInMemoryFilterCompiler,
-    '$neq': invertFilterCompiler($equalsInMemoryFilterCompiler),
-    '$lt': $lessThanInMemoryFilterCompiler,
-    '$gt': invertFilterCompiler($lessThanInMemoryFilterCompiler),
-    '$in': $inInMemoryFilterCompiler,
-    '$contains': $containsInMemoryFilterCompiler,
-    '$length': $lengthInMemoryFilterCompiler,
-}
+    $and: $andInMemoryFilterCompiler,
+    $or: $orInMemoryFilterCompiler,
+    $not: $notInMemoryFilterCompiler,
+    $eq: $equalsInMemoryFilterCompiler,
+    $neq: invertFilterCompiler($equalsInMemoryFilterCompiler),
+    $lt: $lessThanInMemoryFilterCompiler,
+    $gt: invertFilterCompiler($lessThanInMemoryFilterCompiler),
+    $in: $inInMemoryFilterCompiler,
+    $contains: $containsInMemoryFilterCompiler,
+    $length: $lengthInMemoryFilterCompiler,
+};
 
 function compileInMemoryFilter(filter: StamhoofdFilter, definitions: InMemoryFilterDefinitions): InMemoryFilterRunner[] {
     if (filter === undefined) {
         return [];
     }
 
-    const runners: InMemoryFilterRunner[] = []
+    const runners: InMemoryFilterRunner[] = [];
 
     for (const f2 of (Array.isArray(filter) ? filter : [filter])) {
         if (!f2) {
@@ -264,20 +262,20 @@ function compileInMemoryFilter(filter: StamhoofdFilter, definitions: InMemoryFil
         const f = wrapPlainFilter(f2);
         for (const key of Object.keys(f)) {
             if (!(key in definitions)) {
-                throw new Error('Unsupported filter ' + key)
+                throw new Error('Unsupported filter ' + key);
             }
             const filterCompiler = definitions[key];
-            const subFilter = f[key] as StamhoofdFilter
+            const subFilter = f[key] as StamhoofdFilter;
 
-            const s = filterCompiler(subFilter, definitions)
+            const s = filterCompiler(subFilter, definitions);
             if (s === undefined || s === null) {
-                throw new Error('Unsupported filter value for ' + key)
+                throw new Error('Unsupported filter value for ' + key);
             }
             runners.push(s);
         }
     }
 
-    return runners
+    return runners;
 }
 
-export const compileToInMemoryFilter = $andInMemoryFilterCompiler
+export const compileToInMemoryFilter = $andInMemoryFilterCompiler;

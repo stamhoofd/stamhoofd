@@ -1,65 +1,65 @@
-import { AutoEncoder, field, IntegerDecoder } from "@simonbackx/simple-encoding"
-import { SimpleError } from "@simonbackx/simple-errors"
-import { BalanceItemWithPayments } from "../../BalanceItem"
+import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { BalanceItemWithPayments } from '../../BalanceItem';
 
 /**
  * Contains an intention to pay for an outstanding balance item
  */
 export class BalanceItemCartItem extends AutoEncoder {
     get id() {
-        return this.item.id
+        return this.item.id;
     }
 
     @field({ decoder: BalanceItemWithPayments })
-    item: BalanceItemWithPayments
+    item: BalanceItemWithPayments;
 
     /**
      * Amount you want to pay of that balance item
      */
     @field({ decoder: IntegerDecoder })
-    price = 0
+    price = 0;
 
-    validate(data: {balanceItems?: BalanceItemWithPayments[]}) {
+    validate(data: { balanceItems?: BalanceItemWithPayments[] }) {
         if (data.balanceItems !== undefined) {
-            const found = data.balanceItems.find(b => b.id === this.item.id)
+            const found = data.balanceItems.find(b => b.id === this.item.id);
             if (!found) {
                 throw new SimpleError({
-                    code: "not_found",
-                    message: "Eén van de openstaande bedragen is niet meer beschikbaar."
-                })
+                    code: 'not_found',
+                    message: 'Eén van de openstaande bedragen is niet meer beschikbaar.',
+                });
             }
-            this.item = found
+            this.item = found;
         }
 
-        const maxPrice = this.item.priceOpen
+        const maxPrice = this.item.priceOpen;
 
         if (maxPrice === 0) {
             throw new SimpleError({
-                code: "not_found",
-                message: "Eén van de openstaande bedragen is ondertussen al betaald."
-            })
+                code: 'not_found',
+                message: 'Eén van de openstaande bedragen is ondertussen al betaald.',
+            });
         }
 
         if (maxPrice < 0) {
             // Allow negative prices
 
             if (this.price > 0) {
-                this.price = maxPrice
+                this.price = maxPrice;
             }
-            
+
             if (this.price < maxPrice) {
                 // Don't throw: we'll throw a different error during checkout if the price has changed
-                this.price = maxPrice
+                this.price = maxPrice;
             }
 
             return;
         }
         if (this.price < 0) {
-            this.price = maxPrice
+            this.price = maxPrice;
         }
         if (this.price > maxPrice) {
             // Don't throw: we'll throw a different error during checkout if the price has changed
-            this.price = maxPrice
+            this.price = maxPrice;
         }
     }
 }

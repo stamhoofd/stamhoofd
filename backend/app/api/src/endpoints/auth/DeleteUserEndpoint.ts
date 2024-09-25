@@ -11,11 +11,11 @@ type ResponseBody = undefined;
 
 export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "DELETE") {
+        if (request.method !== 'DELETE') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/user", {});
+        const params = Endpoint.parseParameters(request.url, '/user', {});
 
         if (params) {
             return [true, params as Params];
@@ -24,35 +24,35 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope()
-        const {user, token} = await Context.authenticate({allowWithoutAccount: true})
-        
+        const organization = await Context.setOptionalOrganizationScope();
+        const { user, token } = await Context.authenticate({ allowWithoutAccount: true });
+
         // Send an e-mail to inform everyone about this action
 
         // Delete the account
 
         const bcc = (await getDefaultEmailFrom(null, {
-            template: {}
-        }))
+            template: {},
+        }));
         await sendEmailTemplate(organization, {
             recipients: [
                 Recipient.create({
-                    email: user.email
-                })
+                    email: user.email,
+                }),
             ],
             singleBcc: bcc.replyTo || bcc.from,
             template: {
                 type: EmailTemplateType.DeleteAccountConfirmation,
             },
-            type: 'transactional'
-        })
+            type: 'transactional',
+        });
 
         // Soft delete until processed manually
         user.verified = false;
         user.password = null;
-        await user.save()
-        await token.delete()
-        
-        return new Response(undefined)
+        await user.save();
+        await token.delete();
+
+        return new Response(undefined);
     }
 }

@@ -1,61 +1,60 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, IntegerDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
-import { v4 as uuidv4 } from "uuid";
-import { EditorSmartButton } from "../email/EditorSmartButton";
-import { EditorSmartVariable } from "../email/EditorSmartVariable";
-import { EmailAttachment, Recipient, Replacement } from "../endpoints/EmailRequest";
-import { StamhoofdFilterDecoder } from "../filters/FilteredRequest";
-import { StamhoofdFilter } from "../filters/StamhoofdFilter";
-import { MemberDetails } from "../members/MemberDetails";
-import { MemberWithRegistrationsBlob } from "../members/MemberWithRegistrationsBlob";
-import { EmailTemplateType } from "./EmailTemplate";
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, IntegerDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { v4 as uuidv4 } from 'uuid';
+import { EditorSmartButton } from '../email/EditorSmartButton';
+import { EditorSmartVariable } from '../email/EditorSmartVariable';
+import { EmailAttachment, Recipient, Replacement } from '../endpoints/EmailRequest';
+import { StamhoofdFilterDecoder } from '../filters/FilteredRequest';
+import { StamhoofdFilter } from '../filters/StamhoofdFilter';
+import { MemberDetails } from '../members/MemberDetails';
+import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob';
+import { EmailTemplateType } from './EmailTemplate';
 
 export enum EmailRecipientFilterType {
-    "Members" = "Members",
-    "MemberParents" = "MemberParents",
-    "MemberUnverified" = "MemberUnverified"
+    Members = 'Members',
+    MemberParents = 'MemberParents',
+    MemberUnverified = 'MemberUnverified',
 }
 
-export function getExampleRecipient(type: EmailRecipientFilterType|null = null) {
+export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {
     return MemberWithRegistrationsBlob.create({
         details: MemberDetails.create({
-            firstName: "Jan",
-            lastName: "Janssens",
-            email: "jan.janssens@voorbeeld-emailadres.com"
-        })
-    }).getEmailRecipients(['member'])[0]
+            firstName: 'Jan',
+            lastName: 'Janssens',
+            email: 'jan.janssens@voorbeeld-emailadres.com',
+        }),
+    }).getEmailRecipients(['member'])[0];
 }
 
 export enum EmailStatus {
-    "Draft" = "Draft",
-    "Sending" = "Sending",
-    "Sent" = "Sent",
-    "Deleted" = "Deleted",
+    Draft = 'Draft',
+    Sending = 'Sending',
+    Sent = 'Sent',
+    Deleted = 'Deleted',
 }
 
 export enum EmailRecipientsStatus {
-    "NotCreated" = "NotCreated",
-    "Creating" = "Creating",
-    "Created" = "Created"
+    NotCreated = 'NotCreated',
+    Creating = 'Creating',
+    Created = 'Created',
 }
 
 export class EmailRecipientSubfilter extends AutoEncoder {
     @field({ decoder: new EnumDecoder(EmailRecipientFilterType) })
-    type = EmailRecipientFilterType.Members
+    type = EmailRecipientFilterType.Members;
 
-    @field({ decoder: StamhoofdFilterDecoder, nullable: true})
-    filter: StamhoofdFilter|null = null
+    @field({ decoder: StamhoofdFilterDecoder, nullable: true })
+    filter: StamhoofdFilter | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true})
-    search: string|null = null
+    @field({ decoder: StringDecoder, nullable: true })
+    search: string | null = null;
 }
-
 
 export class EmailRecipientFilter extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EmailRecipientSubfilter) })
-    filters: EmailRecipientSubfilter[] = []
+    filters: EmailRecipientSubfilter[] = [];
 
     @field({ decoder: BooleanDecoder })
-    groupByEmail = false
+    groupByEmail = false;
 }
 
 export class Email extends AutoEncoder {
@@ -63,55 +62,55 @@ export class Email extends AutoEncoder {
     id: string;
 
     @field({ decoder: EmailRecipientFilter })
-    recipientFilter = EmailRecipientFilter.create({})
+    recipientFilter = EmailRecipientFilter.create({});
 
     @field({ decoder: StringDecoder, nullable: true })
-    subject: string|null = null
+    subject: string | null = null;
 
     @field({ decoder: new EnumDecoder(EmailStatus) })
-    status = EmailStatus.Draft
+    status = EmailStatus.Draft;
 
     @field({ decoder: new EnumDecoder(EmailRecipientsStatus) })
-    recipientsStatus = EmailRecipientsStatus.NotCreated
+    recipientsStatus = EmailRecipientsStatus.NotCreated;
 
     @field({ decoder: AnyDecoder })
-    json = {}
+    json = {};
 
     @field({ decoder: StringDecoder, nullable: true })
-    text: string | null = null
+    text: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    html: string | null = null
+    html: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    fromAddress: string | null = null
+    fromAddress: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    fromName: string | null = null
+    fromName: string | null = null;
 
-    @field({ decoder: IntegerDecoder, nullable: true})
-    recipientCount: number|null = null
+    @field({ decoder: IntegerDecoder, nullable: true })
+    recipientCount: number | null = null;
 
     @field({ decoder: new ArrayDecoder(EmailAttachment) })
-    attachments: EmailAttachment[] = []
+    attachments: EmailAttachment[] = [];
 
     @field({ decoder: DateDecoder, nullable: true })
-    sentAt: Date|null = null
+    sentAt: Date | null = null;
 
     @field({ decoder: DateDecoder })
-    createdAt: Date = new Date()
+    createdAt: Date = new Date();
 
     @field({ decoder: DateDecoder })
-    updatedAt: Date = new Date()
+    updatedAt: Date = new Date();
 
     getTemplateType() {
         for (const filter of this.recipientFilter.filters) {
             if (filter.type === EmailRecipientFilterType.Members) {
-                return EmailTemplateType.SavedMembersEmail
+                return EmailTemplateType.SavedMembersEmail;
             }
         }
 
-        return null
+        return null;
     }
 }
 
@@ -120,55 +119,55 @@ export class EmailRecipient extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    emailId: string = ""
+    emailId: string = '';
 
     @field({ decoder: StringDecoder, nullable: true })
-    firstName: string | null = null
+    firstName: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    lastName: string | null = null
+    lastName: string | null = null;
 
     @field({ decoder: StringDecoder })
-    email: string
+    email: string;
 
     @field({ decoder: new ArrayDecoder(Replacement) })
-    replacements: Replacement[] = []
+    replacements: Replacement[] = [];
 
     @field({ decoder: StringDecoder, nullable: true })
-    failErrorMessage: string|null = null
+    failErrorMessage: string | null = null;
 
     @field({ decoder: IntegerDecoder })
-    failCount = 0
+    failCount = 0;
 
     @field({ decoder: DateDecoder, nullable: true })
-    firstFailedAt: Date|null = null
+    firstFailedAt: Date | null = null;
 
     @field({ decoder: DateDecoder, nullable: true })
-    lastFailedAt: Date|null = null
+    lastFailedAt: Date | null = null;
 
     @field({ decoder: DateDecoder, nullable: true })
-    sentAt: Date|null = null
+    sentAt: Date | null = null;
 
     @field({ decoder: DateDecoder })
-    createdAt: Date = new Date()
+    createdAt: Date = new Date();
 
     @field({ decoder: DateDecoder })
-    updatedAt: Date = new Date()
+    updatedAt: Date = new Date();
 
     getDefaultReplacements() {
-        return Recipient.create(this).getDefaultReplacements()
+        return Recipient.create(this).getDefaultReplacements();
     }
 }
 
 export class EmailPreview extends Email {
-    @field({ decoder: EmailRecipient, nullable: true})
-    exampleRecipient: EmailRecipient|null = null
+    @field({ decoder: EmailRecipient, nullable: true })
+    exampleRecipient: EmailRecipient | null = null;
 
     @field({ decoder: new ArrayDecoder(EditorSmartVariable) })
-    smartVariables: EditorSmartVariable[] = []
+    smartVariables: EditorSmartVariable[] = [];
 
     @field({ decoder: new ArrayDecoder(EditorSmartButton) })
-    smartButtons: EditorSmartButton[] = []
+    smartButtons: EditorSmartButton[] = [];
 
     // todo: count stats
     // todo: bounce / spam stats

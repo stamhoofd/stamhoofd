@@ -81,7 +81,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
 
     get allCategories() {
         const parentCategory = this.parentCategory;
-        return this.period.availableCategories.filter(c => c.categories.length == 0 && c.id !== parentCategory?.id)
+        return this.period.availableCategories.filter(c => c.categories.length === 0 && c.id !== parentCategory?.id)
     }
 
     moveTo(category: GroupCategory) {
@@ -145,7 +145,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
             [
                 new ContextMenuItem({
                     name: "Verplaats naar",
-                    disabled: this.allCategories.length == 0,
+                    disabled: this.allCategories.length === 0,
                     childMenu: new ContextMenu([
                         this.allCategories.map(cat => 
                             new ContextMenuItem({

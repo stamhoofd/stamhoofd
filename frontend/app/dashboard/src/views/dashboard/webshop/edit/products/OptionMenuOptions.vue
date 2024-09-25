@@ -32,7 +32,7 @@ export default class OptionMenuOptions extends Mixins(NavigationMixin) {
 
     moveOptionUp(option: Option) {
         const index = this.optionMenu.options.findIndex(c => option.id === c.id)
-        if (index == -1 || index == 0) {
+        if (index === -1 || index === 0) {
             return;
         }
 
@@ -44,7 +44,7 @@ export default class OptionMenuOptions extends Mixins(NavigationMixin) {
 
     moveOptionDown(option: Option) {
         const index = this.optionMenu.options.findIndex(c => option.id === c.id)
-        if (index == -1 || index >= this.optionMenu.options.length - 1) {
+        if (index === -1 || index >= this.optionMenu.options.length - 1) {
             return;
         }
 
@@ -63,7 +63,7 @@ export default class OptionMenuOptions extends Mixins(NavigationMixin) {
     }
 
     set draggableOptions(options) {
-        if (options.length != this.optionMenu.options.length) {
+        if (options.length !== this.optionMenu.options.length) {
             return;
         }
 

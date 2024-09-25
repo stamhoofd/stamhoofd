@@ -82,7 +82,7 @@
         </template>
 
         <!-- Warnings and errors -->
-        <template v-if="emails.length == 0">
+        <template v-if="emails.length === 0">
             <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
                 Stel eerst jouw e-mailadressen in
                 <span class="button text inherit-color">
@@ -540,7 +540,7 @@ async function toBase64(file: File) {
 }
 
 async function changedFile(event: InputEvent & { target: HTMLInputElement & { files: FileList } }) {
-    if (!event.target.files || event.target.files.length == 0) {
+    if (!event.target.files || event.target.files.length === 0) {
         return;
     }
 

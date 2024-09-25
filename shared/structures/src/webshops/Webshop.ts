@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 import { DNSRecord, DNSRecordType } from '../DNSRecord';
- 
+
 import { Organization } from '../Organization';
 import { Category } from './Category';
 import { Product } from './Product';
@@ -16,21 +16,21 @@ export class WebshopPreview extends AutoEncoder {
      * Not writeable
      */
     @field({ decoder: StringDecoder, version: 134 })
-    uri = ""
+    uri = '';
 
     /**
      * Not writeable
      */
-    @field({ decoder: StringDecoder, version: 89, field: "uri" })
-    @field({ 
-        decoder: StringDecoder, 
-        nullable: true, 
-        version: 134, 
-        downgrade: function(this: Webshop) {
-            return this.legacyUri ?? this.uri
-        } 
+    @field({ decoder: StringDecoder, version: 89, field: 'uri' })
+    @field({
+        decoder: StringDecoder,
+        nullable: true,
+        version: 134,
+        downgrade: function (this: Webshop) {
+            return this.legacyUri ?? this.uri;
+        },
     })
-    legacyUri: string | null = null
+    legacyUri: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 89 })
     domain: string | null = null;
@@ -39,72 +39,72 @@ export class WebshopPreview extends AutoEncoder {
     domainUri: string | null = null;
 
     @field({ decoder: WebshopMetaData })
-    meta = WebshopMetaData.create({})
+    meta = WebshopMetaData.create({});
 
     @field({ decoder: WebshopPrivateMetaData, version: 62 })
-    privateMeta = WebshopPrivateMetaData.create({})
+    privateMeta = WebshopPrivateMetaData.create({});
 
     get hasSingleTickets() {
-        return this.meta.hasSingleTickets
+        return this.meta.hasSingleTickets;
     }
 
     get hasTickets() {
-        return this.meta.hasTickets
+        return this.meta.hasTickets;
     }
 
-    getDefaultDomain(organization: Organization): string  {
-        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])
+    getDefaultDomain(organization: Organization): string {
+        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']);
     }
 
     getDefaultUrl(organization: Organization): string {
-        return this.getDefaultDomain(organization)+this.getDefaultSuffix()
+        return this.getDefaultDomain(organization) + this.getDefaultSuffix();
     }
 
     getDomainUrl(): string {
-        return this.domain+this.getDomainSuffix()
+        return this.domain + this.getDomainSuffix();
     }
 
     getUrl(organization: Organization): string {
         if (this.domain && this.meta.domainActive) {
-            return this.getDomainUrl()
+            return this.getDomainUrl();
         }
 
-        return this.getDefaultUrl(organization)
+        return this.getDefaultUrl(organization);
     }
-    
+
     getLegacyUrl(organization: Organization): string | null {
         if (!STAMHOOFD.domains.legacyWebshop || this.legacyUri === null) {
-            return null
+            return null;
         }
-        return organization.uri+"."+STAMHOOFD.domains.legacyWebshop+(this.legacyUri ? "/"+this.legacyUri : "")
+        return organization.uri + '.' + STAMHOOFD.domains.legacyWebshop + (this.legacyUri ? '/' + this.legacyUri : '');
     }
 
     getDomainSuffix(): string {
         if (!this.domainUri) {
-            return ""
+            return '';
         }
-        return "/"+this.domainUri
+        return '/' + this.domainUri;
     }
 
     getDefaultSuffix(): string {
         if (!this.uri) {
-            return ""
+            return '';
         }
-        return "/"+this.uri
+        return '/' + this.uri;
     }
 
     getUrlSuffix(): string {
         if (this.domain) {
-            return this.getDomainSuffix()
+            return this.getDomainSuffix();
         }
-        return this.getDefaultSuffix()
+        return this.getDefaultSuffix();
     }
 
     isClosed(margin = 0) {
         if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin)) {
-            return true
+            return true;
         }
-        return false
+        return false;
     }
 }
 
@@ -116,21 +116,21 @@ export class Webshop extends AutoEncoder {
      * Not writeable
      */
     @field({ decoder: StringDecoder, version: 134 })
-    uri = ""
+    uri = '';
 
     /**
      * Not writeable
      */
-    @field({ decoder: StringDecoder, field: "uri"  })
-    @field({ 
-        decoder: StringDecoder, 
-        nullable: true, 
-        version: 134, 
-        downgrade: function(this: Webshop) {
-            return this.legacyUri ?? this.uri
-        }
+    @field({ decoder: StringDecoder, field: 'uri' })
+    @field({
+        decoder: StringDecoder,
+        nullable: true,
+        version: 134,
+        downgrade: function (this: Webshop) {
+            return this.legacyUri ?? this.uri;
+        },
     })
-    legacyUri: string | null = null
+    legacyUri: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
     domain: string | null = null;
@@ -139,20 +139,20 @@ export class Webshop extends AutoEncoder {
     domainUri: string | null = null;
 
     @field({ decoder: WebshopMetaData })
-    meta = WebshopMetaData.create({})
+    meta = WebshopMetaData.create({});
 
     @field({ decoder: new ArrayDecoder(Product) })
-    products: Product[] = []
+    products: Product[] = [];
 
     @field({ decoder: new ArrayDecoder(Category) })
-    categories: Category[] = []
+    categories: Category[] = [];
 
     get hasSingleTickets() {
-        return this.meta.hasSingleTickets
+        return this.meta.hasSingleTickets;
     }
 
     get hasTickets() {
-        return this.meta.hasTickets
+        return this.meta.hasTickets;
     }
 
     /**
@@ -162,14 +162,14 @@ export class Webshop extends AutoEncoder {
         for (const product of this.products) {
             for (const price of product.prices) {
                 if (price.price) {
-                    return false
+                    return false;
                 }
             }
 
             for (const menu of product.optionMenus) {
                 for (const option of menu.options) {
                     if (option.price) {
-                        return false
+                        return false;
                     }
                 }
             }
@@ -178,7 +178,7 @@ export class Webshop extends AutoEncoder {
         for (const plan of this.meta.seatingPlans) {
             for (const category of plan.categories) {
                 if (category.price) {
-                    return false
+                    return false;
                 }
             }
         }
@@ -186,87 +186,87 @@ export class Webshop extends AutoEncoder {
         if (this.meta.paymentConfiguration.administrationFee.fixed) {
             return false;
         }
-        
-        return true
+
+        return true;
     }
 
     get canEnableCart() {
         if (this.products.length === 1 && !this.meta.allowDiscountCodeEntry) {
-            const product = this.products[0]
+            const product = this.products[0];
             if (product.isUnique) {
-                return false
+                return false;
             }
         }
-        return true
+        return true;
     }
 
     get shouldEnableCart() {
         if (!this.meta.cartEnabled) {
-            return false
+            return false;
         }
-        return this.canEnableCart
+        return this.canEnableCart;
     }
 
-    getDefaultDomain(organization: Organization): string  {
-        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])
+    getDefaultDomain(organization: Organization): string {
+        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']);
     }
 
     getDefaultUrl(organization: Organization): string {
-        return this.getDefaultDomain(organization)+this.getDefaultSuffix()
+        return this.getDefaultDomain(organization) + this.getDefaultSuffix();
     }
 
     getDomainUrl(): string {
-        return this.domain+this.getDomainSuffix()
+        return this.domain + this.getDomainSuffix();
     }
 
     getUrl(organization: Organization): string {
         if (this.domain && this.meta.domainActive) {
-            return this.getDomainUrl()
+            return this.getDomainUrl();
         }
 
-        return this.getDefaultUrl(organization)
+        return this.getDefaultUrl(organization);
     }
-    
+
     getLegacyUrl(organization: Organization): string | null {
         if (!STAMHOOFD.domains.legacyWebshop || this.legacyUri === null) {
-            return null
+            return null;
         }
-        return organization.uri+"."+STAMHOOFD.domains.legacyWebshop+(this.legacyUri ? "/"+this.legacyUri : "")
+        return organization.uri + '.' + STAMHOOFD.domains.legacyWebshop + (this.legacyUri ? '/' + this.legacyUri : '');
     }
 
     getDomainSuffix(): string {
         if (!this.domainUri) {
-            return ""
+            return '';
         }
-        return "/"+this.domainUri
+        return '/' + this.domainUri;
     }
 
     getDefaultSuffix(): string {
         if (!this.uri) {
-            return ""
+            return '';
         }
-        return "/"+this.uri
+        return '/' + this.uri;
     }
 
     getUrlSuffix(): string {
         if (this.domain) {
-            return this.getDomainSuffix()
+            return this.getDomainSuffix();
         }
-        return this.getDefaultSuffix()
+        return this.getDefaultSuffix();
     }
 
     buildDNSRecords(): DNSRecord[] {
         if (!this.domain) {
-            return []
+            return [];
         }
-        return WebshopPrivateMetaData.buildDNSRecords(this.domain)
+        return WebshopPrivateMetaData.buildDNSRecords(this.domain);
     }
 
     isClosed(margin = 0) {
         if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin) || this.opensInTheFuture()) {
-            return true
+            return true;
         }
-        return false
+        return false;
     }
 
     opensInTheFuture() {
@@ -274,24 +274,23 @@ export class Webshop extends AutoEncoder {
             return false;
         }
         if (this.meta.openAt && this.meta.openAt.getTime() > new Date().getTime()) {
-            return true
+            return true;
         }
-        return false
+        return false;
     }
 
     clearStock() {
         for (const product of this.products) {
-            product.clearStock()
+            product.clearStock();
         }
 
         for (const method of this.meta.checkoutMethods) {
-            method.clearStock()
+            method.clearStock();
         }
     }
 }
 
 export class PrivateWebshop extends Webshop {
     @field({ decoder: WebshopPrivateMetaData })
-    privateMeta = WebshopPrivateMetaData.create({})
+    privateMeta = WebshopPrivateMetaData.create({});
 }
-

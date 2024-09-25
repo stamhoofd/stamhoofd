@@ -1,4 +1,4 @@
-import { XlsxFileWriter } from "./XlsxFileWriter";
+import { XlsxFileWriter } from './XlsxFileWriter';
 
 export class XlsxThemeWriter extends XlsxFileWriter {
     async close() {
@@ -322,4 +322,3 @@ export class XlsxThemeWriter extends XlsxFileWriter {
         await super.close();
     }
 }
-

@@ -1,4 +1,4 @@
-import { AutoEncoder, EmailDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, EmailDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 export class Admin extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -10,8 +10,8 @@ export class Admin extends AutoEncoder {
 
 export class EditAdmin extends AutoEncoder {
     @field({ decoder: EmailDecoder })
-    email: string
+    email: string;
 
     @field({ decoder: StringDecoder })
-    password: string
+    password: string;
 }

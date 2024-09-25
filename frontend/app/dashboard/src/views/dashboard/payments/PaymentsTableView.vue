@@ -3,7 +3,7 @@
         ref="modernTableView" 
         :table-object-fetcher="tableObjectFetcher" 
         :filter-builders="filterBuilders" 
-        :default-sort-column="allColumns.find(c => c.id == 'createdAt')"
+        :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
         :default-filter="defaultFilter"
         :title="title" 
         :column-configuration-id="configurationId" 

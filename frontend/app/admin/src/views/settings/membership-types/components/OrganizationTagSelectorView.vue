@@ -5,7 +5,7 @@
             <input ref="input" v-model="$searchString" :autofocus="true" class="input" placeholder="Zoek tag" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
         </form>
         <hr>
-        
+
         <STList>
             <STListItem v-for="tag in $searchResult" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                 <template #left>
@@ -21,7 +21,7 @@
         <p v-if="!$searchResult.length" class="style-description-large">
             Er zijn geen resultaten gevonden.
         </p>
-        
+
         <TransitionFade>
             <div v-if="$selectedOutsideSearch.length" class="container">
                 <hr>
@@ -51,26 +51,26 @@ import { computed, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
-        tagIds?: string[],
+        tagIds?: string[];
         onAdd: (
             allTags: OrganizationTag[],
             addedTags: OrganizationTag[],
             deletedTags: OrganizationTag[]
-        ) => void
+        ) => void;
     }>(),
     {
-        tagIds: () => []
-    }
+        tagIds: () => [],
+    },
 );
 
 const title = 'Selecteer tags';
 const $saveText = computed(() => {
-    if(!props.tagIds.length) return 'Voeg toe';
+    if (!props.tagIds.length) return 'Voeg toe';
     return 'Wijzig selectie';
 });
 
 const $hasChanges = computed(() => {
-    if(!props.tagIds.length) {
+    if (!props.tagIds.length) {
         return $selectedTags.value.size > 0;
     }
 
@@ -86,7 +86,7 @@ const pop = usePop();
 const tags = $platform.value.config.tags;
 const initialSelection = props.tagIds.reduce((result, tagId) => {
     const tag = tags.find(tag => tag.id === tagId);
-    if(tag) {
+    if (tag) {
         result.push(tag);
     }
     return result;
@@ -96,7 +96,7 @@ const $selectedTags = ref(new Map<string, OrganizationTag>(initialSelection.map(
 const $selectedOutsideSearch = computed(() => Array.from($selectedTags.value.values()).filter(tag => !$searchResult.value.includes(tag)));
 const $searchResult = computed(() => {
     const searchString = $searchString.value.trim().toLowerCase();
-    if(!searchString) return tags;
+    if (!searchString) return tags;
     return tags.filter(tag => tag.name.toLowerCase().includes(searchString));
 });
 
@@ -109,41 +109,43 @@ function toggleSelect(tag: OrganizationTag) {
 }
 
 function select(value: boolean, tag: OrganizationTag) {
-    if(value) {
+    if (value) {
         $selectedTags.value.set(tag.id, tag);
-    } else {
-        if(isSelected(tag)) {
+    }
+    else {
+        if (isSelected(tag)) {
             $selectedTags.value.delete(tag.id);
         }
     }
 }
 
 function getSelectionAsArray() {
-    return Array.from($selectedTags.value.values())
+    return Array.from($selectedTags.value.values());
 }
 
 async function save() {
     const allTags = getSelectionAsArray();
     const deletedTags = initialSelection.filter(tag => !allTags.includes(tag));
 
-    if(deletedTags.length) {
+    if (deletedTags.length) {
         let confirmText = 'Ben je zeker dat je alle tags wilt verwijderen?';
 
-        if(allTags.length) {
+        if (allTags.length) {
             const deleteCount = deletedTags.length;
             const selectionCount = allTags.length;
             const deletedTagsString = deletedTags.map(t => t.name).join(', ');
             const selectionText = selectionCount === 1 ? 'Er is 1 tag geselecteerd.' : `Er zijn ${selectionCount} tags geselecteerd.`;
 
-            if(deletedTagsString.length > 100) {
+            if (deletedTagsString.length > 100) {
                 confirmText = `${selectionText} Ben je zeker dat je ${deleteCount} tags wilt verwijderen?`;
-            } else {
+            }
+            else {
                 confirmText = `${selectionText} Ben je zeker dat je de volgende tag(s) wilt verwijderen: ${deletedTagsString}`;
             }
         }
 
         const isConfirm = await CenteredMessage.confirm(confirmText, 'Ja');
-        if(!isConfirm) return false;
+        if (!isConfirm) return false;
     }
 
     const addedTags = allTags.filter(tag => !initialSelection.includes(tag));

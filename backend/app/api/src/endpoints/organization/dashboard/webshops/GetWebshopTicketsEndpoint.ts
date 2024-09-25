@@ -1,24 +1,24 @@
-import { Decoder } from "@simonbackx/simple-encoding";
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { Decoder } from '@simonbackx/simple-encoding';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Ticket, Webshop } from '@stamhoofd/models';
-import { PaginatedResponse, PermissionLevel, TicketPrivate, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { PaginatedResponse, PermissionLevel, TicketPrivate, WebshopTicketsQuery } from '@stamhoofd/structures';
 
-import { Context } from "../../../../helpers/Context";
+import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
-type Query = WebshopTicketsQuery
-type Body = undefined
-type ResponseBody = PaginatedResponse<TicketPrivate[], Query>
+type Query = WebshopTicketsQuery;
+type Body = undefined;
+type ResponseBody = PaginatedResponse<TicketPrivate[], Query>;
 
 export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = WebshopTicketsQuery as Decoder<WebshopTicketsQuery>
+    queryDecoder = WebshopTicketsQuery as Decoder<WebshopTicketsQuery>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/webshop/@id/tickets/private", { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/tickets/private', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -29,7 +29,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
     async handle(_: DecodedRequest<Params, Query, Body>): Promise<Response<ResponseBody>> {
         await Promise.resolve();
         throw new Error('Not implemented');
-        /*const organization = await Context.setOrganizationScope();
+        /* const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
@@ -41,7 +41,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         if (!webshop || !await Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Read)) {
             throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot de tickets van deze webshop")
         }
-        
+
         let tickets: Ticket[] | undefined = undefined
         const limit = 150
 
@@ -58,13 +58,13 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         const supportsDeletedTickets = request.request.getVersion() >= 229
 
         return new Response(
-            new PaginatedResponse({ 
+            new PaginatedResponse({
                 results: tickets.map(ticket => TicketPrivate.create(ticket)).filter(ticket => supportsDeletedTickets || !ticket.deletedAt),
                 next: tickets.length >= limit ? WebshopTicketsQuery.create({
                     updatedSince: tickets[tickets.length - 1].updatedAt ?? undefined,
                     lastId: tickets[tickets.length - 1].id ?? undefined
                 }) : undefined
             })
-        );*/
+        ); */
     }
 }

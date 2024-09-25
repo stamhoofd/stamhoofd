@@ -24,7 +24,7 @@
                     </p>
                 </STListItem>
             </STList>
-            <p v-if="!loadingResults && results.length == 0 && query" class="info-box">
+            <p v-if="!loadingResults && results.length === 0 && query" class="info-box">
                 {{ $t('735ec53c-5b23-469a-9365-d1216e1c739b') }}
             </p>
         </main>
@@ -67,7 +67,7 @@ const updateResults = async () => {
     const q = query.value
     const cachedCount = counter
 
-    if (q.length == 0 ) {
+    if (q.length === 0 ) {
         results.value = []
         loadingResults.value = false
         return
@@ -120,7 +120,7 @@ const startUpdateResults = async () => {
 
     Request.cancelAll(owner)
 
-    if (value.length == 0) {
+    if (value.length === 0) {
         results.value = []
         loadingResults.value = false
         return

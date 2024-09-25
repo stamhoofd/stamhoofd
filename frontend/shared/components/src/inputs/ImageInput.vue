@@ -6,7 +6,7 @@
 
             <Spinner v-if="uploading" />
             <img v-else-if="modelValue === null && placeholder" :src="placeholderSrc" :width="placeholderShownResolution.width" :height="placeholderShownResolution.height">
-            <span v-else-if="modelValue == null" class="icon upload" />
+            <span v-else-if="modelValue === null" class="icon upload" />
             <img v-else :src="src" :width="shownResolution.width" :height="shownResolution.height">
             <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
         </label>
@@ -59,10 +59,10 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     uploading = false
 
     get isSquare() {
-        if (this.resolutions == null) {
+        if (this.resolutions === null) {
             return false
         }
-        return !!this.resolutions.find(r => r.width == r.height && r.width)
+        return !!this.resolutions.find(r => r.width === r.height && r.width)
     }
 
     get src() {
@@ -93,7 +93,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     }
 
     changedFile(event) {
-        if (!event.target.files || event.target.files.length != 1) {
+        if (!event.target.files || event.target.files.length !== 1) {
             return;
         }
         if (this.uploading) {

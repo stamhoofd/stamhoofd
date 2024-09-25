@@ -1,28 +1,28 @@
-import { column,Model } from "@simonbackx/simple-database";
-import { v4 as uuidv4 } from "uuid";
+import { column, Model } from '@simonbackx/simple-database';
+import { v4 as uuidv4 } from 'uuid';
 
 export class StripeCheckoutSession extends Model {
-    static table = "stripe_checkout_sessions";
+    static table = 'stripe_checkout_sessions';
 
     @column({
-        primary: true, type: "string", beforeSave(value) {
+        primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
-        }
+        },
     })
     id!: string;
 
-    @column({ type: "string" })
+    @column({ type: 'string' })
     paymentId: string;
 
-    @column({ type: "string" })
+    @column({ type: 'string' })
     stripeSessionId: string;
 
-    @column({ type: "string", nullable: true })
+    @column({ type: 'string', nullable: true })
     organizationId: string | null = null;
 
     /**
      * For direct charges, this should be set
      */
-    @column({ type: "string", nullable: true })
-    accountId: string|null = null
+    @column({ type: 'string', nullable: true })
+    accountId: string | null = null;
 }

@@ -82,7 +82,7 @@ async function submit() {
  
     const valid = await errors.validator.validate()
 
-    if (password.value != passwordRepeat.value) {
+    if (password.value !== passwordRepeat.value) {
         errors.errorBox = new ErrorBox(
             new SimpleError({
                 code: "password_mismatch",

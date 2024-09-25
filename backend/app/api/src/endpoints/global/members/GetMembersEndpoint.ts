@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, Platform } from '@stamhoofd/models';
-import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
+import { SQL, compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
 import { CountFilteredRequest, Country, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
-import parsePhoneNumber from "libphonenumber-js/max";
+import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { memberFilterCompilers } from '../../../sql-filters/members';
@@ -16,20 +15,20 @@ import { memberSorters } from '../../../sql-sorters/members';
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<MembersBlob, LimitedFilteredRequest>
+type ResponseBody = PaginatedResponse<MembersBlob, LimitedFilteredRequest>;
 
-const sorters = memberSorters
-const filterCompilers = memberFilterCompilers
+const sorters = memberSorters;
+const filterCompilers = memberFilterCompilers;
 
 export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>
+    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/members", {});
+        const params = Endpoint.parseParameters(request.url, '/members', {});
 
         if (params) {
             return [true, params as Params];
@@ -37,18 +36,18 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         return [false];
     }
 
-    static async buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
-        const organization = Context.organization
-        let scopeFilter: StamhoofdFilter|undefined = undefined;
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+        const organization = Context.organization;
+        let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (!organization && !Context.auth.canAccessAllPlatformMembers()) {
-            const tags = Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read)
-            if (tags != 'all' && tags.length === 0) {
-                throw Context.auth.error()
+            const tags = Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
+            if (tags !== 'all' && tags.length === 0) {
+                throw Context.auth.error();
             }
-        
+
             if (tags !== 'all') {
-                const platform = await Platform.getShared()
+                const platform = await Platform.getShared();
 
                 // Add organization scope filter
                 scopeFilter = {
@@ -56,27 +55,27 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         $elemMatch: {
                             organization: {
                                 tags: {
-                                    $in: tags
-                                }
+                                    $in: tags,
+                                },
                             },
                             periodId: platform.periodId,
                             group: {
                                 defaultAgeGroupId: {
-                                    $neq: null
-                                }
-                            }
-                        }
-                    }
+                                    $neq: null,
+                                },
+                            },
+                        },
+                    },
                 };
             }
         }
 
         if (organization) {
             // Add organization scope filter
-            const groups = await Context.auth.getAccessibleGroups(organization.id)
+            const groups = await Context.auth.getAccessibleGroups(organization.id);
 
             if (groups.length === 0) {
-                throw Context.auth.error()
+                throw Context.auth.error();
             }
 
             if (groups === 'all') {
@@ -86,173 +85,177 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         registrations: {
                             $elemMatch: {
                                 organizationId: organization.id,
-                            }
-                        }
+                            },
+                        },
                     };
-                } else {
+                }
+                else {
                     // Can only access current period
                     scopeFilter = {
                         registrations: {
                             $elemMatch: {
                                 organizationId: organization.id,
                                 periodId: organization.periodId,
-                            }
-                        }
+                            },
+                        },
                     };
                 }
-            } else {
+            }
+            else {
                 scopeFilter = {
                     registrations: {
                         $elemMatch: {
                             organizationId: organization.id,
                             periodId: organization.periodId,
                             groupId: {
-                                $in: groups
-                            }
-                        }
-                    }
+                                $in: groups,
+                            },
+                        },
+                    },
                 };
             }
         }
-        
+
         const query = SQL
             .select(
-                SQL.column('members', 'id')
+                SQL.column('members', 'id'),
             )
             .from(
-                SQL.table('members')
+                SQL.table('members'),
             );
-            
+
         if (scopeFilter) {
-            query.where(compileToSQLFilter(scopeFilter, filterCompilers))
+            query.where(compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers))
+            query.where(compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
-            let searchFilter: StamhoofdFilter|null = null           
+            let searchFilter: StamhoofdFilter | null = null;
 
             // is phone?
             if (!searchFilter && q.search.match(/^\+?[0-9\s-]+$/)) {
                 // Try to format as phone so we have 1:1 space matches
                 try {
-                    const phoneNumber = parsePhoneNumber(q.search, (Context.i18n.country as Country) || Country.Belgium)
+                    const phoneNumber = parsePhoneNumber(q.search, (Context.i18n.country as Country) || Country.Belgium);
                     if (phoneNumber && phoneNumber.isValid()) {
                         const formatted = phoneNumber.formatInternational();
                         searchFilter = {
                             $or: [
                                 {
                                     phone: {
-                                        $eq: formatted
-                                    }
+                                        $eq: formatted,
+                                    },
                                 },
                                 {
                                     parentPhone: {
-                                        $eq: formatted
-                                    }
+                                        $eq: formatted,
+                                    },
                                 },
                                 {
                                     unverifiedPhone: {
-                                        $eq: formatted
-                                    }
-                                }
-                            ]
-                        }
-                        
+                                        $eq: formatted,
+                                    },
+                                },
+                            ],
+                        };
                     }
-                } catch (e) {
-                    console.error('Failed to parse phone number', q.search, e)
+                }
+                catch (e) {
+                    console.error('Failed to parse phone number', q.search, e);
                 }
             }
 
-             // Is lidnummer?
-             if (!searchFilter && q.search.match(/^[0-9]{4}-[0-9]{6}-[0-9]{1,2}$/) || q.search.match(/^[0-9]{10}$/)) {
+            // Is lidnummer?
+            if (!searchFilter && (q.search.match(/^[0-9]{4}-[0-9]{6}-[0-9]{1,2}$/) || q.search.match(/^[0-9]{10}$/))) {
                 searchFilter = {
                     memberNumber: {
-                        $eq: q.search
-                    }
-                }
+                        $eq: q.search,
+                    },
+                };
             }
 
             // Two search modes:
             // e-mail or name based searching
             if (searchFilter) {
                 // already done
-            } else if (q.search.includes('@')) {
+            }
+            else if (q.search.includes('@')) {
                 const isCompleteAddress = DataValidator.isEmailValid(q.search);
 
                 // Member email address contains, or member parent contains
                 searchFilter = {
-                    '$or': [
+                    $or: [
                         {
                             email: {
-                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search
-                            }
+                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
+                            },
                         },
                         {
                             parentEmail: {
-                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search
-                            }
+                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
+                            },
                         },
                         {
                             unverifiedEmail: {
-                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search
-                            }
-                        }
-                    ]
-                } as any as StamhoofdFilter
-            } else {
+                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search,
+                            },
+                        },
+                    ],
+                } as any as StamhoofdFilter;
+            }
+            else {
                 searchFilter = {
                     name: {
-                        $contains: q.search
-                    }
-                }
+                        $contains: q.search,
+                    },
+                };
             }
 
             // todo: Address search detection
 
             if (searchFilter) {
-                query.where(compileToSQLFilter(searchFilter, filterCompilers))
+                query.where(compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
+                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
-            q.sort = assertSort(q.sort, [{key: 'id'}])
-            query.orderBy(compileToSQLSorter(q.sort, sorters))
-            query.limit(q.limit)
+            q.sort = assertSort(q.sort, [{ key: 'id' }]);
+            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            query.limit(q.limit);
         }
-       
-        return query
+
+        return query;
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
-        const query = await GetMembersEndpoint.buildQuery(requestQuery)
-        const data = await query.fetch()
-        
+        const query = await GetMembersEndpoint.buildQuery(requestQuery);
+        const data = await query.fetch();
+
         const memberIds = data.map((r) => {
             if (typeof r.members.id === 'string') {
-                return r.members.id
+                return r.members.id;
             }
-            throw new Error('Expected string')
+            throw new Error('Expected string');
         });
 
-        const _members = await Member.getBlobByIds(...memberIds)
+        const _members = await Member.getBlobByIds(...memberIds);
         // Make sure members is in same order as memberIds
-        const members = memberIds.map(id => _members.find(m => m.id === id)!)
+        const members = memberIds.map(id => _members.find(m => m.id === id)!);
 
         for (const member of members) {
             if (!await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
-                throw Context.auth.error()
+                throw Context.auth.error();
             }
         }
 
-        let next: LimitedFilteredRequest|undefined;
+        let next: LimitedFilteredRequest | undefined;
 
         if (memberIds.length >= requestQuery.limit) {
             const lastObject = members[members.length - 1];
@@ -263,8 +266,8 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 pageFilter: nextFilter,
                 sort: requestQuery.sort,
                 limit: requestQuery.limit,
-                search: requestQuery.search
-            })
+                search: requestQuery.search,
+            });
 
             if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
                 console.error('Found infinite loading loop for', requestQuery);
@@ -274,13 +277,13 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         return new PaginatedResponse<MembersBlob, LimitedFilteredRequest>({
             results: await AuthenticatedStructures.membersBlob(members),
-            next
+            next,
         });
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
 
@@ -288,20 +291,20 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'limit',
-                message: 'Limit can not be more than ' + maxLimit
-            })
+                message: 'Limit can not be more than ' + maxLimit,
+            });
         }
 
         if (request.query.limit < 1) {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'limit',
-                message: 'Limit can not be less than 1'
-            })
+                message: 'Limit can not be less than 1',
+            });
         }
-        
+
         return new Response(
-            await GetMembersEndpoint.buildData(request.query)
+            await GetMembersEndpoint.buildData(request.query),
         );
     }
 }

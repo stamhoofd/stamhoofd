@@ -78,7 +78,7 @@ export default class ProductSelectDateRangeInput extends VueComponent {
             return
         }
         
-        const a = this.dateRanges.find(aa => aa.id == val.id)
+        const a = this.dateRanges.find(aa => aa.id === val.id)
         if (a) {
             this.selectedDateRange = a
             if (this.editingDateRange) {
@@ -98,7 +98,7 @@ export default class ProductSelectDateRangeInput extends VueComponent {
     }
 
     mounted() {
-        const a = this.dateRanges.find(aa => aa.id == this.modelValue?.id)
+        const a = this.dateRanges.find(aa => aa.id === this.modelValue?.id)
         if (a) {
             this.selectedDateRange = a
             this.editingDateRange = false

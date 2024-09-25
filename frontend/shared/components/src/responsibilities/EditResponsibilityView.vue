@@ -25,7 +25,7 @@
             />
         </STInputBox>
 
-        <Checkbox v-if="app == 'admin'" v-model="notOrganizationBased">
+        <Checkbox v-if="app === 'admin'" v-model="notOrganizationBased">
             Nationale functie
         </Checkbox>
 

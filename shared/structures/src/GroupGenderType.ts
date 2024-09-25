@@ -1,5 +1,5 @@
 export enum GroupGenderType {
-    Mixed = "Mixed",
-    OnlyMale = "OnlyMale",
-    OnlyFemale = "OnlyFemale",
+    Mixed = 'Mixed',
+    OnlyMale = 'OnlyMale',
+    OnlyFemale = 'OnlyFemale',
 }

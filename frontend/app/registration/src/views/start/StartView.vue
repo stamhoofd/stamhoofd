@@ -8,7 +8,7 @@
 
             <p>{{ $t('369440db-a9e0-4530-a06b-3ea05cc6a2b0') }}</p>
 
-            <p v-if="members.length == 0" class="style-button-bar">
+            <p v-if="members.length === 0" class="style-button-bar">
                 <button v-if="isAcceptingNewMembers" class="button primary" type="button" @click="registerMembers">
                     <span class="icon edit" />
                     <span>Schrijf een lid in</span>
