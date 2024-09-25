@@ -188,12 +188,12 @@ export class AdminPermissionChecker {
     }
 
     /**
-     * Will throw error if not allowed to write this event
+     * Will throw error if not allowed to edit/add/delete this event
      * @param event 
      * @returns Organization if event for specific organization, else null
      * @throws error if not allowed to write this event
      */
-    async tryWriteEvent(event: Event): Promise<Organization | null> {
+    async tryAdminEvent(event: Event, options: {organization?: Organization} = {}): Promise<Organization | null> {
         const accessRight: AccessRight = AccessRight.EventWrite;
         const eventForTags = event.meta.organizationTagIds;
         const eventForDefaultAgeGroupIds = event.meta.defaultAgeGroupIds;
@@ -207,7 +207,11 @@ export class AdminPermissionChecker {
             let organizationPermissions: LoadedPermissions | null = null;
 
             try {
-                organization = await this.getOrganization(eventForOrganization);
+                if(eventForOrganization === options.organization?.id) {
+                    organization = options.organization;
+                } else {
+                    organization = await this.getOrganization(eventForOrganization);
+                }
                 organizationPermissions = await this.getOrganizationPermissions(organization);
             } catch(error) {
                 console.error(error);
@@ -285,19 +289,16 @@ export class AdminPermissionChecker {
             })
         }
 
-        if(eventForTags === null && eventForDefaultAgeGroupIds === null) {
-            // todo: add option to create event for all groups
-            if(!platformPermissions.hasAccessRight(accessRight)) {
+        //organization tags
+        if(eventForTags === null) {
+            if(!(platformPermissions.hasAccessRight(accessRight) || platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, '', accessRight))) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren voor alle groepen.',
                     statusCode: 400
                 })
             }
-        } 
-
-        //organization tags
-        if(eventForTags !== null) {
+        } else {
             for(const tagId of eventForTags) {
                 if(!platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tagId, accessRight)) {
                     throw new SimpleError({
@@ -308,20 +309,6 @@ export class AdminPermissionChecker {
                 }
             }
         }
-        //defaultAgeGroups
-        if(eventForDefaultAgeGroupIds !== null) {
-            for(const defaultAgeGroupId of eventForDefaultAgeGroupIds) {
-                // todo: make configurable in frontend
-                if(!platformPermissions.hasResourceAccessRight(PermissionsResourceType.DefaultAgeGroups, defaultAgeGroupId, accessRight)) {
-                    throw new SimpleError({
-                        code: 'permission_denied',
-                        message: "Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren voor deze standaard leeftijdsgroep(en).",
-                        statusCode: 400
-                    })
-                }
-            }
-        }
-        //#endregion
 
         return null;
     }

@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Event, Group, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Event, Group, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Event as EventStruct, GroupType, NamedObject } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -51,7 +51,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             const event = new Event()
             event.organizationId = put.organizationId
             event.meta = put.meta;
-            const eventOrganization = await this.tryWriteEvent(event);
+            const eventOrganization = await this.tryAdminEvent(event);
             event.id = put.id
             event.name = put.name
             event.startDate = put.startDate
@@ -103,16 +103,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     human: 'De activiteit werd niet gevonden',
                 })
             }
-
-            try {
-                await this.tryWriteEvent(event);
-            } catch {
-                throw new SimpleError({
-                    code: 'not_found',
-                    message: 'Event not found',
-                    human: 'De activiteit werd niet gevonden',
-                })
-            }
+            
+            const originalOrganization = (await this.tryAdminEvent(event)) ?? undefined;
 
             if (patch.meta?.organizationCache) {
                 throw new SimpleError({
@@ -122,16 +114,14 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     field: 'meta.organizationCache'
                 })
             }
-            
 
             event.meta = patchObject(event.meta, patch.meta);
 
             if(patch.organizationId) {
                 event.organizationId = patch.organizationId
             }
-
-            // todo: prevent loading organization twice?
-            const eventOrganization = await this.tryWriteEvent(event);
+            
+            const eventOrganization = await this.tryAdminEvent(event, { organization: originalOrganization });
             if (eventOrganization) {
                 event.meta.organizationCache = NamedObject.create({id: eventOrganization.id, name: eventOrganization.name})
             }
@@ -219,7 +209,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({ code: "not_found", message: "Event not found", statusCode: 404 });
             }
 
-            await this.tryWriteEvent(event);
+            await this.tryAdminEvent(event);
 
             if(event.groupId) {
                 await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
@@ -333,8 +323,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
     }
 
-    private async tryWriteEvent(event: Event) {
-        return await Context.auth.tryWriteEvent(event);
+    private async tryAdminEvent(event: Event, options: {organization?: Organization} = {}) {
+        return await Context.auth.tryAdminEvent(event, options);
     }
 
     private static throwIfAddressIsMissing(event: Event) {

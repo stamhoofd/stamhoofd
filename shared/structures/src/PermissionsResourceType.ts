@@ -6,8 +6,7 @@ export enum PermissionsResourceType {
     Groups = "Groups",
     GroupCategories = "GroupCategories",
     OrganizationTags = "OrganizationTags",
-    RecordCategories = "RecordCategory",
-    DefaultAgeGroups = 'DefaultAgeGroups',
+    RecordCategories = "RecordCategory"
 }
 
 export function getPermissionResourceTypeName(type: PermissionsResourceType, plural = true): string {
@@ -17,6 +16,5 @@ export function getPermissionResourceTypeName(type: PermissionsResourceType, plu
         case PermissionsResourceType.GroupCategories: return plural ? 'categorieën' : 'categorie';
         case PermissionsResourceType.OrganizationTags: return plural ? 'tags' : 'tag';
         case PermissionsResourceType.RecordCategories: return plural ? 'vragenlijsten' : 'vragenlijst';
-        case PermissionsResourceType.DefaultAgeGroups: return plural ? 'standaard leeftijdsgroepen' : 'standaard leeftijdsgroep';
     }
 }
