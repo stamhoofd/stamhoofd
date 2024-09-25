@@ -1,6 +1,7 @@
 'use strict';
 import tseslint from 'typescript-eslint';
 import eslint from '@eslint/js';
+import stylistic from '@stylistic/eslint-plugin'
 
 // Configs
 import frontend from './configs/frontend.js';
@@ -11,6 +12,18 @@ import jest from 'eslint-plugin-jest'
 const baseRules = [
     eslint.configs.recommended,
     ...tseslint.configs.recommendedTypeChecked,  
+    stylistic.configs.customize({
+        // the following options are the default values
+        indent: 4,
+        quotes: 'single',
+        semi: true,
+        jsx: false
+    }),
+    {
+        rules: {
+            '@stylistic/quotes': ['error', 'single', { allowTemplateLiterals: true, avoidEscape: true }],
+        }
+    },
     {
         // Make sure TypeScript type checking can run correctly for rules that require it
         files: ['*.ts', '**/*.ts'],
