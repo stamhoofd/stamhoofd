@@ -44,7 +44,7 @@ export class Sorter {
         return 1
     }
 
-    static byEnumValue<T extends {}>( a: string, b: string, enumObject: T) {
+    static byEnumValue<T extends object>( a: string, b: string, enumObject: T) {
         return Object.values(enumObject).indexOf(a) - Object.values(enumObject).indexOf(b)
     }
 
@@ -78,8 +78,8 @@ export class Sorter {
      * Return the first non zero value from a list, or zero if all values are zero
      */
     static stack(...sortResults: number[]) {
-        while(sortResults.length > 0) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        while (sortResults.length > 0) {
+             
             const f = sortResults.shift()!
             if (f != 0) {
                 return f

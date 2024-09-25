@@ -29,8 +29,17 @@ const baseRules = [
     },
     {
         // Make sure we disable TypeScript eslint rules that are not compatible with JavaScript files
-        files: ['**/*.js', '**/*.mjs'],
+        files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
         ...tseslint.configs.disableTypeChecked,
+    },
+    {
+        files: ['**/*.cjs'],
+        languageOptions: {
+            sourceType: "commonjs"
+        }
+    },
+    {
+        ignores: ["**/dist/*"]
     }
 ];
 
@@ -42,6 +51,9 @@ export default {
             ...frontend
         ],
         backend: [
+            ...baseRules
+        ],
+        shared: [
             ...baseRules
         ]
     },

@@ -1,5 +1,5 @@
 export const throttle = (func: any, limit: any) => {
-    let lastFunc: any;
+    let lastFunc: NodeJS.Timeout;
     let lastRan: any;
     return function(this: any) {
         const context = this;
