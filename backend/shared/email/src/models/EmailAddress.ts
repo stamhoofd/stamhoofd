@@ -1,7 +1,7 @@
 import { column, Database, Model } from '@simonbackx/simple-database';
+import { QueueHandler } from '@stamhoofd/queues';
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
-import { QueueHandler } from '@stamhoofd/queues';
 import { EmailInterfaceRecipient } from '../classes/Email';
 
 async function randomBytes(size: number): Promise<Buffer> {

@@ -206,7 +206,7 @@ export class PlatformFamilyManager {
             .flatMap(cm => cm.users)
             .find(u => u.id === userId)?.memberId ?? null;
 
-        if(userMemberId !== newUserMemberId) {
+        if (userMemberId !== newUserMemberId) {
             this.context.updateData(true, false, false).catch(console.error)
         }
     }

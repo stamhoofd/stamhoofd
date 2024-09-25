@@ -17,9 +17,9 @@ import STNavigationBar from "./navigation/STNavigationBar.vue";
 
 
 export type ComponentExposed<T> =
-	T extends new (...angs: any) => infer E ? E :
-	    T extends (props: any, ctx: any, expose: (exposed: infer E) => any, ...args: any) => any ? NonNullable<E> :
-	        {};
+	T extends new (...args: any[]) => infer E ? E :
+	    T extends ((props: any, ctx: any, expose: (exposed: infer E) => any, ...args: any[]) => any) ? NonNullable<E> :
+	        object;
 
 /**
  * Return false if it should not cancel the default behaviour
@@ -39,7 +39,7 @@ function focusNextElement () {
                 return element.offsetWidth > 0 || element.offsetHeight > 0 || element === activeElement
             });
         const index = focussable.indexOf(activeElement);
-        if(index > -1) {
+        if (index > -1) {
             const nextElement = focussable[index + 1]
             if (!nextElement) {
                 if (activeElement.form.hasAttribute("data-submit-last-field")) {

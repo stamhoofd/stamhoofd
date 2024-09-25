@@ -26,11 +26,11 @@
     "editor.formatOnSave": false,
     "eslint.format.enable": true,
     "eslint.options": {
-        "extensions": [
+        /*"extensions": [
             ".js",
             ".ts",
             ".vue"
-        ]
+        ]*/
     },
     "eslint.validate": [
         "typescript",

@@ -314,7 +314,6 @@ export class Email extends Model {
                 }
             })
 
-            // eslint-disable-next-line no-constant-condition
             while (true) {
                 const data = await SQL.select()
                     .from('email_recipients')
@@ -617,14 +616,14 @@ export class Email extends Model {
 
             let recipientRow: EmailRecipientStruct | undefined;
 
-            if(recipient) {
+            if (recipient) {
                 const emailRecipient = EmailRecipient.fromRow(recipient[EmailRecipient.table]);
-                if(emailRecipient) {
+                if (emailRecipient) {
                     recipientRow = emailRecipient.getStructure();
                 }
             }
 
-            if(!recipientRow) {
+            if (!recipientRow) {
                 recipientRow = getExampleRecipient();
             }
 

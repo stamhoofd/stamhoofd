@@ -1,0 +1,14 @@
+{
+    "name": "eslint-plugin-stamhoofd",
+    "version": "2.39.1",
+    "main": "./src/index.js",
+    "license": "UNLICENCED",
+    "sideEffects": false,
+    "type": "module",
+    "files": [
+        "src"
+    ],
+    "publishConfig": {
+        "access": "public"
+    }
+}
