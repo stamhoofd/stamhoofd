@@ -211,61 +211,88 @@ export class AdminPermissionChecker {
                 organizationPermissions = await this.getOrganizationPermissions(organization);
             } catch(error) {
                 console.error(error);
-                // throws if organization not found for example
-                // todo
-                throw new Error('todo');
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Event not found',
+                    human: 'De activiteit werd niet gevonden',
+                })
             }
 
             if(organizationPermissions === null) {
-                // todo
-                throw new Error('todo');
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
+                    statusCode: 400
+                })
             }
 
             if(eventForGroups === null) {
                 if(!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, '', accessRight)) {
-                    // todo
-                    throw new Error('todo');
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
+                        statusCode: 400
+                    })
                 }
             } else {
                 for(const group of eventForGroups) {
                     if(!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, group.id, accessRight)) {
-                        // todo
-                        throw new Error('todo');
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze groep(en).',
+                            statusCode: 400
+                        })
                     }
                 }
             }
 
             if(eventForTags !== null) {
                 // not supported currently
-                // todo
-                throw new Error('todo');
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Een activiteit voor een organisatie kan geen tags bevatten.',
+                    statusCode: 400
+                })
             }
 
             if(eventForDefaultAgeGroupIds !== null) {
                 // not supported currently
-                // todo
-                throw new Error('todo');
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Een activiteit voor een organisatie kan niet beperkt worden tot specifieke standaard leeftijdsgroepen.',
+                    statusCode: 400
+                })
             }
 
             return organization;
         } else if(eventForGroups !== null) {
             // not supported currently
-            // todo
-            throw new Error('todo');
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'Een nationale of reginale activiteit kan (momenteel) niet beperkt worden tot specifieke groepen.',
+                statusCode: 400
+            })
         }
         //#endregion
 
         //#region platform
         const platformPermissions = this.platformPermissions;
         if(!platformPermissions) {
-            // todo
-            throw new Error('todo');
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren.',
+                statusCode: 400
+            })
         }
 
         if(eventForTags === null && eventForDefaultAgeGroupIds === null) {
             // todo: add option to create event for all groups
             if(!platformPermissions.hasAccessRight(accessRight)) {
-                throw new Error('todo');
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren voor alle groepen.',
+                    statusCode: 400
+                })
             }
         } 
 
@@ -273,8 +300,11 @@ export class AdminPermissionChecker {
         if(eventForTags !== null) {
             for(const tagId of eventForTags) {
                 if(!platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tagId, accessRight)) {
-                    // todo
-                    throw new Error('todo');
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: "Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren voor deze regio('s).",
+                        statusCode: 400
+                    })
                 }
             }
         }
@@ -283,8 +313,11 @@ export class AdminPermissionChecker {
             for(const defaultAgeGroupId of eventForDefaultAgeGroupIds) {
                 // todo: make configurable in frontend
                 if(!platformPermissions.hasResourceAccessRight(PermissionsResourceType.DefaultAgeGroups, defaultAgeGroupId, accessRight)) {
-                    // todo
-                    throw new Error('todo');
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: "Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren voor deze standaard leeftijdsgroep(en).",
+                        statusCode: 400
+                    })
                 }
             }
         }
