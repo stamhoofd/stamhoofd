@@ -4,7 +4,10 @@ export default {
     rules: {
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", "caughtErrors": "none", }],
+
         "@typescript-eslint/no-namespace": "off",
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-misused-promises": "error",

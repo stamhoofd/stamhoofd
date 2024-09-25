@@ -3,7 +3,7 @@ import { Sorter } from "@stamhoofd/utility";
 
 import { MemberSummary } from "../admin/MemberSummary";
 import { SortDefinition } from "./Sorters";
-import { SortList } from "./SortList";
+import { SortItemDirection, SortList } from "./SortList";
 
 export type InMemorySorter<T> = (a: T, b: T) => number;
 export type InMemorySortDefinition<T, B extends PlainObject = PlainObject> = SortDefinition<T, B> & {
@@ -21,7 +21,7 @@ export function compileToInMemorySorter<T>(sortBy: SortList, definitions: InMemo
             throw new Error('Unknown sort key ' + s.key)
         }
 
-        if (s.order === 'DESC') {
+        if (s.order === SortItemDirection.DESC) {
             sorters.push((a, b) => {
                 return - d.sort(a, b)
             });

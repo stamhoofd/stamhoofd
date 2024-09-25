@@ -112,8 +112,8 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             }
         }
 
-        if(subtypes && subtypes.includes('unverified')) {
-            for(const unverifiedEmail of this.details.unverifiedEmails) {
+        if (subtypes && subtypes.includes('unverified')) {
+            for (const unverifiedEmail of this.details.unverifiedEmails) {
                 recipients.push(
                     EmailRecipient.create({
                         email: unverifiedEmail,

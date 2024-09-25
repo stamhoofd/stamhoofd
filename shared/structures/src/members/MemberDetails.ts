@@ -3,7 +3,7 @@ import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
 import { Replacement } from '../endpoints/EmailRequest';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
@@ -241,7 +241,7 @@ export class MemberDetails extends AutoEncoder {
 
         if (this.phone) {
             const formattedPhone = Formatter.removeDuplicateSpaces(this.phone.trim());
-            if(formattedPhone !== this.phone) {
+            if (formattedPhone !== this.phone) {
                 this.phone = formattedPhone;
             }
 
@@ -257,7 +257,7 @@ export class MemberDetails extends AutoEncoder {
         if (this.hasUnverifiedData) {
             const lastReviewed = this.reviewTimes.getLastReview("parents") && this.reviewTimes.getLastReview("details");
 
-            if(lastReviewed) {
+            if (lastReviewed) {
                 // clear unverified data
                 this.unverifiedAddresses = [];
                 this.unverifiedEmails = [];
@@ -265,20 +265,20 @@ export class MemberDetails extends AutoEncoder {
             } else {
                 //#region filter used unverified addresses
                 const usedAddressIds = new Set<string>();
-                if(this.unverifiedAddresses.length > 0) {
+                if (this.unverifiedAddresses.length > 0) {
                     const memberAddressId = this.address?.id;
                     const parentAddressIds = this.parents.filter(parent => parent.address).map(parent => parent.address!.id);
                 
-                    for(const unverifiedAddress of this.unverifiedAddresses) {
+                    for (const unverifiedAddress of this.unverifiedAddresses) {
                         unverifiedAddress.cleanData();
                         const addressId = unverifiedAddress.id;
                         const isUsed = addressId === memberAddressId || parentAddressIds.includes(addressId);
-                        if(isUsed) {
+                        if (isUsed) {
                             usedAddressIds.add(addressId);
                         }
                     }
                 
-                    if(usedAddressIds.size > 0) {
+                    if (usedAddressIds.size > 0) {
                         this.unverifiedAddresses = this.unverifiedAddresses.filter(address => !usedAddressIds.has(address.id));
                     }
                 }
@@ -288,18 +288,18 @@ export class MemberDetails extends AutoEncoder {
                 this.unverifiedEmails = filterUsedAndInvalidEmails(this.unverifiedEmails);
 
                 //#region filter unverified phones
-                if(this.unverifiedPhones.length > 0 ){
+                if (this.unverifiedPhones.length > 0 ){
                     const parentPhones = new Set<string>();
-                    for(const parent of this.parents) {
+                    for (const parent of this.parents) {
                         const parentPhone = parent.phone;
-                        if(parentPhone) parentPhones.add(parentPhone);
+                        if (parentPhone) parentPhones.add(parentPhone);
                     }
 
                     this.unverifiedPhones = this.unverifiedPhones
                     .map(phone => Formatter.removeDuplicateSpaces(phone.trim()))
                     .filter(unverifiedPhone => {
-                        if(this.phone === unverifiedPhone) return false;
-                        if(parentPhones.has(unverifiedPhone)) return false;
+                        if (this.phone === unverifiedPhone) return false;
+                        if (parentPhones.has(unverifiedPhone)) return false;
                         return true;
                     });
                 }
@@ -308,21 +308,21 @@ export class MemberDetails extends AutoEncoder {
         }
         //#endregion
         
-        if(this.notes !== null) {
+        if (this.notes !== null) {
             // cut long notes
-            if(this.notes.length > 1000) {
+            if (this.notes.length > 1000) {
                 this.notes = this.notes.substring(0, 1000);
             }
 
             // remove empty notes
-            if(/^\s*$/.test(this.notes)) {
+            if (/^\s*$/.test(this.notes)) {
                 this.notes = null;
             }
         }
 
         // set requires financial support if uitpasNumber has 'kansentarief'
         const hasFinancialSupport = !!this.requiresFinancialSupport?.value;
-        if((hasFinancialSupport === false) && this.uitpasNumber !== null && DataValidator.isUitpasNumberKansenTarief(this.uitpasNumber)) {
+        if ((hasFinancialSupport === false) && this.uitpasNumber !== null && DataValidator.isUitpasNumberKansenTarief(this.uitpasNumber)) {
             this.requiresFinancialSupport = BooleanStatus.create({value: true});
         }
     }

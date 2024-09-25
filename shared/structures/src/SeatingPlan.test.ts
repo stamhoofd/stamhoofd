@@ -1,9 +1,4 @@
-import { ObjectData } from "@simonbackx/simple-encoding";
-
-import { GroupGenderType } from "./GroupGenderType";
-import { GroupSettings, WaitingListType } from "./GroupSettings";
 import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType } from "./SeatingPlan";
-
 
 describe("SeatingPlan", () => {
     describe('adjustSeatsForBetterFit', () => {

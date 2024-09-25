@@ -62,7 +62,7 @@ export class SetupStep extends AutoEncoder {
     }
 
     get progress() {
-        if(!this.totalSteps) return 1;
+        if (!this.totalSteps) return 1;
         return this.finishedSteps / this.totalSteps
     }
 
@@ -70,15 +70,15 @@ export class SetupStep extends AutoEncoder {
         const isDone = this.isDone;
         const isReviewed = this.isReviewed;
 
-        if(isDone && isReviewed) {
+        if (isDone && isReviewed) {
             return 0;
         }
 
-        if(isDone && !isReviewed) {
+        if (isDone && !isReviewed) {
             return 1;
         }
         
-        if(!isDone && isReviewed) {
+        if (!isDone && isReviewed) {
             return 2;
         }
 
@@ -87,7 +87,7 @@ export class SetupStep extends AutoEncoder {
 
     markReviewed({userId, userName}: {userId: string, userName: string}) {
         const now = new Date();
-        if(this.review === null || (now.getTime() > this.review.date.getTime())) {
+        if (this.review === null || (now.getTime() > this.review.date.getTime())) {
             this.review = SetupStepReview.create({
                 date: now,
                 userName,
@@ -101,18 +101,18 @@ export class SetupStep extends AutoEncoder {
     }
 
     update(finishedSteps: number, totalSteps: number) {
-        if(finishedSteps === this.finishedSteps && totalSteps === this.totalSteps) {
+        if (finishedSteps === this.finishedSteps && totalSteps === this.totalSteps) {
             return;
         }
         
         const now = new Date();
 
-        if(totalSteps === 0) {
+        if (totalSteps === 0) {
             finishedSteps = 1;
             totalSteps = 1;
         }
 
-        if(this.updatedAt === null || (now.getTime() > this.updatedAt.getTime())) {
+        if (this.updatedAt === null || (now.getTime() > this.updatedAt.getTime())) {
             this.finishedSteps = finishedSteps;
             this.totalSteps = totalSteps;
             this.updatedAt = now;
@@ -131,10 +131,10 @@ export class SetupSteps extends AutoEncoder {
     getAll(): {type: SetupStepType, step: SetupStep}[] {
         const result: {type: SetupStepType, step: SetupStep}[] = [];
 
-        for(const value of Object.values(SetupStepType)) {
+        for (const value of Object.values(SetupStepType)) {
             const step = this.steps.get(value);
 
-            if(step) {
+            if (step) {
                 result.push({type: value, step});
             }
         }
@@ -153,12 +153,12 @@ export class SetupSteps extends AutoEncoder {
     getStepsToDoOverview(): {type: SetupStepType, step: SetupStep}[] {
         const result: {type: SetupStepType, step: SetupStep}[] = [];
 
-        for(const value of Object.values(SetupStepType)) {
+        for (const value of Object.values(SetupStepType)) {
             const step = this.steps.get(value);
 
-            if(step) {
+            if (step) {
                 // filter out steps that are done and reviewed
-                if(step.isDone && step.isReviewed) {
+                if (step.isDone && step.isReviewed) {
                     continue;
                 }
 
@@ -178,21 +178,21 @@ export class SetupSteps extends AutoEncoder {
 
     markReviewed(stepType: SetupStepType, by: {userId: string, userName: string}) {
         const step = this.steps.get(stepType);
-        if(step) {
+        if (step) {
             step.markReviewed(by);
         }
     }
 
     resetReviewed(stepType: SetupStepType) {
         const step = this.steps.get(stepType);
-        if(step) {
+        if (step) {
             step.resetReviewed();
         }
     }
 
     update(stepType: SetupStepType, {finishedSteps, totalSteps}: {finishedSteps: number, totalSteps: number}) {
         const step = this.steps.get(stepType);
-        if(step) {
+        if (step) {
             step.update(finishedSteps, totalSteps);
         } else {
             this.steps.set(stepType, SetupStep.create({finishedSteps, totalSteps}));

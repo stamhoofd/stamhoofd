@@ -9,7 +9,7 @@ export enum PaymentStatus {
 
 export class PaymentStatusHelper {
     static getName(method: PaymentStatus): string {
-        switch(method) {
+        switch (method) {
             case PaymentStatus.Pending: return "wacht op betaling";
             case PaymentStatus.Created: return "wacht op betaling";
             case PaymentStatus.Succeeded: return "ontvangen";

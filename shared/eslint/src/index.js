@@ -6,6 +6,7 @@ import eslint from '@eslint/js';
 import frontend from './configs/frontend.js';
 import typescript from './configs/typescript.js';
 import defaultRules from './configs/default.js';
+import jest from 'eslint-plugin-jest'
 
 const baseRules = [
     eslint.configs.recommended,
@@ -38,6 +39,15 @@ const baseRules = [
             sourceType: "commonjs"
         }
     },
+    {
+        files: ['**/*.test.js', '**/*.test.ts'],
+        ...jest.configs['flat/recommended'],
+        rules: {
+            ...jest.configs['flat/recommended'].rules,
+            'jest/prefer-expect-assertions': 'off',
+        },
+    },
+
     {
         ignores: ["**/dist/*"]
     }

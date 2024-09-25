@@ -247,7 +247,7 @@ export class PlatformFamily {
                 }
             }
 
-            for(const unverifiedAddress of member.member.details.unverifiedAddresses) {
+            for (const unverifiedAddress of member.member.details.unverifiedAddresses) {
                 addresses.set(unverifiedAddress.toString(), unverifiedAddress);
             }
         }
@@ -618,7 +618,7 @@ export class PlatformMember implements ObjectWithRecords {
 
     filterRegistrations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean, types?: GroupType[], organizationId?: string}) {
         return this.patchedMember.registrations.filter(r => {
-            if (!r.registeredAt === null || r.deactivatedAt !== null) {
+            if (r.registeredAt === null || r.deactivatedAt !== null) {
                 return false;
             }
 

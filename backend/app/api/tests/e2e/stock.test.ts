@@ -1,5 +1,5 @@
 /* eslint-disable jest/expect-expect */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 /* eslint-disable jest/no-standalone-expect */
 import { PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-endpoints";

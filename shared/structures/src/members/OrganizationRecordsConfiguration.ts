@@ -292,7 +292,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             clone.dataPermission = parent.dataPermission;
         }
 
-        if(parent.uitpasNumber !== null) {
+        if (parent.uitpasNumber !== null) {
             clone.uitpasNumber = parent.uitpasNumber;
         }
 

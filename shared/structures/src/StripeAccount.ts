@@ -51,7 +51,7 @@ export class StripeMetaData extends AutoEncoder {
     type: 'express' | 'standard' = 'express'
 
     @field({ decoder: AnyDecoder, optional: true, nullable: true })
-    blob: any | null = null
+    blob: any = null
 
     @field({ decoder: StripeBusinessProfile, optional: true })
     business_profile = StripeBusinessProfile.create({})

@@ -34,7 +34,7 @@ export function downgradePaymentMethodArrayV150(newerValue: PaymentMethod[]): Pa
 
 export class PaymentMethodHelper {
     static getName(method: PaymentMethod, context: null | "takeout" | "delivery" | 'Takeout' | 'Delivery' | 'OnSite' = null): string {
-        switch(method) {
+        switch (method) {
             case PaymentMethod.Unknown: return "onbekende betaalmethode";
             case PaymentMethod.PointOfSale: {
                 switch (context) {
@@ -56,7 +56,7 @@ export class PaymentMethodHelper {
     }
 
     static getPluralName(method: PaymentMethod): string {
-        switch(method) {
+        switch (method) {
             case PaymentMethod.Unknown: return "onbekende betaalmethodes";
             case PaymentMethod.PointOfSale: {
                 return 'betalingen ter plaatse'

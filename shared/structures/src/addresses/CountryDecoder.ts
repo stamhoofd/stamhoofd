@@ -21,7 +21,7 @@ export const CountryDecoder = new EnumDecoder(Country);
 
 export class CountryHelper {
     static getName(country: Country): string {
-        switch(country) {
+        switch (country) {
         case Country.Belgium: return "België"
         case Country.Netherlands: return "Nederland"
         case Country.Luxembourg: return "Luxemburg"

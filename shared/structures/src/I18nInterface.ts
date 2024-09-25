@@ -1,6 +1,5 @@
 // Vue compability
-interface LocaleMessages { [key: string]: any; }
-type TranslateResult = string | LocaleMessages;
+type TranslateResult = string;
 
 /**
  * Shared structure between frontend and backend

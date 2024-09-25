@@ -99,7 +99,11 @@ export class Cart extends AutoEncoder {
             try {
                 item.refresh(webshop)
             } catch (e) {
-                errors.addError(e)
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    errors.addError(e)
+                } else {
+                    throw e;
+                }
             }
         }
 
@@ -123,8 +127,10 @@ export class Cart extends AutoEncoder {
             } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     e.addNamespace('cart')
+                    errors.addError(e)
+                } else {
+                    throw e;
                 }
-                errors.addError(e)
 
                 if (isSimpleError(e) && (e.meta as any)?.recoverable) {
                     item.cartError = e;

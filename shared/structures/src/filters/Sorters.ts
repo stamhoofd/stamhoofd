@@ -1,5 +1,5 @@
 import { PlainObject } from "@simonbackx/simple-encoding";
-import { SortList } from "./SortList";
+import { SortItemDirection, SortList } from "./SortList";
 
 export type SortDefinition<T, B extends PlainObject = PlainObject> = {
     getValue(a: T): B
@@ -28,7 +28,7 @@ function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<
     const baseFilter = {
         // Either the object is plainly larger than this. 
         [first.key]: {
-            [first.order === 'ASC' ? '$gt' : '$lt']: lastValue
+            [first.order === SortItemDirection.ASC ? '$gt' : '$lt']: lastValue
         }
     };
 

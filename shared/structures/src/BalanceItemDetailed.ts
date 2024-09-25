@@ -1,9 +1,9 @@
 import { field } from "@simonbackx/simple-encoding"
 
-import { BalanceItem, BalanceItemPayment, BalanceItemRelationType, BalanceItemType, shouldAggregateOnRelationType } from "./BalanceItem"
+import { Formatter } from "@stamhoofd/utility"
+import { BalanceItem, BalanceItemPayment } from "./BalanceItem"
 import { RegistrationWithMember } from "./members/RegistrationWithMember"
 import { Order } from "./webshops/Order"
-import { Formatter } from "@stamhoofd/utility"
 
 // Do we still need this?
 export class BalanceItemDetailed extends BalanceItem {

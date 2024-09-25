@@ -174,11 +174,11 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return this.totalPrice - this.administrationFee
     }
 
-    doesMatchFilter(filter: StamhoofdFilter): boolean {
+    doesMatchFilter(_filter: StamhoofdFilter): boolean {
         throw new Error('Method not implemented.');
     }
 
-    isRecordEnabled(record: RecordSettings): boolean {
+    isRecordEnabled(_record: RecordSettings): boolean {
         return true;
     }
 
@@ -187,7 +187,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         //return this.recordAnswers
     }
 
-    patchRecordAnswers(patch: PatchAnswers): this {
+    patchRecordAnswers(_patch: PatchAnswers): this {
         throw new Error("Method not implemented.");
     }
 
@@ -340,7 +340,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         })
     }
 
-    validateTimeSlot(webshop: Webshop, organizationMeta: OrganizationMetaData) {
+    validateTimeSlot(_webshop: Webshop, _organizationMeta: OrganizationMetaData) {
         if (!this.checkoutMethod || this.checkoutMethod.timeSlots.timeSlots.length == 0) {
             this.timeSlot = null;
             return;
@@ -435,7 +435,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: "invalid_phone",
                     message: "Invalid phone",
-                    human: i18n.t('shared.inputs.mobile.invalidMessage').toString(),
+                    human: i18n.t('shared.inputs.mobile.invalidMessage'),
                     field: "customer.phone"
                 })
             }

@@ -14,7 +14,7 @@ export enum OptionSelectionRequirement {
 
 export class OptionSelectionRequirementHelper {
     static getName(requirement: OptionSelectionRequirement): string {
-        switch(requirement) {
+        switch (requirement) {
             case OptionSelectionRequirement.Required: return "Enkel met";
             case OptionSelectionRequirement.Optional: return "Met of zonder";
             case OptionSelectionRequirement.Excluded: return "Enkel zonder";
@@ -48,7 +48,7 @@ export class ProductSelector extends AutoEncoder {
     optionIds: Map<string, OptionSelectionRequirement> = new Map()
 
     getOptionRequirement(optionMenu: OptionMenu, option: Option): OptionSelectionRequirement  {
-        let value = this.optionIds.get(option.id);
+        const value = this.optionIds.get(option.id);
         if (!value) {
             if (optionMenu.multipleChoice) {
                 return OptionSelectionRequirement.Optional;
@@ -74,7 +74,7 @@ export class ProductSelector extends AutoEncoder {
         }
 
         for (const option of cartItem.options) {
-            let value = this.getOptionRequirement(option.optionMenu, option.option)
+            const value = this.getOptionRequirement(option.optionMenu, option.option)
 
             if (value === OptionSelectionRequirement.Excluded) {
                 return false;
@@ -251,13 +251,13 @@ export class ProductDiscountSettings extends AutoEncoder {
     cartLabel: string|null = null;
 
     getApplicableDiscounts(offset: number, amount: number): ProductDiscount[] {
-        let d = this.discounts.slice()
+        const d = this.discounts.slice()
         if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatLast) {
-            while(d.length < offset + amount) {
+            while (d.length < offset + amount) {
                 d.push(this.discounts[this.discounts.length - 1])
             }
         } else if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
-            while(d.length < offset + amount) {
+            while (d.length < offset + amount) {
                 d.push(this.discounts[d.length % this.discounts.length])
             }
         }
@@ -268,9 +268,9 @@ export class ProductDiscountSettings extends AutoEncoder {
     getTitle(webshop: Webshop, isAdmin = false): {title: string, description: string, footnote: string} {
         const n = this.product.getName(webshop, isAdmin)
 
-        let titles: string[] = [n.name];
+        const titles: string[] = [n.name];
         let descriptions: string[] = [];
-        let footnotes: string[] = [];
+        const footnotes: string[] = [];
 
         if (n.footnote) {
             const index = '*'.repeat(footnotes.length + 1);
@@ -446,9 +446,9 @@ export class Discount extends AutoEncoder {
     productDiscounts: ProductDiscountSettings[] = []
 
     getTitle(webshop: Webshop, isAdmin = false): {title: string, description: string, footnote: string} {
-        let titles: string[] = [];
-        let footnotes: string[] = [];
-        let descriptions: string[] = [];
+        const titles: string[] = [];
+        const footnotes: string[] = [];
+        const descriptions: string[] = [];
 
         if (this.orderDiscount.percentageDiscount) {
             titles.push(

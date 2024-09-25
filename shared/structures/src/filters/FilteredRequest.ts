@@ -53,7 +53,7 @@ export class StamhoofdFilterDecoder {
     }
 
     static decode(data: Data): StamhoofdFilter {
-        const value = data.value;
+        const value: unknown = data.value;
 
         if (value === null) {
             return null;
@@ -71,7 +71,7 @@ export class StamhoofdFilterDecoder {
 
         if (typeof value === 'object') {
             // Check if it's a date
-            if (value.$ === '$date') {
+            if ('$' in value && value.$ === '$date' && 'value' in value) {
                 return DateDecoder.decode(
                     data.clone({
                         data: value.value, 

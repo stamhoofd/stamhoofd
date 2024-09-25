@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/sim
 import { v4 as uuidv4 } from "uuid";
 
 import { DNSRecord, DNSRecordType } from '../DNSRecord';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 import { Organization } from '../Organization';
 import { Category } from './Category';
 import { Product } from './Product';

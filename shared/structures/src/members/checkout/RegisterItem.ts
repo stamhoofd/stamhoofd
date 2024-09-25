@@ -373,7 +373,7 @@ export class RegisterItem {
             const menu = remainingMenus[index]
             if (!menu.multipleChoice) {
                 // Already used: not possible to add another
-                remainingMenus.splice(index, 1)[0]
+                remainingMenus.splice(index, 1)
             }
             
             const option = menu.options.find(m => m.id === o.option.id)

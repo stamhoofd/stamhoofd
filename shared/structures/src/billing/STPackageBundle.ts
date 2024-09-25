@@ -19,7 +19,7 @@ export enum STPackageBundle {
 
 export class STPackageBundleHelper {
     static getTitle(bundle: STPackageBundle): string {
-        switch(bundle) {
+        switch (bundle) {
             case STPackageBundle.Members: return "Ledenadministratie voor één jaar"
             case STPackageBundle.Webshops: return "Webshops (max. 10) voor één jaar"
             case STPackageBundle.SingleWebshop: return "Eén webshop voor twee maanden"
@@ -28,7 +28,7 @@ export class STPackageBundleHelper {
     }
 
     static getDescription(bundle: STPackageBundle): string {
-        switch(bundle) {
+        switch (bundle) {
             case STPackageBundle.Members: return "€ 1 per jaar, per lid. Minimum € 79 per jaar, waarbij 79 leden inbegrepen (minder leden kan uiteraard)"
             case STPackageBundle.Webshops: return "€ 79 per jaar (inclusief ticketverkoop-functie) indien minder dan 50.000 euro omzet per jaar (zie website voor hogere omzet)"
             case STPackageBundle.SingleWebshop: return "Eénmalig € 49 (inclusief ticketverkoop-functie)"
@@ -37,7 +37,7 @@ export class STPackageBundleHelper {
     }
 
     static isPublic(bundle: STPackageBundle): boolean {
-        switch(bundle) {
+        switch (bundle) {
             case STPackageBundle.Members: return true;
             case STPackageBundle.Webshops: return true;
             case STPackageBundle.SingleWebshop: return true;
@@ -49,7 +49,7 @@ export class STPackageBundleHelper {
      * If you buy a package that is not combineable with an existing one, should it throw an error?
      */
     static isStackable(bundle: STPackageBundle, pack: STPackage): boolean {
-        switch(bundle) {
+        switch (bundle) {
             case STPackageBundle.TrialMembers: {
                 // Not allowed to start a trial even if pack is expired
                 return false
@@ -63,7 +63,7 @@ export class STPackageBundleHelper {
     }
 
     static isCombineable(bundle: STPackageBundle, pack: STPackage): boolean {
-        switch(bundle) {
+        switch (bundle) {
             case STPackageBundle.Members: {
                 if (pack.meta.type === STPackageType.Members) {
                     // Already bought

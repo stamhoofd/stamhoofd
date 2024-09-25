@@ -323,7 +323,7 @@ export function calculateVATPercentage(address: Address, VATNumber: string | nul
         } else {
             // Apply VAT rate of the home country for consumers in the EU
 
-            switch( address.country) {
+            switch ( address.country) {
                 case Country.Netherlands: VATRate = 21; break;
                 case Country.Luxembourg: VATRate = 17; break;
                 case Country.France: VATRate = 20; break;

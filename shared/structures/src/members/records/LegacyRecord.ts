@@ -1,7 +1,7 @@
 import { AutoEncoder, Data, Decoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { LegacyRecordType,OldRecordType } from "./LegacyRecordType";
+import { LegacyRecordType, OldRecordType } from "./LegacyRecordType";
 
 // Temporary fix for space in enum....
 class TrimEnumDecoder<E extends { [key: number]: string | number }> implements Decoder<E[keyof E]> {

@@ -20,7 +20,7 @@ export class ReduceablePrice extends AutoEncoder {
     reducedPrice: number | null = null
     
     getPrice(isReduced: boolean) {
-        if(this.reducedPrice === null) {
+        if (this.reducedPrice === null) {
             return this.price;
         }
 

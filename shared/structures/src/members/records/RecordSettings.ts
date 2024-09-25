@@ -72,8 +72,8 @@ export class RecordWarning extends AutoEncoder {
 
     static get sort() {
         return (warning1: RecordWarning, warning2: RecordWarning) => {
-            const priority1: string = warning1.type
-            const priority2: string = warning2.type
+            const priority1 = warning1.type
+            const priority2 = warning2.type
 
             if (priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Warning ||
                 priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Info ||

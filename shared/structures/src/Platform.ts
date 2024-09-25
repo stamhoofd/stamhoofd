@@ -79,13 +79,13 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
     getBasePrice(tagIds: string[], shouldApplyReducedPrice: boolean) {
         let result: number | null = null;
 
-        for(const tagId of tagIds.concat([''])) {
+        for (const tagId of tagIds.concat([''])) {
             const price = this.prices.get(tagId);
-            if(!price) continue;
+            if (!price) continue;
 
             const priceForMember = price.getPrice(shouldApplyReducedPrice);
 
-            if(result === null || priceForMember < result) {
+            if (result === null || priceForMember < result) {
                 result = priceForMember;
             }
         }

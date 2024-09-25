@@ -552,7 +552,7 @@ export class CartItem extends AutoEncoder {
                 const menu = remainingMenus[index]
                 if (!menu.multipleChoice) {
                     // Already used: not possible to add another
-                    remainingMenus.splice(index, 1)[0]
+                    remainingMenus.splice(index, 1);
                 }
                 
                 const option = menu.options.find(m => m.id === o.option.id)
@@ -585,7 +585,11 @@ export class CartItem extends AutoEncoder {
         try {
             this.validateAnswers()
         } catch (e) {
-            errors.addError(e)
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                errors.addError(e)
+            } else {
+                throw e
+            }
         }
 
         errors.throwIfNotEmpty()

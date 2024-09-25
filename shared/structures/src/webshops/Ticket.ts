@@ -18,7 +18,7 @@ export class Ticket extends AutoEncoder {
     createdAt: Date = new Date()
 
     @field({ decoder: DateDecoder })
-    updatedAt: Date= new Date()
+    updatedAt: Date = new Date()
 
     /**
      * Unique secret (per webshop) that is printed on the ticket and is required for lookups
@@ -53,7 +53,7 @@ export class TicketPublic extends Ticket {
         return this.items.length === 1 && this.items[0].product.isTicket
     }
 
-    getPrice(order?: Order|null|undefined) {
+    getPrice(order?: Order|null) {
         if (!this.isSingle) {
             if (order) {
                 return order.data.totalPrice
@@ -163,7 +163,7 @@ export class TicketPublic extends Ticket {
             Sorter.byNumberValue(a.items.length, b.items.length),
             Sorter.byStringValue(a.items[0]?.product?.name ?? "", b.items[0]?.product?.name ?? ""),
             Sorter.byStringValue(a.items[0]?.id ?? "", b.items[0]?.id ?? ""), // group same options and items
-            -1 * Sorter.byNumberValue(a.index, b.index) as any,
+            -1 * Sorter.byNumberValue(a.index, b.index),
         )
     }
 

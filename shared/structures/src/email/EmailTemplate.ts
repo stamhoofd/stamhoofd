@@ -322,7 +322,7 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
-        if(type === EmailTemplateType.VerifyEmail) {
+        if (type === EmailTemplateType.VerifyEmail) {
             return [
                 "greeting",
                 "email",
@@ -332,7 +332,7 @@ export class EmailTemplate extends AutoEncoder {
             ]
         }
 
-        if(type === EmailTemplateType.VerifyEmailWithoutCode) {
+        if (type === EmailTemplateType.VerifyEmailWithoutCode) {
             return [
                 "greeting",
                 "email",
@@ -341,7 +341,7 @@ export class EmailTemplate extends AutoEncoder {
             ]
         }
 
-        if(type === EmailTemplateType.AdminInvitation) {
+        if (type === EmailTemplateType.AdminInvitation) {
             return [
                 "greeting",
                 "email",
@@ -353,7 +353,7 @@ export class EmailTemplate extends AutoEncoder {
             ]
         }
 
-        if(type === EmailTemplateType.AdminInvitationNewUser) {
+        if (type === EmailTemplateType.AdminInvitationNewUser) {
             return [
                 "greeting",
                 "email",

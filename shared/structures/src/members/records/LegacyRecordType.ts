@@ -1,7 +1,3 @@
-import { LegacyRecord } from "./LegacyRecord";
-import { RecordAnswer } from "./RecordAnswer";
-import { RecordCategory } from "./RecordCategory";
-import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from "./RecordSettings";
 
 export enum LegacyRecordType {
     // Privacy
