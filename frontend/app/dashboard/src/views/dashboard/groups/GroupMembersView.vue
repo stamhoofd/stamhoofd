@@ -470,26 +470,14 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
     }
 
-    get recordCategories(): RecordCategory[] {
-        // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
-            if (category.childCategories.length > 0) {
-                return category.childCategories
-            }
-            return [category]
-        })
-    }
-
-    get records(): RecordSettings[] {
-        // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return this.recordCategories.flatMap(c => c.records)
-    }
-
     get filterDefinitions() {
         const base: FilterDefinition<MemberWithRegistrations>[] = MemberWithRegistrations.getBaseFilterDefinitions(OrganizationManager.organization)
 
         base.push(
-            ...RecordCategory.getRecordCategoryDefinitions<MemberWithRegistrations>(this.recordCategories, (member) => member.details.recordAnswers)
+            ...RecordCategory.getRecordCategoryDefinitions<MemberWithRegistrations>(
+                OrganizationManager.organization.meta.recordsConfiguration.recordCategories, 
+                (member) => member.details.recordAnswers
+            )
         )
 
         return base

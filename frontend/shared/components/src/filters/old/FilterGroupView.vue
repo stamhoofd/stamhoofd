@@ -65,7 +65,7 @@
         </p>
 
         <p v-for="(category, index) in categories" :key="'categories'+index">
-            <button class="button text" type="button" @click="openCategory($event, category)">
+            <button class="button text wrap" type="button" @click="openCategory($event, category)">
                 <span class="icon add" />
                 <span>{{ category.name }}</span>
             </button>

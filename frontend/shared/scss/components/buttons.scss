@@ -215,6 +215,20 @@
                 text-overflow: clip;
                 flex-shrink: 0;
             }
+
+        }
+
+        &.wrap {
+            height: auto;
+            line-height: 1.4;
+            min-height: 34px;
+
+            > span {
+                white-space: normal;
+                overflow: visible;
+                text-align: left;
+                margin: 8px 0;
+            }
         }
     }
 
