@@ -14,7 +14,7 @@
         "build:full": "yarn clear && yarn build",
         "clear": "rm -rf ./dist",
         "start": "yarn build && node --enable-source-maps ./dist/index.js",
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+        "lint": "eslint"
     },
     "devDependencies": {
         "@types/formidable": "3.4.5",

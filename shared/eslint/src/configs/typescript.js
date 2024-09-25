@@ -2,11 +2,16 @@
 
 export default {
     rules: {
+        "no-undef": "off", // Does not work with TypeScript
+        
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-explicit-any": "off",
 
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", "caughtErrors": "none", }],
+
+        "prefer-promise-reject-errors": "off",
+        "@typescript-eslint/prefer-promise-reject-errors": "off", // Does not work correctly when passing on 'any' errors in a try catch block using reject()
 
         "@typescript-eslint/no-namespace": "off",
         "@typescript-eslint/no-floating-promises": "error",

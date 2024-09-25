@@ -1,4 +1,3 @@
-/* eslint-disable simple-import-sort/exports */
 export {Organization} from "./Organization"
 export {User} from "./User"
 export {Payment} from "./Payment"

@@ -123,17 +123,9 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         user.permissions = UserPermissions.create({})
         user.permissions.organizationPermissions.set(organization.id, Permissions.create({ level: PermissionLevel.Full }))
         await user.save()
-
-        // for (const model of registerCodeModels) {
-        //     await model.save()
-        // }
-
+        
         const code = await EmailVerificationCode.createFor(user, user.email)
-        code.send(user, organization, request.i18n)
-
-        // for (const email of delayEmails) {
-        //     Email.sendInternal(email, organization.i18n)
-        // }
+        code.send(user, organization, request.i18n).catch(console.error);
 
         return new Response(SignupResponse.create({
             token: code.token

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { Email, EmailAddress, EmailInterfaceRecipient } from "@stamhoofd/email";
 import { Organization } from "@stamhoofd/models";
 import { Formatter } from "@stamhoofd/utility";

@@ -12,7 +12,7 @@ import { Context } from '../../../helpers/Context';
 import { limiter } from './UploadImage';
 
 type Params = Record<string, never>;
-type Query = {};
+type Query = Record<string, never>;
 type Body = undefined
 type ResponseBody = File
 

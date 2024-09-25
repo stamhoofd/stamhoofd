@@ -26,7 +26,7 @@ export class CookieHelper {
         return cookies[name]
     }
 
-    static setCookie(response: Response<any>, name: string, value: string, options?: cookie.CookieSerializeOptions | undefined) {
+    static setCookie(response: Response<any>, name: string, value: string, options?: cookie.CookieSerializeOptions) {
         const cookies = cookie.serialize(name, value, options)
         let currentCookies = response.headers['set-cookie']
         if (!currentCookies) {
@@ -38,7 +38,7 @@ export class CookieHelper {
                 currentCookies = [currentCookies.toString()]
                 response.headers['set-cookie'] = currentCookies
             }
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+             
             (currentCookies ).push(cookies)
         }
     }

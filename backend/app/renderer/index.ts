@@ -1,4 +1,6 @@
-require('@stamhoofd/backend-env').load({service: 'renderer'});
+import backendEnv from "@stamhoofd/backend-env";
+backendEnv.load({ service: "renderer" })
+
 import { CORSPreflightEndpoint, Router, RouterServer } from "@simonbackx/simple-endpoints";
 import { I18n } from "@stamhoofd/backend-i18n";
 import { CORSMiddleware, LogMiddleware } from "@stamhoofd/backend-middleware";

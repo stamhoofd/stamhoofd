@@ -18,7 +18,7 @@
         "test": "jest --runInBand",
         "test:reset": "yarn build:full && jest --runInBand",
         "migrations": "yarn build:full && node ./dist/migrations.js",
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+        "lint": "eslint"
     },
     "devDependencies": {
         "@types/cookie": "^0.5.1",

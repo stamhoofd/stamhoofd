@@ -1,4 +1,6 @@
-require('@stamhoofd/backend-env').load()
+import backendEnv from "@stamhoofd/backend-env";
+backendEnv.load();
+
 import { Column, Database, Migration } from "@simonbackx/simple-database";
 import { CORSPreflightEndpoint, Router, RouterServer } from "@simonbackx/simple-endpoints";
 import { I18n } from "@stamhoofd/backend-i18n";

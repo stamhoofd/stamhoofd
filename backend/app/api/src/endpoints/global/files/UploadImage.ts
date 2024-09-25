@@ -10,7 +10,7 @@ import { promises as fs } from "fs";
 import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
-type Query = {};
+type Query = Record<string, never>;
 type Body = undefined
 type ResponseBody = ImageStruct
 

@@ -5,7 +5,6 @@ import { EmailTemplateType, ForgotPasswordRequest, Recipient, Replacement } from
 
 import { Context } from '../../helpers/Context';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = ForgotPasswordRequest;

@@ -141,6 +141,7 @@ export class User extends Model {
         }
 
         return (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             await User.where(query)
         ).filter(a => !a.isApiUser)
     }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Database } from '@simonbackx/simple-database';
 import { logger, StyledText } from "@simonbackx/simple-logging";
 import { Email, EmailAddress } from '@stamhoofd/email';
@@ -13,7 +15,7 @@ import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
 
 // Importing postmark returns undefined (this is a bug, so we need to use require)
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const postmark = require("postmark")
 
 let lastDNSCheck: Date | null = null
@@ -576,7 +578,7 @@ async function checkReservedUntil() {
         }
     })
 
-    for(const registration of registrations) {
+    for (const registration of registrations) {
         registration.scheduleStockUpdate()
     }
 

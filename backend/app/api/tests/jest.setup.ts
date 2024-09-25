@@ -1,4 +1,5 @@
-require('@stamhoofd/backend-env').load({path: __dirname+'/../../.env.test.json'})
+import backendEnv from "@stamhoofd/backend-env";
+backendEnv.load({path: __dirname+'/../../.env.test.json'})
 
 import { Column,Database } from "@simonbackx/simple-database";
 import { Request } from '@simonbackx/simple-endpoints';

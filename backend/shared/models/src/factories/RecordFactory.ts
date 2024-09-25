@@ -1,7 +1,7 @@
 import { Factory } from "@simonbackx/simple-database";
 import { LegacyRecord, LegacyRecordType } from '@stamhoofd/structures';
 
-interface Options {}
+type Options = Record<string, never>;
 
 export class RecordFactory extends Factory<Options, LegacyRecord> {LegacyRecordLegacyRecord
     create(): Promise<LegacyRecord> {

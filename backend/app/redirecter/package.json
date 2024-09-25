@@ -7,7 +7,7 @@
         "build": "rm -rf ./dist/src/data && tsc -b && mkdir -p ./dist/src/data && cp ./src/data/* ./dist/src/data",
         "build:full": "rm -rf ./dist && yarn build",
         "start": "yarn build && node ./dist/index.js",
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+        "lint": "eslint"
     },
     "devDependencies": {
         "@types/node": "^20.12"

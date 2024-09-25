@@ -1,4 +1,6 @@
-require('@stamhoofd/backend-env').load()
+import backendEnv from "@stamhoofd/backend-env";
+backendEnv.load();
+
 import { Column, Migration } from "@simonbackx/simple-database";
 import { Version } from "@stamhoofd/structures";
 import path from "path";

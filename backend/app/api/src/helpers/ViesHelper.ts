@@ -117,7 +117,7 @@ export class ViesHelperStatic {
         const formatted = result.value ?? vatNumber;
 
         try {
-            const cleaned = formatted.substring(2).replace(/(\.\-\s)+/g, "")
+            const cleaned = formatted.substring(2).replace(/(\.-\s)+/g, "")
             const response = await this.request("POST", "https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number", {
                 countryCode: country,
                 vatNumber: cleaned

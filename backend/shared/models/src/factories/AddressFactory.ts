@@ -2,7 +2,7 @@ import { Factory } from "@simonbackx/simple-database";
 import StreetNames from "@simonbackx/simple-database/dist/src/classes/data/streets";
 import { Address, Country } from "@stamhoofd/structures";
 
-interface Options {}
+type Options = Record<string, never>;
 
 export class AddressFactory extends Factory<Options, Address> {
     randomStreet(): string {

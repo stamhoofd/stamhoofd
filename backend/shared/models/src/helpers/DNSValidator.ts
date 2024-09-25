@@ -1,8 +1,7 @@
 import { SimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { DNSRecord, DNSRecordStatus, DNSRecordType } from "@stamhoofd/structures";
 import { sleep } from "@stamhoofd/utility";
-
-const { Resolver } = require('dns').promises;
+import { Resolver } from 'dns/promises';
 
 export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = false) {
      // Revalidate all

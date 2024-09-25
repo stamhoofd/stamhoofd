@@ -1,4 +1,4 @@
-import { createMollieClient } from '@mollie/api-client';
+import { createMollieClient, PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
@@ -224,9 +224,9 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                                     payment.iban = "xxxx xxxx xxxx "+details.cardNumber
                                 }
 
-                                if (mollieData.status == "paid") {
+                                if (mollieData.status === MolliePaymentStatus.paid) {
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded)
-                                } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
+                                } else if (mollieData.status === MolliePaymentStatus.failed || mollieData.status === MolliePaymentStatus.expired || mollieData.status === MolliePaymentStatus.canceled) {
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
                                 } else if (this.isManualExpired(payment.status, payment)) {
                                     // Mollie still returning pending after 1 day: mark as failed

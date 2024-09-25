@@ -12,7 +12,7 @@
     ],
     "scripts": {
         "build": " tsc -b . esm",
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+        "lint": "eslint"
     },
     "devDependencies": {
         "@types/archiver": "^6.0.2"

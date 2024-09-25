@@ -1,4 +1,6 @@
-require('@stamhoofd/backend-env').load({ service: "redirecter" })
+import backendEnv from "@stamhoofd/backend-env";
+backendEnv.load({ service: "redirecter" })
+
 import { Router, RouterServer } from "@simonbackx/simple-endpoints";
 import { Country } from "@stamhoofd/structures";
 

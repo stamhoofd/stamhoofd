@@ -426,7 +426,7 @@ export class Member extends Model {
                 await Member.updateMembershipsForId(id)
             }
         }).catch((e) => {
-            console.error('Failed to update memberships for group id ', id), e
+            console.error('Failed to update memberships for group id ', id, e)
         });
     }
 
@@ -560,10 +560,10 @@ export class Member extends Model {
             membership.expireDate = periodConfig.expireDate
             membership.generated = true;
 
-            if(me.details.memberNumber === null) {
+            if (me.details.memberNumber === null) {
                 try {
                     await me.assignMemberNumber(membership);
-                } catch(error) {
+                } catch (error) {
                     console.error(`Failed to assign member number for id ${me.id}: ${error.message}`);
                     // If the assignment of the member number fails the membership is not created but the member is registered
                     return;
@@ -599,8 +599,8 @@ export class Member extends Model {
                 const memberNumber = await member.createMemberNumber(membership);
                 member.details.memberNumber = memberNumber;
                 await member.save();
-            } catch(error) {
-                if(isSimpleError(error) || isSimpleErrors(error)) {
+            } catch (error) {
+                if (isSimpleError(error) || isSimpleErrors(error)) {
                     throw error;
                 } else {
                     console.error(error);
@@ -619,7 +619,7 @@ export class Member extends Model {
 
         //#region get birth date part (ddmmjj)
         const birthDay = this.details?.birthDay;
-        if(!birthDay) {
+        if (!birthDay) {
             throw new SimpleError({
                 code: 'assign_member_number',
                 message: "Missing birthDay",
@@ -636,7 +636,7 @@ export class Member extends Model {
         //#region get group number
         const organizationId = membership.organizationId;
         const organization = await Organization.getByID(organizationId);
-        if(!organization) {
+        if (!organization) {
             throw new Error(`Organization with id ${organizationId} not found`);
         }
         const groupNumber = organization.uri;
@@ -665,7 +665,7 @@ export class Member extends Model {
         let memberNumber: string = '';
         let tries = 0;
 
-        while(doesExist) {
+        while (doesExist) {
             followUpNumber++;
             memberNumber = firstPart + followUpNumber;
 
@@ -679,9 +679,9 @@ export class Member extends Model {
 
             console.log(`Is ${memberNumber} unique? ${result === null}`);
 
-            if(result !== null) {
+            if (result !== null) {
                 tries++;
-                if(tries > 9) {
+                if (tries > 9) {
                     throw new SimpleError({
                         code: 'assign_member_number',
                         message: `Duplicate member numbers (last try: ${memberNumber}, tries: ${tries})`,

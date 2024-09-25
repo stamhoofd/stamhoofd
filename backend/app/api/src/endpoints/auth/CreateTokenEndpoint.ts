@@ -102,7 +102,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             // if not: throw a validation error (e-mail validation is required)
             if (!user.verified) {
                 const code = await EmailVerificationCode.createFor(user, user.email)
-                code.send(user, organization, request.i18n)
+                code.send(user, organization, request.i18n).catch(console.error);
                 
                 throw new SimpleError({
                     code: "verify_email",

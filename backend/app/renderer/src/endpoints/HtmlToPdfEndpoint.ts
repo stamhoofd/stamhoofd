@@ -50,7 +50,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
 
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            form.parse(request.request.request, async (err, fieldsMultiple, files) => {
+            form.parse(request.request.request, async (err: Error, fieldsMultiple, files) => {
                 if (err) {
                     reject(err);
                     return;

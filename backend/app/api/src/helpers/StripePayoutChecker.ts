@@ -106,7 +106,7 @@ export class StripePayoutChecker {
 
                             if (stripePayments.length === 1) {
                                 paymentId = stripePayments[0].paymentId;
-                                console.log("Found missing payment metadata for payment intent "+originatingTransaction.payment_intent, paymentId)
+                                console.log("Found missing payment metadata for payment intent ", originatingTransaction.payment_intent, paymentId)
                             } else {
                                 // Probably a card payment
                                 // Search for the checkout session
@@ -124,7 +124,7 @@ export class StripePayoutChecker {
 
                                     if (stripeCheckoutSessions.length === 1) {
                                         paymentId = stripeCheckoutSessions[0].paymentId;
-                                        console.log("Found missing payment metadata for payment intent "+originatingTransaction.payment_intent, paymentId)
+                                        console.log("Found missing payment metadata for payment intent ", originatingTransaction.payment_intent, paymentId)
                                     } else {
                                         console.log("No payment found for checkout session "+session.id)
                                     }

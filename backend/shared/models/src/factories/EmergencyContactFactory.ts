@@ -1,7 +1,7 @@
 import { Factory } from "@simonbackx/simple-database";
 import { EmergencyContact, Gender } from "@stamhoofd/structures";
 
-interface Options { }
+type Options = Record<string, never>;
 
 export class EmergencyContactFactory extends Factory<Options, EmergencyContact> {
 

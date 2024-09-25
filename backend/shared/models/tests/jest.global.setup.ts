@@ -1,4 +1,6 @@
-require('@stamhoofd/backend-env').load({path: __dirname+'/../../.env.test.json'})
+import backendEnv from "@stamhoofd/backend-env";
+backendEnv.load({path: __dirname+'/../../.env.test.json'})
+
 import { Database, Migration } from "@simonbackx/simple-database";
 
 export default async () => {
