@@ -117,7 +117,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             event.meta = patchObject(event.meta, patch.meta);
 
-            if(patch.organizationId) {
+            if(patch.organizationId !== undefined) {
                 event.organizationId = patch.organizationId
             }
             
