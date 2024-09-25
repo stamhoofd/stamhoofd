@@ -1,5 +1,5 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ModalStackComponent, NavigationController, onCheckRoutes, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
 import { AccountSwitcher, AppType, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -8,8 +8,8 @@ import { computed, markRaw, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { WhatsNewCount } from './classes/WhatsNewCount';
-import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 import { useGlobalRoutes } from './useGlobalRoutes';
+import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -348,12 +348,10 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                         ];
 
                         if (organization?.meta.packages.useMembers) {
-                            tabs.push(membersTab);
-
-                            if (reactiveSession.auth.hasFullAccess()) {
-                                tabs.push(calendarTab);
-                            }
+                            tabs.push(membersTab)
                         }
+
+                        tabs.push(calendarTab)
 
                         if (organization?.meta.packages.useWebshops && (organization?.privateMeta?.featureFlags.includes('webshops') ?? false)) {
                             tabs.push(webshopsTab);
