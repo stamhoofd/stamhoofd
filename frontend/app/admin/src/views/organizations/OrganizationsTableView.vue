@@ -52,6 +52,7 @@ const present = usePresent();
 const platform = usePlatform();
 const auth = useAuth();
 const {getOrganizationUIFilterBuilders} = useGetOrganizationUIFilterBuilders();
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 const configurationId = computed(() => {
     return 'organizations'
@@ -134,20 +135,20 @@ const allColumns: Column<ObjectType, any>[] = [
         getValue: (organization) => organization.period.setupSteps.getProgress(),
         format: (progress) => {
             const {completed, total} = progress;
-            if(total === 0) {
+            if (total === 0) {
                 return 'Geen';
             }
-            if(completed >= total) {
+            if (completed >= total) {
                 return 'Voltooid';
             }
             return `${progress.completed}/${progress.total}`
         },
         getStyle: (progress) => {
             const {completed, total} = progress;
-            if(total === 0) {
+            if (total === 0) {
                 return 'gray';
             }
-            if(completed >= total) {
+            if (completed >= total) {
                 return 'success';
             }
             return 'gray';
