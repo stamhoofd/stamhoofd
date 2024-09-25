@@ -193,25 +193,16 @@ export class AdminPermissionChecker {
      * @returns Organization if event for specific organization, else null
      * @throws error if not allowed to write this event
      */
-    async tryAdminEvent(event: Event, options: {organization?: Organization} = {}): Promise<Organization | null> {
+    async checkEventAccess(event: Event): Promise<Organization | null> {
         const accessRight: AccessRight = AccessRight.EventWrite;
-        const eventForTags = event.meta.organizationTagIds;
-        const eventForDefaultAgeGroupIds = event.meta.defaultAgeGroupIds;
 
         //#region organization and groups
-        const eventForOrganization = event.organizationId;
-        const eventForGroups = event.meta.groups;
-
-        if(eventForOrganization !== null) {
+        if(event.organizationId !== null) {
             let organization: Organization | null = null;
             let organizationPermissions: LoadedPermissions | null = null;
 
             try {
-                if(eventForOrganization === options.organization?.id) {
-                    organization = options.organization;
-                } else {
-                    organization = await this.getOrganization(eventForOrganization);
-                }
+                organization = await this.getOrganization(event.organizationId);
                 organizationPermissions = await this.getOrganizationPermissions(organization);
             } catch(error) {
                 console.error(error);
@@ -226,89 +217,92 @@ export class AdminPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
-                    statusCode: 400
+                    statusCode: 403
                 })
             }
 
-            if(eventForGroups === null) {
+            if(event.meta.groups === null) {
                 if(!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, '', accessRight)) {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
-                        statusCode: 400
+                        statusCode: 403
                     })
                 }
             } else {
-                for(const group of eventForGroups) {
+                for(const group of event.meta.groups) {
                     if(!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, group.id, accessRight)) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze groep(en).',
-                            statusCode: 400
+                            statusCode: 403
                         })
                     }
                 }
             }
 
-            if(eventForTags !== null) {
+            if(event.meta.organizationTagIds !== null) {
                 // not supported currently
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Een activiteit voor een organisatie kan geen tags bevatten.',
-                    statusCode: 400
+                    statusCode: 403
                 })
             }
 
-            if(eventForDefaultAgeGroupIds !== null) {
+            if(event.meta.defaultAgeGroupIds !== null) {
                 // not supported currently
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Een activiteit voor een organisatie kan niet beperkt worden tot specifieke standaard leeftijdsgroepen.',
-                    statusCode: 400
+                    statusCode: 403
                 })
             }
 
             return organization;
-        } else if(eventForGroups !== null) {
-            // not supported currently
-            throw new SimpleError({
-                code: 'permission_denied',
-                message: 'Een nationale of reginale activiteit kan (momenteel) niet beperkt worden tot specifieke groepen.',
-                statusCode: 400
-            })
         }
         //#endregion
 
         //#region platform
+        if(event.meta.groups !== null) {
+            // not supported currently
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'Een nationale of regionale activiteit kan (momenteel) niet beperkt worden tot specifieke groepen.',
+                statusCode: 403
+            })
+        }
+
         const platformPermissions = this.platformPermissions;
         if(!platformPermissions) {
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren.',
-                statusCode: 400
+                statusCode: 403
             })
         }
 
         //organization tags
-        if(eventForTags === null) {
+        if(event.meta.organizationTagIds === null) {
             if(!(platformPermissions.hasAccessRight(accessRight) || platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, '', accessRight))) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message: 'Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren voor alle groepen.',
-                    statusCode: 400
+                    message: 'Je kan geen nationale activiteiten beheren',
+                    statusCode: 403
                 })
             }
         } else {
-            for(const tagId of eventForTags) {
+            for(const tagId of event.meta.organizationTagIds) {
                 if(!platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tagId, accessRight)) {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: "Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren voor deze regio('s).",
-                        statusCode: 400
+                        statusCode: 403
                     })
                 }
             }
         }
+        //#endregion
 
         return null;
     }
@@ -1244,10 +1238,6 @@ export class AdminPermissionChecker {
 
     canAccessAllPlatformMembers(): boolean {
         return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs)
-    }
-
-    canAccess(accessRight: AccessRight): boolean {
-        return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(accessRight);
     }
 
     hasPlatformFullAccess(): boolean {

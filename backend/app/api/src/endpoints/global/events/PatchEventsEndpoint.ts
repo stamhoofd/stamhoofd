@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Event, Group, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Event, Group, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Event as EventStruct, GroupType, NamedObject } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -51,7 +51,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             const event = new Event()
             event.organizationId = put.organizationId
             event.meta = put.meta;
-            const eventOrganization = await this.tryAdminEvent(event);
+            const eventOrganization = await this.checkEventAccess(event);
             event.id = put.id
             event.name = put.name
             event.startDate = put.startDate
@@ -104,7 +104,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 })
             }
             
-            const originalOrganization = (await this.tryAdminEvent(event)) ?? undefined;
+            await this.checkEventAccess(event);
 
             if (patch.meta?.organizationCache) {
                 throw new SimpleError({
@@ -121,9 +121,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 event.organizationId = patch.organizationId
             }
             
-            const eventOrganization = await this.tryAdminEvent(event, { organization: originalOrganization });
+            const eventOrganization = await this.checkEventAccess(event);
             if (eventOrganization) {
                 event.meta.organizationCache = NamedObject.create({id: eventOrganization.id, name: eventOrganization.name})
+            } else {
+                event.meta.organizationCache = null;
             }
 
             event.name = patch.name ?? event.name
@@ -209,7 +211,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({ code: "not_found", message: "Event not found", statusCode: 404 });
             }
 
-            await this.tryAdminEvent(event);
+            await this.checkEventAccess(event);
 
             if(event.groupId) {
                 await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
@@ -323,8 +325,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
     }
 
-    private async tryAdminEvent(event: Event, options: {organization?: Organization} = {}) {
-        return await Context.auth.tryAdminEvent(event, options);
+    private async checkEventAccess(event: Event) {
+        return await Context.auth.checkEventAccess(event);
     }
 
     private static throwIfAddressIsMissing(event: Event) {
