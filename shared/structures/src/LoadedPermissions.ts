@@ -194,6 +194,19 @@ export class LoadedPermissions {
         return false;
     }
 
+    hasAccessRightForSomeResource(type: PermissionsResourceType, right: AccessRight): boolean {
+        if (this.hasAccessRight(right)) {
+            return true
+        }
+
+        const resource = this.resources.get(type)
+        if (!resource) {
+            return false;
+        }
+
+        return resource.size > 0;
+    }
+
     hasReadAccess(): boolean {
         return this.hasAccess(PermissionLevel.Read);
     }

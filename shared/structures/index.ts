@@ -46,8 +46,8 @@ export * from './src/PermissionsResourceType';
 export * from './src/Platform';
 export * from './src/Policy';
 export * from './src/RegisterCodeStatus';
-export * from './src/RegistrationPeriodBase';
 export * from './src/RegistrationPeriod';
+export * from './src/RegistrationPeriodBase';
 export * from './src/ResourcePermissions';
 export * from './src/RichText';
 export * from './src/SeatingPlan';
@@ -185,3 +185,5 @@ export * from './src/BalanceItemDetailed';
 export * from './src/SponsorConfig';
 
 export * from './src/filters/ExcelExportRequest';
+export * from './src/helpers';
+

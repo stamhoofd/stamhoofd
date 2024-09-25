@@ -9,7 +9,7 @@ import { PermissionsResourceType } from './PermissionsResourceType';
 import { Platform } from './Platform';
 import { ResourcePermissions } from './ResourcePermissions';
 
-type OrganizationForPermissionCalculation = {
+export type OrganizationForPermissionCalculation = {
     id: string;
     meta: {
         tags: string[];

@@ -2,7 +2,7 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar title="Activiteiten">
             <template #right>
-                <button type="button" class="button text navigation" @click="addEvent()">
+                <button v-if="canAdminSomeEvent" type="button" class="button text navigation" @click="addEvent()">
                     <span class="icon add" />
                     <span>Nieuw</span>
                 </button>
@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { Event, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import { Event, EventPermissionChecker, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
 import { useEventsObjectFetcher } from '../fetchers';
@@ -97,6 +97,14 @@ const yearLabels = computed(() => {
             return 'Toekomstige'
         }
         return y.toString()
+    })
+})
+
+const canAdminSomeEvent = computed(() => {
+    return EventPermissionChecker.canAdminSome({
+        userPermissions: user.value?.permissions ?? null,
+        platform: platform.value,
+        organization: organization.value
     })
 })
 

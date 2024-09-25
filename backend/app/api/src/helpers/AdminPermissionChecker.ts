@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedOutstandingBalance, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, FinancialSupportSettings, GroupCategory, GroupStatus, LoadedPermissions, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 /**
@@ -194,121 +194,18 @@ export class AdminPermissionChecker {
      * @returns Organization if event for specific organization, else null
      * @throws error if not allowed to write this event
      */
-    async checkEventAccess(event: Event): Promise<Organization | null> {
-        const accessRight: AccessRight = AccessRight.EventWrite;
-
-        // #region organization and groups
-        if (event.organizationId !== null) {
-            let organization: Organization | null = null;
-            let organizationPermissions: LoadedPermissions | null = null;
-
-            try {
-                organization = await this.getOrganization(event.organizationId);
-                organizationPermissions = await this.getOrganizationPermissions(organization);
-            }
-            catch (error) {
-                console.error(error);
-                throw new SimpleError({
-                    code: 'not_found',
-                    message: 'Event not found',
-                    human: 'De activiteit werd niet gevonden',
-                });
-            }
-
-            if (organizationPermissions === null) {
-                throw new SimpleError({
-                    code: 'permission_denied',
-                    message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
-                    statusCode: 403,
-                });
-            }
-
-            if (event.meta.groups === null) {
-                if (!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, '', accessRight)) {
-                    throw new SimpleError({
-                        code: 'permission_denied',
-                        message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
-                        statusCode: 403,
-                    });
+    async checkEventAccess(event: Event, {organization}: {organization?: Organization} = {}): Promise<Organization | null> {
+        return await EventPermissionChecker.tryAdminEvent(event, {
+            userPermissions: this.user.permissions,
+            platform: this.platform,
+            getOrganization: async (id: string) => {
+                if(organization?.id === id) {
+                    return organization;
                 }
+    
+                return await this.getOrganization(id);
             }
-            else {
-                for (const group of event.meta.groups) {
-                    if (!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, group.id, accessRight)) {
-                        throw new SimpleError({
-                            code: 'permission_denied',
-                            message: 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze groep(en).',
-                            statusCode: 403,
-                        });
-                    }
-                }
-            }
-
-            if (event.meta.organizationTagIds !== null) {
-                // not supported currently
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Een activiteit voor een organisatie kan geen tags bevatten.',
-                    statusCode: 403,
-                });
-            }
-
-            if (event.meta.defaultAgeGroupIds !== null) {
-                // not supported currently
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Een activiteit voor een organisatie kan niet beperkt worden tot specifieke standaard leeftijdsgroepen.',
-                    statusCode: 403,
-                });
-            }
-
-            return organization;
-        }
-        // #endregion
-
-        // #region platform
-        if (event.meta.groups !== null) {
-            // not supported currently
-            throw new SimpleError({
-                code: 'permission_denied',
-                message: 'Een nationale of regionale activiteit kan (momenteel) niet beperkt worden tot specifieke groepen.',
-                statusCode: 403,
-            });
-        }
-
-        const platformPermissions = this.platformPermissions;
-        if (!platformPermissions) {
-            throw new SimpleError({
-                code: 'permission_denied',
-                message: 'Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren.',
-                statusCode: 403,
-            });
-        }
-
-        // organization tags
-        if (event.meta.organizationTagIds === null) {
-            if (!(platformPermissions.hasAccessRight(accessRight) || platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, '', accessRight))) {
-                throw new SimpleError({
-                    code: 'permission_denied',
-                    message: 'Je kan geen nationale activiteiten beheren',
-                    statusCode: 403,
-                });
-            }
-        }
-        else {
-            for (const tagId of event.meta.organizationTagIds) {
-                if (!platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tagId, accessRight)) {
-                    throw new SimpleError({
-                        code: 'permission_denied',
-                        message: "Je hebt geen toegangsrechten om een nationale of regionale activiteit te beheren voor deze regio('s).",
-                        statusCode: 403,
-                    });
-                }
-            }
-        }
-        // #endregion
-
-        return null;
+        })
     }
 
     async canAccessArchivedGroups(organizationId: string) {
