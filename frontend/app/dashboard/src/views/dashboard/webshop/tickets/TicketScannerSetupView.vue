@@ -6,7 +6,7 @@
             <h1>
                 Tickets scannen
             </h1>
-            
+
             <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
             <p v-else-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
                 Vink hieronder de tickets aan die je wilt scannen en klik op "starten". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).
@@ -58,15 +58,14 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-import { WebshopManager } from "../WebshopManager";
-import TicketScannerView from "./TicketScannerView.vue";
-
+import { WebshopManager } from '../WebshopManager';
+import TicketScannerView from './TicketScannerView.vue';
 
 @Component({
     components: {
@@ -76,105 +75,106 @@ import TicketScannerView from "./TicketScannerView.vue";
         STListItem,
         STToolbar,
         Spinner,
-        Checkbox
-    }
+        Checkbox,
+    },
 })
 export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        webshopManager!: WebshopManager
+    webshopManager!: WebshopManager;
 
-    disabledProducts: Product[] = []
-    isChecking = true
-    noDatabaseSupport = false
+    disabledProducts: Product[] = [];
+    isChecking = true;
+    noDatabaseSupport = false;
 
     created() {
         this.webshopManager.loadWebshopIfNeeded().then(() => {
             // Load disabled products in database
-            this.webshopManager.readSettingKey("disabledProducts").then(value => {
+            this.webshopManager.readSettingKey('disabledProducts').then((value) => {
                 if (value && Array.isArray(value)) {
                     if (this.ticketProducts) {
-                        this.disabledProducts = this.ticketProducts?.filter(p => value.includes(p.id))
+                        this.disabledProducts = this.ticketProducts?.filter(p => value.includes(p.id));
                     }
                 }
-            }).catch(console.error)
-        }).catch(console.error)
+            }).catch(console.error);
+        }).catch(console.error);
 
         // Initialize offlien storage: check if everything works okay
-        this.isChecking = true
-        this.webshopManager.getDatabase().catch(e => {
-            this.noDatabaseSupport = true
+        this.isChecking = true;
+        this.webshopManager.getDatabase().catch((e) => {
+            this.noDatabaseSupport = true;
         }).finally(() => {
-            this.isChecking = false
-        })
+            this.isChecking = false;
+        });
     }
 
     formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString())
+        return Formatter.capitalizeFirstLetter(dateRange.toString());
     }
 
     get isLoading() {
-        return this.webshopManager.webshop === null
+        return this.webshopManager.webshop === null;
     }
 
     /**
      * Only filter if we sell tickets as products, not for tickets per order
      */
     get shouldFilter() {
-        return this.webshopManager.preview.meta.ticketType === WebshopTicketType.Tickets
+        return this.webshopManager.preview.meta.ticketType === WebshopTicketType.Tickets;
     }
 
     get ticketProducts() {
-        return this.webshopManager.webshop?.products.filter(p => p.type === ProductType.Ticket || p.type === ProductType.Voucher) ?? []
+        return this.webshopManager.webshop?.products.filter(p => p.type === ProductType.Ticket || p.type === ProductType.Voucher) ?? [];
     }
 
     get categories() {
-        const categories = this.webshopManager.webshop?.categories.filter(c => this.getCategoryProducts(c).length > 0) ?? []
+        const categories = this.webshopManager.webshop?.categories.filter(c => this.getCategoryProducts(c).length > 0) ?? [];
         if (categories.length <= 0) {
             return [
                 Category.create({
                     name: '',
-                    productIds: this.ticketProducts.map(p => p.id)
-                })
-            ]
+                    productIds: this.ticketProducts.map(p => p.id),
+                }),
+            ];
         }
         return categories;
     }
 
     getCategoryProducts(category: Category) {
-        return category.productIds.flatMap(p => {
-            const product = this.ticketProducts.find(pp => pp.id === p)
+        return category.productIds.flatMap((p) => {
+            const product = this.ticketProducts.find(pp => pp.id === p);
             if (product) {
-                return [product]
+                return [product];
             }
-            return []
-        })
+            return [];
+        });
     }
 
     isProductSelected(product: Product) {
-        return !this.disabledProducts.find(p => p.id === product.id)
+        return !this.disabledProducts.find(p => p.id === product.id);
     }
 
     setProductSelected(product: Product, selected: boolean) {
         if (selected === this.isProductSelected(product)) {
-            return
+            return;
         }
         if (selected) {
-            this.disabledProducts = this.disabledProducts.filter(p => p.id !== product.id)
-        } else {
-            this.disabledProducts.push(product)
+            this.disabledProducts = this.disabledProducts.filter(p => p.id !== product.id);
+        }
+        else {
+            this.disabledProducts.push(product);
         }
     }
 
     start() {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(TicketScannerView, { 
+            root: new ComponentWithProperties(TicketScannerView, {
                 webshopManager: this.webshopManager,
-                disabledProducts: this.disabledProducts
-            })
-        }))
+                disabledProducts: this.disabledProducts,
+            }),
+        }));
 
         // Save disabled products in database
-        this.webshopManager.storeSettingKey("disabledProducts", this.disabledProducts.map(p => p.id)).catch(console.error)
+        this.webshopManager.storeSettingKey('disabledProducts', this.disabledProducts.map(p => p.id)).catch(console.error);
     }
 }
 </script>

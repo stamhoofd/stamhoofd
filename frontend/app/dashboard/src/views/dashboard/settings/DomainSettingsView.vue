@@ -29,7 +29,7 @@
                     </p>
                 </template>
             </template>
-        
+
             <STErrorsDefault :error-box="errorBox" />
 
             <STInputBox title="Domeinnaam" error-fields="mailDomain" :error-box="errorBox">
@@ -95,11 +95,10 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { Organization, OrganizationDomains } from "@stamhoofd/structures";
-
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
+import { Organization, OrganizationDomains } from '@stamhoofd/structures';
 
 import DNSRecordsView from './DNSRecordsView.vue';
 
@@ -111,18 +110,18 @@ import DNSRecordsView from './DNSRecordsView.vue';
         STErrorsDefault,
         Checkbox,
         BackButton,
-        LoadingButton
+        LoadingButton,
     },
 })
 export default class DomainSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    useDkim1024bit = false
-    registerDomain = this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain ?? ""
-    mailDomain = this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? ""
-    customRegisterDomain = this.registerDomain && this.mailDomain && (this.registerDomain !== 'inschrijven.' + this.mailDomain)
-    allowSubdomain = !!this.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/)
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
+    useDkim1024bit = false;
+    registerDomain = this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain ?? '';
+    mailDomain = this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? '';
+    customRegisterDomain = this.registerDomain && this.mailDomain && (this.registerDomain !== 'inschrijven.' + this.mailDomain);
+    allowSubdomain = !!this.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/);
 
     validateDomain() {
         const d = this.mailDomain;
@@ -133,9 +132,9 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
             return true;
         }
         if (!d.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
-            return false
+            return false;
         }
-        return true
+        return true;
     }
 
     validateRegisterDomain() {
@@ -147,124 +146,128 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     }
 
     get usedRegisterDomain() {
-        return this.customRegisterDomain ? this.registerDomain : ("inschrijven."+this.mailDomain);
+        return this.customRegisterDomain ? this.registerDomain : ('inschrijven.' + this.mailDomain);
     }
 
     get isStamhoofd() {
-        return this.$organizationManager.user.email.endsWith("@stamhoofd.be") || this.$organizationManager.user.email.endsWith("@stamhoofd.nl")
+        return this.$organizationManager.user.email.endsWith('@stamhoofd.be') || this.$organizationManager.user.email.endsWith('@stamhoofd.nl');
     }
 
     get isMailOk() {
-        return this.organization.privateMeta?.pendingMailDomain === null && this.organization.privateMeta?.mailDomain !== null
-    } 
+        return this.organization.privateMeta?.pendingMailDomain === null && this.organization.privateMeta?.mailDomain !== null;
+    }
 
     get isRegisterOk() {
-        return this.organization.privateMeta?.pendingRegisterDomain === null && this.organization.registerDomain !== null
-    } 
+        return this.organization.privateMeta?.pendingRegisterDomain === null && this.organization.registerDomain !== null;
+    }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get enableMemberModule() {
-        return this.organization.meta.modules.useMembers
+        return this.organization.meta.modules.useMembers;
     }
 
     get isAlreadySet() {
-        return !!(this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain)
+        return !!(this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain);
     }
 
     domainChanged() {
-        const errors = new SimpleErrors()
-       
+        const errors = new SimpleErrors();
+
         if (!this.validateDomain()) {
             errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "De domeinnaam die je hebt ingevuld is niet geldig",
-                field: "mailDomain"
-            }))
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
+                code: 'invalid_field',
+                message: 'De domeinnaam die je hebt ingevuld is niet geldig',
+                field: 'mailDomain',
+            }));
+            this.errorBox = new ErrorBox(errors);
+        }
+        else {
+            this.errorBox = null;
         }
     }
 
     registerDomainChanged() {
-        const errors = new SimpleErrors()
-       
+        const errors = new SimpleErrors();
+
         if (!this.validateRegisterDomain()) {
             errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "De domeinnaam die je hebt ingevuld is niet geldig",
-                field: "registerDomain"
-            }))
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
+                code: 'invalid_field',
+                message: 'De domeinnaam die je hebt ingevuld is niet geldig',
+                field: 'registerDomain',
+            }));
+            this.errorBox = new ErrorBox(errors);
+        }
+        else {
+            this.errorBox = null;
         }
     }
-  
+
     async save() {
         if (this.saving) {
             return;
         }
 
-        const errors = new SimpleErrors()
-       
+        const errors = new SimpleErrors();
+
         if (!this.validateDomain()) {
             errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "De domeinnaam die je hebt ingevuld is niet geldig",
-                field: "mailDomain"
-            }))
+                code: 'invalid_field',
+                message: 'De domeinnaam die je hebt ingevuld is niet geldig',
+                field: 'mailDomain',
+            }));
         }
 
         if (this.customRegisterDomain && !this.validateRegisterDomain()) {
             errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "De domeinnaam die je hebt ingevuld is niet geldig",
-                field: "registerDomain"
-            }))
+                code: 'invalid_field',
+                message: 'De domeinnaam die je hebt ingevuld is niet geldig',
+                field: 'registerDomain',
+            }));
         }
 
-        let valid = false
+        let valid = false;
 
         if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
-            valid = true
+            this.errorBox = new ErrorBox(errors);
         }
-        valid = valid && await this.validator.validate()
+        else {
+            this.errorBox = null;
+            valid = true;
+        }
+        valid = valid && await this.validator.validate();
 
         if (!valid) {
             return;
         }
 
-        this.saving = true
+        this.saving = true;
 
         try {
             const registerDomain = this.usedRegisterDomain;
             const response = await this.$context.authenticatedServer.request({
-                method: "POST",
-                path: "/organization/domain",
+                method: 'POST',
+                path: '/organization/domain',
                 body: OrganizationDomains.create({
                     mailDomain: this.mailDomain,
                     registerDomain: (this.enableMemberModule || this.organization.registerDomain === registerDomain || this.organization.privateMeta?.pendingRegisterDomain === registerDomain) ? registerDomain : null,
-                    useDkim1024bit: this.useDkim1024bit
+                    useDkim1024bit: this.useDkim1024bit,
                 }),
-                decoder: Organization as Decoder<Organization>
-            })
-            this.$organization.deepSet(response.data)
-            this.show(new ComponentWithProperties(DNSRecordsView, {}))
-            this.saving = false
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-            this.saving = false
+                decoder: Organization as Decoder<Organization>,
+            });
+            this.$organization.deepSet(response.data);
+            this.show(new ComponentWithProperties(DNSRecordsView, {}));
+            this.saving = false;
+        }
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
+            this.saving = false;
         }
 
-        //this.pop({ force: true })
+        // this.pop({ force: true })
     }
 
     async deleteMe() {
@@ -272,34 +275,33 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
             return;
         }
 
-        if (!confirm("Ben je zeker dat je jouw domeinnaam wilt loskoppelen?")) {
+        if (!confirm('Ben je zeker dat je jouw domeinnaam wilt loskoppelen?')) {
             return;
         }
 
-        this.saving = true
+        this.saving = true;
 
         try {
             const response = await this.$context.authenticatedServer.request({
-                method: "POST",
-                path: "/organization/domain",
+                method: 'POST',
+                path: '/organization/domain',
                 body: OrganizationDomains.create({
                     mailDomain: null,
-                    registerDomain: null
+                    registerDomain: null,
                 }),
-                decoder: Organization as Decoder<Organization>
-            })
+                decoder: Organization as Decoder<Organization>,
+            });
 
-            this.$context.updateOrganization(response.data)
-            this.pop({ force: true })
-            this.saving = false
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-            this.saving = false
+            this.$context.updateOrganization(response.data);
+            this.pop({ force: true });
+            this.saving = false;
+        }
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
+            this.saving = false;
         }
     }
-
-
 }
 </script>
 

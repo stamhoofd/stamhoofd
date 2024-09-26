@@ -6,10 +6,10 @@
                     <STListItem :selectable="true">
                         <template #left>
                             <div v-if="product.images[0]" class="product-selector-image-preview">
-                                <ImageComponent :image="product.images[0]" :autoHeight="true" />
+                                <ImageComponent :image="product.images[0]" :auto-height="true" />
                             </div>
                         </template>
-                        
+
                         <h2 class="style-title-list">
                             {{ product.name }}
                         </h2>
@@ -25,12 +25,12 @@
             </div>
         </STInputBox>
 
-        <STInputBox title="Prijskeuzes" error-fields="productPriceIds" :error-box="errorBox" class="max" v-if="product && product.prices.length > 1">
+        <STInputBox v-if="product && product.prices.length > 1" title="Prijskeuzes" error-fields="productPriceIds" :error-box="errorBox" class="max">
             <STList>
                 <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
-                     <template #left>
-                         <Checkbox :model-value="isPriceSelected(price)" @update:model-value="setPriceSelected(price, $event)" />
-                     </template>
+                    <template #left>
+                        <Checkbox :model-value="isPriceSelected(price)" @update:model-value="setPriceSelected(price, $event)" />
+                    </template>
 
                     <h2 class="style-title-list">
                         {{ price.name || 'Naamloos' }}
@@ -39,20 +39,20 @@
             </STList>
         </STInputBox>
 
-        <STInputBox :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errorBox" class="max" v-for="optionMenu of product.optionMenus" :key="optionMenu.id">
+        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errorBox" class="max">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
-                     <template #left>
-                         <Checkbox :model-value="isOptionSelected(optionMenu, option)" @update:model-value="setOptionSelected(optionMenu, option, $event)" />
-                     </template>
+                    <template #left>
+                        <Checkbox :model-value="isOptionSelected(optionMenu, option)" @update:model-value="setOptionSelected(optionMenu, option, $event)" />
+                    </template>
 
                     <h2 class="style-title-list">
                         {{ option.name || 'Naamloos' }}
                     </h2>
 
                     <template #right>
-                        <button class="button text" type="button" @click.stop.prevent="showRequirementMenu(optionMenu, option, $event)" v-if="optionMenu.multipleChoice">
-                            <span>{{getRequirementName(getOptionRequirement(optionMenu, option))}}</span>
+                        <button v-if="optionMenu.multipleChoice" class="button text" type="button" @click.stop.prevent="showRequirementMenu(optionMenu, option, $event)">
+                            <span>{{ getRequirementName(getOptionRequirement(optionMenu, option)) }}</span>
                             <span class="icon arrow-down-small" />
                         </button>
                     </template>
@@ -63,16 +63,15 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ContextMenu, ContextMenuItem, ErrorBox, ImageComponent, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { Option, OptionMenu, OptionSelectionRequirementHelper } from "@stamhoofd/structures";
-import { OptionSelectionRequirement } from "@stamhoofd/structures";
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Checkbox, ContextMenu, ContextMenuItem, ErrorBox, ImageComponent, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
+import { Option, OptionMenu, OptionSelectionRequirementHelper } from '@stamhoofd/structures';
+import { OptionSelectionRequirement } from '@stamhoofd/structures';
 import { PrivateWebshop, Product, ProductPrice, ProductSelector } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import ChooseProductView from "./ChooseProductView.vue";
-
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import ChooseProductView from './ChooseProductView.vue';
 
 @Component({
     components: {
@@ -80,20 +79,20 @@ import ChooseProductView from "./ChooseProductView.vue";
         STList,
         ImageComponent,
         Checkbox,
-        STInputBox
-    }
+        STInputBox,
+    },
 })
 export default class ProductSelectorBox extends Mixins(NavigationMixin) {
-    @Prop({required: true})
-        webshop: PrivateWebshop
+    @Prop({ required: true })
+    webshop: PrivateWebshop;
 
-    @Prop({required: true})
-        productSelector: ProductSelector
+    @Prop({ required: true })
+    productSelector: ProductSelector;
 
-    @Prop({ default: null }) 
-        validator: Validator | null
+    @Prop({ default: null })
+    validator: Validator | null;
 
-    errorBox: ErrorBox | null = null
+    errorBox: ErrorBox | null = null;
 
     addPatch(patch: AutoEncoderPatchType<ProductSelector>) {
         this.$emit('patch', patch);
@@ -102,14 +101,14 @@ export default class ProductSelectorBox extends Mixins(NavigationMixin) {
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate()
-            })
+                return this.validate();
+            });
         }
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
@@ -122,71 +121,71 @@ export default class ProductSelectorBox extends Mixins(NavigationMixin) {
                     saveHandler: (product: Product) => {
                         this.addPatch(ProductSelector.patch({
                             productId: product.id,
-                            optionIds: new Map()
-                        }))
-                    }
-                })
+                            optionIds: new Map(),
+                        }));
+                    },
+                }),
             ],
-            modalDisplayStyle: "sheet"
-        })
+            modalDisplayStyle: 'sheet',
+        });
     }
 
     async validate() {
         if (!this.product) {
             this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": 'Kies een artikel',
-                "field": "productId"
-            }))
-            return false
+                code: 'invalid_field',
+                message: 'Kies een artikel',
+                field: 'productId',
+            }));
+            return false;
         }
 
         return true;
     }
 
     get product() {
-        return this.webshop.products.find(p => p.id === this.productSelector.productId)
+        return this.webshop.products.find(p => p.id === this.productSelector.productId);
     }
 
     isPriceSelected(price: ProductPrice) {
-        return this.productSelector.productPriceIds.includes(price.id) || this.productSelector.productPriceIds.length === 0
+        return this.productSelector.productPriceIds.includes(price.id) || this.productSelector.productPriceIds.length === 0;
     }
 
     setPriceSelected(price: ProductPrice, selected: boolean) {
-        let productPriceIds = this.productSelector.productPriceIds.filter(i => i !== price.id)
+        let productPriceIds = this.productSelector.productPriceIds.filter(i => i !== price.id);
         if (productPriceIds.length === 0 && this.product) {
-            productPriceIds = this.product!.prices.map(p => p.id).filter(i => i !== price.id)
+            productPriceIds = this.product!.prices.map(p => p.id).filter(i => i !== price.id);
         }
 
         if (selected) {
-            productPriceIds.push(price.id)
+            productPriceIds.push(price.id);
         }
 
         if (productPriceIds.length === this.product?.prices.length) {
-            productPriceIds = []
+            productPriceIds = [];
         }
 
         this.addPatch(ProductSelector.patch({
-            productPriceIds: productPriceIds as any
-        }))
+            productPriceIds: productPriceIds as any,
+        }));
     }
 
     getOptionRequirement(menu: OptionMenu, option: Option): OptionSelectionRequirement {
-        return this.productSelector.getOptionRequirement(menu, option)
+        return this.productSelector.getOptionRequirement(menu, option);
     }
 
     setOptionRequirement(menu: OptionMenu, option: Option, requirement: OptionSelectionRequirement) {
         const map = new Map(this.productSelector.optionIds);
 
-        map.set(option.id, requirement)
+        map.set(option.id, requirement);
 
         this.addPatch(ProductSelector.patch({
-            optionIds: map
-        }))
+            optionIds: map,
+        }));
     }
 
     isOptionSelected(menu: OptionMenu, option: Option): boolean {
-        return this.productSelector.getOptionRequirement(menu, option) !== OptionSelectionRequirement.Excluded
+        return this.productSelector.getOptionRequirement(menu, option) !== OptionSelectionRequirement.Excluded;
     }
 
     setOptionSelected(menu: OptionMenu, option: Option, selected: boolean) {
@@ -199,50 +198,50 @@ export default class ProductSelectorBox extends Mixins(NavigationMixin) {
         const map = new Map(this.productSelector.optionIds);
 
         if (selected) {
-            map.set(option.id, OptionSelectionRequirement.Optional)
-        } else {
-            map.set(option.id, OptionSelectionRequirement.Excluded)
+            map.set(option.id, OptionSelectionRequirement.Optional);
+        }
+        else {
+            map.set(option.id, OptionSelectionRequirement.Excluded);
         }
 
         this.addPatch(ProductSelector.patch({
-            optionIds: map
-        }))
+            optionIds: map,
+        }));
     }
 
     getRequirementName(requirement: OptionSelectionRequirement) {
-        return OptionSelectionRequirementHelper.getName(requirement)
+        return OptionSelectionRequirementHelper.getName(requirement);
     }
 
     showRequirementMenu(menu: OptionMenu, option: Option, event) {
         const value = this.getOptionRequirement(menu, option);
-        let values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Required, OptionSelectionRequirement.Excluded]
+        let values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Required, OptionSelectionRequirement.Excluded];
 
         if (!menu.multipleChoice) {
-            values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Excluded]
+            values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Excluded];
         }
 
         const c = new ContextMenu([
-            values.map(v => {
+            values.map((v) => {
                 return new ContextMenuItem({
                     name: OptionSelectionRequirementHelper.getName(v),
                     selected: v === value,
                     action: () => {
-                        this.setOptionRequirement(menu, option, v)
+                        this.setOptionRequirement(menu, option, v);
                         return true;
-                    }
-                })
-            })
-        ])
+                    },
+                });
+            }),
+        ]);
 
         c.show({
             button: event.currentTarget,
-            xPlacement: "left",
-            yPlacement: "bottom",
-        }).catch(console.error)
+            xPlacement: 'left',
+            yPlacement: 'bottom',
+        }).catch(console.error);
     }
 }
 </script>
-
 
 <style lang="scss">
 .product-selector-image-preview .image-component {

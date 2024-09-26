@@ -17,7 +17,7 @@
                 </a>
             </p>
 
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.General)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/flag.svg">
@@ -113,7 +113,7 @@
                 <hr>
                 <h2>Ledenadministratie</h2>
 
-                <STList class="illustration-list">    
+                <STList class="illustration-list">
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationPage)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
@@ -160,8 +160,6 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-
-
 
                     <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationRecords)">
                         <template #left>
@@ -236,7 +234,7 @@
             <template v-if="feature('sso')">
                 <hr>
                 <h2>Geavanceerd</h2>
-                <STList class="illustration-list">    
+                <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
@@ -257,7 +255,7 @@
             <template v-if="!salesDisabled">
                 <hr>
                 <h2>{{ $t('405a811e-ebb1-4948-84cd-8fb5860104e6') }}</h2>
-                <STList class="illustration-list">    
+                <STList class="illustration-list">
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
@@ -278,7 +276,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{$t("0208e14e-b26e-4411-9e8e-461b63b1c0c1")}}
+                            {{ $t("0208e14e-b26e-4411-9e8e-461b63b1c0c1") }}
                         </h2>
                         <p class="style-description">
                             Geef 25 euro en krijg zelf ook een tegoed
@@ -309,24 +307,24 @@
 </template>
 
 <script lang="ts" setup>
-import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, usePlatform, useSalesDisabled } from "@stamhoofd/components";
+import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, usePlatform, useSalesDisabled } from '@stamhoofd/components';
 
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
-import { defineRoutes, useNavigate, usePresent } from "@simonbackx/vue-app-navigation";
-import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { useOrganizationManager, useRequestOwner } from "@stamhoofd/networking";
-import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from "@stamhoofd/structures";
-import { ComponentOptions, Ref, computed, ref } from "vue";
-import LabsView from "./LabsView.vue";
-import PaymentSettingsView from "./PaymentSettingsView.vue";
-import PersonalizeSettingsView from "./PersonalizeSettingsView.vue";
-import PremisesView from "./PremisesView.vue";
-import PrivacySettingsView from "./PrivacySettingsView.vue";
-import RegistrationPageSettingsView from "./RegistrationPageSettingsView.vue";
-import RegistrationPaymentSettingsView from "./RegistrationPaymentSettingsView.vue";
-import SSOSettingsView from "./SSOSettingsView.vue";
-import { buildManageGroupsComponent } from "./buildManageGroupsComponent";
-import FreeContributionSettingsView from "./modules/members/FreeContributionSettingsView.vue";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
+import { ComponentOptions, Ref, computed, ref } from 'vue';
+import LabsView from './LabsView.vue';
+import PaymentSettingsView from './PaymentSettingsView.vue';
+import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
+import PremisesView from './PremisesView.vue';
+import PrivacySettingsView from './PrivacySettingsView.vue';
+import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
+import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
+import SSOSettingsView from './SSOSettingsView.vue';
+import { buildManageGroupsComponent } from './buildManageGroupsComponent';
+import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 enum Routes {
@@ -358,22 +356,22 @@ defineRoutes([
     {
         url: Routes.General,
         component: GeneralSettingsView as ComponentOptions,
-        present: 'popup'
+        present: 'popup',
     },
     {
         url: Routes.Personalization,
         component: PersonalizeSettingsView as unknown as ComponentOptions,
-        present: 'popup'
+        present: 'popup',
     },
     {
         url: Routes.Privacy,
         component: PrivacySettingsView as unknown as ComponentOptions,
-        present: 'popup'
+        present: 'popup',
     },
     {
         url: Routes.PaymentAccounts,
         component: PaymentSettingsView as unknown as ComponentOptions,
-        present: 'popup'
+        present: 'popup',
     },
     {
         url: Routes.Admins,
@@ -385,9 +383,9 @@ defineRoutes([
         component: EditEmailTemplatesView as ComponentOptions,
         paramsToProps() {
             return {
-                types: [...Object.values(EmailTemplateType)].filter(t => EmailTemplate.allowOrganizationLevel(t))
-            }
-        }
+                types: [...Object.values(EmailTemplateType)].filter(t => EmailTemplate.allowOrganizationLevel(t)),
+            };
+        },
     },
     {
         url: Routes.EmailSettings,
@@ -408,13 +406,13 @@ defineRoutes([
         url: Routes.RegistrationGroups,
         present: 'popup',
         handler: async (options) => {
-            const component = buildManageGroupsComponent($organizationManager.value)
+            const component = buildManageGroupsComponent($organizationManager.value);
 
             await present({
                 ...(options as any),
-                components: [component]
-            })
-        }
+                components: [component],
+            });
+        },
     },
     {
         url: Routes.RegistrationRecords,
@@ -422,19 +420,19 @@ defineRoutes([
         component: RecordsConfigurationView as ComponentOptions,
         paramsToProps() {
             return {
-                inheritedRecordsConfiguration: OrganizationRecordsConfiguration.build({platform: platform.value}),
+                inheritedRecordsConfiguration: OrganizationRecordsConfiguration.build({ platform: platform.value }),
                 recordsConfiguration: $organizationManager.value.organization.meta.recordsConfiguration,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
                     await $organizationManager.value.patch(Organization.patch({
                         id: $organizationManager.value.organization.id,
                         meta: OrganizationMetaData.patch({
-                            recordsConfiguration: patch
-                        })
-                    }))
-                    Toast.success("De aanpassingen zijn opgeslagen").show();
-                }
-            }
-        }
+                            recordsConfiguration: patch,
+                        }),
+                    }));
+                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                },
+            };
+        },
     },
     {
         url: Routes.RegistrationFreeContributions,
@@ -455,64 +453,67 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
-    }
-])
-const $navigate = useNavigate()
-const stripeAccounts = ref([]) as Ref<StripeAccount[]>
-const loadingStripeAccounts = ref(false)
-const context = useContext()
-const owner = useRequestOwner()
+    },
+]);
+const $navigate = useNavigate();
+const stripeAccounts = ref([]) as Ref<StripeAccount[]>;
+const loadingStripeAccounts = ref(false);
+const context = useContext();
+const owner = useRequestOwner();
 const feature = useFeatureFlag();
 const stripeWarnings = computed(() => {
-    return stripeAccounts.value.flatMap(a => a.warning ? [a.warning] : [])
-})
-const $t = useTranslate()
-const salesDisabled = useSalesDisabled()
-const membersPackage = useMembersPackage()
-loadStripeAccounts(null).catch(console.error)
+    return stripeAccounts.value.flatMap(a => a.warning ? [a.warning] : []);
+});
+const $t = useTranslate();
+const salesDisabled = useSalesDisabled();
+const membersPackage = useMembersPackage();
+loadStripeAccounts(null).catch(console.error);
 
 async function loadStripeAccounts(recheckStripeAccount: string | null) {
     try {
-        loadingStripeAccounts.value = true
+        loadingStripeAccounts.value = true;
         if (recheckStripeAccount) {
             try {
                 await context.value.authenticatedServer.request({
-                    method: "POST",
-                    path: "/stripe/accounts/" + encodeURIComponent(recheckStripeAccount),
+                    method: 'POST',
+                    path: '/stripe/accounts/' + encodeURIComponent(recheckStripeAccount),
                     decoder: StripeAccount as Decoder<StripeAccount>,
-                    owner
-                })
-            } catch (e) {
-                console.error(e)
+                    owner,
+                });
+            }
+            catch (e) {
+                console.error(e);
             }
         }
         const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/stripe/accounts",
+            method: 'GET',
+            path: '/stripe/accounts',
             decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
-            owner
-        })
-        stripeAccounts.value = response.data
+            owner,
+        });
+        stripeAccounts.value = response.data;
 
         if (!recheckStripeAccount) {
             for (const account of stripeAccounts.value) {
                 try {
                     const response = await context.value.authenticatedServer.request({
-                        method: "POST",
-                        path: "/stripe/accounts/" + encodeURIComponent(account.id),
+                        method: 'POST',
+                        path: '/stripe/accounts/' + encodeURIComponent(account.id),
                         decoder: StripeAccount as Decoder<StripeAccount>,
-                        owner
-                    })
-                    account.deepSet(response.data)
-                } catch (e) {
-                    console.error(e)
+                        owner,
+                    });
+                    account.deepSet(response.data);
+                }
+                catch (e) {
+                    console.error(e);
                 }
             }
         }
-    } catch (e) {
-        console.error(e)
     }
-    loadingStripeAccounts.value = false
+    catch (e) {
+        console.error(e);
+    }
+    loadingStripeAccounts.value = false;
 }
 
 </script>

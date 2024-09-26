@@ -31,21 +31,21 @@
 import { ErrorBox, Toast, useErrors, useOrganization } from '@stamhoofd/components';
 import { Group, Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { ref } from 'vue';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
 
 const props = defineProps<{
-    period: RegistrationPeriod,
-    callback: () => void
+    period: RegistrationPeriod;
+    callback: () => void;
 }>();
 
 const loading = ref(false);
 const organization = useOrganization();
 const organizationManager = useOrganizationManager();
-const errors = useErrors()
-const pop = usePop()
+const errors = useErrors();
+const pop = usePop();
 
 async function start() {
     if (loading.value) {
@@ -54,8 +54,8 @@ async function start() {
     loading.value = true;
 
     try {
-        const currentPeriod = organization.value!.period
-        const newOrganizationPeriod = currentPeriod.duplicate(props.period)
+        const currentPeriod = organization.value!.period;
+        const newOrganizationPeriod = currentPeriod.duplicate(props.period);
 
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
         arr.addPut(newOrganizationPeriod);
@@ -64,14 +64,15 @@ async function start() {
 
         await organizationManager.value.patch(
             Organization.patch({
-                period: newOrganizationPeriod
-            })
-        )
-        props.callback()
-        new Toast(newOrganizationPeriod.period.name + ' is nu ingesteld als het huidige werkjaar', 'success').show()
-        await pop({force: true})
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+                period: newOrganizationPeriod,
+            }),
+        );
+        props.callback();
+        new Toast(newOrganizationPeriod.period.name + ' is nu ingesteld als het huidige werkjaar', 'success').show();
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
 }

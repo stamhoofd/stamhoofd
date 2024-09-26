@@ -2,7 +2,7 @@
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errorBox" />
-        
+
         <STInputBox title="Naam (kort)" error-fields="meta.name" :error-box="errorBox">
             <input
                 v-model="name"
@@ -74,7 +74,7 @@
             <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errorBox">
                 <DateSelection v-model="availableUntil" />
             </STInputBox>
-            <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
+            <TimeInput v-model="availableUntil" title="Om" :validator="validator" />
         </div>
 
         <Checkbox v-model="useOpenAt">
@@ -85,17 +85,17 @@
             <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errorBox">
                 <DateSelection v-model="openAt" />
             </STInputBox>
-            <TimeInput v-model="openAt" title="Om" :validator="validator" /> 
+            <TimeInput v-model="openAt" title="Om" :validator="validator" />
         </div>
 
         <div class="container">
             <hr>
             <h2>Nummering</h2>
             <p v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" class="warning-box">
-                Je kan de bestelnummering niet meer wijzigen van willekeurig naar opeenvolgend (dupliceer de webshop als je dat toch nog wilt doen). 
+                Je kan de bestelnummering niet meer wijzigen van willekeurig naar opeenvolgend (dupliceer de webshop als je dat toch nog wilt doen).
             </p>
             <p v-else-if="numberingType === WebshopNumberingType.Random" class="warning-box">
-                Je kan de bestelnummering achteraf niet meer wijzigen van willekeurig naar opeenvolgend. 
+                Je kan de bestelnummering achteraf niet meer wijzigen van willekeurig naar opeenvolgend.
             </p>
 
             <STList>
@@ -131,11 +131,11 @@
 
             <EditPaymentMethodsBox
                 type="webshop"
-                :organization="organization" 
+                :organization="organization"
                 :config="config"
-                :private-config="privateConfig" 
-                :validator="validator" 
-                :show-administration-fee="false" 
+                :private-config="privateConfig"
+                :validator="validator"
+                :show-administration-fee="false"
                 @patch:config="patchConfig($event)"
                 @patch:private-config="patchPrivateConfig($event)"
             />
@@ -179,8 +179,8 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from '@stamhoofd/components';
 import { AccessRight, PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
@@ -197,89 +197,88 @@ import EditWebshopMixin from './EditWebshopMixin';
         TimeInput,
         Radio,
         SaveView,
-        EditPaymentMethodsBox
+        EditPaymentMethodsBox,
     },
 })
 export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
-    
-    mounted() {        
+    mounted() {
         // Auto assign roles
         if (this.isNew && this.$organizationManager.user.permissions && !this.webshop.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions)) {
             // By default, add full permissions for all the roles this user has, that also have create webshop permissions
-            const roles = this.$organization.privateMeta?.roles.flatMap(r => {
-                const has = this.$organizationManager.user.permissions?.organizationPermissions.get(this.organization.id)?.roles.find(i => i.id === r.id)
+            const roles = this.$organization.privateMeta?.roles.flatMap((r) => {
+                const has = this.$organizationManager.user.permissions?.organizationPermissions.get(this.organization.id)?.roles.find(i => i.id === r.id);
                 if (r.hasAccessRight(AccessRight.OrganizationCreateWebshops) && has) {
-                    return [PermissionRole.create(r)]
+                    return [PermissionRole.create(r)];
                 }
-                return []
-            }) ?? []
+                return [];
+            }) ?? [];
 
             if (roles.length > 0) {
-                const permissions = PermissionsByRole.patch({})
+                const permissions = PermissionsByRole.patch({});
                 for (const role of roles) {
-                    permissions.full.addPut(role)
+                    permissions.full.addPut(role);
                 }
                 this.addPatch(PrivateWebshop.patch({
                     privateMeta: WebshopPrivateMetaData.patch({
-                        permissions
-                    })
-                }))
+                        permissions,
+                    }),
+                }));
             }
         }
     }
 
     get canChangeType() {
-        return true; //this.webshop.products.length === 0 && this.webshop.meta.checkoutMethods.length === 0
+        return true; // this.webshop.products.length === 0 && this.webshop.meta.checkoutMethods.length === 0
     }
-    
+
     get viewTitle() {
         if (this.isNew) {
-            return "Nieuwe verkoop, inschrijvingsformulier of geldinzameling starten"
+            return 'Nieuwe verkoop, inschrijvingsformulier of geldinzameling starten';
         }
-        return "Algemene instellingen"
+        return 'Algemene instellingen';
     }
 
     get WebshopTicketType() {
-        return WebshopTicketType
+        return WebshopTicketType;
     }
 
     get WebshopNumberingType() {
-        return WebshopNumberingType
+        return WebshopNumberingType;
     }
 
     get WebshopAuthType() {
-        return WebshopAuthType
+        return WebshopAuthType;
     }
 
     get name() {
-        return this.webshop.meta.name
+        return this.webshop.meta.name;
     }
 
     set name(name: string) {
-        const patch = WebshopMetaData.patch({ name })
-        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+        const patch = WebshopMetaData.patch({ name });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get roles() {
-        return this.organization.privateMeta?.roles ?? []
+        return this.organization.privateMeta?.roles ?? [];
     }
 
     get ticketType() {
-        return this.webshop.meta.ticketType
+        return this.webshop.meta.ticketType;
     }
 
     set ticketType(ticketType: WebshopTicketType) {
-        const patch = WebshopMetaData.patch({ ticketType })
-        const p = PrivateWebshop.patch({ meta: patch})
+        const patch = WebshopMetaData.patch({ ticketType });
+        const p = PrivateWebshop.patch({ meta: patch });
 
         // Restore any chagnes to locations
         if (this.webshopPatch.meta) {
-            this.webshopPatch.meta.checkoutMethods = patch.checkoutMethods
+            this.webshopPatch.meta.checkoutMethods = patch.checkoutMethods;
         }
 
         // Restore any changes to products
         if (this.webshopPatch) {
-            this.webshopPatch.products = p.products
+            this.webshopPatch.products = p.products;
         }
 
         if (ticketType === WebshopTicketType.Tickets) {
@@ -289,28 +288,29 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
                 if (product.type !== ProductType.Ticket && product.type !== ProductType.Voucher) {
                     const productPatch = Product.patch({
                         id: product.id,
-                        type: ProductType.Ticket
-                    })
-                    p.products.addPatch(productPatch)
+                        type: ProductType.Ticket,
+                    });
+                    p.products.addPatch(productPatch);
                     used = true;
                 }
             }
 
             if (used) {
-                new Toast('Sommige artikelen zullen worden omgezet in tickets waardoor je hun locatie en datum nog zal moeten invullen', 'warning yellow').setHide(null).show()
+                new Toast('Sommige artikelen zullen worden omgezet in tickets waardoor je hun locatie en datum nog zal moeten invullen', 'warning yellow').setHide(null).show();
             }
 
             // Remove all locations
             let deletedLocation = false;
             for (const location of this.webshop.meta.checkoutMethods) {
-                patch.checkoutMethods.addDelete(location.id)
+                patch.checkoutMethods.addDelete(location.id);
                 deletedLocation = true;
             }
 
             if (deletedLocation) {
-                new Toast('Alle afhaal- en leveringslocaties zullen worden verwijderd als je opslaat omdat deze niet ondersteund worden bij een ticketverkoop voor personen', 'warning yellow').setHide(null).show()
+                new Toast('Alle afhaal- en leveringslocaties zullen worden verwijderd als je opslaat omdat deze niet ondersteund worden bij een ticketverkoop voor personen', 'warning yellow').setHide(null).show();
             }
-        } else {
+        }
+        else {
             let used = false;
             // Update all products to not ticket or voucher if needed
             for (const product of this.webshop.products) {
@@ -319,150 +319,152 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
                         id: product.id,
                         type: ProductType.Product,
                         location: null,
-                        dateRange: null
-                    })
-                    p.products.addPatch(productPatch)
+                        dateRange: null,
+                    });
+                    p.products.addPatch(productPatch);
                     used = true;
                 }
             }
 
             if (used) {
-                new Toast('Sommige tickets zullen worden omgezet in gewone artikels waardoor hun locatie en datum informatie verloren gaat als je nu opslaat.', 'warning yellow').setHide(null).show()
+                new Toast('Sommige tickets zullen worden omgezet in gewone artikels waardoor hun locatie en datum informatie verloren gaat als je nu opslaat.', 'warning yellow').setHide(null).show();
             }
         }
 
-        this.addPatch(p)
+        this.addPatch(p);
     }
 
     get originalNumberingType() {
-        return this.originalWebshop.privateMeta.numberingType
+        return this.originalWebshop.privateMeta.numberingType;
     }
 
     get numberingType() {
-        return this.webshop.privateMeta.numberingType
+        return this.webshop.privateMeta.numberingType;
     }
 
     set numberingType(numberingType: WebshopNumberingType) {
-        const patch = WebshopPrivateMetaData.patch({ numberingType })
-        this.addPatch(PrivateWebshop.patch({ privateMeta: patch}) )
+        const patch = WebshopPrivateMetaData.patch({ numberingType });
+        this.addPatch(PrivateWebshop.patch({ privateMeta: patch }));
     }
 
     get authType() {
-        return this.webshop.meta.authType
+        return this.webshop.meta.authType;
     }
 
     set authType(authType: WebshopAuthType) {
-        const patch = WebshopMetaData.patch({ authType })
-        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+        const patch = WebshopMetaData.patch({ authType });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get organization() {
-        return this.$context.organization!
+        return this.$context.organization!;
     }
 
     get useAvailableUntil() {
-        return this.webshop.meta.availableUntil !== null
+        return this.webshop.meta.availableUntil !== null;
     }
 
     set useAvailableUntil(use: boolean) {
         if (use === this.useAvailableUntil) {
             return;
         }
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
         if (use) {
-            meta.availableUntil = new Date()
-        } else {
-            meta.availableUntil = null
+            meta.availableUntil = new Date();
         }
-        p.meta = meta
-        this.addPatch(p)
+        else {
+            meta.availableUntil = null;
+        }
+        p.meta = meta;
+        this.addPatch(p);
     }
 
     get availableUntil() {
-        return this.webshop.meta.availableUntil ?? new Date()
+        return this.webshop.meta.availableUntil ?? new Date();
     }
 
     set availableUntil(availableUntil: Date) {
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.availableUntil = availableUntil
-        p.meta = meta
-        this.addPatch(p)
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.availableUntil = availableUntil;
+        p.meta = meta;
+        this.addPatch(p);
     }
 
     get useOpenAt() {
-        return this.webshop.meta.openAt !== null
+        return this.webshop.meta.openAt !== null;
     }
 
     set useOpenAt(use: boolean) {
         if (use === this.useOpenAt) {
             return;
         }
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
         if (use) {
-            meta.openAt = new Date()
-        } else {
-            meta.openAt = null
+            meta.openAt = new Date();
         }
-        p.meta = meta
-        this.addPatch(p)
+        else {
+            meta.openAt = null;
+        }
+        p.meta = meta;
+        this.addPatch(p);
     }
 
     get openAt() {
-        return this.webshop.meta.openAt ?? new Date()
+        return this.webshop.meta.openAt ?? new Date();
     }
 
     set openAt(openAt: Date) {
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.openAt = openAt
-        p.meta = meta
-        this.addPatch(p)
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.openAt = openAt;
+        p.meta = meta;
+        this.addPatch(p);
     }
 
     validate() {
         if (this.webshop.meta.name.trim().length === 0) {
             throw new SimpleError({
-                code: "invalid_field",
-                message: "Name is empty",
-                human: "Vul een naam in voor jouw webshop voor je doorgaat",
-                field: "meta.name"
-            })
+                code: 'invalid_field',
+                message: 'Name is empty',
+                human: 'Vul een naam in voor jouw webshop voor je doorgaat',
+                field: 'meta.name',
+            });
         }
     }
 
     get config() {
-        return this.webshop.meta.paymentConfiguration
+        return this.webshop.meta.paymentConfiguration;
     }
 
     patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
         this.addPatch(
             PrivateWebshop.patch({
                 meta: WebshopMetaData.patch({
-                    paymentConfiguration: patch
-                })
-            })
-        )
+                    paymentConfiguration: patch,
+                }),
+            }),
+        );
     }
 
     get privateConfig() {
-        return this.webshop.privateMeta.paymentConfiguration
+        return this.webshop.privateMeta.paymentConfiguration;
     }
 
     patchPrivateConfig(patch: PrivatePaymentConfiguration) {
         this.addPatch(
             PrivateWebshop.patch({
                 privateMeta: WebshopPrivateMetaData.patch({
-                    paymentConfiguration: patch
-                })
-            })
-        )
+                    paymentConfiguration: patch,
+                }),
+            }),
+        );
     }
 
     getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
     }
 }
 </script>

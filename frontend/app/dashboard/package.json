@@ -9,7 +9,7 @@
         "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build",
         "test": "jest",
-        "lint": "eslint",
+        "lint": "eslint --cache",
         "check-types": "vue-tsc --noEmit"
     },
     "files": [

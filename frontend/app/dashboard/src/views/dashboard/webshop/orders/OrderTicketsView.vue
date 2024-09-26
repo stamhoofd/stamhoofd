@@ -15,24 +15,25 @@
         </main>
 
         <STToolbar>
-            <template #right><button class="button primary" type="button" @click="downloadAllTickets">
-                <span class="icon download" />
-                <span>Download</span>
-            </button></template>
+            <template #right>
+                <button class="button primary" type="button" @click="downloadAllTickets">
+                    <span class="icon download" />
+                    <span>Download</span>
+                </button>
+            </template>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { SessionManager } from '@stamhoofd/networking';
 import { PrivateOrderWithTickets, TicketPublic } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-
-import { WebshopManager } from "../WebshopManager";
-import TicketRow from "./TicketRow.vue";
+import { WebshopManager } from '../WebshopManager';
+import TicketRow from './TicketRow.vue';
 
 @Component({
     components: {
@@ -40,31 +41,31 @@ import TicketRow from "./TicketRow.vue";
         STToolbar,
         STList,
         STListItem,
-        TicketRow
-    }
+        TicketRow,
+    },
 })
-export default class OrderTicketsView extends Mixins(NavigationMixin){
-    loading = false
-    errorBox: ErrorBox | null = null
+export default class OrderTicketsView extends Mixins(NavigationMixin) {
+    loading = false;
+    errorBox: ErrorBox | null = null;
 
     @Prop({ required: true })
-        initialOrder!: PrivateOrderWithTickets
+    initialOrder!: PrivateOrderWithTickets;
 
     @Prop({ required: true })
-        webshopManager!: WebshopManager
+    webshopManager!: WebshopManager;
 
     get webshop() {
-        return this.webshopManager.preview
+        return this.webshopManager.preview;
     }
 
-    order: PrivateOrderWithTickets = this.initialOrder
+    order: PrivateOrderWithTickets = this.initialOrder;
 
     get tickets() {
-        return this.order.tickets.map(t => t.getPublic(this.order)).sort(TicketPublic.sort)
+        return this.order.tickets.map(t => t.getPublic(this.order)).sort(TicketPublic.sort);
     }
 
     get hasWrite() {
-        return this.webshop.privateMeta.permissions.hasWriteAccess(this.$context.organizationPermissions)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(this.$context.organizationPermissions);
     }
 
     async downloadAllTickets() {
@@ -72,12 +73,10 @@ export default class OrderTicketsView extends Mixins(NavigationMixin){
             /* webpackChunkName: "TicketBuilder" */
             /* webpackPrefetch: true */
             '@stamhoofd/ticket-builder'
-        )).TicketBuilder
+        )).TicketBuilder;
 
-        const builder = new TicketBuilder(this.tickets, this.webshop, this.$organization, this.order)
-        await builder.download()
+        const builder = new TicketBuilder(this.tickets, this.webshop, this.$organization, this.order);
+        await builder.download();
     }
-
-  
 }
 </script>

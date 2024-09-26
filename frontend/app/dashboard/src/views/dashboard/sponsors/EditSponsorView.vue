@@ -6,7 +6,7 @@
         <h1 v-else>
             Sponsor bewerken
         </h1>
-          
+
         <STErrorsDefault :error-box="errorBox" />
         <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
             <input
@@ -61,7 +61,6 @@
 
         <ImageComponent v-if="banner" :image="banner" :max-height="150" :auto-height="true" />
 
-
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
@@ -78,9 +77,9 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, ImageComponent, NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, UrlInput, Validator } from "@stamhoofd/components";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, Checkbox, ErrorBox, ImageComponent, NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, UrlInput, Validator } from '@stamhoofd/components';
 import { Image, ResolutionRequest, Sponsor, Version } from '@stamhoofd/structures';
 
 @Component({
@@ -95,143 +94,143 @@ import { Image, ResolutionRequest, Sponsor, Version } from '@stamhoofd/structure
         Checkbox,
         UploadButton,
         UrlInput,
-        ImageComponent
+        ImageComponent,
     },
 })
 export default class EditSponsorView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-        sponsor: Sponsor
+    sponsor: Sponsor;
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
-    patchSponsor: AutoEncoderPatchType<Sponsor> = Sponsor.patch({})
+    patchSponsor: AutoEncoderPatchType<Sponsor> = Sponsor.patch({});
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: ((patch: AutoEncoderPatchType<Sponsor>) => void);
+    saveHandler: ((patch: AutoEncoderPatchType<Sponsor>) => void);
 
     @Prop({ required: false })
-        deleteHandler: (() => void);
+    deleteHandler: (() => void);
 
     get patchedSponsor() {
-        return this.sponsor.patch(this.patchSponsor)
+        return this.sponsor.patch(this.patchSponsor);
     }
-   
+
     get name() {
-        return this.patchedSponsor.name
+        return this.patchedSponsor.name;
     }
 
     set name(name: string) {
-        this.addPatch(Sponsor.patch({ name }))
+        this.addPatch(Sponsor.patch({ name }));
     }
 
     get url() {
-        return this.patchedSponsor.url
+        return this.patchedSponsor.url;
     }
 
-    set url(url: string|null) {
-        this.addPatch(Sponsor.patch({ url: url ? url : null })) 
+    set url(url: string | null) {
+        this.addPatch(Sponsor.patch({ url: url ? url : null }));
     }
 
     get onTickets() {
-        return this.patchedSponsor.onTickets
+        return this.patchedSponsor.onTickets;
     }
 
     set onTickets(onTickets: boolean) {
-        this.addPatch(Sponsor.patch({onTickets}))
+        this.addPatch(Sponsor.patch({ onTickets }));
     }
 
     addPatch(patch: AutoEncoderPatchType<Sponsor>) {
-        this.patchSponsor = this.patchSponsor.patch(patch)
+        this.patchSponsor = this.patchSponsor.patch(patch);
     }
 
     async save() {
         if (!await this.validator.validate()) {
-            return
+            return;
         }
 
         try {
-            this.saveHandler(this.patchSponsor)
-            this.pop({ force: true })
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+            this.saveHandler(this.patchSponsor);
+            this.pop({ force: true });
         }
-       
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
+        }
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze keuze wilt verwijderen?", "Verwijderen")) {
-            return
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze keuze wilt verwijderen?', 'Verwijderen')) {
+            return;
         }
-        this.deleteHandler()
-        this.pop({ force: true })
+        this.deleteHandler();
+        this.pop({ force: true });
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchSponsor, this.sponsor, { version: Version })
+        return patchContainsChanges(this.patchSponsor, this.sponsor, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
     get logo() {
-        return this.patchedSponsor.logo
+        return this.patchedSponsor.logo;
     }
 
     set logo(logo: Image | null) {
-        const p = Sponsor.patch({ 
-            logo
-        })
-        this.addPatch(p)
+        const p = Sponsor.patch({
+            logo,
+        });
+        this.addPatch(p);
     }
 
     get banner() {
-        return this.patchedSponsor.banner
+        return this.patchedSponsor.banner;
     }
 
     set banner(banner: Image | null) {
-        const p = Sponsor.patch({ 
-            banner
-        })
-        this.addPatch(p)
+        const p = Sponsor.patch({
+            banner,
+        });
+        this.addPatch(p);
     }
 
     get logoResolutions() {
         return [
             ResolutionRequest.create({
-                height: 80
+                height: 80,
             }),
             ResolutionRequest.create({
-                height: 80*2
+                height: 80 * 2,
             }),
             ResolutionRequest.create({
-                height: 80*3
-            })
-        ]
+                height: 80 * 3,
+            }),
+        ];
     }
 
     get resolutions() {
         return [
             ResolutionRequest.create({
-                height: 150
+                height: 150,
             }),
             ResolutionRequest.create({
-                height: 300
+                height: 300,
             }),
             ResolutionRequest.create({
-                height: 450
-            })
-        ]
+                height: 450,
+            }),
+        ];
     }
 }
 </script>

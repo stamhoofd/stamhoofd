@@ -32,7 +32,7 @@
                             <p v-if="option.userDescription" class="style-description-small style-em">
                                 Ingelogd als {{ option.userDescription }}
                             </p>
-                            
+
                             <span v-if="option.userDescription" class="icon gray sync floating" />
                             <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
                             <span v-if="isPlatform && option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
@@ -69,32 +69,32 @@ import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { ContextLogo, getAppDescription, getAppTitle, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useContextOptions, usePlatform } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { throttle } from "@stamhoofd/utility";
+import { throttle } from '@stamhoofd/utility';
 import { computed, getCurrentInstance, onMounted, reactive, Ref, ref, shallowRef, watch } from 'vue';
 
-const isNative = ref(AppManager.shared.isNative)
-const loadingDefault = ref(true)
-const loadingResults = ref(false)
-const query = ref("");
+const isNative = ref(AppManager.shared.isNative);
+const loadingDefault = ref(true);
+const loadingResults = ref(false);
+const query = ref('');
 const defaultOptions: Ref<Option[]> = shallowRef([]);
 const results: Ref<Option[]> = shallowRef([]);
-const owner = useRequestOwner()
-const input = ref<HTMLInputElement | null>(null)
-const resultElements = reactive<HTMLElement[]>([])
-const visibleOptions = computed(() => query.value.length === 0 ? defaultOptions.value : results.value)
-const isPlatform = STAMHOOFD.userMode === 'platform'
+const owner = useRequestOwner();
+const input = ref<HTMLInputElement | null>(null);
+const resultElements = reactive<HTMLElement[]>([]);
+const visibleOptions = computed(() => query.value.length === 0 ? defaultOptions.value : results.value);
+const isPlatform = STAMHOOFD.userMode === 'platform';
 const instance = getCurrentInstance();
 const platform = usePlatform();
 
 onMounted(() => {
-    console.info('Mounted OrganizationSelectionView', instance)
-})
+    console.info('Mounted OrganizationSelectionView', instance);
+});
 
-const {getDefaultOptions, selectOption, getOptionForOrganization} = useContextOptions()
+const { getDefaultOptions, selectOption, getOptionForOrganization } = useContextOptions();
 
 getDefaultOptions().then((opts) => {
     defaultOptions.value = opts;
-    loadingDefault.value = false
+    loadingDefault.value = false;
 }).catch(console.error);
 
 let lastQuery = '';
@@ -102,112 +102,113 @@ let counter = 0;
 
 const help = () => {
     // todo
-}
+};
 
 const focusResult = (index: number) => {
     if (index === -1) {
         if (input.value) {
             input.value.focus();
         }
-        return
+        return;
     }
     if (resultElements) {
         if (resultElements[index]) {
-            resultElements[index].focus()
+            resultElements[index].focus();
         }
     }
-}
+};
 
 const setResults = async (cachedCount: number, organizations: Organization[]) => {
     if (cachedCount !== counter) {
         // A new request have started already
         // (race condition if this was scheduled)
-        return
+        return;
     }
 
     if (organizations.length === 0) {
-        results.value = []
+        results.value = [];
         return;
     }
 
     // Start loading the options
     const options = await Promise.all(organizations.map(async (organization) => {
-        const option = await getOptionForOrganization(organization) as Option
-        return option
-    }))
+        const option = await getOptionForOrganization(organization) as Option;
+        return option;
+    }));
 
     if (cachedCount !== counter) {
         // A new request have started already
-        return
+        return;
     }
 
-    results.value = options
-}
+    results.value = options;
+};
 
 const updateResults = async () => {
-    const q = query.value
-    const cachedCount = counter
+    const q = query.value;
+    const cachedCount = counter;
 
     if (q.length === 0) {
-        await setResults(cachedCount, [])
-        loadingResults.value = false
-        return
+        await setResults(cachedCount, []);
+        loadingResults.value = false;
+        return;
     }
-    loadingResults.value = true
+    loadingResults.value = true;
 
     try {
         const response = await NetworkManager.server.request({
-            method: "GET",
-            path: "/organizations/search",
-            query: {query: q },
+            method: 'GET',
+            path: '/organizations/search',
+            query: { query: q },
             decoder: new ArrayDecoder(Organization as Decoder<Organization>),
-            owner
-        })
+            owner,
+        });
 
         if (cachedCount !== counter) {
             // A new request have started already
-            return
+            return;
         }
-        await setResults(cachedCount, response.data)
-    } catch (e) {
+        await setResults(cachedCount, response.data);
+    }
+    catch (e) {
         if (cachedCount !== counter) {
             // A new request have started already
-            return
+            return;
         }
         if (!Request.isAbortError(e)) {
-            console.error(e)
-            Toast.fromError(e).show()
+            console.error(e);
+            Toast.fromError(e).show();
         }
-        await setResults(cachedCount, [])
+        await setResults(cachedCount, []);
     }
 
     if (cachedCount !== counter) {
         // A new request have started already
-        return
+        return;
     }
-    loadingResults.value = false
-}
+    loadingResults.value = false;
+};
 
 const throttleUpdateResults = throttle(updateResults, 500);
 
 const startUpdateResults = async () => {
-    const value = query.value
+    const value = query.value;
     if (value === lastQuery) {
-        return
+        return;
     }
-    lastQuery = value
-    loadingResults.value = true
+    lastQuery = value;
+    loadingResults.value = true;
     counter += 1;
 
-    Request.cancelAll(owner)
+    Request.cancelAll(owner);
 
     if (value.length === 0) {
-        await setResults(counter, [])
-        loadingResults.value = false
-        return
+        await setResults(counter, []);
+        loadingResults.value = false;
+        return;
     }
-    throttleUpdateResults()
-}
+    throttleUpdateResults();
+};
 
 watch(query, startUpdateResults);
 
@@ -217,29 +218,29 @@ defineRoutes([
         name: 'join',
         component: async () => (await import('../signup/SignupGeneralView.vue')).default as any,
         paramsToProps(_, query) {
-            const code = query?.get("code")
-            const organization = query?.get("org")
+            const code = query?.get('code');
+            const organization = query?.get('org');
 
             if (code && organization) {
                 return {
                     initialRegisterCode: {
                         code,
-                        organization
+                        organization,
                     },
-                    visitViaUrl: true
-                }
+                    visitViaUrl: true,
+                };
             }
-            
+
             return {
                 initialRegisterCode: null,
-                visitViaUrl: !!query
-            }
+                visitViaUrl: !!query,
+            };
         },
-        present: 'popup'
-    }
-])
+        present: 'popup',
+    },
+]);
 
-const $navigate = useNavigate()
+const $navigate = useNavigate();
 
 </script>
 

@@ -77,9 +77,9 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem } from "@stamhoofd/components";
-import { Product, ProductPrice } from "@stamhoofd/structures"
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem } from '@stamhoofd/components';
+import { Product, ProductPrice } from '@stamhoofd/structures';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
@@ -88,114 +88,115 @@ import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/cl
         Checkbox,
         NumberInput,
         STList,
-        STListItem
+        STListItem,
     },
 })
 export default class ProductPriceBox extends VueComponent {
     @Prop({ required: true })
-        errorBox: ErrorBox
+    errorBox: ErrorBox;
 
     @Prop({ required: true })
-        productPrice: ProductPrice
+    productPrice: ProductPrice;
 
     @Prop({ required: true })
-        product: Product
+    product: Product;
 
     get patchedProduct() {
-        return this.product
+        return this.product;
     }
 
     get patchedProductPrice() {
-        return this.productPrice
+        return this.productPrice;
     }
 
     get name() {
-        return this.patchedProductPrice.name
+        return this.patchedProductPrice.name;
     }
 
     set name(name: string) {
-        this.addPricePatch(ProductPrice.patch({ name }))
+        this.addPricePatch(ProductPrice.patch({ name }));
     }
 
     get price() {
-        return this.patchedProductPrice.price
+        return this.patchedProductPrice.price;
     }
 
     set price(price: number) {
-        this.addPricePatch(ProductPrice.patch({ price }))
+        this.addPricePatch(ProductPrice.patch({ price }));
     }
 
     get discountAmount() {
-        return this.patchedProductPrice.discountAmount
+        return this.patchedProductPrice.discountAmount;
     }
 
     set discountAmount(discountAmount: number) {
-        this.addPricePatch(ProductPrice.patch({ discountAmount }))
+        this.addPricePatch(ProductPrice.patch({ discountAmount }));
     }
 
     get discountPrice() {
-        return this.patchedProductPrice.discountPrice
+        return this.patchedProductPrice.discountPrice;
     }
 
     set discountPrice(discountPrice: number | null) {
-        this.addPricePatch(ProductPrice.patch({ discountPrice }))
+        this.addPricePatch(ProductPrice.patch({ discountPrice }));
     }
 
     get useDiscount() {
-        return this.patchedProductPrice.discountPrice !== null
+        return this.patchedProductPrice.discountPrice !== null;
     }
 
     set useDiscount(useDiscount: boolean) {
         if (useDiscount === this.useDiscount) {
-            return
+            return;
         }
         if (useDiscount) {
-            this.discountPrice = this.price
-        } else {
-            this.discountPrice = null
+            this.discountPrice = this.price;
+        }
+        else {
+            this.discountPrice = null;
         }
     }
 
     get hidden() {
-        return this.patchedProductPrice.hidden
+        return this.patchedProductPrice.hidden;
     }
 
     set hidden(hidden: boolean) {
-        this.addPricePatch(ProductPrice.patch({ hidden }))
+        this.addPricePatch(ProductPrice.patch({ hidden }));
     }
 
     get useStock() {
-        return this.patchedProductPrice.stock !== null
+        return this.patchedProductPrice.stock !== null;
     }
 
     set useStock(useStock: boolean) {
-        this.addPricePatch(ProductPrice.patch({ stock: useStock ? (this.patchedProductPrice.stock ?? this.patchedProductPrice.stock ?? (this.patchedProductPrice.usedStock || 10)) : null }))
+        this.addPricePatch(ProductPrice.patch({ stock: useStock ? (this.patchedProductPrice.stock ?? this.patchedProductPrice.stock ?? (this.patchedProductPrice.usedStock || 10)) : null }));
     }
 
     get stock() {
-        return this.patchedProductPrice.stock
+        return this.patchedProductPrice.stock;
     }
 
     set stock(stock: number | null) {
-        this.addPricePatch(ProductPrice.patch({ stock }))
+        this.addPricePatch(ProductPrice.patch({ stock }));
     }
 
     get usedStock() {
-        return this.patchedProductPrice.usedStock
+        return this.patchedProductPrice.usedStock;
     }
 
     addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {
-        const p = Product.patch({})
-        p.prices.addPatch(ProductPrice.patch(Object.assign({}, patch, { id: this.productPrice.id })))
-        this.addPatch(p)
+        const p = Product.patch({});
+        p.prices.addPatch(ProductPrice.patch(Object.assign({}, patch, { id: this.productPrice.id })));
+        this.addPatch(p);
     }
 
     addPatch(patch: AutoEncoderPatchType<Product>) {
-        this.$emit('patch', patch)
+        this.$emit('patch', patch);
     }
-   
+
     get isSingle() {
-        return this.patchedProduct.prices.length <= 1
+        return this.patchedProduct.prices.length <= 1;
     }
 }
 </script>

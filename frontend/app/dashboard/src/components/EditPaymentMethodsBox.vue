@@ -22,10 +22,11 @@
             </a>
         </p>
 
-
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)">
-                <template #left><Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" /></template>
+                <template #left>
+                    <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
+                </template>
                 <h3 class="style-title-list">
                     {{ getName(method) }}
                 </h3>
@@ -94,7 +95,7 @@
             <hr>
             <h2>Administratiekosten</h2>
             <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
-        
+
             <div class="split-inputs">
                 <STInputBox title="Vaste kost" error-fields="administrationFee.fixed" :error-box="errorBox">
                     <PriceInput v-model="fixed" :min="0" placeholder="Vaste kost" :required="true" />
@@ -116,15 +117,14 @@
     </div>
 </template>
 
-
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, Dropdown, ErrorBox, IBANInput, LoadingView, PermyriadInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { I18nController } from "@stamhoofd/frontend-i18n";
-import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from "@stamhoofd/structures";
-import { Formatter, Sorter } from "@stamhoofd/utility";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+import { Checkbox, Dropdown, ErrorBox, IBANInput, LoadingView, PermyriadInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 
 @Component({
     components: {
@@ -138,118 +138,119 @@ import { Formatter, Sorter } from "@stamhoofd/utility";
         IBANInput,
         PriceInput,
         PermyriadInput,
-        STErrorsDefault
+        STErrorsDefault,
     },
     filters: {
-        price: Formatter.price.bind(Formatter)
-    }
+        price: Formatter.price.bind(Formatter),
+    },
 })
 export default class EditPaymentMethodsBox extends VueComponent {
     @Prop({ required: true })
-        type: 'registration'|'webshop'
+    type: 'registration' | 'webshop';
 
     @Prop({ default: true })
-        showAdministrationFee: boolean
+    showAdministrationFee: boolean;
 
-    @Prop({ default: null }) 
-        validator: Validator | null
+    @Prop({ default: null })
+    validator: Validator | null;
 
-    errorBox: ErrorBox | null = null
-
-    @Prop({ required: true })
-        organization: Organization
+    errorBox: ErrorBox | null = null;
 
     @Prop({ required: true })
-        privateConfig: PrivatePaymentConfiguration
+    organization: Organization;
 
     @Prop({ required: true })
-        config: PaymentConfiguration
+    privateConfig: PrivatePaymentConfiguration;
+
+    @Prop({ required: true })
+    config: PaymentConfiguration;
 
     @Prop({ required: false, default: null })
-        choices: PaymentMethod[] | null
+    choices: PaymentMethod[] | null;
 
     @Prop({ required: false, default: true })
-        showPrices: boolean
+    showPrices: boolean;
 
-    loadingStripeAccounts = false
-    stripeAccounts: StripeAccount[] = []
+    loadingStripeAccounts = false;
+    stripeAccounts: StripeAccount[] = [];
 
     created() {
-        this.loadStripeAccounts().catch(console.error)
+        this.loadStripeAccounts().catch(console.error);
     }
 
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate()
-            })
+                return this.validate();
+            });
         }
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
     async validate() {
-        this.clean()
-        await this.$nextTick()
-        
+        this.clean();
+        await this.$nextTick();
+
         if (this.loadingStripeAccounts) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'loading',
-                message: "Nog bezig met laden. Even geduld."
-            }))
-            return false
+                message: 'Nog bezig met laden. Even geduld.',
+            }));
+            return false;
         }
 
         if (this.config.paymentMethods.length === 0) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'no_payment_methods',
-                message: "Je moet minimaal één betaalmethode selecteren"
-            }))
-            return false
+                message: 'Je moet minimaal één betaalmethode selecteren',
+            }));
+            return false;
         }
 
         return true;
     }
 
     patchPrivateConfig(patch: AutoEncoderPatchType<PrivatePaymentConfiguration>) {
-        this.$emit("patch:privateConfig", patch)
+        this.$emit('patch:privateConfig', patch);
     }
 
     patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
-        this.$emit("patch:config", patch)
+        this.$emit('patch:config', patch);
     }
 
     get hasTransfers() {
-        return this.config.paymentMethods.includes(PaymentMethod.Transfer)
+        return this.config.paymentMethods.includes(PaymentMethod.Transfer);
     }
 
     async loadStripeAccounts() {
         try {
-            this.loadingStripeAccounts = true
+            this.loadingStripeAccounts = true;
             const response = await this.$context.authenticatedServer.request({
-                method: "GET",
-                path: "/stripe/accounts",
+                method: 'GET',
+                path: '/stripe/accounts',
                 decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
                 shouldRetry: true,
-                owner: this
-            })
-            this.stripeAccounts = response.data
+                owner: this,
+            });
+            this.stripeAccounts = response.data;
 
             if (!this.hasMollieOrBuckaroo && !this.stripeAccountObject) {
-                this.stripeAccountId = this.stripeAccounts[0]?.id ?? null
+                this.stripeAccountId = this.stripeAccounts[0]?.id ?? null;
             }
 
             this.$nextTick(() => {
-                this.setDefaultSelection()
-            })
-        } catch (e) {
-            console.error(e)
+                this.setDefaultSelection();
+            });
         }
-        this.loadingStripeAccounts = false
+        catch (e) {
+            console.error(e);
+        }
+        this.loadingStripeAccounts = false;
     }
 
     setDefaultSelection() {
@@ -257,257 +258,260 @@ export default class EditPaymentMethodsBox extends VueComponent {
             const ignore = [
                 PaymentMethod.Unknown,
                 PaymentMethod.Transfer,
-                PaymentMethod.PointOfSale
-            ]
+                PaymentMethod.PointOfSale,
+            ];
 
             let found = false;
 
             // Check if online payments are enabled
             for (const p of this.sortedPaymentMethods) {
                 if (!ignore.includes(p) && this.canEnablePaymentMethod(p)) {
-                    this.setPaymentMethod(p, true)
-                    found = true
+                    this.setPaymentMethod(p, true);
+                    found = true;
                 }
             }
 
             if (!found) {
                 // Enable transfer
-                this.setPaymentMethod(PaymentMethod.Transfer, true)
+                this.setPaymentMethod(PaymentMethod.Transfer, true);
             }
-        } else {
-            this.clean()
+        }
+        else {
+            this.clean();
         }
     }
-    
+
     get country() {
-        return I18nController.shared.country
+        return I18nController.shared.country;
     }
 
     get stripeAccountId() {
-        return this.privateConfig.stripeAccountId
+        return this.privateConfig.stripeAccountId;
     }
 
     set stripeAccountId(value: string | null) {
         this.patchPrivateConfig(PrivatePaymentConfiguration.patch({
-            stripeAccountId: value
+            stripeAccountId: value,
         }));
 
         // Clear all unsupported payment methods
         this.$nextTick(() => {
-            this.clean()
-        })
+            this.clean();
+        });
     }
 
     clean() {
         for (const method of this.config.paymentMethods) {
             if (!this.canEnablePaymentMethod(method)) {
-                this.setPaymentMethod(method, false, true)
+                this.setPaymentMethod(method, false, true);
             }
         }
     }
 
     get stripeAccountObject() {
-        return this.stripeAccounts.find(a => a.id === this.stripeAccountId) ?? null
+        return this.stripeAccounts.find(a => a.id === this.stripeAccountId) ?? null;
     }
 
     get sortedPaymentMethods() {
         if (this.choices !== null) {
-            return this.choices
+            return this.choices;
         }
 
-        const r: PaymentMethod[] = []
+        const r: PaymentMethod[] = [];
 
         // Force a given ordering
         if (this.country === Country.Netherlands) {
-            r.push(PaymentMethod.iDEAL)
+            r.push(PaymentMethod.iDEAL);
         }
 
         // Force a given ordering
         if (this.country === Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq)
+            r.push(PaymentMethod.Payconiq);
         }
 
         // Force a given ordering
-        r.push(PaymentMethod.Bancontact)
+        r.push(PaymentMethod.Bancontact);
 
         // Force a given ordering
         if (this.country !== Country.Netherlands) {
-            r.push(PaymentMethod.iDEAL)
+            r.push(PaymentMethod.iDEAL);
         }
 
-        r.push(PaymentMethod.CreditCard)
-        
-        r.push(PaymentMethod.Transfer)
-        r.push(PaymentMethod.PointOfSale)
+        r.push(PaymentMethod.CreditCard);
+
+        r.push(PaymentMethod.Transfer);
+        r.push(PaymentMethod.PointOfSale);
 
         // Sort so all disabled are at the end:
-        r.sort((a, b) => Sorter.byBooleanValue(this.canEnablePaymentMethod(a), this.canEnablePaymentMethod(b)))
-        return r
+        r.sort((a, b) => Sorter.byBooleanValue(this.canEnablePaymentMethod(a), this.canEnablePaymentMethod(b)));
+        return r;
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        return PaymentMethodHelper.getNameCapitalized(paymentMethod)
+        return PaymentMethodHelper.getNameCapitalized(paymentMethod);
     }
-    
-    providerText(provider: PaymentProvider | null, map: {[key: string]: string}): string {
+
+    providerText(provider: PaymentProvider | null, map: { [key: string]: string }): string {
         if (provider === null) {
-            return ""
-        } else {
-            return map[provider]
+            return '';
+        }
+        else {
+            return map[provider];
         }
     }
 
     getDescription(paymentMethod: PaymentMethod): string {
-        const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta) ?? PaymentProvider.Stripe
+        const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta) ?? PaymentProvider.Stripe;
 
         switch (paymentMethod) {
-            case PaymentMethod.Transfer: return this.$t("d2749916-b99a-47af-9bc4-300648fe77a7")
-            case PaymentMethod.Payconiq: 
+            case PaymentMethod.Transfer: return this.$t('d2749916-b99a-47af-9bc4-300648fe77a7');
+            case PaymentMethod.Payconiq:
                 return this.providerText(provider, {
-                    [PaymentProvider.Payconiq]: "",
-                    [PaymentProvider.Buckaroo]: "Via Buckaroo"
-                })
-            case PaymentMethod.Bancontact: 
+                    [PaymentProvider.Payconiq]: '',
+                    [PaymentProvider.Buckaroo]: 'Via Buckaroo',
+                });
+            case PaymentMethod.Bancontact:
                 return this.providerText(provider, {
-                    [PaymentProvider.Buckaroo]: "Via Buckaroo",
-                    [PaymentProvider.Mollie]: "Via Mollie",
-                    [PaymentProvider.Stripe]: "",
-                })
-            
-            case PaymentMethod.iDEAL:  
+                    [PaymentProvider.Buckaroo]: 'Via Buckaroo',
+                    [PaymentProvider.Mollie]: 'Via Mollie',
+                    [PaymentProvider.Stripe]: '',
+                });
+
+            case PaymentMethod.iDEAL:
                 return this.providerText(provider, {
-                    [PaymentProvider.Buckaroo]: "Via Buckaroo",
-                    [PaymentProvider.Mollie]: "Via Mollie",
-                    [PaymentProvider.Stripe]: "",
-                })
-            case PaymentMethod.CreditCard: 
+                    [PaymentProvider.Buckaroo]: 'Via Buckaroo',
+                    [PaymentProvider.Mollie]: 'Via Mollie',
+                    [PaymentProvider.Stripe]: '',
+                });
+            case PaymentMethod.CreditCard:
                 return this.providerText(provider, {
-                    [PaymentProvider.Buckaroo]: "Via Buckaroo",
-                    [PaymentProvider.Mollie]: "Via Mollie",
-                    [PaymentProvider.Stripe]: "",
-                })
-            case PaymentMethod.Unknown: return ""
-            case PaymentMethod.DirectDebit: return ""
-            case PaymentMethod.PointOfSale: return this.$t("f511ce18-7a60-4fe8-8695-16216ffb7bdc")
+                    [PaymentProvider.Buckaroo]: 'Via Buckaroo',
+                    [PaymentProvider.Mollie]: 'Via Mollie',
+                    [PaymentProvider.Stripe]: '',
+                });
+            case PaymentMethod.Unknown: return '';
+            case PaymentMethod.DirectDebit: return '';
+            case PaymentMethod.PointOfSale: return this.$t('f511ce18-7a60-4fe8-8695-16216ffb7bdc');
         }
     }
 
     getPaymentMethod(method: PaymentMethod) {
-        return this.config.paymentMethods.includes(method)
+        return this.config.paymentMethods.includes(method);
     }
 
     setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false) {
         if (enabled === this.getPaymentMethod(method)) {
-            return
+            return;
         }
-        
-        const arr = new PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>()
+
+        const arr = new PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>();
         if (enabled) {
-            const errorMessage = this.getEnableErrorMessage(method)
+            const errorMessage = this.getEnableErrorMessage(method);
             if (!force && this.choices === null && errorMessage) {
-                new Toast(errorMessage, "error red").setHide(15*1000).show()
-                return
+                new Toast(errorMessage, 'error red').setHide(15 * 1000).show();
+                return;
             }
-            arr.addPut(method)
-        } else {
+            arr.addPut(method);
+        }
+        else {
             if (!force && this.choices === null && this.config.paymentMethods.length === 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
+                new Toast('Je moet minimaal één betaalmethode accepteren', 'error red').show();
+                return;
             }
 
-            arr.addDelete(method)
+            arr.addDelete(method);
         }
 
         this.patchConfig(PaymentConfiguration.patch({
-            paymentMethods: arr
-        }))
+            paymentMethods: arr,
+        }));
     }
 
     canEnablePaymentMethod(method: PaymentMethod) {
-        const errorMessage = this.getEnableErrorMessage(method)
-        return this.choices !== null || !errorMessage
+        const errorMessage = this.getEnableErrorMessage(method);
+        return this.choices !== null || !errorMessage;
     }
 
     get hasMollieOrBuckaroo() {
-        return this.organization.privateMeta?.buckarooSettings !== null || !!this.organization.privateMeta?.mollieOnboarding?.canReceivePayments
+        return this.organization.privateMeta?.buckarooSettings !== null || !!this.organization.privateMeta?.mollieOnboarding?.canReceivePayments;
     }
 
     get mollieOrBuckarooName() {
         if (this.organization.privateMeta?.buckarooSettings !== null) {
-            return "Buckaroo"
+            return 'Buckaroo';
         }
-        return "Mollie"
+        return 'Mollie';
     }
 
     getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined {
         if (paymentMethod === PaymentMethod.Unknown || paymentMethod === PaymentMethod.Transfer || paymentMethod === PaymentMethod.PointOfSale) {
-            return
+            return;
         }
 
-        if (this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta))  {
+        if (this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta)) {
             return;
         }
 
         if (this.organization.privateMeta?.buckarooSettings?.paymentMethods.includes(paymentMethod)) {
-            return
+            return;
         }
 
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: {
-                if ((this.organization.privateMeta?.payconiqApiKey ?? "").length === 0) {
-                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie."
+                if ((this.organization.privateMeta?.payconiqApiKey ?? '').length === 0) {
+                    return 'Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie.';
                 }
-                break
+                break;
             }
 
             case PaymentMethod.iDEAL:
             case PaymentMethod.CreditCard:
             case PaymentMethod.Bancontact: {
                 if (this.stripeAccountObject) {
-                    return PaymentMethodHelper.getName(paymentMethod)+" is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld."
+                    return PaymentMethodHelper.getName(paymentMethod) + ' is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.';
                 }
-                break
+                break;
             }
         }
 
-        return this.$t('253a60ce-cba7-4679-863c-494609d03e8f', {paymentMethod: PaymentMethodHelper.getName(paymentMethod)});
+        return this.$t('253a60ce-cba7-4679-863c-494609d03e8f', { paymentMethod: PaymentMethodHelper.getName(paymentMethod) });
     }
 
     // Administration cost
     get fixed() {
-        return this.config.administrationFee.fixed
+        return this.config.administrationFee.fixed;
     }
 
     set fixed(fixed: number) {
         this.patchConfig(PaymentConfiguration.patch({
             administrationFee: AdministrationFeeSettings.patch({
-                fixed: Math.max(0, fixed)
-            })
-        }))
+                fixed: Math.max(0, fixed),
+            }),
+        }));
     }
 
     get percentage() {
-        return this.config.administrationFee.percentage
+        return this.config.administrationFee.percentage;
     }
 
     set percentage(percentage: number) {
         this.patchConfig(PaymentConfiguration.patch({
             administrationFee: AdministrationFeeSettings.patch({
-                percentage: Math.min(10000, Math.max(0, percentage))
-            })
-        }))
+                percentage: Math.min(10000, Math.max(0, percentage)),
+            }),
+        }));
     }
 
     get zeroIfZero() {
-        return this.config.administrationFee.zeroIfZero
+        return this.config.administrationFee.zeroIfZero;
     }
 
     set zeroIfZero(zeroIfZero: boolean) {
         this.patchConfig(PaymentConfiguration.patch({
             administrationFee: AdministrationFeeSettings.patch({
-                zeroIfZero
-            })
-        }))
+                zeroIfZero,
+            }),
+        }));
     }
 
     get exampleAdministrationFeeValue1() {
@@ -515,7 +519,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
     }
 
     get exampleAdministrationFee1() {
-        return this.config.administrationFee.calculate(this.exampleAdministrationFeeValue1)
+        return this.config.administrationFee.calculate(this.exampleAdministrationFeeValue1);
     }
 
     get exampleAdministrationFeeValue2() {
@@ -526,93 +530,92 @@ export default class EditPaymentMethodsBox extends VueComponent {
     }
 
     get exampleAdministrationFee2() {
-        return this.config.administrationFee.calculate(this.exampleAdministrationFeeValue2)
+        return this.config.administrationFee.calculate(this.exampleAdministrationFeeValue2);
     }
 
     // Transfer settings
     get transferTypes() {
         return [
-            { 
+            {
                 value: TransferDescriptionType.Structured,
                 name: this.$t('f22ff741-6a05-4b15-aa6a-16e3a197ac99'),
-                description: "Willekeurig aangemaakt."
+                description: 'Willekeurig aangemaakt.',
             },
-            { 
+            {
                 value: TransferDescriptionType.Reference,
-                name: this.type === 'registration' ? "Naam van lid/leden" : "Bestelnummer",
-                description: "Eventueel voorafgegaan door een zelf gekozen woord (zie onder)"
+                name: this.type === 'registration' ? 'Naam van lid/leden' : 'Bestelnummer',
+                description: 'Eventueel voorafgegaan door een zelf gekozen woord (zie onder)',
             },
-            { 
+            {
                 value: TransferDescriptionType.Fixed,
-                name: "Vaste mededeling",
-                description: this.type === 'registration' ? 
-                    "Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn."
-                    :
-                    "Altijd dezelfde mededeling voor alle bestellingen."
+                name: 'Vaste mededeling',
+                description: this.type === 'registration'
+                    ? 'Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn.'
+                    : 'Altijd dezelfde mededeling voor alle bestellingen.',
 
-            }
-        ]
+            },
+        ];
     }
 
     get transferTypeDescription() {
-        return this.transferTypes.find(t => t.value === this.transferType)?.description ?? ""
+        return this.transferTypes.find(t => t.value === this.transferType)?.description ?? '';
     }
 
     get creditor() {
-        return this.config.transferSettings.creditor
+        return this.config.transferSettings.creditor;
     }
 
-    set creditor(creditor: string | null ) {
-        this.patchConfig(PaymentConfiguration.patch({ 
+    set creditor(creditor: string | null) {
+        this.patchConfig(PaymentConfiguration.patch({
             transferSettings: TransferSettings.patch({
-                creditor: !creditor || creditor.length === 0 || creditor === this.organization.name ? null : creditor
-            })
-        }))
+                creditor: !creditor || creditor.length === 0 || creditor === this.organization.name ? null : creditor,
+            }),
+        }));
     }
 
     get iban() {
-        return this.config.transferSettings.iban
+        return this.config.transferSettings.iban;
     }
 
-    set iban(iban: string | null ) {
-        this.patchConfig(PaymentConfiguration.patch({ 
+    set iban(iban: string | null) {
+        this.patchConfig(PaymentConfiguration.patch({
             transferSettings: TransferSettings.patch({
-                iban: !iban || iban.length === 0 ? null : iban
-            })
-        }))
+                iban: !iban || iban.length === 0 ? null : iban,
+            }),
+        }));
     }
 
     get prefix() {
-        return this.config.transferSettings.prefix
+        return this.config.transferSettings.prefix;
     }
 
-    set prefix(prefix: string | null ) {
-        this.patchConfig(PaymentConfiguration.patch({ 
+    set prefix(prefix: string | null) {
+        this.patchConfig(PaymentConfiguration.patch({
             transferSettings: TransferSettings.patch({
-                prefix
-            })
-        }))
+                prefix,
+            }),
+        }));
     }
 
     get transferType() {
-        return this.config.transferSettings.type
+        return this.config.transferSettings.type;
     }
 
-    set transferType(type: TransferDescriptionType ) {
-        this.patchConfig(PaymentConfiguration.patch({ 
+    set transferType(type: TransferDescriptionType) {
+        this.patchConfig(PaymentConfiguration.patch({
             transferSettings: TransferSettings.patch({
-                type
-            })
-        }))
+                type,
+            }),
+        }));
     }
 
     get isBelgium() {
-        return this.organization.address.country === Country.Belgium
+        return this.organization.address.country === Country.Belgium;
     }
 
     get transferExample() {
-        const fakeReference = this.type === 'registration' ? this.$t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : "152";
-        const settings = this.config.transferSettings
+        const fakeReference = this.type === 'registration' ? this.$t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : '152';
+        const settings = this.config.transferSettings;
 
         return settings.generateDescription(fakeReference, this.organization.address.country, {
             nr: this.type === 'registration' ? '' : fakeReference,
@@ -620,8 +623,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
             phone: this.type === 'registration' ? '' : this.$t('0c3689c1-01f8-455a-a9b0-8f766c03b2d3').toString(),
             name: this.type === 'registration' ? this.$t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : this.$t('bb910a6c-ec64-46d8-bebb-c3b4312bbfb4').toString(),
             naam: this.type === 'registration' ? this.$t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : this.$t('bb910a6c-ec64-46d8-bebb-c3b4312bbfb4').toString(),
-        })
+        });
     }
-
 }
 </script>

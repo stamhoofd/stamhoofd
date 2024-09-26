@@ -29,12 +29,14 @@
                         Aangemaakt op {{ formatDate(template.createdAt) }}
                     </p>
 
-                    <template #right><span v-if="template.status === 'Draft'" class="style-tag">Klad</span>
-                    <span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span v-if="template.status === 'Draft'" class="style-tag">Klad</span>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
 
-            <p class="style-button-bar" v-if="false">
+            <p v-if="false" class="style-button-bar">
                 <button type="button" class="button text" @click="addDocument">
                     <span class="icon add" />
                     <span class="text">Nieuw document</span>
@@ -45,78 +47,78 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
-import { Request } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { LoadingView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { DocumentTemplatePrivate } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { LoadingView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from '@stamhoofd/components';
+import { DocumentTemplatePrivate } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-
-import DocumentTemplateOverview from "./DocumentTemplateOverview.vue";
-import EditDocumentTemplateView from "./EditDocumentTemplateView.vue";
+import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
+import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 
 @Component({
     components: {
         STNavigationBar,
         STList,
         STListItem,
-        LoadingView
+        LoadingView,
     },
     directives: {
-        tooltip: TooltipDirective
-    }
+        tooltip: TooltipDirective,
+    },
 })
 export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
-    templates: DocumentTemplatePrivate[] = []
-    loading = true
+    templates: DocumentTemplatePrivate[] = [];
+    loading = true;
 
     mounted() {
-        this.loadTemplates().catch(console.error)
+        this.loadTemplates().catch(console.error);
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     activated() {
-        this.loadTemplates().catch(console.error)
+        this.loadTemplates().catch(console.error);
     }
 
     beforeUnmount() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     formatDate(date: Date) {
-        return Formatter.date(date)
+        return Formatter.date(date);
     }
 
     async loadTemplates() {
         try {
             const response = await this.$context.authenticatedServer.request({
-                method: "GET",
-                path: "/organization/document-templates",
+                method: 'GET',
+                path: '/organization/document-templates',
                 decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
                 shouldRetry: false,
-                owner: this
-            })
-            this.templates = response.data
-        } catch (e) {
-            console.error(e)
-            Toast.fromError(e).show()
+                owner: this,
+            });
+            this.templates = response.data;
         }
-        this.loading = false
+        catch (e) {
+            console.error(e);
+            Toast.fromError(e).show();
+        }
+        this.loading = false;
     }
 
     get disableActivities() {
-        return this.organization.meta.packages.disableActivities
+        return this.organization.meta.packages.disableActivities;
     }
 
     addDocument() {
         if (this.organization.meta.packages.disableActivities) {
-            new Toast(this.$t("f0ff8a76-a986-440c-b966-a5579e0844f4"), 'error red').show()
-            return
+            new Toast(this.$t('f0ff8a76-a986-440c-b966-a5579e0844f4'), 'error red').show();
+            return;
         }
 
         this.present({
@@ -125,23 +127,23 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
                     isNew: true,
                     document: DocumentTemplatePrivate.create({}),
                     callback: (template: DocumentTemplatePrivate) => {
-                        this.templates.push(template)
-                        this.openTemplate(template)
-                    }
-                })
+                        this.templates.push(template);
+                        this.openTemplate(template);
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     openTemplate(template: DocumentTemplatePrivate) {
         this.show({
             components: [
                 new ComponentWithProperties(DocumentTemplateOverview, {
-                    template
-                })
-            ]
-        })
+                    template,
+                }),
+            ],
+        });
     }
 }
 </script>

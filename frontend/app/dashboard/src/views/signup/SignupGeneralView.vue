@@ -2,30 +2,30 @@
     <LoadingView v-if="loadingRegisterCode" />
     <form v-else id="signup-general-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Nieuwe vereniging" />
-        
+
         <main>
             <h1>
                 {{ $t("92f76d54-282e-448e-ae15-21411b7bc085") }}
             </h1>
             <p>
-                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $domains.marketing" target="_blank" class="inline-link" v-if="validatedRegisterCode">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
+                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
             </p>
             <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
-                {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }} 
+                {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }}
                 <span class="button text" type="button">
                     Log dan hier in
                 </span>
             </button>
 
             <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
-                Je ontvangt {{formatPrice(validatedRegisterCode.value)}} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
+                Je ontvangt {{ formatPrice(validatedRegisterCode.value) }} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
             </p>
             <p v-else-if="validatedRegisterCode" class="success-box icon gift">
-                {{validatedRegisterCode.customMessage}}
+                {{ validatedRegisterCode.customMessage }}
             </p>
 
             <p v-if="reuseRegisterCode" class="warning-box">
-                {{$t('5e60cf0f-5489-4e90-8dab-97c56c2e989c')}}
+                {{ $t('5e60cf0f-5489-4e90-8dab-97c56c2e989c') }}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -81,7 +81,6 @@
             </div>
 
             <template v-if="!validatedRegisterCode">
-
                 <hr>
                 <h2>Hoe ken je Stamhoofd?</h2>
 
@@ -100,7 +99,6 @@
                 <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
                     Andere
                 </Checkbox>
-
             </template>
         </main>
 
@@ -119,12 +117,12 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, LoadingView, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, LoadingView, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, Storage } from '@stamhoofd/networking';
-import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
+import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import SignupAccountView from './SignupAccountView.vue';
@@ -141,61 +139,60 @@ import SignupAccountView from './SignupAccountView.vue';
         LoadingButton,
         Checkbox,
         Dropdown,
-        LoadingView
+        LoadingView,
     },
     metaInfo() {
         return {
-            title: "Sluit jouw vereniging aan | Stamhoofd",
+            title: 'Sluit jouw vereniging aan | Stamhoofd',
             meta: [
                 {
                     vmid: 'description',
                     name: 'description',
-                    content: "Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.",
-                }
-            ]
-        }
+                    content: 'Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.',
+                },
+            ],
+        };
     },
     navigation: {
-        title: "Sluit jouw vereniging aan | Stamhoofd",
-    }
+        title: 'Sluit jouw vereniging aan | Stamhoofd',
+    },
 })
 export default class SignupGeneralView extends Mixins(NavigationMixin) {
-    name = ""
-    validator = new Validator()
-    errorBox: ErrorBox | null = null
-    address: Address | null = null
-    acquisitionTypes: AcquisitionType[] = []
+    name = '';
+    validator = new Validator();
+    errorBox: ErrorBox | null = null;
+    address: Address | null = null;
+    acquisitionTypes: AcquisitionType[] = [];
 
-    @Prop({ default: false})
-        visitViaUrl!: boolean
+    @Prop({ default: false })
+    visitViaUrl!: boolean;
 
     @Prop({ default: null })
-        initialRegisterCode!: { code: string; organization: string } | null;
+    initialRegisterCode!: { code: string; organization: string } | null;
 
-    registerCode = this.initialRegisterCode
+    registerCode = this.initialRegisterCode;
 
-    validatedRegisterCode: null|RegisterCode = null;
+    validatedRegisterCode: null | RegisterCode = null;
 
     reuseRegisterCode = false;
 
-
-    loading = false
+    loading = false;
     loadingRegisterCode = true;
 
     // Make reactive
-    I18nController = I18nController.shared
+    I18nController = I18nController.shared;
 
-    type: OrganizationType | null = null
-    umbrellaOrganization: UmbrellaOrganization | null = null
+    type: OrganizationType | null = null;
+    umbrellaOrganization: UmbrellaOrganization | null = null;
 
     mounted() {
-        this.loadRegisterCode().catch(e => {
-            console.error(e)
-        })
+        this.loadRegisterCode().catch((e) => {
+            console.error(e);
+        });
     }
 
     formatPrice(p: number) {
-        return Formatter.price(p)
+        return Formatter.price(p);
     }
 
     async loadRegisterCode() {
@@ -203,63 +200,69 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
 
         if (this.initialRegisterCode) {
             try {
-                await Storage.keyValue.setItem("savedRegisterCode", JSON.stringify(this.initialRegisterCode))
-                await Storage.keyValue.setItem("savedRegisterCodeDate", new Date().getTime()+"")
-            } catch (e) {
-                console.error(e)
+                await Storage.keyValue.setItem('savedRegisterCode', JSON.stringify(this.initialRegisterCode));
+                await Storage.keyValue.setItem('savedRegisterCodeDate', new Date().getTime() + '');
+            }
+            catch (e) {
+                console.error(e);
             }
         }
         try {
-            const currentCount = await Storage.keyValue.getItem("what-is-new")
-            const saved = await Storage.keyValue.getItem("savedRegisterCode")
-            const dString = await Storage.keyValue.getItem("savedRegisterCodeDate")
-            
+            const currentCount = await Storage.keyValue.getItem('what-is-new');
+            const saved = await Storage.keyValue.getItem('savedRegisterCode');
+            const dString = await Storage.keyValue.getItem('savedRegisterCodeDate');
+
             if (saved !== null && dString !== null) {
-                const d = parseInt(dString)
+                const d = parseInt(dString);
                 if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
-                    const parsed = JSON.parse(saved)
+                    const parsed = JSON.parse(saved);
                     if (parsed.code && parsed.organization) {
                         if (currentCount === null) {
-                            this.registerCode = JSON.parse(saved)
-                        } else {
-                            this.reuseRegisterCode = true
-                            this.registerCode = null
+                            this.registerCode = JSON.parse(saved);
+                        }
+                        else {
+                            this.reuseRegisterCode = true;
+                            this.registerCode = null;
                         }
                     }
-                } else {
-                    // Expired or invalid
-                    await Storage.keyValue.removeItem("savedRegisterCode")
-                    await Storage.keyValue.removeItem("savedRegisterCodeDate")
-                    this.registerCode = null
                 }
-            } else {
-                await Storage.keyValue.removeItem("savedRegisterCode")
-                await Storage.keyValue.removeItem("savedRegisterCodeDate")
-                this.registerCode = null
+                else {
+                    // Expired or invalid
+                    await Storage.keyValue.removeItem('savedRegisterCode');
+                    await Storage.keyValue.removeItem('savedRegisterCodeDate');
+                    this.registerCode = null;
+                }
             }
-        } catch (e) {
-            console.error(e)
+            else {
+                await Storage.keyValue.removeItem('savedRegisterCode');
+                await Storage.keyValue.removeItem('savedRegisterCodeDate');
+                this.registerCode = null;
+            }
+        }
+        catch (e) {
+            console.error(e);
         }
 
         if (this.registerCode) {
             try {
-                await this.validateCode()
-            } catch (e) {
-                this.errorBox = new ErrorBox(e)
-                this.registerCode = null
-                await Storage.keyValue.removeItem("savedRegisterCode")
-                await Storage.keyValue.removeItem("savedRegisterCodeDate")
+                await this.validateCode();
+            }
+            catch (e) {
+                this.errorBox = new ErrorBox(e);
+                this.registerCode = null;
+                await Storage.keyValue.removeItem('savedRegisterCode');
+                await Storage.keyValue.removeItem('savedRegisterCodeDate');
             }
         }
         this.loadingRegisterCode = false;
     }
 
     get isBelgium() {
-        return I18nController.shared.country === Country.Belgium && (!this.address  || this.address.country === Country.Belgium)
+        return I18nController.shared.country === Country.Belgium && (!this.address || this.address.country === Country.Belgium);
     }
 
     get AcquisitionType() {
-        return AcquisitionType
+        return AcquisitionType;
     }
 
     async validateCode() {
@@ -267,177 +270,182 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         if (this.registerCode) {
             try {
                 const response = await NetworkManager.server.request({
-                    method: "GET",
-                    path: "/register-code/"+encodeURIComponent(this.registerCode.code.toUpperCase()),
-                    decoder: RegisterCode as Decoder<RegisterCode>
-                })
-                this.validatedRegisterCode = response.data
-                this.acquisitionTypes = [AcquisitionType.Recommended]
-            } catch (e) {
+                    method: 'GET',
+                    path: '/register-code/' + encodeURIComponent(this.registerCode.code.toUpperCase()),
+                    decoder: RegisterCode as Decoder<RegisterCode>,
+                });
+                this.validatedRegisterCode = response.data;
+                this.acquisitionTypes = [AcquisitionType.Recommended];
+            }
+            catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
-                    if (e.hasCode("invalid_code")) {
+                    if (e.hasCode('invalid_code')) {
                         throw new SimpleError({
-                            code: "invalid_code",
-                            message: "De gebruikte doorverwijzingslink is niet meer geldig. Je kan verder met registereren, maar je ontvangt geen tegoed.",
-                            field: "registerCode"
-                        })
+                            code: 'invalid_code',
+                            message: 'De gebruikte doorverwijzingslink is niet meer geldig. Je kan verder met registereren, maar je ontvangt geen tegoed.',
+                            field: 'registerCode',
+                        });
                     }
                 }
-                throw e
+                throw e;
             }
         }
     }
 
     async goNext() {
         if (this.loading) {
-            return
+            return;
         }
-        
+
         try {
             if (this.name.length === 0) {
                 throw new SimpleError({
-                    code: "invalid_field",
-                    message: "",
-                    human: "Vul de naam van jouw vereniging in",
-                    field: "name"
-                })
+                    code: 'invalid_field',
+                    message: '',
+                    human: 'Vul de naam van jouw vereniging in',
+                    field: 'name',
+                });
             }
             if (this.name.length < 4) {
                 throw new SimpleError({
-                    code: "invalid_field",
-                    message: "",
-                    human: "De naam van jouw vereniging is te kort",
-                    field: "name"
-                })
+                    code: 'invalid_field',
+                    message: '',
+                    human: 'De naam van jouw vereniging is te kort',
+                    field: 'name',
+                });
             }
 
             if (this.type === null) {
                 throw new SimpleError({
-                    code: "invalid_field",
-                    message: "Maak een keuze",
-                    field: "type"
-                })
+                    code: 'invalid_field',
+                    message: 'Maak een keuze',
+                    field: 'type',
+                });
             }
 
             if (this.type === OrganizationType.Youth && this.isBelgium) {
                 if (this.umbrellaOrganization === null) {
                     throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Maak een keuze",
-                        field: "umbrellaOrganization"
-                    })
+                        code: 'invalid_field',
+                        message: 'Maak een keuze',
+                        field: 'umbrellaOrganization',
+                    });
                 }
-            } else {
-                this.umbrellaOrganization = null
+            }
+            else {
+                this.umbrellaOrganization = null;
             }
 
             this.loading = true;
-            this.errorBox = null
+            this.errorBox = null;
 
             if (!await this.validator.validate() || !this.address) {
-                this.loading = false;
-                return
-            }
-
-            // Check register code
-            try {
-                await this.validateCode()
-            } catch (e) {
-                this.errorBox = new ErrorBox(e)
                 this.loading = false;
                 return;
             }
 
-            const defaultStartDate = new Date()
-            defaultStartDate.setMonth(defaultStartDate.getMonth() + 1)
-            defaultStartDate.setDate(1)
+            // Check register code
+            try {
+                await this.validateCode();
+            }
+            catch (e) {
+                this.errorBox = new ErrorBox(e);
+                this.loading = false;
+                return;
+            }
 
-            const defaultEndDate = new Date(defaultStartDate.getTime())
-            defaultEndDate.setFullYear(defaultStartDate.getFullYear() + 1)
+            const defaultStartDate = new Date();
+            defaultStartDate.setMonth(defaultStartDate.getMonth() + 1);
+            defaultStartDate.setDate(1);
+
+            const defaultEndDate = new Date(defaultStartDate.getTime());
+            defaultEndDate.setFullYear(defaultStartDate.getFullYear() + 1);
 
             const organization = Organization.create({
                 name: this.name,
-                uri: "", // ignored by backend for now
+                uri: '', // ignored by backend for now
                 meta: OrganizationMetaData.create({
                     type: this.type,
                     umbrellaOrganization: this.umbrellaOrganization,
                     recordsConfiguration: RecordConfigurationFactory.create(this.type, this.address.country),
                     defaultStartDate,
-                    defaultEndDate
+                    defaultEndDate,
                 }),
                 privateMeta: OrganizationPrivateMetaData.create({
-                    acquisitionTypes: this.acquisitionTypes
+                    acquisitionTypes: this.acquisitionTypes,
                 }),
-                address: this.address
-            })
+                address: this.address,
+            });
 
             this.loading = false;
-            this.errorBox = null
-            this.show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: this.registerCode }))
+            this.errorBox = null;
+            this.show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: this.registerCode }));
             plausible('signupGeneral');
-        } catch (e) {
+        }
+        catch (e) {
             this.loading = false;
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
             plausible('signupGeneralError');
             return;
         }
     }
 
     get availableTypes() {
-        const types = OrganizationTypeHelper.getList().sort((a, b) => 
+        const types = OrganizationTypeHelper.getList().sort((a, b) =>
             Sorter.stack(
                 Sorter.byBooleanValue(
-                    !a.name.toLowerCase().startsWith("andere"), 
-                    !b.name.toLowerCase().startsWith("andere")
-                ), 
-                Sorter.byStringProperty(a, b, "name")
-            )
+                    !a.name.toLowerCase().startsWith('andere'),
+                    !b.name.toLowerCase().startsWith('andere'),
+                ),
+                Sorter.byStringProperty(a, b, 'name'),
+            ),
         );
 
         // Group by category
         const map = new Map<string, {
             value: OrganizationType;
             name: string;
-        }[]>()
+        }[]>();
 
         for (const type of types) {
-            const cat = OrganizationTypeHelper.getCategory(type.value)
+            const cat = OrganizationTypeHelper.getCategory(type.value);
             if (!map.has(cat)) {
-                map.set(cat, [type])
-            } else {
-                map.get(cat)!.push(type)
+                map.set(cat, [type]);
+            }
+            else {
+                map.get(cat)!.push(type);
             }
         }
 
-        const keys = Array.from(map.keys()).sort(Sorter.byStringValue)
+        const keys = Array.from(map.keys()).sort(Sorter.byStringValue);
 
         return keys.map((key) => {
-            const types = map.get(key)!
+            const types = map.get(key)!;
             return {
                 name: key,
-                types
-            }
-        })
+                types,
+            };
+        });
     }
 
     get availableUmbrellaOrganizations() {
-        return UmbrellaOrganizationHelper.getList().sort((a, b) => 
+        return UmbrellaOrganizationHelper.getList().sort((a, b) =>
             Sorter.stack(
                 Sorter.byBooleanValue(
-                    !a.name.toLowerCase().startsWith("andere"), 
-                    !b.name.toLowerCase().startsWith("andere")
-                ), 
-                Sorter.byStringProperty(a, b, "name")
-            )
-        )
+                    !a.name.toLowerCase().startsWith('andere'),
+                    !b.name.toLowerCase().startsWith('andere'),
+                ),
+                Sorter.byStringProperty(a, b, 'name'),
+            ),
+        );
     }
 
     async shouldNavigateAway() {
-        if (this.name === "" && this.address === null && this.type === null) {
-            return true
+        if (this.name === '' && this.address === null && this.type === null) {
+            return true;
         }
-        if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten?", "Sluiten")) {
+        if (await CenteredMessage.confirm('Ben je zeker dat je dit venster wilt sluiten?', 'Sluiten')) {
             plausible('closeSignup');
             return true;
         }
@@ -448,19 +456,20 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     // Helpers ---
 
     getBooleanType(type: AcquisitionType) {
-        return !!this.acquisitionTypes.find(r => r === type)
+        return !!this.acquisitionTypes.find(r => r === type);
     }
 
     setBooleanType(type: AcquisitionType, enabled: boolean) {
-        const index = this.acquisitionTypes.findIndex(r => r === type)
+        const index = this.acquisitionTypes.findIndex(r => r === type);
         if ((index !== -1) === enabled) {
-            return
+            return;
         }
-        
+
         if (enabled) {
-            this.acquisitionTypes.push(type)
-        } else {
-            this.acquisitionTypes.splice(index, 1)
+            this.acquisitionTypes.push(type);
+        }
+        else {
+            this.acquisitionTypes.splice(index, 1);
         }
     }
 }

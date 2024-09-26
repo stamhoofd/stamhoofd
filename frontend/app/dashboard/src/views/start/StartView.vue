@@ -28,6 +28,6 @@ import { useDashboardQuickActions } from '@stamhoofd/components/src/quick-action
 import SetupStepsView from './SetupStepsView.vue';
 
 const auth = useAuth();
-const quickActions = useDashboardQuickActions()
+const quickActions = useDashboardQuickActions();
 
 </script>

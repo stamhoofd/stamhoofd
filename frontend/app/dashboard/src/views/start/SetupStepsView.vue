@@ -22,14 +22,13 @@
     </template>
 </template>
 
-
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { EmailSettingsView, GeneralSettingsView, GlobalEventBus, SetupStepRows, TransitionFade, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed, onActivated, ref } from 'vue';
-import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
+import PremisesView from '../../views/dashboard/settings/PremisesView.vue';
 import RegistrationPaymentSettingsView from '../dashboard/settings/RegistrationPaymentSettingsView.vue';
 import GroupsReview from './GroupsReview.vue';
 import FunctionsReview from './ResponsibilitiesReview.vue';
@@ -59,13 +58,14 @@ function paramToPropsFactory(record: Record<string, unknown> = {}): () => Promis
         if (shouldUpdateOrganization) {
             try {
                 await forceUpdateOrganization();
-            } catch (error) {
+            }
+            catch (error) {
                 console.error(error);
             }
         }
         shouldUpdateOrganization = false;
         return record;
-    }
+    };
 }
 
 enum Routes {
@@ -74,7 +74,7 @@ enum Routes {
     Responsibilities = 'functies',
     Companies = 'companies',
     Emails = 'emails',
-    Payment = 'payment'
+    Payment = 'payment',
 }
 
 defineRoutes([
@@ -82,38 +82,38 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
-        paramsToProps: paramToPropsFactory({isReview: true})
+        paramsToProps: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Companies,
         present: 'popup',
         component: GeneralSettingsView as unknown as ComponentOptions,
-        paramsToProps: paramToPropsFactory({isReview: true})
+        paramsToProps: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Payment,
         present: 'popup',
         component: RegistrationPaymentSettingsView as unknown as ComponentOptions,
-        paramsToProps: paramToPropsFactory({isReview: true})
+        paramsToProps: paramToPropsFactory({ isReview: true }),
     },
     {
         url: Routes.Groups,
         present: 'popup',
         component: GroupsReview as unknown as ComponentOptions,
-        paramsToProps: paramToPropsFactory()
+        paramsToProps: paramToPropsFactory(),
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
         component: FunctionsReview as unknown as ComponentOptions,
-        paramsToProps: paramToPropsFactory()
+        paramsToProps: paramToPropsFactory(),
     },
     {
         url: Routes.Emails,
         present: 'popup',
         component: EmailSettingsView as unknown as ComponentOptions,
-        paramsToProps: paramToPropsFactory()
-    }
+        paramsToProps: paramToPropsFactory(),
+    },
 ]);
 
 let shouldUpdateOrganization = false;
@@ -121,7 +121,7 @@ let shouldUpdateOrganization = false;
 async function onClickStep(type: SetupStepType) {
     shouldUpdateOrganization = true;
 
-    switch(type) {
+    switch (type) {
         case SetupStepType.Premises: {
             await $navigate(Routes.Premises);
             break;
@@ -147,7 +147,7 @@ async function onClickStep(type: SetupStepType) {
             break;
         }
         case SetupStepType.Registrations: {
-            await GlobalEventBus.sendEvent('selectTabByName', 'leden')
+            await GlobalEventBus.sendEvent('selectTabByName', 'leden');
             break;
         }
     }

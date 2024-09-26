@@ -87,16 +87,16 @@ import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegi
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, onActivated, Ref, ref } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
-import EditCategoryGroupsView from "../dashboard/groups/EditCategoryGroupsView.vue";
+import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
 import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
 
 const $organization = useOrganization();
 const $context = useContext();
 const urlHelpers = useUrl();
-const $navigate = useNavigate()
+const $navigate = useNavigate();
 const collapsed = useCollapsed('leden');
 const platform = usePlatform();
-const organizationManager = useOrganizationManager()
+const organizationManager = useOrganizationManager();
 const owner = useRequestOwner();
 const present = usePresent();
 const auth = useAuth();
@@ -105,25 +105,25 @@ const splitViewController = useSplitViewController();
 const tree = computed(() => {
     return period.value.getCategoryTree({
         permissions: $context.value?.organizationPermissions,
-        organization: $organization.value!
-    })
-})
-const period = ref($organization.value?.period) as Ref<OrganizationRegistrationPeriod>
+        organization: $organization.value!,
+    });
+});
+const period = ref($organization.value?.period) as Ref<OrganizationRegistrationPeriod>;
 const newestPeriod = computed(() => {
-    return platform.value.period
-})
+    return platform.value.period;
+});
 const canUpgradePeriod = computed(() => {
-    return $organization.value?.period.period.id !== platform.value.period.id && $organization.value!.period.period.startDate < platform.value.period.startDate
-})
+    return $organization.value?.period.period.id !== platform.value.period.id && $organization.value!.period.period.startDate < platform.value.period.startDate;
+});
 
 const canSetDefaultPeriod = computed(() => {
-    return (period.value.period.id === platform.value.period.id && $organization.value!.period.period.id !== platform.value.period.id) 
-        || (period.value.period.startDate > $organization.value!.period.period.startDate && !period.value.period.locked)
-})
+    return (period.value.period.id === platform.value.period.id && $organization.value!.period.period.id !== platform.value.period.id)
+        || (period.value.period.startDate > $organization.value!.period.period.startDate && !period.value.period.locked);
+});
 
 const $rootCategory = computed(() => period.value.rootCategory);
 
-const $canEdit = computed(() => organizationManager.value.user.permissions ?  $rootCategory.value && $rootCategory.value.canEdit($context.value.auth.permissions) : false)
+const $canEdit = computed(() => organizationManager.value.user.permissions ? $rootCategory.value && $rootCategory.value.canEdit($context.value.auth.permissions) : false);
 
 onActivated(() => {
     urlHelpers.setTitle('Leden');
@@ -131,99 +131,101 @@ onActivated(() => {
 
 const getCategoryIcon = (category: GroupCategoryTree) => {
     if (category.settings.name.toLocaleLowerCase().includes('lessen') || category.settings.name.toLocaleLowerCase().includes('proefles')) {
-        return "education"
+        return 'education';
     }
 
     if (category.settings.name.toLocaleLowerCase().includes('activiteiten') || category.settings.name.toLocaleLowerCase().includes('kamp') || category.settings.name.toLocaleLowerCase().includes('weekend')) {
-        return "flag"
+        return 'flag';
     }
 
     if (category.settings.name.toLocaleLowerCase().includes('betaling')) {
-        return "card"
+        return 'card';
     }
 
     if (category.categories.length) {
-        return "category"
+        return 'category';
     }
 
-    return "group"
-}
+    return 'group';
+};
 
 const isCategoryDeactivated = (category: GroupCategoryTree) => {
-    return period.value.isCategoryDeactivated($organization.value!, category)
-}
+    return period.value.isCategoryDeactivated($organization.value!, category);
+};
 
 enum Routes {
-    Category = "category",
-    Group = "group",
-    GroupWithPeriod = "groupWithPeriod"
+    Category = 'category',
+    Group = 'group',
+    GroupWithPeriod = 'groupWithPeriod',
 }
 defineRoutes([
     {
         url: 'categorie/@slug',
         name: Routes.Category,
         params: {
-            slug: String
+            slug: String,
         },
         show: 'detail',
-        component: async () => ((await import( "../dashboard/groups/CategoryView.vue")).default) as unknown as ComponentOptions,
-        paramsToProps: (params: {slug: string}) => {
+        component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default) as unknown as ComponentOptions,
+        paramsToProps: (params: { slug: string }) => {
             const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
             if (!category) {
-                throw new Error('Category not found')
+                throw new Error('Category not found');
             }
             return {
                 category,
-                period: period.value
-            }
+                period: period.value,
+            };
         },
         propsToParams(props) {
-            if (!("category" in props)) {
-                throw new Error('Missing category')
+            if (!('category' in props)) {
+                throw new Error('Missing category');
             }
             return {
                 params: {
-                    slug: Formatter.slug((props.category as GroupCategory).settings.name)
-                }
-            }
-        }
+                    slug: Formatter.slug((props.category as GroupCategory).settings.name),
+                },
+            };
+        },
     },
     {
         url: '@slug',
         name: Routes.Group,
         params: {
-            slug: String
+            slug: String,
         },
         show: 'detail',
-        component: async () => ((await import( "../dashboard/groups/GroupOverview.vue")).default) as unknown as ComponentOptions,
-        paramsToProps: (params: {slug: string}) => {
+        component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default) as unknown as ComponentOptions,
+        paramsToProps: (params: { slug: string }) => {
             const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
             if (!group) {
-                throw new Error('Group not found')
+                throw new Error('Group not found');
             }
             return {
                 group,
-                period: period.value
-            }
+                period: period.value,
+            };
         },
         propsToParams(props) {
-            if (!("group" in props)) {
-                throw new Error('Missing group')
+            if (!('group' in props)) {
+                throw new Error('Missing group');
             }
             return {
                 params: {
-                    slug: Formatter.slug((props.group as Group).settings.name)
-                }
-            }
+                    slug: Formatter.slug((props.group as Group).settings.name),
+                },
+            };
         },
-        isDefault: tree.value.getAllGroups().length ? {
-            properties: {
-                group: tree.value.getAllGroups()[0],
-                period: period.value
-            }
-        } : undefined
-    }
-])
+        isDefault: tree.value.getAllGroups().length
+            ? {
+                    properties: {
+                        group: tree.value.getAllGroups()[0],
+                        period: period.value,
+                    },
+                }
+            : undefined,
+    },
+]);
 const checkRoute = useCheckRoute();
 
 async function switchPeriod(event: MouseEvent) {
@@ -234,22 +236,22 @@ async function switchPeriod(event: MouseEvent) {
     const organization = $organization.value!;
 
     const menu = new ContextMenu([
-        (list.periods.slice(0, 10) ?? []).map(p => {
+        (list.periods.slice(0, 10) ?? []).map((p) => {
             return new ContextMenuItem({
                 name: p.name,
                 selected: p.id === period.value.period.id,
                 icon: p.id === platform.value.period.id && p.id !== period.value.period.id ? 'dot' : '',
                 action: async () => {
-                    const organizationPeriod = list.organizationPeriods.find(o => o.period.id === p.id)
+                    const organizationPeriod = list.organizationPeriods.find(o => o.period.id === p.id);
                     if (!organizationPeriod) {
                         // Can not start if ended, or if not starging withing 2 months
                         if (p.endDate < new Date() || p.startDate < organization.period.period.startDate) {
-                            new CenteredMessage('Niet beschikbaar', 'Deze periode is niet beschikbaar voor jouw organisatie.').addCloseButton().show()
+                            new CenteredMessage('Niet beschikbaar', 'Deze periode is niet beschikbaar voor jouw organisatie.').addCloseButton().show();
                             return false;
                         }
 
                         if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 62 && STAMHOOFD.environment !== 'development') {
-                            new CenteredMessage('Niet beschikbaar', 'Je kan pas 2 maand voor de start van het nieuwe werkjaar overschakelen.').addCloseButton().show()
+                            new CenteredMessage('Niet beschikbaar', 'Je kan pas 2 maand voor de start van het nieuwe werkjaar overschakelen.').addCloseButton().show();
                             return false;
                         }
 
@@ -258,33 +260,33 @@ async function switchPeriod(event: MouseEvent) {
                                 new ComponentWithProperties(StartNewRegistrationPeriodView, {
                                     period: p,
                                     callback: () => {
-                                        period.value = organizationManager.value.organization.period
-                                    }
-                                })
+                                        period.value = organizationManager.value.organization.period;
+                                    },
+                                }),
                             ],
-                            modalDisplayStyle: "popup"
-                        })
+                            modalDisplayStyle: 'popup',
+                        });
                         return true;
                     }
 
-                    new Toast('Je bekijkt nu ' + p.name, 'success').show()
-                    period.value = organizationPeriod
+                    new Toast('Je bekijkt nu ' + p.name, 'success').show();
+                    period.value = organizationPeriod;
 
                     // Make sure we open the first group again
                     if (!splitViewController.value?.shouldCollapse()) {
                         await $navigate(Routes.Group, {
                             properties: {
                                 group: tree.value.getAllGroups()[0],
-                                period: period.value
-                            }
-                        })
+                                period: period.value,
+                            },
+                        });
                     }
                     return true;
-                }
+                },
             });
-        })
-    ])
-    menu.show({ button, yOffset: -10 }).catch(console.error)
+        }),
+    ]);
+    menu.show({ button, yOffset: -10 }).catch(console.error);
 }
 
 async function setDefaultPeriod() {
@@ -292,23 +294,24 @@ async function setDefaultPeriod() {
     try {
         await organizationManager.value.patch(
             Organization.patch({
-                period: period.value
-            })
-        )
-        new Toast(period.value.period.name + ' is nu ingesteld als het huidige werkjaar', 'success').show()
-    } catch (e) {
-        Toast.fromError(e).show()
+                period: period.value,
+            }),
+        );
+        new Toast(period.value.period.name + ' is nu ingesteld als het huidige werkjaar', 'success').show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
     }
 }
 
 async function upgradePeriod() {
     const list = await organizationManager.value.loadPeriods(false, false, owner);
-    const organizationPeriod = list.organizationPeriods.find(o => o.period.id === platform.value.period.id)
+    const organizationPeriod = list.organizationPeriods.find(o => o.period.id === platform.value.period.id);
 
     if (organizationPeriod) {
         // We can just set the default
-        period.value = organizationPeriod
-        return await setDefaultPeriod()
+        period.value = organizationPeriod;
+        return await setDefaultPeriod();
     }
 
     await present({
@@ -316,26 +319,26 @@ async function upgradePeriod() {
             new ComponentWithProperties(StartNewRegistrationPeriodView, {
                 period: platform.value.period,
                 callback: () => {
-                    period.value = organizationManager.value.organization.period
-                }
-            })
+                    period.value = organizationManager.value.organization.period;
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function editMe() {
-    if(!$rootCategory.value) return;
-    await present(new ComponentWithProperties(NavigationController, { 
-        root: new ComponentWithProperties(EditCategoryGroupsView, { 
-            category: $rootCategory.value, 
+    if (!$rootCategory.value) return;
+    await present(new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(EditCategoryGroupsView, {
+            category: $rootCategory.value,
             period: period.value,
-            organization: $organization.value, 
+            organization: $organization.value,
             saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                patch.id = period.value.id
-                await organizationManager.value.patchPeriod(patch)
-            }
-        })
-    }).setDisplayStyle("popup"))
+                patch.id = period.value.id;
+                await organizationManager.value.patchPeriod(patch);
+            },
+        }),
+    }).setDisplayStyle('popup'));
 }
 </script>

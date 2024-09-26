@@ -38,7 +38,6 @@
                 <p v-if="isFromOtherWebshop(plan)" class="style-description-small">
                     Dit zaalplan is van een andere webshop. Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.
                 </p>
-                
 
                 <template #right>
                     <button class="button icon edit gray" type="button" @click="editSeatingPlan(plan)" />
@@ -57,14 +56,14 @@
 
         <h2>Acties</h2>
 
-        <STList class="illustration-list">    
+        <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" element-name="label">
                 <input type="file" multiple="multiple" style="display: none;" accept=".plan" @change="importSeatingPlan">
-                
+
                 <template #left>
                     <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
                 </template>
-                
+
                 <h2 class="style-title-list">
                     Importeer zaalplan
                 </h2>
@@ -84,12 +83,11 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder, ObjectData, patchContainsChanges, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, ErrorBox, LoadingButton, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, Version, WebshopMetaData } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, ErrorBox, LoadingButton, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from '@stamhoofd/components';
+import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, Version, WebshopMetaData } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-
 
 import EditSeatingPlanView from './EditSeatingPlanView.vue';
 
@@ -101,186 +99,186 @@ import EditSeatingPlanView from './EditSeatingPlanView.vue';
         Radio,
         STList,
         STListItem,
-        LoadingButton
+        LoadingButton,
     },
 })
 export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    importingSeatingPlan = false
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    importingSeatingPlan = false;
 
     @Prop({ required: true })
-        product!: Product
+    product!: Product;
 
     @Prop({ required: true })
-        webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
     /// For now only used to update locations and times of other products that are shared
-    patchWebshop:  AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({})
-    patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id })
+    patchWebshop: AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({});
+    patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id });
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: (patchProduct: AutoEncoderPatchType<Product>, patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+    saveHandler: (patchProduct: AutoEncoderPatchType<Product>, patch: AutoEncoderPatchType<PrivateWebshop>) => void;
 
     get patchedWebshop() {
-        return this.webshop.patch(this.patchWebshop)
+        return this.webshop.patch(this.patchWebshop);
     }
 
     get patchedProduct() {
-        return this.product.patch(this.patchProduct)
+        return this.product.patch(this.patchProduct);
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     addPatch(patch: AutoEncoderPatchType<Product>) {
-        this.patchProduct = this.patchProduct.patch(patch)
+        this.patchProduct = this.patchProduct.patch(patch);
     }
 
     isFromOtherWebshop(seatingPlan: SeatingPlan) {
-        return !this.patchedWebshop.meta.seatingPlans.find(p => p.id === seatingPlan.id)
+        return !this.patchedWebshop.meta.seatingPlans.find(p => p.id === seatingPlan.id);
     }
 
     async save() {
-        const isValid = await this.validator.validate()
+        const isValid = await this.validator.validate();
         if (!isValid) {
-            return
+            return;
         }
 
         // If seating plan is not yet added to webshop, add it.
-        const added = this.addSeatingPlanIfNotInWebshop(this.selectedPlan)
+        const added = this.addSeatingPlanIfNotInWebshop(this.selectedPlan);
         if (added) {
             // We assigned a new id to this seating plan
-            const {webshopPatch, id} = added
-            this.addPatch(Product.patch({ seatingPlanId: id }))
-            this.patchWebshop = this.patchWebshop.patch(webshopPatch)
+            const { webshopPatch, id } = added;
+            this.addPatch(Product.patch({ seatingPlanId: id }));
+            this.patchWebshop = this.patchWebshop.patch(webshopPatch);
         }
 
-        this.saveHandler(this.patchProduct, this.patchWebshop)
-        this.pop({ force: true })
+        this.saveHandler(this.patchProduct, this.patchWebshop);
+        this.pop({ force: true });
     }
 
-    addSeatingPlanIfNotInWebshop(id: string|null) {
+    addSeatingPlanIfNotInWebshop(id: string | null) {
         // If seating plan is not yet added to webshop, add it.
         if (id && !this.patchedWebshop.meta.seatingPlans.find(p => p.id === id)) {
-            let seatingPlan = this.allSeatingPlans.find(p => p.id === id)
+            let seatingPlan = this.allSeatingPlans.find(p => p.id === id);
             if (!seatingPlan) {
-                throw new Error("Seating plan not found")
+                throw new Error('Seating plan not found');
             }
 
             // Give the seating plan a new unique id
-            seatingPlan = seatingPlan.patch({id: SeatingPlan.create({}).id})
+            seatingPlan = seatingPlan.patch({ id: SeatingPlan.create({}).id });
 
-            const webshopMetaPatch = WebshopMetaData.patch({})
-            webshopMetaPatch.seatingPlans.addPut(seatingPlan)
-            const webshopPatch = PrivateWebshop.patch({meta: webshopMetaPatch})
-            return {webshopPatch, id: seatingPlan.id}
+            const webshopMetaPatch = WebshopMetaData.patch({});
+            webshopMetaPatch.seatingPlans.addPut(seatingPlan);
+            const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
+            return { webshopPatch, id: seatingPlan.id };
         }
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchProduct, this.product, { version: Version }) || patchContainsChanges(this.patchWebshop, this.webshop, { version: Version })
+        return patchContainsChanges(this.patchProduct, this.product, { version: Version }) || patchContainsChanges(this.patchWebshop, this.webshop, { version: Version });
     }
 
     get selectedPlan() {
-        return this.patchedProduct.seatingPlanId
+        return this.patchedProduct.seatingPlanId;
     }
 
     set selectedPlan(seatingPlanId: string | null) {
-        this.addPatch(Product.patch({ seatingPlanId }))
+        this.addPatch(Product.patch({ seatingPlanId }));
     }
 
     get seatingPlans() {
-        return this.patchedWebshop.meta.seatingPlans
+        return this.patchedWebshop.meta.seatingPlans;
     }
 
     get otherWebshopSeatingPlans() {
-        const seatingPlans = this.organization.webshops.filter(w => w.id !== this.webshop.id).flatMap(w => w.meta.seatingPlans)
+        const seatingPlans = this.organization.webshops.filter(w => w.id !== this.webshop.id).flatMap(w => w.meta.seatingPlans);
 
         // If seating plans have the same name, only show the last changed one
-        const map = new Map<string, SeatingPlan>()
+        const map = new Map<string, SeatingPlan>();
         for (const seatingPlan of seatingPlans) {
-            map.set(seatingPlan.name, seatingPlan)
+            map.set(seatingPlan.name, seatingPlan);
         }
 
-        return Array.from(map.values())
+        return Array.from(map.values());
     }
 
     get allSeatingPlans() {
         // Unique by name
-        const map = new Map<string, SeatingPlan>()
-        const usedIds = new Set<string>()
-        const reservedIds = new Set<string>()
+        const map = new Map<string, SeatingPlan>();
+        const usedIds = new Set<string>();
+        const reservedIds = new Set<string>();
 
         for (const seatingPlan of this.seatingPlans) {
-            reservedIds.add(seatingPlan.id)
+            reservedIds.add(seatingPlan.id);
         }
 
         for (const seatingPlan of this.otherWebshopSeatingPlans) {
             if (usedIds.has(seatingPlan.id) || reservedIds.has(seatingPlan.id)) {
-                continue
+                continue;
             }
-            map.set(seatingPlan.name, seatingPlan)
-            usedIds.add(seatingPlan.id)
+            map.set(seatingPlan.name, seatingPlan);
+            usedIds.add(seatingPlan.id);
         }
 
         for (const seatingPlan of this.seatingPlans) {
             if (usedIds.has(seatingPlan.id)) {
-                continue
+                continue;
             }
-            map.set(seatingPlan.name, seatingPlan)
-            usedIds.add(seatingPlan.id)
+            map.set(seatingPlan.name, seatingPlan);
+            usedIds.add(seatingPlan.id);
         }
 
-        return Array.from(map.values()).sort((a, b) => Sorter.byStringProperty(a, b, 'name'))
+        return Array.from(map.values()).sort((a, b) => Sorter.byStringProperty(a, b, 'name'));
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
     addSeatingPlan() {
         const seatingPlan = SeatingPlan.create({
-            name: "",
+            name: '',
             categories: [
                 SeatingPlanCategory.create({
                     id: '0',
-                    name: "Standaard",
-                    price: 0
-                })
+                    name: 'Standaard',
+                    price: 0,
+                }),
             ],
             sections: [
                 SeatingPlanSection.create({
-                    name: "",
+                    name: '',
                     rows: [
                         SeatingPlanRow.create({
                             label: 'B',
                             seats: [
                                 SeatingPlanSeat.create({
                                     label: '1',
-                                    category: '0'
-                                })
-                            ]
+                                    category: '0',
+                                }),
+                            ],
                         }),
                         SeatingPlanRow.create({
                             label: 'A',
                             seats: [
                                 SeatingPlanSeat.create({
                                     label: '1',
-                                    category: '0'
-                                })
-                            ]
+                                    category: '0',
+                                }),
+                            ],
                         }),
                         // Empty row
                         SeatingPlanRow.create({
-                            seats: []
+                            seats: [],
                         }),
                         // Podium
                         SeatingPlanRow.create({
@@ -288,20 +286,18 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
                                 SeatingPlanSeat.create({
                                     label: 'Podium',
                                     grow: 1,
-                                    type: SeatType.Space
-                                })
-                            ]
-                        })
-                    ]
-                })
-            ]
+                                    type: SeatType.Space,
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+            ],
         });
-        
-        
-        const webshopMetaPatch = WebshopMetaData.patch({})
-        webshopMetaPatch.seatingPlans.addPut(seatingPlan)
-        const webshopPatch = PrivateWebshop.patch({meta: webshopMetaPatch})
 
+        const webshopMetaPatch = WebshopMetaData.patch({});
+        webshopMetaPatch.seatingPlans.addPut(seatingPlan);
+        const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
 
         this.present({
             components: [
@@ -310,23 +306,23 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
                     seatingPlan,
                     isNew: true,
                     saveHandler: (patchedWebshop: AutoEncoderPatchType<PrivateWebshop>) => {
-                        this.patchWebshop = this.patchWebshop.patch(webshopPatch).patch(patchedWebshop)
-                        this.selectedPlan = seatingPlan.id
-                    }
-                })
+                        this.patchWebshop = this.patchWebshop.patch(webshopPatch).patch(patchedWebshop);
+                        this.selectedPlan = seatingPlan.id;
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     editSeatingPlan(seatingPlan: SeatingPlan) {
-        const added = this.addSeatingPlanIfNotInWebshop(seatingPlan.id)
+        const added = this.addSeatingPlanIfNotInWebshop(seatingPlan.id);
         const patched = added ?? {
             webshopPatch: PrivateWebshop.patch({}),
-            id: seatingPlan.id
-        }
+            id: seatingPlan.id,
+        };
 
-        const seatingPlanPatched = seatingPlan.patch({id: patched.id})
+        const seatingPlanPatched = seatingPlan.patch({ id: patched.id });
 
         this.present({
             components: [
@@ -335,27 +331,27 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
                     seatingPlan: seatingPlanPatched,
                     isNew: !!added,
                     saveHandler: (patchedWebshop: AutoEncoderPatchType<PrivateWebshop>) => {
-                        this.patchWebshop = this.patchWebshop.patch(patched.webshopPatch).patch(patchedWebshop)
-                        this.selectedPlan = seatingPlanPatched.id
-                    }
-                })
+                        this.patchWebshop = this.patchWebshop.patch(patched.webshopPatch).patch(patchedWebshop);
+                        this.selectedPlan = seatingPlanPatched.id;
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     async importSeatingPlan(event) {
         if (this.importingSeatingPlan) {
-            return
+            return;
         }
 
         if (!event.target.files || event.target.files.length === 0) {
             return;
         }
 
-        const files = event.target.files as FileList
-        const file = files[0]
-        this.importingSeatingPlan = true
+        const files = event.target.files as FileList;
+        const file = files[0];
+        this.importingSeatingPlan = true;
 
         try {
             const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
@@ -363,28 +359,28 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
             const jsonFile = data.file('plan.json');
 
             if (!jsonFile) {
-                this.importingSeatingPlan = false
-                new CenteredMessage(this.$t("de1d5cdf-6aa6-4912-828a-82cb53f8abf6")).addCloseButton().show()
-                return
+                this.importingSeatingPlan = false;
+                new CenteredMessage(this.$t('de1d5cdf-6aa6-4912-828a-82cb53f8abf6')).addCloseButton().show();
+                return;
             }
 
-            const blob = await jsonFile.async("blob")
+            const blob = await jsonFile.async('blob');
             const text = await blob.text();
 
-            const json = JSON.parse(text)
+            const json = JSON.parse(text);
 
             // Decode
-            const decoded = new VersionBoxDecoder(SeatingPlan as Decoder<SeatingPlan>).decode(new ObjectData(json, {version: 0}))
+            const decoded = new VersionBoxDecoder(SeatingPlan as Decoder<SeatingPlan>).decode(new ObjectData(json, { version: 0 }));
 
-            const seatingPlan = decoded.data
+            const seatingPlan = decoded.data;
 
             // Asign a unique id to the seating plan
-            const r = SeatingPlan.create({})
-            seatingPlan.id = r.id
+            const r = SeatingPlan.create({});
+            seatingPlan.id = r.id;
 
-            const webshopMetaPatch = WebshopMetaData.patch({})
-            webshopMetaPatch.seatingPlans.addPut(seatingPlan)
-            const webshopPatch = PrivateWebshop.patch({meta: webshopMetaPatch})
+            const webshopMetaPatch = WebshopMetaData.patch({});
+            webshopMetaPatch.seatingPlans.addPut(seatingPlan);
+            const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
 
             this.present({
                 components: [
@@ -393,26 +389,25 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
                         seatingPlan,
                         isNew: true,
                         saveHandler: (patchedWebshop: AutoEncoderPatchType<PrivateWebshop>) => {
-                            this.patchWebshop = this.patchWebshop.patch(webshopPatch).patch(patchedWebshop)
-                            this.selectedPlan = seatingPlan.id
-                        }
-                    })
+                            this.patchWebshop = this.patchWebshop.patch(webshopPatch).patch(patchedWebshop);
+                            this.selectedPlan = seatingPlan.id;
+                        },
+                    }),
                 ],
-                modalDisplayStyle: "popup"
-            })
-            
-        } catch (e) {
-            console.error(e)
+                modalDisplayStyle: 'popup',
+            });
+        }
+        catch (e) {
+            console.error(e);
             const message = this.$t('977fa720-e451-4dd8-a317-881cf7a409b1');
-            new Toast(message, 'error red')
-        } finally {
-            this.importingSeatingPlan = false
+            new Toast(message, 'error red');
+        }
+        finally {
+            this.importingSeatingPlan = false;
         }
 
         // Clear selection
         event.target.value = null;
     }
-
-    
 }
 </script>

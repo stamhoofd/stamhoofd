@@ -56,17 +56,17 @@ const prices = computed(() => {
     const group = props.group;
 
     if (group.settings.prices.length === 0) {
-        return 'geen'
+        return 'geen';
     }
 
     return Array.from(
         new Set(group.settings.prices
-            .flatMap(p => {
+            .flatMap((p) => {
                 const standardPrice = p.price.price;
                 const reducedPrice = p.price.reducedPrice;
                 if (reducedPrice) return [standardPrice, reducedPrice];
                 return [standardPrice];
-            }))
+            })),
     ).map(price => price / 100)
         .sort((a, b) => a - b)
         .map(price => `${currency} ${price}`)
@@ -115,7 +115,7 @@ const status = computed(() => {
     }
 });
 
-const $defaultAgeGroups = computed(() => platform.value.config.defaultAgeGroups)
+const $defaultAgeGroups = computed(() => platform.value.config.defaultAgeGroups);
 
 const defaultAgeGroupName = computed(() => {
     const group = props.group;
@@ -133,7 +133,7 @@ const defaultAgeGroupName = computed(() => {
     }
 
     return defaultAgeGroup.name;
-})
+});
 </script>
 
 <style lang="scss" scoped></style>

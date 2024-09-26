@@ -30,13 +30,13 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
-import { Request } from "@simonbackx/simple-networking";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { Document, DocumentData, DocumentTemplatePrivate, RecordCategory, Version } from "@stamhoofd/structures";
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
+import { SessionManager } from '@stamhoofd/networking';
+import { Document, DocumentData, DocumentTemplatePrivate, RecordCategory, Version } from '@stamhoofd/structures';
+import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
@@ -45,78 +45,78 @@ import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/c
         SaveView,
         STInputBox,
         RecordAnswerInput,
-        STErrorsDefault
-    }
+        STErrorsDefault,
+    },
 })
 export default class EditDocumentView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        isNew!: boolean
-    
-    @Prop({ required: true })
-        document!: Document
+    isNew!: boolean;
 
     @Prop({ required: true })
-        template!: DocumentTemplatePrivate
+    document!: Document;
 
-    patchDocument = Document.patch({})
-    validator = new Validator()
-    errorBox: ErrorBox | null = null
-    saving = false
-    editingAnswers = this.document.data.fieldAnswers.map(a => a.clone())
+    @Prop({ required: true })
+    template!: DocumentTemplatePrivate;
+
+    patchDocument = Document.patch({});
+    validator = new Validator();
+    errorBox: ErrorBox | null = null;
+    saving = false;
+    editingAnswers = this.document.data.fieldAnswers.map(a => a.clone());
 
     get patchedDocument() {
-        return this.document.patch(this.patchDocument)
+        return this.document.patch(this.patchDocument);
     }
 
     get definitions() {
-        return []
+        return [];
     }
 
     get fieldCategories() {
-        return RecordCategory.flattenCategories([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories], {} as any)
+        return RecordCategory.flattenCategories([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories], {} as any);
     }
 
-    @Watch("editingAnswers")
+    @Watch('editingAnswers')
     saveAnswers() {
         for (const answer of this.editingAnswers) {
-            const previousAnswer = this.document.data.fieldAnswers.find(a => a.settings.id === answer.settings.id)
+            const previousAnswer = this.document.data.fieldAnswers.find(a => a.settings.id === answer.settings.id);
             if (!previousAnswer || previousAnswer.stringValue !== answer.stringValue) {
-                answer.markReviewed()
+                answer.markReviewed();
             }
         }
 
         this.patchDocument = this.patchDocument.patch({
             data: DocumentData.patch({
-                fieldAnswers: this.editingAnswers as any
-            })
-        })
+                fieldAnswers: this.editingAnswers as any,
+            }),
+        });
     }
 
     get title() {
-        return this.isNew ? "Nieuw document" : "Document bewerken"
+        return this.isNew ? 'Nieuw document' : 'Document bewerken';
     }
 
     get description() {
-        return this.patchedDocument.data.description
+        return this.patchedDocument.data.description;
     }
 
     set description(value: string) {
         this.patchDocument = this.patchDocument.patch({
             data: DocumentData.patch({
-                description: value
-            })
-        })
+                description: value,
+            }),
+        });
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchDocument, this.document, { version: Version })
+        return patchContainsChanges(this.patchDocument, this.document, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
     async validate() {
@@ -124,58 +124,60 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
     }
 
     beforeUnmount() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     async save() {
         if (this.saving) {
-            return
+            return;
         }
 
-        this.saving = true
+        this.saving = true;
 
         try {
             // Make sure answers are updated
             this.saveAnswers();
-            
+
             if (!await this.validator.validate()) {
-                this.saving = false
-                return
+                this.saving = false;
+                return;
             }
 
-            await this.validate()
+            await this.validate();
 
-            const patch: PatchableArrayAutoEncoder<Document> = new PatchableArray() as PatchableArrayAutoEncoder<Document>
+            const patch: PatchableArrayAutoEncoder<Document> = new PatchableArray() as PatchableArrayAutoEncoder<Document>;
 
             if (this.isNew) {
-                patch.addPut(this.patchedDocument)
-            } else {
-                this.patchDocument.id = this.patchedDocument.id
-                patch.addPatch(this.patchDocument)
+                patch.addPut(this.patchedDocument);
+            }
+            else {
+                this.patchDocument.id = this.patchedDocument.id;
+                patch.addPatch(this.patchDocument);
             }
 
             const response = await this.$context.authenticatedServer.request({
-                method: "PATCH",
-                path: "/organization/documents",
+                method: 'PATCH',
+                path: '/organization/documents',
                 body: patch,
                 decoder: new ArrayDecoder(Document as Decoder<Document>),
                 shouldRetry: false,
-                owner: this
-            })
-            const updatedDocument = response.data[0]
+                owner: this,
+            });
+            const updatedDocument = response.data[0];
             if (updatedDocument) {
-                this.editingAnswers = this.document.data.fieldAnswers.map(a => a.clone())
-                this.patchDocument = Document.patch({})
-                this.document.deepSet(updatedDocument)
+                this.editingAnswers = this.document.data.fieldAnswers.map(a => a.clone());
+                this.patchDocument = Document.patch({});
+                this.document.deepSet(updatedDocument);
             }
-            
-            this.dismiss({ force: true })
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
+
+            this.dismiss({ force: true });
+        }
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
         }
 
-        this.saving = false
+        this.saving = false;
     }
 }
 </script>

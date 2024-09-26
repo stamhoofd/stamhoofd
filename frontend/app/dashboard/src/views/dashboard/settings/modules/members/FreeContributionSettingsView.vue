@@ -49,12 +49,10 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from "@stamhoofd/components";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, Checkbox, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from '@stamhoofd/components';
 import { FreeContributionSettings, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
-
-
 
 @Component({
     components: {
@@ -62,115 +60,114 @@ import { FreeContributionSettings, Organization, OrganizationMetaData, Organizat
         STInputBox,
         STErrorsDefault,
         Checkbox,
-        PriceInput
+        PriceInput,
     },
 })
 export default class FreeContributionSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    temp_organization = this.$organization
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
+    temp_organization = this.$organization;
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
 
     created() {
-        this.organizationPatch.id = this.$organization.id
+        this.organizationPatch.id = this.$organization.id;
     }
 
     get organization() {
-        return this.$organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch);
     }
 
     get enableFinancialSupport() {
-        return this.organization.meta.recordsConfiguration.financialSupport !== null
+        return this.organization.meta.recordsConfiguration.financialSupport !== null;
     }
 
     get freeContribution() {
-        return this.organization.meta.recordsConfiguration.freeContribution !== null
+        return this.organization.meta.recordsConfiguration.freeContribution !== null;
     }
 
     set freeContribution(enable: boolean) {
         if (enable === this.freeContribution) {
-            return
+            return;
         }
 
         if (enable) {
             this.organizationPatch = this.organizationPatch.patch({
                 meta: OrganizationMetaData.patch({
                     recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                        freeContribution: FreeContributionSettings.create({})
-                    })
-                })
-            })
-        } else {
+                        freeContribution: FreeContributionSettings.create({}),
+                    }),
+                }),
+            });
+        }
+        else {
             this.organizationPatch = this.organizationPatch.patch({
                 meta: OrganizationMetaData.patch({
                     recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                        freeContribution: null
-                    })
-                })
-            })
+                        freeContribution: null,
+                    }),
+                }),
+            });
         }
     }
 
     get amountCount() {
-        return this.organization.meta.recordsConfiguration.freeContribution?.amounts?.length ?? 0
+        return this.organization.meta.recordsConfiguration.freeContribution?.amounts?.length ?? 0;
     }
 
-    getFreeContributionAmounts(index: number ) {
-        return this.organization.meta.recordsConfiguration.freeContribution?.amounts[index] ?? 0
+    getFreeContributionAmounts(index: number) {
+        return this.organization.meta.recordsConfiguration.freeContribution?.amounts[index] ?? 0;
     }
 
     setFreeContributionAmounts(index: number, amount: number) {
-        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice()
-        amounts[index] = amount
+        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
+        amounts[index] = amount;
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
                     freeContribution: FreeContributionSettings.create({
                         description: this.freeContributionDescription,
-                        amounts
-                    })
-                })
-            })
-        })
+                        amounts,
+                    }),
+                }),
+            }),
+        });
     }
 
     deleteOption(index: number) {
-        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice()
-        amounts.splice(index, 1)
+        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
+        amounts.splice(index, 1);
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
                     freeContribution: FreeContributionSettings.create({
                         description: this.freeContributionDescription,
-                        amounts
-                    })
-                })
-            })
-        })
+                        amounts,
+                    }),
+                }),
+            }),
+        });
     }
-
 
     addOption() {
-        const last = this.organization.meta.recordsConfiguration.freeContribution?.amounts?.slice(-1)[0] ?? 0
-        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice()
-        amounts.push(last + 10*100)
+        const last = this.organization.meta.recordsConfiguration.freeContribution?.amounts?.slice(-1)[0] ?? 0;
+        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
+        amounts.push(last + 10 * 100);
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
                     freeContribution: FreeContributionSettings.create({
                         description: this.freeContributionDescription,
-                        amounts
-                    })
-                })
-            })
-        })
+                        amounts,
+                    }),
+                }),
+            }),
+        });
     }
 
-
     get freeContributionDescription() {
-        return this.organization.meta.recordsConfiguration.freeContribution?.description ?? ""
+        return this.organization.meta.recordsConfiguration.freeContribution?.description ?? '';
     }
 
     set freeContributionDescription(description: string) {
@@ -178,11 +175,11 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
                     freeContribution: FreeContributionSettings.patch({
-                        description
-                    })
-                })
-            })
-        })
+                        description,
+                    }),
+                }),
+            }),
+        });
     }
 
     async save() {
@@ -190,49 +187,51 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
             return;
         }
 
-        const errors = new SimpleErrors()
-      
-        let valid = false
+        const errors = new SimpleErrors();
+
+        let valid = false;
 
         if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
-            valid = true
+            this.errorBox = new ErrorBox(errors);
         }
-        valid = valid && await this.validator.validate()
+        else {
+            this.errorBox = null;
+            valid = true;
+        }
+        valid = valid && await this.validator.validate();
 
         if (!valid) {
             return;
         }
 
-        this.saving = true
+        this.saving = true;
 
         try {
-            await this.$organizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
-            new Toast('De wijzigingen zijn opgeslagen', "success green").show()
-            this.dismiss({ force: true })
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+            await this.$organizationManager.patch(this.organizationPatch);
+            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
+            new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+            this.dismiss({ force: true });
+        }
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
         }
 
-        this.saving = false
+        this.saving = false;
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
+        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
     mounted() {
-        this.setUrl("/free-contribution");
+        this.setUrl('/free-contribution');
     }
 }
 </script>

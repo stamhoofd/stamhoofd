@@ -39,7 +39,7 @@ const tree = computed(() => period.value?.getCategoryTree({
     permissions: auth.permissions,
     organization: $organization.value!,
     maxDepth: 1,
-    smartCombine: true
+    smartCombine: true,
 }));
 
 const allGroups = computed(() => tree.value.getAllGroups());
@@ -51,33 +51,34 @@ async function editGroup(group: Group) {
             promise: async () => {
                 try {
                     // Make sure we have an up to date group
-                    await organizationManager.value.forceUpdate()
+                    await organizationManager.value.forceUpdate();
                     return new ComponentWithProperties(EditGroupView, {
-                        group, 
+                        group,
                         iswNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
                             const periodPatch = OrganizationRegistrationPeriod.patch({
-                                id: period.value.id
-                            })
-                            periodPatch.groups.addPatch(patch)
-                            await organizationManager.value.patchPeriod(periodPatch)
-                        }
-                    })
-                } catch (e) {
-                    Toast.fromError(e).show()
-                    throw e
+                                id: period.value.id,
+                            });
+                            periodPatch.groups.addPatch(patch);
+                            await organizationManager.value.patchPeriod(periodPatch);
+                        },
+                    });
                 }
-            }
-        })
-    })
+                catch (e) {
+                    Toast.fromError(e).show();
+                    throw e;
+                }
+            },
+        }),
+    });
 
     await present({
         animated: true,
         adjustHistory: true,
-        modalDisplayStyle: "popup",
+        modalDisplayStyle: 'popup',
         components: [
-            displayedComponent
-        ]
+            displayedComponent,
+        ],
     });
 }
 </script>

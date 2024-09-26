@@ -12,11 +12,11 @@
             {{ name }}
         </h3>
         <div>
-            <p class="style-description-small" v-if="placeholderString">
+            <p v-if="placeholderString" class="style-description-small">
                 {{ placeholderString }}
             </p>
 
-            <p class="style-description-small inline-link secundary" v-for="member of members" :key="member.id" @click="editMember(member)">
+            <p v-for="member of members" :key="member.id" class="style-description-small inline-link secundary" @click="editMember(member)">
                 {{ member.member.name }}
             </p>
         </div>
@@ -40,31 +40,31 @@ import { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structur
 import { computed } from 'vue';
 
 const props = defineProps<{
-    responsibility: MemberResponsibility,
-    group: Group | null,
-    members: PlatformMember[],
-    count?: number,
-    progress?: number,
-    total?: number
+    responsibility: MemberResponsibility;
+    group: Group | null;
+    members: PlatformMember[];
+    count?: number;
+    progress?: number;
+    total?: number;
 }>();
 
-const present = usePresent()
+const present = usePresent();
 
 const color = computed(() => {
     const icon = $icon.value;
-    if(icon ==='success') return 'success';
+    if (icon === 'success') return 'success';
     return 'gray';
 });
 
 const $icon = computed<'help' | 'success' | 'error' | undefined>(() => {
     const isOptional = $isOptional.value;
-    if(!isOptional && props.count !== undefined) return 'success';
+    if (!isOptional && props.count !== undefined) return 'success';
 
     const progress = props.progress;
-    if(progress !== undefined) {
-        if(progress === 0 && !isOptional) return 'help';
-        if(progress > 1) return 'error';
-        if(progress === 1) return 'success';
+    if (progress !== undefined) {
+        if (progress === 0 && !isOptional) return 'help';
+        if (progress > 1) return 'error';
+        if (progress === 1) return 'success';
     }
 
     return undefined;
@@ -75,7 +75,7 @@ const $isOptional = computed(() => !props.responsibility.minimumMembers);
 const name = computed(() => {
     const name = props.responsibility.name;
     const group = props.group;
-    if(group) {
+    if (group) {
         return `${name} van ${group.settings.name}`;
     }
 
@@ -84,7 +84,7 @@ const name = computed(() => {
 
 const placeholderString = computed(() => {
     if (!props.members.length) {
-        if($isOptional.value) {
+        if ($isOptional.value) {
             return 'Geen';
         }
         return 'Deze functie moet nog worden toegekend';
@@ -95,17 +95,17 @@ const membersAsString = computed(() => {
     const members = props.members;
 
     if (!members.length) {
-        if($isOptional.value) {
+        if ($isOptional.value) {
             return 'Geen';
         }
         return 'Deze functie moet nog worden toegekend';
     }
-    return members.map((platformMember) => platformMember.member.name).join(', ')
+    return members.map(platformMember => platformMember.member.name).join(', ');
 });
-const actionBuilder = useMemberActions()
+const actionBuilder = useMemberActions();
 
 async function editMember(member: PlatformMember) {
-    await actionBuilder().showMember(member)
+    await actionBuilder().showMember(member);
 }
 </script>
 

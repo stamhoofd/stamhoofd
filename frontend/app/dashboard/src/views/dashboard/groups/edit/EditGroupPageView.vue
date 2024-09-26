@@ -45,9 +45,9 @@
 </template>
 
 <script lang="ts">
-import { SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton } from "@stamhoofd/components";
+import { SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton } from '@stamhoofd/components';
 import { GroupSettings, Image, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 
 import EditGroupMixin from './EditGroupMixin';
 
@@ -58,89 +58,89 @@ import EditGroupMixin from './EditGroupMixin';
         STErrorsDefault,
         STList,
         UploadButton,
-        STListItem
+        STListItem,
     },
 })
 export default class EditGroupPageView extends Mixins(EditGroupMixin) {
     get title() {
-        return 'Bijkomende informatie'
+        return 'Bijkomende informatie';
     }
 
     get location() {
-        return this.patchedGroup.settings.location
+        return this.patchedGroup.settings.location;
     }
 
     set location(location: string) {
-        this.addSettingsPatch({ location })
+        this.addSettingsPatch({ location });
     }
 
     get description() {
-        return this.patchedGroup.settings.description
+        return this.patchedGroup.settings.description;
     }
 
     set description(description: string) {
-        this.addSettingsPatch({ description })
+        this.addSettingsPatch({ description });
     }
 
     get coverPhoto() {
-        return this.patchedGroup.settings.coverPhoto
+        return this.patchedGroup.settings.coverPhoto;
     }
 
     set coverPhoto(coverPhoto: Image | null) {
         this.addSettingsPatch(GroupSettings.patch({
-            coverPhoto
-        }))
+            coverPhoto,
+        }));
     }
 
     get hs() {
         return [
             ResolutionRequest.create({
-                width: 1600
+                width: 1600,
             }),
             ResolutionRequest.create({
-                width: 800
+                width: 800,
             }),
             ResolutionRequest.create({
                 height: 250,
                 width: 250,
-                fit: ResolutionFit.Cover
-            })
-        ]
+                fit: ResolutionFit.Cover,
+            }),
+        ];
     }
 
     get coverPhotoResolution() {
-        const image = this.coverPhoto
+        const image = this.coverPhoto;
         if (!image) {
-            return null
+            return null;
         }
-        return image.getResolutionForSize(800, 200)
+        return image.getResolutionForSize(800, 200);
     }
 
     get coverPhotoSrc() {
-        const image = this.coverPhoto
+        const image = this.coverPhoto;
         if (!image) {
-            return null
+            return null;
         }
-        return this.coverPhotoResolution?.file.getPublicPath()
+        return this.coverPhotoResolution?.file.getPublicPath();
     }
-    
+
     get coverImageWidth() {
-        return this.coverPhotoResolution?.width
+        return this.coverPhotoResolution?.width;
     }
 
     get coverImageHeight() {
-        return this.coverPhotoResolution?.height
+        return this.coverPhotoResolution?.height;
     }
 
     // Cover picture
     get squarePhoto() {
-        return this.patchedGroup.settings.squarePhoto
+        return this.patchedGroup.settings.squarePhoto;
     }
 
     set squarePhoto(squarePhoto: Image | null) {
         this.addSettingsPatch(GroupSettings.patch({
-            squarePhoto
-        }))
+            squarePhoto,
+        }));
     }
 
     get hsSquare() {
@@ -148,19 +148,18 @@ export default class EditGroupPageView extends Mixins(EditGroupMixin) {
             ResolutionRequest.create({
                 height: 250,
                 width: 250,
-                fit: ResolutionFit.Cover
-            })
-        ]
+                fit: ResolutionFit.Cover,
+            }),
+        ];
     }
 
     get squarePhotoSrc() {
-        const image = this.squarePhoto
+        const image = this.squarePhoto;
         if (!image) {
-            return null
+            return null;
         }
-        return image.getResolutionForSize(250, 250).file.getPublicPath()
+        return image.getResolutionForSize(250, 250).file.getPublicPath();
     }
-
 }
 </script>
 

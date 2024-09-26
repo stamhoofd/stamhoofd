@@ -26,89 +26,89 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
-import { Product, ProductPrice } from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from '@stamhoofd/components';
+import { Product, ProductPrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import EditProductPriceView from './EditProductPriceView.vue';
 
 @Component({
     components: {
-        STListItem
+        STListItem,
     },
     filters: {
-        price: Formatter.price.bind(Formatter)
+        price: Formatter.price.bind(Formatter),
     },
     directives: {
-        LongPress: LongPressDirective
-    }
+        LongPress: LongPressDirective,
+    },
 })
 export default class ProductPriceRow extends Mixins(NavigationMixin) {
     @Prop({})
-        productPrice: ProductPrice
+    productPrice: ProductPrice;
 
     @Prop({})
-        product: Product
+    product: Product;
 
     editPrice() {
         this.present(new ComponentWithProperties(EditProductPriceView, { product: this.product, productPrice: this.productPrice, isNew: false, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
-            this.$emit("patch", patch)
+            this.$emit('patch', patch);
 
             // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("popup"))
+        } }).setDisplayStyle('popup'));
     }
 
     moveUp() {
-        this.$emit("move-up")
+        this.$emit('move-up');
     }
 
     moveDown() {
-        this.$emit("move-down")
+        this.$emit('move-down');
     }
-    
+
     async delete() {
         if (!(await CenteredMessage.confirm('Deze prijs verwijderen?', 'Verwijderen'))) {
-            return
+            return;
         }
-        const p = Product.patch({ id: this.product.id })
-        p.prices.addDelete(this.productPrice.id)
-        this.$emit("patch", p)
+        const p = Product.patch({ id: this.product.id });
+        p.prices.addDelete(this.productPrice.id);
+        this.$emit('patch', p);
     }
 
     showContextMenu(event) {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: "Verplaats omhoog",
-                    icon: "arrow-up",
+                    name: 'Verplaats omhoog',
+                    icon: 'arrow-up',
                     action: () => {
-                        this.moveUp()
+                        this.moveUp();
                         return true;
-                    }
+                    },
                 }),
                 new ContextMenuItem({
-                    name: "Verplaats omlaag",
-                    icon: "arrow-down",
+                    name: 'Verplaats omlaag',
+                    icon: 'arrow-down',
                     action: () => {
-                        this.moveDown()
+                        this.moveDown();
                         return true;
-                    }
+                    },
                 }),
             ],
             [
                 new ContextMenuItem({
-                    name: "Verwijderen",
-                    icon: "trash",
+                    name: 'Verwijderen',
+                    icon: 'trash',
                     action: () => {
-                        this.delete().catch(console.error)
+                        this.delete().catch(console.error);
                         return true;
-                    }
+                    },
                 }),
-            ]
-        ])
-        menu.show({ clickEvent: event }).catch(console.error)
+            ],
+        ]);
+        menu.show({ clickEvent: event }).catch(console.error);
     }
 }
 </script>

@@ -62,13 +62,15 @@
                         <span>{{ statusName }}</span>
                         <span v-if="isCanceled" class="icon canceled" />
                     </p>
-                    <template v-if="hasWrite" #right><span class="icon arrow-down-small gray" /></template>
+                    <template v-if="hasWrite" #right>
+                        <span class="icon arrow-down-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem
                     v-for="(payment, index) in order.payments"
                     :key="payment.id"
-                    v-long-press="(e) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                    v-long-press="(e) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite"
                     class="right-description" @click="openPayment(payment)"
                     @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
                 >
@@ -81,7 +83,7 @@
                         <span v-else class="icon clock" />
                     </p>
 
-                    <template #right v-if="order.payments.length > 1 || hasPaymentsWrite">
+                    <template v-if="order.payments.length > 1 || hasPaymentsWrite" #right>
                         <span v-if="order.payments.length > 1">{{ formatPrice(payment.price) }}</span>
                         <span v-if="hasPaymentsWrite" class="icon arrow-right-small gray" />
                     </template>
@@ -116,7 +118,9 @@
                         </span>
                     </p>
 
-                    <template v-if="tickets.length > 0" #right><span class="icon arrow-right-small" /></template>
+                    <template v-if="tickets.length > 0" #right>
+                        <span class="icon arrow-right-small" />
+                    </template>
                 </STListItem>
             </STList>
 
@@ -132,7 +136,7 @@
                 <span class="icon add" />
                 <span>Betaling / terugbetaling registreren</span>
             </button>
-            
+
             <template v-if="order.data.checkoutMethod">
                 <hr>
                 <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
@@ -260,7 +264,9 @@
                     </h3>
 
                     <p class="style-definition-text pre-wrap" v-text="order.data.comments" />
-                    <template v-if="hasWrite" #right><span class="icon edit" /></template>
+                    <template v-if="hasWrite" #right>
+                        <span class="icon edit" />
+                    </template>
                 </STListItem>
             </STList>
 
@@ -279,7 +285,6 @@
                 <ViewRecordCategoryAnswersBox :category="category" :value="order.data" />
             </div>
 
-
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                 <hr>
                 <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
@@ -295,11 +300,11 @@
             <hr>
 
             <p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+                <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
             </p>
 
             <STList>
-                <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
+                <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 
             <hr>
@@ -310,18 +315,18 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { Request } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { CartItemRow, EditPaymentView, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, PaymentView, PriceBreakdownBox, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, TableActionSelection, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
+import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { CartItemRow, EditPaymentView, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, PaymentView, PriceBreakdownBox, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, TableActionSelection, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { WebshopManager } from "../WebshopManager";
-import { OrderActionBuilder } from "./OrderActionBuilder";
-import OrderTicketsView from "./OrderTicketsView.vue";
-import TicketRow from "./TicketRow.vue";
+import { WebshopManager } from '../WebshopManager';
+import { OrderActionBuilder } from './OrderActionBuilder';
+import OrderTicketsView from './OrderTicketsView.vue';
+import TicketRow from './TicketRow.vue';
 
 @Component({
     components: {
@@ -336,7 +341,7 @@ import TicketRow from "./TicketRow.vue";
         TicketRow,
         ViewRecordCategoryAnswersBox,
         CartItemRow,
-        PriceBreakdownBox
+        PriceBreakdownBox,
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -344,78 +349,78 @@ import TicketRow from "./TicketRow.vue";
         date: Formatter.dateWithDay.bind(Formatter),
         dateTime: Formatter.dateTimeWithDay.bind(Formatter),
         minutes: Formatter.minutes.bind(Formatter),
-        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
+        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
     },
     directives: {
         tooltip: TooltipDirective,
-        LongPress: LongPressDirective
-    }
+        LongPress: LongPressDirective,
+    },
 })
-export default class OrderView extends Mixins(NavigationMixin){
-    loading = false
-    errorBox: ErrorBox | null = null
+export default class OrderView extends Mixins(NavigationMixin) {
+    loading = false;
+    errorBox: ErrorBox | null = null;
 
     @Prop({ required: true })
-        initialOrder!: PrivateOrderWithTickets
+    initialOrder!: PrivateOrderWithTickets;
 
     @Prop({ required: true })
-        webshopManager!: WebshopManager
+    webshopManager!: WebshopManager;
 
     get webshop() {
-        return this.webshopManager.preview
+        return this.webshopManager.preview;
     }
 
     get didChangePrice() {
-        return this.order.balanceItems.flatMap(b => b.payments).length > 1 || this.isMissingPayments
+        return this.order.balanceItems.flatMap(b => b.payments).length > 1 || this.isMissingPayments;
     }
 
     get isMissingPayments() {
-        return this.order.payments.reduce((a, b) => a + b.price, 0) !== this.order.totalToPay
+        return this.order.payments.reduce((a, b) => a + b.price, 0) !== this.order.totalToPay;
     }
 
-    order: PrivateOrderWithTickets = this.initialOrder
-    loadingTickets = false
-    
-    @Prop({ default: null })
-        getNextOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
+    order: PrivateOrderWithTickets = this.initialOrder;
+    loadingTickets = false;
 
     @Prop({ default: null })
-        getPreviousOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
+    getNextOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
 
-    @Watch("order.payment.status")
+    @Prop({ default: null })
+    getPreviousOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
+
+    @Watch('order.payment.status')
     onChangePaymentStatus(n: string, old: string) {
         if (n === PaymentStatus.Succeeded && old !== PaymentStatus.Succeeded) {
-            this.downloadNewTickets()
+            this.downloadNewTickets();
         }
     }
 
     formatFreePrice(price: number) {
         if (price === 0) {
-            return ''
+            return '';
         }
-        return Formatter.price(price)
+        return Formatter.price(price);
     }
 
     get tickets() {
-        return this.order.tickets
+        return this.order.tickets;
     }
 
     get hasWarnings() {
-        return this.warnings.length > 0
+        return this.warnings.length > 0;
     }
 
     get warnings(): RecordWarning[] {
-        const warnings: RecordWarning[] = []
+        const warnings: RecordWarning[] = [];
 
         for (const answer of this.recordAnswers.values()) {
-            warnings.push(...answer.getWarnings())
+            warnings.push(...answer.getWarnings());
         }
 
-        return warnings
+        return warnings;
     }
 
     get sortedWarnings() {
-        return this.warnings.slice().sort(RecordWarning.sort)
+        return this.warnings.slice().sort(RecordWarning.sort);
     }
 
     openTickets() {
@@ -424,10 +429,10 @@ export default class OrderView extends Mixins(NavigationMixin){
                 new ComponentWithProperties(OrderTicketsView, {
                     initialOrder: this.order,
                     webshopManager: this.webshopManager,
-                })
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     openPayment(payment: PaymentGeneral) {
@@ -437,61 +442,61 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.present({
             components: [
                 new ComponentWithProperties(PaymentView, {
-                    payment
-                })
+                    payment,
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     get hasNextOrder(): boolean {
         if (!this.getNextOrder || !this.order) {
-            return false
+            return false;
         }
         return !!this.getNextOrder(this.order);
     }
 
     get hasPreviousOrder(): boolean {
         if (!this.getPreviousOrder || !this.order) {
-            return false
+            return false;
         }
         return !!this.getPreviousOrder(this.order);
     }
 
     get hasPaymentsWrite() {
-        const p = this.$context.organizationPermissions
+        const p = this.$context.organizationPermissions;
         if (!p) {
-            return false
+            return false;
         }
         if (p.hasAccessRight(AccessRight.OrganizationManagePayments)) {
-            return true
+            return true;
         }
 
         if (p.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
-            return true
+            return true;
         }
 
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p);
     }
 
     get hasWrite() {
-        const p = this.$context.organizationPermissions
+        const p = this.$context.organizationPermissions;
         if (!p) {
-            return false
+            return false;
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p);
     }
 
     get hasSingleTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket;
     }
 
     get hasTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket)
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket);
     }
 
     get scannedCount() {
-        return this.tickets.reduce((c, ticket) => c + (ticket.scannedAt ? 1 : 0), 0)
+        return this.tickets.reduce((c, ticket) => c + (ticket.scannedAt ? 1 : 0), 0);
     }
 
     get actionBuilder() {
@@ -499,108 +504,108 @@ export default class OrderView extends Mixins(NavigationMixin){
             organizationManager: this.$organizationManager,
             webshopManager: this.webshopManager,
             component: this,
-        })
+        });
     }
 
     get statusName() {
-        return this.order ? OrderStatusHelper.getName(this.order.status) : ""
+        return this.order ? OrderStatusHelper.getName(this.order.status) : '';
     }
 
     get statusColor() {
-        return this.order ? OrderStatusHelper.getColor(this.order.status) : ""
+        return this.order ? OrderStatusHelper.getColor(this.order.status) : '';
     }
 
     get isCanceled() {
-        return this.order.status === OrderStatus.Canceled
+        return this.order.status === OrderStatus.Canceled;
     }
 
     showContextMenu(event) {
         const el = event.currentTarget;
-        const bounds = el.getBoundingClientRect()
+        const bounds = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: bounds.left,
             y: bounds.bottom,
-            xPlacement: "right",
-            yPlacement: "bottom",
+            xPlacement: 'right',
+            yPlacement: 'bottom',
             actions: this.actionBuilder.getActions(),
             selection: {
                 filter: {}, // todo
                 fetcher: {}, // todo
                 markedRows: new Map([[this.order.id, this.order]]),
                 markedRowsAreSelected: true,
-            } as TableActionSelection<PrivateOrderWithTickets>
+            } as TableActionSelection<PrivateOrderWithTickets>,
         });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+        this.present(displayedComponent.setDisplayStyle('overlay'));
     }
 
     markAs(event) {
-        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const el = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget;
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: el.getBoundingClientRect().left + el.offsetWidth,
             y: el.getBoundingClientRect().top + el.offsetHeight,
-            xPlacement: "left",
-            yPlacement: "bottom",
+            xPlacement: 'left',
+            yPlacement: 'bottom',
             actions: this.actionBuilder.getStatusActions(),
             // todo: selection
         });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+        this.present(displayedComponent.setDisplayStyle('overlay'));
     }
 
     changePaymentStatus(event) {
-        const x = event.changedTouches ? event.changedTouches[0].pageX : event.clientX
-        const y = event.changedTouches ? event.changedTouches[0].pageY : event.clientY
+        const x = event.changedTouches ? event.changedTouches[0].pageX : event.clientX;
+        const y = event.changedTouches ? event.changedTouches[0].pageY : event.clientY;
 
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x,
             y,
-            xPlacement: "right",
-            yPlacement: "bottom",
+            xPlacement: 'right',
+            yPlacement: 'bottom',
             actions: this.actionBuilder.getPaymentActions(),
             // todo: selection
         });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+        this.present(displayedComponent.setDisplayStyle('overlay'));
     }
 
     editOrder() {
-        this.actionBuilder.editOrder(this.order).catch(console.error)
+        this.actionBuilder.editOrder(this.order).catch(console.error);
     }
 
     editComments() {
-        this.actionBuilder.editOrder(this.order, "comments").catch(console.error)
+        this.actionBuilder.editOrder(this.order, 'comments').catch(console.error);
     }
 
     created() {
-        this.webshopManager.ticketsEventBus.addListener(this, "fetched", this.onNewTickets.bind(this))
-        this.webshopManager.ticketPatchesEventBus.addListener(this, "patched", this.onNewTicketPatches.bind(this))
-        
+        this.webshopManager.ticketsEventBus.addListener(this, 'fetched', this.onNewTickets.bind(this));
+        this.webshopManager.ticketPatchesEventBus.addListener(this, 'patched', this.onNewTicketPatches.bind(this));
+
         if (this.hasTickets) {
-            this.recheckTickets()
+            this.recheckTickets();
         }
 
         // Listen for patches in payments
-        GlobalEventBus.addListener(this, "paymentPatch", async (payment) => {
+        GlobalEventBus.addListener(this, 'paymentPatch', async (payment) => {
             if (payment && payment.id && this.order.payments.find(p => p.id === payment.id as string)) {
                 // Reload tickets and order
-                await this.downloadNewOrders()
-                this.downloadNewTickets()
+                await this.downloadNewOrders();
+                this.downloadNewTickets();
             }
-            return Promise.resolve()
-        })
+            return Promise.resolve();
+        });
     }
 
     recheckTickets() {
         if (this.hasTickets) {
-            this.loadingTickets = true
+            this.loadingTickets = true;
             this.webshopManager.getTicketsForOrder(this.order.id, true).then((tickets) => {
-                this.order.tickets = tickets
-                this.loadingTickets = false
-            }).catch(e => {
-                console.error(e)
-                this.loadingTickets = false
+                this.order.tickets = tickets;
+                this.loadingTickets = false;
+            }).catch((e) => {
+                console.error(e);
+                this.loadingTickets = false;
             }).finally(() => {
-                this.downloadNewTickets()
-            })
+                this.downloadNewTickets();
+            });
         }
     }
 
@@ -615,13 +620,13 @@ export default class OrderView extends Mixins(NavigationMixin){
             getNextOrder: this.getNextOrder,
             getPreviousOrder: this.getPreviousOrder,
         });
-        
+
         this.show({
             components: [component],
             replace: 1,
             reverse: true,
-            animated: false
-        })
+            animated: false,
+        });
     }
 
     goNext() {
@@ -638,38 +643,36 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.show({
             components: [component],
             replace: 1,
-            animated: false
-        })
+            animated: false,
+        });
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod, this.order.data.paymentContext))
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod, this.order.data.paymentContext));
     }
 
-    async onNewTickets(tickets: TicketPrivate[]) {        
-        this.order.addTickets(tickets)
-        return Promise.resolve()
+    async onNewTickets(tickets: TicketPrivate[]) {
+        this.order.addTickets(tickets);
+        return Promise.resolve();
     }
 
-    onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {        
-        this.order.addTicketPatches(patches)
-        return Promise.resolve()
+    onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        this.order.addTicketPatches(patches);
+        return Promise.resolve();
     }
 
     beforeUnmount() {
-        this.webshopManager.ticketsEventBus.removeListener(this)
-        this.webshopManager.ticketPatchesEventBus.removeListener(this)
-        this.webshopManager.ordersEventBus.removeListener(this)
+        this.webshopManager.ticketsEventBus.removeListener(this);
+        this.webshopManager.ticketPatchesEventBus.removeListener(this);
+        this.webshopManager.ordersEventBus.removeListener(this);
     }
 
     activated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.addEventListener("keydown", this.onKey);
+        document.addEventListener('keydown', this.onKey);
     }
 
     deactivated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.removeEventListener("keydown", this.onKey);
+        document.removeEventListener('keydown', this.onKey);
     }
 
     onKey(event) {
@@ -678,22 +681,23 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
 
         if (!this.isFocused) {
-            return
+            return;
         }
 
         const key = event.key || event.keyCode;
 
-        if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
+        if (key === 'ArrowLeft' || key === 'ArrowUp' || key === 'PageUp') {
             this.goBack();
             event.preventDefault();
-        } else if (key === "ArrowRight" || key === "ArrowDown" || key === "PageDown") {
+        }
+        else if (key === 'ArrowRight' || key === 'ArrowDown' || key === 'PageDown') {
             this.goNext();
             event.preventDefault();
         }
     }
 
     imageSrc(cartItem: CartItem) {
-        return cartItem.product.images[0]?.getPathForSize(100, 100)
+        return cartItem.product.images[0]?.getPathForSize(100, 100);
     }
 
     async downloadNewOrders() {
@@ -702,15 +706,16 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     downloadNewTickets() {
         if (!this.hasTickets) {
-            return
+            return;
         }
         this.webshopManager.fetchNewTickets(false, false).catch((e) => {
             if (this.tickets.length === 0) {
                 if (Request.isNetworkError(e)) {
-                    new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.", "error red").show()
-                } else {
-                    Toast.fromError(e).show()
-                    new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt", "error red").show()
+                    new Toast('Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.', 'error red').show();
+                }
+                else {
+                    Toast.fromError(e).show();
+                    new Toast('Het laden van de tickets die bij deze bestelling horen is mislukt', 'error red').show();
                 }
             }
         });
@@ -719,20 +724,20 @@ export default class OrderView extends Mixins(NavigationMixin){
     get recordCategories(): RecordCategory[] {
         return RecordCategory.flattenCategoriesForAnswers(
             this.webshop.meta.recordCategories,
-            [...this.order.data.recordAnswers.values()]
-        )
+            [...this.order.data.recordAnswers.values()],
+        );
     }
 
     get recordAnswers() {
-        return this.order.data.recordAnswers
+        return this.order.data.recordAnswers;
     }
 
     createPayment() {
         const payment = PaymentGeneral.create({
             method: PaymentMethod.PointOfSale,
             status: PaymentStatus.Succeeded,
-            paidAt: new Date()
-        })
+            paidAt: new Date(),
+        });
 
         const component = new ComponentWithProperties(EditPaymentView, {
             payment,
@@ -740,23 +745,23 @@ export default class OrderView extends Mixins(NavigationMixin){
             isNew: true,
             saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
                 const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-                arr.addPut(payment.patch(patch))
+                arr.addPut(payment.patch(patch));
                 await this.$context.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/payments',
                     body: arr,
                     decoder: new ArrayDecoder(PaymentGeneral),
-                    shouldRetry: false
+                    shouldRetry: false,
                 });
-                
+
                 // Update order
-                await this.downloadNewOrders()
-            }
-        })
+                await this.downloadNewOrders();
+            },
+        });
         this.present({
             components: [component],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 }
 </script>

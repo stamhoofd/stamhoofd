@@ -20,7 +20,7 @@
                 </template>
             </STList>
         </template>
-                
+
         <p v-if="webshop.categories.length === 0">
             <button class="button text" type="button" @click="addProduct">
                 <span class="icon add" />
@@ -60,14 +60,14 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from '@stamhoofd/components';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
 
 import CategoryRow from './categories/CategoryRow.vue';
 import EditCategoryView from './categories/EditCategoryView.vue';
-import EditWebshopMixin from "./EditWebshopMixin";
+import EditWebshopMixin from './EditWebshopMixin';
 import EditProductView from './products/EditProductView.vue';
 import ProductRow from './products/ProductRow.vue';
 
@@ -79,113 +79,113 @@ import ProductRow from './products/ProductRow.vue';
         ProductRow,
         CategoryRow,
         SaveView,
-        Checkbox
-    }
+        Checkbox,
+    },
 })
 export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
     get viewTitle() {
         if (this.isTickets) {
             if (this.webshop.categories.length > 0) {
-                return "Ticket categorieën"
+                return 'Ticket categorieën';
             }
-            return "Aanbod tickets en vouchers"
+            return 'Aanbod tickets en vouchers';
         }
         if (this.webshop.categories.length > 0) {
-            return "Product categorieën"
+            return 'Product categorieën';
         }
-        return "Productaanbod"
+        return 'Productaanbod';
     }
 
     get isTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.Tickets
+        return this.webshop.meta.ticketType === WebshopTicketType.Tickets;
     }
 
     get cartEnabled() {
-        return this.webshop.meta.cartEnabled
+        return this.webshop.meta.cartEnabled;
     }
 
     set cartEnabled(cartEnabled: boolean) {
-        const patch = WebshopMetaData.patch({ cartEnabled })
-        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+        const patch = WebshopMetaData.patch({ cartEnabled });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     addProduct() {
         const product = Product.create({
-            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product
-        })
-        const p = PrivateWebshop.patch({})
-        p.products.addPut(product)
+            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
+        });
+        const p = PrivateWebshop.patch({});
+        p.products.addPut(product);
         this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
-            this.addPatch(p.patch(patch))
+            this.addPatch(p.patch(patch));
 
             // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("popup"))
+        } }).setDisplayStyle('popup'));
     }
 
     addCategory() {
-        const category = Category.create({})
-       
+        const category = Category.create({});
+
         if (this.webshop.categories.length === 0) {
             // Also inherit all products (only on save)
-            category.productIds = this.webshop.products.map(p => p.id)
+            category.productIds = this.webshop.products.map(p => p.id);
         }
 
-        const p = PrivateWebshop.patch({})
-        p.categories.addPut(category)
+        const p = PrivateWebshop.patch({});
+        p.categories.addPut(category);
 
         this.present(new ComponentWithProperties(EditCategoryView, { category, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
-            this.addPatch(p.patch(patch))
-        }}).setDisplayStyle("popup"))
+            this.addPatch(p.patch(patch));
+        } }).setDisplayStyle('popup'));
     }
 
     moveCategoryUp(category: Category) {
-        const index = this.webshop.categories.findIndex(c => category.id === c.id)
+        const index = this.webshop.categories.findIndex(c => category.id === c.id);
         if (index === -1 || index === 0) {
             return;
         }
 
-        const moveTo = index - 2
-        const p = PrivateWebshop.patch({})
-        p.categories.addMove(category.id, this.webshop.categories[moveTo]?.id ?? null)
-        this.addPatch(p)
+        const moveTo = index - 2;
+        const p = PrivateWebshop.patch({});
+        p.categories.addMove(category.id, this.webshop.categories[moveTo]?.id ?? null);
+        this.addPatch(p);
     }
 
     moveCategoryDown(category: Category) {
-        const index = this.webshop.categories.findIndex(c => category.id === c.id)
+        const index = this.webshop.categories.findIndex(c => category.id === c.id);
         if (index === -1 || index >= this.webshop.categories.length - 1) {
             return;
         }
 
-        const moveTo = index + 1
-        const p = PrivateWebshop.patch({})
-        p.categories.addMove(category.id, this.webshop.categories[moveTo].id)
-        this.addPatch(p)
+        const moveTo = index + 1;
+        const p = PrivateWebshop.patch({});
+        p.categories.addMove(category.id, this.webshop.categories[moveTo].id);
+        this.addPatch(p);
     }
 
     moveProductUp(product: Product) {
-        const index = this.webshop.products.findIndex(c => product.id === c.id)
+        const index = this.webshop.products.findIndex(c => product.id === c.id);
         if (index === -1 || index === 0) {
             return;
         }
 
-        const moveTo = index - 2
-        const p = PrivateWebshop.patch({})
-        p.products.addMove(product.id, this.webshop.products[moveTo]?.id ?? null)
-        this.addPatch(p)
+        const moveTo = index - 2;
+        const p = PrivateWebshop.patch({});
+        p.products.addMove(product.id, this.webshop.products[moveTo]?.id ?? null);
+        this.addPatch(p);
     }
 
     moveProductDown(product: Product) {
-        const index = this.webshop.products.findIndex(c => product.id === c.id)
+        const index = this.webshop.products.findIndex(c => product.id === c.id);
         if (index === -1 || index >= this.webshop.products.length - 1) {
             return;
         }
 
-        const moveTo = index + 1
-        const p = PrivateWebshop.patch({})
-        p.products.addMove(product.id, this.webshop.products[moveTo].id)
-        this.addPatch(p)
+        const moveTo = index + 1;
+        const p = PrivateWebshop.patch({});
+        p.products.addMove(product.id, this.webshop.products[moveTo].id);
+        this.addPatch(p);
     }
 
     get draggableProducts() {
@@ -197,11 +197,11 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
             return;
         }
 
-        const patch = PrivateWebshop.patch({})
+        const patch = PrivateWebshop.patch({});
         for (const p of products.slice().reverse()) {
-            patch.products.addMove(p.id, null)
+            patch.products.addMove(p.id, null);
         }
-        this.addPatch(patch)
+        this.addPatch(patch);
     }
 
     get draggableCategories() {
@@ -213,11 +213,11 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
             return;
         }
 
-        const patch = PrivateWebshop.patch({})
+        const patch = PrivateWebshop.patch({});
         for (const c of categories.slice().reverse()) {
-            patch.categories.addMove(c.id, null)
+            patch.categories.addMove(c.id, null);
         }
-        this.addPatch(patch)
+        this.addPatch(patch);
     }
 }
 </script>

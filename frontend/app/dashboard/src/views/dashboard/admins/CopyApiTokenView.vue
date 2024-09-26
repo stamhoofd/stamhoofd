@@ -6,7 +6,7 @@
             <h1>
                 Sla jouw key op
             </h1>
-        
+
             <p class="st-list-description">
                 Hieronder kan je jouw key kopiëren. Bewaar deze goed, want je kan deze nooit meer opvragen.
             </p>
@@ -34,30 +34,29 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, STInputBox,STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { ApiUserWithToken } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, STInputBox, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { ApiUserWithToken } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
         STToolbar,
         STNavigationBar,
-        STInputBox
-    }
+        STInputBox,
+    },
 })
 export default class CopyApiTokenView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        user!: ApiUserWithToken
+    user!: ApiUserWithToken;
 
     formatDate(date: Date) {
-        return Formatter.date(date, true)
+        return Formatter.date(date, true);
     }
 
     async shouldNavigateAway() {
-        return await CenteredMessage.confirm("Heb je jouw key opgeslagen?", "Ja, opgeslagen", "Je kan jouw API-key hierna nooit meer bekijken.")
+        return await CenteredMessage.confirm('Heb je jouw key opgeslagen?', 'Ja, opgeslagen', 'Je kan jouw API-key hierna nooit meer bekijken.');
     }
 }
 </script>

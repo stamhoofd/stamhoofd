@@ -26,7 +26,7 @@
                 <h2>{{ section.name }}</h2>
 
                 <div>
-                    <SeatSelectionBox 
+                    <SeatSelectionBox
                         v-if="seatingPlan && section"
                         :seating-plan="seatingPlan"
                         :seating-plan-section="section"
@@ -44,15 +44,14 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { Request } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox, STNavigationBar, Toast } from "@stamhoofd/components";
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox, STNavigationBar, Toast } from '@stamhoofd/components';
 import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
 
-
-import EditSeatingPlanView from "../edit/seating/EditSeatingPlanView.vue";
+import EditSeatingPlanView from '../edit/seating/EditSeatingPlanView.vue';
 import { WebshopManager } from '../WebshopManager';
 import OrderView from './OrderView.vue';
 
@@ -60,31 +59,31 @@ import OrderView from './OrderView.vue';
     components: {
         STNavigationBar,
         LoadingView,
-        SeatSelectionBox
+        SeatSelectionBox,
     },
 })
 export default class WebshopSeatingView extends Mixins(NavigationMixin) {
     @Prop()
-        webshopManager: WebshopManager
+    webshopManager: WebshopManager;
 
     get preview() {
-        return this.webshopManager.preview
+        return this.webshopManager.preview;
     }
 
     get webshop() {
-        return this.webshopManager.webshop
+        return this.webshopManager.webshop;
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     loading = false;
-    orders: PrivateOrderWithTickets[] = []
-    selectedProductId: string | null = null
+    orders: PrivateOrderWithTickets[] = [];
+    selectedProductId: string | null = null;
 
     get selectedProduct() {
-        return this.webshop?.products?.find(p => p.id === this.selectedProductId) ?? null
+        return this.webshop?.products?.find(p => p.id === this.selectedProductId) ?? null;
     }
 
     set selectedProduct(product: Product | null) {
@@ -92,74 +91,74 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
     }
 
     created() {
-        this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
-        this.webshopManager.ordersEventBus.addListener(this, "deleted", this.onDeleteOrders.bind(this))
+        this.webshopManager.ordersEventBus.addListener(this, 'fetched', this.onNewOrders.bind(this));
+        this.webshopManager.ordersEventBus.addListener(this, 'deleted', this.onDeleteOrders.bind(this));
 
         this.reload();
-        this.loadOrders().catch(console.error)
+        this.loadOrders().catch(console.error);
     }
-    
+
     beforeUnmount() {
-        this.webshopManager.ordersEventBus.removeListener(this)
-        this.webshopManager.ticketsEventBus.removeListener(this)
-        this.webshopManager.ticketPatchesEventBus.removeListener(this)
-        Request.cancelAll(this)
+        this.webshopManager.ordersEventBus.removeListener(this);
+        this.webshopManager.ticketsEventBus.removeListener(this);
+        this.webshopManager.ticketPatchesEventBus.removeListener(this);
+        Request.cancelAll(this);
     }
 
     get availableProducts() {
-        return this.webshop?.products.filter(p => p.seatingPlanId) ?? []
+        return this.webshop?.products.filter(p => p.seatingPlanId) ?? [];
     }
 
     get seatingPlan() {
-        return this.webshop?.meta.seatingPlans.find(p => p.id === this.selectedProduct?.seatingPlanId) ?? null
+        return this.webshop?.meta.seatingPlans.find(p => p.id === this.selectedProduct?.seatingPlanId) ?? null;
     }
 
     get sections() {
-        const plan = this.seatingPlan
+        const plan = this.seatingPlan;
         if (!plan) {
-            return []
+            return [];
         }
-        return plan.sections
+        return plan.sections;
     }
 
     get reservedSeats() {
-        return this.selectedProduct?.reservedSeats ?? []
+        return this.selectedProduct?.reservedSeats ?? [];
     }
 
     get duplicateSeats() {
         // Try to find all seats that are reserved twice
-        const duplicateSeats = new Map<string, ReservedSeat>()
-        const foundSeats = new Set<string>()
+        const duplicateSeats = new Map<string, ReservedSeat>();
+        const foundSeats = new Set<string>();
 
         // We need to look at the reserved seats of orders, not of the product
-        const correctedReservedSeats = this.orders.flatMap(o => o.data.cart.items.flatMap(item => item.product.id === this.selectedProduct?.id ? item.reservedSeats : []))
+        const correctedReservedSeats = this.orders.flatMap(o => o.data.cart.items.flatMap(item => item.product.id === this.selectedProduct?.id ? item.reservedSeats : []));
 
         for (const seat of correctedReservedSeats ?? []) {
             const id = seat.section + ':::' + seat.row + ':::' + seat.seat;
             if (foundSeats.has(id)) {
                 duplicateSeats.set(id, seat);
             }
-            foundSeats.add(id)
+            foundSeats.add(id);
         }
 
-        return [...duplicateSeats.values()]
+        return [...duplicateSeats.values()];
     }
 
     get scannedSeats() {
-        return this.orders.flatMap(o => o.tickets.flatMap(t => {
+        return this.orders.flatMap(o => o.tickets.flatMap((t) => {
             const ticket = t.getPublic(o);
             if (!ticket.isSingle || !ticket.items[0]) {
-                return []
+                return [];
             }
-            const item = ticket.items[0]
+            const item = ticket.items[0];
             if (item.product.id !== this.selectedProduct?.id) {
-                return []
+                return [];
             }
-            return t.scannedAt ? [t.seat] : []
-        }))
+            return t.scannedAt ? [t.seat] : [];
+        }));
     }
 
-    highlightedSeats: ReservedSeat[] = []
+    highlightedSeats: ReservedSeat[] = [];
 
     editSeatingPlan() {
         this.present({
@@ -169,81 +168,81 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
                     seatingPlan: this.seatingPlan,
                     isNew: false,
                     saveHandler: async (patch: AutoEncoderPatchType<PrivateWebshop>) => {
-                        //this.patchWebshop = this.patchWebshop.patch(patchedWebshop)
-                        await this.webshopManager.patchWebshop(patch)
-                    }
-                })
+                        // this.patchWebshop = this.patchWebshop.patch(patchedWebshop)
+                        await this.webshopManager.patchWebshop(patch);
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     chooseProduct(event) {
         const contextMenu = new ContextMenu([
-            this.availableProducts.map(product => {
+            this.availableProducts.map((product) => {
                 return new ContextMenuItem({
                     name: product.name,
                     action: () => {
-                        this.selectedProduct = product
-                        this.highlightedSeats = []
+                        this.selectedProduct = product;
+                        this.highlightedSeats = [];
                         return true;
-                    }
-                })
-            })
+                    },
+                });
+            }),
         ]);
-        contextMenu.show({ button: event.currentTarget, xPlacement: "right" }).catch(console.error);
+        contextMenu.show({ button: event.currentTarget, xPlacement: 'right' }).catch(console.error);
     }
 
     onClickSeat(seat: ReservedSeat) {
         for (const order of this.orders) {
             for (const item of order.data.cart.items) {
                 if (item.product.id !== this.selectedProduct?.id) {
-                    continue
+                    continue;
                 }
                 for (const s of item.reservedSeats) {
                     if (s.equals(seat)) {
-                        this.openOrder(order)
+                        this.openOrder(order);
 
-                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats)
-                        return
+                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats);
+                        return;
                     }
                 }
             }
         }
-        this.highlightedSeats = []
+        this.highlightedSeats = [];
 
         // Check if this seat is reserved in the product
         if (this.selectedProduct?.reservedSeats.find(r => r.equals(seat))) {
             new Toast('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller nog aan het afrekenen is.', 'info').show();
-        } else {
+        }
+        else {
             new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
         }
-
     }
 
     onHoverSeat(seat: ReservedSeat) {
         for (const order of this.orders) {
             for (const item of order.data.cart.items) {
                 if (item.product.id !== this.selectedProduct?.id) {
-                    continue
+                    continue;
                 }
                 for (const s of item.reservedSeats) {
                     if (s.equals(seat)) {
-                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats)
-                        return
+                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats);
+                        return;
                     }
                 }
             }
         }
-        this.highlightedSeats = []
+        this.highlightedSeats = [];
     }
 
     async onDeleteOrders(orders: PrivateOrder[]): Promise<void> {
         // Delete these orders from the loaded orders instead of doing a full reload
         for (const order of orders) {
-            const index = this.orders.findIndex(o => o.id === order.id)
+            const index = this.orders.findIndex(o => o.id === order.id);
             if (index !== -1) {
-                this.orders.splice(index, 1)
+                this.orders.splice(index, 1);
             }
         }
 
@@ -251,11 +250,11 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         await this.webshopManager.loadWebshopIfNeeded(false, true);
 
         // Remove highlight (order might have changed)
-        this.highlightedSeats = []
+        this.highlightedSeats = [];
 
-        return Promise.resolve()
+        return Promise.resolve();
     }
-    
+
     /**
      * Insert or update an order
      */
@@ -263,164 +262,166 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         for (const _order of this.orders) {
             if (order.id === _order.id) {
                 // replace data without affecting reference or tickets
-                _order.set(order)
-                return
+                _order.set(order);
+                return;
             }
         }
-        this.orders.push(PrivateOrderWithTickets.create(order))
+        this.orders.push(PrivateOrderWithTickets.create(order));
     }
 
     async onNewOrders(orders: PrivateOrder[]) {
         // Search for the orders and replace / add them
         for (const order of orders) {
-            this.putOrder(order)
+            this.putOrder(order);
         }
 
         // If we received new orders, the webshop will also have changed reserved seats for the products
         await this.webshopManager.loadWebshopIfNeeded(false, true);
 
         // Remove highlight (order might have changed)
-        this.highlightedSeats = []
+        this.highlightedSeats = [];
 
-        return Promise.resolve()
+        return Promise.resolve();
     }
 
     get hasWrite() {
-        const p = this.$context.organizationPermissions
+        const p = this.$context.organizationPermissions;
         if (!p) {
-            return false
+            return false;
         }
-        return this.preview.privateMeta.permissions.hasWriteAccess(p)    
+        return this.preview.privateMeta.permissions.hasWriteAccess(p);
     }
 
-    isLoadingOrders = true
-    isRefreshingOrders = false
+    isLoadingOrders = true;
+    isRefreshingOrders = false;
 
     async loadOrders() {
-        console.log("Loading orders...")
-        this.orders = []
-        this.isLoadingOrders = true
-        
+        console.log('Loading orders...');
+        this.orders = [];
+        this.isLoadingOrders = true;
+
         // Disabled for now: first fix needed for payment status + deleted orders
         try {
             // We use stream orders because that doesn't block the main thread on iOS
             // (we don't need to decode all orders at the same time on the main thread)
 
             // We use a buffer to prevent DOM updates or Vue slowdown during streaming
-            const arrayBuffer: PrivateOrderWithTickets[] = []
+            const arrayBuffer: PrivateOrderWithTickets[] = [];
 
             await this.webshopManager.streamOrders((order) => {
                 // Same orders could be seen twice
                 arrayBuffer.push(
-                    PrivateOrderWithTickets.create(order)
-                )
-            }, false)
+                    PrivateOrderWithTickets.create(order),
+                );
+            }, false);
 
-            const ticketBuffer: TicketPrivate[] = []
+            const ticketBuffer: TicketPrivate[] = [];
 
             await this.webshopManager.streamTickets((ticket) => {
-                ticketBuffer.push(ticket)
-            }, false)
+                ticketBuffer.push(ticket);
+            }, false);
 
             await this.webshopManager.streamTicketPatches((patch) => {
-                const ticket = ticketBuffer.find(o => o.id === patch.id)
+                const ticket = ticketBuffer.find(o => o.id === patch.id);
                 if (ticket) {
-                    ticket.deepSet(ticket.patch(patch))
+                    ticket.deepSet(ticket.patch(patch));
                 }
-            })
+            });
 
             for (const ticket of ticketBuffer) {
-                const order = arrayBuffer.find(o => o.id === ticket.orderId)
+                const order = arrayBuffer.find(o => o.id === ticket.orderId);
                 if (order) {
-                    order.tickets.push(ticket)
-                } else {
-                    console.warn('Couldn\'t find order for ticket', ticket)
+                    order.tickets.push(ticket);
+                }
+                else {
+                    console.warn('Couldn\'t find order for ticket', ticket);
                 }
             }
 
             if (arrayBuffer.length > 0) {
-                this.orders = arrayBuffer
-                this.isLoadingOrders = false
+                this.orders = arrayBuffer;
+                this.isLoadingOrders = false;
             }
-        } catch (e) {
-            // Database error. We can ignore this and simply move on.
-            console.error(e)
         }
-        await this.refresh(false) 
+        catch (e) {
+            // Database error. We can ignore this and simply move on.
+            console.error(e);
+        }
+        await this.refresh(false);
     }
 
     get hasTickets() {
-        return this.preview.hasTickets
+        return this.preview.hasTickets;
     }
 
     async refresh(reset = false) {
         try {
             // Initiate a refresh
             // don't wait
-            this.isRefreshingOrders = true
-            this.isLoadingOrders = this.orders.length === 0
+            this.isRefreshingOrders = true;
+            this.isLoadingOrders = this.orders.length === 0;
 
             if (reset) {
-                this.orders = []
+                this.orders = [];
             }
-            await this.webshopManager.fetchNewOrders(false, reset)
-        } catch (e) {
-            // Fetching failed
-            Toast.fromError(e).show()
+            await this.webshopManager.fetchNewOrders(false, reset);
         }
-
+        catch (e) {
+            // Fetching failed
+            Toast.fromError(e).show();
+        }
 
         // And preload the tickets if needed
         if (this.hasTickets) {
             try {
-                await this.webshopManager.fetchNewTickets(false, false)
-            } catch (e) {
-                // Fetching failed
-                Toast.fromError(e).show()
+                await this.webshopManager.fetchNewTickets(false, false);
             }
-            
+            catch (e) {
+                // Fetching failed
+                Toast.fromError(e).show();
+            }
+
             // Do we still have some missing patches that are not yet synced with the server?
             this.webshopManager.trySavePatches().catch((e) => {
-                console.error(e)
-                Toast.fromError(e).show()
-            })
+                console.error(e);
+                Toast.fromError(e).show();
+            });
         }
 
-        this.isLoadingOrders = false
-        this.isRefreshingOrders = false
+        this.isLoadingOrders = false;
+        this.isRefreshingOrders = false;
     }
 
-
     get hasFullPermissions() {
-        return this.preview.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions)
+        return this.preview.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions);
     }
 
     reload() {
         this.loading = true;
 
         this.webshopManager.loadWebshopIfNeeded().catch((e) => {
-            console.error(e)
-            Toast.fromError(e).show()
+            console.error(e);
+            Toast.fromError(e).show();
         }).finally(() => {
-            this.loading = false
-            this.selectedProduct = this.selectedProduct ?? this.availableProducts[0] ?? null
-            console.log(this.selectedProduct?.reservedSeats)
-
-        })
+            this.loading = false;
+            this.selectedProduct = this.selectedProduct ?? this.availableProducts[0] ?? null;
+            console.log(this.selectedProduct?.reservedSeats);
+        });
     }
-    
+
     openOrder(order: PrivateOrderWithTickets) {
-        const component = new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(OrderView, { 
+        const component = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(OrderView, {
                 initialOrder: order,
-                webshopManager: this.webshopManager
-            })
-        })
+                webshopManager: this.webshopManager,
+            }),
+        });
 
         if ((this as any).$isMobile) {
-            this.show(component)
-        } else {
-            component.modalDisplayStyle = "popup";
+            this.show(component);
+        }
+        else {
+            component.modalDisplayStyle = 'popup';
             this.present(component);
         }
     }

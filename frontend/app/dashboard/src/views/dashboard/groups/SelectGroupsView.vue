@@ -1,14 +1,14 @@
 <template>
     <div id="parent-view" class="st-view">
         <STNavigationBar title="Kies inschrijvingsgroepen" />
-        
+
         <main>
             <h1>
                 Kies één of meerdere inschrijvingsgroepen
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
-            
+
             <div v-for="category in categoryTree.categories" :key="category.id" class="container">
                 <hr>
                 <h2>{{ category.settings.name }}</h2>
@@ -49,23 +49,23 @@
         </main>
 
         <STToolbar>
-            <template #right><LoadingButton :loading="loading">
-                <button class="button primary" type="button" @click="save">
-                    Opslaan
-                </button>
-            </LoadingButton></template>
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="button" @click="save">
+                        Opslaan
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { Request } from "@simonbackx/simple-networking";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { Group } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
-
+import { Request } from '@simonbackx/simple-networking';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from '@stamhoofd/components';
+import { Group } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
@@ -77,49 +77,51 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
         Checkbox,
         STList,
         STListItem,
-        LoadingButton
-    }
+        LoadingButton,
+    },
 })
 export default class SelectGroupsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        initialGroupIds!: string[]
+    initialGroupIds!: string[];
 
     @Prop({ default: true })
-        allowArchived!: boolean
+    allowArchived!: boolean;
 
-    groupIds = this.initialGroupIds.slice()
+    groupIds = this.initialGroupIds.slice();
 
     @Prop({ required: true })
-        callback: (groupIds: string[]) => Promise<void>
+    callback: (groupIds: string[]) => Promise<void>;
 
-    errorBox: ErrorBox | null = null
-    loading = false
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    loading = false;
+    validator = new Validator();
 
-    archivedGroups: Group[] = []
-    loadingGroups = true
+    archivedGroups: Group[] = [];
+    loadingGroups = true;
 
     get categoryTree() {
-        return this.$organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true})
+        return this.$organization.getCategoryTree({ maxDepth: 1, admin: true, smartCombine: true });
     }
+
     mounted() {
-        this.load().catch(console.error)
+        this.load().catch(console.error);
     }
 
     getSelectedGroup(group: Group): boolean {
-        return this.groupIds.includes(group.id)
+        return this.groupIds.includes(group.id);
     }
 
     setSelectedGroup(group: Group, selected: boolean) {
         if (selected) {
             if (this.getSelectedGroup(group) === selected) {
-                return
+                return;
             }
-            this.groupIds.push(group.id)
-        } else {
-            const index = this.groupIds.findIndex(id => id === group.id)
+            this.groupIds.push(group.id);
+        }
+        else {
+            const index = this.groupIds.findIndex(id => id === group.id);
             if (index !== -1) {
-                this.groupIds.splice(index, 1)
+                this.groupIds.splice(index, 1);
             }
         }
     }
@@ -128,46 +130,47 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return;
         }
-        this.loading = true
-        
+        this.loading = true;
+
         try {
-            await this.callback(this.groupIds)
-            this.errorBox = null
+            await this.callback(this.groupIds);
+            this.errorBox = null;
             this.loading = false;
-            this.dismiss({ force: true })
-            return true
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+            this.dismiss({ force: true });
+            return true;
+        }
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
             this.loading = false;
             return false;
         }
     }
 
     async shouldNavigateAway() {
-        if (this.groupIds.join(",") === this.initialGroupIds.join(",")) {
+        if (this.groupIds.join(',') === this.initialGroupIds.join(',')) {
             return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
     async load() {
         if (!this.allowArchived) {
-            this.loadingGroups = false
+            this.loadingGroups = false;
             return;
         }
 
         try {
-            this.archivedGroups = (await this.$organizationManager.loadArchivedGroups({owner: this}))
-        } catch (e) {
-            Toast.fromError(e).show()
+            this.archivedGroups = (await this.$organizationManager.loadArchivedGroups({ owner: this }));
         }
-        this.loadingGroups = false
+        catch (e) {
+            Toast.fromError(e).show();
+        }
+        this.loadingGroups = false;
     }
 
     beforeUnmount() {
         // Cancel all requests
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
-
 }
 </script>

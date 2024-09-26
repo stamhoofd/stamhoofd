@@ -6,7 +6,7 @@
         <h1 v-else>
             Leveringsoptie bewerken
         </h1>
-        
+
         <STErrorsDefault :error-box="errorBox" />
 
         <STInputBox title="Leveringsnaam" error-fields="name" :error-box="errorBox">
@@ -55,14 +55,14 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
-import { CheckoutMethodPrice, PrivateWebshop, Version, WebshopDeliveryMethod, WebshopMetaData, WebshopTimeSlots } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from '@stamhoofd/components';
+import { CheckoutMethodPrice, PrivateWebshop, Version, WebshopDeliveryMethod, WebshopMetaData, WebshopTimeSlots } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import CheckoutMethodPriceBox from "./CheckoutMethodPriceBox.vue";
-import EditDeliveryRegionsSection from "./EditDeliveryRegionsSection.vue";
-import EditTimeSlotsSection from "./EditTimeSlotsSection.vue";
+import CheckoutMethodPriceBox from './CheckoutMethodPriceBox.vue';
+import EditDeliveryRegionsSection from './EditDeliveryRegionsSection.vue';
+import EditTimeSlotsSection from './EditTimeSlotsSection.vue';
 
 @Component({
     components: {
@@ -72,23 +72,23 @@ import EditTimeSlotsSection from "./EditTimeSlotsSection.vue";
         STList,
         EditTimeSlotsSection,
         CheckoutMethodPriceBox,
-        EditDeliveryRegionsSection
+        EditDeliveryRegionsSection,
     },
 })
 export default class EditDeliveryMethodView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-    deliveryMethod!: WebshopDeliveryMethod
+    deliveryMethod!: WebshopDeliveryMethod;
 
     @Prop({ required: true })
-    isNew!: boolean
+    isNew!: boolean;
 
     @Prop({ required: true })
-    webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
-    patchDeliveryMethod: AutoEncoderPatchType<WebshopDeliveryMethod> = WebshopDeliveryMethod.patch({ id: this.deliveryMethod.id })
+    patchDeliveryMethod: AutoEncoderPatchType<WebshopDeliveryMethod> = WebshopDeliveryMethod.patch({ id: this.deliveryMethod.id });
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
@@ -97,78 +97,75 @@ export default class EditDeliveryMethodView extends Mixins(NavigationMixin) {
     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
 
     get patchedDeliveryMethod() {
-        return this.deliveryMethod.patch(this.patchDeliveryMethod)
+        return this.deliveryMethod.patch(this.patchDeliveryMethod);
     }
 
     get name() {
-        return this.patchedDeliveryMethod.name
+        return this.patchedDeliveryMethod.name;
     }
 
     set name(name: string) {
-        this.patchDeliveryMethod = this.patchDeliveryMethod.patch({ name })
+        this.patchDeliveryMethod = this.patchDeliveryMethod.patch({ name });
     }
 
     get description() {
-        return this.patchedDeliveryMethod.description
+        return this.patchedDeliveryMethod.description;
     }
 
     set description(description: string) {
-        this.patchDeliveryMethod = this.patchDeliveryMethod.patch({ description })
+        this.patchDeliveryMethod = this.patchDeliveryMethod.patch({ description });
     }
 
     addPatch(patch: AutoEncoderPatchType<WebshopDeliveryMethod>) {
-        this.patchDeliveryMethod = this.patchDeliveryMethod.patch(patch)
+        this.patchDeliveryMethod = this.patchDeliveryMethod.patch(patch);
     }
-   
+
     patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
-        this.addPatch(WebshopDeliveryMethod.patch({ timeSlots: patch }))
+        this.addPatch(WebshopDeliveryMethod.patch({ timeSlots: patch }));
     }
 
     patchPrice(patch: AutoEncoderPatchType<CheckoutMethodPrice>) {
-        this.addPatch(WebshopDeliveryMethod.patch({ price: patch }))
+        this.addPatch(WebshopDeliveryMethod.patch({ price: patch }));
     }
-  
+
     async save() {
         if (!await this.validator.validate()) {
             return;
         }
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addPatch(this.patchDeliveryMethod)
-        p.meta = meta
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addPatch(this.patchDeliveryMethod);
+        p.meta = meta;
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze leveringsoptie wilt verwijderen?", "Verwijderen")) {
-            return
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze leveringsoptie wilt verwijderen?', 'Verwijderen')) {
+            return;
         }
 
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addDelete(this.deliveryMethod.id)
-        p.meta = meta
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addDelete(this.deliveryMethod.id);
+        p.meta = meta;
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     cancel() {
-        this.pop()
+        this.pop();
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchDeliveryMethod, this.deliveryMethod, { version: Version })
+        return patchContainsChanges(this.patchDeliveryMethod, this.deliveryMethod, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
-
-    
 }
 </script>
-

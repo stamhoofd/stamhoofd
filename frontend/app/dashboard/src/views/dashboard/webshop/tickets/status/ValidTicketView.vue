@@ -43,7 +43,7 @@
             </div>
 
             <STList>
-                <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
+                <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 
             <hr>
@@ -85,13 +85,15 @@
                         <span>{{ statusName }}</span>
                         <span v-if="isCanceled" class="icon canceled" />
                     </p>
-                    <template v-if="hasWrite" #right><span class="icon arrow-down-small gray" /></template>
+                    <template v-if="hasWrite" #right>
+                        <span class="icon arrow-down-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem
                     v-for="(payment, index) in order.payments"
                     :key="payment.id"
-                    v-long-press="(e) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                    v-long-press="(e) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite"
                     class="right-description" @click="openPayment(payment)"
                     @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
                 >
@@ -104,7 +106,7 @@
                         <span v-else class="icon clock" />
                     </p>
 
-                    <template #right v-if="order.payments.length > 1 || hasPaymentsWrite" >
+                    <template v-if="order.payments.length > 1 || hasPaymentsWrite" #right>
                         <span v-if="order.payments.length > 1">{{ formatPrice(payment.price) }}</span>
                         <span v-if="hasPaymentsWrite" class="icon arrow-right-small gray" />
                     </template>
@@ -284,7 +286,7 @@
             <p v-if="order.status === 'Canceled'" class="error-box">
                 Deze bestelling werd geannuleerd
             </p>
-            
+
             <p v-if="order.payment && order.payment.status !== 'Succeeded'" class="warning-box">
                 Opgelet: deze bestelling werd nog niet betaald.
             </p>
@@ -363,7 +365,9 @@
                         {{ order.number }}
                     </p>
 
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
         </main>
@@ -390,16 +394,16 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, LongPressDirective, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
-import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, LongPressDirective, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-import { OrderActionBuilder } from "../../orders/OrderActionBuilder";
-import OrderView from "../../orders/OrderView.vue";
-import { WebshopManager } from "../../WebshopManager";
+import { OrderActionBuilder } from '../../orders/OrderActionBuilder';
+import OrderView from '../../orders/OrderView.vue';
+import { WebshopManager } from '../../WebshopManager';
 
 @Component({
     components: {
@@ -409,7 +413,7 @@ import { WebshopManager } from "../../WebshopManager";
         STToolbar,
         Spinner,
         ViewRecordCategoryAnswersBox,
-        CartItemRow
+        CartItemRow,
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -417,32 +421,32 @@ import { WebshopManager } from "../../WebshopManager";
         date: Formatter.dateWithDay.bind(Formatter),
         dateTime: Formatter.dateTimeWithDay.bind(Formatter),
         minutes: Formatter.minutes.bind(Formatter),
-        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
+        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
     },
     directives: {
-        LongPress: LongPressDirective
-    }
+        LongPress: LongPressDirective,
+    },
 })
 export default class ValidTicketView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        webshopManager!: WebshopManager
+    webshopManager!: WebshopManager;
 
     @Prop({ required: true })
-        ticket!: TicketPrivate|TicketPublicPrivate
+    ticket!: TicketPrivate | TicketPublicPrivate;
 
     @Prop({ required: true })
-        order!: PrivateOrder
+    order!: PrivateOrder;
 
     get recordAnswers() {
-        return this.order.data.recordAnswers
+        return this.order.data.recordAnswers;
     }
 
     get isMissingPayments() {
-        return this.order.payments.reduce((a, b) => a + b.price, 0) !== this.order.totalToPay
+        return this.order.payments.reduce((a, b) => a + b.price, 0) !== this.order.totalToPay;
     }
 
     get hasWarnings() {
-        return this.warnings.length > 0
+        return this.warnings.length > 0;
     }
 
     get publicTicket() {
@@ -450,41 +454,41 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
     }
 
     get indexDescription() {
-        return this.publicTicket.getIndexDescription(this.webshop)
+        return this.publicTicket.getIndexDescription(this.webshop);
     }
 
     get changedSeatString() {
-        return this.publicTicket.getChangedSeatString(this.webshop, false)
+        return this.publicTicket.getChangedSeatString(this.webshop, false);
     }
 
     get warnings(): RecordWarning[] {
-        const warnings: RecordWarning[] = []
+        const warnings: RecordWarning[] = [];
 
         for (const answer of this.recordAnswers) {
-            warnings.push(...answer.getWarnings())
+            warnings.push(...answer.getWarnings());
         }
 
-        return warnings
+        return warnings;
     }
 
     get sortedWarnings() {
-        return this.warnings.slice().sort(RecordWarning.sort)
+        return this.warnings.slice().sort(RecordWarning.sort);
     }
 
     get isCanceled() {
-        return this.order.status === OrderStatus.Canceled
+        return this.order.status === OrderStatus.Canceled;
     }
 
     get item() {
-        return this.publicTicket.isSingle ? this.publicTicket.items[0] : null
+        return this.publicTicket.isSingle ? this.publicTicket.items[0] : null;
     }
 
     formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString())
+        return Formatter.capitalizeFirstLetter(dateRange.toString());
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod))
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod));
     }
 
     get actionBuilder() {
@@ -492,42 +496,42 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
             organizationManager: this.$organizationManager,
             webshopManager: this.webshopManager,
             component: this,
-        })
+        });
     }
 
     get statusName() {
-        return OrderStatusHelper.getName(this.order.status)
+        return OrderStatusHelper.getName(this.order.status);
     }
 
     get statusColor() {
-        return OrderStatusHelper.getColor(this.order.status)
+        return OrderStatusHelper.getColor(this.order.status);
     }
 
     get webshop() {
-        return this.webshopManager.preview
+        return this.webshopManager.preview;
     }
 
     get hasWrite() {
-        const p = this.$context.organizationPermissions
+        const p = this.$context.organizationPermissions;
         if (!p) {
-            return false
+            return false;
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p);
     }
 
     get hasPaymentsWrite() {
-        const p = this.$context.organizationPermissions
+        const p = this.$context.organizationPermissions;
         if (!p) {
-            return false
+            return false;
         }
         if (p.hasAccessRight(AccessRight.OrganizationManagePayments)) {
-            return true
+            return true;
         }
 
         if (p.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
-            return true
+            return true;
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p);
     }
 
     openPayment(payment: Payment) {
@@ -538,39 +542,38 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         this.present({
             components: [
                 new ComponentWithProperties(AsyncPaymentView, {
-                    payment
-                })
+                    payment,
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     markAs(event) {
-        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const el = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget;
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: el.getBoundingClientRect().left + el.offsetWidth,
             y: el.getBoundingClientRect().top + el.offsetHeight,
-            xPlacement: "left",
-            yPlacement: "bottom",
+            xPlacement: 'left',
+            yPlacement: 'bottom',
             actions: this.actionBuilder.getStatusActions(),
             // todo: selection
         });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+        this.present(displayedComponent.setDisplayStyle('overlay'));
     }
 
     changePaymentStatus(event) {
-        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const el = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget;
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: el.getBoundingClientRect().left + el.offsetWidth,
             y: el.getBoundingClientRect().top + el.offsetHeight,
-            xPlacement: "left",
-            yPlacement: "bottom",
+            xPlacement: 'left',
+            yPlacement: 'bottom',
             actions: this.actionBuilder.getPaymentActions(),
             // todo: selection
         });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+        this.present(displayedComponent.setDisplayStyle('overlay'));
     }
-
 
     async cancelScan() {
         if (this.ticket.scannedAt) {
@@ -578,10 +581,10 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
                 id: this.ticket.id,
                 secret: this.ticket.secret, // needed for lookups
                 scannedAt: null,
-                scannedBy: null
-            }))
+                scannedBy: null,
+            }));
         }
-        this.pop({ force: true })
+        this.pop({ force: true });
     }
 
     async markScanned() {
@@ -590,18 +593,18 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
                 id: this.ticket.id,
                 secret: this.ticket.secret, // needed for lookups
                 scannedAt: new Date(),
-                scannedBy: this.$context.user?.firstName ?? null
-            }))
+                scannedBy: this.$context.user?.firstName ?? null,
+            }));
         }
 
-        this.pop({ force: true })
+        this.pop({ force: true });
     }
 
     get recordCategories(): RecordCategory[] {
         return RecordCategory.flattenCategoriesForAnswers(
             this.webshop.meta.recordCategories,
-            [...this.order.data.recordAnswers.values()]
-        )
+            [...this.order.data.recordAnswers.values()],
+        );
     }
 
     openOrder() {
@@ -610,45 +613,45 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
                 new ComponentWithProperties(OrderView, {
                     initialOrder: PrivateOrderWithTickets.create(this.order),
                     webshopManager: this.webshopManager,
-                })
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     mounted() {
-        ColorHelper.setColor("#0CBB69", this.$el as HTMLElement)
+        ColorHelper.setColor('#0CBB69', this.$el as HTMLElement);
     }
 
     created() {
         // Listen for patches in payments
-        GlobalEventBus.addListener(this, "paymentPatch", async (payment) => {
+        GlobalEventBus.addListener(this, 'paymentPatch', async (payment) => {
             if (payment && payment.id && this.order.payments.find(p => p.id === payment.id as string)) {
-                await this.webshopManager.fetchNewOrders(false, false)
+                await this.webshopManager.fetchNewOrders(false, false);
             }
-            return Promise.resolve()
-        })
+            return Promise.resolve();
+        });
 
-        this.webshopManager.ordersEventBus.addListener(this, "fetched", (orders: PrivateOrder[]) => {
+        this.webshopManager.ordersEventBus.addListener(this, 'fetched', (orders: PrivateOrder[]) => {
             for (const order of orders) {
                 if (order.id === this.order.id) {
-                    this.order.deepSet(order)
+                    this.order.deepSet(order);
                 }
             }
-            return Promise.resolve()
-        })
+            return Promise.resolve();
+        });
     }
 
     beforeUnmount() {
-        this.webshopManager.ordersEventBus.removeListener(this)
+        this.webshopManager.ordersEventBus.removeListener(this);
     }
 
     createPayment() {
         const payment = PaymentGeneral.create({
             method: PaymentMethod.PointOfSale,
             status: PaymentStatus.Succeeded,
-            paidAt: new Date()
-        })
+            paidAt: new Date(),
+        });
 
         const component = new ComponentWithProperties(EditPaymentView, {
             payment,
@@ -656,23 +659,23 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
             isNew: true,
             saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
                 const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-                arr.addPut(payment.patch(patch))
+                arr.addPut(payment.patch(patch));
                 await this.$context.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/payments',
                     body: arr,
                     decoder: new ArrayDecoder(PaymentGeneral),
-                    shouldRetry: false
+                    shouldRetry: false,
                 });
-                
+
                 // Update order
-                await this.webshopManager.fetchNewOrders(false, false)
-            }
-        })
+                await this.webshopManager.fetchNewOrders(false, false);
+            },
+        });
         this.present({
             components: [component],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 }
 </script>

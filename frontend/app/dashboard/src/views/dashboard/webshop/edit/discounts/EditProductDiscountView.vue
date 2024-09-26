@@ -6,7 +6,7 @@
         <h1 v-else>
             Productkorting bewerken
         </h1>
-        
+
         <STErrorsDefault :error-box="errorBox" />
 
         <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="validator" @patch="patchProductSelector" />
@@ -19,15 +19,17 @@
 
         <div v-for="(d, index) in discounts" :key="d.id">
             <STInputBox :title="discounts.length === 1 ? 'Korting' : 'Korting op '+(index+1)+'e stuk' + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' en verder' : '')" :error-box="errorBox" class="max">
-                <template v-if="discounts.length > 1" #right><button class="button icon trash gray" type="button" @click="removeDiscount(d)" /></template>
+                <template v-if="discounts.length > 1" #right>
+                    <button class="button icon trash gray" type="button" @click="removeDiscount(d)" />
+                </template>
 
                 <div class="split-inputs">
                     <div>
-                        <PriceInput v-if="getDiscountType(d) === 'discountPerPiece'" :modelValue="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @update:modelValue="setDiscountDiscountPerPiece(d, $event)" />
-                        <PermyriadInput v-else :modelValue="getDiscountPercentageDiscount(d)" :required="true" @update:modelValue="setDiscountPercentageDiscount(d, $event)" />
+                        <PriceInput v-if="getDiscountType(d) === 'discountPerPiece'" :model-value="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @update:model-value="setDiscountDiscountPerPiece(d, $event)" />
+                        <PermyriadInput v-else :model-value="getDiscountPercentageDiscount(d)" :required="true" @update:model-value="setDiscountPercentageDiscount(d, $event)" />
                     </div>
                     <div>
-                        <Dropdown :modelValue="getDiscountType(d)" @update:model-value="setDiscountType(d, $event)">
+                        <Dropdown :model-value="getDiscountType(d)" @update:model-value="setDiscountType(d, $event)">
                             <option value="percentageDiscount">
                                 Percentage
                             </option>
@@ -128,11 +130,10 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, NumberInput, PermyriadInput, PriceInput, Radio,SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { PrivateWebshop, ProductDiscount, ProductDiscountRepeatBehaviour,ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, NumberInput, PermyriadInput, PriceInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
+import { PrivateWebshop, ProductDiscount, ProductDiscountRepeatBehaviour, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import ProductSelectorBox from './ProductSelectorBox.vue';
 
@@ -149,182 +150,181 @@ import ProductSelectorBox from './ProductSelectorBox.vue';
         Checkbox,
         ProductSelectorBox,
         Dropdown,
-        Radio
+        Radio,
     },
 })
 export default class EditProductDiscountView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-        productDiscount!: ProductDiscountSettings
+    productDiscount!: ProductDiscountSettings;
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
     @Prop({ required: true })
-        webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
     /// For now only used to update locations and times of other products that are shared
-    patchProductDiscount: AutoEncoderPatchType<ProductDiscountSettings> = ProductDiscountSettings.patch({ id: this.productDiscount.id })
-    cachedDiscountType: Map<string, 'percentageDiscount' | 'discountPerPiece'> = new Map()
+    patchProductDiscount: AutoEncoderPatchType<ProductDiscountSettings> = ProductDiscountSettings.patch({ id: this.productDiscount.id });
+    cachedDiscountType: Map<string, 'percentageDiscount' | 'discountPerPiece'> = new Map();
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => void;
-    
+    saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => void;
+
     get patchedProductDiscount() {
-        return this.productDiscount.patch(this.patchProductDiscount)
+        return this.productDiscount.patch(this.patchProductDiscount);
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get productSelector() {
-        return this.patchedProductDiscount.product
+        return this.patchedProductDiscount.product;
     }
 
     patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
         this.addPatch(ProductDiscountSettings.patch({
-            product: patch
-        }))
+            product: patch,
+        }));
     }
 
     addPatch(patch: AutoEncoderPatchType<ProductDiscountSettings>) {
-        this.patchProductDiscount = this.patchProductDiscount.patch(patch)
+        this.patchProductDiscount = this.patchProductDiscount.patch(patch);
     }
 
     get discounts() {
-        return this.patchedProductDiscount.discounts
+        return this.patchedProductDiscount.discounts;
     }
-    
+
     get repeatBehaviour() {
-        return this.patchedProductDiscount.repeatBehaviour
+        return this.patchedProductDiscount.repeatBehaviour;
     }
 
     set repeatBehaviour(repeatBehaviour: ProductDiscountRepeatBehaviour) {
         this.addPatch(ProductDiscountSettings.patch({
-            repeatBehaviour
-        }))
+            repeatBehaviour,
+        }));
     }
 
     get cartLabel() {
-        return this.patchedProductDiscount.cartLabel ?? ''
+        return this.patchedProductDiscount.cartLabel ?? '';
     }
 
     set cartLabel(cartLabel: string) {
         this.addPatch(ProductDiscountSettings.patch({
-            cartLabel: cartLabel || null
-        }))
+            cartLabel: cartLabel || null,
+        }));
     }
 
     getDiscountType(d: ProductDiscount) {
         if (this.cachedDiscountType.has(d.id)) {
-            return this.cachedDiscountType.get(d.id)
+            return this.cachedDiscountType.get(d.id);
         }
 
         if (d.discountPerPiece > 0) {
-            return 'discountPerPiece'
+            return 'discountPerPiece';
         }
-        return 'percentageDiscount'
+        return 'percentageDiscount';
     }
 
     setDiscountType(d: ProductDiscount, type: 'percentageDiscount' | 'discountPerPiece') {
-        this.cachedDiscountType.set(d.id, type)
+        this.cachedDiscountType.set(d.id, type);
 
-        const p = ProductDiscountSettings.patch({})
+        const p = ProductDiscountSettings.patch({});
         if (type === 'percentageDiscount') {
             p.discounts.addPatch(ProductDiscount.patch({
                 id: d.id,
                 percentageDiscount: Math.min(100, this.getDiscountDiscountPerPiece(d)),
-                discountPerPiece: 0
-            }))
-        } else {
+                discountPerPiece: 0,
+            }));
+        }
+        else {
             p.discounts.addPatch(ProductDiscount.patch({
                 id: d.id,
                 percentageDiscount: 0,
-                discountPerPiece: Math.max(1, this.getDiscountPercentageDiscount(d))
-            }))
+                discountPerPiece: Math.max(1, this.getDiscountPercentageDiscount(d)),
+            }));
         }
-        this.addPatch(p)
+        this.addPatch(p);
     }
 
     getDiscountDiscountPerPiece(d: ProductDiscount) {
-        return d.discountPerPiece
+        return d.discountPerPiece;
     }
 
     setDiscountDiscountPerPiece(d: ProductDiscount, discountPerPiece: number) {
-        const p = ProductDiscountSettings.patch({})
+        const p = ProductDiscountSettings.patch({});
         p.discounts.addPatch(ProductDiscount.patch({
             id: d.id,
             percentageDiscount: 0,
-            discountPerPiece: discountPerPiece
-        }))
-        this.addPatch(p)
+            discountPerPiece: discountPerPiece,
+        }));
+        this.addPatch(p);
     }
 
     getDiscountPercentageDiscount(d: ProductDiscount) {
-        return d.percentageDiscount
+        return d.percentageDiscount;
     }
 
     setDiscountPercentageDiscount(d: ProductDiscount, percentageDiscount: number) {
-        const p = ProductDiscountSettings.patch({})
+        const p = ProductDiscountSettings.patch({});
         p.discounts.addPatch(ProductDiscount.patch({
             id: d.id,
             percentageDiscount,
-            discountPerPiece: 0
-        }))
-        this.addPatch(p)
+            discountPerPiece: 0,
+        }));
+        this.addPatch(p);
     }
 
     addDiscount() {
-        const p = ProductDiscountSettings.patch({})
-        p.discounts.addPut(ProductDiscount.create({}))
-        this.addPatch(p)
+        const p = ProductDiscountSettings.patch({});
+        p.discounts.addPut(ProductDiscount.create({}));
+        this.addPatch(p);
     }
 
     removeDiscount(discount: ProductDiscount) {
-        const p = ProductDiscountSettings.patch({})
-        p.discounts.addDelete(discount.id)
-        this.addPatch(p)
+        const p = ProductDiscountSettings.patch({});
+        p.discounts.addDelete(discount.id);
+        this.addPatch(p);
     }
-    
+
     async save() {
-        const isValid = await this.validator.validate()
+        const isValid = await this.validator.validate();
         if (!isValid) {
-            return
+            return;
         }
-        const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray()
-        p.addPatch(this.patchProductDiscount)
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
+        p.addPatch(this.patchProductDiscount);
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze korting wilt verwijderen?", "Verwijderen")) {
-            return
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze korting wilt verwijderen?', 'Verwijderen')) {
+            return;
         }
 
-        const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray()
-        p.addDelete(this.productDiscount.id)
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
+        p.addDelete(this.productDiscount.id);
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchProductDiscount, this.productDiscount, { version: Version })
+        return patchContainsChanges(this.patchProductDiscount, this.productDiscount, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
-
-    
 }
 </script>

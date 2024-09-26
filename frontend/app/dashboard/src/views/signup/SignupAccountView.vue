@@ -46,7 +46,6 @@
                 </div>
             </div>
 
-
             <div class="checkbox-box">
                 <Checkbox v-model="acceptPrivacy" class="long-text">
                     Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">het privacybeleid</a>.
@@ -76,10 +75,10 @@
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, PasswordStrength, ReplaceRootEventBus, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { LoginHelper, SessionContext, SessionManager, Storage } from "@stamhoofd/networking";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, PasswordStrength, ReplaceRootEventBus, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
+import { LoginHelper, SessionContext, SessionManager, Storage } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 
 import { getScopedDashboardRoot } from '../../getRootViews';
@@ -94,141 +93,142 @@ import { getScopedDashboardRoot } from '../../getRootViews';
         BackButton,
         EmailInput,
         Checkbox,
-        PasswordStrength
-    }
+        PasswordStrength,
+    },
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {
+    @Prop({ required: true })
+    organization: Organization;
 
-    @Prop({required: true})
-        organization: Organization
+    @Prop({ required: true })
+    registerCode: { code: string; organization: string } | null;
 
-    @Prop({required: true})
-        registerCode: { code: string; organization: string } | null;
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    password = '';
+    passwordRepeat = '';
+    email = '';
+    firstName = '';
+    lastName = '';
 
-    password = ""
-    passwordRepeat = ""
-    email = ""
-    firstName = ""
-    lastName = ""
-
-    loading = false
-    acceptPrivacy = false
-    acceptTerms = false
-    acceptDataAgreement = false
+    loading = false;
+    acceptPrivacy = false;
+    acceptTerms = false;
+    acceptDataAgreement = false;
 
     async goNext() {
         if (this.loading) {
-            return
+            return;
         }
 
         try {
             // TODO: validate details
 
             // Generate keys
-            this.loading = true
-            this.errorBox = null
+            this.loading = true;
+            this.errorBox = null;
 
-            const valid = await this.validator.validate()
+            const valid = await this.validator.validate();
 
-            const errors = new SimpleErrors()
+            const errors = new SimpleErrors();
             if (this.firstName.length < 2) {
                 errors.addError(new SimpleError({
-                    code: "invalid_field",
-                    message: "Vul jouw voornaam in",
-                    field: "firstName"
-                }))
+                    code: 'invalid_field',
+                    message: 'Vul jouw voornaam in',
+                    field: 'firstName',
+                }));
             }
             if (this.lastName.length < 2) {
                 errors.addError(new SimpleError({
-                    code: "invalid_field",
-                    message: "Vul jouw achternaam in",
-                    field: "lastName"
-                }))
+                    code: 'invalid_field',
+                    message: 'Vul jouw achternaam in',
+                    field: 'lastName',
+                }));
             }
-            errors.throwIfNotEmpty()
+            errors.throwIfNotEmpty();
 
             if (this.password !== this.passwordRepeat) {
                 plausible('passwordsNotMatching'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
-                    code: "password_do_not_match",
-                    message: "De ingevoerde wachtwoorden komen niet overeen",
-                    field: "passwordRepeat"
-                })
+                    code: 'password_do_not_match',
+                    message: 'De ingevoerde wachtwoorden komen niet overeen',
+                    field: 'passwordRepeat',
+                });
             }
 
             if (this.password.length < 8) {
                 plausible('passwordTooShort'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
-                    code: "password_too_short",
-                    message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan.",
-                    field: "password"
-                })
+                    code: 'password_too_short',
+                    message: 'Jouw wachtwoord moet uit minstens 8 karakters bestaan.',
+                    field: 'password',
+                });
             }
 
             if (!this.acceptPrivacy) {
                 plausible('termsNotAccepted'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
-                    code: "read_privacy",
-                    message: "Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken."
-                })
+                    code: 'read_privacy',
+                    message: 'Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken.',
+                });
             }
 
             if (!this.acceptTerms) {
                 plausible('termsNotAccepted');
                 throw new SimpleError({
-                    code: "read_privacy",
-                    message: "Je moet akkoord gaan met de algemene voorwaarden voor je een account kan aanmaken."
-                })
+                    code: 'read_privacy',
+                    message: 'Je moet akkoord gaan met de algemene voorwaarden voor je een account kan aanmaken.',
+                });
             }
 
             if (!this.acceptDataAgreement) {
                 plausible('termsNotAccepted');
                 throw new SimpleError({
-                    code: "read_privacy",
-                    message: "Je moet akkoord gaan met de verwerkersovereenkomst voor je een account kan aanmaken."
-                })
+                    code: 'read_privacy',
+                    message: 'Je moet akkoord gaan met de verwerkersovereenkomst voor je een account kan aanmaken.',
+                });
             }
-            this.organization.meta.lastSignedTerms = new Date()
+            this.organization.meta.lastSignedTerms = new Date();
 
             if (!valid) {
-                this.loading = false 
-                this.errorBox = null
+                this.loading = false;
+                this.errorBox = null;
                 return;
             }
-        
-            const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code)
+
+            const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code);
             plausible('signup');
 
             this.loading = false;
 
             try {
-                Storage.keyValue.removeItem("savedRegisterCode").catch(console.error)
-                Storage.keyValue.removeItem("savedRegisterCodeDate").catch(console.error)
-            } catch (e) {
-                console.error(e)
+                Storage.keyValue.removeItem('savedRegisterCode').catch(console.error);
+                Storage.keyValue.removeItem('savedRegisterCodeDate').catch(console.error);
+            }
+            catch (e) {
+                console.error(e);
             }
 
-            const session = new SessionContext(this.organization)
+            const session = new SessionContext(this.organization);
             await SessionManager.prepareSessionForUsage(session, true);
             const dashboardContext = await getScopedDashboardRoot(session, {
                 initialPresents: [
                     {
                         components: [new ComponentWithProperties(ConfirmEmailView, { token, email: this.email })],
-                        modalDisplayStyle: "popup"
-                    }
-                ]
-            })
-            await this.dismiss({force: true})
-            await ReplaceRootEventBus.sendEvent("replace", dashboardContext);
+                        modalDisplayStyle: 'popup',
+                    },
+                ],
+            });
+            await this.dismiss({ force: true });
+            await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
 
             // Show popup to confirm e-mail
-        } catch (e) {
-            this.loading = false
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
+        }
+        catch (e) {
+            this.loading = false;
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
             plausible('signupAccountError');
             return;
         }

@@ -16,7 +16,7 @@
                 </template>
             </STListItem>
         </STList>
-            
+
         <p>
             <button class="button text" type="button" @click="addOnSiteMethod">
                 <span class="icon add" />
@@ -42,11 +42,10 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { SaveView, STErrorsDefault, STList, STListItem } from '@stamhoofd/components';
 import { AnyCheckoutMethod, CheckoutMethod, PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
-
 
 import EditWebshopMixin from './EditWebshopMixin';
 import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
@@ -57,129 +56,130 @@ import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
         STListItem,
         STList,
         STErrorsDefault,
-        SaveView
+        SaveView,
     },
 })
 export default class EditWebshopCheckoutMethodsView extends Mixins(EditWebshopMixin) {
     get viewTitle() {
-        return "Afhaal- en leveringsopties"
+        return 'Afhaal- en leveringsopties';
     }
 
     addOnSiteMethod() {
         const onSiteMethod = WebshopOnSiteMethod.create({
-            address: this.$organization.address
-        })
-       
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addPut(onSiteMethod)
-        p.meta = meta
+            address: this.$organization.address,
+        });
 
-        this.present(new ComponentWithProperties(EditTakeoutMethodView, { 
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addPut(onSiteMethod);
+        p.meta = meta;
+
+        this.present(new ComponentWithProperties(EditTakeoutMethodView, {
             isNew: true,
-            takeoutMethod: onSiteMethod, 
-            webshop: this.webshop.patch(p), 
+            takeoutMethod: onSiteMethod,
+            webshop: this.webshop.patch(p),
             saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
                 // Merge both patches
-                this.addPatch(p.patch(patch))
-            }
-        }).setDisplayStyle("popup"))
+                this.addPatch(p.patch(patch));
+            },
+        }).setDisplayStyle('popup'));
     }
 
     addTakeoutMethod() {
         const takeoutMethod = WebshopTakeoutMethod.create({
-            address: this.$organization.address
-        })
-       
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addPut(takeoutMethod)
-        p.meta = meta
+            address: this.$organization.address,
+        });
 
-        this.present(new ComponentWithProperties(EditTakeoutMethodView, { 
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addPut(takeoutMethod);
+        p.meta = meta;
+
+        this.present(new ComponentWithProperties(EditTakeoutMethodView, {
             isNew: true,
-            takeoutMethod, 
-            webshop: this.webshop.patch(p), 
+            takeoutMethod,
+            webshop: this.webshop.patch(p),
             saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
                 // Merge both patches
-                this.addPatch(p.patch(patch))
-            }
-        }).setDisplayStyle("popup"))
+                this.addPatch(p.patch(patch));
+            },
+        }).setDisplayStyle('popup'));
     }
 
     addDeliveryMethod() {
-        const deliveryMethod = WebshopDeliveryMethod.create({})
-       
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addPut(deliveryMethod)
-        p.meta = meta
+        const deliveryMethod = WebshopDeliveryMethod.create({});
 
-        this.present(new ComponentWithProperties(EditDeliveryMethodView, { 
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addPut(deliveryMethod);
+        p.meta = meta;
+
+        this.present(new ComponentWithProperties(EditDeliveryMethodView, {
             isNew: true,
-            deliveryMethod, 
-            webshop: this.webshop.patch(p), 
+            deliveryMethod,
+            webshop: this.webshop.patch(p),
             saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
                 // Merge both patches
-                this.addPatch(p.patch(patch))
-            }
-        }).setDisplayStyle("popup"))
+                this.addPatch(p.patch(patch));
+            },
+        }).setDisplayStyle('popup'));
     }
 
     editCheckoutMethod(checkoutMethod: AnyCheckoutMethod) {
         if (checkoutMethod instanceof WebshopTakeoutMethod || checkoutMethod instanceof WebshopOnSiteMethod) {
             this.present(
-                new ComponentWithProperties(EditTakeoutMethodView, { 
+                new ComponentWithProperties(EditTakeoutMethodView, {
                     isNew: false,
-                    takeoutMethod: checkoutMethod, 
-                    webshop: this.webshop, 
+                    takeoutMethod: checkoutMethod,
+                    webshop: this.webshop,
                     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
                         // Merge both patches
-                        this.addPatch(patch)
-                    }
-                }).setDisplayStyle("popup")
-            )
-        } else {
+                        this.addPatch(patch);
+                    },
+                }).setDisplayStyle('popup'),
+            );
+        }
+        else {
             this.present(
-                new ComponentWithProperties(EditDeliveryMethodView, { 
+                new ComponentWithProperties(EditDeliveryMethodView, {
                     isNew: false,
-                    deliveryMethod: checkoutMethod, 
-                    webshop: this.webshop, 
+                    deliveryMethod: checkoutMethod,
+                    webshop: this.webshop,
                     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
                         // Merge both patches
-                        this.addPatch(patch)
-                    }
-                }).setDisplayStyle("popup")
-            )
+                        this.addPatch(patch);
+                    },
+                }).setDisplayStyle('popup'),
+            );
         }
     }
 
     moveCheckoutUp(location: CheckoutMethod) {
-        const index = this.webshop.meta.checkoutMethods.findIndex(c => location.id === c.id)
+        const index = this.webshop.meta.checkoutMethods.findIndex(c => location.id === c.id);
         if (index === -1 || index === 0) {
             return;
         }
 
-        const moveTo = index - 2
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addMove(location.id, this.webshop.meta.checkoutMethods[moveTo]?.id ?? null)
-        p.meta = meta
-        this.addPatch(p)
+        const moveTo = index - 2;
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addMove(location.id, this.webshop.meta.checkoutMethods[moveTo]?.id ?? null);
+        p.meta = meta;
+        this.addPatch(p);
     }
 
     moveCheckoutDown(location: CheckoutMethod) {
-        const index = this.webshop.meta.checkoutMethods.findIndex(c => location.id === c.id)
+        const index = this.webshop.meta.checkoutMethods.findIndex(c => location.id === c.id);
         if (index === -1 || index >= this.webshop.meta.checkoutMethods.length - 1) {
             return;
         }
 
-        const moveTo = index + 1
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addMove(location.id,this.webshop.meta.checkoutMethods[moveTo].id)
-        p.meta = meta
-        this.addPatch(p)
+        const moveTo = index + 1;
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addMove(location.id, this.webshop.meta.checkoutMethods[moveTo].id);
+        p.meta = meta;
+        this.addPatch(p);
     }
 }
 </script>

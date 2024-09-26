@@ -16,59 +16,59 @@
 
         <p v-if="scannedAtDescription" class="style-description-small" v-text="scannedAtDescription" />
 
-        <template #right><button class="button text" type="button" @click="markAs">
-            <span :class="'style-tag '+statusColor">{{ statusName }}</span>
-            <span v-if="hasWrite" class="icon arrow-down-small" />
-        </button></template>
+        <template #right>
+            <button class="button text" type="button" @click="markAs">
+                <span :class="'style-tag '+statusColor">{{ statusName }}</span>
+                <span v-if="hasWrite" class="icon arrow-down-small" />
+            </button>
+        </template>
     </STListItem>
 </template>
 
-
 <script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, LongPressDirective, STList, STListItem } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { Order, ProductDateRange, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ContextMenu, ContextMenuItem, LongPressDirective, STList, STListItem } from '@stamhoofd/components';
+import { SessionManager } from '@stamhoofd/networking';
+import { Order, ProductDateRange, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-
-import TicketAlreadyScannedView from "../tickets/status/TicketAlreadyScannedView.vue";
-import ValidTicketView from "../tickets/status/ValidTicketView.vue";
-import { WebshopManager } from "../WebshopManager";
+import TicketAlreadyScannedView from '../tickets/status/TicketAlreadyScannedView.vue';
+import ValidTicketView from '../tickets/status/ValidTicketView.vue';
+import { WebshopManager } from '../WebshopManager';
 
 @Component({
     components: {
         STListItem,
-        STList
+        STList,
     },
     directives: {
-        LongPress: LongPressDirective
-    }
+        LongPress: LongPressDirective,
+    },
 })
-export default class TicketRow extends Mixins(NavigationMixin){
+export default class TicketRow extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        ticket!: TicketPublicPrivate
+    ticket!: TicketPublicPrivate;
 
     @Prop({ required: true })
-        order!: Order
+    order!: Order;
 
     @Prop({ required: true })
-        webshopManager!: WebshopManager
+    webshopManager!: WebshopManager;
 
     get webshop() {
-        return this.webshopManager.preview
+        return this.webshopManager.preview;
     }
 
-    QRCodeUrl: string | null = null
+    QRCodeUrl: string | null = null;
 
     get cartItem() {
         // todo: multiple item support needed!
-        return this.ticket.items[0]
+        return this.ticket.items[0];
     }
 
     get name() {
-        return this.ticket.getTitle()
+        return this.ticket.getTitle();
     }
 
     get scannedAtDescription() {
@@ -76,25 +76,25 @@ export default class TicketRow extends Mixins(NavigationMixin){
             return 'Niet gescand';
         }
         if (!this.ticket.scannedBy) {
-            return 'Gescand op '+Formatter.dateTime(this.ticket.scannedAt);
+            return 'Gescand op ' + Formatter.dateTime(this.ticket.scannedAt);
         }
-        return "Gescand op "+Formatter.dateTime(this.ticket.scannedAt) + " door " + this.ticket.scannedBy
+        return 'Gescand op ' + Formatter.dateTime(this.ticket.scannedAt) + ' door ' + this.ticket.scannedBy;
     }
 
     get canShare() {
-        return !!navigator.share
+        return !!navigator.share;
     }
 
     get isSingle() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket;
     }
 
     get hasWrite() {
-        const p = this.$context.organizationPermissions
+        const p = this.$context.organizationPermissions;
         if (!p) {
-            return false
+            return false;
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p);
     }
 
     openTicket() {
@@ -104,12 +104,12 @@ export default class TicketRow extends Mixins(NavigationMixin){
                     root: new ComponentWithProperties(!this.ticket.scannedAt ? ValidTicketView : TicketAlreadyScannedView, {
                         order: this.order,
                         ticket: this.ticket,
-                        webshopManager: this.webshopManager
-                    })
-                })
+                        webshopManager: this.webshopManager,
+                    }),
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     openMenu(clickEvent) {
@@ -118,10 +118,10 @@ export default class TicketRow extends Mixins(NavigationMixin){
                 new ContextMenuItem({
                     name: 'Open scanscherm',
                     action: () => {
-                        this.openTicket()
+                        this.openTicket();
                         return true;
                     },
-                    icon: 'qr-code'
+                    icon: 'qr-code',
                 }),
                 new ContextMenuItem({
                     name: 'Markeer als',
@@ -130,20 +130,20 @@ export default class TicketRow extends Mixins(NavigationMixin){
                 new ContextMenuItem({
                     name: 'Download',
                     action: () => {
-                        this.download().catch(console.error)
+                        this.download().catch(console.error);
                         return true;
                     },
-                    icon: 'download'
-                })
-            ]
-        ])
-        contextMenu.show({clickEvent}).catch(console.error)
+                    icon: 'download',
+                }),
+            ],
+        ]);
+        contextMenu.show({ clickEvent }).catch(console.error);
     }
 
     markAs(event) {
-        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
-        const contextMenu = this.getMarkAsMenu()
-        contextMenu.show({ button: el, xPlacement: "left" }).catch(console.error)
+        const el = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget;
+        const contextMenu = this.getMarkAsMenu();
+        contextMenu.show({ button: el, xPlacement: 'left' }).catch(console.error);
     }
 
     getMarkAsMenu() {
@@ -157,8 +157,8 @@ export default class TicketRow extends Mixins(NavigationMixin){
                             id: this.ticket.id,
                             secret: this.ticket.secret, // needed for lookups
                             scannedAt: new Date(),
-                            scannedBy: this.$context.user?.firstName ?? null
-                        })).catch(console.error)
+                            scannedBy: this.$context.user?.firstName ?? null,
+                        })).catch(console.error);
                         return true;
                     },
                 }),
@@ -170,33 +170,33 @@ export default class TicketRow extends Mixins(NavigationMixin){
                             id: this.ticket.id,
                             secret: this.ticket.secret, // needed for lookups
                             scannedAt: null,
-                            scannedBy: null
-                        })).catch(console.error)
+                            scannedBy: null,
+                        })).catch(console.error);
                         return true;
                     },
-                })
-            ]
+                }),
+            ],
         ]);
     }
 
     get statusName() {
-        return this.ticket.scannedAt ? "Gescand" : "Niet gescand"
+        return this.ticket.scannedAt ? 'Gescand' : 'Niet gescand';
     }
 
     get statusColor() {
-        return this.ticket.scannedAt ? "" : "gray"
+        return this.ticket.scannedAt ? '' : 'gray';
     }
 
     formatPrice(price: number) {
-        return Formatter.price(price)
+        return Formatter.price(price);
     }
 
     formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString())
+        return Formatter.capitalizeFirstLetter(dateRange.toString());
     }
 
     get qrMessage() {
-        return "https://"+this.webshop.getUrl(this.$organization) + "/tickets/"+this.ticket.secret
+        return 'https://' + this.webshop.getUrl(this.$organization) + '/tickets/' + this.ticket.secret;
     }
 
     async download() {
@@ -204,10 +204,10 @@ export default class TicketRow extends Mixins(NavigationMixin){
             /* webpackChunkName: "TicketBuilder" */
             /* webpackPrefetch: true */
             '@stamhoofd/ticket-builder'
-        )).TicketBuilder
- 
-        const builder = new TicketBuilder([this.ticket], this.webshop, this.$organization, this.order ?? undefined)
-        await builder.download()
+        )).TicketBuilder;
+
+        const builder = new TicketBuilder([this.ticket], this.webshop, this.$organization, this.order ?? undefined);
+        await builder.download();
     }
 }
 </script>

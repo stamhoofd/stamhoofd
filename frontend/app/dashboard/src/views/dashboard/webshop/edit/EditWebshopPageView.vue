@@ -66,7 +66,6 @@
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
         </figure>
 
-
         <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
 
         <hr>
@@ -149,16 +148,15 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput } from "@stamhoofd/components";
-import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from "@stamhoofd/structures";
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
+import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 
-
-import EditSponsorsBox from "../../sponsors/EditSponsorsBox.vue";
-import EditPolicyBox from "./EditPolicyBox.vue";
-import EditWebshopMixin from "./EditWebshopMixin";
+import EditSponsorsBox from '../../sponsors/EditSponsorsBox.vue';
+import EditPolicyBox from './EditPolicyBox.vue';
+import EditWebshopMixin from './EditWebshopMixin';
 
 @Component({
     components: {
@@ -175,169 +173,169 @@ import EditWebshopMixin from "./EditWebshopMixin";
         LogoEditor,
         ColorInput,
         EditSponsorsBox,
-        Checkbox
-    }
+        Checkbox,
+    },
 })
 export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get viewTitle() {
-        return "Webshop pagina wijzigen"
+        return 'Webshop pagina wijzigen';
     }
 
     get hasTickets() {
-        return this.webshop.hasTickets
+        return this.webshop.hasTickets;
     }
 
     addMetaPatch(patch: AutoEncoderPatchType<WebshopMetaData>) {
-        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     patchPolicy(policy: Policy, patch: AutoEncoderPatchType<Policy>) {
-        const p = WebshopMetaData.patch({})
-        patch.id = policy.id
-        p.policies.addPatch(patch)
-        this.addPatch(PrivateWebshop.patch({ meta: p }) )
+        const p = WebshopMetaData.patch({});
+        patch.id = policy.id;
+        p.policies.addPatch(patch);
+        this.addPatch(PrivateWebshop.patch({ meta: p }));
     }
 
     deletePolicy(policy: Policy) {
-        const p = WebshopMetaData.patch({})
-        p.policies.addDelete(policy.id)
-        this.addPatch(PrivateWebshop.patch({ meta: p }) )
+        const p = WebshopMetaData.patch({});
+        p.policies.addDelete(policy.id);
+        this.addPatch(PrivateWebshop.patch({ meta: p }));
     }
 
     addPolicy() {
-        const p = WebshopMetaData.patch({})
-        p.policies.addPut(Policy.create({}))
-        this.addPatch(PrivateWebshop.patch({ meta: p }) )
+        const p = WebshopMetaData.patch({});
+        p.policies.addPut(Policy.create({}));
+        this.addPatch(PrivateWebshop.patch({ meta: p }));
     }
 
     get policies() {
-        return this.webshop.meta.policies
+        return this.webshop.meta.policies;
     }
 
     get title() {
-        return this.webshop.meta.title
+        return this.webshop.meta.title;
     }
 
     set title(title: string) {
-        const patch = WebshopMetaData.patch({ title })
-        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+        const patch = WebshopMetaData.patch({ title });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get description() {
-        return this.webshop.meta.description
+        return this.webshop.meta.description;
     }
 
     set description(description: RichText) {
-        const patch = WebshopMetaData.patch({ description })
-        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+        const patch = WebshopMetaData.patch({ description });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get reduceBranding() {
-        return this.webshop.meta.reduceBranding
+        return this.webshop.meta.reduceBranding;
     }
 
     set reduceBranding(reduceBranding: boolean) {
-        const patch = WebshopMetaData.patch({ reduceBranding })
-        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+        const patch = WebshopMetaData.patch({ reduceBranding });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get WebshopLayout() {
-        return WebshopLayout
+        return WebshopLayout;
     }
 
     get layout() {
-        return this.webshop.meta.layout
+        return this.webshop.meta.layout;
     }
 
     set layout(layout: WebshopLayout) {
-        const patch = WebshopMetaData.patch({ layout })
-        this.addPatch(PrivateWebshop.patch({ meta: patch }) )
+        const patch = WebshopMetaData.patch({ layout });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get defaultColor() {
-        return this.organization.meta.color ?? null
+        return this.organization.meta.color ?? null;
     }
 
     get color() {
-        return this.webshop.meta.color
+        return this.webshop.meta.color;
     }
 
     set color(color: string | null) {
-        const patch = WebshopMetaData.patch({ color })
-        this.addPatch(PrivateWebshop.patch({ meta: patch }) )
+        const patch = WebshopMetaData.patch({ color });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get darkMode() {
-        return this.webshop.meta.darkMode
+        return this.webshop.meta.darkMode;
     }
 
     set darkMode(darkMode: DarkMode) {
-        const patch = WebshopMetaData.patch({ darkMode })
-        this.addPatch(PrivateWebshop.patch({ meta: patch }) )
+        const patch = WebshopMetaData.patch({ darkMode });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get useLogo() {
-        return this.webshop.meta.useLogo
+        return this.webshop.meta.useLogo;
     }
 
     set useLogo(useLogo: boolean) {
-        this.addMetaPatch(WebshopMetaData.patch({ useLogo }))
+        this.addMetaPatch(WebshopMetaData.patch({ useLogo }));
     }
 
     get coverPhoto() {
-        return this.webshop.meta.coverPhoto
+        return this.webshop.meta.coverPhoto;
     }
 
     set coverPhoto(coverPhoto: Image | null) {
-        const patch = WebshopMetaData.patch({ coverPhoto })
-        this.addPatch(PrivateWebshop.patch({ meta: patch }) )
+        const patch = WebshopMetaData.patch({ coverPhoto });
+        this.addPatch(PrivateWebshop.patch({ meta: patch }));
     }
 
     get hs() {
         return [
             ResolutionRequest.create({
-                width: 1800
+                width: 1800,
             }),
             ResolutionRequest.create({
-                width: 900
-            })
-        ]
+                width: 900,
+            }),
+        ];
     }
 
     get coverPhotoResolution() {
-        const image = this.coverPhoto
+        const image = this.coverPhoto;
         if (!image) {
-            return null
+            return null;
         }
-        return image.getResolutionForSize(800, 200)
+        return image.getResolutionForSize(800, 200);
     }
 
     get coverPhotoSrc() {
-        const image = this.coverPhoto
+        const image = this.coverPhoto;
         if (!image) {
-            return null
+            return null;
         }
-        return this.coverPhotoResolution?.file.getPublicPath()
+        return this.coverPhotoResolution?.file.getPublicPath();
     }
-    
+
     get coverImageWidth() {
-        return this.coverPhotoResolution?.width
+        return this.coverPhotoResolution?.width;
     }
 
     get coverImageHeight() {
-        return this.coverPhotoResolution?.height
+        return this.coverPhotoResolution?.height;
     }
 
     get sponsorConfig() {
-        return this.webshop.meta.sponsors
+        return this.webshop.meta.sponsors;
     }
 
-    patchSponsorConfig(config: AutoEncoderPatchType<SponsorConfig>|null) {
-        this.addMetaPatch(WebshopMetaData.patch({sponsors: config}))
+    patchSponsorConfig(config: AutoEncoderPatchType<SponsorConfig> | null) {
+        this.addMetaPatch(WebshopMetaData.patch({ sponsors: config }));
     }
 
     previewTicket() {
@@ -345,26 +343,27 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
         const product = this.webshop.products.find(p => p.type === ProductType.Ticket) ?? this.webshop.products[0];
 
         if (!product) {
-            new Toast('Voeg ten minste één ticket toe aan je webshop om een voorbeeld van een ticket te bekijken', 'error red').show()
+            new Toast('Voeg ten minste één ticket toe aan je webshop om een voorbeeld van een ticket te bekijken', 'error red').show();
             return;
         }
-        const cart = Cart.create({})
-        const item = CartItem.createDefault(product, cart, this.webshop, {admin: true})
+        const cart = Cart.create({});
+        const item = CartItem.createDefault(product, cart, this.webshop, { admin: true });
 
-        const seatingPlan = product.seatingPlanId ? this.webshop.meta.seatingPlans.find(s => s.id === product.seatingPlanId) : null
+        const seatingPlan = product.seatingPlanId ? this.webshop.meta.seatingPlans.find(s => s.id === product.seatingPlanId) : null;
         const section = seatingPlan ? seatingPlan.sections[0] : null;
         const row = section ? section.rows.filter(r => r.label && r.seatCount > 0)[Math.floor(section.rows.filter(r => r.label && r.seatCount > 0).length / 2)] : null;
-        const seat = row ? row.seats.filter(s => s.isValidSeat)[Math.floor(row.seats.filter(s => s.isValidSeat).length/2)] : null;
+        const seat = row ? row.seats.filter(s => s.isValidSeat)[Math.floor(row.seats.filter(s => s.isValidSeat).length / 2)] : null;
 
-        const reservedSeat = seat ? CartReservedSeat.create({
-            section: section!.id,
-            row: row!.label,
-            seat: seat.label
-        }) : null;
-
+        const reservedSeat = seat
+            ? CartReservedSeat.create({
+                section: section!.id,
+                row: row!.label,
+                seat: seat.label,
+            })
+            : null;
 
         if (reservedSeat && seatingPlan) {
-            reservedSeat.calculatePrice(seatingPlan)
+            reservedSeat.calculatePrice(seatingPlan);
         }
 
         const ticket = TicketPublic.create({
@@ -372,8 +371,8 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
             secret: 'VRBLDTICKET',
             index: 1,
             total: 1,
-            seat: reservedSeat
-        })
+            seat: reservedSeat,
+        });
 
         this.present({
             components: [
@@ -381,14 +380,13 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
                     root: new ComponentWithProperties(DetailedTicketView, {
                         organization: this.organization,
                         webshop: this.webshop,
-                        ticket
-                    })
-                })
+                        ticket,
+                    }),
+                }),
             ],
-            modalDisplayStyle: "sheet"
-        })
+            modalDisplayStyle: 'sheet',
+        });
     }
-
 }
 </script>
 

@@ -4,7 +4,7 @@
             <h1>{{ title }}</h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
-            
+
             <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e')" error-fields="name" :error-box="errors.errorBox">
                 <input
                     id="premise-name"
@@ -26,9 +26,9 @@
                     autocomplete=""
                 />
             </STInputBox>
-            
+
             <AddressInput v-model="address" :title="$t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
-        
+
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
                 <hr>
                 <h2>Type</h2>
@@ -72,9 +72,9 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { AddressInput, SaveView, useEditPopup, useErrors, usePlatform } from "@stamhoofd/components";
+import { AddressInput, SaveView, useEditPopup, useErrors, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { PlatformPremiseType, Premise } from "@stamhoofd/structures";
+import { PlatformPremiseType, Premise } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(
@@ -82,12 +82,12 @@ const props = withDefaults(
         premise: Premise;
         isNew: boolean;
         saveHandler: (premise: AutoEncoderPatchType<Premise>) => Promise<void>;
-        deleteHandler?: (() => Promise<void>)|null;
-        premiseTypeCount: Map<string, {type: PlatformPremiseType, count: number}>
+        deleteHandler?: (() => Promise<void>) | null;
+        premiseTypeCount: Map<string, { type: PlatformPremiseType; count: number }>;
     }>(),
     {
         deleteHandler: null,
-    }
+    },
 );
 
 const $t = useTranslate();
@@ -96,11 +96,11 @@ const title = computed(() => props.isNew ? $t('5e40dfe9-b4ed-497c-a37d-e162191ba
 const errors = useErrors();
 const platform$ = usePlatform();
 
-const {saving, doDelete, hasChanges, save, patched, addPatch, shouldNavigateAway} = useEditPopup({
+const { saving, doDelete, hasChanges, save, patched, addPatch, shouldNavigateAway } = useEditPopup({
     errors,
     saveHandler: props.saveHandler,
     deleteHandler: props.deleteHandler,
-    toPatch: props.premise
+    toPatch: props.premise,
 });
 
 const platformPremiseTypes = computed(() => platform$.value.config.premiseTypes);
@@ -109,34 +109,34 @@ const premiseTypeWarnings = ref<Map<string, string>>(new Map());
 const name = computed({
     get: () => patched.value.name,
     set: (name) => {
-        addPatch({name});
-    }
+        addPatch({ name });
+    },
 });
 
 const description = computed({
     get: () => patched.value.description,
     set: (description) => {
-        addPatch({description});
-    }
+        addPatch({ description });
+    },
 });
 
 const address = computed({
     get: () => patched.value.address,
     set: (address) => {
-        addPatch({address});
-    }
+        addPatch({ address });
+    },
 });
 
 const premiseTypeIds = computed({
     get: () => patched.value.premiseTypeIds,
     set: (premiseTypeIds) => {
-        addPatch({premiseTypeIds: premiseTypeIds as any});
-    }
+        addPatch({ premiseTypeIds: premiseTypeIds as any });
+    },
 });
 
 const originalPremiseTypeIds = new Set(patched.value.premiseTypeIds);
 
-//#region unknown types
+// #region unknown types
 const distinctPlatformTypeIds = new Set(platformPremiseTypes.value.map(type => type.id));
 const unknownTypeIds = Array.from(originalPremiseTypeIds).filter(id => !distinctPlatformTypeIds.has(id));
 const hasUnknownType = unknownTypeIds.length > 0;
@@ -145,26 +145,29 @@ const isUnknownTypeSelected = ref(hasUnknownType);
 function selectUnkownType(isSelected: boolean) {
     const knownTypeIds = premiseTypeIds.value.filter(id => distinctPlatformTypeIds.has(id));
 
-    if(isSelected) {
+    if (isSelected) {
         premiseTypeIds.value = knownTypeIds.concat(unknownTypeIds);
-    } else {
+    }
+    else {
         premiseTypeIds.value = knownTypeIds;
     }
 
     isUnknownTypeSelected.value = isSelected;
 }
-//#endregion
+// #endregion
 
 function selectPremiseType(isSelected: boolean, premiseType: PlatformPremiseType) {
     const premiseTypeId = premiseType.id;
 
-    if(isSelected) {
-        if(premiseTypeIds.value.includes(premiseTypeId)) {
+    if (isSelected) {
+        if (premiseTypeIds.value.includes(premiseTypeId)) {
             console.error(`${premiseType.name} is already selected`);
-        } else {
+        }
+        else {
             premiseTypeIds.value = [...premiseTypeIds.value, premiseTypeId];
         }
-    } else {
+    }
+    else {
         premiseTypeIds.value = premiseTypeIds.value.filter(id => id !== premiseTypeId);
     }
 
@@ -178,20 +181,20 @@ function isPremiseTypeSelected(premiseType: PlatformPremiseType) {
 function isPremiseTypeDisabled(premiseType: PlatformPremiseType) {
     const max = premiseType.max;
     const min = premiseType.min;
-    if(max === null && min === null) return false;
+    if (max === null && min === null) return false;
 
     const premiseTypeId = premiseType.id;
 
     const typeCount = props.premiseTypeCount.get(premiseTypeId);
 
-    if(!typeCount) {
+    if (!typeCount) {
         console.error(`Premise type ${premiseTypeId} not found in premiseTypeCount`);
         return;
     }
 
     const count = typeCount.count;
 
-    if(max !== null && count >= max && !originalPremiseTypeIds.has(premiseTypeId)) {
+    if (max !== null && count >= max && !originalPremiseTypeIds.has(premiseTypeId)) {
         return true;
     }
 
@@ -202,15 +205,15 @@ function updatePremiseTypeWarnings() {
     const currentPremiseTypeIds = new Set(premiseTypeIds.value);
     const warnings = new Map<string, string>();
 
-    for(const [id, {count, type}] of props.premiseTypeCount.entries()) {
+    for (const [id, { count, type }] of props.premiseTypeCount.entries()) {
         const isSelected = currentPremiseTypeIds.has(id);
-        if(isSelected) continue;
+        if (isSelected) continue;
         const wasSelected = originalPremiseTypeIds.has(id);
         const isChanged = isSelected !== wasSelected;
-        if(isChanged) {
+        if (isChanged) {
             const min = type.min;
 
-            if(min !== null && count <= min) {
+            if (min !== null && count <= min) {
                 const message = `Het minimum aantal van deze soort is ${min}.`;
                 warnings.set(id, message);
             }
@@ -225,7 +228,7 @@ async function deleteMe() {
 }
 
 defineExpose({
-    shouldNavigateAway
+    shouldNavigateAway,
 });
 </script>
 

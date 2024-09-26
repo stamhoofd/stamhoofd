@@ -56,35 +56,33 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from "@simonbackx/simple-encoding";
-import { Request } from "@simonbackx/simple-networking";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
-import { OpenIDClientConfiguration } from "@stamhoofd/structures";
-
-
+import { Decoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from '@stamhoofd/components';
+import { OpenIDClientConfiguration } from '@stamhoofd/structures';
 
 @Component({
     components: {
         SaveView,
         STInputBox,
-        STErrorsDefault
+        STErrorsDefault,
     },
 })
 export default class SSOSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
 
-    ssoConfiguration: OpenIDClientConfiguration | null = null
+    ssoConfiguration: OpenIDClientConfiguration | null = null;
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get redirectUri() {
-        return 'https://' + this.organization.id + "." + STAMHOOFD.domains.api + '/openid/callback'
+        return 'https://' + this.organization.id + '.' + STAMHOOFD.domains.api + '/openid/callback';
     }
 
     get hasChanges() {
@@ -92,32 +90,32 @@ export default class SSOSettingsView extends Mixins(NavigationMixin) {
     }
 
     get issuer() {
-        return this.ssoConfiguration?.issuer ?? ""
+        return this.ssoConfiguration?.issuer ?? '';
     }
 
     set issuer(value: string) {
         if (this.ssoConfiguration) {
-            this.ssoConfiguration.issuer = value
+            this.ssoConfiguration.issuer = value;
         }
     }
 
     get clientId() {
-        return this.ssoConfiguration?.clientId ?? ""
+        return this.ssoConfiguration?.clientId ?? '';
     }
 
     set clientId(value: string) {
         if (this.ssoConfiguration) {
-            this.ssoConfiguration.clientId = value
+            this.ssoConfiguration.clientId = value;
         }
     }
 
     get clientSecret() {
-        return this.ssoConfiguration?.clientSecret ?? ""
+        return this.ssoConfiguration?.clientSecret ?? '';
     }
 
     set clientSecret(value: string) {
         if (this.ssoConfiguration) {
-            this.ssoConfiguration.clientSecret = value
+            this.ssoConfiguration.clientSecret = value;
         }
     }
 
@@ -125,52 +123,54 @@ export default class SSOSettingsView extends Mixins(NavigationMixin) {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
     async loadConfiguration() {
         try {
             const response = await this.$context.authenticatedServer.request({
-                method: "GET",
-                path: "/organization/sso",
+                method: 'GET',
+                path: '/organization/sso',
                 decoder: OpenIDClientConfiguration as Decoder<OpenIDClientConfiguration>,
-                owner: this
-            })
-            this.ssoConfiguration = response.data
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+                owner: this,
+            });
+            this.ssoConfiguration = response.data;
+        }
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
         }
     }
 
     async save() {
         if (this.saving) {
-            return
+            return;
         }
-        this.saving = true
+        this.saving = true;
         try {
             const response = await this.$context.authenticatedServer.request({
-                method: "POST",
-                path: "/organization/sso",
+                method: 'POST',
+                path: '/organization/sso',
                 decoder: OpenIDClientConfiguration as Decoder<OpenIDClientConfiguration>,
                 body: this.ssoConfiguration,
                 owner: this,
-                shouldRetry: false
-            })
-            this.ssoConfiguration = response.data
-            this.dismiss({force: true})
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+                shouldRetry: false,
+            });
+            this.ssoConfiguration = response.data;
+            this.dismiss({ force: true });
         }
-        this.saving = false
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
+        }
+        this.saving = false;
     }
 
     beforeUnmount() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     mounted() {
-        this.setUrl("/sso");
-        this.loadConfiguration().catch(console.error)
+        this.setUrl('/sso');
+        this.loadConfiguration().catch(console.error);
     }
 }
 </script>

@@ -6,13 +6,13 @@
             <h1>
                 Pas de volgende instellingen aan
             </h1>
-        
+
             <p class="st-list-description">
                 Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
-            
+
             <div v-for="record in records" :key="record.id">
                 <DNSRecordBox :record="record" />
             </div>
@@ -39,12 +39,11 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, TooltipDirective } from '@stamhoofd/components';
 import { SessionManager } from '@stamhoofd/networking';
-import { Organization, OrganizationDomains } from "@stamhoofd/structures"
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
+import { Organization, OrganizationDomains } from '@stamhoofd/structures';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 
 import DNSRecordBox from '../../../components/DNSRecordBox.vue';
 import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
@@ -58,60 +57,58 @@ import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
         Checkbox,
         BackButton,
         LoadingButton,
-        DNSRecordBox
+        DNSRecordBox,
     },
     directives: {
-        tooltip: TooltipDirective
-    }
+        tooltip: TooltipDirective,
+    },
 })
 export default class DNSRecordsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    saving = false
+    errorBox: ErrorBox | null = null;
+    saving = false;
 
-    session = this.$context
+    session = this.$context;
 
     get records() {
-        return this.$organization.privateMeta?.dnsRecords ?? []
+        return this.$organization.privateMeta?.dnsRecords ?? [];
     }
 
     get mailDomain() {
-        return this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain  ?? "?"
+        return this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? '?';
     }
-   
+
     async validate() {
         if (this.saving) {
             return;
         }
-    
-        this.saving = true
+
+        this.saving = true;
 
         try {
             const response = await this.$context.authenticatedServer.request({
-                method: "POST",
-                path: "/organization/domain",
+                method: 'POST',
+                path: '/organization/domain',
                 body: OrganizationDomains.create({
                     mailDomain: this.mailDomain,
-                    registerDomain: this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain
+                    registerDomain: this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain,
                 }),
-                decoder: Organization as Decoder<Organization>
-            })
+                decoder: Organization as Decoder<Organization>,
+            });
 
-            this.$organization.deepSet(response.data)
-            this.saving = false
+            this.$organization.deepSet(response.data);
+            this.saving = false;
 
             if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null && response.data.privateMeta.pendingRegisterDomain === null) {
-                this.show(new ComponentWithProperties(DNSRecordsDoneView, {}))
+                this.show(new ComponentWithProperties(DNSRecordsDoneView, {}));
             }
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-            this.saving = false
+        }
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
+            this.saving = false;
         }
 
-        //this.pop({ force: true })
+        // this.pop({ force: true })
     }
-
-
-
 }
 </script>

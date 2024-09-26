@@ -4,7 +4,7 @@
             Vragenlijsten en gegevens
         </h1>
         <p>Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen.</p>
-            
+
         <STErrorsDefault :error-box="errorBox" />
 
         <hr>
@@ -46,11 +46,11 @@
 </template>
 
 <script lang="ts">
-import { PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, STErrorsDefault, STList, STListItem, SaveView, checkoutUIFilterBuilders } from "@stamhoofd/components";
-import { Checkout, PatchAnswers, PrivateWebshop, RecordCategory, WebshopMetaData } from "@stamhoofd/structures";
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, STErrorsDefault, STList, STListItem, SaveView, checkoutUIFilterBuilders } from '@stamhoofd/components';
+import { Checkout, PatchAnswers, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
 import EditWebshopMixin from './EditWebshopMixin';
 
 @Component({
@@ -60,21 +60,20 @@ import EditWebshopMixin from './EditWebshopMixin';
         STList,
         RecordCategoryRow,
         STListItem,
-        Checkbox
+        Checkbox,
     },
 })
 export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) {
-    
     get categories() {
         return this.webshop.meta.recordCategories;
     }
 
     set categories(recordCategories: RecordCategory[]) {
-        this.addPatch(PrivateWebshop.patch({ 
+        this.addPatch(PrivateWebshop.patch({
             meta: WebshopMetaData.patch({
-                recordCategories: recordCategories as any
-            })
-        }))
+                recordCategories: recordCategories as any,
+            }),
+        }));
     }
 
     get phoneEnabled() {
@@ -82,34 +81,34 @@ export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) 
     }
 
     set phoneEnabled(phoneEnabled: boolean) {
-        this.addPatch(PrivateWebshop.patch({ 
+        this.addPatch(PrivateWebshop.patch({
             meta: WebshopMetaData.patch({
-                phoneEnabled
-            })
-        }))
+                phoneEnabled,
+            }),
+        }));
     }
 
     get editorSettings() {
         return new RecordEditorSettings({
             dataPermission: false,
             filterBuilder: (_categories: RecordCategory[]) => {
-                return checkoutUIFilterBuilders[0]
+                return checkoutUIFilterBuilders[0];
             },
             exampleValue: Checkout.create({}),
             patchExampleValue(checkout, patch: PatchAnswers) {
                 return checkout.patch(
                     Checkout.patch({
-                        recordAnswers: patch
-                    })
-                )
-            }
-        })
+                        recordAnswers: patch,
+                    }),
+                );
+            },
+        });
     }
 
     addCategory() {
         const category = RecordCategory.create({});
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
-        arr.addPut(category)
+        arr.addPut(category);
 
         this.present({
             components: [
@@ -121,12 +120,12 @@ export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) 
                         isNew: true,
                         allowChildCategories: true,
                         saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                            this.addCategoriesPatch(arr.patch(patch))
-                        }
-                    })
-                })
+                            this.addCategoriesPatch(arr.patch(patch));
+                        },
+                    }),
+                }),
             ],
-            modalDisplayStyle: "popup"
+            modalDisplayStyle: 'popup',
         });
     }
 
@@ -141,21 +140,21 @@ export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) 
                         isNew: false,
                         allowChildCategories: true,
                         saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                            this.addCategoriesPatch(patch)
-                        }
-                    })
-                })
+                            this.addCategoriesPatch(patch);
+                        },
+                    }),
+                }),
             ],
-            modalDisplayStyle: "popup"
+            modalDisplayStyle: 'popup',
         });
     }
 
     addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
-        this.addPatch(PrivateWebshop.patch({ 
+        this.addPatch(PrivateWebshop.patch({
             meta: WebshopMetaData.patch({
-                recordCategories: patch
-            })
-        }))
+                recordCategories: patch,
+            }),
+        }));
     }
 }
 </script>

@@ -7,13 +7,11 @@
             </template>
         </STNavigationBar>
 
-    
         <main>
             <h1>API-keys</h1>
             <p>{{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}</p>
 
-
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="createUser">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/laptop-add.svg">
@@ -64,13 +62,12 @@
     </div>
 </template>
 
-
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from '@stamhoofd/components';
 import { SessionManager } from '@stamhoofd/networking';
 import { ApiUser, PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -85,93 +82,94 @@ import ApiUserView from './ApiUserView.vue';
         STList,
         STListItem,
         LoadingView,
-        BackButton
+        BackButton,
     },
     directives: {
-        tooltip: TooltipDirective
-    }
+        tooltip: TooltipDirective,
+    },
 })
 export default class ApiUsersView extends Mixins(NavigationMixin) {
-    SessionManager = SessionManager // needed to make session reactive
-    loading = true
-    apiUsers: ApiUser[] = []
+    SessionManager = SessionManager; // needed to make session reactive
+    loading = true;
+    apiUsers: ApiUser[] = [];
 
     mounted() {
-        this.load().catch(e => {
-            console.error(e)
-        })
+        this.load().catch((e) => {
+            console.error(e);
+        });
     }
 
     async load() {
         try {
             const response = await this.$context.authenticatedServer.request({
-                method: "GET",
-                path: "/api-keys",
+                method: 'GET',
+                path: '/api-keys',
                 decoder: new ArrayDecoder(ApiUser as Decoder<ApiUser>),
-                owner: this
-            })
-            response.data.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
-            this.apiUsers = response.data
-        } catch (e) {
+                owner: this,
+            });
+            response.data.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
+            this.apiUsers = response.data;
+        }
+        catch (e) {
             if (!Request.isNetworkError(e)) {
-                Toast.fromError(e).show()
+                Toast.fromError(e).show();
             }
         }
-        this.loading = false
+        this.loading = false;
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     permissionList(user: User) {
-        const list: string[] = []
+        const list: string[] = [];
         const o = user.permissions?.forOrganization(this.organization);
         if (o?.hasFullAccess()) {
-            list.push("Hoofdbeheerders")
+            list.push('Hoofdbeheerders');
         }
 
         for (const role of o?.roles ?? []) {
-            list.push(role.name)
+            list.push(role.name);
         }
-        return list.join(", ")
+        return list.join(', ');
     }
 
     get roles() {
-        return this.organization.privateMeta?.roles ?? []
+        return this.organization.privateMeta?.roles ?? [];
     }
 
     createUser() {
         const p = UserPermissions.create({});
-        p.organizationPermissions.set(this.organization.id, Permissions.create({ level: PermissionLevel.Full }))
-        this.present(new ComponentWithProperties(NavigationController, { 
+        p.organizationPermissions.set(this.organization.id, Permissions.create({ level: PermissionLevel.Full }));
+        this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ApiUserView, {
                 user: ApiUser.create({
                     organizationId: this.organization.id,
-                    permissions: p
+                    permissions: p,
                 }),
                 isNew: true,
                 callback: () => {
-                    this.load().catch(e => {
-                        console.error(e)
-                    })
-                }
-            }) 
-        }).setDisplayStyle("popup"))
+                    this.load().catch((e) => {
+                        console.error(e);
+                    });
+                },
+            }),
+        }).setDisplayStyle('popup'));
     }
 
     editUser(admin: ApiUser) {
-        this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(ApiUserView, { 
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(ApiUserView, {
                 user: admin,
                 isNew: false,
                 callback: () => {
-                    this.load().catch(e => {
-                        console.error(e)
-                    })
-                }
-            })
-        }).setDisplayStyle("popup"))
+                    this.load().catch((e) => {
+                        console.error(e);
+                    });
+                },
+            }),
+        }).setDisplayStyle('popup'));
     }
 }
 

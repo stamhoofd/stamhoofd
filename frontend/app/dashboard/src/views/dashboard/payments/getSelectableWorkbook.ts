@@ -1,6 +1,6 @@
-import { SelectableColumn, SelectableSheet, SelectableWorkbook } from "@stamhoofd/frontend-excel-export";
-import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
+import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 export function getSelectableWorkbook() {
     return new SelectableWorkbook({
@@ -18,7 +18,7 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'price',
-                        name: 'Prijs'
+                        name: 'Prijs',
                     }),
 
                     new SelectableColumn({
@@ -33,9 +33,9 @@ export function getSelectableWorkbook() {
                     ...getInvoiceColumns(),
                     ...getSettlementColumns(),
                     ...getStripeColumns(),
-                    ...getTransferColumns()
+                    ...getTransferColumns(),
 
-                ]
+                ],
             }),
             new SelectableSheet({
                 id: 'balanceItemPayments',
@@ -62,7 +62,7 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'balanceItem.description',
-                        name: 'Beschrijving'
+                        name: 'Beschrijving',
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
@@ -73,61 +73,60 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'amount',
-                        name: 'Aantal'
+                        name: 'Aantal',
                     }),
-                    
+
                     new SelectableColumn({
                         id: 'unitPrice',
-                        name: 'Eenheidsprijs'
+                        name: 'Eenheidsprijs',
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: 'Prijs'
+                        name: 'Prijs',
                     }),
 
                     ...getGeneralColumns({ category: 'Betaling (herhaling)' }),
                     ...getInvoiceColumns(),
-                ]
-            })
-        ]
-    })
+                ],
+            }),
+        ],
+    });
 }
 
-function getGeneralColumns(options?: {category?: string | null;}) {
+function getGeneralColumns(options?: { category?: string | null }) {
     {
         return [
             new SelectableColumn({
                 id: 'status',
                 name: 'Betaalstatus',
-                ...options
+                ...options,
             }),
 
             new SelectableColumn({
                 id: 'method',
                 name: 'Betaalmethode',
-                ...options
+                ...options,
             }),
 
             new SelectableColumn({
                 id: 'provider',
                 name: 'Betaalprovider',
-                ...options
+                ...options,
             }),
-
 
             new SelectableColumn({
                 id: 'createdAt',
                 name: 'Aangemaakt op',
-                ...options
+                ...options,
             }),
 
             new SelectableColumn({
                 id: 'paidAt',
                 name: 'Betaald op',
-                ...options
+                ...options,
             }),
-        ]
+        ];
     }
 }
 
@@ -137,27 +136,27 @@ function getSettlementColumns() {
             id: 'settlement.reference',
             name: 'Uitbetalingsmededeling',
             description: 'De mededeling die de betaalprovider heeft gebruikt bij de uitbetaling',
-            category: 'Uitbetaling'
+            category: 'Uitbetaling',
         }),
         new SelectableColumn({
             id: 'settlement.settledAt',
             name: 'Uitbetalingsdatum',
             description: 'Datum waarop de betaling werd uitbetaald door de betaalprovider',
-            category: 'Uitbetaling'
+            category: 'Uitbetaling',
         }),
         new SelectableColumn({
             id: 'settlement.amount',
             name: 'Uitbetalingsbedrag',
             description: 'Totale bedrag dat werd uitbetaald door de betaalprovider in de uitbetaling (bevat dus ook andere betalingen)',
-            category: 'Uitbetaling'
+            category: 'Uitbetaling',
         }),
         new SelectableColumn({
             id: 'settlement.fee',
             name: 'Uitbetalingstransactiekosten',
             description: 'De totale transactiekosten die zijn afgehouden van deze uitbetaling door de betaalprovider (bevat dus ook de transactiekosten van andere betalingen)',
-            category: 'Uitbetaling'
-        })
-    ]
+            category: 'Uitbetaling',
+        }),
+    ];
 }
 
 function getStripeColumns() {
@@ -166,28 +165,28 @@ function getStripeColumns() {
             id: 'transferFee',
             name: 'Transactiekosten',
             description: 'Transactiekosten die in mindering worden gebracht door de betaalprovider',
-            category: 'Stripe'
+            category: 'Stripe',
         }),
         new SelectableColumn({
             id: 'stripeAccountId',
             name: 'Account ID',
             description: 'Stripe Account ID waarop de betaling is ontvangen',
             category: 'Stripe',
-            enabled: false
+            enabled: false,
         }),
         new SelectableColumn({
             id: 'iban',
             name: 'Kaartnummer',
             description: 'De laatste 4 cijfers van de IBAN-rekeningnummer of creditcard van de betaler',
-            category: 'Stripe'
+            category: 'Stripe',
         }),
         new SelectableColumn({
             id: 'ibanName',
             name: 'Kaarthouder',
             description: 'Naam van de betaler volgens de bank',
-            category: 'Stripe'
-        })
-    ]
+            category: 'Stripe',
+        }),
+    ];
 }
 
 function getTransferColumns() {
@@ -196,23 +195,22 @@ function getTransferColumns() {
             id: 'transferDescription',
             name: 'Mededeling',
             description: 'Mededeling van de betaling',
-            category: 'Overschrijvingen'
+            category: 'Overschrijvingen',
         }),
         new SelectableColumn({
             id: 'transferSettings.creditor',
             name: 'Begunstigde',
             description: 'De eigenaar van de rekening waarnaar de betaler heeft overgeschreven',
-            category: 'Overschrijvingen'
+            category: 'Overschrijvingen',
         }),
         new SelectableColumn({
             id: 'transferSettings.iban',
             name: 'Rekeningnummer begunstigde',
             description: 'Rekeningnummer waarnaar de betaler heeft overgeschreven',
-            category: 'Overschrijvingen'
+            category: 'Overschrijvingen',
         }),
-    ]
+    ];
 }
-
 
 function getInvoiceColumns() {
     return [
@@ -220,43 +218,43 @@ function getInvoiceColumns() {
             id: 'customer.name',
             name: 'Naam',
             description: 'Naam van de betaler',
-            category: 'Facturatiegegevens'
+            category: 'Facturatiegegevens',
         }),
         new SelectableColumn({
             id: 'customer.email',
             name: 'E-mailadres',
             description: 'E-mailadres van de betaler',
-            category: 'Facturatiegegevens'
+            category: 'Facturatiegegevens',
         }),
 
         new SelectableColumn({
             id: 'customer.company.name',
             name: 'Bedrijfsnaam',
-            category: 'Facturatiegegevens'
+            category: 'Facturatiegegevens',
         }),
 
         new SelectableColumn({
             id: 'customer.company.VATNumber',
             name: 'BTW-nummer',
-            category: 'Facturatiegegevens'
+            category: 'Facturatiegegevens',
         }),
 
         new SelectableColumn({
             id: 'customer.company.companyNumber',
             name: 'Ondernemingsnummer',
-            category: 'Facturatiegegevens'
+            category: 'Facturatiegegevens',
         }),
 
         new SelectableColumn({
             id: 'customer.company.address',
             name: 'Bedrijfsadres',
-            category: 'Facturatiegegevens'
+            category: 'Facturatiegegevens',
         }),
 
         new SelectableColumn({
             id: 'customer.company.administrationEmail',
             name: 'E-mailadres administratie',
-            category: 'Facturatiegegevens'
+            category: 'Facturatiegegevens',
         }),
-    ]
+    ];
 }

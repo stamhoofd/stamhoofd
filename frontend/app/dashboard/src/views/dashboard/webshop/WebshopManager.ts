@@ -1,63 +1,62 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
-import { Request, RequestResult } from "@simonbackx/simple-networking";
-import { EventBus, Toast } from "@stamhoofd/components";
-import { OrganizationManager, SessionContext } from "@stamhoofd/networking";
-import { OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
-import { toRaw, unref } from "vue";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { Request, RequestResult } from '@simonbackx/simple-networking';
+import { EventBus, Toast } from '@stamhoofd/components';
+import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
+import { OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
+import { toRaw, unref } from 'vue';
 
 /**
  * Responsible for managing a single webshop orders and tickets
  * + persistent storage and loading orders from local database instead of the server
  */
 export class WebshopManager {
-    preview: WebshopPreview
-    webshop: PrivateWebshop | null = null
-    lastFetchedWebshop: Date | null = null
+    preview: WebshopPreview;
+    webshop: PrivateWebshop | null = null;
+    lastFetchedWebshop: Date | null = null;
 
-    private webshopPromise: Promise<PrivateWebshop> | null = null
-    private webshopFetchPromise: Promise<PrivateWebshop> | null = null
+    private webshopPromise: Promise<PrivateWebshop> | null = null;
+    private webshopFetchPromise: Promise<PrivateWebshop> | null = null;
 
-    database: IDBDatabase | null = null
-    private databasePromise: Promise<IDBDatabase> | null = null
+    database: IDBDatabase | null = null;
+    private databasePromise: Promise<IDBDatabase> | null = null;
 
+    lastFetchedOrder: { updatedAt: Date; number: number } | null | undefined = undefined;
+    lastFetchedTicket: { updatedAt: Date; id: string } | null | undefined = undefined;
+    isLoadingOrders = false;
+    isLoadingTickets = false;
+    savingTicketPatches = false;
 
-    lastFetchedOrder: { updatedAt: Date, number: number } | null | undefined = undefined
-    lastFetchedTicket: { updatedAt: Date, id: string } | null | undefined = undefined
-    isLoadingOrders = false
-    isLoadingTickets = false
-    savingTicketPatches = false
-
-    lastUpdatedOrders: Date | null = null
-    lastUpdatedTickets: Date | null = null
+    lastUpdatedOrders: Date | null = null;
+    lastUpdatedTickets: Date | null = null;
 
     /**
      * Listen for new orders that are being fetched or loaded
      */
-    ordersEventBus = new EventBus<string, PrivateOrder[]>()
-    ticketsEventBus = new EventBus<string, TicketPrivate[]>()
-    ticketPatchesEventBus = new EventBus<string, AutoEncoderPatchType<TicketPrivate>[]>()
+    ordersEventBus = new EventBus<string, PrivateOrder[]>();
+    ticketsEventBus = new EventBus<string, TicketPrivate[]>();
+    ticketPatchesEventBus = new EventBus<string, AutoEncoderPatchType<TicketPrivate>[]>();
 
-    context: SessionContext
+    context: SessionContext;
 
     constructor(context: SessionContext, preview: WebshopPreview) {
-        this.context = context
-        this.preview = preview
+        this.context = context;
+        this.preview = preview;
     }
 
     get hasWrite() {
-        return this.preview.privateMeta.permissions.hasWriteAccess(this.context.organizationPermissions)
+        return this.preview.privateMeta.permissions.hasWriteAccess(this.context.organizationPermissions);
     }
 
     get hasRead() {
-        return this.preview.privateMeta.permissions.hasReadAccess(this.context.organizationPermissions)
+        return this.preview.privateMeta.permissions.hasReadAccess(this.context.organizationPermissions);
     }
 
     /**
      * Cancel all pending loading states and retries
      */
     close() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     /**
@@ -65,71 +64,72 @@ export class WebshopManager {
      */
     private async fetchWebshop(shouldRetry = true) {
         const response = await this.context.authenticatedServer.request({
-            method: "GET",
-            path: "/webshop/"+this.preview.id,
+            method: 'GET',
+            path: '/webshop/' + this.preview.id,
             decoder: PrivateWebshop as Decoder<PrivateWebshop>,
             shouldRetry,
-            owner: this
-        })
+            owner: this,
+        });
 
         // Clone data and keep references
-        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.deepSet(response.data)
-        this.preview.deepSet(response.data)
+        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.deepSet(response.data);
+        this.preview.deepSet(response.data);
 
         // Save async (could fail in some unsupported browsers)
-        this.storeWebshop(response.data).catch(console.error)
+        this.storeWebshop(response.data).catch(console.error);
 
-        return response.data
+        return response.data;
     }
 
     async patchWebshop(webshopPatch: AutoEncoderPatchType<PrivateWebshop>) {
         const response = await this.context.authenticatedServer.request({
-            method: "PATCH",
-            path: "/webshop/"+this.preview.id,
+            method: 'PATCH',
+            path: '/webshop/' + this.preview.id,
             body: webshopPatch,
             decoder: PrivateWebshop as Decoder<PrivateWebshop>,
-            owner: this
-        })
+            owner: this,
+        });
 
-        this.updateWebshop(response.data)
+        this.updateWebshop(response.data);
     }
 
     updateWebshop(webshop: PrivateWebshop) {
         if (this.webshop) {
-            this.webshop.set(webshop)
-        } else {
-            this.webshop = webshop
+            this.webshop.set(webshop);
+        }
+        else {
+            this.webshop = webshop;
         }
 
         // Clone data and keep references
-        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(webshop)
-        this.preview.set(webshop)
-        new OrganizationManager(this.context).save().catch(console.error)
+        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(webshop);
+        this.preview.set(webshop);
+        new OrganizationManager(this.context).save().catch(console.error);
 
         // Save async (could fail in some unsupported browsers)
-        this.storeWebshop(webshop).catch(console.error)
+        this.storeWebshop(webshop).catch(console.error);
     }
 
     async loadWebshopFromDatabase(): Promise<PrivateWebshop | undefined> {
-        const raw = await this.readSettingKey("webshop")
+        const raw = await this.readSettingKey('webshop');
         if (raw === undefined) {
-            return undefined
+            return undefined;
         }
-        const webshop = PrivateWebshop.decode(new ObjectData(raw, { version: Version }))
+        const webshop = PrivateWebshop.decode(new ObjectData(raw, { version: Version }));
 
         // Clone data and keep references
-        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(webshop)
-        this.preview.set(webshop)
+        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(webshop);
+        this.preview.set(webshop);
 
-        return webshop
+        return webshop;
     }
 
     async storeWebshop(webshop: PrivateWebshop) {
-        await this.storeSettingKey("webshop", webshop.encode({ version: Version }))
+        await this.storeSettingKey('webshop', webshop.encode({ version: Version }));
     }
 
     backgroundReloadWebshop() {
-        this.loadWebshop(false).catch(console.error)
+        this.loadWebshop(false).catch(console.error);
     }
 
     /**
@@ -142,48 +142,50 @@ export class WebshopManager {
         if (this.webshop) {
             // If too long ago, also initiate a background update
 
-            if (forceBackground || !this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
+            if (forceBackground || !this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000 * 60 * 15)) {
                 // Do a background update if not yet already doing this
-                this.backgroundReloadWebshop()
+                this.backgroundReloadWebshop();
             }
 
-            return this.webshop
+            return this.webshop;
         }
 
         if (this.webshopPromise) {
-            return this.webshopPromise
+            return this.webshopPromise;
         }
-        
+
         this.webshopPromise = (async () => {
             // Try to get it from the database, also init a background fetch if it is too long ago
             try {
-                const webshop = await this.loadWebshopFromDatabase()
+                const webshop = await this.loadWebshopFromDatabase();
                 if (webshop) {
                     if (this.webshop) {
-                        this.webshop.set(webshop)
-                    } else {
-                        this.webshop = webshop
+                        this.webshop.set(webshop);
+                    }
+                    else {
+                        this.webshop = webshop;
                     }
 
-                    if (forceBackground || !this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
+                    if (forceBackground || !this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000 * 60 * 15)) {
                         // Do a background update if not yet already doing this
-                        this.backgroundReloadWebshop()
+                        this.backgroundReloadWebshop();
                     }
-                    return webshop
+                    return webshop;
                 }
-            } catch (e) {
+            }
+            catch (e) {
                 // Possible no database support
-                console.error(e)
+                console.error(e);
 
                 // Do a normal fetch
             }
 
-            return await this.loadWebshop(shouldRetry)
-        })()
-        
+            return await this.loadWebshop(shouldRetry);
+        })();
+
         return this.webshopPromise.finally(() => {
-            this.webshopPromise = null
-        })
+            this.webshopPromise = null;
+        });
     }
 
     /**
@@ -191,47 +193,48 @@ export class WebshopManager {
      */
     async loadWebshop(shouldRetry = true): Promise<PrivateWebshop> {
         if (this.webshopFetchPromise) {
-            return this.webshopFetchPromise
+            return this.webshopFetchPromise;
         }
-        
+
         this.webshopFetchPromise = (async () => {
             // Try to get it from the database, also init a background fetch if it is too long ago
-            const webshop = await this.fetchWebshop(shouldRetry)
-            this.lastFetchedWebshop = new Date()
-            return webshop
-        })()
-        
+            const webshop = await this.fetchWebshop(shouldRetry);
+            this.lastFetchedWebshop = new Date();
+            return webshop;
+        })();
+
         return this.webshopFetchPromise.then((webshop: PrivateWebshop) => {
             if (this.webshop) {
-                this.webshop.set(webshop)
-            } else {
-                this.webshop = webshop
+                this.webshop.set(webshop);
             }
-            return webshop
+            else {
+                this.webshop = webshop;
+            }
+            return webshop;
         }).finally(() => {
-            this.webshopFetchPromise = null
-        })
+            this.webshopFetchPromise = null;
+        });
     }
 
     deleteDatabase() {
-        window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
+        window.indexedDB.deleteDatabase('webshop-' + this.preview.id);
     }
 
     async getDatabase(): Promise<IDBDatabase> {
         if (this.database) {
-            return this.database
+            return this.database;
         }
 
         if (this.databasePromise) {
-            return this.databasePromise
+            return this.databasePromise;
         }
 
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
-            const version = Version
+            const version = Version;
             let resolved = false;
 
-            const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
+            const DBOpenRequest = window.indexedDB.open('webshop-' + this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
 
@@ -239,32 +242,31 @@ export class WebshopManager {
                     return;
                 }
                 resolved = true;
-                resolve(DBOpenRequest.result)
-            }
+                resolve(DBOpenRequest.result);
+            };
 
-            DBOpenRequest.onblocked = function(e) {
-                console.log("DB open blocked", e);
-                new Toast("Er staat een ander tabblad open van Stamhoofd die werkt in een oudere versie. Sluit die eerst af.", "error red").setHide(15*1000).show()
+            DBOpenRequest.onblocked = function (e) {
+                console.log('DB open blocked', e);
+                new Toast('Er staat een ander tabblad open van Stamhoofd die werkt in een oudere versie. Sluit die eerst af.', 'error red').setHide(15 * 1000).show();
             };
 
             DBOpenRequest.onerror = (event) => {
-                console.error(event)
+                console.error(event);
 
                 if (resolved) {
                     return;
                 }
 
                 // Try to delete this database if something goes wrong
-                //if (STAMHOOFD.environment == "development") {
+                // if (STAMHOOFD.environment == "development") {
                 this.deleteDatabase();
-                //}
-
+                // }
 
                 resolved = true;
                 reject(new SimpleError({
-                    code: "not_supported",
-                    message: "Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken."
-                }))
+                    code: 'not_supported',
+                    message: 'Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.',
+                }));
             };
 
             DBOpenRequest.onupgradeneeded = (event: IDBVersionChangeEvent) => {
@@ -272,24 +274,24 @@ export class WebshopManager {
 
                 if (event.oldVersion < 1) {
                     // Version 1 is the first version of the database.
-                    db.createObjectStore("orders", { keyPath: "id" });
-                    const ticketStore = db.createObjectStore("tickets", { keyPath: "secret" });
-                    db.createObjectStore("ticketPatches", { keyPath: "secret" });
-                    db.createObjectStore("settings", {});
+                    db.createObjectStore('orders', { keyPath: 'id' });
+                    const ticketStore = db.createObjectStore('tickets', { keyPath: 'secret' });
+                    db.createObjectStore('ticketPatches', { keyPath: 'secret' });
+                    db.createObjectStore('settings', {});
 
                     // Search tickets by order id
-                    ticketStore.createIndex("orderId", "orderId", { unique: false });
-
-                } else {
+                    ticketStore.createIndex('orderId', 'orderId', { unique: false });
+                }
+                else {
                     // For now: we clear all stores if we have a version update
-                    DBOpenRequest.transaction!.objectStore("orders").clear()
-                    DBOpenRequest.transaction!.objectStore("tickets").clear()
-                    DBOpenRequest.transaction!.objectStore("ticketPatches").clear()
-                    DBOpenRequest.transaction!.objectStore("settings").clear()
+                    DBOpenRequest.transaction!.objectStore('orders').clear();
+                    DBOpenRequest.transaction!.objectStore('tickets').clear();
+                    DBOpenRequest.transaction!.objectStore('ticketPatches').clear();
+                    DBOpenRequest.transaction!.objectStore('settings').clear();
 
                     if (event.oldVersion < 114) {
-                        const ticketStore = DBOpenRequest.transaction!.objectStore("tickets")
-                        ticketStore.createIndex("orderId", "orderId", { unique: false });
+                        const ticketStore = DBOpenRequest.transaction!.objectStore('tickets');
+                        ticketStore.createIndex('orderId', 'orderId', { unique: false });
                     }
                 }
             };
@@ -298,185 +300,189 @@ export class WebshopManager {
             // Sometimes a browser hangs when trying to open a database. We cannot wait forever...
             setTimeout(() => {
                 if (!resolved) {
-                    // Abort 
+                    // Abort
                     reject(new SimpleError({
-                        code: "not_supported",
-                        message: "Kijk na of je nog een ander tabblad open hebt staan met Stamhoofd en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken."
-                    }))
+                        code: 'not_supported',
+                        message: 'Kijk na of je nog een ander tabblad open hebt staan met Stamhoofd en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.',
+                    }));
                 }
             }, 2000);
-        })
+        });
 
-        return this.databasePromise.then(database => {
-            this.databasePromise = null
-            return database
-        })
+        return this.databasePromise.then((database) => {
+            this.databasePromise = null;
+            return database;
+        });
     }
 
     async readSettingKey(key: IDBValidKey): Promise<any | undefined> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["settings"], "readonly");
+            const transaction = db.transaction(['settings'], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("settings");
-            const request = objectStore.get(key)
+            const objectStore = transaction.objectStore('settings');
+            const request = objectStore.get(key);
 
             request.onsuccess = () => {
-                resolve(request.result)
-            }
-        })
+                resolve(request.result);
+            };
+        });
     }
 
     async storeSettingKey(key: IDBValidKey, value: any) {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["settings"], "readwrite");
+            const transaction = db.transaction(['settings'], 'readwrite');
 
             transaction.oncomplete = () => {
-                resolve()
+                resolve();
             };
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("settings");
+            const objectStore = transaction.objectStore('settings');
 
             // Unref potential proxies here
-            objectStore.put(toRaw(value), key)
-        })
+            objectStore.put(toRaw(value), key);
+        });
     }
 
     async storeOrders(orders: PrivateOrder[]) {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["orders"], "readwrite");
+            const transaction = db.transaction(['orders'], 'readwrite');
 
             transaction.oncomplete = () => {
-                resolve()
+                resolve();
             };
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
                 this.deleteDatabase();
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("orders");
+            const objectStore = transaction.objectStore('orders');
 
             for (const order of orders) {
                 if (order.status === OrderStatus.Deleted) {
                     objectStore.delete(order.id);
-                } else {
+                }
+                else {
                     objectStore.put(order.encode({ version: Version }));
                 }
             }
-        })
+        });
     }
 
     async getTicketsForOrder(orderId: string, withPatches = true): Promise<TicketPrivate[]> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
-        const tickets: TicketPrivate[] = []
+        const tickets: TicketPrivate[] = [];
 
         await new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["tickets", "ticketPatches"], "readonly");
+            const transaction = db.transaction(['tickets', 'ticketPatches'], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("tickets");
-            const ticketPatches = transaction.objectStore("ticketPatches");
+            const objectStore = transaction.objectStore('tickets');
+            const ticketPatches = transaction.objectStore('ticketPatches');
 
-            const orderIndex = objectStore.index("orderId");
+            const orderIndex = objectStore.index('orderId');
 
             const range = IDBKeyRange.only(orderId);
-            const request = orderIndex.openCursor(range)
+            const request = orderIndex.openCursor(range);
             request.onsuccess = (event: any) => {
                 const cursor = event.target.result;
                 if (cursor) {
-                    const rawOrder = cursor.value
-                    const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }))
+                    const rawOrder = cursor.value;
+                    const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }));
 
                     if (withPatches) {
-                        const request2 = ticketPatches.get(ticket.secret)
+                        const request2 = ticketPatches.get(ticket.secret);
                         request2.onsuccess = () => {
-                            const rawPatch = request2.result
+                            const rawPatch = request2.result;
 
                             if (rawPatch === undefined) {
                                 // no patch found
-                                tickets.push(ticket)
+                                tickets.push(ticket);
                                 cursor.continue();
-                                return
+                                return;
                             }
 
-                            const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
+                            const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }));
                             const patched = ticket.patch(patch);
-                            tickets.push(patched)
+                            tickets.push(patched);
                             cursor.continue();
-                        }
-                    } else {
-                        tickets.push(ticket)
+                        };
+                    }
+                    else {
+                        tickets.push(ticket);
                         cursor.continue();
                     }
-                    
-                } else {
-                    // no more results
-                    resolve()
                 }
-            }
-        })
-        
-        return tickets.filter(t => !t.deletedAt)
+                else {
+                    // no more results
+                    resolve();
+                }
+            };
+        });
+
+        return tickets.filter(t => !t.deletedAt);
     }
 
     async streamTickets(callback: (ticket: TicketPrivate) => void, networkFetch = true): Promise<void> {
         try {
-            const db = await this.getDatabase()
+            const db = await this.getDatabase();
 
             await new Promise<void>((resolve, reject) => {
-                const transaction = db.transaction(["tickets"], "readonly");
+                const transaction = db.transaction(['tickets'], 'readonly');
 
                 transaction.onerror = (event) => {
                     // Don't forget to handle errors!
-                    reject(event)
+                    reject(event);
                 };
 
                 // Do the actual saving
-                const objectStore = transaction.objectStore("tickets");
+                const objectStore = transaction.objectStore('tickets');
 
-                const request = objectStore.openCursor()
+                const request = objectStore.openCursor();
                 request.onsuccess = (event: any) => {
                     const cursor = event.target.result;
                     if (cursor) {
-                        const rawOrder = cursor.value
-                        const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }))
+                        const rawOrder = cursor.value;
+                        const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }));
                         if (!ticket.deletedAt) {
-                            callback(ticket)
+                            callback(ticket);
                         }
                         cursor.continue();
-                    } else {
-                        // no more results
-                        resolve()
                     }
-                }
-            })
-        } catch (e) {
+                    else {
+                        // no more results
+                        resolve();
+                    }
+                };
+            });
+        }
+        catch (e) {
             console.error(e);
             if (!networkFetch) {
                 throw e;
@@ -486,40 +492,41 @@ export class WebshopManager {
         if (networkFetch) {
             await this.fetchNewTickets(false, false, (tickets: TicketPrivate[]) => {
                 for (const ticket of tickets) {
-                    callback(ticket)
+                    callback(ticket);
                 }
-            })
+            });
         }
     }
 
     async streamTicketPatches(callback: (ticket: AutoEncoderPatchType<TicketPrivate>) => void): Promise<void> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         await new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["ticketPatches"], "readonly");
+            const transaction = db.transaction(['ticketPatches'], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("ticketPatches");
+            const objectStore = transaction.objectStore('ticketPatches');
 
-            const request = objectStore.openCursor()
+            const request = objectStore.openCursor();
             request.onsuccess = (event: any) => {
                 const cursor = event.target.result;
                 if (cursor) {
-                    const rawPatch = cursor.value
-                    const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
-                    callback(patch)
+                    const rawPatch = cursor.value;
+                    const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }));
+                    callback(patch);
                     cursor.continue();
-                } else {
-                    // no more results
-                    resolve()
                 }
-            }
-        })
+                else {
+                    // no more results
+                    resolve();
+                }
+            };
+        });
     }
 
     /**
@@ -528,46 +535,49 @@ export class WebshopManager {
     async streamOrders(callback: (order: PrivateOrder) => void, networkFetch = true): Promise<void> {
         let callbackError = false;
         try {
-            const db = await this.getDatabase()
+            const db = await this.getDatabase();
 
             await new Promise<void>((resolve, reject) => {
-                const transaction = db.transaction(["orders"], "readonly");
+                const transaction = db.transaction(['orders'], 'readonly');
 
                 transaction.onerror = (event) => {
                     // Don't forget to handle errors!
                     try {
                         this.deleteDatabase();
-                    } catch (e) {
-                        console.error(e)
                     }
-                    reject(event)
+                    catch (e) {
+                        console.error(e);
+                    }
+                    reject(event);
                 };
 
                 // Do the actual saving
-                const objectStore = transaction.objectStore("orders");
+                const objectStore = transaction.objectStore('orders');
 
-                const request = objectStore.openCursor()
+                const request = objectStore.openCursor();
                 request.onsuccess = (event: any) => {
                     const cursor = event.target.result;
                     if (cursor) {
-                        const rawOrder = cursor.value
+                        const rawOrder = cursor.value;
 
                         let order: PrivateOrder;
                         try {
-                            order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
-                        } catch (e) {
+                            order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }));
+                        }
+                        catch (e) {
                             // Decoding error: ignore
                             // force fetch all again
-                            this.clearLastFetchedOrder().catch(console.error)
+                            this.clearLastFetchedOrder().catch(console.error);
 
                             // Stop reading without throwing an error
                             return;
                         }
 
                         try {
-                            callback(order)
-                        } catch (e) {
-                            console.error('callback failed', e)
+                            callback(order);
+                        }
+                        catch (e) {
+                            console.error('callback failed', e);
                             // Propagate error
                             callbackError = true;
                             reject(e);
@@ -575,13 +585,15 @@ export class WebshopManager {
                         }
 
                         cursor.continue();
-                    } else {
-                        // no more results
-                        resolve()
                     }
-                }
-            })
-        } catch (e) {
+                    else {
+                        // no more results
+                        resolve();
+                    }
+                };
+            });
+        }
+        catch (e) {
             console.error(e);
             if (!networkFetch || callbackError) {
                 throw e;
@@ -589,148 +601,148 @@ export class WebshopManager {
         }
 
         if (networkFetch) {
-            const owner = {}
-            this.ordersEventBus.addListener(owner, "fetched", (orders: PrivateOrder[]) => {
+            const owner = {};
+            this.ordersEventBus.addListener(owner, 'fetched', (orders: PrivateOrder[]) => {
                 for (const order of orders) {
-                    callback(order)
+                    callback(order);
                 }
-                return Promise.resolve()
-            })
+                return Promise.resolve();
+            });
             try {
-                await this.fetchNewOrders(false, false)
-            } finally {
-                this.ordersEventBus.removeListener(owner)
+                await this.fetchNewOrders(false, false);
+            }
+            finally {
+                this.ordersEventBus.removeListener(owner);
             }
         }
     }
 
     async clearOrdersFromDatabase(): Promise<void> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["orders"], "readwrite");
+            const transaction = db.transaction(['orders'], 'readwrite');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("orders");
+            const objectStore = transaction.objectStore('orders');
 
-            const request = objectStore.clear()
+            const request = objectStore.clear();
             request.onsuccess = () => {
-                resolve()
-            }
-
-        })
+                resolve();
+            };
+        });
     }
 
     async getOrdersFromDatabase(): Promise<PrivateOrder[]> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<PrivateOrder[]>((resolve, reject) => {
-            const transaction = db.transaction(["orders"], "readonly");
+            const transaction = db.transaction(['orders'], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("orders");
+            const objectStore = transaction.objectStore('orders');
 
-            const request = objectStore.getAll()
+            const request = objectStore.getAll();
             request.onsuccess = () => {
-                const rawOrders = request.result
+                const rawOrders = request.result;
 
                 // TODO: need version fix here
-                const orders = new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrders, { version: Version }))
-                resolve(orders)
-            }
-
-        })
+                const orders = new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrders, { version: Version }));
+                resolve(orders);
+            };
+        });
     }
 
     async getTicketPatchesFromDatabase(): Promise<AutoEncoderPatchType<TicketPrivate>[]> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<AutoEncoderPatchType<TicketPrivate>[]>((resolve, reject) => {
-            const transaction = db.transaction(["ticketPatches"], "readonly");
+            const transaction = db.transaction(['ticketPatches'], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("ticketPatches");
+            const objectStore = transaction.objectStore('ticketPatches');
 
-            const request = objectStore.getAll()
+            const request = objectStore.getAll();
             request.onsuccess = () => {
-                const rawOrders = request.result
+                const rawOrders = request.result;
 
                 // TODO: need version fix here
-                const patches = new ArrayDecoder(TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawOrders, { version: Version }))
-                resolve(patches)
-            }
-
-        })
+                const patches = new ArrayDecoder(TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawOrders, { version: Version }));
+                resolve(patches);
+            };
+        });
     }
 
     async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<PrivateOrder[], WebshopOrdersQuery>> {
         const response = await this.context.authenticatedServer.request({
-            method: "GET",
-            path: "/webshop/"+this.preview.id+"/orders",
+            method: 'GET',
+            path: '/webshop/' + this.preview.id + '/orders',
             query,
             shouldRetry: retry,
             decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), WebshopOrdersQuery as Decoder<WebshopOrdersQuery>),
-            owner: this
-        })
+            owner: this,
+        });
 
-        return response.data
+        return response.data;
     }
 
     async patchOrders(patches: PatchableArrayAutoEncoder<PrivateOrder>) {
         const response = await this.context.authenticatedServer.request({
-            method: "PATCH",
-            path: "/webshop/"+this.preview.id+"/orders",
+            method: 'PATCH',
+            path: '/webshop/' + this.preview.id + '/orders',
             decoder: new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>),
             body: patches,
             shouldRetry: false,
-            owner: this
-        })
+            owner: this,
+        });
 
         // Move all data to original order
         try {
-            await this.storeOrders(response.data)
-        } catch (e) {
-            console.error(e)
+            await this.storeOrders(response.data);
+        }
+        catch (e) {
+            console.error(e);
             // No db support or other error. Should ignore
         }
 
         // Patching orders can result in changed tickets. We'll need to pull those in.
         try {
-            await this.fetchNewTickets(false, false)
-        } catch (e) {
-            console.error(e)
+            await this.fetchNewTickets(false, false);
+        }
+        catch (e) {
+            console.error(e);
         }
 
-        await this.ordersEventBus.sendEvent("fetched", response.data)
-        return response.data
+        await this.ordersEventBus.sendEvent('fetched', response.data);
+        return response.data;
     }
 
     async setlastFetchedOrder(order: PrivateOrder) {
         this.lastFetchedOrder = {
             updatedAt: order.updatedAt,
-            number: order.number!
-        }
-        await this.storeSettingKey("lastFetchedOrder", this.lastFetchedOrder)
+            number: order.number!,
+        };
+        await this.storeSettingKey('lastFetchedOrder', this.lastFetchedOrder);
     }
 
     async clearLastFetchedOrder() {
-        this.lastFetchedOrder = null
-        await this.storeSettingKey("lastFetchedOrder", null)
+        this.lastFetchedOrder = null;
+        await this.storeSettingKey('lastFetchedOrder', null);
     }
 
     async addTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
@@ -739,69 +751,73 @@ export class WebshopManager {
         }
 
         // First save the patch in the local database
-        await this.storeTicketPatches(patches)
-        await this.ticketPatchesEventBus.sendEvent("patched", patches)
+        await this.storeTicketPatches(patches);
+        await this.ticketPatchesEventBus.sendEvent('patched', patches);
 
         // Try to save all remaining patches to the server (once)
         // Don't wait
-        this.trySavePatches().catch(console.error)
+        this.trySavePatches().catch(console.error);
     }
 
     async addTicketPatch(patch: AutoEncoderPatchType<TicketPrivate>) {
-        await this.addTicketPatches([patch])
+        await this.addTicketPatches([patch]);
     }
 
     async trySavePatches() {
         if (this.savingTicketPatches) {
             // Already working on it
-            return
+            return;
         }
-        this.savingTicketPatches = true
+        this.savingTicketPatches = true;
 
-        const patches = await this.getTicketPatchesFromDatabase()
+        const patches = await this.getTicketPatchesFromDatabase();
         if (patches.length > 0) {
             try {
-                await this.patchTickets(patches)
-                this.savingTicketPatches = false
+                await this.patchTickets(patches);
+                this.savingTicketPatches = false;
                 return this.trySavePatches();
-            } catch (e) {
+            }
+            catch (e) {
                 if (Request.isNetworkError(e)) {
                     // failed.
-                } else {
-                    this.savingTicketPatches = false
+                }
+                else {
+                    this.savingTicketPatches = false;
                     throw e;
                 }
             }
         }
-        this.savingTicketPatches = false
+        this.savingTicketPatches = false;
     }
 
     async patchTickets(patches: AutoEncoderPatchType<TicketPrivate>[]) {
         // Then make one try for a request (might fail if we don't have internet)
-        let response: RequestResult<TicketPrivate[]>
+        let response: RequestResult<TicketPrivate[]>;
         try {
             response = await this.context.authenticatedServer.request({
-                method: "PATCH",
-                path: "/webshop/"+this.preview.id+"/tickets/private",
+                method: 'PATCH',
+                path: '/webshop/' + this.preview.id + '/tickets/private',
                 decoder: new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>),
                 body: patches,
                 shouldRetry: false,
-                owner: this
-            })
-        } catch (e) {
+                owner: this,
+            });
+        }
+        catch (e) {
             if (isSimpleErrors(e)) {
                 for (const error of e.errors) {
                     if (error.hasCode('ticket_not_found')) {
-                        const id = error.field
+                        const id = error.field;
 
                         // remove patch for this ticket
-                        const patch = patches.find(i => i.id === id)
+                        const patch = patches.find(i => i.id === id);
                         if (patch && patch.secret) {
-                            console.info('Deleted invalid patch for deleted ticket ' + patch.secret)
+                            console.info('Deleted invalid patch for deleted ticket ' + patch.secret);
                             try {
-                                await this.removeTicketPatch(patch.secret)
-                            } catch (q) {
-                                console.error(q)
+                                await this.removeTicketPatch(patch.secret);
+                            }
+                            catch (q) {
+                                console.error(q);
                             }
                         }
                     }
@@ -812,14 +828,15 @@ export class WebshopManager {
 
         // Move all data to original order
         try {
-            await this.storeTickets(response.data)
-        } catch (e) {
-            console.error(e)
+            await this.storeTickets(response.data);
+        }
+        catch (e) {
+            console.error(e);
             // No db support or other error. Should ignore
         }
-        this.ticketsEventBus.sendEvent("fetched", response.data).catch(console.error)
+        this.ticketsEventBus.sendEvent('fetched', response.data).catch(console.error);
 
-        return response.data
+        return response.data;
     }
 
     /**
@@ -829,121 +846,126 @@ export class WebshopManager {
     async fetchNewOrders(retry = false, reset = false) {
         // TODO: clear local database if resetting
         if (this.isLoadingOrders) {
-            return
+            return;
         }
-        this.isLoadingOrders = true
+        this.isLoadingOrders = true;
 
         try {
             if (!reset && this.lastFetchedOrder === undefined) {
                 // Only once (if undefined)
                 try {
-                    this.lastFetchedOrder = await this.readSettingKey("lastFetchedOrder") ?? null
+                    this.lastFetchedOrder = await this.readSettingKey('lastFetchedOrder') ?? null;
                     if (this.lastFetchedOrder?.updatedAt && !this.lastUpdatedOrders) {
                         // Set initial timestamp in case of network error later on
-                        this.lastUpdatedOrders = this.lastFetchedOrder.updatedAt
+                        this.lastUpdatedOrders = this.lastFetchedOrder.updatedAt;
                     }
-                } catch (e) {
-                    console.error(e)
+                }
+                catch (e) {
+                    console.error(e);
                     // Probably no database support. Ignore it and load everything.
-                    this.lastFetchedOrder = null
+                    this.lastFetchedOrder = null;
                 }
             }
 
-            let didClear = false
+            let didClear = false;
 
-            let query: WebshopOrdersQuery | undefined = reset ? WebshopOrdersQuery.create({}) : WebshopOrdersQuery.create({
-                updatedSince: this.lastFetchedOrder ? this.lastFetchedOrder.updatedAt : undefined,
-                afterNumber: this.lastFetchedOrder ? this.lastFetchedOrder.number : undefined,
-            })
+            let query: WebshopOrdersQuery | undefined = reset
+                ? WebshopOrdersQuery.create({})
+                : WebshopOrdersQuery.create({
+                    updatedSince: this.lastFetchedOrder ? this.lastFetchedOrder.updatedAt : undefined,
+                    afterNumber: this.lastFetchedOrder ? this.lastFetchedOrder.number : undefined,
+                });
 
             while (query) {
-                const response: PaginatedResponse<PrivateOrder[], WebshopOrdersQuery> = await this.fetchOrders(query, retry)
+                const response: PaginatedResponse<PrivateOrder[], WebshopOrdersQuery> = await this.fetchOrders(query, retry);
 
                 if (reset && !didClear) {
                     // Clear only if we have internet access
-                    didClear = true
+                    didClear = true;
                     try {
-                        await this.clearOrdersFromDatabase()
-                    } catch (e) {
+                        await this.clearOrdersFromDatabase();
+                    }
+                    catch (e) {
                         // ignore since some browsers don't support databases
-                        console.error(e)
+                        console.error(e);
                     }
                 }
 
                 if (response.results.length > 0) {
                     // Save these orders to the local database
                     // Non-critical:
-                    this.storeOrders(response.results).catch(console.error)
+                    this.storeOrders(response.results).catch(console.error);
 
                     // Non-critical:
-                    this.setlastFetchedOrder(response.results[response.results.length - 1]).catch(console.error)
+                    this.setlastFetchedOrder(response.results[response.results.length - 1]).catch(console.error);
 
                     // Already send these new orders to our listeners, who want to know new incoming orders
-                    const fetched = response.results.filter(o => o.status !== OrderStatus.Deleted)
-                    this.ordersEventBus.sendEvent("fetched", fetched).catch(console.error)
-                    
+                    const fetched = response.results.filter(o => o.status !== OrderStatus.Deleted);
+                    this.ordersEventBus.sendEvent('fetched', fetched).catch(console.error);
+
                     // Let listeners know that some orders are deleted
-                    const deleted = response.results.filter(o => o.status === OrderStatus.Deleted)
+                    const deleted = response.results.filter(o => o.status === OrderStatus.Deleted);
                     if (deleted.length > 0) {
-                        this.ordersEventBus.sendEvent("deleted", deleted).catch(console.error)
+                        this.ordersEventBus.sendEvent('deleted', deleted).catch(console.error);
                     }
                 }
-                
-                query = response.next
+
+                query = response.next;
             }
-            this.lastUpdatedOrders = new Date()
-        } finally {
-            this.isLoadingOrders = false
+            this.lastUpdatedOrders = new Date();
+        }
+        finally {
+            this.isLoadingOrders = false;
         }
     }
 
     /// TICKETS
     async removeTicketPatch(secret: string) {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["ticketPatches"], "readwrite");
+            const transaction = db.transaction(['ticketPatches'], 'readwrite');
 
             transaction.oncomplete = () => {
-                resolve()
+                resolve();
             };
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const ticketPatches = transaction.objectStore("ticketPatches");
+            const ticketPatches = transaction.objectStore('ticketPatches');
             ticketPatches.delete(secret);
-        })
+        });
     }
-
 
     /// TICKETS
     async storeTickets(tickets: TicketPrivate[], clearPatches = true) {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["tickets", "ticketPatches"], "readwrite");
+            const transaction = db.transaction(['tickets', 'ticketPatches'], 'readwrite');
 
             transaction.oncomplete = () => {
-                resolve()
+                resolve();
             };
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("tickets");
-            const ticketPatches = transaction.objectStore("ticketPatches");
+            const objectStore = transaction.objectStore('tickets');
+            const ticketPatches = transaction.objectStore('ticketPatches');
 
             for (const ticket of tickets) {
                 if (ticket.deletedAt) {
                     objectStore.delete(ticket.secret);
-                } else {
+                }
+                else {
                     objectStore.put(ticket.encode({ version: Version }));
                 }
 
@@ -952,151 +974,150 @@ export class WebshopManager {
                     ticketPatches.delete(ticket.secret);
                 }
             }
-        })
+        });
     }
 
     async storeTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["ticketPatches"], "readwrite");
+            const transaction = db.transaction(['ticketPatches'], 'readwrite');
 
             transaction.oncomplete = () => {
-                resolve()
+                resolve();
             };
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const ticketPatches = transaction.objectStore("ticketPatches");
+            const ticketPatches = transaction.objectStore('ticketPatches');
 
             for (const patch of patches) {
                 ticketPatches.put(patch.encode({ version: Version }));
             }
-        })
+        });
     }
 
     async getTicketFromDatabase(secret: string, withPatches = true): Promise<TicketPrivate | undefined> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<TicketPrivate | undefined>((resolve, reject) => {
-            const transaction = db.transaction(["tickets", "ticketPatches"], "readonly");
+            const transaction = db.transaction(['tickets', 'ticketPatches'], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("tickets");
-            const ticketPatches = transaction.objectStore("ticketPatches");
+            const objectStore = transaction.objectStore('tickets');
+            const ticketPatches = transaction.objectStore('ticketPatches');
 
-            const request = objectStore.get(secret)
+            const request = objectStore.get(secret);
 
             request.onsuccess = () => {
-                const rawTicket = request.result
+                const rawTicket = request.result;
 
                 if (rawTicket === undefined) {
-                    resolve(undefined)
-                    return
+                    resolve(undefined);
+                    return;
                 }
 
-                const ticket = (TicketPrivate as Decoder<TicketPrivate>).decode(new ObjectData(rawTicket, { version: Version }))
+                const ticket = (TicketPrivate as Decoder<TicketPrivate>).decode(new ObjectData(rawTicket, { version: Version }));
 
                 if (withPatches) {
-                    const request2 = ticketPatches.get(secret)
+                    const request2 = ticketPatches.get(secret);
                     request2.onsuccess = () => {
-                        const rawPatch = request2.result
+                        const rawPatch = request2.result;
 
                         if (rawPatch === undefined) {
                             // no patch found
-                            resolve(ticket)
-                            return
+                            resolve(ticket);
+                            return;
                         }
 
-                        const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
-                        resolve(ticket.patch(patch))
-                    }
-                } else {
-                    resolve(ticket)
+                        const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }));
+                        resolve(ticket.patch(patch));
+                    };
                 }
-            }
-
-        })
+                else {
+                    resolve(ticket);
+                }
+            };
+        });
     }
 
     async deleteOrderFromDatabase(id: string): Promise<void> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["orders"], "readwrite");
+            const transaction = db.transaction(['orders'], 'readwrite');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("orders");
-            const request = objectStore.delete(id)
+            const objectStore = transaction.objectStore('orders');
+            const request = objectStore.delete(id);
             request.onsuccess = () => {
-                resolve()
-            }
-        })
+                resolve();
+            };
+        });
     }
 
     async getOrderFromDatabase(id: string): Promise<PrivateOrder | undefined> {
-        const db = await this.getDatabase()
+        const db = await this.getDatabase();
 
         return new Promise<PrivateOrder | undefined>((resolve, reject) => {
-            const transaction = db.transaction(["orders"], "readonly");
+            const transaction = db.transaction(['orders'], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                reject(event)
+                reject(event);
             };
 
             // Do the actual saving
-            const objectStore = transaction.objectStore("orders");
+            const objectStore = transaction.objectStore('orders');
 
-            const request = objectStore.get(id)
+            const request = objectStore.get(id);
             request.onsuccess = () => {
-                const rawOrder = request.result
+                const rawOrder = request.result;
 
                 if (rawOrder === undefined) {
-                    resolve(undefined)
-                    return
+                    resolve(undefined);
+                    return;
                 }
 
-                const order = (PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrder, { version: Version }))
-                resolve(order)
-            }
-
-        })
+                const order = (PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrder, { version: Version }));
+                resolve(order);
+            };
+        });
     }
 
     async fetchTickets(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<TicketPrivate[], WebshopTicketsQuery>> {
         const response = await this.context.authenticatedServer.request({
-            method: "GET",
-            path: "/webshop/"+this.preview.id+"/tickets/private",
+            method: 'GET',
+            path: '/webshop/' + this.preview.id + '/tickets/private',
             query,
             shouldRetry: retry,
             decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), WebshopTicketsQuery as Decoder<WebshopTicketsQuery>),
-            owner: this
-        })
+            owner: this,
+        });
 
-        return response.data
+        return response.data;
     }
 
     async setLastFetchedTicket(ticket: TicketPrivate) {
         this.lastFetchedTicket = {
             updatedAt: ticket.updatedAt,
-            id: ticket.id!
-        }
-        await this.storeSettingKey("lastFetchedTicket", this.lastFetchedTicket)
+            id: ticket.id!,
+        };
+        await this.storeSettingKey('lastFetchedTicket', this.lastFetchedTicket);
     }
 
     /**
@@ -1106,55 +1127,59 @@ export class WebshopManager {
     async fetchNewTickets(retry = false, reset = false, callback?: (tickets: TicketPrivate[]) => void) {
         // TODO: clear local database if resetting
         if (this.isLoadingTickets) {
-            return
+            return;
         }
-        this.isLoadingTickets = true
+        this.isLoadingTickets = true;
 
         try {
             if (this.lastFetchedTicket === undefined) {
                 // Only once (if undefined)
                 try {
-                    this.lastFetchedTicket = await this.readSettingKey("lastFetchedTicket") ?? null
+                    this.lastFetchedTicket = await this.readSettingKey('lastFetchedTicket') ?? null;
 
                     if (this.lastFetchedTicket?.updatedAt && !this.lastUpdatedTickets) {
                         // Set initial timestamp in case of network error later on
-                        this.lastUpdatedTickets = this.lastFetchedTicket.updatedAt
+                        this.lastUpdatedTickets = this.lastFetchedTicket.updatedAt;
                     }
-                } catch (e) {
-                    console.error(e)
+                }
+                catch (e) {
+                    console.error(e);
                     // Probably no database support. Ignore it and load everything.
-                    this.lastFetchedTicket = null
+                    this.lastFetchedTicket = null;
                 }
             }
-            let query: WebshopTicketsQuery | undefined = reset ? WebshopTicketsQuery.create({}) : WebshopTicketsQuery.create({
-                updatedSince: this.lastFetchedTicket ? this.lastFetchedTicket.updatedAt : undefined,
-                lastId: this.lastFetchedTicket ? this.lastFetchedTicket.id : undefined,
-            })
+            let query: WebshopTicketsQuery | undefined = reset
+                ? WebshopTicketsQuery.create({})
+                : WebshopTicketsQuery.create({
+                    updatedSince: this.lastFetchedTicket ? this.lastFetchedTicket.updatedAt : undefined,
+                    lastId: this.lastFetchedTicket ? this.lastFetchedTicket.id : undefined,
+                });
 
             while (query) {
-                const response: PaginatedResponse<TicketPrivate[], WebshopTicketsQuery> = await this.fetchTickets(query, retry)
+                const response: PaginatedResponse<TicketPrivate[], WebshopTicketsQuery> = await this.fetchTickets(query, retry);
 
                 if (response.results.length > 0) {
                     // Save these orders to the local database
                     // Non-critical:
-                    this.storeTickets(response.results).catch(console.error)
+                    this.storeTickets(response.results).catch(console.error);
 
                     // Non-critical:
-                    this.setLastFetchedTicket(response.results[response.results.length - 1]).catch(console.error)
+                    this.setLastFetchedTicket(response.results[response.results.length - 1]).catch(console.error);
 
                     if (callback) {
-                        callback(response.results)
-                    } else {
-                        this.ticketsEventBus.sendEvent("fetched", response.results).catch(console.error)
+                        callback(response.results);
+                    }
+                    else {
+                        this.ticketsEventBus.sendEvent('fetched', response.results).catch(console.error);
                     }
                 }
-                
-                query = response.next
+
+                query = response.next;
             }
-            this.lastUpdatedTickets = new Date()
-        } finally {
-            this.isLoadingTickets = false
+            this.lastUpdatedTickets = new Date();
+        }
+        finally {
+            this.isLoadingTickets = false;
         }
     }
-
 }

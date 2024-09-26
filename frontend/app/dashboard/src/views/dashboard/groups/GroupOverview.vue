@@ -17,12 +17,14 @@
                 Deze groep staat in een categorie die enkel zichtbaar is voor beheerders of leden met een functie
             </p>
             <p v-if="!isArchive && !isOpen" class="info-box">
-                Inschrijvingen zijn momenteel gesloten via het ledenportaal. <template v-if="hasFullPermissions">Stel een datum in waarop ze moeten openen, of open de inschrijvingen manueel via de knoppen onderaan.</template>
+                Inschrijvingen zijn momenteel gesloten via het ledenportaal. <template v-if="hasFullPermissions">
+                    Stel een datum in waarop ze moeten openen, of open de inschrijvingen manueel via de knoppen onderaan.
+                </template>
             </p>
 
             <BillingWarningBox filter-types="members" class="data-table-prefix" />
 
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
@@ -92,7 +94,7 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-                    
+
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
@@ -198,8 +200,8 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from "@stamhoofd/components";
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 
@@ -211,25 +213,25 @@ import EditGroupPageView from './edit/EditGroupPageView.vue';
 const props = defineProps<{
     group: Group;
     period: OrganizationRegistrationPeriod;
-}>()
+}>();
 
-const isPublic = computed(() => props.group.isPublic(props.period.availableCategories))
-const title = computed(() => props.group.settings.name)
-const isArchive = computed(() => props.group.status === GroupStatus.Archived)
-const isOpen = computed(() => !props.group.closed)
+const isPublic = computed(() => props.group.isPublic(props.period.availableCategories));
+const title = computed(() => props.group.settings.name);
+const isArchive = computed(() => props.group.status === GroupStatus.Archived);
+const isOpen = computed(() => !props.group.closed);
 const auth = useAuth();
-const hasFullPermissions = computed(() => auth.canAccessGroup(props.group, PermissionLevel.Full))
-const organizationManager = useOrganizationManager()
-const organization = useOrganization()
-const navigationController = useNavigationController()
-const present = usePresent()
-const isLocked = computed(() => props.period.period.locked)
+const hasFullPermissions = computed(() => auth.canAccessGroup(props.group, PermissionLevel.Full));
+const organizationManager = useOrganizationManager();
+const organization = useOrganization();
+const navigationController = useNavigationController();
+const present = usePresent();
+const isLocked = computed(() => props.period.period.locked);
 const platform = usePlatform();
 
 enum Routes {
-    "Members" = "Members",
-    "WaitingList" = "WaitingList",
-    "Responsibility" = "Responsibility"
+    Members = 'Members',
+    WaitingList = 'WaitingList',
+    Responsibility = 'Responsibility',
 }
 
 defineRoutes([
@@ -239,9 +241,9 @@ defineRoutes([
         component: MembersTableView as ComponentOptions,
         paramsToProps: () => {
             return {
-                group: props.group
-            }
-        }
+                group: props.group,
+            };
+        },
     },
     {
         url: 'wachtlijst',
@@ -249,12 +251,12 @@ defineRoutes([
         component: MembersTableView as ComponentOptions,
         paramsToProps: () => {
             if (!props.group.waitingList) {
-                throw new Error('No waiting list')
+                throw new Error('No waiting list');
             }
             return {
-                group: props.group.waitingList
-            }
-        }
+                group: props.group.waitingList,
+            };
+        },
     },
     {
         url: Routes.Members,
@@ -262,57 +264,57 @@ defineRoutes([
         present: 'popup',
         paramsToProps: () => {
             return {
-                group: props.group
-            }
-        }
+                group: props.group,
+            };
+        },
     },
     {
         url: '/r/@slug',
         name: Routes.Responsibility,
         params: {
-            slug: String
+            slug: String,
         },
         component: MembersTableView as ComponentOptions,
-        paramsToProps(params: {slug: string}) {
-            const responsibility = linkedResponsibilities.value.find(r => Formatter.slug(r.name) === params.slug)
+        paramsToProps(params: { slug: string }) {
+            const responsibility = linkedResponsibilities.value.find(r => Formatter.slug(r.name) === params.slug);
 
             if (!responsibility) {
-                throw new Error('Responsibility not found')
+                throw new Error('Responsibility not found');
             }
 
             return {
                 responsibility,
-                customTitle: responsibility.name + ' ('+ props.group.settings.name + ')',
-                customFilter: getResponsibilityFilter(responsibility)
-            }
+                customTitle: responsibility.name + ' (' + props.group.settings.name + ')',
+                customFilter: getResponsibilityFilter(responsibility),
+            };
         },
         propsToParams(props) {
-            if (!("responsibility" in props)) {
-                throw new Error('Missing responsibility')
+            if (!('responsibility' in props)) {
+                throw new Error('Missing responsibility');
             }
 
             return {
                 params: {
-                    slug: Formatter.slug((props.responsibility as MemberResponsibility).name as string)
-                }
-            }
-        }
-    }
-])
+                    slug: Formatter.slug((props.responsibility as MemberResponsibility).name as string),
+                },
+            };
+        },
+    },
+]);
 
-const navigate = useNavigate()
+const navigate = useNavigate();
 const linkedResponsibilities = computed(() => {
     if (props.group.defaultAgeGroupId === null) {
-        return []
+        return [];
     }
 
     if (!auth.hasFullAccess()) {
-        return []
+        return [];
     }
 
-    const id = props.group.defaultAgeGroupId
-    return platform.value.config.responsibilities.filter(r => r.defaultAgeGroupIds !== null && r.defaultAgeGroupIds.includes(id) && (r.organizationTagIds === null || organization.value?.meta.matchTags(r.organizationTagIds)))
-})
+    const id = props.group.defaultAgeGroupId;
+    return platform.value.config.responsibilities.filter(r => r.defaultAgeGroupIds !== null && r.defaultAgeGroupIds.includes(id) && (r.organizationTagIds === null || organization.value?.meta.matchTags(r.organizationTagIds)));
+});
 
 function getResponsibilityFilter(responsibility: MemberResponsibility) {
     return {
@@ -320,19 +322,19 @@ function getResponsibilityFilter(responsibility: MemberResponsibility) {
             $elemMatch: {
                 responsibilityId: responsibility.id,
                 group: {
-                    id: props.group.id
-                }
-            }
-        }
-    }
+                    id: props.group.id,
+                },
+            },
+        },
+    };
 }
 
 async function openResponsibility(responsibility: MemberResponsibility) {
     await navigate(Routes.Responsibility, {
         params: {
-            slug: Formatter.slug(responsibility.name)
-        }
-    })
+            slug: Formatter.slug(responsibility.name),
+        },
+    });
 }
 
 async function displayEditComponent(component: any, animated = true) {
@@ -341,35 +343,35 @@ async function displayEditComponent(component: any, animated = true) {
             promise: async () => {
                 try {
                     // Make sure we have an up to date group
-                    await organizationManager.value.forceUpdate()
+                    await organizationManager.value.forceUpdate();
                     return new ComponentWithProperties(component, {
-                        group: props.group, 
+                        group: props.group,
                         period: props.period,
-                        organization: organization.value, 
+                        organization: organization.value,
                         iswNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                            patch.id = props.period.id
-                            await organizationManager.value.patchPeriod(patch)
-                        }
-                    })
-                } catch (e) {
-                    Toast.fromError(e).show()
-                    throw e
+                            patch.id = props.period.id;
+                            await organizationManager.value.patchPeriod(patch);
+                        },
+                    });
                 }
-            }
-        })
-    })
+                catch (e) {
+                    Toast.fromError(e).show();
+                    throw e;
+                }
+            },
+        }),
+    });
 
     await present({
         animated,
         adjustHistory: animated,
-        modalDisplayStyle: "popup",
+        modalDisplayStyle: 'popup',
         components: [
-            displayedComponent
-        ]
+            displayedComponent,
+        ],
     });
 }
-
 
 async function editGeneral(animated = true) {
     const displayedComponent = new ComponentWithProperties(NavigationController, {
@@ -377,33 +379,34 @@ async function editGeneral(animated = true) {
             promise: async () => {
                 try {
                     // Make sure we have an up to date group
-                    await organizationManager.value.forceUpdate()
+                    await organizationManager.value.forceUpdate();
                     return new ComponentWithProperties(EditGroupView, {
-                        group: props.group, 
+                        group: props.group,
                         iswNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
                             const periodPatch = OrganizationRegistrationPeriod.patch({
-                                id: props.period.id
-                            })
-                            periodPatch.groups.addPatch(patch)
-                            await organizationManager.value.patchPeriod(periodPatch)
-                        }
-                    })
-                } catch (e) {
-                    Toast.fromError(e).show()
-                    throw e
+                                id: props.period.id,
+                            });
+                            periodPatch.groups.addPatch(patch);
+                            await organizationManager.value.patchPeriod(periodPatch);
+                        },
+                    });
                 }
-            }
-        })
-    })
+                catch (e) {
+                    Toast.fromError(e).show();
+                    throw e;
+                }
+            },
+        }),
+    });
 
     await present({
         animated,
         adjustHistory: animated,
-        modalDisplayStyle: "popup",
+        modalDisplayStyle: 'popup',
         components: [
-            displayedComponent
-        ]
+            displayedComponent,
+        ],
     });
 }
 
@@ -411,23 +414,23 @@ async function editPermissions(animated = true) {
     await present({
         animated,
         adjustHistory: animated,
-        modalDisplayStyle: "popup",
+        modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditResourceRolesView, {
                 description: 'Kies hier wie deze inschrijvingsgroep kan bekijken, bewerken of beheren.',
                 resource: {
                     id: props.group.id,
                     name: props.group.settings.name,
-                    type: PermissionsResourceType.Groups
+                    type: PermissionsResourceType.Groups,
                 },
-                configurableAccessRights: []
-            })
-        ]
+                configurableAccessRights: [],
+            }),
+        ],
     });
 }
 
 async function editPage(animated = true) {
-    await displayEditComponent(EditGroupPageView, animated)
+    await displayEditComponent(EditGroupPageView, animated);
 }
 
 async function editEmails(animated = true) {
@@ -437,204 +440,210 @@ async function editEmails(animated = true) {
                 groups: props.group.waitingList ? [props.group, props.group.waitingList] : [props.group],
                 allowEditGenerated: false,
                 types: [
-                    EmailTemplateType.RegistrationConfirmation
-                ]
-            })
+                    EmailTemplateType.RegistrationConfirmation,
+                ],
+            }),
         ],
-        modalDisplayStyle: "popup",
+        modalDisplayStyle: 'popup',
         animated,
-    })
+    });
 }
 
 async function openGroup() {
-    if (!await CenteredMessage.confirm("Ben je zeker dat je de inschrijvingen wilt openen?", "Ja, openen")) {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je de inschrijvingen wilt openen?', 'Ja, openen')) {
         return;
     }
 
     try {
         const p = Group.patch({
             id: props.group.id,
-            status: GroupStatus.Open
+            status: GroupStatus.Open,
         });
 
         if (props.group.settings.registrationStartDate && props.group.settings.registrationStartDate.getTime() > Date.now()) {
             p.settings = GroupSettings.patch({
-                registrationStartDate: null
-            })
+                registrationStartDate: null,
+            });
         }
 
         if (props.group.settings.registrationEndDate && props.group.settings.registrationEndDate.getTime() <= Date.now()) {
             p.settings = GroupSettings.patch({
-                registrationEndDate: null
-            })
+                registrationEndDate: null,
+            });
         }
-        await organizationManager.value.patchGroup(props.period, p)
-        new Toast("De inschrijvingen zijn terug open", "success green").show()
-    } catch (e) {
-        Toast.fromError(e).show()
+        await organizationManager.value.patchGroup(props.period, p);
+        new Toast('De inschrijvingen zijn terug open', 'success green').show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
     }
 }
 
 async function archiveGroup() {
-    if (!await CenteredMessage.confirm("Ben je zeker dat je deze groep wilt archiveren?", "Ja, archiveren")) {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze groep wilt archiveren?', 'Ja, archiveren')) {
         return;
     }
 
     try {
-        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({})
+        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({});
 
         for (const category of props.period.settings.categories) {
             if (category.groupIds.includes(props.group.id)) {
-                const catPatch = GroupCategory.patch({id: category.id})
-                catPatch.groupIds.addDelete(props.group.id)
-                settingsPatch.categories.addPatch(catPatch)
+                const catPatch = GroupCategory.patch({ id: category.id });
+                catPatch.groupIds.addDelete(props.group.id);
+                settingsPatch.categories.addPatch(catPatch);
             }
         }
 
         const patch = OrganizationRegistrationPeriod.patch({
             id: props.period.id,
-            settings: settingsPatch
-        })
+            settings: settingsPatch,
+        });
         patch.groups.addPatch(Group.patch({
             id: props.group.id,
-            status: GroupStatus.Archived
-        }))
+            status: GroupStatus.Archived,
+        }));
 
-        await organizationManager.value.patchPeriod(patch)
-        new Toast("De groep is gearchiveerd", "success green").show()
-    } catch (e) {
-        Toast.fromError(e).show()
+        await organizationManager.value.patchPeriod(patch);
+        new Toast('De groep is gearchiveerd', 'success green').show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
     }
 }
 
 async function deleteGroup() {
-    if (!await CenteredMessage.confirm("Ben je zeker dat je deze groep wilt verwijderen?", "Ja, verwijderen")) {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze groep wilt verwijderen?', 'Ja, verwijderen')) {
         return;
     }
 
-    if (!await CenteredMessage.confirm("Je kan dit niet ongedaan maken en verliest gegevens van alle bijhorende leden?", "Ja, verwijderen")) {
+    if (!await CenteredMessage.confirm('Je kan dit niet ongedaan maken en verliest gegevens van alle bijhorende leden?', 'Ja, verwijderen')) {
         return;
     }
 
     try {
-        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({})
+        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({});
 
         for (const category of props.period.settings.categories) {
             if (category.groupIds.includes(props.group.id)) {
-                const catPatch = GroupCategory.patch({id: category.id})
-                catPatch.groupIds.addDelete(props.group.id)
-                settingsPatch.categories.addPatch(catPatch)
+                const catPatch = GroupCategory.patch({ id: category.id });
+                catPatch.groupIds.addDelete(props.group.id);
+                settingsPatch.categories.addPatch(catPatch);
             }
         }
 
         const patch = OrganizationRegistrationPeriod.patch({
             id: props.period.id,
-            settings: settingsPatch
-        })
-        patch.groups.addDelete(props.group.id)
+            settings: settingsPatch,
+        });
+        patch.groups.addDelete(props.group.id);
 
-        await organizationManager.value.patchPeriod(patch)
-        new Toast("De groep is verwijderd", "success green").show()
-        await navigationController.value?.pop({force: true})
-    } catch (e) {
-        Toast.fromError(e).show()
+        await organizationManager.value.patchPeriod(patch);
+        new Toast('De groep is verwijderd', 'success green').show();
+        await navigationController.value?.pop({ force: true });
+    }
+    catch (e) {
+        Toast.fromError(e).show();
     }
 }
 
-const allCategories = computed(() => organization.value ? organization.value.getCategoryTree({admin: true, permissions: auth.permissions}).getAllCategories().filter(c => c.categories.length === 0) : [])
+const allCategories = computed(() => organization.value ? organization.value.getCategoryTree({ admin: true, permissions: auth.permissions }).getAllCategories().filter(c => c.categories.length === 0) : []);
 
 async function restoreGroup(event: MouseEvent) {
     if (allCategories.value.length === 1) {
-        await unarchiveGroupTo(props.group, allCategories.value[0])
-        return
+        await unarchiveGroupTo(props.group, allCategories.value[0]);
+        return;
     }
 
     const menu = new ContextMenu([
-        allCategories.value.map(cat => 
+        allCategories.value.map(cat =>
             new ContextMenuItem({
                 name: cat.settings.name,
-                rightText: cat.groupIds.length+"",
+                rightText: cat.groupIds.length + '',
                 action: () => {
-                    unarchiveGroupTo(props.group, cat).catch(console.error)
-                    return true
-                }
-            })
-        )
-    ])
-    await menu.show({ clickEvent: event })
+                    unarchiveGroupTo(props.group, cat).catch(console.error);
+                    return true;
+                },
+            }),
+        ),
+    ]);
+    await menu.show({ clickEvent: event });
 }
 
 async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
     if (!await CenteredMessage.confirm(`${group.settings.name} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten')) {
-        return
+        return;
     }
 
-    const wasArchive = isArchive.value
+    const wasArchive = isArchive.value;
 
     try {
-        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({})
-        const catPatch = GroupCategory.patch({id: cat.id})
+        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({});
+        const catPatch = GroupCategory.patch({ id: cat.id });
 
         if (cat.groupIds.filter(id => id === group.id).length > 1) {
             // Not fixable, we need to set the ids manually
-            const cleaned = cat.groupIds.filter(id => id !== group.id)
-            cleaned.push(group.id)
-            catPatch.groupIds = cleaned as any
-        } else {
+            const cleaned = cat.groupIds.filter(id => id !== group.id);
+            cleaned.push(group.id);
+            catPatch.groupIds = cleaned as any;
+        }
+        else {
             // We need to delete it to fix issues if it is still there
-            catPatch.groupIds.addDelete(group.id)
-            catPatch.groupIds.addPut(group.id)
+            catPatch.groupIds.addDelete(group.id);
+            catPatch.groupIds.addPut(group.id);
         }
 
-        settingsPatch.categories.addPatch(catPatch)
+        settingsPatch.categories.addPatch(catPatch);
 
         const patch = OrganizationRegistrationPeriod.patch({
             id: props.period.id,
-            settings: settingsPatch
-        })
+            settings: settingsPatch,
+        });
 
         patch.groups.addPatch(Group.patch({
             id: group.id,
-            status: GroupStatus.Closed
-        }))
+            status: GroupStatus.Closed,
+        }));
 
         try {
-            await organizationManager.value.patchPeriod(patch)
-            
+            await organizationManager.value.patchPeriod(patch);
+
             // Manually update this group
-            const foundGroup = props.period.groups.find(g => g.id === group.id)
+            const foundGroup = props.period.groups.find(g => g.id === group.id);
             if (foundGroup) {
                 // Bit ugly, but only reliable way
-                props.group.set(foundGroup)
+                props.group.set(foundGroup);
             }
-        } catch (e) {
-            Toast.fromError(e).show()
         }
-        new Toast(wasArchive ? "De inschrijvingsgroep is teruggezet" : "De inschrijvingen zijn gesloten", "success green").show()
-    } catch (e) {
-        Toast.fromError(e).show()
+        catch (e) {
+            Toast.fromError(e).show();
+        }
+        new Toast(wasArchive ? 'De inschrijvingsgroep is teruggezet' : 'De inschrijvingen zijn gesloten', 'success green').show();
     }
-
+    catch (e) {
+        Toast.fromError(e).show();
+    }
 }
 
 async function closeGroup() {
-    if (!await CenteredMessage.confirm("Ben je zeker dat je de inschrijvingen wilt sluiten?", "Ja, sluiten")) {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je de inschrijvingen wilt sluiten?', 'Ja, sluiten')) {
         return;
     }
 
     try {
         const patch = OrganizationRegistrationPeriod.patch({
-            id: props.period.id
-        })
+            id: props.period.id,
+        });
         patch.groups.addPatch(Group.patch({
             id: props.group.id,
-            status: GroupStatus.Closed
-        }))
+            status: GroupStatus.Closed,
+        }));
 
-        await organizationManager.value.patchPeriod(patch)
-        new Toast("De inschrijvingen zijn gesloten", "success green").show()
-    } catch (e) {
-        Toast.fromError(e).show()
+        await organizationManager.value.patchPeriod(patch);
+        new Toast('De inschrijvingen zijn gesloten', 'success green').show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
     }
 }
 </script>

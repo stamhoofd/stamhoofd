@@ -10,7 +10,7 @@
         <main>
             <h1>
                 Document
-            </h1>           
+            </h1>
 
             <p v-if="unlinkedAnswers.length" class="info-box">
                 {{ $t('719f31f6-cae0-41b0-97e6-ab8f5ff01d19', { unlinkedAnswersText }) }}
@@ -92,13 +92,13 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { ErrorBox, LongPressDirective, STErrorsDefault, STList, STListItem, STNavigationBar, TableActionsContextMenu, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
-import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { ErrorBox, LongPressDirective, STErrorsDefault, STList, STListItem, STNavigationBar, TableActionsContextMenu, TooltipDirective, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { DocumentActionBuilder } from "./DocumentActionBuilder";
+import { DocumentActionBuilder } from './DocumentActionBuilder';
 
 @Component({
     components: {
@@ -106,79 +106,79 @@ import { DocumentActionBuilder } from "./DocumentActionBuilder";
         STList,
         STListItem,
         STErrorsDefault,
-        ViewRecordCategoryAnswersBox
+        ViewRecordCategoryAnswersBox,
     },
     filters: {
         dateTime: Formatter.dateTimeWithDay.bind(Formatter),
-        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
+        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
     },
     directives: {
         tooltip: TooltipDirective,
-        LongPress: LongPressDirective
-    }
+        LongPress: LongPressDirective,
+    },
 })
-export default class DocumentView extends Mixins(NavigationMixin){
-    loading = false
-    errorBox: ErrorBox | null = null
+export default class DocumentView extends Mixins(NavigationMixin) {
+    loading = false;
+    errorBox: ErrorBox | null = null;
 
     @Prop({ required: true })
-        document!: Document
+    document!: Document;
 
     @Prop({ required: true })
-        template!: DocumentTemplatePrivate
-    
-    @Prop({ default: null })
-        getNext!: (document: Document) => Document | null;
+    template!: DocumentTemplatePrivate;
 
     @Prop({ default: null })
-        getPrevious!: (document: Document) => Document | null;
+    getNext!: (document: Document) => Document | null;
+
+    @Prop({ default: null })
+    getPrevious!: (document: Document) => Document | null;
 
     get hasWarnings() {
-        return this.warnings.length > 0
+        return this.warnings.length > 0;
     }
 
     get warnings(): RecordWarning[] {
-        const warnings: RecordWarning[] = []
+        const warnings: RecordWarning[] = [];
 
         for (const answer of this.usedAnswers) {
-            warnings.push(...answer.getWarnings())
+            warnings.push(...answer.getWarnings());
         }
 
-        return warnings
+        return warnings;
     }
 
     get sortedWarnings() {
-        return this.warnings.slice().sort(RecordWarning.sort)
+        return this.warnings.slice().sort(RecordWarning.sort);
     }
 
     get usedAnswers() {
-        return this.document.data.fieldAnswers.filter(a => {
-            return !!this.recordCategories.find(c => {
-                return !!c.getAllRecords().find(r => {
-                    return r.id === a.settings.id
+        return this.document.data.fieldAnswers.filter((a) => {
+            return !!this.recordCategories.find((c) => {
+                return !!c.getAllRecords().find((r) => {
+                    return r.id === a.settings.id;
                 });
-            })
-        })
+            });
+        });
     }
 
     get unlinkedAnswers() {
-        return this.usedAnswers.filter(a => !!a.reviewedAt)
+        return this.usedAnswers.filter(a => !!a.reviewedAt);
     }
 
     get unlinkedAnswersText() {
-        return Formatter.joinLast(this.unlinkedAnswers.map(a => a.settings.name), ", ", " en ")
+        return Formatter.joinLast(this.unlinkedAnswers.map(a => a.settings.name), ', ', ' en ');
     }
 
     get hasNext(): boolean {
         if (!this.getNext || !this.document) {
-            return false
+            return false;
         }
         return !!this.getNext(this.document);
     }
 
     get hasPrevious(): boolean {
         if (!this.getPrevious || !this.document) {
-            return false
+            return false;
         }
         return !!this.getPrevious(this.document);
     }
@@ -188,38 +188,38 @@ export default class DocumentView extends Mixins(NavigationMixin){
             $context: this.$context,
             template: this.template,
             component: this,
-        })
+        });
     }
 
     get statusName() {
-        return this.document ? DocumentStatusHelper.getName(this.document.status) : ""
+        return this.document ? DocumentStatusHelper.getName(this.document.status) : '';
     }
 
     get statusColor() {
-        return this.document ? DocumentStatusHelper.getColor(this.document.status) : ""
+        return this.document ? DocumentStatusHelper.getColor(this.document.status) : '';
     }
 
     showContextMenu(event) {
         const el = event.currentTarget;
-        const bounds = el.getBoundingClientRect()
+        const bounds = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: bounds.left,
             y: bounds.bottom,
-            xPlacement: "right",
-            yPlacement: "bottom",
+            xPlacement: 'right',
+            yPlacement: 'bottom',
             actions: this.actionBuilder.getActions(),
-            //selection: todo
+            // selection: todo
         });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+        this.present(displayedComponent.setDisplayStyle('overlay'));
     }
 
     editDocument() {
-        //this.actionBuilder.editOrder(this.document).catch(console.error)
+        // this.actionBuilder.editOrder(this.document).catch(console.error)
     }
 
     resetDocument() {
-        this.actionBuilder.resetDocuments([this.document]).catch(console.error)
+        this.actionBuilder.resetDocuments([this.document]).catch(console.error);
     }
 
     goBack() {
@@ -233,13 +233,13 @@ export default class DocumentView extends Mixins(NavigationMixin){
             getNext: this.getNext,
             getPrevious: this.getPrevious,
         });
-        
+
         this.show({
             components: [component],
             replace: 1,
             reverse: true,
-            animated: false
-        })
+            animated: false,
+        });
     }
 
     goNext() {
@@ -256,18 +256,16 @@ export default class DocumentView extends Mixins(NavigationMixin){
         this.show({
             components: [component],
             replace: 1,
-            animated: false
-        })
+            animated: false,
+        });
     }
 
     activated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.addEventListener("keydown", this.onKey);
+        document.addEventListener('keydown', this.onKey);
     }
 
     deactivated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.removeEventListener("keydown", this.onKey);
+        document.removeEventListener('keydown', this.onKey);
     }
 
     onKey(event) {
@@ -276,29 +274,30 @@ export default class DocumentView extends Mixins(NavigationMixin){
         }
 
         if (!this.isFocused) {
-            return
+            return;
         }
 
         const key = event.key || event.keyCode;
 
-        if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
+        if (key === 'ArrowLeft' || key === 'ArrowUp' || key === 'PageUp') {
             this.goBack();
             event.preventDefault();
-        } else if (key === "ArrowRight" || key === "ArrowDown" || key === "PageDown") {
+        }
+        else if (key === 'ArrowRight' || key === 'ArrowDown' || key === 'PageDown') {
             this.goNext();
             event.preventDefault();
         }
     }
-   
+
     get recordCategories(): RecordCategory[] {
         return RecordCategory.flattenCategoriesForAnswers(
             [...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories],
-            [...this.document.data.fieldAnswers.values()]
-        )
+            [...this.document.data.fieldAnswers.values()],
+        );
     }
 
     get fieldAnswers() {
-        return this.document.data.fieldAnswers
+        return this.document.data.fieldAnswers;
     }
 }
 </script>

@@ -8,7 +8,7 @@
                 <span v-if="!isPublic" v-tooltip="'Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.'" class="icon lock small" />
                 <span v-if="parentCategories.length" class="button icon arrow-swap" />
             </h1>
-          
+
             <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="categories.length > 0">
@@ -61,7 +61,7 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-                    
+
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
                         <template #left>
                             <GroupAvatar :group="group" />
@@ -102,12 +102,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, ContextMenu, ContextMenuItem, EditGroupView, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { Group, GroupCategory, GroupCategoryTree, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
-import GroupOverview from "./GroupOverview.vue";
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { BackButton, ContextMenu, ContextMenuItem, EditGroupView, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
+import { Group, GroupCategory, GroupCategoryTree, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
+import GroupOverview from './GroupOverview.vue';
 
 @Component({
     components: {
@@ -118,34 +118,34 @@ import GroupOverview from "./GroupOverview.vue";
         STList,
         STListItem,
         BackButton,
-        GroupAvatar
+        GroupAvatar,
     },
 })
 export default class CategoryView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
 
     @Prop({ required: true })
-        category: GroupCategory
+    category: GroupCategory;
 
     @Prop({ required: true })
-        period: OrganizationRegistrationPeriod
+    period: OrganizationRegistrationPeriod;
 
     get parentCategories() {
         return [
             ...(!this.isRoot && this.period.settings.rootCategory ? [this.period.settings.rootCategory] : []),
             ...this.category.getParentCategories(this.period.availableCategories),
-        ]
+        ];
     }
 
     get isPublic() {
-        return this.tree.isPublic(this.period.availableCategories)
+        return this.tree.isPublic(this.period.availableCategories);
     }
 
     openCategorySelector(event: MouseEvent) {
         if (this.parentCategories.length === 0) {
-            return
+            return;
         }
 
         const actions: ContextMenuItem[] = [];
@@ -155,9 +155,9 @@ export default class CategoryView extends Mixins(NavigationMixin) {
                 name: parent.id === this.period.settings.rootCategoryId ? 'Alle inschrijvingsgroepen' : parent.settings.name,
                 icon: 'category',
                 action: () => {
-                    this.swapCategory(parent)
+                    this.swapCategory(parent);
                     return true;
-                }
+                },
             }));
         }
         const menu = new ContextMenu([
@@ -168,92 +168,92 @@ export default class CategoryView extends Mixins(NavigationMixin) {
                     disabled: true,
                     action: () => {
                         return true;
-                    }
+                    },
                 }),
-                ...actions
-            ]
-        ])
-        menu.show({ clickEvent: event, xPlacement: "right", yPlacement: "bottom" }).catch(console.error)
+                ...actions,
+            ],
+        ]);
+        menu.show({ clickEvent: event, xPlacement: 'right', yPlacement: 'bottom' }).catch(console.error);
     }
 
     swapCategory(category: GroupCategory) {
         this.show({
             components: [new ComponentWithProperties(CategoryView, {
                 category,
-                period: this.period
+                period: this.period,
             })],
             replace: this.navigationController?.components?.length ?? 1,
-            animated: false
-        })
+            animated: false,
+        });
     }
 
     get reactiveCategory() {
-        const c = this.period.settings.categories.find(c => c.id === this.category.id)
+        const c = this.period.settings.categories.find(c => c.id === this.category.id);
         if (c) {
-            return c
+            return c;
         }
-        return this.category
+        return this.category;
     }
 
-    getMemberCount({waitingList}: {waitingList?: boolean} = {}) {
-        return this.tree.getMemberCount({waitingList})
+    getMemberCount({ waitingList }: { waitingList?: boolean } = {}) {
+        return this.tree.getMemberCount({ waitingList });
     }
 
     get tree() {
-        return GroupCategoryTree.build(this.reactiveCategory, this.period, {permissions: this.$context.auth.permissions})
+        return GroupCategoryTree.build(this.reactiveCategory, this.period, { permissions: this.$context.auth.permissions });
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get isRoot() {
-        return this.category.id === this.organization.meta.rootCategoryId
+        return this.category.id === this.organization.meta.rootCategoryId;
     }
 
     get title() {
-        return this.isRoot ? 'Alle inschrijvingsgroepen' : this.name+''
+        return this.isRoot ? 'Alle inschrijvingsgroepen' : this.name + '';
     }
 
     get name() {
-        return this.reactiveCategory.settings.name
+        return this.reactiveCategory.settings.name;
     }
 
     get canCreate() {
-        return this.$context.auth.canCreateGroupInCategory(this.category)
+        return this.$context.auth.canCreateGroupInCategory(this.category);
     }
 
     get groups() {
-        return this.tree.groups
+        return this.tree.groups;
     }
 
     get categories() {
-        return this.tree.categories
+        return this.tree.categories;
     }
 
     openCategory(category: GroupCategory) {
         this.show(new ComponentWithProperties(CategoryView, {
             category,
-            period: this.period
-        }))
+            period: this.period,
+        }));
     }
 
     openGroup(group: Group) {
         this.show(new ComponentWithProperties(GroupOverview, {
             group,
-            period: this.period
-        }))
+            period: this.period,
+        }));
     }
 
     openAll(animated = true) {
         this.show({
             components: [
                 new ComponentWithProperties(MembersTableView, {
-                    category: this.tree
-                })
+                    category: this.tree,
+                }),
             ],
-            animated
-        })
+            animated,
+        });
     }
 
     createGroup() {
@@ -262,26 +262,26 @@ export default class CategoryView extends Mixins(NavigationMixin) {
             periodId: this.period.period.id,
             settings: GroupSettings.create({}),
             privateSettings: GroupPrivateSettings.create({}),
-            status: GroupStatus.Closed
-        })
-        const settings = OrganizationRegistrationPeriodSettings.patch({})
+            status: GroupStatus.Closed,
+        });
+        const settings = OrganizationRegistrationPeriodSettings.patch({});
 
-        const me = GroupCategory.patch({ id: this.category.id })
-        me.groupIds.addPut(group.id)
-        settings.categories.addPatch(me)
-        
-        this.present(new ComponentWithProperties(EditGroupView, { 
-            group, 
+        const me = GroupCategory.patch({ id: this.category.id });
+        me.groupIds.addPut(group.id);
+        settings.categories.addPatch(me);
+
+        this.present(new ComponentWithProperties(EditGroupView, {
+            group,
             isNew: true,
             saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
                 const p = OrganizationRegistrationPeriod.patch({
                     id: this.period.id,
-                    settings
-                })
-                p.groups.addPut(group.patch(patch))
-                await this.$organizationManager.patchPeriod(p)
-            }
-        }).setDisplayStyle("popup"))
+                    settings,
+                });
+                p.groups.addPut(group.patch(patch));
+                await this.$organizationManager.patchPeriod(p);
+            },
+        }).setDisplayStyle('popup'));
     }
 }
 </script>

@@ -6,7 +6,7 @@
         <h1 v-else>
             Kortingscode bewerken
         </h1>
-        
+
         <STErrorsDefault :error-box="errorBox" />
 
         <STInputBox title="Code" error-fields="code" :error-box="errorBox">
@@ -86,7 +86,7 @@
                 <span>Korting toevoegen</span>
             </button>
         </p>
-      
+
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
@@ -104,12 +104,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
 import { Discount, DiscountCode, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscount, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
 import EditDiscountView from './EditDiscountView.vue';
@@ -125,107 +124,108 @@ import EditProductDiscountView from './EditProductDiscountView.vue';
         STListItem,
         PermyriadInput,
         PriceInput,
-        Checkbox
+        Checkbox,
     },
 })
 export default class EditDiscountCodeView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-        discountCode!: DiscountCode
+    discountCode!: DiscountCode;
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
     @Prop({ required: true })
-        webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
     /// For now only used to update locations and times of other products that are shared
-    patchDiscountCode: AutoEncoderPatchType<DiscountCode> = DiscountCode.patch({ id: this.discountCode.id })
+    patchDiscountCode: AutoEncoderPatchType<DiscountCode> = DiscountCode.patch({ id: this.discountCode.id });
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => void;
-    
+    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => void;
+
     get patchedDiscountCode() {
-        return this.discountCode.patch(this.patchDiscountCode)
+        return this.discountCode.patch(this.patchDiscountCode);
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get link() {
-        const cleaned = Formatter.slug(this.code).toUpperCase()
-        return this.webshop.getUrl(this.organization) + '/code/' + cleaned
+        const cleaned = Formatter.slug(this.code).toUpperCase();
+        return this.webshop.getUrl(this.organization) + '/code/' + cleaned;
     }
 
     getDiscountTitle(discount: Discount) {
-        return discount.getTitle(this.webshop, true)
+        return discount.getTitle(this.webshop, true);
     }
 
     getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
     }
 
     addPatch(patch: AutoEncoderPatchType<DiscountCode>) {
-        this.patchDiscountCode = this.patchDiscountCode.patch(patch)
+        this.patchDiscountCode = this.patchDiscountCode.patch(patch);
     }
 
     get code() {
-        return this.patchedDiscountCode.code
+        return this.patchedDiscountCode.code;
     }
 
     set code(code: string) {
         this.addPatch(DiscountCode.patch({
-            code
-        }))
+            code,
+        }));
     }
 
     get description() {
-        return this.patchedDiscountCode.description
+        return this.patchedDiscountCode.description;
     }
-    
+
     set description(description: string) {
         this.addPatch(DiscountCode.patch({
-            description
-        }))
+            description,
+        }));
     }
 
     get maximumUsage() {
-        return this.patchedDiscountCode.maximumUsage
+        return this.patchedDiscountCode.maximumUsage;
     }
 
-    set maximumUsage(maximumUsage: number|null) {
+    set maximumUsage(maximumUsage: number | null) {
         this.addPatch(DiscountCode.patch({
-            maximumUsage
-        }))
+            maximumUsage,
+        }));
     }
 
     get useMaximumUsage() {
-        return this.maximumUsage !== null
+        return this.maximumUsage !== null;
     }
 
     set useMaximumUsage(useMaximumUsage: boolean) {
         if (useMaximumUsage) {
-            this.maximumUsage = this.maximumUsage ?? this.discountCode.maximumUsage ?? 1
-        } else {
-            this.maximumUsage = null
+            this.maximumUsage = this.maximumUsage ?? this.discountCode.maximumUsage ?? 1;
+        }
+        else {
+            this.maximumUsage = null;
         }
     }
 
     addDiscountsPatch(d: PatchableArrayAutoEncoder<Discount>) {
         const meta = DiscountCode.patch({
             discounts: d,
-        })
-        this.addPatch(meta)
+        });
+        this.addPatch(meta);
     }
 
     addDiscount() {
-        const discount = Discount.create({})
+        const discount = Discount.create({});
         const arr: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
         arr.addPut(discount);
 
@@ -237,12 +237,12 @@ export default class EditDiscountCodeView extends Mixins(NavigationMixin) {
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => {
                         arr.merge(patch);
-                        this.addDiscountsPatch(arr)
-                    }
-                })
+                        this.addDiscountsPatch(arr);
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     editDiscount(discount: Discount) {
@@ -253,16 +253,16 @@ export default class EditDiscountCodeView extends Mixins(NavigationMixin) {
                     discount,
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => {
-                        this.addDiscountsPatch(patch)
-                    }
-                })
+                        this.addDiscountsPatch(patch);
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     cleanCode() {
-        this.code = Formatter.slug(this.code).toUpperCase()
+        this.code = Formatter.slug(this.code).toUpperCase();
     }
 
     validate() {
@@ -270,80 +270,80 @@ export default class EditDiscountCodeView extends Mixins(NavigationMixin) {
             throw new SimpleError({
                 code: 'required_field',
                 field: 'code',
-                message: 'Vul een code in'
-            })
+                message: 'Vul een code in',
+            });
         }
 
         if (this.patchedDiscountCode.discounts.length === 0) {
             throw new SimpleError({
                 code: 'required_field',
                 field: 'discounts',
-                message: 'Voeg minstens één korting toe'
-            })
+                message: 'Voeg minstens één korting toe',
+            });
         }
     }
 
     async save() {
-        this.cleanCode()
-        
-        const isValid = await this.validator.validate()
+        this.cleanCode();
+
+        const isValid = await this.validator.validate();
         this.errorBox = null;
 
         try {
-            this.validate()
-        } catch (e) {
+            this.validate();
+        }
+        catch (e) {
             this.errorBox = new ErrorBox(e);
             return;
         }
 
         if (!isValid) {
-            return
+            return;
         }
-        const p: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray()
-        p.addPatch(this.patchDiscountCode)
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+        p.addPatch(this.patchDiscountCode);
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze kortingscode wilt verwijderen?", "Verwijderen")) {
-            return
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze kortingscode wilt verwijderen?', 'Verwijderen')) {
+            return;
         }
 
-        const p: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray()
-        p.addDelete(this.discountCode.id)
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+        p.addDelete(this.discountCode.id);
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchDiscountCode, this.discountCode, { version: Version })
+        return patchContainsChanges(this.patchDiscountCode, this.discountCode, { version: Version });
     }
 
     generateCode() {
         function nextChar() {
             // All characters except difficult to differentiate characters in uppercase (0, O, 1, L, I)
-            const allowList = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7', '8', '9']
-            return allowList[Math.floor(Math.random() * allowList.length)]
+            const allowList = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7', '8', '9'];
+            return allowList[Math.floor(Math.random() * allowList.length)];
         }
 
         function nextChars(num = 4) {
-            let result = ''
+            let result = '';
             for (let i = 0; i < num; i++) {
-                result += nextChar()
+                result += nextChar();
             }
-            return result
+            return result;
         }
 
-        this.code = nextChars(4) + '-' + nextChars(4) + '-' + nextChars(4) + '-' + nextChars(4)
+        this.code = nextChars(4) + '-' + nextChars(4) + '-' + nextChars(4) + '-' + nextChars(4);
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
-
 }
 </script>

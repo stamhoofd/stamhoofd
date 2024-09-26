@@ -13,7 +13,9 @@
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
                         </h2>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
             </div>
@@ -26,7 +28,9 @@
                     <h2 class="style-title-list">
                         {{ group.settings.name }}
                     </h2>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
             <p v-else class="info-box">
@@ -37,13 +41,11 @@
 </template>
 
 <script lang="ts">
-import { Request } from "@simonbackx/simple-networking";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
-import { DocumentTemplateGroup, Group, RecordCategory } from "@stamhoofd/structures";
-
-
+import { Request } from '@simonbackx/simple-networking';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { BackButton, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { DocumentTemplateGroup, Group, RecordCategory } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -52,46 +54,47 @@ import { DocumentTemplateGroup, Group, RecordCategory } from "@stamhoofd/structu
         STList,
         STListItem,
         BackButton,
-        Spinner
-    }
+        Spinner,
+    },
 })
-export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin){
-    @Prop({ required: true }) 
-        addGroup: (group: DocumentTemplateGroup, component: NavigationMixin) => void
-        
-    @Prop({ required: true }) 
-        fieldCategories!: RecordCategory[]
+export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin) {
+    @Prop({ required: true })
+    addGroup: (group: DocumentTemplateGroup, component: NavigationMixin) => void;
 
-    archivedGroups: Group[] = []
-    loadingGroups = true
+    @Prop({ required: true })
+    fieldCategories!: RecordCategory[];
+
+    archivedGroups: Group[] = [];
+    loadingGroups = true;
 
     get categoryTree() {
-        return this.$organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true})
+        return this.$organization.getCategoryTree({ maxDepth: 1, admin: true, smartCombine: true });
     }
 
     selectGroup(group: Group) {
         this.addGroup(DocumentTemplateGroup.create({
             groupId: group.id,
-            cycle: group.cycle
+            cycle: group.cycle,
         }), this);
     }
 
     mounted() {
-        this.load().catch(console.error)
+        this.load().catch(console.error);
     }
 
     beforeUnmount() {
         // Cancel all requests
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     async load() {
         try {
-            this.archivedGroups = await this.$organizationManager.loadArchivedGroups({owner: this})
-        } catch (e) {
-            Toast.fromError(e).show()
+            this.archivedGroups = await this.$organizationManager.loadArchivedGroups({ owner: this });
         }
-        this.loadingGroups = false
+        catch (e) {
+            Toast.fromError(e).show();
+        }
+        this.loadingGroups = false;
     }
 }
 </script>

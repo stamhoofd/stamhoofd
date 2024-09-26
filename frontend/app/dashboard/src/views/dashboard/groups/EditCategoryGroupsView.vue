@@ -7,11 +7,11 @@
                 {{ period.period.nameShort }}
             </span>
         </h1>
-            
+
         <p v-if="isRoot && enableActivities">
             Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen in {{ period.period.name }}. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je leeftijdsgroepen en één voor al je vrijwilligers.
         </p>
-          
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!isRoot">
@@ -27,7 +27,9 @@
             </STInputBox>
             <Checkbox v-if="isPlatformAdmin" v-model="locked">
                 Vergrendel deze categorie (enkel zichtbaar voor platformbeheerders)
-                <p class="style-description-small">Een vergrendelde categorie kan niet verwijderd of hernoemd worden. Enkel platformbeheerders kunnen een categorie vergrendelen of ontgrendelen (enkel jij ziet deze checkbox).</p>
+                <p class="style-description-small">
+                    Een vergrendelde categorie kan niet verwijderd of hernoemd worden. Enkel platformbeheerders kunnen een categorie vergrendelen of ontgrendelen (enkel jij ziet deze checkbox).
+                </p>
             </Checkbox>
         </template>
 
@@ -104,155 +106,156 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, STErrorsDefault, STInputBox, STList, SaveView, useAuth, useDraggableArrayIds, useErrors, usePatch } from "@stamhoofd/components";
-import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, STErrorsDefault, STInputBox, STList, SaveView, useAuth, useDraggableArrayIds, useErrors, usePatch } from '@stamhoofd/components';
+import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
 import { computed, getCurrentInstance, ref } from 'vue';
-import GroupCategoryRow from "./GroupCategoryRow.vue";
-import GroupRow from "./GroupRow.vue";
+import GroupCategoryRow from './GroupCategoryRow.vue';
+import GroupRow from './GroupRow.vue';
 import GroupTrashView from './GroupTrashView.vue';
 
 // Self reference
-const instance = getCurrentInstance()
-const EditCategoryGroupsView = instance!.type
+const instance = getCurrentInstance();
+const EditCategoryGroupsView = instance!.type;
 
 const props = defineProps<{
-    organization: Organization
-    category: GroupCategory
-    isNew: boolean
-    period: OrganizationRegistrationPeriod
+    organization: Organization;
+    category: GroupCategory;
+    isNew: boolean;
+    period: OrganizationRegistrationPeriod;
     saveHandler: ((patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>);
-}>()
+}>();
 
-const {patched: patchedPeriod, hasChanges, patch, addPatch} = usePatch(props.period)
+const { patched: patchedPeriod, hasChanges, patch, addPatch } = usePatch(props.period);
 const enableActivities = computed(() => props.organization.meta.modules.useActivities);
-const saving = ref(false)
-const pop = usePop()
-const errors = useErrors()
-const present = usePresent()
+const saving = ref(false);
+const pop = usePop();
+const errors = useErrors();
+const present = usePresent();
 const auth = useAuth();
 const isPlatformAdmin = auth.hasFullPlatformAccess();
 
 const patchedCategory = computed(() => {
-    const c = patchedPeriod.value.settings.categories.find(c => c.id === props.category.id)
+    const c = patchedPeriod.value.settings.categories.find(c => c.id === props.category.id);
     if (c) {
-        return c
+        return c;
     }
-    return props.category
-})
+    return props.category;
+});
 
-const isRoot = computed(() => props.category.id === patchedPeriod.value.settings.rootCategoryId)
-const title = computed(() => isRoot.value ? 'Inschrijvingsgroepen' : (props.isNew ? "Nieuwe categorie" : name.value))
+const isRoot = computed(() => props.category.id === patchedPeriod.value.settings.rootCategoryId);
+const title = computed(() => isRoot.value ? 'Inschrijvingsgroepen' : (props.isNew ? 'Nieuwe categorie' : name.value));
 const name = computed({
     get: () => patchedCategory.value.settings.name,
     set: (name: string) => {
-        addCategoryPatch(GroupCategory.patch({ 
+        addCategoryPatch(GroupCategory.patch({
             settings: GroupCategorySettings.patch({
-                name
-            })
-        }))
-    }
-})
+                name,
+            }),
+        }));
+    },
+});
 const locked = computed({
     get: () => patchedCategory.value.settings.locked,
     set: (locked: boolean) => {
         addCategoryPatch(
-            GroupCategory.patch({ 
+            GroupCategory.patch({
                 settings: GroupCategorySettings.patch({
-                    locked
-                })
-            })
-        )
-    }
-})
+                    locked,
+                }),
+            }),
+        );
+    },
+});
 const canDeleteOrRename = computed(() => !locked.value || isPlatformAdmin);
 const limitRegistrations = computed({
     get: () => patchedCategory.value.settings.maximumRegistrations !== null,
     set: (limitRegistrations: boolean) => {
         addCategoryPatch(
-            GroupCategory.patch({ 
+            GroupCategory.patch({
                 settings: GroupCategorySettings.patch({
-                    maximumRegistrations: limitRegistrations ? 1 : null
-                })
-            })
-        )
-    }
-})
+                    maximumRegistrations: limitRegistrations ? 1 : null,
+                }),
+            }),
+        );
+    },
+});
 const isHidden = computed({
     get: () => !patchedCategory.value.settings.public,
     set: (isHidden: boolean) => {
         addCategoryPatch(
-            GroupCategory.patch({ 
+            GroupCategory.patch({
                 settings: GroupCategorySettings.patch({
-                    public: !isHidden
-                })
-            })
-        )
-    }
-})
-const isPublic = computed(() => patchedCategory.value.isPublic(patchedPeriod.value.settings.categories))
+                    public: !isHidden,
+                }),
+            }),
+        );
+    },
+});
+const isPublic = computed(() => patchedCategory.value.isPublic(patchedPeriod.value.settings.categories));
 
 const categories = computed(() => {
-    return patchedCategory.value.categoryIds.flatMap(id => {
-        const category = patchedPeriod.value.settings.categories.find(c => c.id === id)
+    return patchedCategory.value.categoryIds.flatMap((id) => {
+        const category = patchedPeriod.value.settings.categories.find(c => c.id === id);
         if (category) {
-            return [category]
+            return [category];
         }
-        return []
-    })
-})
+        return [];
+    });
+});
 
 const draggableCategories = useDraggableArrayIds(() => {
-    return categories.value
+    return categories.value;
 }, (patch: PatchableArray<string, string, string>) => {
     addCategoryPatch(GroupCategory.patch({
-        categoryIds: patch
-    }))
-})
+        categoryIds: patch,
+    }));
+});
 
 const groups = computed(() => {
-    return patchedCategory.value.groupIds.flatMap(id => {
-        const group = patchedPeriod.value.groups.find(g => g.id === id)
+    return patchedCategory.value.groupIds.flatMap((id) => {
+        const group = patchedPeriod.value.groups.find(g => g.id === id);
         if (group) {
-            return [group]
+            return [group];
         }
-        return []
-    })
-})
+        return [];
+    });
+});
 
 const draggableGroups = useDraggableArrayIds(() => {
-    return groups.value
+    return groups.value;
 }, (patch: PatchableArray<string, string, string>) => {
     addCategoryPatch(GroupCategory.patch({
-        groupIds: patch
-    }))
-})
+        groupIds: patch,
+    }));
+});
 
 function addCategoryPatch(patch: AutoEncoderPatchType<GroupCategory>) {
-    const settings = OrganizationRegistrationPeriodSettings.patch({})
-    patch.id = props.category.id
-    settings.categories.addPatch(patch)
+    const settings = OrganizationRegistrationPeriodSettings.patch({});
+    patch.id = props.category.id;
+    settings.categories.addPatch(patch);
 
     addPatch(OrganizationRegistrationPeriod.patch({
-        settings
-    }))
+        settings,
+    }));
 }
 
 async function save() {
     if (saving.value) {
-        return
+        return;
     }
 
-    saving.value = true
+    saving.value = true;
 
     try {
-        await props.saveHandler(patch.value)
-        await pop({ force: true })
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
     }
-    saving.value = false
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    saving.value = false;
 }
 
 async function createGroup() {
@@ -260,105 +263,105 @@ async function createGroup() {
         organizationId: props.organization.id,
         periodId: props.organization.period.period.id,
         settings: GroupSettings.create({
-            name: "",
+            name: '',
             genderType: props.organization.meta.genderType === OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
         }),
         privateSettings: GroupPrivateSettings.create({}),
-        status: GroupStatus.Closed
-    })
+        status: GroupStatus.Closed,
+    });
 
-    const settings = OrganizationRegistrationPeriodSettings.patch({})
+    const settings = OrganizationRegistrationPeriodSettings.patch({});
 
-    const me = GroupCategory.patch({ id: props.category.id })
-    me.groupIds.addPut(group.id)
-    settings.categories.addPatch(me)
+    const me = GroupCategory.patch({ id: props.category.id });
+    me.groupIds.addPut(group.id);
+    settings.categories.addPatch(me);
 
     const p = OrganizationRegistrationPeriod.patch({
-        settings
-    })
+        settings,
+    });
 
-    p.groups.addPut(group)
-    
+    p.groups.addPut(group);
+
     await present({
         components: [
-            new ComponentWithProperties(EditGroupView, { 
-                group, 
+            new ComponentWithProperties(EditGroupView, {
+                group,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<Group>) => {
-                    p.groups.addPatch(patch)
-                    addPatch(p)
-                }
-            })
+                    p.groups.addPatch(patch);
+                    addPatch(p);
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function createCategory() {
-    const category = GroupCategory.create({})
-    category.groupIds = patchedCategory.value.categoryIds.length === 0 ? patchedCategory.value.groupIds : []
-    
-    const settings = OrganizationRegistrationPeriodSettings.patch({})
-    settings.categories.addPut(category)
+    const category = GroupCategory.create({});
+    category.groupIds = patchedCategory.value.categoryIds.length === 0 ? patchedCategory.value.groupIds : [];
 
-    const me = GroupCategory.patch({ 
+    const settings = OrganizationRegistrationPeriodSettings.patch({});
+    settings.categories.addPut(category);
+
+    const me = GroupCategory.patch({
         id: props.category.id,
-        groupIds: [] as any
-    })
+        groupIds: [] as any,
+    });
 
-    me.categoryIds.addPut(category.id)
-    settings.categories.addPatch(me)
+    me.categoryIds.addPut(category.id);
+    settings.categories.addPatch(me);
 
     const p = OrganizationRegistrationPeriod.patch({
-        settings
-    })
-    
+        settings,
+    });
+
     await present({
         components: [
-            new ComponentWithProperties(EditCategoryGroupsView, { 
-                category: category, 
+            new ComponentWithProperties(EditCategoryGroupsView, {
+                category: category,
                 organization: props.organization,
                 period: patchedPeriod.value.patch(p),
                 isNew: true,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addPatch(p.patch(patch))
-                }
-            })
+                    addPatch(p.patch(patch));
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function openGroupTrash() {
     await present({
         components: [
-            new ComponentWithProperties(GroupTrashView, { }).setDisplayStyle("popup")
+            new ComponentWithProperties(GroupTrashView, { }).setDisplayStyle('popup'),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm(groups.value.length ? "Ben je zeker dat je deze categorie en groepen wilt verwijderen?" : "Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
-        return
+    if (!await CenteredMessage.confirm(groups.value.length ? 'Ben je zeker dat je deze categorie en groepen wilt verwijderen?' : 'Ben je zeker dat je deze categorie wilt verwijderen?', 'Verwijderen')) {
+        return;
     }
-    const settings = OrganizationRegistrationPeriodSettings.patch({})
-    settings.categories.addDelete(props.category.id)
+    const settings = OrganizationRegistrationPeriodSettings.patch({});
+    settings.categories.addDelete(props.category.id);
     const p = OrganizationRegistrationPeriod.patch({
-        settings
-    })
-    await props.saveHandler(p)
-    await pop({ force: true })
+        settings,
+    });
+    await props.saveHandler(p);
+    await pop({ force: true });
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

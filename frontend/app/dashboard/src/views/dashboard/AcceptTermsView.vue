@@ -24,80 +24,80 @@
 </template>
 
 <script lang="ts">
-import { SimpleError } from "@simonbackx/simple-errors";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, ErrorBox, ReplaceRootEventBus, STErrorsDefault, SaveView } from "@stamhoofd/components";
-import { Organization, OrganizationMetaData } from "@stamhoofd/structures";
-import { getOrganizationSelectionRoot } from "../../getRootViews";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { Checkbox, ErrorBox, ReplaceRootEventBus, STErrorsDefault, SaveView } from '@stamhoofd/components';
+import { Organization, OrganizationMetaData } from '@stamhoofd/structures';
+import { getOrganizationSelectionRoot } from '../../getRootViews';
 
 @Component({
     components: {
         SaveView,
         Checkbox,
-        STErrorsDefault
+        STErrorsDefault,
     },
 })
 export default class AcceptTermsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
+    errorBox: ErrorBox | null = null;
 
-    acceptPrivacy = false
-    acceptTerms = false
-    acceptDataAgreement = false
-    loading = false
+    acceptPrivacy = false;
+    acceptTerms = false;
+    acceptDataAgreement = false;
+    loading = false;
 
     async save() {
         if (this.loading) {
-            return
+            return;
         }
 
         try {
-            this.loading = true
-            this.errorBox = null
-
+            this.loading = true;
+            this.errorBox = null;
 
             if (!this.acceptPrivacy) {
                 throw new SimpleError({
-                    code: "read_privacy",
-                    message: "Je moet kennis hebben genomen van het privacybeleid."
-                })
+                    code: 'read_privacy',
+                    message: 'Je moet kennis hebben genomen van het privacybeleid.',
+                });
             }
 
             if (!this.acceptTerms) {
                 throw new SimpleError({
-                    code: "read_privacy",
-                    message: "Je moet akkoord gaan met de algemene voorwaarden."
-                })
+                    code: 'read_privacy',
+                    message: 'Je moet akkoord gaan met de algemene voorwaarden.',
+                });
             }
 
             if (!this.acceptDataAgreement) {
                 throw new SimpleError({
-                    code: "read_privacy",
-                    message: "Je moet akkoord gaan met de verwerkersovereenkomst."
-                })
+                    code: 'read_privacy',
+                    message: 'Je moet akkoord gaan met de verwerkersovereenkomst.',
+                });
             }
 
             await this.$organizationManager.patch(
                 Organization.patch({
                     id: this.$organization.id,
                     meta: OrganizationMetaData.patch({
-                        lastSignedTerms: new Date()
-                    })
-                }), 
-                false
-            )
-            this.pop({ force: true })
-        } catch (e) {
-            this.loading = false
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
+                        lastSignedTerms: new Date(),
+                    }),
+                }),
+                false,
+            );
+            this.pop({ force: true });
+        }
+        catch (e) {
+            this.loading = false;
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
             return;
         }
     }
 
     async shouldNavigateAway() {
         // Force session logout
-        await ReplaceRootEventBus.sendEvent('replace', getOrganizationSelectionRoot())
+        await ReplaceRootEventBus.sendEvent('replace', getOrganizationSelectionRoot());
         return true;
     }
 }

@@ -6,9 +6,9 @@
         <h1 v-else>
             Korting bewerken
         </h1>
-        
+
         <STErrorsDefault :error-box="errorBox" />
-        
+
         <div class="split-inputs">
             <STInputBox title="Vast bedrag" error-fields="administrationFee.fixed" :error-box="errorBox">
                 <PriceInput v-model="fixedDiscount" :min="0" placeholder="Vaste kost" :required="true" />
@@ -96,7 +96,7 @@
                 </p>
             </STListItem>
         </STList>
-      
+
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
@@ -113,11 +113,10 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
 import { Discount, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscount, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
 import EditProductDiscountView from './EditProductDiscountView.vue';
@@ -132,101 +131,101 @@ import EditProductDiscountView from './EditProductDiscountView.vue';
         STListItem,
         PermyriadInput,
         PriceInput,
-        Checkbox
+        Checkbox,
     },
 })
 export default class EditDiscountView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-        discount!: Discount
+    discount!: Discount;
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
     @Prop({ required: true })
-        webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
     /// For now only used to update locations and times of other products that are shared
-    patchDiscount: AutoEncoderPatchType<Discount> = Discount.patch({ id: this.discount.id })
+    patchDiscount: AutoEncoderPatchType<Discount> = Discount.patch({ id: this.discount.id });
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => void;
-    
+    saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => void;
+
     get patchedDiscount() {
-        return this.discount.patch(this.patchDiscount)
+        return this.discount.patch(this.patchDiscount);
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
     }
 
     addPatch(patch: AutoEncoderPatchType<Discount>) {
-        this.patchDiscount = this.patchDiscount.patch(patch)
+        this.patchDiscount = this.patchDiscount.patch(patch);
     }
 
     get applyMultipleTimes() {
-        return this.patchedDiscount.applyMultipleTimes
+        return this.patchedDiscount.applyMultipleTimes;
     }
 
     set applyMultipleTimes(applyMultipleTimes: boolean) {
         this.addPatch(Discount.patch({
-            applyMultipleTimes
-        }))
+            applyMultipleTimes,
+        }));
     }
 
     get fixedDiscount() {
-        return this.patchedDiscount.orderDiscount.fixedDiscount
+        return this.patchedDiscount.orderDiscount.fixedDiscount;
     }
 
     set fixedDiscount(fixedDiscount: number) {
         this.addPatch(Discount.patch({
             orderDiscount: GeneralDiscount.patch({
-                fixedDiscount
-            })
-        }))
+                fixedDiscount,
+            }),
+        }));
     }
 
     get percentageDiscount() {
-        return this.patchedDiscount.orderDiscount.percentageDiscount
+        return this.patchedDiscount.orderDiscount.percentageDiscount;
     }
 
     set percentageDiscount(percentageDiscount: number) {
         this.addPatch(Discount.patch({
             orderDiscount: GeneralDiscount.patch({
-                percentageDiscount
-            })
-        }))
+                percentageDiscount,
+            }),
+        }));
     }
 
     addRequirementsPatch(d: PatchableArrayAutoEncoder<DiscountRequirement>) {
         const meta = Discount.patch({
             requirements: d,
-        })
-        this.addPatch(meta)
+        });
+        this.addPatch(meta);
     }
 
     addProductDiscountPatch(d: PatchableArrayAutoEncoder<ProductDiscountSettings>) {
         const meta = Discount.patch({
             productDiscounts: d,
-        })
-        this.addPatch(meta)
+        });
+        this.addPatch(meta);
     }
 
     addRequirement() {
         const requirement = DiscountRequirement.create({
             product: ProductSelector.create({
-                productId: this.webshop.products[0].id
-            })
-        })
+                productId: this.webshop.products[0].id,
+            }),
+        });
         const arr: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray();
         arr.addPut(requirement);
 
@@ -238,12 +237,12 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<DiscountRequirement>) => {
                         arr.merge(patch);
-                        this.addRequirementsPatch(arr)
-                    }
-                })
+                        this.addRequirementsPatch(arr);
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     editRequirement(discountRequirement: DiscountRequirement) {
@@ -254,20 +253,20 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
                     discountRequirement: discountRequirement,
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<DiscountRequirement>) => {
-                        this.addRequirementsPatch(patch)
-                    }
-                })
+                        this.addRequirementsPatch(patch);
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     addProductDiscount() {
         const productDiscount = ProductDiscountSettings.create({
             product: ProductSelector.create({
-                productId: this.webshop.products[0].id
-            })
-        })
+                productId: this.webshop.products[0].id,
+            }),
+        });
         const arr: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
         arr.addPut(productDiscount);
 
@@ -279,12 +278,12 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => {
                         arr.merge(patch);
-                        this.addProductDiscountPatch(arr)
-                    }
-                })
+                        this.addProductDiscountPatch(arr);
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     editProductDiscount(productDiscount: ProductDiscountSettings) {
@@ -295,47 +294,45 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
                     productDiscount,
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => {
-                        this.addProductDiscountPatch(patch)
-                    }
-                })
+                        this.addProductDiscountPatch(patch);
+                    },
+                }),
             ],
-            modalDisplayStyle: "popup"
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
 
     async save() {
-        const isValid = await this.validator.validate()
+        const isValid = await this.validator.validate();
         if (!isValid) {
-            return
+            return;
         }
-        const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray()
-        p.addPatch(this.patchDiscount)
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
+        p.addPatch(this.patchDiscount);
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze korting wilt verwijderen?", "Verwijderen")) {
-            return
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze korting wilt verwijderen?', 'Verwijderen')) {
+            return;
         }
 
-        const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray()
-        p.addDelete(this.discount.id)
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
+        p.addDelete(this.discount.id);
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchDiscount, this.discount, { version: Version })
+        return patchContainsChanges(this.patchDiscount, this.discount, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
-
-    
 }
 </script>

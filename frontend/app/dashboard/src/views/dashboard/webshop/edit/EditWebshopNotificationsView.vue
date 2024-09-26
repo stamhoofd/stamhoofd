@@ -29,15 +29,13 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
-import { Request } from "@simonbackx/simple-networking";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { EmailInput, SaveView, STErrorsDefault, STInputBox, TooltipDirective } from "@stamhoofd/components";
-import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { EmailInput, SaveView, STErrorsDefault, STInputBox, TooltipDirective } from '@stamhoofd/components';
+import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
-
-import EditWebshopMixin from "./EditWebshopMixin";
-
+import EditWebshopMixin from './EditWebshopMixin';
 
 @Component({
     components: {
@@ -47,116 +45,117 @@ import EditWebshopMixin from "./EditWebshopMixin";
         EmailInput,
     },
     directives: {
-        tooltip: TooltipDirective
-    }
+        tooltip: TooltipDirective,
+    },
 })
 export default class EditWebshopNotificationsView extends Mixins(EditWebshopMixin) {
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get user() {
-        return this.$organizationManager.user
+        return this.$organizationManager.user;
     }
 
     get viewTitle() {
-        return "Meldingen"
+        return 'Meldingen';
     }
 
     beforeUnmount() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     get emails() {
-        return this.webshop.privateMeta.notificationEmails
+        return this.webshop.privateMeta.notificationEmails;
     }
 
     getEmail(n: number) {
-        return this.emails[n]
+        return this.emails[n];
     }
 
     mounted() {
-        this.checkBounces().catch(console.error)
+        this.checkBounces().catch(console.error);
     }
 
     setEmail(n: number, email: string) {
         const notificationEmails = this.emails.slice();
         notificationEmails[n] = email;
-        this.addPatch(PrivateWebshop.patch({ 
+        this.addPatch(PrivateWebshop.patch({
             privateMeta: WebshopPrivateMetaData.patch({
-                notificationEmails: notificationEmails as any
-            })
-        }))
+                notificationEmails: notificationEmails as any,
+            }),
+        }));
     }
 
     deleteEmail(n: number) {
         const notificationEmails = this.emails.slice();
-        notificationEmails.splice(n, 1)
-        this.addPatch(PrivateWebshop.patch({ 
+        notificationEmails.splice(n, 1);
+        this.addPatch(PrivateWebshop.patch({
             privateMeta: WebshopPrivateMetaData.patch({
-                notificationEmails: notificationEmails as any
-            })
-        }))
+                notificationEmails: notificationEmails as any,
+            }),
+        }));
     }
 
     addEmail(str: string) {
         const notificationEmails = this.emails.slice();
         notificationEmails.push(str);
-        this.addPatch(PrivateWebshop.patch({ 
+        this.addPatch(PrivateWebshop.patch({
             privateMeta: WebshopPrivateMetaData.patch({
-                notificationEmails: notificationEmails as any
-            })
-        }))
+                notificationEmails: notificationEmails as any,
+            }),
+        }));
     }
 
     isBlocked(n: number) {
         const email = this.getEmail(n);
-        return this.emailInformation.find(e => e.email === email && (e.markedAsSpam || e.hardBounce || e.unsubscribedAll))
+        return this.emailInformation.find(e => e.email === email && (e.markedAsSpam || e.hardBounce || e.unsubscribedAll));
     }
 
     getInvalidEmailDescription(n: number) {
         const email = this.getEmail(n);
-        const find = this.emailInformation.find(e => e.email === email)
+        const find = this.emailInformation.find(e => e.email === email);
         if (!find) {
-            return null
+            return null;
         }
         if (find.unsubscribedAll) {
-            return "Heeft zich uitgeschreven voor e-mails"
+            return 'Heeft zich uitgeschreven voor e-mails';
         }
         if (find.markedAsSpam) {
-            return "Heeft e-mail als spam gemarkeerd"
+            return 'Heeft e-mail als spam gemarkeerd';
         }
         if (find.hardBounce) {
-            return "Ongeldig e-mailadres"
+            return 'Ongeldig e-mailadres';
         }
-        return null
+        return null;
     }
 
     checkingBounces = false;
-    emailInformation: EmailInformation[] = []
+    emailInformation: EmailInformation[] = [];
 
     async checkBounces() {
         if (this.checkingBounces) {
-            return
+            return;
         }
-        this.checkingBounces = true
+        this.checkingBounces = true;
 
         try {
             const response = await this.$context.authenticatedServer.request({
-                method: "POST",
-                path: "/email/check-bounces",
+                method: 'POST',
+                path: '/email/check-bounces',
                 body: this.emails,
-                decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>)
-            })
-            this.emailInformation = response.data
-        } catch (e) {
-            console.error(e)
+                decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>),
+            });
+            this.emailInformation = response.data;
         }
-        this.checkingBounces = false
+        catch (e) {
+            console.error(e);
+        }
+        this.checkingBounces = false;
     }
 
     get suggestions() {
-        return [this.user.email].filter(e => !this.emails.includes(e))
+        return [this.user.email].filter(e => !this.emails.includes(e));
     }
 
     get emailCount() {

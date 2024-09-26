@@ -23,102 +23,104 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
-import { Category, PrivateWebshop } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from '@stamhoofd/components';
+import { Category, PrivateWebshop } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import EditCategoryView from './EditCategoryView.vue';
 
 @Component({
     components: {
-        STListItem
+        STListItem,
     },
     directives: {
         LongPress: LongPressDirective,
-    }
+    },
 })
 export default class CategoryRow extends Mixins(NavigationMixin) {
     @Prop({})
-        category: Category
+    category: Category;
 
     @Prop({})
-        webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
     editCategory() {
         this.present(new ComponentWithProperties(EditCategoryView, { category: this.category, webshop: this.webshop, isNew: false, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // This same patch could also patch products ;)
-            this.$emit("patch", patch)
+            this.$emit('patch', patch);
 
             // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("popup"))
+        } }).setDisplayStyle('popup'));
     }
 
     moveUp() {
-        this.$emit("move-up")
+        this.$emit('move-up');
     }
 
     moveDown() {
-        this.$emit("move-down")
+        this.$emit('move-down');
     }
 
     async delete(keepArticles = false) {
         if (!(await CenteredMessage.confirm(keepArticles ? 'Deze categorie verwijderen en alle artikels erin behouden?' : 'Deze categorie en artikels verwijderen?', 'Verwijderen'))) {
-            return
+            return;
         }
-        const p = PrivateWebshop.patch({ id: this.webshop.id })
-        p.categories.addDelete(this.category.id)
+        const p = PrivateWebshop.patch({ id: this.webshop.id });
+        p.categories.addDelete(this.category.id);
 
         if (!keepArticles) {
             for (const id of this.category.productIds) {
-                p.products.addDelete(id)
+                p.products.addDelete(id);
             }
         }
 
-        this.$emit("patch", p)
+        this.$emit('patch', p);
     }
 
     showContextMenu(event) {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: "Verplaats omhoog",
-                    icon: "arrow-up",
+                    name: 'Verplaats omhoog',
+                    icon: 'arrow-up',
                     action: () => {
-                        this.moveUp()
+                        this.moveUp();
                         return true;
-                    }
+                    },
                 }),
                 new ContextMenuItem({
-                    name: "Verplaats omlaag",
-                    icon: "arrow-down",
+                    name: 'Verplaats omlaag',
+                    icon: 'arrow-down',
                     action: () => {
-                        this.moveDown()
+                        this.moveDown();
                         return true;
-                    }
+                    },
                 }),
             ],
             [
-                ...(this.webshop.categories.length === 1 ? [
-                    new ContextMenuItem({
-                        name: "Verwijder en behoud artikels",
-                        action: () => {
-                            this.delete(true).catch(console.error)
-                            return true;
-                        }
-                    }),
-                ] : []),
+                ...(this.webshop.categories.length === 1
+                    ? [
+                            new ContextMenuItem({
+                                name: 'Verwijder en behoud artikels',
+                                action: () => {
+                                    this.delete(true).catch(console.error);
+                                    return true;
+                                },
+                            }),
+                        ]
+                    : []),
                 new ContextMenuItem({
-                    name: "Verwijderen",
-                    icon: "trash",
+                    name: 'Verwijderen',
+                    icon: 'trash',
                     action: () => {
-                        this.delete(false).catch(console.error)
+                        this.delete(false).catch(console.error);
                         return true;
-                    }
+                    },
                 }),
-            ]
-        ])
-        menu.show({ clickEvent: event }).catch(console.error)
+            ],
+        ]);
+        menu.show({ clickEvent: event }).catch(console.error);
     }
 }
 </script>

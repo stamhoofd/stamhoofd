@@ -30,13 +30,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { STErrorsDefault, STInputBox, STList, STListItem, UploadButton, ViewportHelper } from "@stamhoofd/components";
-import { Sponsor, SponsorConfig } from "@stamhoofd/structures";
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { STErrorsDefault, STInputBox, STList, STListItem, UploadButton, ViewportHelper } from '@stamhoofd/components';
+import { Sponsor, SponsorConfig } from '@stamhoofd/structures';
 
-import EditSponsorView from "./EditSponsorView.vue";
+import EditSponsorView from './EditSponsorView.vue';
 
 @Component({
     components: {
@@ -44,29 +44,29 @@ import EditSponsorView from "./EditSponsorView.vue";
         STErrorsDefault,
         UploadButton,
         STList,
-        STListItem
-    }
+        STListItem,
+    },
 })
 export default class EditSponsorsBox extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        config: SponsorConfig|null
+    config: SponsorConfig | null;
 
-    patchConfig(patch: AutoEncoderPatchType<SponsorConfig>|null) {
+    patchConfig(patch: AutoEncoderPatchType<SponsorConfig> | null) {
         if (patch && !this.config) {
-            this.$emit("patch", SponsorConfig.create({}).patch(patch))
+            this.$emit('patch', SponsorConfig.create({}).patch(patch));
             return;
         }
-        this.$emit("patch", patch)
+        this.$emit('patch', patch);
     }
 
     get sponsors() {
-        return this.config?.sponsors ?? []
+        return this.config?.sponsors ?? [];
     }
 
     addSponsor() {
-        const sponsor = Sponsor.create({})
-        const patch = SponsorConfig.patch({})
-        patch.sponsors.addPut(sponsor)
+        const sponsor = Sponsor.create({});
+        const patch = SponsorConfig.patch({});
+        patch.sponsors.addPut(sponsor);
 
         this.present({
             components: [
@@ -74,14 +74,14 @@ export default class EditSponsorsBox extends Mixins(NavigationMixin) {
                     sponsor,
                     isNew: true,
                     saveHandler: (p: AutoEncoderPatchType<Sponsor>) => {
-                        p.id = sponsor.id
-                        patch.sponsors.addPatch(p)
-                        this.patchConfig(patch)
-                    }
-                })
+                        p.id = sponsor.id;
+                        patch.sponsors.addPatch(p);
+                        this.patchConfig(patch);
+                    },
+                }),
             ],
-            modalDisplayStyle: "sheet"
-        })
+            modalDisplayStyle: 'sheet',
+        });
     }
 
     editSponsor(sponsor: Sponsor) {
@@ -91,20 +91,20 @@ export default class EditSponsorsBox extends Mixins(NavigationMixin) {
                     sponsor,
                     isNew: false,
                     saveHandler: (p: AutoEncoderPatchType<Sponsor>) => {
-                        const patch = SponsorConfig.patch({})
-                        p.id = sponsor.id
-                        patch.sponsors.addPatch(p)
-                        this.patchConfig(patch)
+                        const patch = SponsorConfig.patch({});
+                        p.id = sponsor.id;
+                        patch.sponsors.addPatch(p);
+                        this.patchConfig(patch);
                     },
                     deleteHandler: () => {
-                        const patch = SponsorConfig.patch({})
-                        patch.sponsors.addDelete(sponsor.id)
-                        this.patchConfig(patch)
+                        const patch = SponsorConfig.patch({});
+                        patch.sponsors.addDelete(sponsor.id);
+                        this.patchConfig(patch);
                     },
-                })
+                }),
             ],
-            modalDisplayStyle: "sheet"
-        })
+            modalDisplayStyle: 'sheet',
+        });
     }
 
     get draggableSponsors() {
@@ -117,9 +117,9 @@ export default class EditSponsorsBox extends Mixins(NavigationMixin) {
         }
 
         const patch = SponsorConfig.patch({
-            sponsors: sponsors as any
-        })
-        this.patchConfig(patch)
+            sponsors: sponsors as any,
+        });
+        this.patchConfig(patch);
     }
 }
 </script>

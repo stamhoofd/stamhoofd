@@ -12,13 +12,13 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
 import { useGlobalRoutes } from './useGlobalRoutes';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
-    return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
+    return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
 }
 
-export async function wrapContext(context: SessionContext, app: AppType|'auto', component: ComponentWithProperties, options?: {ownDomain?: boolean, initialPresents?: PushOptions[]}) {
-    const platformManager = await PlatformManager.createFromCache(context, true)
+export async function wrapContext(context: SessionContext, app: AppType | 'auto', component: ComponentWithProperties, options?: { ownDomain?: boolean; initialPresents?: PushOptions[] }) {
+    const platformManager = await PlatformManager.createFromCache(context, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);
-    await I18nController.loadDefault(context, Country.Belgium, "nl", context?.organization?.address?.country)
+    await I18nController.loadDefault(context, Country.Belgium, 'nl', context?.organization?.address?.country);
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
@@ -27,30 +27,32 @@ export async function wrapContext(context: SessionContext, app: AppType|'auto', 
             $memberManager,
             $organizationManager: new OrganizationManager(context),
             reactive_components: {
-                "tabbar-left": options?.ownDomain && context.organization ? new ComponentWithProperties(OrganizationLogo, {
-                    organization: context.organization
-                }) : new ComponentWithProperties(OrganizationSwitcher, {}),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
-                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
+                'tabbar-left': options?.ownDomain && context.organization
+                    ? new ComponentWithProperties(OrganizationLogo, {
+                        organization: context.organization,
+                    })
+                    : new ComponentWithProperties(OrganizationSwitcher, {}),
+                'tabbar-right': new ComponentWithProperties(AccountSwitcher, {}),
+                'tabbar-replacement': new ComponentWithProperties(ContextNavigationBar, {}),
             },
-            stamhoofd_app: app
+            stamhoofd_app: app,
         }),
         root: wrapWithModalStack(new ComponentWithProperties(CustomHooksContainer, {
             root: component,
             hooks: () => {
-                useGlobalRoutes()
-            }
-        }), options?.initialPresents)
+                useGlobalRoutes();
+            },
+        }), options?.initialPresents),
     });
 }
 
 export async function loadSessionFromUrl() {
     const parts = UrlHelper.shared.getParts();
-    const ignoreUris = ['login', 'aansluiten', 'start', 'activiteiten', 'mandje' , 'leden'];
+    const ignoreUris = ['login', 'aansluiten', 'start', 'activiteiten', 'mandje', 'leden'];
 
-    let session: SessionContext|null = null;
+    let session: SessionContext | null = null;
 
-    console.log('load session', parts)
+    console.log('load session', parts);
 
     if (parts[1] && !ignoreUris.includes(parts[1])) {
         const uri = parts[1];
@@ -59,19 +61,20 @@ export async function loadSessionFromUrl() {
         // todo: use cache
         try {
             const response = await NetworkManager.server.request({
-                method: "GET",
-                path: "/organization-from-uri",
+                method: 'GET',
+                path: '/organization-from-uri',
                 query: {
-                    uri
+                    uri,
                 },
-                decoder: Organization as Decoder<Organization>
-            })
-            const organization = response.data
+                decoder: Organization as Decoder<Organization>,
+            });
+            const organization = response.data;
 
-            session = new SessionContext(organization)
-            await session.loadFromStorage()
+            session = new SessionContext(organization);
+            await session.loadFromStorage();
             await SessionManager.prepareSessionForUsage(session, false);
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Failed to load organization from uri', uri);
             session = null;
         }
@@ -84,41 +87,39 @@ export function getLoginRoot() {
     return new ComponentWithProperties(CoverImageContainer, {
         root: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(LoginView, {
-                initialEmail: UrlHelper.shared.getSearchParams().get('email') ?? ''
-            })
-        })
-    })
+                initialEmail: UrlHelper.shared.getSearchParams().get('email') ?? '',
+            }),
+        }),
+    });
 }
 
-export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
     // In platform mode, we always redirect to the 'auto' login view, so that we redirect the user to the appropriate environment after signin in
     if (STAMHOOFD.userMode === 'platform') {
         return new ComponentWithProperties(PromiseView, {
             promise: async () => {
                 // Replace itself again after a successful login
-                const root = await getScopedAutoRoot(reactiveSession, options)
+                const root = await getScopedAutoRoot(reactiveSession, options);
                 await ReplaceRootEventBus.sendEvent('replace', root);
                 return new ComponentWithProperties({}, {});
-            }
-        })
+            },
+        });
     }
 
-    return getLoginRoot()
+    return getLoginRoot();
 }
 
-
-export async function getOrganizationSelectionRoot(optionalSession?: SessionContext|null) {
-    const session = optionalSession ?? new SessionContext(null)
-    const reactiveSession = session
-    await session.loadFromStorage()
+export async function getOrganizationSelectionRoot(optionalSession?: SessionContext | null) {
+    const session = optionalSession ?? new SessionContext(null);
+    const reactiveSession = session;
+    await session.loadFromStorage();
     await SessionManager.prepareSessionForUsage(session, false);
 
     let baseRoot = new ComponentWithProperties(CoverImageContainer, {
         root: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(OrganizationSelectionView, {})
-        })
-    })
-    
+            root: new ComponentWithProperties(OrganizationSelectionView, {}),
+        }),
+    });
 
     if (STAMHOOFD.userMode === 'platform') {
         // In platform mode, we need authentication
@@ -128,161 +129,162 @@ export async function getOrganizationSelectionRoot(optionalSession?: SessionCont
         });
     }
 
-    return await wrapContext(reactiveSession, 'auto', baseRoot)
+    return await wrapContext(reactiveSession, 'auto', baseRoot);
 }
 
 export function getNoPermissionsView() {
-    return  wrapWithModalStack(new ComponentWithProperties(TabBarController, {
+    return wrapWithModalStack(new ComponentWithProperties(TabBarController, {
         tabs: [
             new TabBarItem({
                 icon: 'key',
                 name: 'Geen toegang',
                 component: new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(NoPermissionsView, {})
-                })
-            })
-        ]
-    }))
+                    root: new ComponentWithProperties(NoPermissionsView, {}),
+                }),
+            }),
+        ],
+    }));
 }
 
 export async function getScopedDashboardRootFromUrl() {
     // UrlHelper.fixedPrefix = "beheerders";
-    const session = await loadSessionFromUrl()
-        
+    const session = await loadSessionFromUrl();
+
     if (!session || !session.organization) {
-        return getOrganizationSelectionRoot(session)
+        return getOrganizationSelectionRoot(session);
     }
 
-    return await getScopedDashboardRoot(session)
+    return await getScopedDashboardRoot(session);
 }
 
 export async function getScopedAutoRootFromUrl() {
-    const fromUrl = await loadSessionFromUrl()
-    const session = fromUrl ?? (await SessionManager.getLastGlobalSession())
+    const fromUrl = await loadSessionFromUrl();
+    const session = fromUrl ?? (await SessionManager.getLastGlobalSession());
     await SessionManager.prepareSessionForUsage(session, false);
-    
-    return await getScopedAutoRoot(session)
+
+    return await getScopedAutoRoot(session);
 }
 
-export async function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {    
+export async function getScopedAutoRoot(session: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
     if (!session.user) {
         // We can't really determine the automatic root view because we are not signed in
         // So return the login view, that will call getScopedAutoRoot again after login
-        const reactiveSession = session
+        const reactiveSession = session;
 
-        return await wrapContext(reactiveSession, 'auto', 
+        return await wrapContext(reactiveSession, 'auto',
             new ComponentWithProperties(AuthenticatedView, {
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
                         if (reactiveSession.user) {
                             // Replace itself again after a successful login
-                            const root = await getScopedAutoRoot(reactiveSession, options)
+                            const root = await getScopedAutoRoot(reactiveSession, options);
                             await ReplaceRootEventBus.sendEvent('replace', root);
-                        } else {
+                        }
+                        else {
                             throw new SimpleError({
                                 code: 'infinite_redirect',
-                                message: 'Er ging iets mis: te veel doorverwijzingen.'
-                            })
+                                message: 'Er ging iets mis: te veel doorverwijzingen.',
+                            });
                         }
                         return new ComponentWithProperties({}, {});
-                    }
+                    },
                 }),
                 loginRoot: wrapWithModalStack(getLoginRoot()),
-            })
-        )
+            }),
+        );
     }
 
-    
     // Make sure users without permissions always go to the member portal automatically
     if (((!session.organization && !session.auth.userPermissions) || (session.organization && !session.auth.permissions)) && (STAMHOOFD.userMode === 'platform' || (session.organization && session.organization.meta.packages.useMembers))) {
         const registration = await import('@stamhoofd/registration');
-        return await registration.getRootView(session)
+        return await registration.getRootView(session);
     }
 
     if (session.organization) {
-        return await getScopedDashboardRoot(session, options)
+        return await getScopedDashboardRoot(session, options);
     }
 
     // Users with permissions should always have the option to choose the member portal or the dashboard
-    return getOrganizationSelectionRoot(session)
+    return getOrganizationSelectionRoot(session);
 }
 
-export async function getScopedDashboardRoot(reactiveSession: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+export async function getScopedDashboardRoot(reactiveSession: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     const startView = new ComponentWithProperties(NavigationController, {
-        root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})
-    })
+        root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {}),
+    });
 
     setTitleSuffix(reactiveSession.organization?.name ?? '');
 
-    const startTab =  new TabBarItem({
+    const startTab = new TabBarItem({
         icon: 'home',
         name: 'Start',
-        component: startView
+        component: startView,
     });
 
     const membersTab = new TabBarItem({
         icon: 'group',
         name: 'Leden',
         component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./views/members/MembersMenu.vue'), {})
-        })
+            root: AsyncComponent(() => import('./views/members/MembersMenu.vue'), {}),
+        }),
     });
 
     const calendarTab = new TabBarItem({
         icon: 'calendar',
         name: 'Activiteiten',
         component: new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(ManageEventsView, {})
-        })
+            root: new ComponentWithProperties(ManageEventsView, {}),
+        }),
     });
 
     const webshopsTab = new TabBarItem({
         icon: 'basket',
         name: 'Verkoop',
         component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {})
-        })
+            root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {}),
+        }),
     });
 
-    const whatsNewBadge = ref('')
+    const whatsNewBadge = ref('');
 
     const loadWhatsNew = () => {
-        const currentCount = localStorage.getItem("what-is-new")
+        const currentCount = localStorage.getItem('what-is-new');
         if (currentCount) {
-            const c = parseInt(currentCount)
+            const c = parseInt(currentCount);
             if (!isNaN(c) && WhatsNewCount - c > 0) {
-                whatsNewBadge.value = (WhatsNewCount - c).toString()
+                whatsNewBadge.value = (WhatsNewCount - c).toString();
             }
-        } else {
-            localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
         }
-    }
+        else {
+            localStorage.setItem('what-is-new', (WhatsNewCount as any).toString());
+        }
+    };
     loadWhatsNew();
 
     const settingsTab = new TabBarItem({
         icon: 'settings',
         name: 'Instellingen',
         component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {})
-        })
-    })
+            root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {}),
+        }),
+    });
 
     const financesTab = new TabBarItem({
         icon: 'calculator',
         name: 'Boekhouding',
         component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./views/dashboard/settings/FinancesView.vue'), {})
-        })
-    })
+            root: AsyncComponent(() => import('./views/dashboard/settings/FinancesView.vue'), {}),
+        }),
+    });
 
-    const documentsTab =  new TabBarItem({
+    const documentsTab = new TabBarItem({
         icon: 'file-filled',
         name: 'Documenten',
         component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {})
-        })
-    })
+            root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {}),
+        }),
+    });
 
     const sharedMoreItems: TabBarItem[] = [];
 
@@ -293,12 +295,12 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                 name: 'Wat is er nieuw?',
                 badge: whatsNewBadge,
                 action: async function () {
-                    window.open(STAMHOOFD.CHANGELOG_URL![STAMHOOFD.fixedCountry ?? reactiveSession.organization?.address?.country ?? ''] ?? STAMHOOFD.CHANGELOG_URL![''], '_blank')
+                    window.open(STAMHOOFD.CHANGELOG_URL![STAMHOOFD.fixedCountry ?? reactiveSession.organization?.address?.country ?? ''] ?? STAMHOOFD.CHANGELOG_URL![''], '_blank');
                     whatsNewBadge.value = '';
-                    localStorage.setItem("what-is-new", WhatsNewCount.toString());
-                }
-            })
-        )
+                    localStorage.setItem('what-is-new', WhatsNewCount.toString());
+                },
+            }),
+        );
     }
 
     if (STAMHOOFD.domains.documentation) {
@@ -307,12 +309,11 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                 icon: 'book',
                 name: 'Documentatie',
                 action: async function () {
-                    window.open('https://'+ LocalizedDomains.documentation, '_blank')
-                }
-            })
-        )
+                    window.open('https://' + LocalizedDomains.documentation, '_blank');
+                },
+            }),
+        );
     }
-
 
     if (STAMHOOFD.NOLT_URL) {
         sharedMoreItems.push(
@@ -320,11 +321,11 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                 icon: 'feedback',
                 name: 'Feedback',
                 action: async function () {
-                    const NoltHelper = (await import('./classes/NoltHelper'))
-                    await NoltHelper.openNolt(reactiveSession, false)
-                }
-            })
-        )
+                    const NoltHelper = (await import('./classes/NoltHelper'));
+                    await NoltHelper.openNolt(reactiveSession, false);
+                },
+            }),
+        );
     }
 
     // todo: accept terms view
@@ -335,54 +336,55 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
     //     }).catch(console.error)
     // }
 
-    return wrapContext(reactiveSession, 'dashboard', 
+    return wrapContext(reactiveSession, 'dashboard',
         new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {
                     tabs: computed(() => {
                         const organization = reactiveSession.organization;
 
-                        const tabs: (TabBarItem|TabBarItemGroup)[] = [
-                            startTab
-                        ]
+                        const tabs: (TabBarItem | TabBarItemGroup)[] = [
+                            startTab,
+                        ];
 
                         if (organization?.meta.packages.useMembers) {
-                            tabs.push(membersTab)
+                            tabs.push(membersTab);
 
                             if (reactiveSession.auth.hasFullAccess()) {
-                                tabs.push(calendarTab)
+                                tabs.push(calendarTab);
                             }
                         }
 
                         if (organization?.meta.packages.useWebshops && (organization?.privateMeta?.featureFlags.includes('webshops') ?? false)) {
-                            tabs.push(webshopsTab)
+                            tabs.push(webshopsTab);
                         }
 
                         const moreTab = new TabBarItemGroup({
                             icon: 'category',
                             name: 'Meer',
                             items: [
-                                ...sharedMoreItems // need to create a new array, don't pass directly!
-                            ]
+                                ...sharedMoreItems, // need to create a new array, don't pass directly!
+                            ],
                         });
 
                         if (reactiveSession.auth.hasFullAccess()) {
-                            moreTab.items.unshift(documentsTab)
-                            moreTab.items.unshift(financesTab)
-                            moreTab.items.unshift(settingsTab)
-                        } else if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
-                            moreTab.items.unshift(financesTab)
+                            moreTab.items.unshift(documentsTab);
+                            moreTab.items.unshift(financesTab);
+                            moreTab.items.unshift(settingsTab);
+                        }
+                        else if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+                            moreTab.items.unshift(financesTab);
                         }
 
-                        tabs.push(moreTab)
+                        tabs.push(moreTab);
 
                         return tabs;
-                    })
-                })
+                    }),
+                }),
             ),
             loginRoot: wrapWithModalStack(getNonAutoLoginRoot(reactiveSession, options)),
             noPermissionsRoot: getNoPermissionsView(),
         }),
-        options
+        options,
     );
 }

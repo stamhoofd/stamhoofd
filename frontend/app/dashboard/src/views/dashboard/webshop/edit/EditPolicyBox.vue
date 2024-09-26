@@ -10,7 +10,7 @@
                 </button>
             </div>
         </h2>
-        
+
         <STInputBox title="Naam">
             <input
                 ref="firstInput"
@@ -46,13 +46,12 @@
     </div>
 </template>
 
-
 <script lang="ts">
-import { SimpleError } from "@simonbackx/simple-errors";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, FileInput,LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator} from "@stamhoofd/components";
-import { File, Policy } from "@stamhoofd/structures"
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { BackButton, ErrorBox, FileInput, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
+import { File, Policy } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
@@ -64,83 +63,84 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
         Radio,
         BackButton,
         LoadingButton,
-        FileInput
+        FileInput,
     },
 })
 export default class EditPolicyBox extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    errorBox: ErrorBox | null
+    errorBox: ErrorBox | null;
 
     @Prop({ required: true })
-    validator: Validator
+    validator: Validator;
 
     @Prop({ required: true })
-    policy!: Policy
+    policy!: Policy;
 
-    selectedType = (this.policy.file ? "file" : "website")
+    selectedType = (this.policy.file ? 'file' : 'website');
 
     get name() {
-        return this.policy.name
+        return this.policy.name;
     }
 
     set name(name: string) {
-        this.$emit("patch", Policy.patch({ name }))
+        this.$emit('patch', Policy.patch({ name }));
     }
-    
+
     get url() {
-        return this.policy.url
+        return this.policy.url;
     }
 
     set url(url: string | null) {
-        this.$emit("patch", Policy.patch({ url }))
+        this.$emit('patch', Policy.patch({ url }));
     }
 
     get file() {
-        return this.policy.file
+        return this.policy.file;
     }
 
     set file(file: File | null) {
-        this.$emit("patch", Policy.patch({ file }))
+        this.$emit('patch', Policy.patch({ file }));
     }
 
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate()
-            })
+                return this.validate();
+            });
         }
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
     validate() {
         // TODO: add validator
-        if (this.selectedType === "file") {
+        if (this.selectedType === 'file') {
             this.url = null;
             // We don't clear the file if url is selected, since url has priority over the file. So we don't need to reupload the file
             if (!this.file) {
                 throw new SimpleError({
-                    code: "",
-                    message: "Selecteer een bestand"
-                })
+                    code: '',
+                    message: 'Selecteer een bestand',
+                });
             }
-        } else {
+        }
+        else {
             if (!this.url) {
                 throw new SimpleError({
-                    code: "",
-                    message: "Vul een geldige link in"
-                })
+                    code: '',
+                    message: 'Vul een geldige link in',
+                });
             }
         }
 
-        if (this.selectedType === "website" && this.policy.url && this.policy.url.length > 0 && !this.policy.url.startsWith("http://") && !this.policy.url.startsWith("https://") && !this.policy.url.startsWith("mailto:") && !this.policy.url.startsWith("tel:")) {
-            this.url = "http://"+this.policy.url
+        if (this.selectedType === 'website' && this.policy.url && this.policy.url.length > 0 && !this.policy.url.startsWith('http://') && !this.policy.url.startsWith('https://') && !this.policy.url.startsWith('mailto:') && !this.policy.url.startsWith('tel:')) {
+            this.url = 'http://' + this.policy.url;
         }
-        return true
+        return true;
     }
 }
 </script>

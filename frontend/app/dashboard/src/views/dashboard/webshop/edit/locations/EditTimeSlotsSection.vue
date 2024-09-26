@@ -13,7 +13,7 @@
             </div>
         </h2>
         <slot />
-    
+
         <p v-if="timeSlots.timeSlots.length === 0" class="info-box">
             Je hebt geen intervallen toegevoegd, dus er moet geen keuze gemaakt worden.
         </p>
@@ -43,11 +43,11 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { PrivateWebshop, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { PrivateWebshop, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import EditTimeSlotView from './EditTimeSlotView.vue';
 
@@ -60,49 +60,48 @@ import EditTimeSlotView from './EditTimeSlotView.vue';
     },
     filters: {
         date: Formatter.date.bind(Formatter),
-        minutes: Formatter.minutes.bind(Formatter)
-    }
+        minutes: Formatter.minutes.bind(Formatter),
+    },
 })
 export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    title!: string
+    title!: string;
 
     @Prop({ required: true })
-    timeSlots!: WebshopTimeSlots
+    timeSlots!: WebshopTimeSlots;
 
     @Prop({ required: true })
-    webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
     addPatch(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
-        this.$emit("patch", patch)
+        this.$emit('patch', patch);
     }
 
     get sortedSlots() {
-        return this.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort)
+        return this.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort);
     }
-   
+
     addTimeSlot() {
         const timeSlot = WebshopTimeSlot.create({
-            date: new Date()
-        })
-        const p = WebshopTimeSlots.patch({})
-        p.timeSlots.addPut(timeSlot)
-        
+            date: new Date(),
+        });
+        const p = WebshopTimeSlots.patch({});
+        p.timeSlots.addPut(timeSlot);
+
         this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots.patch(p), isNew: true, webshop: this.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
             // Merge both patches
-            this.addPatch(p.patch(patch))
+            this.addPatch(p.patch(patch));
 
             // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("sheet"))
+        } }).setDisplayStyle('sheet'));
     }
 
     editTimeSlot(timeSlot: WebshopTimeSlot) {
         this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots, isNew: false, webshop: this.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
-            this.addPatch(patch)
+            this.addPatch(patch);
 
             // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("sheet"))
+        } }).setDisplayStyle('sheet'));
     }
-    
 }
 </script>

@@ -15,7 +15,7 @@ import { ReviewCheckbox, useOrganization, useReview, useSetupStepTranslations } 
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
-const props = defineProps<{type: SetupStepType}>();
+const props = defineProps<{ type: SetupStepType }>();
 
 const setupStepTranslations = useSetupStepTranslations();
 

@@ -6,7 +6,7 @@
         <h1 v-else>
             {{ locationTitleName }} bewerken
         </h1>
-        
+
         <STErrorsDefault :error-box="errorBox" />
 
         <div class="split-inputs">
@@ -60,12 +60,12 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
-import { Address, CheckoutMethodType, PrivateWebshop, Version, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlots } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from '@stamhoofd/components';
+import { Address, CheckoutMethodType, PrivateWebshop, Version, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlots } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import EditTimeSlotsSection from "./EditTimeSlotsSection.vue";
+import EditTimeSlotsSection from './EditTimeSlotsSection.vue';
 
 @Component({
     components: {
@@ -74,118 +74,115 @@ import EditTimeSlotsSection from "./EditTimeSlotsSection.vue";
         STErrorsDefault,
         AddressInput,
         STList,
-        EditTimeSlotsSection
+        EditTimeSlotsSection,
     },
 })
 export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-        takeoutMethod!: WebshopTakeoutMethod | WebshopOnSiteMethod
+    takeoutMethod!: WebshopTakeoutMethod | WebshopOnSiteMethod;
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
     @Prop({ required: true })
-        webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
-    patchTakeoutMethod: AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod> = this.takeoutMethod.type === CheckoutMethodType.Takeout ? WebshopTakeoutMethod.patch({ id: this.takeoutMethod.id }) : WebshopOnSiteMethod.patch({ id: this.takeoutMethod.id })
+    patchTakeoutMethod: AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod> = this.takeoutMethod.type === CheckoutMethodType.Takeout ? WebshopTakeoutMethod.patch({ id: this.takeoutMethod.id }) : WebshopOnSiteMethod.patch({ id: this.takeoutMethod.id });
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+    saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
 
     get isTakeout() {
-        return this.takeoutMethod.type === CheckoutMethodType.Takeout
+        return this.takeoutMethod.type === CheckoutMethodType.Takeout;
     }
 
     get locationTitleName() {
         if (this.isTakeout) {
-            return "Afhaallocatie"
+            return 'Afhaallocatie';
         }
-        return "Ter plaatse consumeren"
+        return 'Ter plaatse consumeren';
     }
 
     get patchedTakeoutMethod() {
-        return this.takeoutMethod.patch(this.patchTakeoutMethod)
+        return this.takeoutMethod.patch(this.patchTakeoutMethod);
     }
 
     get name() {
-        return this.patchedTakeoutMethod.name
+        return this.patchedTakeoutMethod.name;
     }
 
     set name(name: string) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ name })
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ name });
     }
 
     get address() {
-        return this.patchedTakeoutMethod.address
+        return this.patchedTakeoutMethod.address;
     }
 
     set address(address: Address) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ address })
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ address });
     }
 
     get description() {
-        return this.patchedTakeoutMethod.description
+        return this.patchedTakeoutMethod.description;
     }
 
     set description(description: string) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ description })
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ description });
     }
 
     addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod>>) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch(patch as any)
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch(patch as any);
     }
-   
+
     patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
-        this.addPatch({ timeSlots: patch })
+        this.addPatch({ timeSlots: patch });
     }
-  
+
     async save() {
         if (!await this.validator.validate()) {
             return;
         }
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addPatch(this.patchTakeoutMethod)
-        p.meta = meta
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addPatch(this.patchTakeoutMethod);
+        p.meta = meta;
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze locatie wilt verwijderen?", "Verwijderen")) {
-            return
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze locatie wilt verwijderen?', 'Verwijderen')) {
+            return;
         }
 
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        meta.checkoutMethods.addDelete(this.takeoutMethod.id)
-        p.meta = meta
-        this.saveHandler(p)
-        this.pop({ force: true })
+        const p = PrivateWebshop.patch({});
+        const meta = WebshopMetaData.patch({});
+        meta.checkoutMethods.addDelete(this.takeoutMethod.id);
+        p.meta = meta;
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     cancel() {
-        this.pop()
+        this.pop();
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchTakeoutMethod, this.takeoutMethod, { version: Version })
+        return patchContainsChanges(this.patchTakeoutMethod, this.takeoutMethod, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
-
-    
 }
 </script>
-

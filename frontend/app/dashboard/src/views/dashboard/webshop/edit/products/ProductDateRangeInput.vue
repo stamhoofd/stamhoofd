@@ -17,75 +17,75 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { DateSelection, ErrorBox, STInputBox, TimeInput, Validator } from "@stamhoofd/components"
-import { ProductDateRange} from "@stamhoofd/structures"
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { DateSelection, ErrorBox, STInputBox, TimeInput, Validator } from '@stamhoofd/components';
+import { ProductDateRange } from '@stamhoofd/structures';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
         STInputBox,
         DateSelection,
-        TimeInput
-    }
+        TimeInput,
+    },
 })
 export default class ProductDateRangeInput extends VueComponent {
     /**
      * Assign a validator if you want to offload the validation to components
      */
-    @Prop({ default: null }) 
-    validator: Validator | null
-
-    errorBox: ErrorBox | null = null
-    
     @Prop({ default: null })
-    value: ProductDateRange | null
+    validator: Validator | null;
+
+    errorBox: ErrorBox | null = null;
+
+    @Prop({ default: null })
+    value: ProductDateRange | null;
 
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.isValid()
-            })
+                return this.isValid();
+            });
         }
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
     get startDate() {
-        return this.value?.startDate ?? new Date()
+        return this.value?.startDate ?? new Date();
     }
 
     set startDate(startDate: Date) {
         if (this.value) {
-            this.$emit('update:modelValue', this.value.patch({ startDate }))
+            this.$emit('update:modelValue', this.value.patch({ startDate }));
         }
     }
 
     get endDate() {
-        return this.value?.endDate ?? new Date()
+        return this.value?.endDate ?? new Date();
     }
 
     set endDate(endDate: Date) {
         if (this.value) {
-            this.$emit('update:modelValue', this.value.patch({ endDate }))
+            this.$emit('update:modelValue', this.value.patch({ endDate }));
         }
     }
 
     async isValid(): Promise<boolean> {
-        await Promise.resolve()
+        await Promise.resolve();
         if (this.startDate > this.endDate) {
             this.errorBox = new ErrorBox(new SimpleError({
-                code: "invalid_field",
-                field: "endDate",
-                message: "De einddatum en tijdstip die je hebt ingevuld ligt voor de startdatum en tijdstip"
-            }))
-            return false
+                code: 'invalid_field',
+                field: 'endDate',
+                message: 'De einddatum en tijdstip die je hebt ingevuld ligt voor de startdatum en tijdstip',
+            }));
+            return false;
         }
 
-        return true
+        return true;
     }
 }
 </script>

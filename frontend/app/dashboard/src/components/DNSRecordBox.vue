@@ -5,17 +5,17 @@
             <dd>{{ record.type }}</dd>
 
             <dt>Naam</dt>
-            <dd v-tooltip="'Klik om te kopiëren'" class="selectable" v-copyable>
+            <dd v-tooltip="'Klik om te kopiëren'" v-copyable class="selectable">
                 {{ record.name }}
             </dd>
 
             <dt>Waarde</dt>
-            <dd v-tooltip="'Klik om te kopiëren'" class="selectable" v-copyable>
+            <dd v-tooltip="'Klik om te kopiëren'" v-copyable class="selectable">
                 {{ record.value }}
             </dd>
 
             <dt>TTL</dt>
-            <dd class="selectable" v-copyable>
+            <dd v-copyable class="selectable">
                 3600
             </dd>
 
@@ -30,12 +30,11 @@
     </div>
 </template>
 
-
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
-import { DNSRecord } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from '@stamhoofd/components';
+import { DNSRecord } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
@@ -45,16 +44,15 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
         STErrorsDefault,
         Checkbox,
         BackButton,
-        LoadingButton
+        LoadingButton,
     },
     directives: {
-        tooltip: TooltipDirective
-    }
+        tooltip: TooltipDirective,
+    },
 })
 export default class DNSRecordBox extends Mixins(NavigationMixin) {
     @Prop({})
-    record: DNSRecord
-
+    record: DNSRecord;
 }
 </script>
 

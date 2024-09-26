@@ -32,11 +32,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, patchContainsChanges, PatchType } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator, EditUserPermissionsBox } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator, EditUserPermissionsBox } from '@stamhoofd/components';
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
-import { ApiUser, ApiUserWithToken, PermissionLevel, Permissions, User, UserPermissions, Version } from "@stamhoofd/structures";
+import { ApiUser, ApiUserWithToken, PermissionLevel, Permissions, User, UserPermissions, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import CopyApiTokenView from './CopyApiTokenView.vue';
@@ -51,60 +51,60 @@ import CopyApiTokenView from './CopyApiTokenView.vue';
         STListItem,
         Spinner,
         SaveView,
-        EditUserPermissionsBox
+        EditUserPermissionsBox,
     },
     directives: {
-        tooltip: Tooltip
+        tooltip: Tooltip,
     },
     filters: {
-        date: Formatter.date.bind(Formatter)
-    }
+        date: Formatter.date.bind(Formatter),
+    },
 })
 export default class ApiUserView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    deleting = false
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
+    deleting = false;
 
     @Prop({ required: true })
-        user!: ApiUser
+    user!: ApiUser;
 
     @Prop({ required: true })
-        callback!: () => void
+    callback!: () => void;
 
-    patchUser: AutoEncoderPatchType<ApiUser> = ApiUser.patch({ id: this.user.id })
+    patchUser: AutoEncoderPatchType<ApiUser> = ApiUser.patch({ id: this.user.id });
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
     get hasChanges() {
-        return patchContainsChanges(this.patchUser, this.user, { version: Version })
+        return patchContainsChanges(this.patchUser, this.user, { version: Version });
     }
 
     get title() {
         if (this.isNew) {
-            return 'Nieuwe API-key'
+            return 'Nieuwe API-key';
         }
-        return 'API-key bewerken'
+        return 'API-key bewerken';
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get patchedUser() {
-        return this.user.patch(this.patchUser)
+        return this.user.patch(this.patchUser);
     }
 
     get fullAccess() {
-        return !!this.patchedUser.permissions?.forOrganization(this.organization)?.hasFullAccess()
+        return !!this.patchedUser.permissions?.forOrganization(this.organization)?.hasFullAccess();
     }
 
     async save() {
@@ -112,55 +112,57 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
             return;
         }
 
-        this.saving = true
+        this.saving = true;
 
-        const errors = new SimpleErrors()
+        const errors = new SimpleErrors();
 
         if (this.name.length < 2) {
             errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "Vul een naam in",
-                field: "name"
-            }))
+                code: 'invalid_field',
+                message: 'Vul een naam in',
+                field: 'name',
+            }));
         }
-        
-        let valid = false
+
+        let valid = false;
 
         if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
-            valid = true
+            this.errorBox = new ErrorBox(errors);
         }
-        valid = valid && await this.validator.validate()
+        else {
+            this.errorBox = null;
+            valid = true;
+        }
+        valid = valid && await this.validator.validate();
 
         // TODO: validate if at least email or name is filled in
 
         if (!valid) {
-            this.saving = false
+            this.saving = false;
             return;
         }
 
-        const permissions = Permissions.patch({ level: this.fullAccess ? PermissionLevel.Full : (PermissionLevel.None )})
-        this.addPermissionsPatch(permissions)
+        const permissions = Permissions.patch({ level: this.fullAccess ? PermissionLevel.Full : (PermissionLevel.None) });
+        this.addPermissionsPatch(permissions);
 
         try {
             let user: ApiUser;
             if (this.isNew) {
                 const response = await this.$context.authenticatedServer.request({
-                    method: "POST",
-                    path: "/api-keys",
+                    method: 'POST',
+                    path: '/api-keys',
                     body: this.patchedUser,
-                    decoder: ApiUserWithToken as Decoder<ApiUserWithToken>
-                })
+                    decoder: ApiUserWithToken as Decoder<ApiUserWithToken>,
+                });
                 user = response.data;
-            } else {
+            }
+            else {
                 const response = await this.$context.authenticatedServer.request({
-                    method: "PATCH",
-                    path: "/api-keys/"+this.user.id,
+                    method: 'PATCH',
+                    path: '/api-keys/' + this.user.id,
                     body: this.patchUser,
-                    decoder: ApiUser as Decoder<ApiUser>
-                })
+                    decoder: ApiUser as Decoder<ApiUser>,
+                });
                 user = response.data;
             }
 
@@ -168,24 +170,26 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
             this.user.deepSet(user);
             this.patchUser = ApiUser.patch({ id: this.user.id });
 
-            this.callback()
+            this.callback();
 
             if (this.isNew) {
                 this.show({
                     components: [
-                        new ComponentWithProperties(CopyApiTokenView, { user })
+                        new ComponentWithProperties(CopyApiTokenView, { user }),
                     ],
                     replace: 1,
-                    animated: true
-                })
-            } else {
-                this.pop({ force: true })
-                this.saving = false
+                    animated: true,
+                });
             }
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-            this.saving = false
+            else {
+                this.pop({ force: true });
+                this.saving = false;
+            }
+        }
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
+            this.saving = false;
         }
     }
 
@@ -193,12 +197,12 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
         if (this.deleting || this.saving) {
             return false;
         }
-        
+
         if (this.isNew) {
             return false;
         }
 
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze API-key wilt verwijderen?", "Verwijderen")) {
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze API-key wilt verwijderen?', 'Verwijderen')) {
             return false;
         }
 
@@ -207,18 +211,19 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
         try {
             // Patch the user
             await this.$context.authenticatedServer.request({
-                method: "DELETE",
-                path: "/api-keys/"+this.user.id,
-            })
+                method: 'DELETE',
+                path: '/api-keys/' + this.user.id,
+            });
 
-            this.callback()
-            this.pop({ force: true })
-            this.deleting = false
+            this.callback();
+            this.pop({ force: true });
+            this.deleting = false;
 
-            new Toast("API-key '"+this.user.name+"' werd verwijderd", "success").setHide(2000).show()
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
+            new Toast("API-key '" + this.user.name + "' werd verwijderd", 'success').setHide(2000).show();
+        }
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
             this.deleting = false;
         }
         return false;
@@ -229,31 +234,30 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
     /// --------------------------------------------------------
 
     addPatch(patch: PartialWithoutMethods<PatchType<User>>) {
-        this.patchUser = this.patchUser.patch(patch)
+        this.patchUser = this.patchUser.patch(patch);
     }
 
     addPermissionsPatch(patch: PartialWithoutMethods<PatchType<Permissions>>) {
         if (!this.patchedUser.permissions) {
-            const base = UserPermissions.create({})
-            const p = base.convertPatch(Permissions.patch(patch), this.organization.id)
-            this.addPatch({ permissions: base.patch(p) })
+            const base = UserPermissions.create({});
+            const p = base.convertPatch(Permissions.patch(patch), this.organization.id);
+            this.addPatch({ permissions: base.patch(p) });
             return;
         }
 
-        this.addPatch({ permissions: this.patchedUser.permissions!.convertPatch(Permissions.patch(patch), this.organization.id) })
+        this.addPatch({ permissions: this.patchedUser.permissions!.convertPatch(Permissions.patch(patch), this.organization.id) });
     }
-
 
     /// --------------------------------------------------------
     /// --------------------- Mappers --------------------------
     /// --------------------------------------------------------
 
     get name() {
-        return this.patchedUser.name ?? ""
+        return this.patchedUser.name ?? '';
     }
 
     set name(name: string) {
-        this.addPatch({ name })
+        this.addPatch({ name });
     }
 }
 </script>

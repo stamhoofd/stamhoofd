@@ -6,7 +6,7 @@
         <h1 v-else>
             {{ name || 'Categorie' }} bewerken
         </h1>
-          
+
         <STErrorsDefault :error-box="errorBox" />
         <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
             <input
@@ -67,13 +67,13 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage,ErrorBox, SaveView, STErrorsDefault,STInputBox, STList, Validator } from "@stamhoofd/components";
-import { Category, PrivateWebshop, Product, ProductType, Version, WebshopTicketType } from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from '@stamhoofd/components';
+import { Category, PrivateWebshop, Product, ProductType, Version, WebshopTicketType } from '@stamhoofd/structures';
 
 import EditProductView from '../products/EditProductView.vue';
-import ProductRow from "../products/ProductRow.vue"
+import ProductRow from '../products/ProductRow.vue';
 
 @Component({
     components: {
@@ -81,162 +81,162 @@ import ProductRow from "../products/ProductRow.vue"
         STInputBox,
         STErrorsDefault,
         ProductRow,
-        STList
+        STList,
     },
 })
 export default class EditCategoryView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-        category: Category
+    category: Category;
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
     @Prop({ required: true })
-        webshop: PrivateWebshop
-    
-    patchWebshop: AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({})
+    webshop: PrivateWebshop;
+
+    patchWebshop: AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({});
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: ((patch: AutoEncoderPatchType<PrivateWebshop>) => void);
+    saveHandler: ((patch: AutoEncoderPatchType<PrivateWebshop>) => void);
 
     get patchedWebshop() {
-        return this.webshop.patch(this.patchWebshop)
+        return this.webshop.patch(this.patchWebshop);
     }
 
     get isTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.Tickets
+        return this.webshop.meta.ticketType === WebshopTicketType.Tickets;
     }
 
     get patchedCategory() {
-        const c = this.patchedWebshop.categories.find(c => c.id === this.category.id)
+        const c = this.patchedWebshop.categories.find(c => c.id === this.category.id);
         if (c) {
-            return c
+            return c;
         }
-        return this.category
+        return this.category;
     }
 
     get products() {
-        return this.patchedCategory.productIds.flatMap(id => {
-            const product = this.patchedWebshop.products.find(p => p.id === id)
+        return this.patchedCategory.productIds.flatMap((id) => {
+            const product = this.patchedWebshop.products.find(p => p.id === id);
             if (product) {
-                return [product]
+                return [product];
             }
-            return []
-        })
+            return [];
+        });
     }
 
     get name() {
-        return this.patchedCategory.name
+        return this.patchedCategory.name;
     }
 
     set name(name: string) {
-        this.addCategoryPatch(Category.patch({ name }))
+        this.addCategoryPatch(Category.patch({ name }));
     }
 
     get description() {
-        return this.patchedCategory.description
+        return this.patchedCategory.description;
     }
 
     set description(description: string) {
-        this.addCategoryPatch(Category.patch({ description }))
+        this.addCategoryPatch(Category.patch({ description }));
     }
 
     addProduct() {
         const product = Product.create({
-            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product
-        })
-        const p = PrivateWebshop.patch({})
-        p.products.addPut(product)
+            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
+        });
+        const p = PrivateWebshop.patch({});
+        p.products.addPut(product);
 
-        const cp = Category.patch({ id: this.category.id })
-        cp.productIds.addPut(product.id)
-        p.categories.addPatch(cp)
-        
+        const cp = Category.patch({ id: this.category.id });
+        cp.productIds.addPut(product.id);
+        p.categories.addPatch(cp);
+
         this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.patchedWebshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
-            this.addPatch(p.patch(patch))
+            this.addPatch(p.patch(patch));
 
             // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("popup"))
+        } }).setDisplayStyle('popup'));
     }
 
     addCategoryPatch(patch: AutoEncoderPatchType<Category>) {
-        const p = PrivateWebshop.patch({})
-        p.categories.addPatch(Category.patch(Object.assign({}, patch, { id: this.category.id })))
-        this.addPatch(p)
+        const p = PrivateWebshop.patch({});
+        p.categories.addPatch(Category.patch(Object.assign({}, patch, { id: this.category.id })));
+        this.addPatch(p);
     }
 
     addPatch(patch: AutoEncoderPatchType<PrivateWebshop>) {
-        this.patchWebshop = this.patchWebshop.patch(patch)
+        this.patchWebshop = this.patchWebshop.patch(patch);
 
         // Delete all products that do not exist any longer
-        const deleteIds = this.patchedCategory.productIds.flatMap(id => {
-            const product = this.patchedWebshop.products.find(p => p.id === id)
+        const deleteIds = this.patchedCategory.productIds.flatMap((id) => {
+            const product = this.patchedWebshop.products.find(p => p.id === id);
             if (product) {
                 // exists
-                return []
+                return [];
             }
-            return [id]
-        })
+            return [id];
+        });
 
         if (deleteIds.length > 0) {
             // clean up
-            const cp = Category.patch({ id: this.category.id })
+            const cp = Category.patch({ id: this.category.id });
             for (const id of deleteIds) {
-                cp.productIds.addDelete(id)
-                console.log("Automatically deleted product from this category: "+id)
+                cp.productIds.addDelete(id);
+                console.log('Automatically deleted product from this category: ' + id);
             }
-            this.addCategoryPatch(cp)
+            this.addCategoryPatch(cp);
         }
     }
 
     save() {
-        this.saveHandler(this.patchWebshop)
-        this.pop({ force: true })
+        this.saveHandler(this.patchWebshop);
+        this.pop({ force: true });
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
-            return
+        if (!await CenteredMessage.confirm('Ben je zeker dat je deze categorie wilt verwijderen?', 'Verwijderen')) {
+            return;
         }
-        const p = PrivateWebshop.patch({})
-        p.categories.addDelete(this.category.id)
+        const p = PrivateWebshop.patch({});
+        p.categories.addDelete(this.category.id);
 
         for (const id of this.category.productIds) {
-            p.products.addDelete(id)
+            p.products.addDelete(id);
         }
-        this.saveHandler(p)
-        this.pop({ force: true })
+        this.saveHandler(p);
+        this.pop({ force: true });
     }
 
     moveProductUp(product: Product) {
-        const index = this.patchedCategory.productIds.findIndex(c => product.id === c)
+        const index = this.patchedCategory.productIds.findIndex(c => product.id === c);
         if (index === -1 || index === 0) {
             return;
         }
 
-        const moveTo = index - 2
-        const p = Category.patch({})
-        p.productIds.addMove(product.id, this.patchedCategory.productIds[moveTo] ?? null)
-        this.addCategoryPatch(p)
+        const moveTo = index - 2;
+        const p = Category.patch({});
+        p.productIds.addMove(product.id, this.patchedCategory.productIds[moveTo] ?? null);
+        this.addCategoryPatch(p);
     }
 
     moveProductDown(product: Product) {
-        const index = this.patchedCategory.productIds.findIndex(c => product.id === c)
+        const index = this.patchedCategory.productIds.findIndex(c => product.id === c);
         if (index === -1 || index >= this.patchedCategory.productIds.length - 1) {
             return;
         }
 
-        const moveTo = index + 1
-        const p = Category.patch({})
-        p.productIds.addMove(product.id, this.patchedCategory.productIds[moveTo])
-        this.addCategoryPatch(p)
+        const moveTo = index + 1;
+        const p = Category.patch({});
+        p.productIds.addMove(product.id, this.patchedCategory.productIds[moveTo]);
+        this.addCategoryPatch(p);
     }
 
     get draggableProducts() {
@@ -248,24 +248,22 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const patch = Category.patch({})
+        const patch = Category.patch({});
         for (const p of products.slice().reverse()) {
-            patch.productIds.addMove(p.id, null)
+            patch.productIds.addMove(p.id, null);
         }
-        this.addCategoryPatch(patch)
+        this.addCategoryPatch(patch);
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchWebshop, this.webshop, { version: Version })
+        return patchContainsChanges(this.patchWebshop, this.webshop, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
-
-    
 }
 </script>

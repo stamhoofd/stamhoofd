@@ -5,22 +5,22 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <EditPaymentMethodsBox 
+        <EditPaymentMethodsBox
             type="webshop"
-            :organization="organization" 
+            :organization="organization"
             :config="config"
-            :private-config="privateConfig" 
-            :validator="validator" 
+            :private-config="privateConfig"
+            :validator="validator"
             @patch:config="patchConfig($event)"
-            @patch:privateConfig="patchPrivateConfig($event)" 
+            @patch:private-config="patchPrivateConfig($event)"
         />
     </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { SaveView, STErrorsDefault, STInputBox } from "@stamhoofd/components";
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { SaveView, STErrorsDefault, STInputBox } from '@stamhoofd/components';
 import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
@@ -31,51 +31,48 @@ import EditWebshopMixin from './EditWebshopMixin';
         STInputBox,
         STErrorsDefault,
         EditPaymentMethodsBox,
-        SaveView
+        SaveView,
     },
 })
 export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMixin) {
-    
     get viewTitle() {
-        return "Betaalmethodes"
+        return 'Betaalmethodes';
     }
 
     get isAnyTicketType() {
-        return (this.webshop.meta.ticketType !== WebshopTicketType.None)
+        return (this.webshop.meta.ticketType !== WebshopTicketType.None);
     }
 
     get config() {
-        return this.webshop.meta.paymentConfiguration
+        return this.webshop.meta.paymentConfiguration;
     }
 
     patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
         this.addPatch(
             PrivateWebshop.patch({
                 meta: WebshopMetaData.patch({
-                    paymentConfiguration: patch
-                })
-            })
-        )
+                    paymentConfiguration: patch,
+                }),
+            }),
+        );
     }
 
     get privateConfig() {
-        return this.webshop.privateMeta.paymentConfiguration
+        return this.webshop.privateMeta.paymentConfiguration;
     }
 
     patchPrivateConfig(patch: PrivatePaymentConfiguration) {
         this.addPatch(
             PrivateWebshop.patch({
                 privateMeta: WebshopPrivateMetaData.patch({
-                    paymentConfiguration: patch
-                })
-            })
-        )
+                    paymentConfiguration: patch,
+                }),
+            }),
+        );
     }
 
     get organization() {
-        return this.$context.organization!
+        return this.$context.organization!;
     }
-
-    
 }
 </script>

@@ -98,10 +98,10 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, SaveView, STErrorsDefault, Toast, Validator } from "@stamhoofd/components";
-import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, SaveView, STErrorsDefault, Toast, Validator } from '@stamhoofd/components';
+import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
@@ -116,57 +116,57 @@ import DomainSettingsView from './DomainSettingsView.vue';
     },
     navigation: {
         title: 'Personaliseren',
-    }
+    },
 })
 export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    temp_organization = this.$organization
-    showDomainSettings = true
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
+    temp_organization = this.$organization;
+    showDomainSettings = true;
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
-    
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
+
     created() {
-        this.organizationPatch.id = this.$organization.id
+        this.organizationPatch.id = this.$organization.id;
     }
 
     get organization() {
-        return this.$organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch);
     }
 
     get enableMemberModule() {
-        return this.organization.meta.modules.useMembers
+        return this.organization.meta.modules.useMembers;
     }
-    
+
     get squareLogoResolutions() {
         return [
             ResolutionRequest.create({
                 height: 50,
                 width: 50,
-                fit: ResolutionFit.Inside
+                fit: ResolutionFit.Inside,
             }),
             ResolutionRequest.create({
                 height: 70,
                 width: 70,
-                fit: ResolutionFit.Inside
+                fit: ResolutionFit.Inside,
             }),
             ResolutionRequest.create({
-                height: 50*3,
-                width: 50*3,
-                fit: ResolutionFit.Inside
+                height: 50 * 3,
+                width: 50 * 3,
+                fit: ResolutionFit.Inside,
             }),
             ResolutionRequest.create({
-                height: 70*3,
-                width: 70*3,
-                fit: ResolutionFit.Inside
+                height: 70 * 3,
+                width: 70 * 3,
+                fit: ResolutionFit.Inside,
             }),
             ResolutionRequest.create({
-                height: 70*3,
-                width: 70*3,
-                fit: ResolutionFit.Inside
-            })
-        ]
+                height: 70 * 3,
+                width: 70 * 3,
+                fit: ResolutionFit.Inside,
+            }),
+        ];
     }
 
     get horizontalLogoResolutions() {
@@ -174,143 +174,144 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
             ResolutionRequest.create({
                 height: 50,
                 width: 300,
-                fit: ResolutionFit.Inside
+                fit: ResolutionFit.Inside,
             }),
             ResolutionRequest.create({
                 height: 70,
                 width: 300,
-                fit: ResolutionFit.Inside
+                fit: ResolutionFit.Inside,
             }),
             ResolutionRequest.create({
-                height: 50*3,
-                width: 300*3,
-                fit: ResolutionFit.Inside
+                height: 50 * 3,
+                width: 300 * 3,
+                fit: ResolutionFit.Inside,
             }),
             ResolutionRequest.create({
-                height: 70*3,
-                width: 300*3,
-                fit: ResolutionFit.Inside
+                height: 70 * 3,
+                width: 300 * 3,
+                fit: ResolutionFit.Inside,
             }),
-        ]
+        ];
     }
 
     addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<Organization>>) {
-        this.organizationPatch = this.organizationPatch.patch(Organization.patch(patch))
+        this.organizationPatch = this.organizationPatch.patch(Organization.patch(patch));
     }
 
     get color() {
-        return this.organization.meta.color
+        return this.organization.meta.color;
     }
 
     set color(color: string | null) {
         this.addPatch({
             meta: OrganizationMetaData.patch({
-                color: color
-            })
-        })
+                color: color,
+            }),
+        });
     }
 
     get squareLogo() {
-        return this.organization.meta.squareLogo
+        return this.organization.meta.squareLogo;
     }
 
     set squareLogo(squareLogo: Image | null) {
         this.addPatch({
             meta: OrganizationMetaData.patch({
-                squareLogo
-            })
-        })
+                squareLogo,
+            }),
+        });
     }
 
     get expandLogo() {
-        return this.organization.meta.expandLogo
+        return this.organization.meta.expandLogo;
     }
 
     set expandLogo(expandLogo: boolean) {
         this.addPatch({
             meta: OrganizationMetaData.patch({
-                expandLogo
-            })
-        })
+                expandLogo,
+            }),
+        });
     }
 
-
     get horizontalLogo() {
-        return this.organization.meta.horizontalLogo
+        return this.organization.meta.horizontalLogo;
     }
 
     set horizontalLogo(horizontalLogo: Image | null) {
         this.addPatch({
             meta: OrganizationMetaData.patch({
-                horizontalLogo
-            })
-        })
+                horizontalLogo,
+            }),
+        });
     }
 
     get isMailOk() {
-        return this.organization.privateMeta?.pendingMailDomain === null && this.organization.privateMeta?.mailDomain !== null
-    } 
+        return this.organization.privateMeta?.pendingMailDomain === null && this.organization.privateMeta?.mailDomain !== null;
+    }
 
     get isRegisterOk() {
-        return this.organization.privateMeta?.pendingRegisterDomain === null && this.organization.registerDomain !== null
-    } 
+        return this.organization.privateMeta?.pendingRegisterDomain === null && this.organization.registerDomain !== null;
+    }
 
     async save() {
         if (this.saving) {
             return;
         }
 
-        const errors = new SimpleErrors()
-      
-        let valid = false
+        const errors = new SimpleErrors();
+
+        let valid = false;
 
         if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
-            valid = true
+            this.errorBox = new ErrorBox(errors);
         }
-        valid = valid && await this.validator.validate()
+        else {
+            this.errorBox = null;
+            valid = true;
+        }
+        valid = valid && await this.validator.validate();
 
         if (!valid) {
             return;
         }
 
-        this.saving = true
+        this.saving = true;
 
         try {
-            await this.$organizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
-            new Toast('De wijzigingen zijn opgeslagen', "success green").show()
-            this.dismiss({ force: true })
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+            await this.$organizationManager.patch(this.organizationPatch);
+            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
+            new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+            this.dismiss({ force: true });
+        }
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
         }
 
-        this.saving = false
+        this.saving = false;
     }
 
     setupDomain() {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(DomainSettingsView, {})
-        }).setDisplayStyle("popup"))
+            root: new ComponentWithProperties(DomainSettingsView, {}),
+        }).setDisplayStyle('popup'));
     }
-   
+
     openRecords() {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(DNSRecordsView, {})
-        }).setDisplayStyle("popup"))
+            root: new ComponentWithProperties(DNSRecordsView, {}),
+        }).setDisplayStyle('popup'));
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
+        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 }
 </script>
@@ -339,7 +340,6 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         cursor: pointer;
         touch-action: manipulation;
-
 
         &:hover {
             border-color: $color-primary-gray-light;

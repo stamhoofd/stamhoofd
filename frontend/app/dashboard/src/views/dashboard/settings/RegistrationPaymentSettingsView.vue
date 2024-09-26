@@ -10,18 +10,18 @@
             <ReviewCheckbox :data="review.$reviewCheckboxData" />
             <hr>
         </div>
-        
+
         <STErrorsDefault :error-box="errorBox" />
 
-        <EditPaymentMethodsBox 
+        <EditPaymentMethodsBox
             type="registration"
-            :organization="organization" 
+            :organization="organization"
 
-            :config="config" 
-            :private-config="privateConfig" 
+            :config="config"
+            :private-config="privateConfig"
             :validator="validator"
-            @patch:config="patchConfig($event)" 
-            @patch:private-config="patchPrivateConfig($event)" 
+            @patch:config="patchConfig($event)"
+            @patch:private-config="patchPrivateConfig($event)"
         />
     </SaveView>
 </template>
@@ -29,10 +29,10 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, ReviewCheckbox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useReview, useSetupStepTranslations, Validator } from "@stamhoofd/components";
-import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, SetupStepType, Version } from "@stamhoofd/structures";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, ReviewCheckbox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useReview, useSetupStepTranslations, Validator } from '@stamhoofd/components';
+import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, SetupStepType, Version } from '@stamhoofd/structures';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
@@ -49,74 +49,74 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
         STListItem,
         Checkbox,
         EditPaymentMethodsBox,
-        ReviewCheckbox
+        ReviewCheckbox,
     },
 })
 export default class RegistrationPaymentSettingsView extends Mixins(NavigationMixin) {
     @Prop({ required: false, default: false })
-        isReview: boolean;
-    
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    temp_organization = this.$organization
-    loadingMollie = false
+    isReview: boolean;
+
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
+    temp_organization = this.$organization;
+    loadingMollie = false;
     $t = useTranslate();
     setupTranslations = useSetupStepTranslations();
-
-    title: string = this.isReview ? this.setupTranslations.getReviewTitle(SetupStepType.Payment) : 'Betaalmethodes voor inschrijvingen';
+    title = '';
 
     review = useReview(SetupStepType.Payment);
     hasReviewChanges = this.review.$hasChanges;
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
 
     created() {
-        this.organizationPatch.id = this.$organization.id
+        this.organizationPatch.id = this.$organization.id;
+        this.title = this.isReview ? this.setupTranslations.getReviewTitle(SetupStepType.Payment) : 'Betaalmethodes voor inschrijvingen';
     }
 
     get organization() {
-        return this.$organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch);
     }
 
     get isBelgium() {
-        return this.organization.address.country === Country.Belgium
+        return this.organization.address.country === Country.Belgium;
     }
 
     get hasTransfers() {
-        return this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer)
+        return this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer);
     }
 
     addPatch(patch: AutoEncoderPatchType<Organization>) {
-        this.organizationPatch = this.organizationPatch.patch(patch)
+        this.organizationPatch = this.organizationPatch.patch(patch);
     }
 
     addMetaPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationMetaData>>) {
         this.organizationPatch = this.organizationPatch.patch({
-            meta: OrganizationMetaData.patch(patch)
-        })
+            meta: OrganizationMetaData.patch(patch),
+        });
     }
 
     get config() {
-        return this.organization.meta.registrationPaymentConfiguration
+        return this.organization.meta.registrationPaymentConfiguration;
     }
 
     patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
         this.addMetaPatch({
-            registrationPaymentConfiguration: patch
-        })
+            registrationPaymentConfiguration: patch,
+        });
     }
 
     get privateConfig() {
-        return this.organization.privateMeta?.registrationPaymentConfiguration ?? PrivatePaymentConfiguration.create({})
+        return this.organization.privateMeta?.registrationPaymentConfiguration ?? PrivatePaymentConfiguration.create({});
     }
 
     patchPrivateConfig(patch: AutoEncoderPatchType<PrivatePaymentConfiguration>) {
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
-                registrationPaymentConfiguration: patch
-            })
-        })
+                registrationPaymentConfiguration: patch,
+            }),
+        });
     }
 
     async save() {
@@ -124,45 +124,47 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
             return;
         }
 
-        const errors = new SimpleErrors()
-       
-        let valid = false
+        const errors = new SimpleErrors();
+
+        let valid = false;
 
         if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
-            valid = true
+            this.errorBox = new ErrorBox(errors);
         }
-        valid = valid && await this.validator.validate()
+        else {
+            this.errorBox = null;
+            valid = true;
+        }
+        valid = valid && await this.validator.validate();
 
         if (!valid) {
             return;
         }
 
-        this.saving = true
+        this.saving = true;
 
         try {
-            if(this.hasChanges) {
-                await this.$organizationManager.patch(this.organizationPatch)
-                this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
+            if (this.hasChanges) {
+                await this.$organizationManager.patch(this.organizationPatch);
+                this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
             }
 
-            if(this.hasReviewChanges) {
+            if (this.hasReviewChanges) {
                 await this.review.save();
             }
 
-            new Toast('De wijzigingen zijn opgeslagen', "success green").show()
-            this.dismiss({ force: true })
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+            new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+            this.dismiss({ force: true });
+        }
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
         }
 
-        this.saving = false
+        this.saving = false;
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
+        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version });
     }
 
     get hasSomeChanges() {
@@ -173,7 +175,7 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 }
 </script>

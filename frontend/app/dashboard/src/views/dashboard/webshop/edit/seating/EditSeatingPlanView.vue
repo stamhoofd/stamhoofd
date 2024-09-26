@@ -41,13 +41,17 @@
         <p>Maak een zetelcategorie aan om een meerprijs in rekening te brengen voor sommige zetels of bepaalde zetels te reserveren. Selecteer daarna een rij of een zetel en klik op rechtermuisknop om de categorie van die rij of zetel te wijzigen.</p>
         <STList>
             <STListItem v-for="category in patchedSeatingPlan.categories" :key="category.id" :selectable="true" element-name="button" @click="editCategory(category)">
-                <template #left><span class="icon dot gray custom-color" :style="{'--color': patchedSeatingPlan.getCategoryColor(category.id)}" /></template>
+                <template #left>
+                    <span class="icon dot gray custom-color" :style="{'--color': patchedSeatingPlan.getCategoryColor(category.id)}" />
+                </template>
                 <h3 class="style-title-list">
                     {{ category.name }}
                 </h3>
             </STListItem>
             <STListItem :selectable="true" element-name="button" @click="addCategory">
-                <template #left><span class="icon add gray" /></template>
+                <template #left>
+                    <span class="icon add gray" />
+                </template>
                 <h3 class="style-title-list">
                     Nieuwe categorie
                 </h3>
@@ -76,7 +80,7 @@
                 >
             </STInputBox>
 
-            <EditSeatingPlanSectionBox 
+            <EditSeatingPlanSectionBox
                 :seating-plan="patchedSeatingPlan"
                 :seating-plan-section="section"
                 :validator="validator"
@@ -98,12 +102,12 @@
 
             <h2>Acties</h2>
 
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="downloadSettings(true)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/box-download.svg">
                     </template>
-                    
+
                     <h2 class="style-title-list">
                         Exporteer zaalplan
                     </h2>
@@ -125,12 +129,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges, VersionBox } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, LoadingButton,Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, ErrorBox, LoadingButton, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from '@stamhoofd/components';
+import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import EditSeatingPlanCategoryView from './EditSeatingPlanCategoryView.vue';
 import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';
@@ -145,58 +148,58 @@ import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';
         STListItem,
         EditSeatingPlanSectionBox,
         LoadingButton,
-        Checkbox
+        Checkbox,
     },
 })
 export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
     @Prop({ required: true })
-        seatingPlan!: SeatingPlan
+    seatingPlan!: SeatingPlan;
 
     @Prop({ required: true })
-        webshop: PrivateWebshop
+    webshop: PrivateWebshop;
 
     /// For now only used to update locations and times of other products that are shared
-    patchWebshop:  AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({})
-    patchSeatingPlan: AutoEncoderPatchType<SeatingPlan> = SeatingPlan.patch({ id: this.seatingPlan.id })
+    patchWebshop: AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({});
+    patchSeatingPlan: AutoEncoderPatchType<SeatingPlan> = SeatingPlan.patch({ id: this.seatingPlan.id });
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void | Promise<void>;
+    saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void | Promise<void>;
 
     get patchedWebshop() {
-        return this.webshop.patch(this.patchWebshop)
+        return this.webshop.patch(this.patchWebshop);
     }
 
     get patchedSeatingPlan() {
-        return this.seatingPlan.patch(this.patchSeatingPlan)
+        return this.seatingPlan.patch(this.patchSeatingPlan);
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get title() {
         if (this.isNew) {
-            return 'Nieuw zaalplan maken'
+            return 'Nieuw zaalplan maken';
         }
-        return 'Zaalplan aanpassen'
+        return 'Zaalplan aanpassen';
     }
 
     addPatch(patch: AutoEncoderPatchType<SeatingPlan>) {
-        this.patchSeatingPlan = this.patchSeatingPlan.patch(patch)
+        this.patchSeatingPlan = this.patchSeatingPlan.patch(patch);
     }
 
     get name() {
-        return this.patchedSeatingPlan.name
+        return this.patchedSeatingPlan.name;
     }
 
     set name(value: string) {
@@ -204,7 +207,7 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
     }
 
     get requireOptimalReservation() {
-        return this.patchedSeatingPlan.requireOptimalReservation
+        return this.patchedSeatingPlan.requireOptimalReservation;
     }
 
     set requireOptimalReservation(value: boolean) {
@@ -213,14 +216,14 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
 
     setSectionName(section: SeatingPlanSection, value: string) {
         const p = SeatingPlan.patch({});
-        p.sections.addPatch(SeatingPlanSection.patch({ id: section.id, name: value }))
-        this.addPatch(p)
+        p.sections.addPatch(SeatingPlanSection.patch({ id: section.id, name: value }));
+        this.addPatch(p);
     }
 
     async save() {
-        const isValid = await this.validator.validate()
+        const isValid = await this.validator.validate();
         if (!isValid) {
-            return
+            return;
         }
 
         if (this.name.length < 2) {
@@ -229,9 +232,9 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
                     code: 'invalid_field',
                     message: 'De naam van de zaal moet minstens 2 karakters lang zijn',
                     field: 'name',
-                })
+                }),
             );
-            return
+            return;
         }
 
         if (this.patchedSeatingPlan.sections.length > 1) {
@@ -242,88 +245,89 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
                         new SimpleError({
                             code: 'invalid_field',
                             message: 'De naam van een zone mag niet leeg zijn',
-                            field: 'sections['+section.id+'].name',
-                        })
+                            field: 'sections[' + section.id + '].name',
+                        }),
                     );
-                    return
+                    return;
                 }
                 if (this.patchedSeatingPlan.sections.filter(s => s.name === section.name).length > 1) {
                     this.errorBox = new ErrorBox(
                         new SimpleError({
                             code: 'invalid_field',
                             message: 'De naam van een zone moet uniek zijn',
-                            field: 'sections['+section.id+'].name',
-                        })
+                            field: 'sections[' + section.id + '].name',
+                        }),
                     );
-                    return
+                    return;
                 }
             }
         }
 
         this.saving = true;
 
-        const p = PrivateWebshop.patch(this.patchWebshop)
-        const meta = WebshopMetaData.patch({})
-        meta.seatingPlans.addPatch(this.patchSeatingPlan)
-        const patchedWebshop = p.patch({meta})
+        const p = PrivateWebshop.patch(this.patchWebshop);
+        const meta = WebshopMetaData.patch({});
+        meta.seatingPlans.addPatch(this.patchSeatingPlan);
+        const patchedWebshop = p.patch({ meta });
 
         try {
-            await this.saveHandler(patchedWebshop)
-            this.pop({ force: true })
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+            await this.saveHandler(patchedWebshop);
+            this.pop({ force: true });
+        }
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
         }
 
         this.saving = false;
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchSeatingPlan, this.seatingPlan, { version: Version }) || patchContainsChanges(this.patchWebshop, this.webshop, { version: Version })
+        return patchContainsChanges(this.patchSeatingPlan, this.seatingPlan, { version: Version }) || patchContainsChanges(this.patchWebshop, this.webshop, { version: Version });
     }
 
     addSection() {
         const section = SeatingPlanSection.create({
             rows: [
                 SeatingPlanRow.create({
-                    label: 'A'
-                })
-            ]
-        })
-        const patch = SeatingPlan.patch({})
-        patch.sections.addPut(section)
-        this.addPatch(patch)
+                    label: 'A',
+                }),
+            ],
+        });
+        const patch = SeatingPlan.patch({});
+        patch.sections.addPut(section);
+        this.addPatch(patch);
     }
 
     async deleteSection(section: SeatingPlanSection) {
-        if (!(await CenteredMessage.confirm("Ben je zeker dat je deze zone wilt verwijderen?", "Verwijderen"))) {
+        if (!(await CenteredMessage.confirm('Ben je zeker dat je deze zone wilt verwijderen?', 'Verwijderen'))) {
             return;
         }
 
-        const patch = SeatingPlan.patch({})
-        patch.sections.addDelete(section.id)
-        this.addPatch(patch)
+        const patch = SeatingPlan.patch({});
+        patch.sections.addDelete(section.id);
+        this.addPatch(patch);
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
-    downloadingSettings = false
+    downloadingSettings = false;
 
     async downloadSettings() {
         if (this.downloadingSettings) {
-            return
+            return;
         }
-        this.downloadingSettings = true
+        this.downloadingSettings = true;
 
         try {
-            const versionBox = new VersionBox(this.patchedSeatingPlan)
-            
+            const versionBox = new VersionBox(this.patchedSeatingPlan);
+
             // Create a clean JSON file
-            const string = JSON.stringify(versionBox.encode({version: Version}), null, 2);
+            const string = JSON.stringify(versionBox.encode({ version: Version }), null, 2);
 
             // Create a blob
             const blob = new Blob([string], { type: 'application/json' });
@@ -333,29 +337,31 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
             const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
             const zip = new JSZip();
             zip.file('plan.json', blob);
-            const zipBlob = await zip.generateAsync({type:"blob", compression: "DEFLATE", compressionOptions : {level:6}})
-            saveAs(zipBlob, Formatter.fileSlug(this.patchedSeatingPlan.name)+ '.plan');
-        } catch (e) {
-            console.error(e)
-            new Toast('Er is iets misgelopen bij het downloaden van het zaalplan. Probeer om alles eerst op te slaan en daarna de pagina te herladen. Als het probleem zich blijft voordoen, neem dan contact met ons op.', 'error red')
-        } finally {
-            this.downloadingSettings = false
+            const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+            saveAs(zipBlob, Formatter.fileSlug(this.patchedSeatingPlan.name) + '.plan');
+        }
+        catch (e) {
+            console.error(e);
+            new Toast('Er is iets misgelopen bij het downloaden van het zaalplan. Probeer om alles eerst op te slaan en daarna de pagina te herladen. Als het probleem zich blijft voordoen, neem dan contact met ons op.', 'error red');
+        }
+        finally {
+            this.downloadingSettings = false;
         }
     }
 
     addCategory() {
         // We choose a short id
-        let id = this.patchedSeatingPlan.categories.length + 1
+        let id = this.patchedSeatingPlan.categories.length + 1;
         while (this.patchedSeatingPlan.categories.find(c => c.id === id.toString())) {
-            id++
+            id++;
         }
         const category = SeatingPlanCategory.create({
             id: id.toString(),
-            name: 'Naamloos'
-        })
-        const patch = SeatingPlan.patch({})
-        patch.categories.addPut(category)
-        
+            name: 'Naamloos',
+        });
+        const patch = SeatingPlan.patch({});
+        patch.categories.addPut(category);
+
         this.present({
             components: [
                 new ComponentWithProperties(EditSeatingPlanCategoryView, {
@@ -363,12 +369,12 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
                     isNew: true,
                     category,
                     saveHandler: (p: AutoEncoderPatchType<SeatingPlan>) => {
-                        this.addPatch(patch.patch(p))
-                    }
-                })
+                        this.addPatch(patch.patch(p));
+                    },
+                }),
             ],
-            modalDisplayStyle: 'sheet'
-        })
+            modalDisplayStyle: 'sheet',
+        });
     }
 
     editCategory(category: SeatingPlanCategory) {
@@ -379,14 +385,13 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
                     isNew: false,
                     category,
                     saveHandler: (p: AutoEncoderPatchType<SeatingPlan>) => {
-                        this.addPatch(p)
-                    }
-                })
+                        this.addPatch(p);
+                    },
+                }),
             ],
-            modalDisplayStyle: 'sheet'
-        })
+            modalDisplayStyle: 'sheet',
+        });
     }
-    
 }
 </script>
 

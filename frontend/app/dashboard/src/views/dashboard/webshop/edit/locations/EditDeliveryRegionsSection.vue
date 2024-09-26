@@ -9,7 +9,7 @@
                 <input v-model="searchQuery" class="input" placeholder="Toevoegen">
             </div>
         </LoadingButton>
-    
+
         <STList>
             <STListItem v-for="city in cities" :key="city.id" class="right-description" :selectable="true" @click="toggleCity(city)">
                 {{ city.name }} ({{ city.province.name }}, {{ countryName(city.country) }})
@@ -43,25 +43,25 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { LoadingButton,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { LoadingButton, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { SessionManager } from '@stamhoofd/networking';
-import { City, Country, CountryHelper, Province, SearchRegions, WebshopDeliveryMethod } from "@stamhoofd/structures"
+import { City, Country, CountryHelper, Province, SearchRegions, WebshopDeliveryMethod } from '@stamhoofd/structures';
 
 const throttle = (func, limit) => {
     let lastFunc;
     let lastRan;
-    return function() {
+    return function () {
         const context = this;
-        // eslint-disable-next-line prefer-rest-params
+
         const args = arguments;
         if (lastRan) {
             clearTimeout(lastFunc);
         }
         lastRan = Date.now();
-            
-        lastFunc = setTimeout(function() {
+
+        lastFunc = setTimeout(function () {
             if (Date.now() - lastRan >= limit) {
                 func.apply(context, args);
                 lastRan = Date.now();
@@ -76,139 +76,140 @@ const throttle = (func, limit) => {
         STToolbar,
         STListItem,
         STList,
-        LoadingButton
-    }
+        LoadingButton,
+    },
 })
 export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) {
-  
     @Prop({ required: true })
-        deliveryMethod!: WebshopDeliveryMethod
+    deliveryMethod!: WebshopDeliveryMethod;
 
-    searchQuery = ""
+    searchQuery = '';
     throttledSearch = throttle(this.doSearch.bind(this), 300);
-    loadingSearch = false
-    searchResults: SearchRegions | null = null
-    searchCount = 0
+    loadingSearch = false;
+    searchResults: SearchRegions | null = null;
+    searchCount = 0;
 
     @Watch('searchQuery')
     onSearch() {
         // start query
-        this.loadingSearch = true
+        this.loadingSearch = true;
         this.searchCount++;
 
         if (this.searchQuery.length === 0) {
-            this.searchResults = null
-            this.loadingSearch = false
-            return
+            this.searchResults = null;
+            this.loadingSearch = false;
+            return;
         }
-        this.throttledSearch()
+        this.throttledSearch();
     }
 
     countryName(country: Country) {
-        return CountryHelper.getName(country)
+        return CountryHelper.getName(country);
     }
 
     async doSearch() {
         if (this.searchQuery.length === 0) {
-            this.searchResults = null
-            this.loadingSearch = false
-            return
+            this.searchResults = null;
+            this.loadingSearch = false;
+            return;
         }
 
-        const c = this.searchCount
+        const c = this.searchCount;
 
         // search
         const response = await this.$context.server.request({
-            method: "GET",
-            path: "/address/search",
+            method: 'GET',
+            path: '/address/search',
             query: {
-                query: this.searchQuery
+                query: this.searchQuery,
             },
-            decoder: SearchRegions as Decoder<SearchRegions>
-        })
+            decoder: SearchRegions as Decoder<SearchRegions>,
+        });
 
         if (c === this.searchCount) {
-            this.searchResults = response.data
-            this.loadingSearch = false
+            this.searchResults = response.data;
+            this.loadingSearch = false;
         }
     }
 
     addPatch(patch: AutoEncoderPatchType<WebshopDeliveryMethod>) {
-        this.$emit("patch", patch)
+        this.$emit('patch', patch);
     }
 
     get cities() {
         if (this.searchResults) {
-            return this.searchResults.cities
+            return this.searchResults.cities;
         }
-        return this.deliveryMethod.cities
+        return this.deliveryMethod.cities;
     }
 
     get provinces() {
         if (this.searchResults) {
-            return this.searchResults.provinces
+            return this.searchResults.provinces;
         }
-        return this.deliveryMethod.provinces
+        return this.deliveryMethod.provinces;
     }
 
     get countries() {
         if (this.searchResults) {
-            return this.searchResults.countries
+            return this.searchResults.countries;
         }
-        return this.deliveryMethod.countries
+        return this.deliveryMethod.countries;
     }
-   
+
     hasCity(city: City) {
-        return !!this.deliveryMethod.cities.find(c => c.id === city.id)
+        return !!this.deliveryMethod.cities.find(c => c.id === city.id);
     }
 
     toggleCity(city: City) {
-        const p = WebshopDeliveryMethod.patch({})
+        const p = WebshopDeliveryMethod.patch({});
 
         if (this.hasCity(city)) {
-            p.cities.addDelete(city.id)
-        } else {
-            p.cities.addPut(city)
-            this.searchQuery = ""
+            p.cities.addDelete(city.id);
+        }
+        else {
+            p.cities.addPut(city);
+            this.searchQuery = '';
         }
 
-        this.$emit('patch', p)
+        this.$emit('patch', p);
     }
 
     hasProvince(province: Province) {
-        return !!this.deliveryMethod.provinces.find(c => c.id === province.id)
+        return !!this.deliveryMethod.provinces.find(c => c.id === province.id);
     }
 
     toggleProvince(province: Province) {
-        const p = WebshopDeliveryMethod.patch({})
+        const p = WebshopDeliveryMethod.patch({});
 
         if (this.hasProvince(province)) {
-            p.provinces.addDelete(province.id)
-        } else {
-            p.provinces.addPut(province)
-            this.searchQuery = ""
+            p.provinces.addDelete(province.id);
+        }
+        else {
+            p.provinces.addPut(province);
+            this.searchQuery = '';
         }
 
-        this.$emit('patch', p)
+        this.$emit('patch', p);
     }
 
     hasCountry(country: Country) {
-        return !!this.deliveryMethod.countries.find(c => c === country)
+        return !!this.deliveryMethod.countries.find(c => c === country);
     }
 
     toggleCountry(country: Country) {
-        const p = WebshopDeliveryMethod.patch({})
+        const p = WebshopDeliveryMethod.patch({});
 
         if (this.hasCountry(country)) {
-            p.countries.addDelete(country)
-        } else {
-            p.countries.addPut(country)
-            this.searchQuery = ""
+            p.countries.addDelete(country);
+        }
+        else {
+            p.countries.addPut(country);
+            this.searchQuery = '';
         }
 
-        this.$emit('patch', p)
+        this.$emit('patch', p);
     }
-    
 }
 </script>
 

@@ -19,16 +19,16 @@
                     </button>
                 </p>
 
-                <div 
+                <div
                     class="seating-plan-seats"
                     :style="{
                         '--sw': size.width + 'px',
                         '--sh': size.height + 'px',
                     }"
                 >
-                    <div 
-                        v-for="row of rows" 
-                        :key="row.uuid" 
+                    <div
+                        v-for="row of rows"
+                        :key="row.uuid"
                         :ref="'row-' + row.uuid"
                         class="seating-plan-row"
                         :style="{
@@ -38,39 +38,39 @@
                             '--ry': row.y + 'px',
                         }"
                     >
-                        <input 
-                            v-model="row.label" 
+                        <input
+                            v-model="row.label"
                             class="row-label left"
                             :class="{error: isRowInvalid(row)}"
                             @click.prevent="selectInput"
                             @input="emitChange()"
                         >
-                        <input 
-                            v-model="row.label" 
+                        <input
+                            v-model="row.label"
                             class="row-label right"
                             :class="{error: isRowInvalid(row)}"
-                            @click.prevent="selectInput" 
+                            @click.prevent="selectInput"
                             @input="emitChange()"
                         >
-                        <button 
-                            v-if="isRowSelected(row) || row.seats.length === 0" 
-                            class="left add-seat-button button icon add gray hover-show" 
-                            type="button" 
+                        <button
+                            v-if="isRowSelected(row) || row.seats.length === 0"
+                            class="left add-seat-button button icon add gray hover-show"
+                            type="button"
                             @click.prevent="addLeftSeat(row)"
                         />
 
-                        <button 
-                            v-if="isRowSelected(row) || row.seats.length === 0" 
-                            class="right add-seat-button button icon add gray hover-show" 
-                            type="button" 
+                        <button
+                            v-if="isRowSelected(row) || row.seats.length === 0"
+                            class="right add-seat-button button icon add gray hover-show"
+                            type="button"
                             @click.prevent="addRightSeat(row)"
                         />
 
                         <div>
-                            <div 
-                                v-for="seat of row.seats" 
-                                :key="seat.uuid" 
-                                v-long-press="(e) => openContextMenu(e, seat)" 
+                            <div
+                                v-for="seat of row.seats"
+                                :key="seat.uuid"
+                                v-long-press="(e) => openContextMenu(e, seat)"
                                 class="seat"
                                 :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}"
                                 :style="{
@@ -79,17 +79,17 @@
                                     '--x': seat.x + 'px',
                                     '--y': seat.y + 'px',
                                     '--color': getSeatColor(seat)
-                                }" 
+                                }"
                                 @click.left="selectSeat(seat, $event)"
                                 @pointerdown.left="preventIfNotSelected(seat, $event)"
                                 @contextmenu.prevent.stop="openContextMenu($event, seat)"
                             >
-                                <input 
-                                    :ref="'seat-input-' + seat.uuid" 
+                                <input
+                                    :ref="'seat-input-' + seat.uuid"
                                     :data-uuid="seat.uuid"
                                     data-seat="true"
-                                    :value="seat.label" 
-                                    :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}" 
+                                    :value="seat.label"
+                                    :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}"
                                     @input="setSeat(row, seat, $event.target.value)"
                                     @keydown.enter.prevent.stop="insertSeat(row, seat, $event)"
                                 >
@@ -124,51 +124,51 @@
 </template>
 
 <script lang="ts">
-import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem, ErrorBox, STErrorsDefault, Validator } from '@stamhoofd/components';
-import { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings, SeatType } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings, SeatType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 function getNextPattern(examples: string[]): string {
     if (examples.length === 0) {
-        return "1"
+        return '1';
     }
     if (examples.length === 1) {
-        const v = examples[0]
-        return incrementString(v)
+        const v = examples[0];
+        return incrementString(v);
     }
 
     if (examples.length === 2) {
-        const v = examples[examples.length - 2]
-        const v2 = examples[examples.length - 1]
-        
-        const difference = stringToNumber(v2) - stringToNumber(v)
-        return incrementString(v2, difference)
+        const v = examples[examples.length - 2];
+        const v2 = examples[examples.length - 1];
+
+        const difference = stringToNumber(v2) - stringToNumber(v);
+        return incrementString(v2, difference);
     }
 
     // Detect pattern:
     // 17 19 20 -> 18
     // 17 19 18 -> 16
-    const v = examples[examples.length - 3]
-    const v2 = examples[examples.length - 2]
-    const v3 = examples[examples.length - 1]
-    const diff1 = stringToNumber(v2) - stringToNumber(v)
-    const diff2 = stringToNumber(v3) - stringToNumber(v2)
-    if (diff1 === diff2 * 2 || diff1 === -diff2*2) {
+    const v = examples[examples.length - 3];
+    const v2 = examples[examples.length - 2];
+    const v3 = examples[examples.length - 1];
+    const diff1 = stringToNumber(v2) - stringToNumber(v);
+    const diff2 = stringToNumber(v3) - stringToNumber(v2);
+    if (diff1 === diff2 * 2 || diff1 === -diff2 * 2) {
         // Return back
-        return incrementString(v3, -diff1)
+        return incrementString(v3, -diff1);
     }
 
     // Normal
-    return incrementString(v3, diff2)
+    return incrementString(v3, diff2);
 }
 
 function stringToNumber(str: string) {
     // check is numeric
     if (parseInt(str) > 0) {
-        return parseInt(str)
+        return parseInt(str);
     }
 
     // check alphabetical
@@ -179,20 +179,20 @@ function stringToNumber(str: string) {
     // ab = 28
     // az = 52
     // ba = 53
-    const aCharCode = 'a'.charCodeAt(0)
-    const zCharCode = 'z'.charCodeAt(0)
+    const aCharCode = 'a'.charCodeAt(0);
+    const zCharCode = 'z'.charCodeAt(0);
 
     // Convert into an array with min-max values aCharCode - zCharCode
-    const chars = str.toLowerCase().split("").map(c => c.charCodeAt(0)).filter(c => c >= aCharCode && c <= zCharCode)
+    const chars = str.toLowerCase().split('').map(c => c.charCodeAt(0)).filter(c => c >= aCharCode && c <= zCharCode);
 
     // Calculate numeric value of this string
     let val = 0;
     for (let i = 0; i < chars.length; i++) {
-        const char = chars[i] - aCharCode + 1
-        const index = chars.length - i
-        val += char * Math.pow(26, index - 1)
+        const char = chars[i] - aCharCode + 1;
+        const index = chars.length - i;
+        val += char * Math.pow(26, index - 1);
     }
-    return val
+    return val;
 }
 
 function numberToAlpha(num: number) {
@@ -203,154 +203,149 @@ function numberToAlpha(num: number) {
     // 28 = ab
     // 52 = az
     // 53 = ba
-    const aCharCode = 'a'.charCodeAt(0)
+    const aCharCode = 'a'.charCodeAt(0);
 
     // Convert into an array with min-max values aCharCode - zCharCode
-    const chars: number[] = []
+    const chars: number[] = [];
 
     // Calculate numeric value of this string
     let val = num;
     while (val > 0) {
-        const char = (val - 1) % 26
-        chars.unshift(char + aCharCode)
-        val = Math.floor((val - 1)/ 26)
+        const char = (val - 1) % 26;
+        chars.unshift(char + aCharCode);
+        val = Math.floor((val - 1) / 26);
     }
 
-    return chars.map(c => String.fromCharCode(c)).join("")
+    return chars.map(c => String.fromCharCode(c)).join('');
 }
 
 function incrementString(string: string, value = 1) {
     // check is numeric
     if (parseInt(string) > 0) {
-        const val = parseInt(string) + value
+        const val = parseInt(string) + value;
         if (val <= 0) {
-            return ''
+            return '';
         }
-        return (val).toString()
+        return (val).toString();
     }
 
     if (string.length === 0) {
-        return ""
+        return '';
     }
 
-    const isAllCaps = string.toUpperCase() === string
+    const isAllCaps = string.toUpperCase() === string;
 
-    const val = stringToNumber(string) + value
-    return isAllCaps ? numberToAlpha(val).toUpperCase() : numberToAlpha(val)
+    const val = stringToNumber(string) + value;
+    return isAllCaps ? numberToAlpha(val).toUpperCase() : numberToAlpha(val);
 }
-
 
 @Component({
     components: {
-        STErrorsDefault
+        STErrorsDefault,
     },
 })
 export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        seatingPlan!: SeatingPlan
+    seatingPlan!: SeatingPlan;
 
     @Prop({ required: true })
-        seatingPlanSection!: SeatingPlanSection
+    seatingPlanSection!: SeatingPlanSection;
 
-    @Prop({ default: null }) 
-        validator: Validator | null
+    @Prop({ default: null })
+    validator: Validator | null;
 
-    errorBox: ErrorBox | null = null
+    errorBox: ErrorBox | null = null;
 
-    clonedSeatingPlanSection = this.seatingPlanSection.clone()
+    clonedSeatingPlanSection = this.seatingPlanSection.clone();
 
-    selectedSeats: SeatingPlanSeat[] = []
+    selectedSeats: SeatingPlanSeat[] = [];
 
-    historyStack: SeatingPlanSection[] = []
-    redoHistoryStack: SeatingPlanSection[] = []
-    maxHistoryStack = 5000
-    metaPressed = false
-    shiftPressed = false
-    hasFocus = false
+    historyStack: SeatingPlanSection[] = [];
+    redoHistoryStack: SeatingPlanSection[] = [];
+    maxHistoryStack = 5000;
+    metaPressed = false;
+    shiftPressed = false;
+    hasFocus = false;
 
-    //@Watch('seatingPlanSection')
-    //onSeatingPlanSectionChanged() {
+    // @Watch('seatingPlanSection')
+    // onSeatingPlanSectionChanged() {
     //    this.clonedSeatingPlanSection = this.seatingPlanSection.clone()
     //    this.clonedSeatingPlanSection.updatePositions(this.sizeConfig)
-    //}
-    
+    // }
+
     activated() {
-        console.log('activated')
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.addEventListener("keydown", this.onKey);
-        document.addEventListener("keyup", this.onKeyUp);
-        document.addEventListener("keydown", this.onKeyDown);
-        document.addEventListener("click", this.onDocumentClick);
-        document.addEventListener("visibilitychange", this.onVisibilityChange);
-        window.addEventListener("blur", this.onVisibilityChange);
+        console.log('activated');
+
+        document.addEventListener('keydown', this.onKey);
+        document.addEventListener('keyup', this.onKeyUp);
+        document.addEventListener('keydown', this.onKeyDown);
+        document.addEventListener('click', this.onDocumentClick);
+        document.addEventListener('visibilitychange', this.onVisibilityChange);
+        window.addEventListener('blur', this.onVisibilityChange);
     }
 
     deactivated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.removeEventListener("keydown", this.onKey);
-        document.removeEventListener("keyup", this.onKeyUp);
-        document.removeEventListener("keydown", this.onKeyDown);
-        document.removeEventListener("click", this.onDocumentClick);
-        document.removeEventListener("visibilitychange", this.onVisibilityChange);
-        window.removeEventListener("blur", this.onVisibilityChange);
+        document.removeEventListener('keydown', this.onKey);
+        document.removeEventListener('keyup', this.onKeyUp);
+        document.removeEventListener('keydown', this.onKeyDown);
+        document.removeEventListener('click', this.onDocumentClick);
+        document.removeEventListener('visibilitychange', this.onVisibilityChange);
+        window.removeEventListener('blur', this.onVisibilityChange);
     }
 
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate()
-            })
+                return this.validate();
+            });
         }
 
-        this.clonedSeatingPlanSection.updatePositions(this.sizeConfig)
+        this.clonedSeatingPlanSection.updatePositions(this.sizeConfig);
 
-        document.addEventListener("keydown", this.onKey);
-        document.addEventListener("keyup", this.onKeyUp);
-        document.addEventListener("keydown", this.onKeyDown);
-        document.addEventListener("click", this.onDocumentClick);
-        document.addEventListener("visibilitychange", this.onVisibilityChange);
-        window.addEventListener("blur", this.onVisibilityChange);
+        document.addEventListener('keydown', this.onKey);
+        document.addEventListener('keyup', this.onKeyUp);
+        document.addEventListener('keydown', this.onKeyDown);
+        document.addEventListener('click', this.onDocumentClick);
+        document.addEventListener('visibilitychange', this.onVisibilityChange);
+        window.addEventListener('blur', this.onVisibilityChange);
     }
 
     beforeUnmount() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
 
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.removeEventListener("keydown", this.onKey);
-        document.removeEventListener("click", this.onDocumentClick);
-        document.removeEventListener("visibilitychange", this.onVisibilityChange);
-        
+        document.removeEventListener('keydown', this.onKey);
+        document.removeEventListener('click', this.onDocumentClick);
+        document.removeEventListener('visibilitychange', this.onVisibilityChange);
     }
 
     validate() {
-        this.errorBox = null
-        const errors = new SimpleErrors()
+        this.errorBox = null;
+        const errors = new SimpleErrors();
 
         for (const [index, row] of this.rows.entries()) {
             if (this.isRowInvalid(row)) {
-
                 errors.addError(new SimpleError({
-                    code: "invalid_row",
-                    message: `De ${index + 1}${index >= 1 ? 'de' : 'ste'} rij (van boven) is ongeldig. Kijk of de rij een letter/cijfer heeft gekregen en of die uniek is.`
-                }))
-            } else {
+                    code: 'invalid_row',
+                    message: `De ${index + 1}${index >= 1 ? 'de' : 'ste'} rij (van boven) is ongeldig. Kijk of de rij een letter/cijfer heeft gekregen en of die uniek is.`,
+                }));
+            }
+            else {
                 for (const [seatIndex, seat] of row.seats.entries()) {
                     if (this.isSeatInvalid(row, seat)) {
                         errors.addError(new SimpleError({
-                            code: "invalid_seat",
-                            message: `De ${index + 1}${index >= 1 ? 'de' : 'ste'} rij (van boven) bevat een ongeldige zetel op plaats ${seatIndex + 1} vanaf links. Kijk of de zetel een letter/cijfer heeft gekregen en of die uniek is.`
-                        }))
+                            code: 'invalid_seat',
+                            message: `De ${index + 1}${index >= 1 ? 'de' : 'ste'} rij (van boven) bevat een ongeldige zetel op plaats ${seatIndex + 1} vanaf links. Kijk of de zetel een letter/cijfer heeft gekregen en of die uniek is.`,
+                        }));
                     }
-                
                 }
             }
         }
 
         if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-            return false
+            this.errorBox = new ErrorBox(errors);
+            return false;
         }
 
         return true;
@@ -362,11 +357,11 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
             return;
         }
 
-        this.hasFocus = this.$el.contains(event.target as Node)
+        this.hasFocus = this.$el.contains(event.target as Node);
         if (!this.hasFocus) {
             // Blur all
-            this.selectedSeats = []
-            this.blurAll()
+            this.selectedSeats = [];
+            this.blurAll();
             return;
         }
 
@@ -375,16 +370,16 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
             return;
         }
 
-        let insideSelection = false
+        let insideSelection = false;
 
         // Check target is or is inside a button element
-        if (event.target && (event.target as HTMLElement).closest("button")) {
+        if (event.target && (event.target as HTMLElement).closest('button')) {
             return;
         }
 
         for (const seat of this.selectedSeats) {
-            const seatElements = this.$refs["seat-input-" + seat.uuid] as HTMLElement[]
-             
+            const seatElements = this.$refs['seat-input-' + seat.uuid] as HTMLElement[];
+
             // Check event is inside the selected row
             if (seatElements && seatElements.length === 1 && event.target && seatElements[0].contains(event.target as Node)) {
                 insideSelection = true;
@@ -392,88 +387,89 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         }
 
         if (!insideSelection) {
-            this.selectedSeats = []
-            this.blurAll()
+            this.selectedSeats = [];
+            this.blurAll();
         }
     }
 
     onVisibilityChange() {
-        this.metaPressed = false
-        this.shiftPressed = false
+        this.metaPressed = false;
+        this.shiftPressed = false;
     }
 
     onKeyUp(event: KeyboardEvent) {
         // If lifting meta key
-        if (event.key === "Meta") {
-            this.metaPressed = false
+        if (event.key === 'Meta') {
+            this.metaPressed = false;
         }
-        if (event.key === "Shift") {
-            this.shiftPressed = false
+        if (event.key === 'Shift') {
+            this.shiftPressed = false;
         }
     }
 
     onKeyDown(event: KeyboardEvent) {
-        if (event.key === "Meta") {
-            this.metaPressed = true
+        if (event.key === 'Meta') {
+            this.metaPressed = true;
         }
-        if (event.key === "Shift") {
-            this.shiftPressed = true
+        if (event.key === 'Shift') {
+            this.shiftPressed = true;
         }
-        
-        if ((event.key === 'z'||event.key === 'Z') && this.hasFocus) {
-            if ((event.metaKey||event.ctrlKey) && !event.shiftKey) {
-                this.undo()
-                event.preventDefault()
-                return
+
+        if ((event.key === 'z' || event.key === 'Z') && this.hasFocus) {
+            if ((event.metaKey || event.ctrlKey) && !event.shiftKey) {
+                this.undo();
+                event.preventDefault();
+                return;
             }
-            if ((event.metaKey||event.ctrlKey) && event.shiftKey) {
-                this.redo()
-                event.preventDefault()
-                return
+            if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
+                this.redo();
+                event.preventDefault();
+                return;
             }
         }
     }
 
     onKey(event: KeyboardEvent) {
-        if (event.key === "Meta") {
-            this.metaPressed = true
+        if (event.key === 'Meta') {
+            this.metaPressed = true;
         }
-        if (event.key === "Shift") {
-            this.shiftPressed = true
+        if (event.key === 'Shift') {
+            this.shiftPressed = true;
         }
-        
+
         if (!this.hasFocus) {
             return;
         }
-        
+
         if (event.key === 'a' && this.metaPressed && this.hasFocus) {
             // Select all
-            this.selectedSeats = this.rows.flatMap(r => r.seats)
-            event.preventDefault()
-            return
+            this.selectedSeats = this.rows.flatMap(r => r.seats);
+            event.preventDefault();
+            return;
         }
 
-        if (event.key === "Backspace" && this.selectedSeats.length) {
+        if (event.key === 'Backspace' && this.selectedSeats.length) {
             // Delete the seats
             if (this.selectedSeats.length > 1) {
-                const allowedEmptyRows = this.rows.filter(r => r.seats.length === 0)
+                const allowedEmptyRows = this.rows.filter(r => r.seats.length === 0);
 
                 for (const seat of this.selectedSeats) {
-                    this.deleteSeat(seat)
+                    this.deleteSeat(seat);
                 }
 
                 // Delete all rows that have been emptied completely
-                this.clonedSeatingPlanSection.rows = this.clonedSeatingPlanSection.rows.filter(r => r.seats.length > 0 && !allowedEmptyRows.includes(r))
-                this.emitChange()
+                this.clonedSeatingPlanSection.rows = this.clonedSeatingPlanSection.rows.filter(r => r.seats.length > 0 && !allowedEmptyRows.includes(r));
+                this.emitChange();
 
                 // Prevent default: don't delete input text
-                event.preventDefault()
-            } else {
-                // First delete contents, and only then the seat
-                const seat = this.selectedSeats[0]
-                this.backspaceSeat(seat, event)
+                event.preventDefault();
             }
-            return
+            else {
+                // First delete contents, and only then the seat
+                const seat = this.selectedSeats[0];
+                this.backspaceSeat(seat, event);
+            }
+            return;
         }
 
         // Arrow down
@@ -482,9 +478,9 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         //     if (seat) {
         //         // Default behaviour
         //         return;
-        //     } 
+        //     }
         //     const lastSelectedRow = this.selectedRows[this.selectedRows.length - 1]
-        //     
+        //
         //     // Insert new seat in row
         //     this.selectedRows = [lastSelectedRow]
         //     this.insertSeat(lastSelectedRow, null, event)
@@ -492,149 +488,157 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         // }
 
         // Arrow down
-        if (event.key === "ArrowDown" && this.selectedSeats.length) {
+        if (event.key === 'ArrowDown' && this.selectedSeats.length) {
             event.preventDefault(); // prevent scroll
 
-            let newSeats: SeatingPlanSeat[] = []
+            let newSeats: SeatingPlanSeat[] = [];
             for (const seat of this.selectedSeats) {
                 // More complex
-                const newSeat = this.getSeatAt(seat.x + seat.width / 2, seat.y + seat.height + seat.height / 2)
+                const newSeat = this.getSeatAt(seat.x + seat.width / 2, seat.y + seat.height + seat.height / 2);
                 if (newSeat) {
-                    newSeats.push(newSeat)
-                } else {
+                    newSeats.push(newSeat);
+                }
+                else {
                     // Not possible
                     return;
                 }
             }
 
             // Unique array
-            newSeats = newSeats.filter((s, index) => newSeats.indexOf(s) === index)
+            newSeats = newSeats.filter((s, index) => newSeats.indexOf(s) === index);
 
             if (newSeats.length === this.selectedSeats.length) {
                 if (newSeats.length === 1) {
-                    this.selectSingleSeat(newSeats[0])
-                } else {
-                    this.selectedSeats = newSeats
-                    this.blurAll()
+                    this.selectSingleSeat(newSeats[0]);
+                }
+                else {
+                    this.selectedSeats = newSeats;
+                    this.blurAll();
                 }
             }
         }
 
         // Arrow up
-        if (event.key === "ArrowUp" && this.selectedSeats.length) {
+        if (event.key === 'ArrowUp' && this.selectedSeats.length) {
             event.preventDefault(); // prevent scroll
 
-            let newSeats: SeatingPlanSeat[] = []
+            let newSeats: SeatingPlanSeat[] = [];
             for (const seat of this.selectedSeats) {
                 // More complex
-                const newSeat = this.getSeatAt(seat.x + seat.width / 2, seat.y - seat.height / 2)
+                const newSeat = this.getSeatAt(seat.x + seat.width / 2, seat.y - seat.height / 2);
                 if (newSeat) {
-                    newSeats.push(newSeat)
-                } else {
+                    newSeats.push(newSeat);
+                }
+                else {
                     // Not possible
-                    newSeats.push(seat)
+                    newSeats.push(seat);
                 }
             }
 
             // Unique array
-            newSeats = newSeats.filter((s, index) => newSeats.indexOf(s) === index)
+            newSeats = newSeats.filter((s, index) => newSeats.indexOf(s) === index);
 
             if (newSeats.length === this.selectedSeats.length) {
                 if (newSeats.length === 1) {
-                    this.selectSingleSeat(newSeats[0])
-                } else {
-                    this.selectedSeats = newSeats
-                    this.blurAll()
+                    this.selectSingleSeat(newSeats[0]);
+                }
+                else {
+                    this.selectedSeats = newSeats;
+                    this.blurAll();
                 }
             }
         }
 
         // Arrow left
-        if (event.key === "ArrowLeft" && this.selectedSeats.length) {
+        if (event.key === 'ArrowLeft' && this.selectedSeats.length) {
             event.preventDefault(); // prevent scroll
 
-            let newSeats: SeatingPlanSeat[] = []
+            let newSeats: SeatingPlanSeat[] = [];
             for (const seat of this.selectedSeats) {
                 // Get seat left index
-                const row = this.rows.find(r => r.seats.includes(seat))
+                const row = this.rows.find(r => r.seats.includes(seat));
                 if (!row) {
                     continue;
                 }
-                const index = row.seats.indexOf(seat)
+                const index = row.seats.indexOf(seat);
                 if (index > 0) {
-                    newSeats.push(row.seats[index - 1])
-                } else {
+                    newSeats.push(row.seats[index - 1]);
+                }
+                else {
                     // Not possible
-                    newSeats.push(seat)
+                    newSeats.push(seat);
                 }
             }
 
             // Unique array
-            newSeats = newSeats.filter((s, index) => newSeats.indexOf(s) === index)
+            newSeats = newSeats.filter((s, index) => newSeats.indexOf(s) === index);
 
             if (newSeats.length === this.selectedSeats.length) {
                 if (newSeats.length === 1) {
-                    this.selectSingleSeat(newSeats[0])
-                } else {
-                    this.selectedSeats = newSeats
-                    this.blurAll()
+                    this.selectSingleSeat(newSeats[0]);
+                }
+                else {
+                    this.selectedSeats = newSeats;
+                    this.blurAll();
                 }
             }
         }
 
         // Arrow right
-        if (event.key === "ArrowRight" && this.selectedSeats.length) {
+        if (event.key === 'ArrowRight' && this.selectedSeats.length) {
             event.preventDefault(); // prevent scroll
 
-            let newSeats: SeatingPlanSeat[] = []
+            let newSeats: SeatingPlanSeat[] = [];
             for (const seat of this.selectedSeats) {
                 // Get seat left index
-                const row = this.rows.find(r => r.seats.includes(seat))
+                const row = this.rows.find(r => r.seats.includes(seat));
                 if (!row) {
                     continue;
                 }
-                const index = row.seats.indexOf(seat)
+                const index = row.seats.indexOf(seat);
                 if (index >= 0 && index < row.seats.length - 1) {
-                    newSeats.push(row.seats[index + 1])
-                } else {
+                    newSeats.push(row.seats[index + 1]);
+                }
+                else {
                     // Not possible
-                    newSeats.push(seat)
+                    newSeats.push(seat);
                 }
             }
 
             // Unique array
-            newSeats = newSeats.filter((s, index) => newSeats.indexOf(s) === index)
+            newSeats = newSeats.filter((s, index) => newSeats.indexOf(s) === index);
 
             if (newSeats.length === this.selectedSeats.length) {
                 if (newSeats.length === 1) {
-                    this.selectSingleSeat(newSeats[0])
-                } else {
-                    this.selectedSeats = newSeats
-                    this.blurAll()
+                    this.selectSingleSeat(newSeats[0]);
+                }
+                else {
+                    this.selectedSeats = newSeats;
+                    this.blurAll();
                 }
             }
         }
     }
 
     getSelectedSeat() {
-        const active = document.activeElement
-        if (active && active.getAttribute("data-uuid")) {
-            const uuid = active.getAttribute("data-uuid")
+        const active = document.activeElement;
+        if (active && active.getAttribute('data-uuid')) {
+            const uuid = active.getAttribute('data-uuid');
 
             for (const row of this.rows) {
                 for (const seat of row.seats) {
                     if (seat.uuid === uuid) {
-                        return {seat, row}
+                        return { seat, row };
                     }
                 }
             }
         }
 
-        return null
+        return null;
     }
 
     getSeatColor(seat: SeatingPlanSeat) {
-        return this.seatingPlan.getSeatColor(seat)
+        return this.seatingPlan.getSeatColor(seat);
     }
 
     getSeatAt(x: number, y: number) {
@@ -643,70 +647,70 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                 // It should be this row, no other
                 for (const seat of row.seats) {
                     if (seat.x + seat.width >= x) {
-                        return seat
+                        return seat;
                     }
                 }
 
                 // Return last seat
-                return row.seats[row.seats.length - 1] ?? null
+                return row.seats[row.seats.length - 1] ?? null;
             }
         }
-        return null
+        return null;
     }
 
-    emitChange(options: {adjustHistory?: boolean} = {}) {
+    emitChange(options: { adjustHistory?: boolean } = {}) {
         // We use seatingPlanSection for the history stack because this one won't be changed already
         if (options.adjustHistory !== false) {
-            this.historyStack.push(this.seatingPlanSection.clone())
+            this.historyStack.push(this.seatingPlanSection.clone());
 
             // clear redo stack
-            this.redoHistoryStack = []
+            this.redoHistoryStack = [];
         }
 
         this.clonedSeatingPlanSection.updatePositions(this.sizeConfig);
 
-        const seatingPlanPatch = SeatingPlan.patch({id: this.seatingPlan.id})
+        const seatingPlanPatch = SeatingPlan.patch({ id: this.seatingPlan.id });
         seatingPlanPatch.sections.addPatch(SeatingPlanSection.patch({
             id: this.seatingPlanSection.id,
-            rows: this.clonedSeatingPlanSection.rows.map(r => r.clone()) as any
-        }))
-        this.$emit("patch", seatingPlanPatch)
+            rows: this.clonedSeatingPlanSection.rows.map(r => r.clone()) as any,
+        }));
+        this.$emit('patch', seatingPlanPatch);
     }
 
     canUndo() {
-        return this.historyStack.length > 0
+        return this.historyStack.length > 0;
     }
 
     flip() {
-        this.clonedSeatingPlanSection.rows.reverse()
-        this.emitChange()
+        this.clonedSeatingPlanSection.rows.reverse();
+        this.emitChange();
     }
- 
+
     undo() {
         if (!this.canUndo()) {
-            return
+            return;
         }
-        const last = this.historyStack.pop()
+        const last = this.historyStack.pop();
         if (last) {
-            this.redoHistoryStack.push(this.clonedSeatingPlanSection.clone())
-            this.clonedSeatingPlanSection = last
-            this.emitChange({adjustHistory: false})
+            this.redoHistoryStack.push(this.clonedSeatingPlanSection.clone());
+            this.clonedSeatingPlanSection = last;
+            this.emitChange({ adjustHistory: false });
         }
     }
 
     canRedo() {
-        return this.redoHistoryStack.length > 0
+        return this.redoHistoryStack.length > 0;
     }
 
     redo() {
         if (!this.canRedo()) {
-            return
+            return;
         }
-        const last = this.redoHistoryStack.pop()
+        const last = this.redoHistoryStack.pop();
         if (last) {
-            this.historyStack.push(this.clonedSeatingPlanSection.clone())
-            this.clonedSeatingPlanSection = last
-            this.emitChange({adjustHistory: false})
+            this.historyStack.push(this.clonedSeatingPlanSection.clone());
+            this.clonedSeatingPlanSection = last;
+            this.emitChange({ adjustHistory: false });
         }
     }
 
@@ -716,163 +720,165 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                 seatWidth: 35,
                 seatHeight: 35,
                 seatXSpacing: 3 / 4 * 5,
-                seatYSpacing: 10 / 4 * 5
-            })
+                seatYSpacing: 10 / 4 * 5,
+            });
         }
         return new SeatingSizeConfiguration({
             seatWidth: 28,
             seatHeight: 28,
             seatXSpacing: 3,
-            seatYSpacing: 10
-        })
+            seatYSpacing: 10,
+        });
     }
 
     get size() {
-        return this.clonedSeatingPlanSection.calculateSize(this.sizeConfig)
+        return this.clonedSeatingPlanSection.calculateSize(this.sizeConfig);
     }
- 
+
     get rows() {
-        return this.clonedSeatingPlanSection.rows
+        return this.clonedSeatingPlanSection.rows;
     }
 
     get invertedRows() {
-        return this.clonedSeatingPlanSection.rows
+        return this.clonedSeatingPlanSection.rows;
     }
 
     addRow(event, isSpace: boolean) {
-        const lastRows = this.clonedSeatingPlanSection.rows.filter(r => !!r.label).reverse()
-        const lastIds = lastRows.map(r => r.label)
-        const label = isSpace ? '' : getNextPattern(lastIds)
+        const lastRows = this.clonedSeatingPlanSection.rows.filter(r => !!r.label).reverse();
+        const lastIds = lastRows.map(r => r.label);
+        const label = isSpace ? '' : getNextPattern(lastIds);
 
         const row = SeatingPlanRow.create({
             label,
-            seats: isSpace ? [SeatingPlanSeat.create({type: SeatType.Space, grow: 1}), SeatingPlanSeat.create({type: SeatType.Space, grow: 1}), SeatingPlanSeat.create({type: SeatType.Space, grow: 1})] : (lastRows[lastRows.length - 1]?.seats ?? []).map(s => s.clone()),
+            seats: isSpace ? [SeatingPlanSeat.create({ type: SeatType.Space, grow: 1 }), SeatingPlanSeat.create({ type: SeatType.Space, grow: 1 }), SeatingPlanSeat.create({ type: SeatType.Space, grow: 1 })] : (lastRows[lastRows.length - 1]?.seats ?? []).map(s => s.clone()),
         });
-        this.clonedSeatingPlanSection.rows.unshift(row)
-        this.emitChange()
+        this.clonedSeatingPlanSection.rows.unshift(row);
+        this.emitChange();
     }
 
     addRowBottom(event, isSpace: boolean) {
-        const lastRows = this.clonedSeatingPlanSection.rows.filter(r => !!r.label)
-        const lastIds = lastRows.map(r => r.label)        
-        const label = isSpace ? '' : getNextPattern(lastIds)
+        const lastRows = this.clonedSeatingPlanSection.rows.filter(r => !!r.label);
+        const lastIds = lastRows.map(r => r.label);
+        const label = isSpace ? '' : getNextPattern(lastIds);
 
         const row = SeatingPlanRow.create({
             label,
-            seats: isSpace ? [SeatingPlanSeat.create({type: SeatType.Space, grow: 1}), SeatingPlanSeat.create({type: SeatType.Space, grow: 1}), SeatingPlanSeat.create({type: SeatType.Space, grow: 1})]  : (lastRows[lastRows.length - 1]?.seats ?? []).map(s => s.clone()),
+            seats: isSpace ? [SeatingPlanSeat.create({ type: SeatType.Space, grow: 1 }), SeatingPlanSeat.create({ type: SeatType.Space, grow: 1 }), SeatingPlanSeat.create({ type: SeatType.Space, grow: 1 })] : (lastRows[lastRows.length - 1]?.seats ?? []).map(s => s.clone()),
         });
-        this.clonedSeatingPlanSection.rows.push(row)
-        this.emitChange()
+        this.clonedSeatingPlanSection.rows.push(row);
+        this.emitChange();
     }
 
     addRightSeat(row: SeatingPlanRow) {
-        const lastIds = row.seats.map(s => s.label)
-        const label = row.label.length === 0 ? '' : getNextPattern(lastIds)
+        const lastIds = row.seats.map(s => s.label);
+        const label = row.label.length === 0 ? '' : getNextPattern(lastIds);
 
         const seat = SeatingPlanSeat.create({
             label,
             category: this.seatingPlan.categories[0]?.id ?? null,
             type: row.label.length === 0 ? SeatType.Space : SeatType.Seat,
-            grow: row.label.length === 0 ? 1 : 0
-        })
-        row.seats.push(seat)
-        this.emitChange()
+            grow: row.label.length === 0 ? 1 : 0,
+        });
+        row.seats.push(seat);
+        this.emitChange();
 
         this.$nextTick(() => {
             this.$nextTick(() => {
-                this.selectSingleSeat(seat)
+                this.selectSingleSeat(seat);
             });
         });
     }
 
     addLeftSeat(row: SeatingPlanRow) {
-        const lastIds = row.seats.map(s => s.label).reverse()
-        const label = row.label.length === 0 ? '' : getNextPattern(lastIds)
+        const lastIds = row.seats.map(s => s.label).reverse();
+        const label = row.label.length === 0 ? '' : getNextPattern(lastIds);
 
         const seat = SeatingPlanSeat.create({
             label,
             category: this.seatingPlan.categories[0]?.id ?? null,
             type: row.label.length === 0 ? SeatType.Space : SeatType.Seat,
-            grow: row.label.length === 0 ? 1 : 0
-        })
-        row.seats.unshift(seat)
-        this.emitChange()
+            grow: row.label.length === 0 ? 1 : 0,
+        });
+        row.seats.unshift(seat);
+        this.emitChange();
 
         this.$nextTick(() => {
             this.$nextTick(() => {
-                this.selectSingleSeat(seat)
+                this.selectSingleSeat(seat);
             });
         });
     }
 
     isRowSelected(row: SeatingPlanRow) {
-        return !!row.seats.find(s => this.selectedSeats.includes(s))
+        return !!row.seats.find(s => this.selectedSeats.includes(s));
     }
 
     isSeatSelected(seat: SeatingPlanSeat) {
-        return this.selectedSeats.includes(seat)
+        return this.selectedSeats.includes(seat);
     }
 
     preventIfNotSelected(seat: SeatingPlanSeat, event: Event) {
         if (!this.selectedSeats.includes(seat)) {
-            event.preventDefault()
+            event.preventDefault();
         }
     }
 
-    selectSeat(seat: SeatingPlanSeat, event: Event) {        
-        let seats = [seat]
+    selectSeat(seat: SeatingPlanSeat, event: Event) {
+        let seats = [seat];
         if (this.shiftPressed) {
             if (this.selectedSeats.length === 0) {
                 // Select first behaviour
-            } else {
-                const lastSelectedSeat = this.selectedSeats[this.selectedSeats.length - 1]
-                const lastSelectedRowIndex = this.rows.findIndex(r => r.seats.includes(lastSelectedSeat))
-                const currentRowIndex = this.rows.findIndex(r => r.seats.includes(seat))
+            }
+            else {
+                const lastSelectedSeat = this.selectedSeats[this.selectedSeats.length - 1];
+                const lastSelectedRowIndex = this.rows.findIndex(r => r.seats.includes(lastSelectedSeat));
+                const currentRowIndex = this.rows.findIndex(r => r.seats.includes(seat));
 
                 if (lastSelectedRowIndex === -1 || currentRowIndex === -1) {
                     // Not possible
                     return;
                 }
 
-                const lastSelectedRow = this.rows[lastSelectedRowIndex]
-                const currentRow = this.rows[currentRowIndex]
+                const lastSelectedRow = this.rows[lastSelectedRowIndex];
+                const currentRow = this.rows[currentRowIndex];
 
-                const lastIndex = lastSelectedRow.seats.indexOf(lastSelectedSeat)
-                const currentIndex = currentRow.seats.indexOf(seat)
+                const lastIndex = lastSelectedRow.seats.indexOf(lastSelectedSeat);
+                const currentIndex = currentRow.seats.indexOf(seat);
 
-                const firstSeat = lastSelectedRowIndex === currentRowIndex ? (lastIndex < currentIndex ? lastSelectedSeat : seat) : (lastSelectedRowIndex < currentRowIndex ? lastSelectedSeat : seat)
-                const lastSeat = firstSeat === lastSelectedSeat ? seat : lastSelectedSeat
-                
-                const firstSeatRowIndex = this.rows.findIndex(r => r.seats.includes(firstSeat))
-                const lastSeatRowIndex = this.rows.findIndex(r => r.seats.includes(lastSeat))
+                const firstSeat = lastSelectedRowIndex === currentRowIndex ? (lastIndex < currentIndex ? lastSelectedSeat : seat) : (lastSelectedRowIndex < currentRowIndex ? lastSelectedSeat : seat);
+                const lastSeat = firstSeat === lastSelectedSeat ? seat : lastSelectedSeat;
 
-                const firstSeatRow = this.rows[firstSeatRowIndex]
-                const lastSeatRow = this.rows[lastSeatRowIndex]
-                
-                const firstSeatIndex = firstSeatRow.seats.indexOf(firstSeat)
-                const lastSeatIndex = lastSeatRow.seats.indexOf(lastSeat)
+                const firstSeatRowIndex = this.rows.findIndex(r => r.seats.includes(firstSeat));
+                const lastSeatRowIndex = this.rows.findIndex(r => r.seats.includes(lastSeat));
+
+                const firstSeatRow = this.rows[firstSeatRowIndex];
+                const lastSeatRow = this.rows[lastSeatRowIndex];
+
+                const firstSeatIndex = firstSeatRow.seats.indexOf(firstSeat);
+                const lastSeatIndex = lastSeatRow.seats.indexOf(lastSeat);
 
                 // Start at the first seat (seat by seat and row by row), and loop all seats until the last seat
-                let seatIndex = firstSeatIndex
-                let rowIndex = firstSeatRowIndex
+                let seatIndex = firstSeatIndex;
+                let rowIndex = firstSeatRowIndex;
 
                 while (rowIndex < lastSeatRowIndex || (rowIndex === lastSeatRowIndex && seatIndex <= lastSeatIndex)) {
-                    const row = this.rows[rowIndex]
-                    const seat = row.seats[seatIndex]
-                    seats.push(seat)
+                    const row = this.rows[rowIndex];
+                    const seat = row.seats[seatIndex];
+                    seats.push(seat);
 
                     if (seatIndex >= row.seats.length - 1) {
-                        rowIndex++
-                        seatIndex = 0
-                    } else {
-                        seatIndex++
+                        rowIndex++;
+                        seatIndex = 0;
+                    }
+                    else {
+                        seatIndex++;
                     }
                 }
 
                 // Make sure we keep pervious lastSelectedSeat at the end of the array (consistent behaviour when choosing a different seat)
-                seats = seats.filter(s => s !== lastSelectedSeat)
+                seats = seats.filter(s => s !== lastSelectedSeat);
                 if (!this.metaPressed) {
-                    seats.push(lastSelectedSeat)
+                    seats.push(lastSelectedSeat);
                 }
             }
         }
@@ -882,186 +888,188 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
             for (const oneSeat of seats) {
                 if (this.selectedSeats.includes(oneSeat)) {
                     // Only remove on click event (not focus)
-                    this.selectedSeats = this.selectedSeats.filter(s => s !== oneSeat)
-                } else {
-                    this.selectedSeats.push(oneSeat)
+                    this.selectedSeats = this.selectedSeats.filter(s => s !== oneSeat);
+                }
+                else {
+                    this.selectedSeats.push(oneSeat);
                 }
             }
 
             // Update focus of seat that was clicked on
             if (this.selectedSeats.includes(seat)) {
-                this.selectInput(event)
+                this.selectInput(event);
 
                 // Make sure we keep 'seat' at the end of the selectedSeats (for next shift action)
-                this.selectedSeats = this.selectedSeats.filter(s => s !== seat)
-                this.selectedSeats.push(seat)
-            } else {
-                this.blurInput(event)
+                this.selectedSeats = this.selectedSeats.filter(s => s !== seat);
+                this.selectedSeats.push(seat);
+            }
+            else {
+                this.blurInput(event);
             }
 
-            return
+            return;
         }
 
-        this.selectedSeats = seats
-        this.selectInput(event)
+        this.selectedSeats = seats;
+        this.selectInput(event);
     }
 
     selectInput(event: Event) {
-        console.log('select input', event.currentTarget)
-        const input = event.currentTarget as HTMLInputElement
+        console.log('select input', event.currentTarget);
+        const input = event.currentTarget as HTMLInputElement;
         // Check input is INPUT otherwise select child
-        if (input.tagName !== "INPUT") {
-            const childInput = input.querySelector("input")
+        if (input.tagName !== 'INPUT') {
+            const childInput = input.querySelector('input');
             if (childInput) {
                 // Only select if not yet focused
                 if (document.activeElement !== childInput) {
-                    childInput.select()
+                    childInput.select();
                 }
             }
-            return
+            return;
         }
         if (document.activeElement !== input) {
-            input.select()
+            input.select();
         }
     }
 
     blurInput(event: Event) {
-        const input = event.currentTarget as HTMLInputElement
+        const input = event.currentTarget as HTMLInputElement;
         // Check input is INPUT otherwise select child
-        if (input.tagName !== "INPUT") {
-            const childInput = input.querySelector("input")
+        if (input.tagName !== 'INPUT') {
+            const childInput = input.querySelector('input');
             if (childInput) {
-                childInput.blur()
+                childInput.blur();
             }
-            return
+            return;
         }
-        input.blur()
+        input.blur();
     }
 
-    isRowInvalid(row: SeatingPlanRow,) {
+    isRowInvalid(row: SeatingPlanRow) {
         if (!row.label) {
             // Should have no non-space seats
-            return !!row.seats.find(s => !s.isSpace)
+            return !!row.seats.find(s => !s.isSpace);
         }
 
         // Should not have a row with the same label
-        const slug = Formatter.slug(row.label)
-        return this.clonedSeatingPlanSection.rows.filter(r => Formatter.slug(r.label) === slug).length > 1 // Row is also included, so should be 1
+        const slug = Formatter.slug(row.label);
+        return this.clonedSeatingPlanSection.rows.filter(r => Formatter.slug(r.label) === slug).length > 1; // Row is also included, so should be 1
     }
 
     isSeatInvalid(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        return !seat.isSpace && (Formatter.slug(seat.label).length === 0 || row.seats.filter(s => !s.isSpace && Formatter.slug(s.label) === Formatter.slug(seat.label)).length > 1)
+        return !seat.isSpace && (Formatter.slug(seat.label).length === 0 || row.seats.filter(s => !s.isSpace && Formatter.slug(s.label) === Formatter.slug(seat.label)).length > 1);
     }
 
     setSeat(row: SeatingPlanRow, seat: SeatingPlanSeat, value: string) {
-        seat.label = value
-        this.emitChange()
+        seat.label = value;
+        this.emitChange();
 
         // Select all other seats and rows
-        //this.selectedRows = [row]
-        this.selectedSeats = [seat]
+        // this.selectedRows = [row]
+        this.selectedSeats = [seat];
     }
 
-    insertSeat(row: SeatingPlanRow, seat: SeatingPlanSeat|null, event: KeyboardEvent) {
+    insertSeat(row: SeatingPlanRow, seat: SeatingPlanSeat | null, event: KeyboardEvent) {
         // Insert a seat in the row
-        const index = seat === null ? (row.seats.length - 1) : row.seats.indexOf(seat)
+        const index = seat === null ? (row.seats.length - 1) : row.seats.indexOf(seat);
         if (seat === null || index >= 0) {
-            const previousIds = row.seats.slice(0, index + 1).map(s => s.label)
-            const label = getNextPattern(previousIds)
+            const previousIds = row.seats.slice(0, index + 1).map(s => s.label);
+            const label = getNextPattern(previousIds);
 
             const newSeat = SeatingPlanSeat.create({
                 label,
-                category: seat?.category ?? this.seatingPlan.categories[0]?.id ?? null
-            })
-            row.seats.splice(index + 1, 0, newSeat)
-            this.emitChange()
+                category: seat?.category ?? this.seatingPlan.categories[0]?.id ?? null,
+            });
+            row.seats.splice(index + 1, 0, newSeat);
+            this.emitChange();
 
             this.$nextTick(() => {
                 this.$nextTick(() => {
-                    this.selectSingleSeat(newSeat)
+                    this.selectSingleSeat(newSeat);
                 });
             });
         }
 
         // We handled the event, don't change the input
-        event.preventDefault()
+        event.preventDefault();
     }
 
     selectSingleSeat(seat: SeatingPlanSeat) {
-        const ref = this.$refs["seat-input-" + seat.uuid] as HTMLInputElement[]
+        const ref = this.$refs['seat-input-' + seat.uuid] as HTMLInputElement[];
         if (ref && ref.length === 1) {
-            this.selectedSeats = [seat]
-            ref[0].select()
-        } else {
-            console.warn("Could not find input " + seat.uuid)
+            this.selectedSeats = [seat];
+            ref[0].select();
+        }
+        else {
+            console.warn('Could not find input ' + seat.uuid);
         }
     }
 
     backspaceRow(row: SeatingPlanRow, event) {
         // Delete the row
-        const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+        const index = this.clonedSeatingPlanSection.rows.indexOf(row);
         if (index >= 0) {
-            this.clonedSeatingPlanSection.rows.splice(index, 1)
+            this.clonedSeatingPlanSection.rows.splice(index, 1);
             this.emitChange();
         }
 
         // We handled the event, don't change the input
-        event.preventDefault()
+        event.preventDefault();
     }
 
     deleteSeat(seat: SeatingPlanSeat) {
-        const row = this.clonedSeatingPlanSection.rows.find(r => r.seats.includes(seat))
+        const row = this.clonedSeatingPlanSection.rows.find(r => r.seats.includes(seat));
         if (!row) {
-            return
+            return;
         }
         // Delete the seat from the row
-        const index = row.seats.indexOf(seat)
+        const index = row.seats.indexOf(seat);
         if (index >= 0) {
-            row.seats.splice(index, 1)
+            row.seats.splice(index, 1);
             this.emitChange();
         }
-
     }
 
     backspaceSeat(seat: SeatingPlanSeat, event: KeyboardEvent) {
         if (seat.label.length > 0) {
-            return
+            return;
         }
-        const row = this.clonedSeatingPlanSection.rows.find(r => r.seats.includes(seat))
+        const row = this.clonedSeatingPlanSection.rows.find(r => r.seats.includes(seat));
         if (!row) {
-            return
+            return;
         }
 
         // Delete the seat from the row
-        const index = row.seats.indexOf(seat)
+        const index = row.seats.indexOf(seat);
         if (index >= 0) {
-            row.seats.splice(index, 1)
+            row.seats.splice(index, 1);
             this.emitChange();
-        
+
             // Focus the previous seat, or next seat (if it was first)
-            const newSeat = row.seats[index - 1] ?? row.seats[index]
+            const newSeat = row.seats[index - 1] ?? row.seats[index];
             if (newSeat) {
-                this.selectSingleSeat(newSeat)
+                this.selectSingleSeat(newSeat);
             }
         }
 
         // If total seats left is 0, delete the row
         if (row.seats.length === 0) {
-            this.backspaceRow(row, event)
+            this.backspaceRow(row, event);
         }
 
         // We handled the event, don't change the input
-        event.preventDefault()
+        event.preventDefault();
     }
 
     isDisabledPersonSeat(seat: SeatingPlanSeat) {
-        return seat.markings.includes(SeatMarkings.DisabledPerson)
+        return seat.markings.includes(SeatMarkings.DisabledPerson);
     }
 
     blurAll() {
-        const el = document.activeElement as HTMLElement
-        if (el && this.$el.contains(el) && el.hasAttribute("data-seat")) {
-            el.blur()
+        const el = document.activeElement as HTMLElement;
+        if (el && this.$el.contains(el) && el.hasAttribute('data-seat')) {
+            el.blur();
         }
     }
 
@@ -1073,20 +1081,20 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                     icon: 'seat',
                     action: () => {
                         if (seatIndex >= 0) {
-                            let previousIds = row.seats.slice(0, seatIndex).map(s => s.label)
+                            let previousIds = row.seats.slice(0, seatIndex).map(s => s.label);
                             if (previousIds.length === 0) {
                                 // next ids, reversed
-                                previousIds = row.seats.slice(seatIndex).map(s => s.label).reverse()
+                                previousIds = row.seats.slice(seatIndex).map(s => s.label).reverse();
                             }
-                            const label = getNextPattern(previousIds)
+                            const label = getNextPattern(previousIds);
                             row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
                                 label,
-                                category: this.seatingPlan.categories[0]?.id ?? null
-                            }))
-                            this.emitChange()
+                                category: this.seatingPlan.categories[0]?.id ?? null,
+                            }));
+                            this.emitChange();
                         }
                         return true;
-                    }
+                    },
                 }),
                 new ContextMenuItem({
                     name: 'Gang',
@@ -1098,12 +1106,12 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                     if (seatIndex >= 0) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
                                             type: SeatType.Space,
-                                            category: this.seatingPlan.categories[0]?.id ?? null
-                                        }))
-                                        this.emitChange()
+                                            category: this.seatingPlan.categories[0]?.id ?? null,
+                                        }));
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
+                                },
                             }),
                             new ContextMenuItem({
                                 name: '2',
@@ -1112,12 +1120,12 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
                                             blockWidth: 4,
                                             type: SeatType.Space,
-                                            category: this.seatingPlan.categories[0]?.id ?? null
-                                        }))
-                                        this.emitChange()
+                                            category: this.seatingPlan.categories[0]?.id ?? null,
+                                        }));
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
+                                },
                             }),
                             new ContextMenuItem({
                                 name: '3',
@@ -1126,12 +1134,12 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
                                             blockWidth: 6,
                                             type: SeatType.Space,
-                                            category: this.seatingPlan.categories[0]?.id ?? null
-                                        }))
-                                        this.emitChange()
+                                            category: this.seatingPlan.categories[0]?.id ?? null,
+                                        }));
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
+                                },
                             }),
                             new ContextMenuItem({
                                 name: '4',
@@ -1140,12 +1148,12 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
                                             blockWidth: 8,
                                             type: SeatType.Space,
-                                            category: this.seatingPlan.categories[0]?.id ?? null
-                                        }))
-                                        this.emitChange()
+                                            category: this.seatingPlan.categories[0]?.id ?? null,
+                                        }));
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
+                                },
                             }),
                             new ContextMenuItem({
                                 name: 'Automatisch',
@@ -1155,17 +1163,17 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
                                             grow: 1,
                                             type: SeatType.Space,
-                                            category: this.seatingPlan.categories[0]?.id ?? null
-                                        }))
-                                        this.emitChange()
+                                            category: this.seatingPlan.categories[0]?.id ?? null,
+                                        }));
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
+                                },
                             }),
-                        ]
-                    ])
-                })
-            ]
+                        ],
+                    ]),
+                }),
+            ],
         ]);
     }
 
@@ -1176,14 +1184,14 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
 
         // If seat is outside selection: select only this seat
         if (!this.selectedSeats.includes(seat)) {
-            this.selectSeat(seat, event)
+            this.selectSeat(seat, event);
         }
 
-        const selectedRows = this.clonedSeatingPlanSection.rows.filter(r => this.isRowSelected(r))
-        const items: ContextMenuItem[][] = []
+        const selectedRows = this.clonedSeatingPlanSection.rows.filter(r => this.isRowSelected(r));
+        const items: ContextMenuItem[][] = [];
 
         if (selectedRows.length === 1) {
-            const row = selectedRows[0]
+            const row = selectedRows[0];
 
             // Single row menu
             items.push([
@@ -1195,18 +1203,18 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                 name: 'Dupliceren',
                                 icon: 'copy',
                                 action: () => {
-                                    const clonedRow = row.clone()
+                                    const clonedRow = row.clone();
 
-                                    const previousIds = this.clonedSeatingPlanSection.rows.slice(this.clonedSeatingPlanSection.rows.indexOf(row)).map(r => r.label).reverse()
-                                    const label = getNextPattern(previousIds)
-                                    clonedRow.label = label
-                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                                    const previousIds = this.clonedSeatingPlanSection.rows.slice(this.clonedSeatingPlanSection.rows.indexOf(row)).map(r => r.label).reverse();
+                                    const label = getNextPattern(previousIds);
+                                    clonedRow.label = label;
+                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row);
                                     if (index >= 0) {
-                                        this.clonedSeatingPlanSection.rows.splice(index, 0, clonedRow)
-                                        this.emitChange()
+                                        this.clonedSeatingPlanSection.rows.splice(index, 0, clonedRow);
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
+                                },
                             }),
 
                             new ContextMenuItem({
@@ -1214,52 +1222,51 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                 icon: 'arrow-up',
                                 disabled: this.clonedSeatingPlanSection.rows.indexOf(row) <= 0,
                                 action: () => {
-                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row);
                                     if (index >= 0 && index > 0) {
-                                        this.clonedSeatingPlanSection.rows.splice(index - 1, 0, row)
-                                        this.clonedSeatingPlanSection.rows.splice(index + 1, 1)
-                                        this.emitChange()
+                                        this.clonedSeatingPlanSection.rows.splice(index - 1, 0, row);
+                                        this.clonedSeatingPlanSection.rows.splice(index + 1, 1);
+                                        this.emitChange();
                                     }
                                     return true;
-                                    
-                                }
+                                },
                             }),
                             new ContextMenuItem({
                                 name: 'Verplaats naar beneden',
                                 icon: 'arrow-down',
                                 disabled: this.clonedSeatingPlanSection.rows.indexOf(row) >= this.clonedSeatingPlanSection.rows.length - 1,
                                 action: () => {
-                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row);
                                     if (index >= 0 && index < this.clonedSeatingPlanSection.rows.length - 1) {
-                                        this.clonedSeatingPlanSection.rows.splice(index + 2, 0, row)
-                                        this.clonedSeatingPlanSection.rows.splice(index, 1)
-                                        this.emitChange()
+                                        this.clonedSeatingPlanSection.rows.splice(index + 2, 0, row);
+                                        this.clonedSeatingPlanSection.rows.splice(index, 1);
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
+                                },
                             }),
                             new ContextMenuItem({
                                 name: 'Verwijderen',
                                 icon: 'trash',
                                 action: () => {
-                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row);
                                     if (index >= 0) {
-                                        this.clonedSeatingPlanSection.rows.splice(index, 1)
-                                        this.emitChange()
+                                        this.clonedSeatingPlanSection.rows.splice(index, 1);
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
-                            })
-                        ]
-                    ])
-                })
+                                },
+                            }),
+                        ],
+                    ]),
+                }),
             ]);
         }
 
         // Single seat items
         if (this.selectedSeats.length === 1) {
-            const seat = this.selectedSeats[0]
-            const row = this.clonedSeatingPlanSection.rows.find(r => r.seats.includes(seat))
+            const seat = this.selectedSeats[0];
+            const row = this.clonedSeatingPlanSection.rows.find(r => r.seats.includes(seat));
             if (!row) {
                 return;
             }
@@ -1273,31 +1280,31 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                 icon: 'arrow-left',
                                 disabled: row.seats.indexOf(seat) <= 0,
                                 action: () => {
-                                    const index = row.seats.indexOf(seat)
+                                    const index = row.seats.indexOf(seat);
                                     if (index > 0) {
-                                        row.seats.splice(index, 1)
-                                        row.seats.splice(index - 1, 0, seat)
-                                        this.emitChange()
+                                        row.seats.splice(index, 1);
+                                        row.seats.splice(index - 1, 0, seat);
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
+                                },
                             }),
                             new ContextMenuItem({
                                 name: 'Rechts',
                                 icon: 'arrow-right',
                                 disabled: row.seats.indexOf(seat) >= row.seats.length - 1,
                                 action: () => {
-                                    const index = row.seats.indexOf(seat)
+                                    const index = row.seats.indexOf(seat);
                                     if (index >= 0 && index < row.seats.length - 1) {
-                                        row.seats.splice(index, 1)
-                                        row.seats.splice(index + 1, 0, seat)
-                                        this.emitChange()
+                                        row.seats.splice(index, 1);
+                                        row.seats.splice(index + 1, 0, seat);
+                                        this.emitChange();
                                     }
                                     return true;
-                                }
-                            })
-                        ]
-                    ])
+                                },
+                            }),
+                        ],
+                    ]),
                 }),
                 new ContextMenuItem({
                     name: 'Invoegen',
@@ -1306,16 +1313,16 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                         [
                             new ContextMenuItem({
                                 name: 'Links',
-                                childMenu: this.getInsertMenu(row, row.seats.indexOf(seat))
+                                childMenu: this.getInsertMenu(row, row.seats.indexOf(seat)),
                             }),
                             new ContextMenuItem({
                                 name: 'Rechts',
-                                childMenu: this.getInsertMenu(row, row.seats.indexOf(seat) + 1)
-                            })
-                        ]
-                    ])
+                                childMenu: this.getInsertMenu(row, row.seats.indexOf(seat) + 1),
+                            }),
+                        ],
+                    ]),
                 }),
-            ])
+            ]);
         }
 
         // Multi seat items
@@ -1328,46 +1335,46 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                             name: '1',
                             action: () => {
                                 for (const seat of this.selectedSeats) {
-                                    seat.blockWidth = 2
-                                    seat.grow = 0
+                                    seat.blockWidth = 2;
+                                    seat.grow = 0;
                                 }
-                                this.emitChange()
+                                this.emitChange();
                                 return true;
-                            }
+                            },
                         }),
                         new ContextMenuItem({
                             name: '2',
                             action: () => {
                                 for (const seat of this.selectedSeats) {
-                                    seat.blockWidth = 2 * 2
-                                    seat.grow = 0
+                                    seat.blockWidth = 2 * 2;
+                                    seat.grow = 0;
                                 }
-                                this.emitChange()
+                                this.emitChange();
                                 return true;
-                            }
+                            },
                         }),
                         new ContextMenuItem({
                             name: '3',
                             action: () => {
                                 for (const seat of this.selectedSeats) {
-                                    seat.blockWidth = 2 * 3
-                                    seat.grow = 0
+                                    seat.blockWidth = 2 * 3;
+                                    seat.grow = 0;
                                 }
-                                this.emitChange()
+                                this.emitChange();
                                 return true;
-                            }
+                            },
                         }),
                         new ContextMenuItem({
                             name: '4',
                             action: () => {
                                 for (const seat of this.selectedSeats) {
-                                    seat.blockWidth = 2 * 4
-                                    seat.grow = 0
+                                    seat.blockWidth = 2 * 4;
+                                    seat.grow = 0;
                                 }
-                                this.emitChange()
+                                this.emitChange();
                                 return true;
-                            }
-                        })
+                            },
+                        }),
                     ],
                     [
                         new ContextMenuItem({
@@ -1375,15 +1382,15 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                             description: 'Groei automatisch om de volledige rij te vullen',
                             action: () => {
                                 for (const seat of this.selectedSeats) {
-                                    seat.blockWidth = 2
-                                    seat.grow = 1
+                                    seat.blockWidth = 2;
+                                    seat.grow = 1;
                                 }
-                                this.emitChange()
+                                this.emitChange();
                                 return true;
-                            }
-                        })
-                    ]
-                ])
+                            },
+                        }),
+                    ],
+                ]),
             }),
             new ContextMenuItem({
                 name: 'Type',
@@ -1394,25 +1401,25 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                             selected: !!this.selectedSeats.find(seat => seat.type === SeatType.Seat),
                             action: () => {
                                 for (const seat of this.selectedSeats) {
-                                    seat.type = SeatType.Seat
+                                    seat.type = SeatType.Seat;
                                 }
-                                this.emitChange()
+                                this.emitChange();
                                 return true;
-                            }
+                            },
                         }),
                         new ContextMenuItem({
                             name: 'Gang',
                             selected: !!this.selectedSeats.find(seat => seat.type === SeatType.Space),
                             action: () => {
                                 for (const seat of this.selectedSeats) {
-                                    seat.type = SeatType.Space
+                                    seat.type = SeatType.Space;
                                 }
-                                this.emitChange()
+                                this.emitChange();
                                 return true;
-                            }
+                            },
                         }),
-                    ]
-                ])
+                    ],
+                ]),
             }),
             new ContextMenuItem({
                 name: 'Markeringen',
@@ -1423,89 +1430,91 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                             icon: 'disabled-person',
                             selected: !!this.selectedSeats.find(seat => seat.markings.includes(SeatMarkings.DisabledPerson)),
                             action: () => {
-                                const selected = !!this.selectedSeats.find(seat => seat.markings.includes(SeatMarkings.DisabledPerson))
+                                const selected = !!this.selectedSeats.find(seat => seat.markings.includes(SeatMarkings.DisabledPerson));
 
                                 for (const seat of this.selectedSeats) {
                                     if (!seat.markings.includes(SeatMarkings.DisabledPerson)) {
                                         if (!selected) {
-                                            seat.markings.push(SeatMarkings.DisabledPerson)
+                                            seat.markings.push(SeatMarkings.DisabledPerson);
                                         }
-                                    } else {
+                                    }
+                                    else {
                                         if (selected) {
-                                            seat.markings = seat.markings.filter(m => m !== SeatMarkings.DisabledPerson)
+                                            seat.markings = seat.markings.filter(m => m !== SeatMarkings.DisabledPerson);
                                         }
                                     }
                                 }
-                                this.emitChange()
+                                this.emitChange();
                                 return true;
-                            }
-                        })
-                    ]
-                ])
+                            },
+                        }),
+                    ],
+                ]),
             }),
-            ...((this.seatingPlan.categories.length > 1) ? [new ContextMenuItem({
-                name: 'Categorie',
-                childMenu: new ContextMenu([
-                    this.seatingPlan.categories.map(category => {
-                        let allMatching = true;
-                        let oneMatching = false;
+            ...((this.seatingPlan.categories.length > 1)
+                ? [new ContextMenuItem({
+                        name: 'Categorie',
+                        childMenu: new ContextMenu([
+                            this.seatingPlan.categories.map((category) => {
+                                let allMatching = true;
+                                let oneMatching = false;
 
-                        for (const seat of this.selectedSeats) {
-                            if (seat.category !== category.id) {
-                                allMatching = false;
-                            } else {
-                                oneMatching = true;
-                            }
-                        }
-
-
-                        return new ContextMenuItem({
-                            name: category.name,
-                            selected: allMatching||oneMatching,
-                            action: () => {
                                 for (const seat of this.selectedSeats) {
-                                    seat.category = category.id
+                                    if (seat.category !== category.id) {
+                                        allMatching = false;
+                                    }
+                                    else {
+                                        oneMatching = true;
+                                    }
                                 }
-                                this.emitChange()
-                                return true;
-                            }
-                        });
-                    })
-                ])
-            })] : []),
+
+                                return new ContextMenuItem({
+                                    name: category.name,
+                                    selected: allMatching || oneMatching,
+                                    action: () => {
+                                        for (const seat of this.selectedSeats) {
+                                            seat.category = category.id;
+                                        }
+                                        this.emitChange();
+                                        return true;
+                                    },
+                                });
+                            }),
+                        ]),
+                    })]
+                : []),
             new ContextMenuItem({
                 name: 'Zetel verwijderen',
                 icon: 'trash',
                 action: () => {
                     for (const seat of this.selectedSeats) {
-                        const rowIndex = this.clonedSeatingPlanSection.rows.findIndex(r => r.seats.includes(seat))
+                        const rowIndex = this.clonedSeatingPlanSection.rows.findIndex(r => r.seats.includes(seat));
                         if (rowIndex === -1) {
-                            continue
+                            continue;
                         }
-                        const row = this.clonedSeatingPlanSection.rows[rowIndex]
-                        const index = row.seats.indexOf(seat)
+                        const row = this.clonedSeatingPlanSection.rows[rowIndex];
+                        const index = row.seats.indexOf(seat);
                         if (index >= 0) {
-                            row.seats.splice(index, 1)
+                            row.seats.splice(index, 1);
                         }
                         // Became empty?
                         if (row.seats.length === 0) {
-                            this.clonedSeatingPlanSection.rows.splice(rowIndex, 1)
+                            this.clonedSeatingPlanSection.rows.splice(rowIndex, 1);
                         }
                     }
-                    this.emitChange()
+                    this.emitChange();
                     return true;
-                }
-            })
-        ])
+                },
+            }),
+        ]);
 
         const contextMenu = new ContextMenu([
-            ...items
-        ])
+            ...items,
+        ]);
         contextMenu.show({
-            clickEvent: event
-        }).catch(console.error)
+            clickEvent: event,
+        }).catch(console.error);
     }
-    
 }
 </script>
 
@@ -1560,7 +1569,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         }
 
         &.left {
-            left: -80px;  
+            left: -80px;
             padding-right: 10px;
         }
 
@@ -1705,7 +1714,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
             height: 15px;
             padding: 2px;
         }
-        
+
     }
 
     .seat > .icon {
@@ -1725,7 +1734,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     .seats > button {
-        
+
         &:first-child {
             margin-right: auto;
         }

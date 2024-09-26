@@ -21,58 +21,58 @@
 </template>
 
 <script lang="ts">
-import { Checkbox, ErrorBox, PriceInput, STInputBox } from "@stamhoofd/components";
-import { CheckoutMethodPrice } from "@stamhoofd/structures";
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, ErrorBox, PriceInput, STInputBox } from '@stamhoofd/components';
+import { CheckoutMethodPrice } from '@stamhoofd/structures';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {
         STInputBox,
         PriceInput,
-        Checkbox
+        Checkbox,
     },
 })
 export default class CheckoutMethodPriceBox extends VueComponent {
     @Prop({})
-    checkoutMethodPrice: CheckoutMethodPrice
-    
+    checkoutMethodPrice: CheckoutMethodPrice;
+
     @Prop({ default: null })
-    errorBox: ErrorBox | null
+    errorBox: ErrorBox | null;
 
     get price() {
-        return this.checkoutMethodPrice.price
+        return this.checkoutMethodPrice.price;
     }
 
     set price(price: number) {
-        this.$emit("patch", CheckoutMethodPrice.patch({ price }))
+        this.$emit('patch', CheckoutMethodPrice.patch({ price }));
     }
 
     get useMinimumPrice() {
-        return this.checkoutMethodPrice.minimumPrice !== null
+        return this.checkoutMethodPrice.minimumPrice !== null;
     }
 
     set useMinimumPrice(useMinimumPrice: boolean) {
         if (useMinimumPrice === this.useMinimumPrice) {
-            return
+            return;
         }
 
-        this.$emit("patch", CheckoutMethodPrice.patch({ minimumPrice: useMinimumPrice ? this.minimumPrice : null }))
+        this.$emit('patch', CheckoutMethodPrice.patch({ minimumPrice: useMinimumPrice ? this.minimumPrice : null }));
     }
 
     get minimumPrice() {
-        return this.checkoutMethodPrice.minimumPrice ?? 0
+        return this.checkoutMethodPrice.minimumPrice ?? 0;
     }
 
     set minimumPrice(minimumPrice: number | null) {
-        this.$emit("patch", CheckoutMethodPrice.patch({ minimumPrice }))
+        this.$emit('patch', CheckoutMethodPrice.patch({ minimumPrice }));
     }
 
     get discountPrice() {
-        return this.checkoutMethodPrice.discountPrice
+        return this.checkoutMethodPrice.discountPrice;
     }
 
     set discountPrice(discountPrice: number) {
-        this.$emit("patch", CheckoutMethodPrice.patch({ discountPrice }))
+        this.$emit('patch', CheckoutMethodPrice.patch({ discountPrice }));
     }
 }
 </script>

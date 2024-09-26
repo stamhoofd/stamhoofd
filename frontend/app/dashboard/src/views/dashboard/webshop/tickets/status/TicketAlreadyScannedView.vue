@@ -34,7 +34,6 @@
                 </STListItem>
             </STList>
         </main>
-       
 
         <STToolbar>
             <template #right>
@@ -50,14 +49,14 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ColorHelper,Spinner,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { PrivateOrder, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { BackButton, Checkbox, ColorHelper, Spinner, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { PrivateOrder, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import { WebshopManager } from "../../WebshopManager";
-import ValidTicketView from "./ValidTicketView.vue";
+import { WebshopManager } from '../../WebshopManager';
+import ValidTicketView from './ValidTicketView.vue';
 
 @Component({
     components: {
@@ -67,21 +66,21 @@ import ValidTicketView from "./ValidTicketView.vue";
         STListItem,
         STToolbar,
         Spinner,
-        Checkbox
-    }
+        Checkbox,
+    },
 })
 export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        webshopManager!: WebshopManager
+    webshopManager!: WebshopManager;
 
     @Prop({ required: true })
-        ticket!: TicketPrivate|TicketPublicPrivate
+    ticket!: TicketPrivate | TicketPublicPrivate;
 
     @Prop({ required: true })
-        order!: PrivateOrder
+    order!: PrivateOrder;
 
     formatDateTime(date: Date) {
-        return Formatter.capitalizeFirstLetter(Formatter.dateTimeWithDay(date))
+        return Formatter.capitalizeFirstLetter(Formatter.dateTimeWithDay(date));
     }
 
     viewTicket() {
@@ -90,16 +89,16 @@ export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
                 new ComponentWithProperties(ValidTicketView, {
                     webshopManager: this.webshopManager,
                     ticket: this.ticket,
-                    order: this.order
-                })
-            ], 
-            replace: 1, 
-            force: true
-        })
+                    order: this.order,
+                }),
+            ],
+            replace: 1,
+            force: true,
+        });
     }
 
     mounted() {
-        ColorHelper.setColor("#ffc900", this.$el as HTMLElement)
+        ColorHelper.setColor('#ffc900', this.$el as HTMLElement);
     }
 }
 </script>

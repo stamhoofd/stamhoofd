@@ -5,13 +5,13 @@
         </h1>
 
         <p>Hier kan je functies aanzetten die we nog aan het uittesten zijn, of functies die enkel voor geavanceerdere gebruikers nodig zijn.</p>
-        
+
         <STErrorsDefault :error-box="errorBox" />
 
         <hr>
         <h2>Ontwikkelaars</h2>
 
-        <STList class="illustration-list">    
+        <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
                 <template #left>
                     <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
@@ -130,10 +130,10 @@
 import { AutoEncoder, AutoEncoderPatchType, Decoder, ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, InputSheet, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { CenteredMessage, Checkbox, ErrorBox, InputSheet, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from '@stamhoofd/components';
+import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import ApiUsersView from '../admins/ApiUsersView.vue';
@@ -146,172 +146,173 @@ import ApiUsersView from '../admins/ApiUsersView.vue';
         STList,
         STListItem,
         Checkbox,
-        LoadingButton
+        LoadingButton,
     },
 })
 export default class LabsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    downloadingSettings = false
-    uploadingSettings = false
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
-    
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
+    saving = false;
+    downloadingSettings = false;
+    uploadingSettings = false;
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
+
     created() {
-        this.organizationPatch.id = this.$organization.id
+        this.organizationPatch.id = this.$organization.id;
     }
 
     get organization() {
-        return this.$organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch);
     }
 
     openApiUsers(animated = true) {
         this.show({
             components: [
-                new ComponentWithProperties(ApiUsersView, {})
+                new ComponentWithProperties(ApiUsersView, {}),
             ],
-            animated
-        })
+            animated,
+        });
     }
 
     get isBelgium() {
-        return this.organization.address.country === Country.Belgium
+        return this.organization.address.country === Country.Belgium;
     }
 
     get isStamhoofd() {
-        return this.$organizationManager.user.email.endsWith("@stamhoofd.be") || this.$organizationManager.user.email.endsWith("@stamhoofd.nl")
+        return this.$organizationManager.user.email.endsWith('@stamhoofd.be') || this.$organizationManager.user.email.endsWith('@stamhoofd.nl');
     }
 
     get enableBuckaroo() {
-        return (this.organization.privateMeta?.buckarooSettings ?? null) !== null
+        return (this.organization.privateMeta?.buckarooSettings ?? null) !== null;
     }
 
     get forceMollie() {
-        return this.organization.privateMeta?.featureFlags.includes('forceMollie') ?? false
+        return this.organization.privateMeta?.featureFlags.includes('forceMollie') ?? false;
     }
 
     set forceMollie(forceMollie: boolean) {
-        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== 'forceMollie') ?? []
+        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== 'forceMollie') ?? [];
         if (forceMollie) {
-            featureFlags.push('forceMollie')
+            featureFlags.push('forceMollie');
         }
         this.organizationPatch = this.organizationPatch.patch({
-            privateMeta:  OrganizationPrivateMetaData.patch({
-                featureFlags: featureFlags as any
-            })
-        })
+            privateMeta: OrganizationPrivateMetaData.patch({
+                featureFlags: featureFlags as any,
+            }),
+        });
     }
 
     get forcePayconiq() {
-        return this.getFeatureFlag('forcePayconiq')
+        return this.getFeatureFlag('forcePayconiq');
     }
 
     set forcePayconiq(forcePayconiq: boolean) {
-        this.setFeatureFlag('forcePayconiq', forcePayconiq)
+        this.setFeatureFlag('forcePayconiq', forcePayconiq);
     }
 
     getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
     }
 
     setFeatureFlag(flag: string, value: boolean) {
-        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== flag) ?? []
+        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== flag) ?? [];
         if (value) {
-            featureFlags.push(flag)
+            featureFlags.push(flag);
         }
         this.organizationPatch = this.organizationPatch.patch({
-            privateMeta:  OrganizationPrivateMetaData.patch({
-                featureFlags: featureFlags as any
-            })
-        })
+            privateMeta: OrganizationPrivateMetaData.patch({
+                featureFlags: featureFlags as any,
+            }),
+        });
     }
 
     get useTestPayments() {
-        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment !== 'production'
+        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment !== 'production';
     }
 
     set useTestPayments(useTestPayments: boolean) {
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 // Only save non default value
-                useTestPayments: STAMHOOFD.environment !== 'production' === useTestPayments ? null : useTestPayments
-            })
-        })
+                useTestPayments: STAMHOOFD.environment !== 'production' === useTestPayments ? null : useTestPayments,
+            }),
+        });
     }
-   
+
     async save() {
         if (this.saving) {
             return;
         }
 
-        const errors = new SimpleErrors()
-       
-        let valid = false
+        const errors = new SimpleErrors();
+
+        let valid = false;
 
         if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-        } else {
-            this.errorBox = null
-            valid = true
+            this.errorBox = new ErrorBox(errors);
         }
-        valid = valid && await this.validator.validate()
+        else {
+            this.errorBox = null;
+            valid = true;
+        }
+        valid = valid && await this.validator.validate();
 
         if (!valid) {
             return;
         }
 
-        this.saving = true
+        this.saving = true;
 
         try {
-            await this.$organizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
-            new Toast('De wijzigingen zijn opgeslagen', "success green").show()
-            this.dismiss({ force: true })
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
+            await this.$organizationManager.patch(this.organizationPatch);
+            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id });
+            new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+            this.dismiss({ force: true });
+        }
+        catch (e) {
+            this.errorBox = new ErrorBox(e);
         }
 
-        this.saving = false
+        this.saving = false;
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
+        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
     beforeUnmount() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     downloadSettings() {
         if (this.downloadingSettings) {
-            return
+            return;
         }
 
         // Remove private data
         const organization = Organization.create({
             ...this.$organization,
             admins: [],
-            webshops: []
+            webshops: [],
         });
 
         // Delete private tokens
-        organization.privateMeta!.payconiqAccounts = []
-        organization.privateMeta!.buckarooSettings = null
-        organization.privateMeta!.mollieProfile = null
-        organization.privateMeta!.registrationPaymentConfiguration = PrivatePaymentConfiguration.create({})
-        
+        organization.privateMeta!.payconiqAccounts = [];
+        organization.privateMeta!.buckarooSettings = null;
+        organization.privateMeta!.mollieProfile = null;
+        organization.privateMeta!.registrationPaymentConfiguration = PrivatePaymentConfiguration.create({});
 
-        const versionBox = new VersionBox(organization)
-        
+        const versionBox = new VersionBox(organization);
+
         // Create a clean JSON file
-        const string = JSON.stringify(versionBox.encode({version: Version}), null, 2);
+        const string = JSON.stringify(versionBox.encode({ version: Version }), null, 2);
 
         // Create a blob
         const blob = new Blob([string], { type: 'application/json' });
@@ -344,15 +345,17 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
                     try {
                         await this.doUploadSettings(parsed);
-                        new Toast('De instellingen zijn geïmporteerd', "success green").show()
-                    } catch (e) {
-                        Toast.fromError(e).show()
+                        new Toast('De instellingen zijn geïmporteerd', 'success green').show();
                     }
-                } catch (e) {
+                    catch (e) {
+                        Toast.fromError(e).show();
+                    }
+                }
+                catch (e) {
                     Toast.fromError(new SimpleError({
                         code: 'invalid_json',
-                        message: 'Het bestand is geen geldig JSON-bestand'
-                    })).show()
+                        message: 'Het bestand is geen geldig JSON-bestand',
+                    })).show();
                 }
                 this.uploadingSettings = false;
             };
@@ -365,24 +368,25 @@ export default class LabsView extends Mixins(NavigationMixin) {
         // Decode
         let organization: Organization;
         try {
-            const decodedOrganization = new VersionBoxDecoder(Organization as Decoder<Organization>).decode(new ObjectData(blob, {version: 0}));
-            organization = decodedOrganization.data
-        } catch (e) {
+            const decodedOrganization = new VersionBoxDecoder(Organization as Decoder<Organization>).decode(new ObjectData(blob, { version: 0 }));
+            organization = decodedOrganization.data;
+        }
+        catch (e) {
             throw new SimpleError({
                 code: 'invalid_json',
-                message: 'Het bestand is geen geldige export: ' + e.getMessage()
-            })
+                message: 'Het bestand is geen geldige export: ' + e.getMessage(),
+            });
         }
 
         const existing = this.$organization;
 
         const privatePatch = OrganizationPrivateMetaData.patch({});
-        
+
         // Add emails
         for (const email of organization.privateMeta?.emails ?? []) {
             if (!existing.privateMeta?.emails.find(e => e.email === email.email)) {
                 // Only add if it doesn't exist yet
-                privatePatch.emails.addPut(email)
+                privatePatch.emails.addPut(email);
             }
         }
 
@@ -390,7 +394,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
         for (const role of organization.privateMeta?.roles ?? []) {
             if (!existing.privateMeta?.roles.find(r => r.id === role.id)) {
                 // Only add if it doesn't exist yet
-                privatePatch.roles.addPut(role)
+                privatePatch.roles.addPut(role);
             }
         }
 
@@ -398,7 +402,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
         for (const featureFlag of organization.privateMeta?.featureFlags ?? []) {
             if (!existing.privateMeta?.featureFlags.includes(featureFlag)) {
                 // Only add if it doesn't exist yet
-                privatePatch.featureFlags.addPut(featureFlag)
+                privatePatch.featureFlags.addPut(featureFlag);
             }
         }
 
@@ -406,7 +410,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
             ...organization.meta,
         } as any;
         delete meta.registrationPaymentConfiguration;
-        
+
         const organizationPatch = Organization.patch({
             id: existing.id,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -416,18 +420,18 @@ export default class LabsView extends Mixins(NavigationMixin) {
             address: organization.address,
             website: organization.website,
             uri: organization.uri,
-        })
+        });
 
         // Copy over groups
         for (const group of organization.groups) {
             if (!existing.groups.find(g => g.id === group.id)) {
                 // Only add if it doesn't exist yet
-                organizationPatch.groups.addPut(group)
+                organizationPatch.groups.addPut(group);
             }
         }
 
         // Send to server
-        await this.$organizationManager.patch(organizationPatch)
+        await this.$organizationManager.patch(organizationPatch);
     }
 
     applyDiscountCode() {
@@ -442,16 +446,15 @@ export default class LabsView extends Mixins(NavigationMixin) {
                             method: 'POST',
                             path: '/organization/register-code',
                             body: {
-                                registerCode: code
-                            }
-                        })
-                        new Toast('De kortingscode is toegepast', "success green").show()
-                    }   
-                })
+                                registerCode: code,
+                            },
+                        });
+                        new Toast('De kortingscode is toegepast', 'success green').show();
+                    },
+                }),
             ],
-            modalDisplayStyle: 'sheet'
-        })
+            modalDisplayStyle: 'sheet',
+        });
     }
-
 }
 </script>

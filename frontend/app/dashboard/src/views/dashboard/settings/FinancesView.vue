@@ -8,7 +8,7 @@
                 Boekhouding
             </h1>
 
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.Export)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
@@ -60,7 +60,7 @@
                 <h2>Betalingen aan {{ item.organization.name }}</h2>
                 <p>Hier vind je een overzicht van wat je moet betalen aan {{ item.organization.name }}, bv. voor de aansluitingkosten van leden.</p>
 
-                <STList class="illustration-list">    
+                <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.OutstandingBalance, {properties: {items: [item]}})">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
@@ -115,10 +115,10 @@ import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 
 enum Routes {
-    Transfers = "Transfers",
-    Export = "Export",
-    Payments = "Payments",
-    OutstandingBalance = "OutstandingBalance"
+    Transfers = 'Transfers',
+    Export = 'Export',
+    Payments = 'Payments',
+    OutstandingBalance = 'OutstandingBalance',
 }
 
 defineRoutes([
@@ -133,12 +133,12 @@ defineRoutes([
                     status: {
                         $in: [
                             PaymentStatus.Pending,
-                            PaymentStatus.Created
-                        ]
-                    }
-                }
-            }
-        }
+                            PaymentStatus.Created,
+                        ],
+                    },
+                },
+            };
+        },
     },
     {
         name: Routes.Payments,
@@ -149,12 +149,12 @@ defineRoutes([
                 defaultFilter: {
                     status: {
                         $in: [
-                            PaymentStatus.Succeeded
-                        ]
-                    }
-                }
-            }
-        }
+                            PaymentStatus.Succeeded,
+                        ],
+                    },
+                },
+            };
+        },
     },
     {
         name: Routes.Export,
@@ -167,43 +167,43 @@ defineRoutes([
         url: 'openstaand/@uri',
         present: 'popup',
         params: {
-            uri: String
+            uri: String,
         },
         component: BillingStatusView as ComponentOptions,
-        async paramsToProps(params: {uri: string}) {
-            await balancePromise
-            const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri)
+        async paramsToProps(params: { uri: string }) {
+            await balancePromise;
+            const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
 
             if (!item) {
-                throw new Error('Organization not found')
+                throw new Error('Organization not found');
             }
 
             return {
-                items: [item]
-            }
+                items: [item],
+            };
         },
         propsToParams(props) {
-            if (!("items" in props) || (!Array.isArray(props.items)) || !(props.items[0] instanceof OrganizationDetailedBillingStatusItem)) {
-                throw new Error('Missing items')
+            if (!('items' in props) || (!Array.isArray(props.items)) || !(props.items[0] instanceof OrganizationDetailedBillingStatusItem)) {
+                throw new Error('Missing items');
             }
 
             return {
                 params: {
-                    uri: props.items[0].organization.uri
-                }
-            }
-        }
-    }
-])
+                    uri: props.items[0].organization.uri,
+                },
+            };
+        },
+    },
+]);
 
-const auth = useAuth()
+const auth = useAuth();
 const $navigate = useNavigate();
 const owner = useRequestOwner();
-const context = useContext()
-const errors = useErrors()
-const outstandingBalance = ref(null) as Ref<OrganizationDetailedBillingStatus | null>
+const context = useContext();
+const errors = useErrors();
+const outstandingBalance = ref(null) as Ref<OrganizationDetailedBillingStatus | null>;
 
-const balancePromise = updateBalance().catch(console.error)
+const balancePromise = updateBalance().catch(console.error);
 
 // Fetch balance
 async function updateBalance() {
@@ -214,15 +214,14 @@ async function updateBalance() {
             decoder: OrganizationDetailedBillingStatus as Decoder<OrganizationDetailedBillingStatus>,
             shouldRetry: true,
             owner,
-            timeout: 5 * 60 * 1000
-        })
+            timeout: 5 * 60 * 1000,
+        });
 
-        outstandingBalance.value = response.data
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        outstandingBalance.value = response.data;
     }
-
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
 }
-
 
 </script>

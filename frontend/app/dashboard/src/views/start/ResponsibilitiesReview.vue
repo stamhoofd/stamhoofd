@@ -26,7 +26,7 @@
                     />
                 </STList>
             </div>
-            
+
             <div v-if="$rowCategories.optionalRows.length" class="container">
                 <hr>
                 <h2>Optionele functies</h2>
@@ -57,13 +57,13 @@ import ResponsibilityReview from './ResponsibilityReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
 
 type RowData = {
-    responsibility: MemberResponsibility,
-    group: Group | null,
-    members: PlatformMember[],
+    responsibility: MemberResponsibility;
+    group: Group | null;
+    members: PlatformMember[];
     count?: number;
     progress?: number;
     total?: number;
-}
+};
 
 const $organization = useOrganization();
 const $platform = usePlatform();
@@ -77,46 +77,47 @@ const $organizationBasedResponsibilities = computed(() => $platform.value.config
 
 const $groups = computed(() => {
     const organization = $organization.value;
-    if(!organization) return [];
+    if (!organization) return [];
     return organization.period.getCategoryTree({
         permissions: auth.permissions,
         organization,
         maxDepth: 1,
-        smartCombine: true
+        smartCombine: true,
     }).getAllGroups();
 });
 
 const $allRows = computed(() => {
     const organization = $organization.value;
-    if(!organization) return null;
+    if (!organization) return null;
 
     const allMembers = $allMembers.value;
-    if(allMembers === null) return null;
+    if (allMembers === null) return null;
 
     const groups = $groups.value;
-    
+
     const responsibilities = $organizationBasedResponsibilities.value;
     return responsibilities
         .flatMap(r => getRowData(r, allMembers, organization, groups))
-        .sort((a, b) => getPriority(b) - getPriority(a))
+        .sort((a, b) => getPriority(b) - getPriority(a));
 });
 
 const $rowCategories = computed(() => {
-    if($allRows.value === null) {
+    if ($allRows.value === null) {
         return null;
     }
 
     const requiredRows: RowData[] = [];
     const optionalRows: RowData[] = [];
 
-    for(const row of $allRows.value) {
+    for (const row of $allRows.value) {
         const responsibility = row.responsibility;
         const minimumMembers = responsibility.minimumMembers;
         const isRequired = !!minimumMembers;
 
-        if(isRequired) {
+        if (isRequired) {
             requiredRows.push(row);
-        } else {
+        }
+        else {
             optionalRows.push(row);
         }
     }
@@ -124,14 +125,14 @@ const $rowCategories = computed(() => {
     return {
         requiredRows,
         optionalRows,
-    }
+    };
 });
 
 const $isLoading = computed(() => $rowCategories.value === null);
 
 onMounted(async () => {
     await fetchMembers();
-})
+});
 
 useVisibilityChange(async () => {
     await fetchMembers();
@@ -145,11 +146,11 @@ async function fetchMembers() {
 async function getAllMembersWithResponsibilities(responsibilities: MemberResponsibility[]): Promise<PlatformMember[]> {
     const organization = $organization.value;
 
-    if(!organization) return [];
+    if (!organization) return [];
 
     const responsibilityIds = responsibilities.map(r => r.id);
 
-    if(!responsibilityIds.length) return [];
+    if (!responsibilityIds.length) return [];
 
     const query = new LimitedFilteredRequest({
         filter: {
@@ -157,49 +158,49 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
                 $elemMatch: {
                     organizationId: organization.id,
                     periodId: organization.period.period.id,
-                }
+                },
             },
             responsibilities: {
                 $elemMatch: {
                     organizationId: organization.id,
                     responsibilityId: {
-                        $in: responsibilityIds
+                        $in: responsibilityIds,
                     },
                     $and: [
                         {
                             $or: [{
                                 endDate: {
                                     $gt: { $: '$now' },
-                                }
-                            }, { endDate: { $eq: null } }]
-                        }
-                    ]
-                }
-            }
+                                },
+                            }, { endDate: { $eq: null } }],
+                        },
+                    ],
+                },
+            },
         },
         sort: [
             { key: 'firstName', order: SortItemDirection.ASC },
             { key: 'lastName', order: SortItemDirection.ASC },
-            { key: 'id', order: SortItemDirection.ASC }
+            { key: 'id', order: SortItemDirection.ASC },
         ],
         // todo: change limit? or get all?
-        limit: 100
+        limit: 100,
     });
 
     const response = await $context.value.authenticatedServer.request({
-        method: "GET",
-        path: "/members",
+        method: 'GET',
+        path: '/members',
         decoder: new PaginatedResponseDecoder(MembersBlob as Decoder<MembersBlob>, LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
         query,
         shouldRetry: false,
-        owner
+        owner,
     });
 
     const blob = response.data.results;
 
     const results: PlatformMember[] = PlatformFamily.createSingles(blob, {
         contextOrganization: $context.value.organization,
-        platform: $platform.value
+        platform: $platform.value,
     });
 
     return results;
@@ -207,17 +208,17 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
 
 function getRowData(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): RowData[] {
     return getRowDataWithoutProgress(responsibility, allMembersWithResponsibilities, organization, allGroups)
-        .map(row => {
+        .map((row) => {
             return {
                 ...row,
-                ...getProgress(row.responsibility, row.members)
+                ...getProgress(row.responsibility, row.members),
             };
         });
 }
 
 function getPriority(row: RowData) {
-    if(row.count === 0) return 0;
-    if(row.count !== undefined) return 1;
+    if (row.count === 0) return 0;
+    if (row.count !== undefined) return 1;
     return 2;
 }
 
@@ -229,26 +230,26 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
 
     const defaultAgeGroupIds = responsibility.defaultAgeGroupIds;
 
-    if(defaultAgeGroupIds !== null) {
+    if (defaultAgeGroupIds !== null) {
         const rows: Omit<RowData, 'progress'>[] = [];
-        
+
         const includedGroups = defaultAgeGroupIds.flatMap(id => allGroups.filter(g => g.defaultAgeGroupId === id));
-        
-        for(const group of includedGroups) {
+
+        for (const group of includedGroups) {
             const groupId = group.id;
 
             const members = allMembersWithResponsibilities.filter(platformMember => platformMember.member.responsibilities
                 .some(r => r.responsibilityId === responsibilityId
-                        && r.organizationId === organizationId
-                        && r.groupId === groupId
-                        && (r.endDate === null || r.endDate > now)
-                )
+                    && r.organizationId === organizationId
+                    && r.groupId === groupId
+                    && (r.endDate === null || r.endDate > now),
+                ),
             );
 
             rows.push({
                 responsibility,
                 members,
-                group
+                group,
             });
         }
 
@@ -257,23 +258,23 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
 
     const members = allMembersWithResponsibilities.filter(platformMember => platformMember.member.responsibilities
         .some(r => r.responsibilityId === responsibilityId
-                && r.organizationId === organizationId
-                && (r.endDate === null || r.endDate > now)
-        )
+            && r.organizationId === organizationId
+            && (r.endDate === null || r.endDate > now),
+        ),
     );
 
     return [{
         responsibility,
         members,
-        group: null
+        group: null,
     }];
 }
 
-function getProgress(responsibility: MemberResponsibility, members: PlatformMember[]): {count?: number, progress?: number, total?: number} {
+function getProgress(responsibility: MemberResponsibility, members: PlatformMember[]): { count?: number; progress?: number; total?: number } {
     const { minimumMembers, maximumMembers } = responsibility;
 
     if (minimumMembers === null && maximumMembers === null) {
-        return {count: members.length};
+        return { count: members.length };
     }
 
     const count = members.length;
@@ -287,12 +288,13 @@ function getProgress(responsibility: MemberResponsibility, members: PlatformMemb
     // count will exceed
     else if (maximumMembers !== null && count > maximumMembers) {
         total = maximumMembers;
-    } else {
+    }
+    else {
         // other cases: show only count
-        return {count};
+        return { count };
     }
 
-    if(total === 0) return {progress: 1, total}
-    return {progress: count / total, total};
+    if (total === 0) return { progress: 1, total };
+    return { progress: count / total, total };
 }
 </script>
