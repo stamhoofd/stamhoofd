@@ -25,7 +25,7 @@ export class DefaultAgeGroup extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 269 })
     defaultMembershipTypeId: string | null = null;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 337 })
     minimumRequiredMembers = 0;
 
     get name() {
