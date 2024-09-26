@@ -8,7 +8,9 @@
     "[vue]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
-    "codeQL.githubDatabase.update": "never",
+    "[javascript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
@@ -21,17 +23,9 @@
         "json": false
     },
     "editor.codeLens": true,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.formatOnPaste": false,
     "editor.formatOnSave": false,
     "eslint.format.enable": true,
-    "eslint.options": {
-        /*"extensions": [
-            ".js",
-            ".ts",
-            ".vue"
-        ]*/
-    },
     "eslint.validate": [
         "typescript",
         "javascript",
