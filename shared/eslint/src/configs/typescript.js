@@ -29,5 +29,7 @@ export default {
         "@typescript-eslint/no-unsafe-member-access": "off", // This is impossible to use with dependencies that don't have types yet, such as tiptap
         "@typescript-eslint/restrict-plus-operands": "off", // bullshit one
         "@typescript-eslint/require-await": "off", // You should be able to define async methods if you need to match required interfaces or types
+    
+     "@typescript-eslint/no-redundant-type-constituents": "off" // Weird behaviour and reduces code readability
     }
 }
