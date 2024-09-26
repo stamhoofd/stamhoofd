@@ -105,7 +105,7 @@
         <STToolbar>
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click.prevent="goNext">
+                    <button class="button primary" type="submit" @click.prevent="goNext">
                         Vereniging aanmaken
                     </button>
                 </LoadingButton>
