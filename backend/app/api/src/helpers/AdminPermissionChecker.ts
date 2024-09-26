@@ -194,18 +194,12 @@ export class AdminPermissionChecker {
      * @returns Organization if event for specific organization, else null
      * @throws error if not allowed to write this event
      */
-    async checkEventAccess(event: Event, {organization}: {organization?: Organization} = {}): Promise<Organization | null> {
-        return await EventPermissionChecker.tryAdminEvent(event, {
+    async checkEventAccess(event: Event): Promise<Organization | null> {
+        return await EventPermissionChecker.checkEventAccessAsync(event, {
             userPermissions: this.user.permissions,
             platform: this.platform,
-            getOrganization: async (id: string) => {
-                if(organization?.id === id) {
-                    return organization;
-                }
-    
-                return await this.getOrganization(id);
-            }
-        })
+            getOrganization: async (id: string) => await this.getOrganization(id),
+        });
     }
 
     async canAccessArchivedGroups(organizationId: string) {

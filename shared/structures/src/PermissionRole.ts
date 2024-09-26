@@ -177,6 +177,19 @@ export class PermissionRoleDetailed extends PermissionRole {
         return this.getResourcePermissions(type, id)?.hasAccessRight(right) ?? false;
     }
 
+    hasAccessRightForSomeResource(type: PermissionsResourceType, right: AccessRight): boolean {
+        if (this.hasAccessRight(right)) {
+            return true;
+        }
+
+        const resource = this.resources.get(type);
+        if (!resource) {
+            return false;
+        }
+
+        return resource.size > 0;
+    }
+
     add(other: PermissionRoleDetailed) {
         if (getPermissionLevelNumber(this.level) < getPermissionLevelNumber(other.level)) {
             this.level = other.level;
