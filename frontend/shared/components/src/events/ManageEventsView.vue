@@ -45,7 +45,7 @@
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)" />
+                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)"/>
                 </STList>
             </div>
 

@@ -67,16 +67,15 @@
             <STInputBox :title="multipleDays ? 'Startdatum' : 'Datum'" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" />
             </STInputBox>
-            <TimeInput v-if="multipleDays" v-model="startDate" title="Vanaf" :validator="errors.validator" /> 
+            <TimeInput v-if="multipleDays" v-model="startDate" title="Vanaf" :validator="errors.validator" />
         </div>
-
 
         <div class="split-inputs">
             <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" title="Einddatum" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" />
             </STInputBox>
-            <TimeInput v-else v-model="startDate" title="Vanaf" :validator="errors.validator" /> 
-            <TimeInput v-model="endDate" title="Tot" :validator="errors.validator" /> 
+            <TimeInput v-else v-model="startDate" title="Vanaf" :validator="errors.validator" />
+            <TimeInput v-model="endDate" title="Tot" :validator="errors.validator" />
         </div>
 
         <hr>
@@ -92,7 +91,6 @@
                     Nationale of regionale activiteit
                 </h3>
             </STListItem>
-
 
             <STListItem :selectable="true" element-name="label">
                 <template #left>
@@ -162,7 +160,7 @@
             <h2 class="style-with-button">
                 <div>Leeftijdsgroepen</div>
                 <div>
-                    <button type="button" class="button icon trash" @click="deleteGroupsRestriction" />
+                    <button v-if="!hasGroupRestrictions" type="button" class="button icon trash" @click="deleteGroupsRestriction" />
                 </div>
             </h2>
 
@@ -171,7 +169,7 @@
             <p v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id" class="info-box">
                 Je kan dit voorlopig enkel bewerken via het beheerdersportaal van de organisator.
             </p>
-            <GroupsInput v-else v-model="groups" :date="startDate" />
+            <GroupsInput v-else v-model="groups" :date="startDate" :is-group-enabled-operator="isGroupEnabledOperator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="!!location">
@@ -227,7 +225,7 @@
                 </h3>
             </STListItem>
 
-            <STListItem v-if="!isNationalActivity && externalOrganization && organization && organization.id === externalOrganization.id && groups === null" :selectable="true" element-name="button" @click="addGroupsRestriction">
+            <STListItem v-if="!isNationalActivity && externalOrganization && organization && organization.id === externalOrganization.id && groups === null && !hasGroupRestrictions" :selectable="true" element-name="button" @click="addGroupsRestriction">
                 <template #left>
                     <span class="icon add gray" />
                 </template>
@@ -278,12 +276,12 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, GlobalEventBus, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
+import { Event, EventLocation, EventMeta, EventPermissionChecker, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useContext, useOrganization, usePatch, usePlatform } from '../hooks';
+import { useContext, useOrganization, usePatch, usePlatform, useUser } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 import SearchOrganizationView from '../members/SearchOrganizationView.vue';
@@ -293,165 +291,165 @@ const props = withDefaults(
     defineProps<{
         isNew: boolean;
         event: Event;
-        callback?: (() => void)|null;
+        callback?: (() => void) | null;
     }>(),
     {
-        callback: null
-    }
+        callback: null,
+    },
 );
 
 const errors = useErrors();
-const {hasChanges, patched, addPatch, patch} = usePatch(props.event);
-const title = computed(() => props.isNew ? 'Activiteit toevoegen' : 'Activiteit bewerken')
-const saving = ref(false)
-const deleting = ref(false)
-const $t = useTranslate()
+const { hasChanges, patched, addPatch, patch } = usePatch(props.event);
+const title = computed(() => props.isNew ? 'Activiteit toevoegen' : 'Activiteit bewerken');
+const saving = ref(false);
+const deleting = ref(false);
+const $t = useTranslate();
 const context = useContext();
 const pop = usePop();
 const organization = useOrganization();
 const present = usePresent();
 const platform = usePlatform();
+const user = useUser();
 
-const {externalOrganization, choose: chooseOrganizer} = useExternalOrganization(
+const { externalOrganization, choose: chooseOrganizer } = useExternalOrganization(
     computed({
         get: () => patched.value.organizationId,
-        set: (organizationId) => addPatch({
-            organizationId
-        })
-    })
-)
+        set: organizationId => addPatch({
+            organizationId,
+        }),
+    }),
+);
 
 const type = computed(() => {
-    const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId)
-    return type ?? null
-})
+    const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId);
+    return type ?? null;
+});
 
 const isLocationRequired = computed(() => type.value?.isLocationRequired ?? false);
 
 const multipleDays = computed({
     get: () => {
-        return Formatter.dateNumber(patched.value.startDate, true) !== Formatter.dateNumber(patched.value.endDate, true)
+        return Formatter.dateNumber(patched.value.startDate, true) !== Formatter.dateNumber(patched.value.endDate, true);
     },
     set: (md) => {
         if (md === multipleDays.value) {
             return;
         }
         if (md) {
-            const d = new Date(endDate.value)
-            d.setDate(startDate.value.getDate() + (Math.max(2, type.value?.minimumDays || 2) - 1))
-            endDate.value = d
-        } else {
-            const d = new Date(endDate.value)
-            d.setFullYear(startDate.value.getFullYear())
-            d.setMonth(startDate.value.getMonth())
-            d.setDate(startDate.value.getDate())
-            endDate.value = d
+            const d = new Date(endDate.value);
+            d.setDate(startDate.value.getDate() + (Math.max(2, type.value?.minimumDays || 2) - 1));
+            endDate.value = d;
         }
-    }
-})
+        else {
+            const d = new Date(endDate.value);
+            d.setFullYear(startDate.value.getFullYear());
+            d.setMonth(startDate.value.getMonth());
+            d.setDate(startDate.value.getDate());
+            endDate.value = d;
+        }
+    },
+});
 
 // Auto correct invalid types
 watchEffect(() => {
-    const t = type.value
+    const t = type.value;
     if (!t) {
         if (platform.value.config.eventTypes.length) {
-            addPatch({typeId: platform.value.config.eventTypes[0].id})
+            addPatch({ typeId: platform.value.config.eventTypes[0].id });
         }
         return;
     }
 
     if (t.minimumDays !== null && t.minimumDays > 1 && !multipleDays.value) {
-        multipleDays.value = true
+        multipleDays.value = true;
     }
 
     if (t.maximumDays === 1 && multipleDays.value) {
-        multipleDays.value = false
+        multipleDays.value = false;
     }
-})
-
+});
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name})
-})
+    set: name => addPatch({ name }),
+});
 
 const startDate = computed({
     get: () => patched.value.startDate,
     set: (startDate) => {
-        const wasMultipleDays = multipleDays.value
-        addPatch({startDate})
+        const wasMultipleDays = multipleDays.value;
+        addPatch({ startDate });
 
         if (!wasMultipleDays) {
             // Makse sure end date remains same date
-            const d = new Date(endDate.value)
-            d.setFullYear(startDate.getFullYear())
-            d.setMonth(startDate.getMonth())
-            d.setDate(startDate.getDate())
-            endDate.value = d
+            const d = new Date(endDate.value);
+            d.setFullYear(startDate.getFullYear());
+            d.setMonth(startDate.getMonth());
+            d.setDate(startDate.getDate());
+            endDate.value = d;
         }
-    }
-})
+    },
+});
 
 const endDate = computed({
     get: () => patched.value.endDate,
-    set: (endDate) => addPatch({endDate})
-})
-
+    set: endDate => addPatch({ endDate }),
+});
 
 const typeId = computed({
     get: () => patched.value.typeId,
-    set: (typeId) => addPatch({typeId})
-})
+    set: typeId => addPatch({ typeId }),
+});
 
 const organizationTagIds = computed({
     get: () => patched.value.meta.organizationTagIds,
-    set: (organizationTagIds) => 
+    set: organizationTagIds =>
         addPatch({
             meta: EventMeta.patch({
-                organizationTagIds: organizationTagIds as any
-            })
-        })
-})
+                organizationTagIds: organizationTagIds as any,
+            }),
+        }),
+});
 
 const defaultAgeGroupIds = computed({
     get: () => patched.value.meta.defaultAgeGroupIds,
-    set: (defaultAgeGroupIds) => 
+    set: defaultAgeGroupIds =>
         addPatch({
             meta: EventMeta.patch({
-                defaultAgeGroupIds: defaultAgeGroupIds as any
-            })
-        })
-})
+                defaultAgeGroupIds: defaultAgeGroupIds as any,
+            }),
+        }),
+});
 
 const groups = computed({
     get: () => patched.value.meta.groups,
-    set: (groups) => 
+    set: groups =>
         addPatch({
             meta: EventMeta.patch({
-                groups: groups as any
-            })
-        })
-})
+                groups: groups as any,
+            }),
+        }),
+});
 
 const location = computed({
     get: () => patched.value.meta.location,
-    set: (location) => 
+    set: location =>
         addPatch({
             meta: EventMeta.patch({
-                location
-            })
-        })
-})
+                location,
+            }),
+        }),
+});
 
 const coverPhoto = computed({
     get: () => patched.value.meta.coverPhoto,
-    set: (coverPhoto) => 
+    set: coverPhoto =>
         addPatch({
             meta: EventMeta.patch({
-                coverPhoto
-            })
-        })
-})
+                coverPhoto,
+            }),
+        }),
+});
 
 const locationName = computed({
     get: () => location.value?.name ?? '',
@@ -460,13 +458,13 @@ const locationName = computed({
             addPatch({
                 meta: EventMeta.patch({
                     location: EventLocation.patch({
-                        name
-                    })
-                })
-            })
+                        name,
+                    }),
+                }),
+            });
         }
-    }
-})
+    },
+});
 
 const locationAddress = computed({
     get: () => location.value?.address ?? null,
@@ -475,54 +473,73 @@ const locationAddress = computed({
             addPatch({
                 meta: EventMeta.patch({
                     location: EventLocation.patch({
-                        address
-                    })
-                })
-            })
+                        address,
+                    }),
+                }),
+            });
         }
-    }
-})
+    },
+});
 
-const app = useAppContext()
-const canSetNationalActivity = computed(() => app === 'admin')
+const app = useAppContext();
+const canSetNationalActivity = computed(() => app === 'admin');
 const isNationalActivity = computed({
     get: () => patched.value.organizationId === null,
     set: (isNationalActivity) => {
         if (isNationalActivity) {
             addPatch({
-                organizationId: null
-            })
-        } else {
-            const organizationId = props.event.organizationId || organization.value?.id
+                organizationId: null,
+            });
+        }
+        else {
+            const organizationId = props.event.organizationId || organization.value?.id;
 
             if (!organizationId) {
-                chooseOrganizer('Kies een organisator').catch(console.error)
-                return
+                chooseOrganizer('Kies een organisator').catch(console.error);
+                return;
             }
             addPatch({
-                organizationId
-            })
+                organizationId,
+            });
         }
-    }
-})
+    },
+});
 
 const description = computed({
     get: () => patched.value.meta.description,
-    set: (description) => addPatch({
+    set: description => addPatch({
         meta: EventMeta.patch({
-            description
-        })
-    })
-})
+            description,
+        }),
+    }),
+});
 
 const visible = computed({
     get: () => patched.value.meta.visible,
-    set: (visible) => addPatch({
+    set: visible => addPatch({
         meta: EventMeta.patch({
-            visible
-        })
-    })
-})
+            visible,
+        }),
+    }),
+});
+
+const userPermissions = computed(() => user.value?.permissions ?? null);
+
+const hasGroupRestrictions = computed(() => EventPermissionChecker.hasGroupRestrictions(userPermissions.value, organization.value));
+
+watch(hasGroupRestrictions, (hasGroupRestrictions) => {
+    if (hasGroupRestrictions && groups.value === null) {
+        addGroupsRestriction();
+    }
+}, { immediate: true });
+
+const isGroupEnabledOperator = computed(() => {
+    if (!hasGroupRestrictions.value) {
+        return undefined;
+    }
+
+    return EventPermissionChecker.isGroupEnabledOperatorFactory(userPermissions.value, organization.value);
+});
 
 const resolutions = [
     ResolutionRequest.create({
@@ -532,46 +549,44 @@ const resolutions = [
         width: 600,
     }),
     ResolutionRequest.create({
-        width: 300
+        width: 300,
     }),
     ResolutionRequest.create({
-        width: 100
-    })
-]
-
+        width: 100,
+    }),
+];
 
 function addLocation() {
-    location.value = EventLocation.create({})
+    location.value = EventLocation.create({});
 }
 
 function deleteLocation() {
-    location.value = null
+    location.value = null;
 }
 
 function addDefaultAgeGroupRestriction() {
-    defaultAgeGroupIds.value = []
+    defaultAgeGroupIds.value = [];
 }
 
 function addGroupsRestriction() {
-    groups.value = []
+    groups.value = [];
 }
 
 function deleteDefaultAgeGroupRestriction() {
-    defaultAgeGroupIds.value = null
+    defaultAgeGroupIds.value = null;
 }
 
 function deleteGroupsRestriction() {
-    groups.value = null
+    groups.value = null;
 }
 
 function addTagRestriction() {
-    organizationTagIds.value = []
+    organizationTagIds.value = [];
 }
 
 function deleteTagRestriction() {
-    organizationTagIds.value = null
+    organizationTagIds.value = null;
 }
-
 
 async function save() {
     if (saving.value) {
@@ -588,24 +603,32 @@ async function save() {
     }
 
     try {
-        //#region validate location
-        if(isLocationRequired.value) {
-            if(!location.value) {
+        // #region validate location
+        if (isLocationRequired.value) {
+            if (!location.value) {
                 throw new SimpleError({
-                    code: "invalid_field",
-                    message: "De locatie is verplicht voor deze soort activiteit.",
-                    field: "event_required"
+                    code: 'invalid_field',
+                    message: 'De locatie is verplicht voor deze soort activiteit.',
+                    field: 'event_required',
                 });
             }
         }
-        //#endregion
+
+        if (patched.value.meta.groups?.length === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Kies minstens één leeftijdsgroep.',
+            });
+        }
+        // #endregion
 
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
 
         if (props.isNew) {
-            arr.addPut(patched.value)
-        } else {
-            arr.addPatch(patch.value)
+            arr.addPut(patched.value);
+        }
+        else {
+            arr.addPatch(patch.value);
         }
 
         const response = await context.value.authenticatedServer.request({
@@ -613,25 +636,25 @@ async function save() {
             path: '/events',
             body: arr,
             decoder: new ArrayDecoder(Event as Decoder<Event>),
-        })
+        });
 
-        Toast.success($t('dced31f7-3554-425d-bae9-85416e3742d6')).show()
+        Toast.success($t('dced31f7-3554-425d-bae9-85416e3742d6')).show();
 
         // Make sure original event is patched
-        deepSetArray([props.event], response.data)
+        deepSetArray([props.event], response.data);
 
-        props.callback?.()
-        
-        await pop({force: true})
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        props.callback?.();
+
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     saving.value = false;
 }
 
 async function addRegistrations() {
-    
     if (patched.value.group) {
         // Edit the group
         await present({
@@ -643,20 +666,21 @@ async function addRegistrations() {
                     showToasts: false,
                     saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                         addPatch({
-                            group: patch
-                        })
+                            group: patch,
+                        });
                     },
                     deleteHandler: async () => {
                         addPatch({
-                            group: null
-                        })
-                    }
-                })
+                            group: null,
+                        });
+                    },
+                }),
             ],
-            modalDisplayStyle: 'popup'
-        })
-    } else {
-        const organizationId = patched.value.organizationId ?? undefined
+            modalDisplayStyle: 'popup',
+        });
+    }
+    else {
+        const organizationId = patched.value.organizationId ?? undefined;
         const group = Group.create({
             organizationId,
             periodId: externalOrganization.value?.period.period.id ?? organization.value?.period.period.id,
@@ -664,8 +688,8 @@ async function addRegistrations() {
             settings: GroupSettings.create({
                 name: patched.value.name,
                 allowRegistrationsByOrganization: isNationalActivity.value,
-            })
-        })
+            }),
+        });
 
         if (!organizationId) {
             // Kies een organisator
@@ -676,8 +700,8 @@ async function addRegistrations() {
                             title: 'Kies een organisator van deze inschrijvingen',
                             description: 'Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.',
                             selectOrganization: async (organization: Organization, navigation: NavigationActions) => {
-                                group.organizationId = organization.id
-                                group.periodId = organization.period.period.id
+                                group.organizationId = organization.id;
+                                group.periodId = organization.period.period.id;
                                 await navigation.show({
                                     force: true,
                                     replace: 1,
@@ -689,18 +713,18 @@ async function addRegistrations() {
                                             showToasts: false,
                                             saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                                                 addPatch({
-                                                    group: group.patch(patch)
-                                                })
-                                            }
-                                        })
-                                    ]
-                                })
-                            }
-                        })
-                    })
+                                                    group: group.patch(patch),
+                                                });
+                                            },
+                                        }),
+                                    ],
+                                });
+                            },
+                        }),
+                    }),
                 ],
-                modalDisplayStyle: 'popup'
-            })
+                modalDisplayStyle: 'popup',
+            });
             return;
         }
 
@@ -714,15 +738,14 @@ async function addRegistrations() {
                     showToasts: false,
                     saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                         addPatch({
-                            group: group.patch(patch)
-                        })
-                    }
-                })
+                            group: group.patch(patch),
+                        });
+                    },
+                }),
             ],
-            modalDisplayStyle: 'popup'
-        })
+            modalDisplayStyle: 'popup',
+        });
     }
-
 }
 
 async function deleteMe() {
@@ -753,22 +776,23 @@ async function deleteMe() {
                             path: '/events',
                             body: arr,
                             decoder: new ArrayDecoder(Event as Decoder<Event>),
-                        })
+                        });
 
-                        GlobalEventBus.sendEvent('event-deleted', props.event).catch(console.error)
+                        GlobalEventBus.sendEvent('event-deleted', props.event).catch(console.error);
 
-                        Toast.success($t('50df35d9-992f-4697-9150-aa8643ee4f18')).show()
-                        props.callback?.()
-                        await pop({force: true})
-                    } catch (e) {
+                        Toast.success($t('50df35d9-992f-4697-9150-aa8643ee4f18')).show();
+                        props.callback?.();
+                        await pop({ force: true });
+                    }
+                    catch (e) {
                         errors.errorBox = new ErrorBox(e);
                     }
 
                     return true;
-                }
-            })
+                },
+            }),
         ],
-        modalDisplayStyle: "sheet"
+        modalDisplayStyle: 'sheet',
     });
 }
 
@@ -776,11 +800,11 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 
 </script>

@@ -52,6 +52,15 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             const event = new Event();
             event.organizationId = put.organizationId;
             event.meta = put.meta;
+
+            if (event.meta.groups && event.meta.groups.length === 0) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Empty groups',
+                    human: 'Kies minstens één leeftijdsgroep',
+                });
+            }
+
             const eventOrganization = await this.checkEventAccess(event);
             event.id = put.id;
             event.name = put.name;
@@ -120,6 +129,14 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             if (patch.organizationId !== undefined) {
                 event.organizationId = patch.organizationId;
+            }
+
+            if (event.meta.groups && event.meta.groups.length === 0) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Empty groups',
+                    human: 'Kies minstens één leeftijdsgroep',
+                });
             }
 
             const eventOrganization = await this.checkEventAccess(event);

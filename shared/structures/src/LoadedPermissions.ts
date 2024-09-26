@@ -196,15 +196,21 @@ export class LoadedPermissions {
 
     hasAccessRightForSomeResource(type: PermissionsResourceType, right: AccessRight): boolean {
         if (this.hasAccessRight(right)) {
-            return true
+            return true;
         }
 
-        const resource = this.resources.get(type)
-        if (!resource) {
-            return false;
+        const resource = this.resources.get(type);
+        if (resource && resource.size > 0) {
+            return true;
         }
 
-        return resource.size > 0;
+        for (const r of this.roles) {
+            if (r.hasAccessRightForSomeResource(type, right)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     hasReadAccess(): boolean {
