@@ -52,6 +52,14 @@ export function useEventPermissions() {
         return permissions.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite);
     }
 
+    function groupsToFilterEventsOn(): string[] | null {
+        return filterEventsOn(PermissionsResourceType.Groups);
+    }
+
+    function tagsToFilterEventsOn(): string[] | null {
+        return filterEventsOn(PermissionsResourceType.OrganizationTags);
+    }
+
     function isGroupEnabledOperatorFactory() {
         if (!permissions) {
             return () => false;
@@ -73,6 +81,27 @@ export function useEventPermissions() {
         return organizationPermissions?.hasAccessRight(AccessRight.EventWrite) ?? false;
     }
 
+    function filterEventsOn(type: PermissionsResourceType): string[] | null {
+        if (!permissions) {
+            return null;
+        }
+
+        const result = new Set<string>();
+
+        for (const ressourceMap of [permissions.resources, ...permissions.roles.map(r => r.resources)]) {
+            const ressources = ressourceMap.get(type);
+            if (ressources) {
+                for (const [tagId, permissions] of ressources.entries()) {
+                    if (permissions.hasAccessRight(AccessRight.EventWrite)) {
+                        result.add(tagId);
+                    }
+                }
+            }
+        }
+
+        return [...result];
+    }
+
     return {
         canAdminSome,
         hasGroupRestrictions,
@@ -80,5 +109,7 @@ export function useEventPermissions() {
         isGroupEnabledOperatorFactory,
         isTagEnabledOperatorFactory,
         canAdminEventForExternalOrganization,
+        tagsToFilterEventsOn,
+        groupsToFilterEventsOn,
     };
 }
