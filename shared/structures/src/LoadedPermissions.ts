@@ -194,6 +194,10 @@ export class LoadedPermissions {
         return false;
     }
 
+    hasAccessRightForAllResourcesOfType(type: PermissionsResourceType, right: AccessRight): boolean {
+        return this.hasResourceAccessRight(type, '', right);
+    }
+
     hasAccessRightForSomeResource(type: PermissionsResourceType, right: AccessRight): boolean {
         if (this.hasAccessRight(right)) {
             return true;

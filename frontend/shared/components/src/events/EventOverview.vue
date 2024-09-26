@@ -189,10 +189,10 @@ const canAdminEvent = computed(() => {
         if (props.event.organizationId === organization.value?.id) {
             return canAdminEventHelper(organization.value);
         }
-        else {
-            // todo ?
-            return false;
+        else if (groupOrganization.value) {
+            return canAdminEventHelper(groupOrganization.value);
         }
+        return false;
     }
 
     return canAdminEventHelper(null);

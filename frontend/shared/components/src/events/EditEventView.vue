@@ -84,7 +84,7 @@
         <STList>
             <STListItem v-if="canSetNationalActivity || isNationalActivity" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="isNationalActivity" :disabled="isOrganizationActivityDisabled" />
+                    <Checkbox v-model="isNationalActivity" />
                 </template>
 
                 <h3 class="style-title-list">
@@ -109,7 +109,7 @@
             <p>Deze activiteit is enkel zichtbaar voor leden van de organisator.</p>
 
             <STList>
-                <STListItem v-if="externalOrganization" :selectable="true" @click="chooseOrganizer('Kies een organisator')">
+                <STListItem v-if="externalOrganization" :selectable="true" @click="chooseOrganizer('Kies een organisator', canSelectOrganization)">
                     <template #left>
                         <OrganizationAvatar :organization="externalOrganization" />
                     </template>
@@ -281,7 +281,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useContext, useOrganization, usePatch, usePlatform, useUser } from '../hooks';
+import { useContext, useOrganization, usePatch, usePlatform } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 import SearchOrganizationView from '../members/SearchOrganizationView.vue';
@@ -310,8 +310,7 @@ const pop = usePop();
 const organization = useOrganization();
 const present = usePresent();
 const platform = usePlatform();
-const user = useUser();
-const eventPermissions = useEventPermissions({ user, organization, platform });
+const eventPermissions = useEventPermissions();
 
 const { externalOrganization, choose: chooseOrganizer } = useExternalOrganization(
     computed({
@@ -485,7 +484,6 @@ const locationAddress = computed({
 
 const app = useAppContext();
 const canSetNationalActivity = computed(() => app === 'admin');
-const isOrganizationActivityDisabled = computed(() => !eventPermissions.canAdminSomeOrganizationEvent());
 const isNationalActivity = computed({
     get: () => patched.value.organizationId === null,
     set: (isNationalActivity) => {
@@ -498,7 +496,7 @@ const isNationalActivity = computed({
             const organizationId = props.event.organizationId || organization.value?.id;
 
             if (!organizationId) {
-                chooseOrganizer('Kies een organisator').catch(console.error);
+                chooseOrganizer('Kies een organisator', canSelectOrganization).catch(console.error);
                 return;
             }
             addPatch({
@@ -556,6 +554,15 @@ const isTagEnabledOperator = computed(() => {
 
     return eventPermissions.isTagEnabledOperatorFactory();
 });
+
+const canSelectOrganization = (organization: Organization) => {
+    const result = eventPermissions.canAdminEventForExternalOrganization(organization);
+    if (!result) {
+        Toast.error('Je hebt geen rechten om een activiteit aan te maken voor deze organisatie.')
+            .show();
+    }
+    return result;
+};
 
 const resolutions = [
     ResolutionRequest.create({

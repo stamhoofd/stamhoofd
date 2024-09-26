@@ -1,23 +1,23 @@
-import { computed, ref, Ref, watchEffect } from "vue";
-import { useOrganization } from "../../hooks";
-import { SessionContext, useRequestOwner } from "@stamhoofd/networking";
-import { Organization } from "@stamhoofd/structures";
-import { Decoder } from "@simonbackx/simple-encoding";
-import { ErrorBox } from "../../errors/ErrorBox";
-import { NavigationActions } from "../../types/NavigationActions";
-import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { SearchOrganizationView } from "../../members";
+import { Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { Organization } from '@stamhoofd/structures';
+import { computed, ref, Ref, watchEffect } from 'vue';
+import { ErrorBox } from '../../errors/ErrorBox';
+import { useOrganization } from '../../hooks';
+import { SearchOrganizationView } from '../../members';
+import { NavigationActions } from '../../types/NavigationActions';
 
 export function useExternalOrganization(organizationId: Ref<string | null>) {
-    const organization = useOrganization()
+    const organization = useOrganization();
     const loadedOrganization = ref(null) as Ref<Organization | null>;
     const errorBox = ref(null) as Ref<ErrorBox | null>;
-    const present = usePresent()
+    const present = usePresent();
 
     let loadingOrganizationId: string | null; // not reactive
     let loadingCount = 0;
 
-    const owner = useRequestOwner()
+    const owner = useRequestOwner();
 
     const externalOrganization = computed(() => {
         if (!organizationId.value) {
@@ -29,17 +29,17 @@ export function useExternalOrganization(organizationId: Ref<string | null>) {
         }
 
         return loadedOrganization.value;
-    })
+    });
 
     function check() {
         if (organizationId.value && (!externalOrganization.value || externalOrganization.value.id !== organizationId.value)) {
             // Start loading
-            loadOrganization().catch(console.error)
+            loadOrganization().catch(console.error);
         }
     }
 
     watchEffect(() => {
-        check()
+        check();
     });
 
     async function loadOrganization() {
@@ -54,14 +54,14 @@ export function useExternalOrganization(organizationId: Ref<string | null>) {
         const currentCount = loadingCount;
 
         try {
-            errorBox.value = null
+            errorBox.value = null;
             const response = await SessionContext.serverForOrganization(organizationId.value).request({
-                method: "GET",
-                path: "/organization",
+                method: 'GET',
+                path: '/organization',
                 decoder: Organization as Decoder<Organization>,
                 shouldRetry: true,
-                owner
-            })
+                owner,
+            });
 
             if (loadingCount !== currentCount) {
                 // Ignore
@@ -73,7 +73,8 @@ export function useExternalOrganization(organizationId: Ref<string | null>) {
             if (response.data.id === organizationId.value) {
                 loadedOrganization.value = response.data;
             }
-        } catch (e) {
+        }
+        catch (e) {
             if (loadingCount !== currentCount) {
                 // Ignore
                 return;
@@ -83,27 +84,30 @@ export function useExternalOrganization(organizationId: Ref<string | null>) {
             errorBox.value = new ErrorBox(e);
         }
     }
-        
+
     return {
         loading: computed(() => externalOrganization.value === null && !!organizationId.value),
         errorBox,
         externalOrganization,
-        choose: async function chooseOrganizer(title: string) {
+        choose: async function chooseOrganizer(title: string, canSelect?: (organization: Organization) => Promise<boolean> | boolean) {
             await present({
                 components: [
                     new ComponentWithProperties(NavigationController, {
                         root: new ComponentWithProperties(SearchOrganizationView, {
                             title,
-                            selectOrganization: async (organization: Organization, {dismiss}: NavigationActions) => {
-                                await dismiss({force: true});
+                            selectOrganization: async (organization: Organization, { dismiss }: NavigationActions) => {
+                                if (canSelect && !(await canSelect(organization))) {
+                                    return;
+                                }
+                                await dismiss({ force: true });
                                 loadedOrganization.value = organization;
                                 organizationId.value = organization.id;
-                            }
-                        })
-                    })
+                            },
+                        }),
+                    }),
                 ],
-                modalDisplayStyle: "popup"
-            })
-        }
-    }
-}   
+                modalDisplayStyle: 'popup',
+            });
+        },
+    };
+}
