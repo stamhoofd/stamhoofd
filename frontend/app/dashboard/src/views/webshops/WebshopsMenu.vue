@@ -64,38 +64,38 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from "@simonbackx/vue-app-navigation";
-import { useAuth, useOrganization } from "@stamhoofd/components";
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { useAuth, useOrganization } from '@stamhoofd/components';
 import {
     AccessRight,
     WebshopPreview,
     WebshopStatus,
-} from "@stamhoofd/structures";
-import { Formatter, Sorter } from "@stamhoofd/utility";
-import { ComponentOptions, computed, ref } from "vue";
+} from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
+import { ComponentOptions, computed, ref } from 'vue';
 
-//#region composables
+// #region composables
 const $organization = useOrganization();
 const $navigate = useNavigate();
 const auth = useAuth();
-//#endregion
+// #endregion
 
-//#region refs
+// #region refs
 const selectedWebshop = ref<string | null>(null);
 const currentlySelected = ref<string | null>(null);
-//#endregion
+// #endregion
 
-//#region enums
+// #region enums
 enum Button {
-    AddWebshop = "add-webshop",
-    Archive = "webshop-archive",
-    Signup = "signup",
+    AddWebshop = 'add-webshop',
+    Archive = 'webshop-archive',
+    Signup = 'signup',
 }
-//#endregion
+// #endregion
 
-//#region computed
+// #region computed
 const enableWebshopModule = computed(
-    () => $organization.value?.meta.packages.useWebshops ?? false
+    () => $organization.value?.meta.packages.useWebshops ?? false,
 );
 
 const fullAccess = computed(() => auth.permissions?.hasFullAccess() ?? false);
@@ -107,27 +107,27 @@ const allWebshops = computed(() => {
 
 const visibleWebshops = computed(() =>
     allWebshops.value
-        .filter((webshop) => webshop.meta.status !== WebshopStatus.Archived)
+        .filter(webshop => webshop.meta.status !== WebshopStatus.Archived)
         .sort((a, b) =>
             Sorter.stack(
                 Sorter.byBooleanValue(b.isClosed(), a.isClosed()),
-                Sorter.byStringValue(a.meta.name, b.meta.name)
-            )
-        )
+                Sorter.byStringValue(a.meta.name, b.meta.name),
+            ),
+        ),
 );
 
 const canCreateWebshops = computed(() =>
-    hasAccessRight(AccessRight.OrganizationCreateWebshops)
+    hasAccessRight(AccessRight.OrganizationCreateWebshops),
 );
 
 const hasWebshopArchive = computed(() =>
     allWebshops.value.some(
-        (webshop) => webshop.meta.status === WebshopStatus.Archived
-    )
+        webshop => webshop.meta.status === WebshopStatus.Archived,
+    ),
 );
-//#endregion
+// #endregion
 
-//#region functions
+// #region functions
 function hasAccessRight(right: AccessRight) {
     return auth.permissions?.hasAccessRight(right) ?? false;
 }
@@ -151,41 +151,41 @@ async function openWebshop(webshop: WebshopPreview) {
 function selectWebshop(webshop: WebshopPreview) {
     const id = webshop.id;
     selectedWebshop.value = id;
-    selectButton("webshop-" + id);
+    selectButton('webshop-' + id);
 }
 
 function isWebshopOpen(webshop: WebshopPreview) {
     return !webshop.isClosed();
 }
 
-//#endregion
+// #endregion
 
-//#region routes
+// #region routes
 enum Routes {
-    Webshop = "webshop",
-    AddWebshop = "addWebshop",
-    Archive = "archive",
+    Webshop = 'webshop',
+    AddWebshop = 'addWebshop',
+    Archive = 'archive',
 }
 
 defineRoutes([
     // webshop detail
     {
-        url: "@slug",
+        url: '@slug',
         name: Routes.Webshop,
         params: {
             slug: String,
         },
-        show: "detail",
+        show: 'detail',
         component: async () =>
-            (await import("../dashboard/webshop/WebshopOverview.vue"))
+            (await import('../dashboard/webshop/WebshopOverview.vue'))
                 .default as unknown as ComponentOptions,
         paramsToProps: ({ slug }: { slug: string }) => {
             const webshop = visibleWebshops.value.find(
-                (shop) => Formatter.slug(shop.id) === slug
+                shop => Formatter.slug(shop.id) === slug,
             );
 
             if (!webshop) {
-                throw new Error("Webshop not found");
+                throw new Error('Webshop not found');
             }
 
             selectWebshop(webshop);
@@ -198,7 +198,7 @@ defineRoutes([
             const webshop = props.preview as WebshopPreview | undefined;
 
             if (!webshop) {
-                throw new Error("Missing preview (webshop)");
+                throw new Error('Missing preview (webshop)');
             }
 
             selectWebshop(webshop);
@@ -219,12 +219,12 @@ defineRoutes([
     },
     // add webshop
     {
-        url: "nieuw",
+        url: 'nieuw',
         name: Routes.AddWebshop,
-        show: "detail",
-        present: "popup",
+        show: 'detail',
+        present: 'popup',
         component: async () =>
-            (await import("../dashboard/webshop/edit/EditWebshopGeneralView.vue"))
+            (await import('../dashboard/webshop/edit/EditWebshopGeneralView.vue'))
                 .default as unknown as ComponentOptions,
         paramsToProps: () => {
             selectButton(Button.AddWebshop);
@@ -233,11 +233,11 @@ defineRoutes([
     },
     // archive
     {
-        url: "archief",
+        url: 'archief',
         name: Routes.Archive,
-        show: "detail",
+        show: 'detail',
         component: async () =>
-            (await import("../dashboard/webshop/WebshopArchiveView.vue"))
+            (await import('../dashboard/webshop/WebshopArchiveView.vue'))
                 .default as unknown as ComponentOptions,
         paramsToProps: () => {
             selectButton(Button.Archive);
@@ -245,5 +245,5 @@ defineRoutes([
         },
     },
 ]);
-//#endregion
+// #endregion
 </script>
