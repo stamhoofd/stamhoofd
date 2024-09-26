@@ -11,9 +11,9 @@
         </STListItem>
 
         <template v-if="model !== null">
-            <STListItem v-for="option of groupOptions" :key="option.group.id" :selectable="option.isEnabled" element-name="label">
+            <STListItem v-for="option of options" :key="option.group.id" :selectable="option.isEnabled && !option.isLocked" element-name="label">
                 <template #left>
-                    <Checkbox :model-value="getGroupValue(option.group)" :disabled="!option.isEnabled" @update:model-value="setGroupValue(option.group, $event)" />
+                    <Checkbox :model-value="getGroupValue(option.group)" :disabled="!option.isEnabled || option.isLocked" @update:model-value="setGroupValue(option.group, $event)" />
                 </template>
                 <h3 class="style-title-list">
                     {{ option.group.name }}
@@ -39,6 +39,7 @@ const props = withDefaults(
         isGroupEnabledOperator?: (group: NamedObject) => boolean;
     }>(), {
         nullable: false,
+        isGroupEnabledOperator: undefined,
     },
 );
 
@@ -80,17 +81,18 @@ const missingGroups = computed(() => {
     return model.value === null ? [] : model.value.filter(g => !groups.value.find(group => group.id === g.id));
 });
 
-const groupOptions = computed(() => {
+const options = computed(() => {
     const isEnabledOperator = props.isGroupEnabledOperator;
     const groupsToChoose = [...groups.value, ...missingGroups.value];
 
-    let result: { group: NamedObject; isEnabled: boolean }[] = [];
+    let result: { group: NamedObject; isEnabled: boolean; isLocked: boolean }[] = [];
 
     if (isEnabledOperator !== undefined) {
         result = groupsToChoose.map((group) => {
             return {
                 group,
                 isEnabled: isEnabledOperator(group),
+                isLocked: false,
             };
         },
         );
@@ -100,6 +102,7 @@ const groupOptions = computed(() => {
             return {
                 group,
                 isEnabled: true,
+                isLocked: false,
             };
         });
     }
@@ -107,20 +110,20 @@ const groupOptions = computed(() => {
     if (result.filter(x => x.isEnabled).length === 1) {
         const firstEnabled = result.find(x => x.isEnabled);
         if (firstEnabled) {
-            firstEnabled.isEnabled = false;
+            firstEnabled.isLocked = true;
         }
     }
 
     return result;
 });
 
-const enabledGroups = computed(() => groupOptions.value.filter(g => g.isEnabled).map(g => g.group));
+const enabledOptions = computed(() => options.value.filter(g => g.isEnabled).map(g => g.group));
 
-watch(enabledGroups, (groups) => {
-    if (groups.length === 1 && model.value?.length === 0) {
-        model.value = [groups[0]];
+watch(enabledOptions, (options) => {
+    if (options.length === 1 && model.value?.length === 0) {
+        model.value = [options[0]];
     }
-});
+}, { immediate: true });
 
 organizationManager.value.loadPeriods(false, true, owner).then((p) => {
     periods.value = p;
