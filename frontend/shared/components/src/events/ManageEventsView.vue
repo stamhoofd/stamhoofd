@@ -14,7 +14,6 @@
                 Activiteiten
             </h1>
 
-
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
@@ -31,7 +30,7 @@
             </div>
 
             <ScrollableSegmentedControl v-model="selectedYear" :items="years" :labels="yearLabels" />
-            
+
             <template v-if="selectedYear === null && suggestionsGroup">
                 <Checkbox v-model="addSuggestions">
                     Toon wekelijkse suggesties voor {{ suggestionsGroup.settings.name }}
@@ -45,7 +44,7 @@
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)"/>
+                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)" />
                 </STList>
             </div>
 
@@ -56,7 +55,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { Event, EventPermissionChecker, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import { Event, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
 import { useEventsObjectFetcher } from '../fetchers';
@@ -68,134 +67,130 @@ import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue
 import { Toast } from '../overlays/Toast';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
 import EventRow from './components/EventRow.vue';
+import { useEventPermissions } from './composables/useEventPermissions';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
 
 type ObjectType = Event;
 
 const searchQuery = ref('');
-const present = usePresent()
+const present = usePresent();
 const context = useContext();
-const selectedUIFilter = ref(null) as Ref<null|UIFilter>;
-const selectedYear = ref(null) as Ref<number|null>;
+const selectedUIFilter = ref(null) as Ref<null | UIFilter>;
+const selectedYear = ref(null) as Ref<number | null>;
 const years = computed(() => {
     const currentYear = Formatter.year(new Date());
-    return [null, currentYear, currentYear - 1, currentYear - 2]
-})
+    return [null, currentYear, currentYear - 1, currentYear - 2];
+});
 const user = useUser();
 const organization = useOrganization();
-const platform = usePlatform()
+const platform = usePlatform();
 const $navigate = useNavigate();
-const {presentPositionableSheet} = usePositionableSheet()
+const { presentPositionableSheet } = usePositionableSheet();
 const auth = useAuth();
+const eventPermissions = useEventPermissions({ user, organization, platform });
 
-const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [])
+const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : []);
 
 const yearLabels = computed(() => {
-    return years.value.map(y => {
+    return years.value.map((y) => {
         if (y === null) {
-            return 'Toekomstige'
+            return 'Toekomstige';
         }
-        return y.toString()
-    })
-})
+        return y.toString();
+    });
+});
 
-const canAdminSomeEvent = computed(() => {
-    return EventPermissionChecker.canAdminSome({
-        userPermissions: user.value?.permissions ?? null,
-        platform: platform.value,
-        organization: organization.value
-    })
-})
+const canAdminSomeEvent = computed(() => eventPermissions.canAdminSome());
 
 enum Routes {
-    Event = "activiteit"
+    Event = 'activiteit',
 }
 
 defineRoutes([
     {
         name: Routes.Event,
-        url: "@id",
+        url: '@id',
         component: EventOverview as ComponentOptions,
         params: {
-            id: String
+            id: String,
         },
-        paramsToProps: async (params: {id: string}) => {
+        paramsToProps: async (params: { id: string }) => {
             // Fetch event
             const events = await fetcher.objectFetcher.fetch(
                 new LimitedFilteredRequest({
                     filter: {
-                        id: params.id
+                        id: params.id,
                     },
                     limit: 1,
-                    sort: []
-                })
-            )
+                    sort: [],
+                }),
+            );
 
             if (events.results.length === 1) {
                 return {
-                    event: events.results[0]
-                }
+                    event: events.results[0],
+                };
             }
-            Toast.error('Activiteit niet gevonden').show()
-            throw new Error('Event not found')
+            Toast.error('Activiteit niet gevonden').show();
+            throw new Error('Event not found');
         },
 
         propsToParams(props) {
-            if (!("event" in props) || typeof props.event !== 'object' || props.event === null || !("id" in props.event)) {
-                throw new Error('Missing event')
+            if (!('event' in props) || typeof props.event !== 'object' || props.event === null || !('id' in props.event)) {
+                throw new Error('Missing event');
             }
             return {
                 params: {
-                    id: props.event.id
-                }
-            }
-        }
+                    id: props.event.id,
+                },
+            };
+        },
     },
-])
+]);
 
 const objectFetcher = useEventsObjectFetcher({
     get requiredFilter() {
-        return getRequiredFilter()
-    }
-})
+        return getRequiredFilter();
+    },
+});
 
-const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher)
+const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
 
 const addSuggestions = ref(false);
 const suggestedGroups = computed(() => {
-    const u = user.value
+    const u = user.value;
     if (!u || !u.memberId) {
-        return []
+        return [];
     }
-    const member = u.members.members.find(m => m. id === u.memberId)
+    const member = u.members.members.find(m => m.id === u.memberId);
     if (!member) {
-        return []
+        return [];
     }
 
-    const responsibilities = member.responsibilities.filter(r => r.isActive && !!r.groupId)
-    const groups = [organization.value, ...u.members.organizations].flatMap(o => o?.period.groups ?? [])
-    return groups.filter(g => g.settings.defaultEventTime && responsibilities.some(r => r.groupId === g.id))
-})
+    const responsibilities = member.responsibilities.filter(r => r.isActive && !!r.groupId);
+    const groups = [organization.value, ...u.members.organizations].flatMap(o => o?.period.groups ?? []);
+    return groups.filter(g => g.settings.defaultEventTime && responsibilities.some(r => r.groupId === g.id));
+});
 const suggestionsGroup = ref(suggestedGroups.value[0]) ?? null;
 
 const fillEventsUntil = computed(() => {
-    const fetcherLastDate = fetcher.objects[fetcher.objects.length - 1]?.startDate
+    const fetcherLastDate = fetcher.objects[fetcher.objects.length - 1]?.startDate;
 
     if (fetcher.hasMoreObjects) {
-        return fetcherLastDate ?? new Date()
+        return fetcherLastDate ?? new Date();
     }
 
-    const fillUntil = Formatter.luxon(new Date()).plus({months: 2}).endOf('month').toJSDate()
+    const fillUntil = Formatter.luxon(new Date()).plus({ months: 2 }).endOf('month').toJSDate();
 
-    return new Date(Math.max(fillUntil.getTime(), fetcherLastDate?.getTime() ?? 0))
-})
+    return new Date(Math.max(fillUntil.getTime(), fetcherLastDate?.getTime() ?? 0));
+});
 
-const dayOfWeekSuggestion = 7 // Sunday
+const dayOfWeekSuggestion = 7; // Sunday
 
 const eventSuggestions = computed(() => {
     if (!addSuggestions.value || selectedYear.value !== null) {
-        return []
+        return [];
     }
 
     let pointer = Formatter.luxon(new Date());
@@ -203,9 +198,9 @@ const eventSuggestions = computed(() => {
     const suggestions: Event[] = [];
 
     // Find next sunday (dayOfWeekSuggestion)
-    // eslint-disable-next-line no-constant-condition
+
     while (pointer < end) {
-        pointer = pointer.plus({days: 1});
+        pointer = pointer.plus({ days: 1 });
 
         if (pointer.weekday === dayOfWeekSuggestion) {
             // Found next sunday
@@ -215,54 +210,55 @@ const eventSuggestions = computed(() => {
                     name: 'Suggestie',
                     startDate: pointer.toJSDate(),
                     endDate: pointer.toJSDate(),
-                })
+                }),
             );
         }
     }
 
-    return suggestions
+    return suggestions;
 });
 
 const filledEvents = computed(() => {
-    const added = eventSuggestions.value.filter(e => {
+    const added = eventSuggestions.value.filter((e) => {
         for (const event of fetcher.objects) {
             if (Formatter.dateIso(event.startDate) === Formatter.dateIso(e.startDate)) {
-                return false
+                return false;
             }
         }
-        return true
-    })
+        return true;
+    });
 
-    return [...fetcher.objects, ...added].sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+    return [...fetcher.objects, ...added].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
 });
 
 const groupedEvents = computed(() => {
-    return Event.group(filledEvents.value)
+    return Event.group(filledEvents.value);
 });
 
 watchEffect(() => {
-    fetcher.setSearchQuery(searchQuery.value)
+    fetcher.setSearchQuery(searchQuery.value);
     const filter = selectedUIFilter.value ? selectedUIFilter.value.build() : null;
-    fetcher.setFilter(filter)
-})
+    fetcher.setFilter(filter);
+});
 
 function blurFocus() {
-    (document.activeElement as HTMLElement)?.blur()
+    (document.activeElement as HTMLElement)?.blur();
 }
 
 async function addEvent(template?: Event) {
     if (platform.value.config.eventTypes.length === 0) {
         if (auth.hasFullPlatformAccess()) {
-            Toast.error('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.').show()
-        } else {
-            Toast.error('Activiteiten werden nog niet correct geconfigureerd. Vraag een hoofdbeheerder om dit in orde te brengen.').show()
+            Toast.error('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.').show();
         }
-        return
+        else {
+            Toast.error('Activiteiten werden nog niet correct geconfigureerd. Vraag een hoofdbeheerder om dit in orde te brengen.').show();
+        }
+        return;
     }
 
-    const event = (template?.clone() ?? Event.create({}))
-    event.id = Event.create({}).id
-    event.organizationId = organization.value?.id ?? null
+    const event = (template?.clone() ?? Event.create({}));
+    event.id = Event.create({}).id;
+    event.organizationId = organization.value?.id ?? null;
 
     await present({
         modalDisplayStyle: 'popup',
@@ -271,27 +267,27 @@ async function addEvent(template?: Event) {
                 event,
                 isNew: true,
                 callback: () => {
-                    fetcher.reset()
-                }
-            })
-        ]
-    })
+                    fetcher.reset();
+                },
+            }),
+        ],
+    });
 }
 
 async function onClickEvent(event: Event) {
     if (!event.id) {
         // Create a new one
-        return await addEvent(event)
+        return await addEvent(event);
     }
 
-    await $navigate(Routes.Event, {properties: {event}})
+    await $navigate(Routes.Event, { properties: { event } });
 }
 
 async function editFilter(event: MouseEvent) {
     if (!filterBuilders) {
-        return
+        return;
     }
-    const filter = selectedUIFilter.value ?? filterBuilders[0].create()
+    const filter = selectedUIFilter.value ?? filterBuilders[0].create();
     if (!selectedUIFilter.value) {
         selectedUIFilter.value = filter;
     }
@@ -300,15 +296,14 @@ async function editFilter(event: MouseEvent) {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(UIFilterEditor, {
-                    filter
-                })
-            })
-        ]
-    })
+                    filter,
+                }),
+            }),
+        ],
+    });
 }
 
-
-function getRequiredFilter(): StamhoofdFilter|null  {
+function getRequiredFilter(): StamhoofdFilter | null {
     const org = organization.value;
 
     const filters: StamhoofdFilter = {};
@@ -319,39 +314,40 @@ function getRequiredFilter(): StamhoofdFilter|null  {
         d.setHours(0, 0, 0, 0);
 
         filters['startDate'] = {
-            $gt: d
+            $gt: d,
         };
-    } else {
+    }
+    else {
         filters['$and'] = [
             {
                 startDate: {
                     $gte: new Date(selectedYear.value, 0, 1),
-                }
+                },
             },
             {
                 startDate: {
-                    $lt: new Date(selectedYear.value + 1, 0, 1)
-                }
-            }
-        ]
+                    $lt: new Date(selectedYear.value + 1, 0, 1),
+                },
+            },
+        ];
     }
 
     // filter on organization tag ids, if organization lvl
-    if(org) {
+    if (org) {
         filters['organizationTagIds'] = {
-            $in: [null, ...org.meta.tags]
-        }
+            $in: [null, ...org.meta.tags],
+        };
     }
 
     return filters;
 }
 
 useGlobalEventListener('event-deleted', async () => {
-    fetcher.reset()
-})
+    fetcher.reset();
+});
 
 watch(selectedYear, () => {
-    fetcher.reset()
-})
+    fetcher.reset();
+});
 
 </script>

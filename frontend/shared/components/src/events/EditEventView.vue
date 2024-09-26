@@ -84,7 +84,7 @@
         <STList>
             <STListItem v-if="canSetNationalActivity || isNationalActivity" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="isNationalActivity" />
+                    <Checkbox v-model="isNationalActivity" :disabled="isOrganizationActivityDisabled" />
                 </template>
 
                 <h3 class="style-title-list">
@@ -131,12 +131,12 @@
             <h2 class="style-with-button">
                 <div>Regio</div>
                 <div>
-                    <button type="button" class="button icon trash" @click="deleteTagRestriction" />
+                    <button v-if="!hasTagRestrictions" type="button" class="button icon trash" @click="deleteTagRestriction" />
                 </div>
             </h2>
             <p>Kies voor welke groepen deze activiteit zichtbaar is.</p>
 
-            <TagIdsInput v-model="organizationTagIds" />
+            <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-operator="isTagEnabledOperator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
@@ -276,7 +276,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, GlobalEventBus, ImageComponent, NavigationActions, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Event, EventLocation, EventMeta, EventPermissionChecker, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
+import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -286,6 +286,7 @@ import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 import SearchOrganizationView from '../members/SearchOrganizationView.vue';
 import DeleteView from '../views/DeleteView.vue';
+import { useEventPermissions } from './composables/useEventPermissions';
 
 const props = withDefaults(
     defineProps<{
@@ -310,6 +311,7 @@ const organization = useOrganization();
 const present = usePresent();
 const platform = usePlatform();
 const user = useUser();
+const eventPermissions = useEventPermissions({ user, organization, platform });
 
 const { externalOrganization, choose: chooseOrganizer } = useExternalOrganization(
     computed({
@@ -483,6 +485,7 @@ const locationAddress = computed({
 
 const app = useAppContext();
 const canSetNationalActivity = computed(() => app === 'admin');
+const isOrganizationActivityDisabled = computed(() => !eventPermissions.canAdminSomeOrganizationEvent());
 const isNationalActivity = computed({
     get: () => patched.value.organizationId === null,
     set: (isNationalActivity) => {
@@ -523,13 +526,18 @@ const visible = computed({
     }),
 });
 
-const userPermissions = computed(() => user.value?.permissions ?? null);
-
-const hasGroupRestrictions = computed(() => EventPermissionChecker.hasGroupRestrictions(userPermissions.value, organization.value));
+const hasGroupRestrictions = computed(() => organization.value && eventPermissions.hasGroupRestrictions());
+const hasTagRestrictions = computed(() => eventPermissions.hasTagRestrictions());
 
 watch(hasGroupRestrictions, (hasGroupRestrictions) => {
     if (hasGroupRestrictions && groups.value === null) {
         addGroupsRestriction();
+    }
+}, { immediate: true });
+
+watch(hasTagRestrictions, (hasTagRestrictions) => {
+    if (hasTagRestrictions && organizationTagIds.value === null) {
+        addTagRestriction();
     }
 }, { immediate: true });
 
@@ -538,7 +546,15 @@ const isGroupEnabledOperator = computed(() => {
         return undefined;
     }
 
-    return EventPermissionChecker.isGroupEnabledOperatorFactory(userPermissions.value, organization.value);
+    return eventPermissions.isGroupEnabledOperatorFactory();
+});
+
+const isTagEnabledOperator = computed(() => {
+    if (!hasTagRestrictions.value) {
+        return undefined;
+    }
+
+    return eventPermissions.isTagEnabledOperatorFactory();
 });
 
 const resolutions = [
@@ -614,7 +630,7 @@ async function save() {
             }
         }
 
-        if (patched.value.meta.groups?.length === 0) {
+        if (patched.value.meta.groups !== null && patched.value.meta.groups?.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Kies minstens één leeftijdsgroep.',
