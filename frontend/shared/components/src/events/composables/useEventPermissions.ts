@@ -1,63 +1,84 @@
-import { EventPermissionChecker, Organization, Platform, User } from '@stamhoofd/structures';
-import { computed, Ref } from 'vue';
+import { AccessRight, NamedObject, Organization, OrganizationTag, PermissionsResourceType } from '@stamhoofd/structures';
+import { useAuth, usePlatform } from '../../hooks';
 
-export function useEventPermissions({ user, platform, organization }: { user: Ref<User | null>; platform: Ref<Platform | null>; organization: Ref<Organization | null> }) {
-    const userPermissions = computed(() => user.value?.permissions ?? null);
-    const platformPermissions = computed(() => platform.value ? userPermissions.value?.forPlatform(platform.value) ?? null : null);
-    const organizationPermissions = computed(() => organization.value ? userPermissions.value?.forOrganization(organization.value, null) ?? null : null);
-    const allPermissions = computed(() => {
-        return {
-            userPermissions: userPermissions.value,
-            platformPermissions: platformPermissions.value,
-            organizationPermissions: organizationPermissions.value,
-        };
-    });
+export function useEventPermissions() {
+    const auth = useAuth();
+    const platform = usePlatform();
+    const permissions = auth.permissions;
 
     function canAdminSome() {
-        return EventPermissionChecker.canAdminSome(allPermissions.value);
+        if (!permissions) {
+            return false;
+        }
+
+        return permissions.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite) || permissions.hasAccessRightForSomeResource(PermissionsResourceType.Groups, AccessRight.EventWrite);
+    }
+
+    function canAdminAllGroupEvents() {
+        if (!permissions) {
+            return false;
+        }
+        return permissions.hasAccessRightForAllResourcesOfType(PermissionsResourceType.Groups, AccessRight.EventWrite);
+    }
+
+    function canAdminAllTagEvents() {
+        if (!permissions) {
+            return false;
+        }
+        return permissions.hasAccessRightForAllResourcesOfType(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite);
     }
 
     function hasGroupRestrictions() {
-        return EventPermissionChecker.hasGroupRestrictions({
-            userPermissions: userPermissions.value,
-            organizationPermissions: organizationPermissions.value,
-        });
+        if (!permissions) {
+            return false;
+        }
+
+        if (canAdminAllGroupEvents()) {
+            return false;
+        }
+
+        return permissions.hasAccessRightForSomeResource(PermissionsResourceType.Groups, AccessRight.EventWrite);
     }
 
     function hasTagRestrictions() {
-        return EventPermissionChecker.hasTagRestrictions({
-            userPermissions: userPermissions.value,
-            platformPermissions: platformPermissions.value,
-        });
+        if (!permissions) {
+            return false;
+        }
+
+        if (canAdminAllTagEvents()) {
+            return false;
+        }
+
+        return permissions.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite);
     }
 
     function isGroupEnabledOperatorFactory() {
-        return EventPermissionChecker.isGroupEnabledOperatorFactory({
-            userPermissions: userPermissions.value,
-            organizationPermissions: organizationPermissions.value,
-        });
+        if (!permissions) {
+            return () => false;
+        }
+
+        return (group: NamedObject) => permissions.hasResourceAccessRight(PermissionsResourceType.Groups, group.id, AccessRight.EventWrite);
     }
 
     function isTagEnabledOperatorFactory() {
-        return EventPermissionChecker.isTagEnabledOperatorFactory({
-            userPermissions: userPermissions.value,
-            platformPermissions: platformPermissions.value,
-        });
+        if (!permissions) {
+            return () => false;
+        }
+
+        return (tag: OrganizationTag) => permissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tag.id, AccessRight.EventWrite);
     }
 
-    function canAdminSomeOrganizationEvent() {
-        return EventPermissionChecker.canAdminSomeOrganizationEvent(allPermissions.value);
+    function canAdminEventForExternalOrganization(organization: Organization) {
+        const organizationPermissions = auth.user?.permissions?.forOrganization(organization, platform.value);
+        return organizationPermissions?.hasAccessRight(AccessRight.EventWrite) ?? false;
     }
 
     return {
-        userPermissions,
-        platformPermissions,
-        organizationPermissions,
         canAdminSome,
         hasGroupRestrictions,
         hasTagRestrictions,
         isGroupEnabledOperatorFactory,
         isTagEnabledOperatorFactory,
-        canAdminSomeOrganizationEvent,
+        canAdminEventForExternalOrganization,
     };
 }

@@ -1,9 +1,8 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AccessRight } from '../AccessRight';
 import { NamedObject } from '../Event';
-import { LoadedPermissions } from '../LoadedPermissions';
 import { PermissionsResourceType } from '../PermissionsResourceType';
-import { OrganizationTag, Platform } from '../Platform';
+import { Platform } from '../Platform';
 import { OrganizationForPermissionCalculation, UserPermissions } from '../UserPermissions';
 
 interface EventDataForPermission {
@@ -60,6 +59,7 @@ export class EventPermissionChecker {
             this.tryAdminOrganizationEvent(
                 event,
                 organization,
+                platform,
                 userPermissions,
             );
             return organization;
@@ -102,6 +102,7 @@ export class EventPermissionChecker {
             this.tryAdminOrganizationEvent(
                 event,
                 organization,
+                platform,
                 userPermissions,
             );
         }
@@ -129,202 +130,10 @@ export class EventPermissionChecker {
         return true;
     }
 
-    static canAdminSome({
-        userPermissions,
-        platformPermissions,
-        organizationPermissions,
-    }: {
-        userPermissions: UserPermissions | null;
-        platformPermissions: LoadedPermissions | null;
-        organizationPermissions: LoadedPermissions | null;
-    }) {
-        if (!userPermissions) {
-            return false;
-        }
-
-        const accessRight: AccessRight = AccessRight.EventWrite;
-
-        if (
-            platformPermissions && platformPermissions.hasAccessRightForSomeResource(
-                PermissionsResourceType.OrganizationTags,
-                accessRight,
-            )
-        ) {
-            return true;
-        }
-
-        if (organizationPermissions && organizationPermissions.hasAccessRightForSomeResource(
-            PermissionsResourceType.Groups,
-            accessRight,
-        )) {
-            return true;
-        }
-
-        return false;
-    }
-
-    static canAdminSomeOrganizationEvent({
-        userPermissions,
-        platformPermissions,
-        organizationPermissions,
-    }: {
-        userPermissions: UserPermissions | null;
-        platformPermissions: LoadedPermissions | null;
-        organizationPermissions: LoadedPermissions | null;
-    }) {
-        console.log('can admin some organization event?');
-
-        if (!userPermissions) {
-            return false;
-        }
-
-        if (platformPermissions && platformPermissions.hasAccessRightForSomeResource(
-            PermissionsResourceType.Groups,
-            AccessRight.EventWrite,
-        )
-        ) {
-            return true;
-        }
-
-        if (organizationPermissions && organizationPermissions.hasAccessRightForSomeResource(
-            PermissionsResourceType.Groups,
-            AccessRight.EventWrite,
-        )) {
-            return true;
-        }
-
-        return false;
-    }
-
-    // static canCreateOrganizationEvent({
-    //     userPermissions,
-    //     platform,
-    //     organization,
-    // }: {
-    //     userPermissions: UserPermissions | null;
-    //     platform: Platform;
-    //     organization: OrganizationForPermissionCalculation | null;
-    // }) {
-    //     if (!userPermissions) {
-    //         return false;
-    //     }
-
-    //     const accessRight: AccessRight = AccessRight.EventWrite;
-
-    //     const organizationPermissions = userPermissions.forOrganization(
-    //         organization,
-    //         null,
-    //     );
-
-    //     if (!organizationPermissions) {
-    //         throw new SimpleError({
-    //             code: 'permission_denied',
-    //             message:
-    //                 'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
-    //             statusCode: 403,
-    //         });
-    //     }
-
-    //     if (event.meta.groups === null) {
-    //         if (
-    //             !organizationPermissions.hasResourceAccessRight(
-    //                 PermissionsResourceType.Groups,
-    //                 '',
-    //                 accessRight,
-    //             )
-    //         ) {
-    //             throw new SimpleError({
-    //                 code: 'permission_denied',
-    //                 message:
-    //                     'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
-    //                 statusCode: 403,
-    //             });
-    //         }
-    //     }
-    //     else {
-    //         for (const group of event.meta.groups) {
-    //             if (
-    //                 !organizationPermissions.hasResourceAccessRight(
-    //                     PermissionsResourceType.Groups,
-    //                     group.id,
-    //                     accessRight,
-    //                 )
-    //             ) {
-    //                 throw new SimpleError({
-    //                     code: 'permission_denied',
-    //                     message:
-    //                         'Je hebt geen toegangsrechten om een activiteit te beheren voor deze groep(en).',
-    //                     statusCode: 403,
-    //                 });
-    //             }
-    //         }
-    //     }
-
-    //     if (event.meta.organizationTagIds !== null) {
-    //         // not supported currently
-    //         throw new SimpleError({
-    //             code: 'invalid_field',
-    //             message:
-    //                 'Een activiteit voor een organisatie kan geen tags bevatten.',
-    //             statusCode: 403,
-    //         });
-    //     }
-
-    //     if (event.meta.defaultAgeGroupIds !== null) {
-    //         // not supported currently
-    //         throw new SimpleError({
-    //             code: 'invalid_field',
-    //             message:
-    //                 'Een activiteit voor een organisatie kan niet beperkt worden tot specifieke standaard leeftijdsgroepen.',
-    //             statusCode: 403,
-    //         });
-    //     }
-
-    // }
-
-    static hasGroupRestrictions({ userPermissions, organizationPermissions }: { userPermissions: UserPermissions | null; organizationPermissions: LoadedPermissions | null }): boolean {
-        if (!userPermissions || !organizationPermissions) {
-            return true;
-        }
-
-        return organizationPermissions.hasAccessRightForSomeResource(PermissionsResourceType.Groups, AccessRight.EventWrite);
-    }
-
-    static hasTagRestrictions({ userPermissions, platformPermissions }: { userPermissions: UserPermissions | null; platformPermissions: LoadedPermissions | null }): boolean {
-        if (!userPermissions || !platformPermissions) {
-            return true;
-        }
-
-        return platformPermissions.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite);
-    }
-
-    static isGroupEnabledOperatorFactory(
-        { userPermissions, organizationPermissions }: { userPermissions: UserPermissions | null;
-            organizationPermissions: LoadedPermissions | null;
-        },
-    ): (group: NamedObject) => boolean {
-        if (!userPermissions || !organizationPermissions) {
-            return () => false;
-        }
-
-        return (group: NamedObject) => organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Groups, group.id, AccessRight.EventWrite);
-    }
-
-    static isTagEnabledOperatorFactory(
-        { userPermissions, platformPermissions }: { userPermissions: UserPermissions | null;
-            platformPermissions: LoadedPermissions | null ;
-        },
-    ): (tag: OrganizationTag) => boolean {
-        if (!userPermissions || !platformPermissions) {
-            return () => false;
-        }
-
-        return (tag: OrganizationTag) => platformPermissions.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tag.id, AccessRight.EventWrite);
-    }
-
     private static tryAdminOrganizationEvent<O extends OrganizationForPermissionCalculation>(
         event: EventDataForPermission,
         organization: O,
+        platform: Platform,
         userPermissions: UserPermissions,
     ): void {
         const accessRight: AccessRight = AccessRight.EventWrite;
@@ -336,7 +145,7 @@ export class EventPermissionChecker {
 
         const organizationPermissions = userPermissions.forOrganization(
             organization,
-            null,
+            platform,
         );
 
         if (!organizationPermissions) {
@@ -359,7 +168,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message:
-                        'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
+                            'Je hebt geen toegangsrechten om een activiteit te beheren voor deze organisatie.',
                     statusCode: 403,
                 });
             }
@@ -381,26 +190,6 @@ export class EventPermissionChecker {
                     });
                 }
             }
-        }
-
-        if (event.meta.organizationTagIds !== null) {
-            // not supported currently
-            throw new SimpleError({
-                code: 'invalid_field',
-                message:
-                    'Een activiteit voor een organisatie kan geen tags bevatten.',
-                statusCode: 403,
-            });
-        }
-
-        if (event.meta.defaultAgeGroupIds !== null) {
-            // not supported currently
-            throw new SimpleError({
-                code: 'invalid_field',
-                message:
-                    'Een activiteit voor een organisatie kan niet beperkt worden tot specifieke standaard leeftijdsgroepen.',
-                statusCode: 403,
-            });
         }
     }
 

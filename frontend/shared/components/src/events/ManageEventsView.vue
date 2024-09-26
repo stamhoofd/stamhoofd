@@ -88,7 +88,7 @@ const platform = usePlatform();
 const $navigate = useNavigate();
 const { presentPositionableSheet } = usePositionableSheet();
 const auth = useAuth();
-const eventPermissions = useEventPermissions({ user, organization, platform });
+const eventPermissions = useEventPermissions();
 
 const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : []);
 
