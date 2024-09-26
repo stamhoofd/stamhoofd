@@ -1,7 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { getEmailBuilder, RateLimiter } from '@stamhoofd/models';
 import { EmailRequest, Recipient } from '@stamhoofd/structures';

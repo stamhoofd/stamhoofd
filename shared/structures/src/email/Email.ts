@@ -4,7 +4,7 @@ import { EditorSmartButton } from '../email/EditorSmartButton';
 import { EditorSmartVariable } from '../email/EditorSmartVariable';
 import { EmailAttachment, Recipient, Replacement } from '../endpoints/EmailRequest';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter';
+import { mergeFilters, StamhoofdFilter } from '../filters/StamhoofdFilter';
 import { MemberDetails } from '../members/MemberDetails';
 import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob';
 import { EmailTemplateType } from './EmailTemplate';

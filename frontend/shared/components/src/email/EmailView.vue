@@ -115,14 +115,29 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
 
+export type RecipientChooseOneOption = {
+    type: 'ChooseOne';
+    options: {
+        id: string;
+        name: string;
+        value: EmailRecipientSubfilter[];
+    }[];
+};
+
+export type RecipientMultipleChoiceOption = {
+    type: 'MultipleChoice';
+    options: {
+        name: string;
+        id: string;
+    }[];
+    build: (selectedIds: string[]) => EmailRecipientSubfilter[];
+};
+
 const props = withDefaults(defineProps<{
-    defaultSubject?: string,
-    recipientFilterOptions: {
-        name: string,
-        value: EmailRecipientSubfilter[]
-    }[][]
+    defaultSubject?: string;
+    recipientFilterOptions: (RecipientChooseOneOption | RecipientMultipleChoiceOption)[];
 }>(), {
-    defaultSubject: "",
+    defaultSubject: '',
 });
 
 class TmpFile {
@@ -131,9 +146,9 @@ class TmpFile {
     size: string;
 
     constructor(name: string, file: File) {
-        this.name = name
-        this.file = file
-        this.size = Formatter.fileSize(file.size)
+        this.name = name;
+        this.file = file;
+        this.size = Formatter.fileSize(file.size);
     }
 }
 
@@ -141,13 +156,15 @@ const creatingEmail = ref(true);
 const smartVariables = computed(() => email.value ? email.value.smartVariables : []);
 const smartButtons = computed(() => email.value ? email.value.smartButtons : []);
 const errors = useErrors();
-const files = ref([]) as Ref<TmpFile[]>
-const auth = useAuth()
-const $isMobile = useIsMobile()
+const files = ref([]) as Ref<TmpFile[]>;
+const auth = useAuth();
+const $isMobile = useIsMobile();
 const email = ref(null) as Ref<EmailPreview | null>;
 const context = useContext();
 const owner = useRequestOwner();
-const selectedRecipientOptions = ref(props.recipientFilterOptions.map(() => 0));
+
+const selectedRecipientOptions = ref(props.recipientFilterOptions.map(o => [o.options[0].id]));
+
 const groupByEmail = ref(false);
 const editorView = ref(null) as Ref<EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
@@ -158,88 +175,119 @@ const platform = usePlatform();
 
 const emails = computed(() => {
     if (organization.value) {
-        return organization.value.privateMeta?.emails ?? []
+        return organization.value.privateMeta?.emails ?? [];
     }
-    return platform.value?.privateConfig?.emails ?? []
-})
+    return platform.value?.privateConfig?.emails ?? [];
+});
 
-const patch = ref(null) as Ref<AutoEncoderPatchType<Email>|null>;
-const savingPatch = ref(null) as Ref<AutoEncoderPatchType<Email>|null>;
+const patch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
+const savingPatch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
 const sending = ref(false);
 
 const patchedEmail = computed(() => {
     if (savingPatch.value) {
-        return patch.value ? email.value?.patch(savingPatch.value).patch(patch.value) : email.value?.patch(savingPatch.value)
+        return patch.value ? email.value?.patch(savingPatch.value).patch(patch.value) : email.value?.patch(savingPatch.value);
     }
     if (patch.value) {
-        return email.value?.patch(patch.value)
+        return email.value?.patch(patch.value);
     }
-    return email.value
-})
+    return email.value;
+});
 
 function addPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Email>>) {
-    patch.value = patch.value ? patch.value.patch(Email.patch(newPatch)) : Email.patch(newPatch)
+    patch.value = patch.value ? patch.value.patch(Email.patch(newPatch)) : Email.patch(newPatch);
 }
 
 const recipientFilter = computed(() => {
-    const filter = EmailRecipientFilter.create({})
+    const filter = EmailRecipientFilter.create({});
+
     for (let i = 0; i < props.recipientFilterOptions.length; i++) {
+        const option = props.recipientFilterOptions[i];
+        const selectedIds = selectedRecipientOptions.value[i];
+
+        if (option.type === 'ChooseOne') {
+            const selectedOption = option.options.find(o => o.id === selectedIds[0]);
+            if (selectedOption) {
+                filter.filters.push(
+                    ...selectedOption.value,
+                );
+            }
+            continue;
+        }
+
+        const buildFilter = option.build(selectedIds);
         filter.filters.push(
-            ...props.recipientFilterOptions[i][selectedRecipientOptions.value[i]].value
-        )
+            ...buildFilter,
+        );
     }
-    filter.groupByEmail = groupByEmail.value
+
+    filter.groupByEmail = groupByEmail.value;
     return filter;
 });
 
 const toDescription = computed(() => {
-    return props.recipientFilterOptions.map((options, i) => {
-        return options[selectedRecipientOptions.value[i]].name
-    }).join(", ")
-})
+    return props.recipientFilterOptions.flatMap((option, i) => {
+        const selectedIds = selectedRecipientOptions.value[i];
+
+        if (option.type === 'ChooseOne') {
+            const selectedOption = option.options.find(o => o.id === selectedIds[0]);
+            if (selectedOption) {
+                return [selectedOption.name];
+            }
+            return [];
+        }
+
+        return selectedIds.map((id) => {
+            const selectedOption = option.options.find(o => o.id === id);
+            if (selectedOption) {
+                return selectedOption.name;
+            }
+            return '';
+        });
+    }).join(', ');
+});
 
 watch([selectedRecipientOptions, groupByEmail], () => {
-    addPatch({recipientFilter: recipientFilter.value})
-}, {deep: true})
+    addPatch({ recipientFilter: recipientFilter.value });
+}, { deep: true });
 
 const subject = computed({
-    get: () => patchedEmail.value?.subject || "",
+    get: () => patchedEmail.value?.subject || '',
     set: (subject) => {
-        addPatch({subject})
-    }
-})
+        addPatch({ subject });
+    },
+});
 
 const fromAddress = computed({
     get: () => patchedEmail.value?.fromAddress ?? null,
     set: (fromAddress) => {
-        addPatch({fromAddress})
-    }
-})
+        addPatch({ fromAddress });
+    },
+});
 
 const fromName = computed({
     get: () => patchedEmail.value?.fromName ?? null,
     set: (fromName) => {
-        addPatch({fromName})
-    }
-})
+        addPatch({ fromName });
+    },
+});
 
 const selectedEmailAddress = computed({
     get: () => emails.value.find(e => e.email === fromAddress.value && e.name === fromName.value) ?? emails.value.find(e => e.email === fromAddress.value) ?? emails.value.find(e => e.name && e.name === fromName.value) ?? null,
-    set: (email: OrganizationEmail|null) => {
+    set: (email: OrganizationEmail | null) => {
         addPatch({
             fromAddress: email?.email ?? null,
-            fromName: email?.name ?? null
-        })
-    }
-})
-
+            fromName: email?.name ?? null,
+        });
+    },
+});
 
 watch(patch, (newValue, oldValue) => {
     if (newValue === null) {
         return;
     }
-    doThrottledPatch()
-}, {})
+    doThrottledPatch();
+}, {});
 
 watch(editor, (e) => {
     if (!e) {
@@ -247,30 +295,29 @@ watch(editor, (e) => {
     }
     const handler = () => {
         // save json
-        addPatch({json: e.getJSON()})
-    }
+        addPatch({ json: e.getJSON() });
+    };
     e.on('update', handler);
 
     return () => {
         e.off('update', handler);
-    }
-}, {deep: false});
+    };
+}, { deep: false });
 
 onMounted(() => {
     // Create the email
-    createEmail().catch(console.error)
-})
+    createEmail().catch(console.error);
+});
 
 useInterval(async () => {
     if (!email.value || email.value.recipientCount !== null) {
         return;
     }
-    await updateEmail()
-}, 1000)
+    await updateEmail();
+}, 1000);
 
 async function createEmail() {
     try {
-        
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/email',
@@ -279,27 +326,28 @@ async function createEmail() {
                 fromAddress: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).email : null,
                 fromName: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).name : null,
                 status: EmailStatus.Draft,
-                subject: props.defaultSubject
+                subject: props.defaultSubject,
             }),
             decoder: EmailPreview as Decoder<EmailPreview>,
             owner,
-            shouldRetry: false
-        })
+            shouldRetry: false,
+        });
 
-        email.value = response.data
-        creatingEmail.value = false
-        groupByEmail.value = response.data.recipientFilter.groupByEmail
+        email.value = response.data;
+        creatingEmail.value = false;
+        groupByEmail.value = response.data.recipientFilter.groupByEmail;
 
         if (response.data.subject) {
-            subject.value = response.data.subject
+            subject.value = response.data.subject;
         }
 
         await nextTick();
 
         if (response.data.json) {
-            editor.value?.commands.setContent(response.data.json)
+            editor.value?.commands.setContent(response.data.json);
         }
-    } catch (e) {
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
         return;
     }
@@ -309,19 +357,19 @@ const doThrottledPatch = throttle(patchEmail, 1000);
 
 async function patchEmail() {
     if (!email.value) {
-        return
+        return;
     }
 
     if (savingPatch.value || !patch.value) {
-        return
+        return;
     }
     if (sending.value) {
         return;
     }
 
-    const _savingPatch = patch.value
-    savingPatch.value = _savingPatch
-    patch.value = null
+    const _savingPatch = patch.value;
+    savingPatch.value = _savingPatch;
+    patch.value = null;
 
     try {
         const response = await context.value.authenticatedServer.request({
@@ -330,67 +378,68 @@ async function patchEmail() {
             body: _savingPatch,
             decoder: EmailPreview as Decoder<EmailPreview>,
             owner,
-            shouldRetry: false
-        })
+            shouldRetry: false,
+        });
 
-        email.value = response.data
+        email.value = response.data;
 
-        savingPatch.value = null
+        savingPatch.value = null;
 
         // changed meanwhile
         if (patch.value) {
             // do again
-            patchEmail().catch(console.error)
+            patchEmail().catch(console.error);
         }
-    } catch (e) {
-        console.error(e);
-        //patch.value = patch.value ? _savingPatch.patch(patch.value) : _savingPatch
-
-        Toast.fromError(e).setHide(20000).show()
     }
-    savingPatch.value = null
+    catch (e) {
+        console.error(e);
+        // patch.value = patch.value ? _savingPatch.patch(patch.value) : _savingPatch
+
+        Toast.fromError(e).setHide(20000).show();
+    }
+    savingPatch.value = null;
 }
 
 async function updateEmail() {
     if (!email.value) {
-        return
+        return;
     }
     const response = await context.value.authenticatedServer.request({
         method: 'GET',
         path: '/email/' + email.value.id,
         decoder: EmailPreview as Decoder<EmailPreview>,
         owner,
-        shouldRetry: false
-    })
+        shouldRetry: false,
+    });
 
-    email.value = response.data
+    email.value = response.data;
 }
 
 async function manageEmails() {
     await present({
         components: [
-            new ComponentWithProperties(EmailSettingsView, {})
+            new ComponentWithProperties(EmailSettingsView, {}),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function getHTML() {
-    const e = editor.value
+    const e = editor.value;
     if (!e) {
         // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
         return {
-            text: "",
-            html: "",
-            JSON: {}
-        }
+            text: '',
+            html: '',
+            JSON: {},
+        };
     }
 
     const base: string = e.getHTML();
     return {
         ...await EmailStyler.format(base, subject.value),
-        json: e.getJSON()
-    }
+        json: e.getJSON(),
+    };
 }
 
 async function send() {
@@ -404,24 +453,24 @@ async function send() {
     }
 
     if (!email.value) {
-        return
+        return;
     }
 
     const recipientCount = email.value.recipientCount;
     let confirmText = 'Ben je zeker dat je de e-mail wilt versturen?';
 
-    if(recipientCount) {
+    if (recipientCount) {
         confirmText = recipientCount === 1 ? `Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?` : `Ben je zeker dat je de e-mail naar ${email.value.recipientCount} ontvangers wilt versturen?`;
     }
 
     const isConfirm = await CenteredMessage.confirm(confirmText, 'Versturen');
 
-    if(!isConfirm) return;
-    
-    sending.value = true
+    if (!isConfirm) return;
+
+    sending.value = true;
 
     try {
-        const {text, html} = await getHTML()
+        const { text, html } = await getHTML();
         await context.value.authenticatedServer.request({
             method: 'PATCH',
             path: '/email/' + email.value.id,
@@ -431,42 +480,73 @@ async function send() {
                 subject: subject.value,
                 text,
                 html,
-                json: editor.value?.getJSON()
+                json: editor.value?.getJSON(),
             }),
             decoder: EmailPreview as Decoder<EmailPreview>,
             owner,
-            shouldRetry: false
-        })
+            shouldRetry: false,
+        });
 
-        Toast.success('De e-mail is verzonden. Het kan even duren voor alle e-mails zijn verstuurd.').show()
-        await pop({force: true})
-    } catch (e) {
-        console.error(e);
-        Toast.fromError(e).show()
+        Toast.success('De e-mail is verzonden. Het kan even duren voor alle e-mails zijn verstuurd.').show();
+        await pop({ force: true });
     }
-    sending.value = false
+    catch (e) {
+        console.error(e);
+        Toast.fromError(e).show();
+    }
+    sending.value = false;
+}
+
+function getContextMenuForOption(option: RecipientChooseOneOption | RecipientMultipleChoiceOption, index: number): ContextMenuItem[] {
+    const selectedIds = selectedRecipientOptions.value[index];
+
+    if (option.type === 'ChooseOne') {
+        return option.options.map((o) => {
+            return new ContextMenuItem({
+                name: o.name,
+                selected: selectedIds[0] === o.id,
+                action: () => {
+                    selectedRecipientOptions.value[index] = [o.id];
+                },
+            });
+        });
+    }
+
+    return [
+        ...option.options.map((o) => {
+            return new ContextMenuItem({
+                name: o.name,
+                selected: selectedIds.includes(o.id),
+                action: () => {
+                    if (selectedIds.includes(o.id)) {
+                        selectedRecipientOptions.value[index] = selectedIds.filter(id => id !== o.id);
+                    }
+                    else {
+                        selectedRecipientOptions.value[index] = [...selectedIds, o.id];
+                    }
+                },
+            });
+        }),
+    ];
 }
 
 async function showToMenu(event: MouseEvent) {
     const menu = new ContextMenu([
-        props.recipientFilterOptions.map((options, j) => {
-            const selectedOption = options[selectedRecipientOptions.value[j]]
-            return new ContextMenuItem({
-                name: selectedOption.name,
+        props.recipientFilterOptions.flatMap((option, j) => {
+            if (option.type === 'MultipleChoice') {
+                return getContextMenuForOption(option, j);
+            }
+            const selectedIds = selectedRecipientOptions.value[j];
+            const selectedOption = option.options.find(o => o.id === selectedIds[0]);
+
+            return [new ContextMenuItem({
+                name: selectedOption?.name ?? 'Onbekend',
                 childMenu: new ContextMenu([
-                    options.map((option, i) => {
-                        return new ContextMenuItem({
-                            name: option.name,
-                            selected: i === selectedRecipientOptions.value[j],
-                            action: () => {
-                                selectedRecipientOptions.value[j] = i
-                            },
-                        })
-                    })
-                ])
-            })
+                    getContextMenuForOption(option, j),
+                ]),
+            })];
         }),
-        /*[
+        /* [
             new ContextMenuItem({
                 name: groupByEmail.value ? "Eén e-mail per e-mailadres" : "Aparte e-mails per lid (aanbevolen)",
                 childMenu: new ContextMenu([
@@ -490,32 +570,32 @@ async function showToMenu(event: MouseEvent) {
                     ]
                 ])
             })
-        ]*/
-    ])
+        ] */
+    ]);
 
-    menu.show({ button: event.currentTarget }).catch(console.error)
+    menu.show({ button: event.currentTarget }).catch(console.error);
 }
 
 function getFileIcon(file: EmailAttachment) {
-    if (file.filename.endsWith(".png") || file.filename.endsWith(".jpg") || file.filename.endsWith(".jpeg") || file.filename.endsWith(".gif")) {
-        return "file-image"
+    if (file.filename.endsWith('.png') || file.filename.endsWith('.jpg') || file.filename.endsWith('.jpeg') || file.filename.endsWith('.gif')) {
+        return 'file-image';
     }
-    if (file.filename.endsWith(".pdf")) {
-        return "file-pdf color-pdf"
+    if (file.filename.endsWith('.pdf')) {
+        return 'file-pdf color-pdf';
     }
-    if (file.filename.endsWith(".xlsx") || file.filename.endsWith(".xls")) {
-        return "file-excel color-excel"
+    if (file.filename.endsWith('.xlsx') || file.filename.endsWith('.xls')) {
+        return 'file-excel color-excel';
     }
-    if (file.filename.endsWith(".docx") || file.filename.endsWith(".doc")) {
-        return "file-word color-word"
+    if (file.filename.endsWith('.docx') || file.filename.endsWith('.doc')) {
+        return 'file-word color-word';
     }
-    return "file"
+    return 'file';
 }
 
 function deleteAttachment(attachment: EmailAttachment) {
     const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmailAttachment>;
-    arr.addDelete(attachment.id)
-    addPatch({attachments: arr})
+    arr.addDelete(attachment.id);
+    addPatch({ attachments: arr });
 }
 
 async function toBase64(file: File) {
@@ -523,20 +603,21 @@ async function toBase64(file: File) {
         const reader = new FileReader();
         reader.onload = () => {
             // Remove data:*;base64,
-            const str = reader.result as string
-            const index = str.indexOf("base64,")
+            const str = reader.result as string;
+            const index = str.indexOf('base64,');
             if (index !== -1) {
-                resolve(str.slice(index + 7))
-            } else {
-                reject("Invalid base64")
+                resolve(str.slice(index + 7));
             }
-        }
+            else {
+                reject('Invalid base64');
+            }
+        };
         reader.onerror = (e) => {
-            reject(e)
-        }
+            reject(e);
+        };
 
-        reader.readAsDataURL(file)
-    })
+        reader.readAsDataURL(file);
+    });
 }
 
 async function changedFile(event: InputEvent & { target: HTMLInputElement & { files: FileList } }) {
@@ -548,45 +629,45 @@ async function changedFile(event: InputEvent & { target: HTMLInputElement & { fi
 
     for (const file of event.target.files as FileList) {
         if (file.size > 10 * 1024 * 1024) {
-            const error = "Bestanden groter dan 10MB kunnen niet worden verstuurd."
-            Toast.error(error).setHide(20*1000).show()
+            const error = 'Bestanden groter dan 10MB kunnen niet worden verstuurd.';
+            Toast.error(error).setHide(20 * 1000).show();
             continue;
         }
 
-        //const f = new TmpFile(file.name, file)
-        //files.value.push(f)
+        // const f = new TmpFile(file.name, file)
+        // files.value.push(f)
 
         // Add attachment
         arr.addPut(EmailAttachment.create({
             filename: file.name,
             contentType: file.type,
-            content: await toBase64(file)
-        }))
+            content: await toBase64(file),
+        }));
 
-        if (file.name.endsWith(".docx") || file.name.endsWith(".xlsx") || file.name.endsWith(".doc") || file.name.endsWith(".xls")) {
-            const error = "We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door."
-            Toast.warning(error).setHide(30*1000).show()
+        if (file.name.endsWith('.docx') || file.name.endsWith('.xlsx') || file.name.endsWith('.doc') || file.name.endsWith('.xls')) {
+            const error = 'We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.';
+            Toast.warning(error).setHide(30 * 1000).show();
         }
     }
-    
+
     // Clear selection
     (event.target as any).value = null;
 
     // Add patch
-    addPatch({attachments: arr})
+    addPatch({ attachments: arr });
 }
 
 const canOpenTemplates = computed(() => {
-    return !!email.value?.getTemplateType()
-})
+    return !!email.value?.getTemplateType();
+});
 async function openTemplates() {
-    const type = email.value?.getTemplateType()
+    const type = email.value?.getTemplateType();
     if (!type) {
         return;
     }
 
-    const current = await getHTML()
-    const hasExistingContent = (current).text.length > 2 || subject.value.length > 0
+    const current = await getHTML();
+    const hasExistingContent = (current).text.length > 2 || subject.value.length > 0;
 
     await present({
         components: [
@@ -600,20 +681,21 @@ async function openTemplates() {
                     }
                     // todo
                     // set json and subject
-                    editor.value?.commands.setContent(template.json)
-                    subject.value = template.subject
+                    editor.value?.commands.setContent(template.json);
+                    subject.value = template.subject;
 
                     return true;
                 },
-                createOption: hasExistingContent ? EmailTemplate.create({
-                    id: '',
-                    ...current,
-                    subject: subject.value,
-                }) : null
-            })
+                createOption: hasExistingContent
+                    ? EmailTemplate.create({
+                        id: '',
+                        ...current,
+                        subject: subject.value,
+                    })
+                    : null,
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
-
+        modalDisplayStyle: 'popup',
+    });
 }
 </script>

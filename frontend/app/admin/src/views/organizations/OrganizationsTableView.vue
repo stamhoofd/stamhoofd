@@ -19,11 +19,11 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, Toast, useAuth, useContext, useGetOrganizationUIFilterBuilders, useOrganizationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, EmailView, InMemoryTableAction, ModernTableView, RecipientMultipleChoiceOption, TableAction, TableActionSelection, Toast, useAuth, useContext, useGetOrganizationUIFilterBuilders, useOrganizationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Address, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
-import { Ref, computed, ref } from 'vue';
+import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, isEmptyFilter, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
+import { computed, Ref, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import OrganizationView from './OrganizationView.vue';
 
@@ -52,7 +52,7 @@ const present = usePresent();
 const platform = usePlatform();
 const auth = useAuth();
 const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const configurationId = computed(() => {
     return 'organizations';
@@ -182,6 +182,61 @@ async function showOrganization(organization: Organization) {
 
 const actions: TableAction<Organization>[] = [];
 
+async function openMail(selection: TableActionSelection<Organization>) {
+    const filter = selection.filter.filter;
+    const search = selection.filter.search;
+
+    const option: RecipientMultipleChoiceOption = {
+        type: 'MultipleChoice',
+        options: [],
+        build: (selectedIds: string[]) => {
+            const q = EmailRecipientSubfilter.create({
+                type: EmailRecipientFilterType.Members,
+                filter: {
+                    responsibilities: {
+                        $elemMatch: {
+                            responsibilityId: {
+                                $in: selectedIds,
+                            },
+                            endDate: null,
+                            ...(isEmptyFilter(filter) ? {} : { organization: filter }),
+                        },
+                    },
+                },
+                search,
+            });
+
+            return [
+                q,
+            ];
+        },
+    };
+
+    for (const responsibility of platform.value.config.responsibilities) {
+        if (!responsibility.organizationBased) {
+            continue;
+        }
+        option.options.push(
+            {
+                id: responsibility.id,
+                name: responsibility.name,
+            },
+        );
+    }
+
+    const displayedComponent = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(EmailView, {
+            recipientFilterOptions: [option],
+        }),
+    });
+    await present({
+        components: [
+            displayedComponent,
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 if (auth.hasPlatformFullAccess()) {
     actions.push(
         new InMemoryTableAction({
@@ -227,5 +282,15 @@ if (auth.hasPlatformFullAccess()) {
             },
         }),
     );
+
+    actions.push(new AsyncTableAction({
+        name: 'E-mailen',
+        icon: 'email',
+        priority: 12,
+        groupIndex: 3,
+        handler: async (selection: TableActionSelection<Organization>) => {
+            await openMail(selection);
+        },
+    }));
 }
 </script>
