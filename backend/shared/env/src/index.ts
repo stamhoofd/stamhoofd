@@ -44,11 +44,11 @@ function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'admi
     process.env.STRIPE_CONNECT_METHOD = STAMHOOFD.STRIPE_CONNECT_METHOD ?? 'express';
 }
 
-function signInternal(...content: string[]) {
+export function signInternal(...content: string[]) {
     return crypto.createHmac('sha256', Buffer.from(STAMHOOFD.INTERNAL_SECRET_KEY, 'base64')).update(content.join(';')).digest('base64');
 }
 
-function verifyInternalSignature(signature: string, ...content: string[]) {
+export function verifyInternalSignature(signature: string, ...content: string[]) {
     const newSignature = signInternal(...content);
     return crypto.timingSafeEqual(Buffer.from(signature, 'base64'), Buffer.from(newSignature, 'base64'));
 }

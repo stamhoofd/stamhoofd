@@ -1,5 +1,5 @@
 import { XlsxTransformerColumn } from '@stamhoofd/excel-writer';
-import { Address, CountryHelper, MemberWithRegistrationsBlob, Parent, ParentTypeHelper } from '@stamhoofd/structures';
+import { Address, CountryHelper, MemberWithRegistrationsBlob, Parent, ParentTypeHelper, PlatformMember } from '@stamhoofd/structures';
 
 export class XlsxTransformerColumnHelper {
     static formatBoolean(value: boolean | undefined | null): string {
@@ -14,14 +14,14 @@ export class XlsxTransformerColumnHelper {
         return '';
     }
 
-    static creatColumnsForParents(): XlsxTransformerColumn<unknown>[] {
+    static creatColumnsForParents(): XlsxTransformerColumn<PlatformMember>[] {
         return [
             ...this.createColumnsForParent(0),
             ...this.createColumnsForParent(1),
         ];
     }
 
-    static createColumnsForAddresses<T>({ limit, getAddresses, matchIdStart, identifier }: { limit: number; getAddresses: (object: T) => Address[]; matchIdStart: string; identifier: string }): XlsxTransformerColumn<unknown>[] {
+    static createColumnsForAddresses<T>({ limit, getAddresses, matchIdStart, identifier }: { limit: number; getAddresses: (object: T) => Address[]; matchIdStart: string; identifier: string }): XlsxTransformerColumn<T>[] {
         const result: XlsxTransformerColumn<unknown>[] = [];
 
         for (let i = 0; i <= limit; i++) {
@@ -37,8 +37,8 @@ export class XlsxTransformerColumnHelper {
         return result;
     }
 
-    static createColumnsForParent(parentIndex: number): XlsxTransformerColumn<unknown>[] {
-        const getParent = (member: MemberWithRegistrationsBlob): Parent | null | undefined => member.details.parents[parentIndex];
+    static createColumnsForParent(parentIndex: number): XlsxTransformerColumn<PlatformMember>[] {
+        const getParent = (member: PlatformMember): Parent | null | undefined => member.patchedMember.details.parents[parentIndex];
 
         const parentNumber = parentIndex + 1;
 
@@ -51,7 +51,7 @@ export class XlsxTransformerColumnHelper {
                 id: getId('type'),
                 name: getName('Type'),
                 width: 20,
-                getValue: (member: MemberWithRegistrationsBlob) => {
+                getValue: (member: PlatformMember) => {
                     const parent = getParent(member);
 
                     return {
@@ -63,7 +63,7 @@ export class XlsxTransformerColumnHelper {
                 id: getId('firstName'),
                 name: getName('Voornaam'),
                 width: 20,
-                getValue: (member: MemberWithRegistrationsBlob) => ({
+                getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.firstName ?? '',
                 }),
             },
@@ -71,7 +71,7 @@ export class XlsxTransformerColumnHelper {
                 id: getId('lastName'),
                 name: getName('Achternaam'),
                 width: 20,
-                getValue: (member: MemberWithRegistrationsBlob) => ({
+                getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.lastName ?? '',
                 }),
             },
@@ -79,7 +79,7 @@ export class XlsxTransformerColumnHelper {
                 id: getId('phone'),
                 name: getName('Telefoonnummer'),
                 width: 20,
-                getValue: (member: MemberWithRegistrationsBlob) => ({
+                getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.phone ?? '',
                 }),
             },
@@ -87,11 +87,11 @@ export class XlsxTransformerColumnHelper {
                 id: getId('email'),
                 name: getName('E-mailadres'),
                 width: 20,
-                getValue: (member: MemberWithRegistrationsBlob) => ({
+                getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.email ?? '',
                 }),
             },
-            XlsxTransformerColumnHelper.createAddressColumns<MemberWithRegistrationsBlob>({
+            XlsxTransformerColumnHelper.createAddressColumns<PlatformMember>({
                 matchId: getId('address'),
                 getAddress: member => getParent(member)?.address,
                 identifier: getName('Adres'),
