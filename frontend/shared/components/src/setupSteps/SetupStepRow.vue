@@ -30,49 +30,49 @@ import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    setupStepType: SetupStepType,
-    step: SetupStep,
-    listType: 'review' | 'todo'
+    setupStepType: SetupStepType;
+    step: SetupStep;
+    listType: 'review' | 'todo';
 }>();
 
 const setupStepTranslations = useSetupStepTranslations();
 const $t = useTranslate();
-const {getDescription: getReviewDescription } = useSetupStepReviewDescription();
+const { getDescription: getReviewDescription } = useSetupStepReviewDescription();
 
 const isSelectable = computed(() => props.listType === 'todo');
 const title = computed(() => $isDone.value ? setupStepTranslations.getReviewTitle(props.setupStepType) : setupStepTranslations.getTodoTitle(props.setupStepType));
 const description = computed(() => $isDone.value ? setupStepTranslations.getReviewDescription(props.setupStepType) : setupStepTranslations.getTodoDescription(props.setupStepType));
 const reviewDescription = computed(() => {
     const step = props.step;
-    const textIfNotReviewed =  $t('c75d45e6-b741-462b-899e-56a41e10918a');
-    
-    if(step.isDone) {
-        return getReviewDescription(step.review, true, textIfNotReviewed);
+    const textIfNotReviewed = $t('c75d45e6-b741-462b-899e-56a41e10918a');
+
+    if (step.isDone) {
+        return getReviewDescription(step.review, true, $t('586cb220-498a-496a-8db5-89a4f10ba3df'));
     }
 
     return textIfNotReviewed;
-})
+});
 
 const $isDone = computed(() => props.step.isDone);
 
 const $progress = computed(() => {
     // do not show progress if step is done
-    if($isDone.value) return undefined;
+    if ($isDone.value) return undefined;
     return props.step.progress;
 });
 
 const $secondaryIcon = computed(() => {
-    if(props.step.isComplete) {
+    if (props.step.isComplete) {
         return 'success';
     }
     return undefined;
-})
+});
 
 const color = computed(() => {
     const icon = $secondaryIcon.value;
-    if(icon ==='success') return 'success';
+    if (icon === 'success') return 'success';
     return 'gray';
-})
+});
 
 const icons: Record<SetupStepType, string> = {
     [SetupStepType.Premises]: 'home',
@@ -82,7 +82,7 @@ const icons: Record<SetupStepType, string> = {
     [SetupStepType.Emails]: 'email',
     [SetupStepType.Payment]: 'bank',
     [SetupStepType.Registrations]: 'edit',
-}
+};
 
 const icon = computed(() => icons[props.setupStepType]);
 </script>
