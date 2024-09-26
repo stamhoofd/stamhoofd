@@ -363,7 +363,12 @@ export class SetupStepUpdater {
             finishedSteps,
         });
 
-        setupSteps.markReviewed(SetupStepType.Emails, { userId: 'backend', userName: 'backend' });
+        if (finishedSteps >= totalSteps) {
+            setupSteps.markReviewed(SetupStepType.Emails, { userId: 'backend', userName: 'backend' });
+        }
+        else {
+            setupSteps.resetReviewed(SetupStepType.Emails);
+        }
     }
 
     private static updateStepPayment(setupSteps: SetupSteps,
@@ -378,25 +383,52 @@ export class SetupStepUpdater {
     private static async updateStepRegistrations(setupSteps: SetupSteps,
         organization: Organization,
         platform: PlatformStruct) {
-        const defaultAgeGroupIds = platform.config.defaultAgeGroups.map(x => x.id);
+        const defaultAgeGroupIds = platform.config.defaultAgeGroups.filter(g => g.minimumRequiredMembers > 0).map(x => x.id);
 
-        const groupsWithDefaultAgeGroupIdQuery = SQL.select().from(
-            SQL.table(Group.table),
-        )
-            .where(SQL.column('organizationId'), organization.id)
-            .where(SQL.column('periodId'), organization.periodId)
-            .where(SQL.column('defaultAgeGroupId'), defaultAgeGroupIds);
+        const groupsWithDefaultAgeGroups = await Group.select()
+            .where('organizationId', organization.id)
+            .where('periodId', organization.periodId)
+            .where('defaultAgeGroupId', defaultAgeGroupIds)
+            .where('deletedAt', null)
+            .fetch();
 
-        const totalSteps = await groupsWithDefaultAgeGroupIdQuery.count();
-        const finishedSteps = await groupsWithDefaultAgeGroupIdQuery
-            .where(SQL.jsonValue(SQL.column('settings'), '$.value.registeredMembers'), SQLWhereSign.GreaterEqual, minimumRegistrationCount)
-            .count();
+        let totalSteps = 0;
 
-        setupSteps.update(SetupStepType.Registrations, {
-            totalSteps,
-            finishedSteps,
-        });
+        // Count per default age group, (e.g. minmium 10 means the total across all members with the same age group id should be 10, not 10 each)
+        const processedDefaultAgeGroupIds: Map<string, number> = new Map();
 
-        setupSteps.markReviewed(SetupStepType.Registrations, { userId: 'backend', userName: 'backend' });
+        for (const group of groupsWithDefaultAgeGroups) {
+            const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === group.defaultAgeGroupId);
+            if (!defaultAgeGroup) {
+                continue;
+            }
+            if (!processedDefaultAgeGroupIds.has(defaultAgeGroup.id)) {
+                totalSteps += defaultAgeGroup.minimumRequiredMembers;
+                processedDefaultAgeGroupIds.set(defaultAgeGroup.id, Math.min(defaultAgeGroup.minimumRequiredMembers, group.settings.registeredMembers ?? 0));
+            }
+            else {
+                processedDefaultAgeGroupIds.set(defaultAgeGroup.id,
+                    Math.min(
+                        defaultAgeGroup.minimumRequiredMembers,
+                        processedDefaultAgeGroupIds.get(defaultAgeGroup.id)! + (group.settings.registeredMembers ?? 0),
+                    ),
+                );
+            }
+        }
+
+        const finishedSteps = Array.from(processedDefaultAgeGroupIds.values()).reduce((a, b) => a + b, 0);
+
+        if (finishedSteps)
+            setupSteps.update(SetupStepType.Registrations, {
+                totalSteps,
+                finishedSteps,
+            });
+
+        if (finishedSteps >= totalSteps) {
+            setupSteps.markReviewed(SetupStepType.Registrations, { userId: 'backend', userName: 'backend' });
+        }
+        else {
+            setupSteps.resetReviewed(SetupStepType.Registrations);
+        }
     }
 }

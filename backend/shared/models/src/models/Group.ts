@@ -1,12 +1,13 @@
-import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, minimumRegistrationCount, StockReservation } from '@stamhoofd/structures';
+import { column, Database, ManyToOneRelation, Model, OneToManyRelation, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { DefaultAgeGroup, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, minimumRegistrationCount, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
 import { SetupStepUpdater } from '../helpers/SetupStepsUpdater';
-import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
+import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Platform, Registration, User } from './';
+import { SQL, SQLSelect } from '@stamhoofd/sql';
 
 if (Member === undefined) {
     throw new Error('Import Member is undefined');
@@ -220,7 +221,7 @@ export class Group extends Model {
         return null;
     }
 
-    async updateOccupancy(options?: { isNew?: boolean }) {
+    async updateOccupancy(options?: { isNew?: boolean; previousProperties?: { defaultAgeGroupId: string | null; deletedAt: Date | null } }) {
         const registeredMembersBefore = this.settings.registeredMembers ?? 0;
 
         const registeredMembersAfter = await Group.getCount(
@@ -235,14 +236,38 @@ export class Group extends Model {
             [this.id, new Date()],
         );
 
-        if (this.defaultAgeGroupId) {
-            const hasSufficientMembersBefore = registeredMembersBefore >= minimumRegistrationCount;
-            const hasSufficientMembersAfter = (registeredMembersAfter ?? 0) >= minimumRegistrationCount;
+        let updateSteps = false;
 
-            if (options?.isNew || hasSufficientMembersAfter !== hasSufficientMembersBefore) {
-                SetupStepUpdater.updateForOrganizationId(this.organizationId)
-                    .catch(console.error);
+        const currentDefaultAgeGroupId = this.defaultAgeGroupId;
+        const oldDefaultAgeGroupId = (options?.previousProperties?.defaultAgeGroupId ?? this.defaultAgeGroupId);
+
+        const platform = await Platform.getSharedStruct();
+
+        const currentDefaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === currentDefaultAgeGroupId);
+        const oldDefaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === oldDefaultAgeGroupId);
+
+        const includedInMiniumSteps = !!currentDefaultAgeGroup && currentDefaultAgeGroup.minimumRequiredMembers > 0 && !this.deletedAt;
+        const wasIncludedInMinimumSteps = options?.isNew ? false : (!!oldDefaultAgeGroup && oldDefaultAgeGroup.minimumRequiredMembers > 0 && !(options?.previousProperties?.deletedAt ?? this.deletedAt));
+
+        if (includedInMiniumSteps !== wasIncludedInMinimumSteps) {
+            // Total steps have changed
+            updateSteps = true;
+        }
+        else {
+            // Check if members have changed beyond threshold
+            const membersBefore = (wasIncludedInMinimumSteps ? registeredMembersBefore : 0);
+            const memberAfter = (includedInMiniumSteps ? (registeredMembersAfter ?? 0) : 0);
+
+            if (membersBefore !== memberAfter) {
+                if (currentDefaultAgeGroup?.minimumRequiredMembers && (membersBefore < currentDefaultAgeGroup.minimumRequiredMembers || memberAfter < currentDefaultAgeGroup.minimumRequiredMembers)) {
+                    updateSteps = true;
+                }
             }
+        }
+
+        if (updateSteps) {
+            SetupStepUpdater.updateForOrganizationId(this.organizationId)
+                .catch(console.error);
         }
     }
 
@@ -314,6 +339,24 @@ export class Group extends Model {
 
     static async freeStockReservations(groupId: string, reservations: StockReservation[]) {
         return await this.applyStockReservations(groupId, reservations, true);
+    }
+
+    /**
+     * Experimental: needs to move to library
+     */
+    static select() {
+        const transformer = (row: SQLResultNamespacedRow): Group => {
+            const d = (this as typeof Group & typeof Model).fromRow(row[this.table] as any) as Group | undefined;
+
+            if (!d) {
+                throw new Error('EmailTemplate not found');
+            }
+
+            return d;
+        };
+
+        const select = new SQLSelect(transformer, SQL.wildcard());
+        return select.from(SQL.table(this.table));
     }
 }
 

@@ -87,7 +87,7 @@ export class SetupStep extends AutoEncoder {
 
     markReviewed({ userId, userName }: { userId: string; userName: string }) {
         const now = new Date();
-        if (this.review === null || (now.getTime() > this.review.date.getTime())) {
+        if (this.review === null) {
             this.review = SetupStepReview.create({
                 date: now,
                 userName,

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, IntegerDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, IntegerDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
@@ -24,6 +24,9 @@ export class DefaultAgeGroup extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true, version: 269 })
     defaultMembershipTypeId: string | null = null;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    minimumRequiredMembers = 0;
 
     get name() {
         return Formatter.joinLast(this.names, ', ', ' of ');

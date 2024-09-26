@@ -16,6 +16,10 @@
             Geen automatische aansluiting
         </p>
 
+        <p v-if="group.minimumRequiredMembers" class="style-description">
+            Minimum {{ Formatter.pluralText(group.minimumRequiredMembers, 'lid', 'leden') }}
+        </p>
+
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
@@ -25,6 +29,7 @@
 
 <script lang="ts" setup>
 import { DefaultAgeGroup } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 defineProps<{
     group: DefaultAgeGroup;

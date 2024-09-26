@@ -267,6 +267,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen');
         }
 
+        const previousProperties = {
+            deletedAt: model.deletedAt,
+            defaultAgeGroupId: model.defaultAgeGroupId,
+        };
+
         if (struct.settings) {
             struct.settings.period = undefined; // Not allowed to patch manually
             model.settings.patchOrPut(struct.settings);
@@ -376,7 +381,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
         }
 
-        await model.updateOccupancy();
+        await model.updateOccupancy({
+            previousProperties,
+        });
         await model.save();
 
         if (struct.deletedAt !== undefined || struct.defaultAgeGroupId !== undefined) {

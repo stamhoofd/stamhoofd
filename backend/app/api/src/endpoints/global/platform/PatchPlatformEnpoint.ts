@@ -113,6 +113,10 @@ export class PatchPlatformEndpoint extends Endpoint<
                     if (d.defaultMembershipTypeId !== undefined) {
                         shouldUpdateMemberships = true;
                     }
+
+                    if (d.minimumRequiredMembers !== undefined) {
+                        shouldUpdateSetupSteps = true;
+                    }
                 }
             }
         }

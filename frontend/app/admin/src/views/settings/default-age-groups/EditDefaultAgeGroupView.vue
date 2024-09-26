@@ -71,6 +71,15 @@
         </p>
 
         <hr>
+        <h2>Vereisten</h2>
+
+        <div class="split-inputs">
+            <STInputBox title="Minimum aantal leden" error-fields="minimumRequiredMembers" :error-box="errors.errorBox">
+                <NumberInput v-model="minimumRequiredMembers" placeholder="Geen" :required="true" suffix="leden" suffix-singular="lid" />
+            </STInputBox>
+        </div>
+
+        <hr>
         <h2>Gegevensverzameling</h2>
         <p>Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven bij deze standaard leeftijdsgroep. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
 
@@ -82,7 +91,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AgeInput, CenteredMessage, Dropdown, ErrorBox, SaveView, useErrors, usePatch, usePlatform, InheritedRecordsConfigurationBox } from '@stamhoofd/components';
+import { AgeInput, CenteredMessage, Dropdown, ErrorBox, InheritedRecordsConfigurationBox, NumberInput, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { DefaultAgeGroup, OrganizationRecordsConfiguration, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -189,6 +198,11 @@ const maxAge = computed({
 const defaultMembershipTypeId = computed({
     get: () => patched.value.defaultMembershipTypeId,
     set: defaultMembershipTypeId => addPatch({ defaultMembershipTypeId }),
+});
+
+const minimumRequiredMembers = computed({
+    get: () => patched.value.minimumRequiredMembers,
+    set: minimumRequiredMembers => addPatch({ minimumRequiredMembers }),
 });
 
 const recordsConfiguration = computed(() => patched.value.recordsConfiguration);
