@@ -220,7 +220,7 @@ export class Group extends Model {
         return null;
     }
 
-    async updateOccupancy() {
+    async updateOccupancy(options?: { isNew?: boolean }) {
         const registeredMembersBefore = this.settings.registeredMembers ?? 0;
 
         const registeredMembersAfter = await Group.getCount(
@@ -239,7 +239,7 @@ export class Group extends Model {
             const hasSufficientMembersBefore = registeredMembersBefore >= minimumRegistrationCount;
             const hasSufficientMembersAfter = (registeredMembersAfter ?? 0) >= minimumRegistrationCount;
 
-            if (hasSufficientMembersAfter !== hasSufficientMembersBefore) {
+            if (options?.isNew || hasSufficientMembersAfter !== hasSufficientMembersBefore) {
                 SetupStepUpdater.updateForOrganizationId(this.organizationId)
                     .catch(console.error);
             }
