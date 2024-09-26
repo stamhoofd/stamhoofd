@@ -659,7 +659,7 @@ export class PlatformMember implements ObjectWithRecords {
         });
     }
 
-    filterGroups(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[] }) {
+    filterGroups(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
         const registrations = this.filterRegistrations(filters);
         const base: Group[] = [];
 
@@ -684,6 +684,12 @@ export class PlatformMember implements ObjectWithRecords {
 
                 if (filters.canRegister !== undefined) {
                     continue;
+                }
+
+                if (filters.organizationId !== undefined) {
+                    if (item.organization.id !== filters.organizationId) {
+                        continue;
+                    }
                 }
 
                 if (!base.find(g => g.id === item.group.id)) {

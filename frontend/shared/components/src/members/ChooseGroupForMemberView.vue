@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, useNavigationActions, useOrganization, useUninheritedPermissions } from '@stamhoofd/components';
-import { Group, GroupCategoryTree, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { Group, GroupCategoryTree, GroupType, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
@@ -106,11 +106,13 @@ const tree = computed(() => treeFactory({
 }));
 
 const alreadyRegisteredGroups = computed(() => {
-    const tree = treeFactory({
-        filterGroups: g => isAlreadyRegistered(g),
-    });
+    const organizationId = selectedOrganization.value?.id;
 
-    return tree.getAllGroups();
+    if (!organizationId) {
+        return [];
+    }
+
+    return props.member.filterGroups({ organizationId, currentPeriod: true, types: [GroupType.WaitingList, GroupType.Membership] });
 });
 
 const alreadyRegisteredMessage = computed(() => {
