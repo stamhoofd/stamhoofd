@@ -13,15 +13,25 @@
                 Er zijn nog geen leden ingeschreven in deze categorie.
             </template>
         </template>
+
+        <div v-if="syncWarning" type="button" :class="syncStatus === 'changed' ? 'selectable info-box icon sync' : 'selectable error-box icon sync'" @click="hasFull ? openSyncScoutsEnGidsen(true) : undefined">
+            {{ syncWarning }}
+            <span v-if="hasFull" class="button text">
+                Synchroniseer
+            </span>
+            <a v-else :href="'https://'+ $t('shared.domains.marketing') +'/docs/groepsadministratie-scouts-en-gidsen-vlaanderen/'" target="_blank" class="button text">
+                Meer info
+            </a>
+        </div>
     </TableView>
 </template>
 
 <script lang="ts">
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { AsyncComponent, Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, FilterDefinition, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
+import { FilterDefinition, Group, GroupCategoryTree, MemberWithRegistrations, OrganizationType, RecordCategory, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -59,6 +69,60 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     get organization() {
         return OrganizationManager.organization
     }
+
+    get isSGV() {
+        return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
+    }
+    
+    openSyncScoutsEnGidsen(animated = true) {
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: AsyncComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */ "../settings/SGVGroepsadministratieView.vue"))
+                })
+            ]
+        })
+    }
+
+    get syncStatus() {
+        if (!this.isSGV) {
+            return null
+        }
+
+        let base = 'ok';
+
+        for (const member of this.allValues) {
+            const status = member.syncStatus
+            if (status === 'never') {
+                return 'never'
+            }
+
+            if (status === 'outdated' && base !== 'outdated') {
+                base = 'outdated'
+            }
+
+            if (status === 'changed' && base === 'ok') {
+                base = 'changed'
+            }
+        }
+
+        return base
+    }
+
+    get syncWarning() {
+        const syncStatus = this.syncStatus
+        if (syncStatus === 'never') {
+            return this.hasFull ? 'Eén of meerdere leden staan nog niet in de groepsadministratie van Scouts & Gidsen Vlaanderen. Deze zijn mogelijks niet verzekerd! Synchroniseer met de groepsadministratie.' :  'Eén of meerdere leden staan nog niet in de groepsadministratie van Scouts & Gidsen Vlaanderen. Deze zijn mogelijks niet verzekerd! Vraag jouw VGA/groepsleiding om te synchroniseren.'
+        } else if (syncStatus === 'outdated') {
+            return this.hasFull ? 'Gewijzigde inschrijvingen. Synchroniseer met de groepsadministratie.' : 'Gewijzigde inschrijvingen. Vraag jouw VGA/groepsleiding om te synchroniseren met de groepsadministratie.'
+        } else if (syncStatus === 'changed') {
+            return this.hasFull ? 'Gewijzigde gegevens. Synchroniseer met de groepsadministratie' : 'Gewijzigde gegevens. Vraag jouw VGA/groepsleiding om te synchroniseren met de groepsadministratie.'
+        }
+    }
+
 
     mounted() {
         const parts = UrlHelper.shared.getParts()

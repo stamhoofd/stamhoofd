@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { DNSRecord } from "./DNSRecord";
 import { OrganizationEmail } from './OrganizationEmail';
@@ -99,6 +99,20 @@ export class BuckarooSettings extends AutoEncoder  {
     paymentMethods: PaymentMethod[] = [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
 }
 
+export class ExternalSyncData extends AutoEncoder {
+    @field({ decoder: DateDecoder, nullable: true })
+    lastExternalSync: Date | null = null
+
+    @field({ decoder: StringDecoder, nullable: true })
+    lastSyncedBy: string | null = null
+
+    @field({ decoder: DateDecoder, nullable: true })
+    lastDeleted: Date | null = null
+
+    @field({ decoder: new MapDecoder(StringDecoder, IntegerDecoder) })
+    counts: Map<string, number> = new Map()
+}
+
 export class OrganizationPrivateMetaData extends AutoEncoder {
     /**
      * @deprecated
@@ -117,6 +131,9 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true, version: 84 })
     pendingRegisterDomain: string | null = null
+
+    @field({ decoder: ExternalSyncData, nullable: true, optional: true })
+    externalSyncData: ExternalSyncData|null = null;
 
     /**
      * Mail domain that is awaiting validation

@@ -673,6 +673,16 @@
         margin-top: -5px;
         font-size: 15px;
     }
+
+    dd.with-icon {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        > .icon {
+            margin-left: auto;
+        }
+    }
 }
 
 .main-text-container {

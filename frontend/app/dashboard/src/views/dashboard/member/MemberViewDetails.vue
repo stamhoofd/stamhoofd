@@ -70,6 +70,15 @@
                             </template>
                         </dd>
                     </template>
+
+                    <template v-if="isManagedSGV">
+                        <dt>Gesynchroniseerd</dt>
+                        <dd v-tooltip="hasFull ? 'Leden moeten na wijzigingen gesynchroniseerd worden met de groepadministratie van Scouts en Gidsen Vlaanderen. Stamhoofd laat je weten wanneer dit nodig is.\n\nGa hiervoor naar ‘Instellingen’ → ‘Synchroniseer met de groepsadministratie’.' : 'Leden moeten periodiek gesynchroniseerd worden met de groepadministratie van Scouts en Gidsen Vlaanderen. Jouw VGA/groepsleiding kan dit in orde brengen via Stamhoofd'" class="with-icon">
+                            {{ member.details.lastExternalSync ? (formatDate(member.details.lastExternalSync)) : "Nooit" }}
+
+                            <span class="icon help gray" />
+                        </dd>
+                    </template>
                 </dl>
             </div>
 
@@ -321,13 +330,14 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, MemberDetailsWithGroups, MemberWithRegistrations, OrganizationType, Parent, ParentTypeHelper, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, UmbrellaOrganization, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
+import { isMemberManaged } from "../../../classes/SGVGroepsadministratieSync";
 import { MemberActionBuilder } from "../groups/MemberActionBuilder";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
@@ -366,6 +376,32 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         this.checkBounces().catch(e => console.error(e))
+    }
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    get isSGV() {
+        return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
+    }
+
+    get isManagedSGV() {
+        return this.isSGV && isMemberManaged(this.member)
+    }
+
+    formatDate(date: Date) {
+        return Formatter.dateTime(date)
+    }
+
+    get syncStatus() {
+        const managed = this.isManagedSGV
+
+        if (!managed) {
+            return null
+        }
+        
+        return this.member.syncStatus
     }
 
     beforeDestroy() {
@@ -457,6 +493,24 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             }
         }
 
+        const syncStatus = this.syncStatus
+        if (syncStatus === 'never') {
+            warnings.push(RecordWarning.create({
+                text: this.hasFull ? 'Ontbreekt in de groepsadministratie van Scouts en Gidsen Vlaanderen. Dit lid is mogelijks niet verzekerd! Synchroniseer met de groepsadministratie.' :  'Ontbreekt in de groepsadministratie van Scouts en Gidsen Vlaanderen. Dit lid is mogelijks niet verzekerd! Vraag jouw VGA/groepsleiding om te synchroniseren.',
+                type: RecordWarningType.Error
+            }))
+        } else if (syncStatus === 'outdated') {
+            warnings.push(RecordWarning.create({
+                text: this.hasFull ? 'Gewijzigde inschrijvingen. Synchroniseer met de groepsadministratie.' : 'Gewijzigde inschrijvingen. Vraag jouw VGA/groepsleiding om te synchroniseren met de groepsadministratie.',
+                type: RecordWarningType.Error
+            }))
+        } else if (syncStatus === 'changed') {
+            warnings.push(RecordWarning.create({
+                text: this.hasFull ? 'Dit lid werd gewijzigd, maar die wijzigingen werden nog niet gesynchroniseerd met de groepadministratie. Synchroniseer met de groepsadministratie' : 'Dit lid werd gewijzigd, maar die wijzigingen werden nog niet gesynchroniseerd met de groepadministratie. Vraag jouw VGA/groepsleiding om te synchroniseren.',
+                type: RecordWarningType.Warning
+            }))
+        }
+
         return warnings
     }
 
@@ -485,6 +539,10 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             }
         }).setDisplayStyle("popup");
         this.present(displayedComponent);
+    }
+
+    get hasFull(): boolean {
+        return OrganizationManager.user.permissions?.hasFullAccess(OrganizationManager.organization.privateMeta?.roles ?? []) ?? false
     }
 
     get hasWrite(): boolean {

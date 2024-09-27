@@ -7,7 +7,7 @@
             @click="$parent.$emit('pop')"
         >
             <span v-if="icon" :class="'icon '+icon" />
-            <span>{{ text }}</span>
+            <span class="pre-wrap">{{ text }}</span>
         </div>
     </transition>
 </template>

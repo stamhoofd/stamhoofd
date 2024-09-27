@@ -10,14 +10,16 @@ import { Registration } from '@stamhoofd/models';
 import { STInvoice } from '@stamhoofd/models';
 import { STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentProvider, PaymentStatus, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
+import XLSX from "xlsx";
 
 import { ExchangeSTPaymentEndpoint } from './endpoints/global/payments/ExchangeSTPaymentEndpoint';
 import { ExchangePaymentEndpoint } from './endpoints/organization/shared/ExchangePaymentEndpoint';
 import { checkSettlements } from './helpers/CheckSettlements';
+import { ExcelHelper, RowValue } from './helpers/ExcelHelper';
 import { ForwardHandler } from './helpers/ForwardHandler';
 
 // Importing postmark returns undefined (this is a bug, so we need to use require)
@@ -650,6 +652,105 @@ async function checkReservedUntil() {
     }
 }
 
+// Wait for midnight before checking billing
+let lastSGVCheck: Date | null = null
+
+async function checkSGV() {
+    if (STAMHOOFD.environment === "development") {
+        //return
+    }
+
+    // Wait for the next day before doing a new check
+    if (lastSGVCheck && Formatter.dateIso(lastSGVCheck) === Formatter.dateIso(new Date())) {
+        console.log("[S&GV] Skipped.")
+        return
+    }
+    lastSGVCheck = new Date()
+
+    console.log("[S&GV] Generating report...")
+
+    let lastId = ""
+    const allOrganizations: Organization[] = []
+
+    while (true) {
+        const organizations = await Organization.where({ id: { sign: '>', value: lastId } }, {
+            limit: 100,
+            sort: ["id"]
+        })
+        lastId = organizations[organizations.length - 1].id
+
+        allOrganizations.push(...organizations.filter(o => o.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen && o.meta.packages.useMembers && !o.meta.packages.isMembersTrial))
+
+        if (organizations.length < 100) {
+            break;
+        }
+    }
+
+    const countKeys = new Set<string>()
+
+    for (const organization of allOrganizations) {
+        for (const [key] of organization.privateMeta.externalSyncData?.counts.entries() ?? []) {
+            countKeys.add(key)
+        }
+    }
+
+    const countKeysArray = Array.from(countKeys).sort()
+
+    const wsData: RowValue[][] = [
+        [
+            "Naam",
+            "Gemeente",
+            "Laatst gesynchroniseerd",
+            "Laatst lid geschrapt",
+            ...countKeysArray
+        ],
+    ];
+
+    for (const organization of allOrganizations) {
+        wsData.push([
+            organization.name,
+            organization.address.city,
+            organization.privateMeta.externalSyncData?.lastExternalSync ? Formatter.dateTime(organization.privateMeta.externalSyncData.lastExternalSync) : "Nooit",
+            organization.privateMeta.externalSyncData?.lastDeleted ? Formatter.dateTime(organization.privateMeta.externalSyncData.lastDeleted) : "Nooit",
+            ...countKeysArray.map(key => organization.privateMeta.externalSyncData?.counts.get(key) ?? 0)
+        ])
+    }
+
+    console.log('Groepen', allOrganizations.length)
+
+    if (allOrganizations.length === 0) {
+        console.log("[S&GV] No organizations to check")
+        return
+    }
+
+    // Generate Excel file
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+        wb, 
+        ExcelHelper.buildWorksheet(wsData, {
+            defaultColumnWidth: 13
+        }), 
+        "Groepen"
+    );
+    const data = XLSX.write(wb, { type: 'buffer' });
+
+    // Send to S&GV
+    Email.sendInternal({
+        to: 'hallo@stamhoofd.be',
+        bcc: 'hallo@stamhoofd.be',
+        subject: 'Stamhoofd: synchronisatieoverzicht',
+        replyTo: 'hallo@stamhoofd.be',
+        text: 'In bijlage het overzicht van de laatste synchronisatie van alle groepen.',
+        attachments: [
+            {
+                filename: 'rapport-'+Formatter.dateIso(new Date())+'.xlsx',
+                content: data,
+                contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+        ]
+    }, new I18n("nl", "BE"))
+}
+
 
 // Wait for midnight before checking billing
 let lastBillingCheck: Date | null = new Date()
@@ -831,6 +932,12 @@ registeredCronJobs.push({
 registeredCronJobs.push({
     name: 'checkDrips',
     method: checkDrips,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkSGV',
+    method: checkSGV,
     running: false
 });
 

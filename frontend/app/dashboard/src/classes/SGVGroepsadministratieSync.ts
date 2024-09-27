@@ -1,4 +1,4 @@
-import { Address, Gender, Group, MemberDetails, MemberWithRegistrations,Parent, ParentType } from '@stamhoofd/structures';
+import { Address, ExternalSyncData, Gender, Group, MemberDetails, MemberWithRegistrations,Parent, ParentType, User } from '@stamhoofd/structures';
 import { Formatter,StringCompare } from '@stamhoofd/utility';
 
 import { SGVLid } from './SGVStructures';
@@ -97,6 +97,70 @@ export class SGVSyncReport {
     markUnmanagedMissing(lid: any) {
         this.unmanagedMissingInStamhoofd.push(lid)
     }
+
+    createExternalSyncData(current: ExternalSyncData|null, user: User): ExternalSyncData|null {
+        if (this.errors.length > 0) {
+            return current;
+        }
+
+        const counts = new Map<string, number>();
+
+        for (const item of [...this.created, ...this.synced]) {
+            for (const functie of item.lid.functies) {
+                const code: string = functie.omschrijving || functie.code || 'Onbekende functie';
+                if (counts.has(code)) {
+                    counts.set(code, counts.get(code)! + 1)
+                } else {
+                    counts.set(code, 1)
+                }
+            }
+        }
+
+        for (const member of this.skipped) {
+            const post = getPatch(member, {
+                adressen: [],
+                contacten: [],
+                functies: []
+            }, '1234', member.groups, getDefaultGroepFuncties())
+
+            if (post.functies) {
+                for (const functie of post.functies) {
+                    const functieId = functie.functie;
+                    const f = getDefaultGroepFuncties().find(f => f.id === functieId)
+                    if (f) {
+                        const code = f?.beschrijving || f?.code || 'Onbekende functie';
+                        
+                        if (counts.has(code)) {
+                            counts.set(code, counts.get(code)! + 1)
+                        } else {
+                            counts.set(code, 1)
+                        }
+                    }
+                }
+            }
+        }
+
+        return ExternalSyncData.create({
+            lastExternalSync: new Date(),
+            lastDeleted: this.deleted.length > 0 ? new Date() : (current?.lastDeleted ?? null),
+            lastSyncedBy: user.firstName ? (user.firstName + ' ' + user.lastName) : user.email,
+            counts
+        })
+    }
+}
+
+export function isMemberManaged(member: MemberWithRegistrations) {
+    const post = getPatch(member, {
+        adressen: [],
+        contacten: [],
+        functies: []
+    }, '1234', member.groups, getDefaultGroepFuncties())
+
+    if (post.functies.length > 0) {
+        return true;
+    }
+
+    return false;
 }
 
 export function getLidName(lid: any) {

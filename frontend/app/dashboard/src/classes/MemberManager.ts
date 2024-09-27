@@ -216,6 +216,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                 const updatedData = newerData[i]
                 member.set(updatedData)
                 newerData[i] = member
+                this.callListeners("updated", member)
             }
         }
     }

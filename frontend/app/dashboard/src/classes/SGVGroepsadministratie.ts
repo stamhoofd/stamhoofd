@@ -8,7 +8,6 @@ import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
-import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue';
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import { MemberManager } from './MemberManager';
 import { OrganizationManager } from './OrganizationManager';
@@ -30,7 +29,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     functies: GroepFunctie[] = []
 
     get hasToken() {
-        return !!this.token //|| this.dryRun
+        return !!this.token || this.dryRun
     }
 
     /**
@@ -257,6 +256,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     async downloadAll() {
         if (this.dryRun) {
+            await this.getFuncties()
             this.leden = [new SGVLid({
                 id: '3',
                 firstName: 'Existing',
@@ -316,7 +316,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // Start! :D
         const allMembers = await MemberManager.loadMembers([], false)
 
-        if (this.dryRun && allMembers.length > 1) {
+        if (this.dryRun && allMembers.length >= 1) {
             // Add some fake data
             matchedMembers.push({
                 stamhoofd: allMembers[0],
@@ -570,7 +570,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         for (const match of matched) {
             try {
                 // If updatedAt close to lastsynced at (5 seconds)
-                if (match.stamhoofd.details.lastExternalSync && match.stamhoofd.details.lastExternalSync.getTime() > Date.now() - 60*1000*60*24 && Math.abs(match.stamhoofd.details.lastExternalSync.getTime() - match.stamhoofd.updatedAt.getTime()) < 1000*5) {
+                if (match.stamhoofd.syncStatus === 'ok') {
                     //report.addWarning(match.stamhoofd.details.firstName+" "+match.stamhoofd.details.lastName+" werd overgeslagen: geen wijzigingen sinds laatste synchronisatie");
                     report.markSkipped(match.stamhoofd)
                     continue;
@@ -585,11 +585,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 report.addError(new SGVMemberError(match.stamhoofd, e))
             }
         }
-
-        // Show report
-        component.present(new ComponentWithProperties(SGVReportView, {
-            report
-        }).setDisplayStyle("popup"))
     }
 
     async schrapLid(lid: SGVLid, report: SGVSyncReport) {
@@ -623,6 +618,74 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async fetchLid(sgvId: string) {
+        if (this.dryRun) {
+            return {
+                "links": [],
+                "id": sgvId,
+                "aangepast": "2023-01-01T00:00:00.000+02:00",
+                "persoonsgegevens": {
+                    "geslacht": "vrouw",
+                    "gsm": "+32 411 11 11 11"
+                },
+                "vgagegevens": {
+                    "voornaam": "Test",
+                    "achternaam": "Testlid",
+                    "geboortedatum": "2005-01-01",
+                    "beperking": false,
+                    "verminderdlidgeld": false,
+                    "individueleSteekkaartdatumaangepast": "2024-09-01"
+                },
+                "verbondsgegevens": {
+                    "lidnummer": "1234567890",
+                    "klantnummer": "I00000",
+                    "lidgeldbetaald": false,
+                    "lidkaartafgedrukt": false
+                },
+                "email": "",
+                "adressen": [
+                    {
+                        "id": "1234",
+                        "land": "BE",
+                        "postcode": "9000",
+                        "gemeente": "Gent",
+                        "straat": "Demostraat",
+                        "nummer": "1",
+                        "bus": "",
+                        "telefoon": "",
+                        "postadres": true,
+                        "status": "normaal",
+                        "positie": {
+                            "latitude": 0,
+                            "longitude": 0
+                        },
+                        "omschrijving": ""
+                    }
+                ],
+                "contacten": [
+                    {
+                        "id": "12345",
+                        "adres": "1234",
+                        "voornaam": "Testpersoon",
+                        "achternaam": "Test",
+                        "zelfdeAdres": false,
+                        "gsm": "+32 411 11 11 11",
+                        "email": "voorbeeld@geenemail.be",
+                        "rol": "moeder"
+                    }
+                ],
+                "groepseigenVelden": {},
+                "functies": [
+                    {
+                        "links": [],
+                        "groep": "O1234",
+                        "functie": "d5f75b320b812440010b812555c1039b",
+                        "begin": "2020-01-01T00:00:00.000+02:00",
+                        "code": "JIN",
+                        "omschrijving": "Jin"
+                    }
+                ]
+            }
+        }
         // Fetch full member from SGV
         const response = await this.authenticatedServer.request<any>({
             method: "GET",
@@ -641,7 +704,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         if (patch.adressen && patch.adressen.length == 0) {
             throw new SimpleError({
                 code: "",
-                message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
+                message: "Je moet minstens één adres toevoegen in Stamhoofd voor we dat lid kunnen toevoegen in de groepsadministratie"
             })
         }
 
@@ -652,11 +715,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     path: "/lid/"+match.sgvId+"?bevestig=true",
                     body: patch
                 })
-
-                // Mark as synced in Stamhoofd
                 match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
-                match.stamhoofd.details.lastExternalSync = new Date()
-                await MemberManager.patchMembersDetails([match.stamhoofd])
 
                 lid = updateResponse.data
             } catch (e) {
@@ -664,6 +723,16 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 throw e;
             }
         }
+
+        try {
+            // Mark as synced in Stamhoofd
+            match.stamhoofd.details.lastExternalSync = new Date()
+            await MemberManager.patchMembersDetails([match.stamhoofd])
+        } catch (e) {
+            console.error(e)
+            throw e;
+        }
+
         await sleep(100);
 
         return lid;
@@ -773,6 +842,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     // -- Implementation for requestMiddleware ----
 
     async onBeforeRequest(request: Request<any>): Promise<void> {
+        if (this.dryRun) {
+            return;
+        }
+
         if (!this.token) {
             // Euhm? The user is not signed in!
             throw new Error("Could not authenticate request without token")

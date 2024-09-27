@@ -95,6 +95,28 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
         })
     }
 
+    get syncStatus() {
+        if (!this.details.lastExternalSync) {
+            return 'never'
+        }
+
+        for (const registration of this.filterRegistrations({cycleOffset: 0, waitingList: false})) {
+            if (registration.registeredAt && registration.registeredAt > this.details.lastExternalSync) {
+                return 'outdated'
+            }
+        }
+
+        if (this.details.lastExternalSync.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 * 30 * 9) {
+            return 'outdated'
+        }
+
+        if (Math.abs(this.details.lastExternalSync.getTime() - this.updatedAt.getTime()) < 1000*5) {
+            return 'ok'
+        }
+
+        return 'changed'
+    }
+
     /**
      * Pass all the groups of an organization to the member so we can fill in all the groups and registrations that are active
      */
