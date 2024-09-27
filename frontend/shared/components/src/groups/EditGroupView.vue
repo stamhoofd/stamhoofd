@@ -8,7 +8,9 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="type === GroupType.Membership">
-            <p v-if="isNew" class="info-box">Maak gebruik van de activiteitenmodule om leden in te schrijven voor activiteiten. Maak daarvoor geen inschrijvingsgroep aan.</p>
+            <p v-if="isNew" class="info-box">
+                Maak gebruik van de activiteitenmodule om leden in te schrijven voor activiteiten. Maak daarvoor geen inschrijvingsgroep aan.
+            </p>
 
             <div class="split-inputs">
                 <STInputBox title="Naam" error-fields="settings.name" :error-box="errors.errorBox">
@@ -36,7 +38,6 @@
             <p v-if="defaultAgeGroups.length" class="style-description-small">
                 * Voor de aansluiting bij KSA Nationaal moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van KSA Nationaal.
             </p>
-
         </template>
 
         <template v-if="type === GroupType.WaitingList">
@@ -106,7 +107,7 @@
                     </button>
                 </div>
             </h2>
-            <p>Je kan een meerdere tarieven instellen en elk tarief een eigen naam geven. Een lid kan bij het inschrijven zelf één van de beschikbare tarieven kiezen.</p>
+            <p>{{ $t("Je kan één of meerdere tarieven instellen en elk tarief een eigen naam geven. Een lid kan bij het inschrijven zelf één van de beschikbare tarieven kiezen.") }}</p>
 
             <STList v-if="patched.settings.prices.length !== 1" v-model="draggablePrices" :draggable="true">
                 <template #item="{item: price}">
@@ -194,7 +195,7 @@
                     <STInputBox :title="$t('4f7cef46-0b46-4225-839e-510d8a8b95bc')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
                         <DateSelection v-model="registrationStartDate" />
                     </STInputBox>
-                    <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" /> 
+                    <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" />
                 </div>
             </STListItem>
 
@@ -211,7 +212,7 @@
                 </p>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label" v-if="virtualOpenStatus !== GroupStatus.Closed">
+            <STListItem v-if="virtualOpenStatus !== GroupStatus.Closed" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="useRegistrationEndDate" />
                 </template>
@@ -320,7 +321,7 @@
             <p>Zorg ervoor dat bestaande leden voorrang krijgen op inschrijvingen (vooral als je met wachtlijsten werkt).</p>
 
             <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
-                Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep. 
+                Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep.
             </p>
 
             <STList>
@@ -398,8 +399,8 @@
                             <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="preRegistrationsDate" />
                             </STInputBox>
-                                    
-                            <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="errors.validator" /> 
+
+                            <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="errors.validator" />
                         </div>
 
                         <Checkbox v-model="priorityForFamily">
@@ -495,70 +496,69 @@ const props = withDefaults(
         isMultiOrganization: boolean;
         isNew: boolean;
         saveHandler: (group: AutoEncoderPatchType<Group>) => Promise<void>;
-        deleteHandler?: (() => Promise<void>)|null;
+        deleteHandler?: (() => Promise<void>) | null;
         showToasts?: boolean;
     }>(),
     {
         deleteHandler: null,
         showToasts: true,
-        isMultiOrganization: false
-    }
+        isMultiOrganization: false,
+    },
 );
 
 const platform = usePlatform();
 const organization = useOrganization();
-const {patched, hasChanges, addPatch, patch} = usePatch(props.group);
-const period = useRegistrationPeriod(computed(() => patched.value.periodId))
-const forceShowRequireGroupIds = ref(false)
+const { patched, hasChanges, addPatch, patch } = usePatch(props.group);
+const period = useRegistrationPeriod(computed(() => patched.value.periodId));
+const forceShowRequireGroupIds = ref(false);
 const usedStock = computed(() => patched.value.settings.getUsedStock(patched.value) || 0);
 
 function addRequireGroupIds() {
-    forceShowRequireGroupIds.value = true
+    forceShowRequireGroupIds.value = true;
 }
 
-const {externalOrganization: externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingExternalOrganizerErrorBox} = useExternalOrganization(
+const { externalOrganization: externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingExternalOrganizerErrorBox } = useExternalOrganization(
     computed({
         get: () => patched.value.organizationId,
         set: (organizationId: string) => addPatch({
-            organizationId
-        })
-    })
-)
+            organizationId,
+        }),
+    }),
+);
 
 const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
     addPatch({
         settings: GroupSettings.patch({
-            prices
-        })
-    })
-}
-const {addPatch: addPricePatch, addPut: addPricePut, addDelete: addPriceDelete} = usePatchableArray(patchPricesArray)
-const draggablePrices = useDraggableArray(() => patched.value.settings.prices, patchPricesArray)
+            prices,
+        }),
+    });
+};
+const { addPatch: addPricePatch, addPut: addPricePut, addDelete: addPriceDelete } = usePatchableArray(patchPricesArray);
+const draggablePrices = useDraggableArray(() => patched.value.settings.prices, patchPricesArray);
 
-const {addPatch: addOptionMenuPatch, addPut: addOptionMenuPut, addDelete: addOptionMenuDelete} = usePatchableArray((optionMenus: PatchableArrayAutoEncoder<GroupOptionMenu>) => {
+const { addPatch: addOptionMenuPatch, addPut: addOptionMenuPut, addDelete: addOptionMenuDelete } = usePatchableArray((optionMenus: PatchableArrayAutoEncoder<GroupOptionMenu>) => {
     addPatch({
         settings: GroupSettings.patch({
-            optionMenus
-        })
-    })
-})
+            optionMenus,
+        }),
+    });
+});
 
 const recordsConfiguration = computed(() => patched.value.settings.recordsConfiguration);
 const patchRecordsConfiguration = (recordsConfiguration: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
     addPatch({
         settings: GroupSettings.patch({
-            recordsConfiguration
-        })
-    })
-}
+            recordsConfiguration,
+        }),
+    });
+};
 const inheritedRecordsConfiguration = computed(() => {
     return OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: externalOrganization.value,
         group: patched.value,
-        includeGroup: false
-    })
-
+        includeGroup: false,
+    });
 });
 
 const errors = useErrors();
@@ -566,229 +566,230 @@ const saving = ref(false);
 const deleting = ref(false);
 const $t = useTranslate();
 const pop = usePop();
-const {priceName: reducedPriceName} = useFinancialSupportSettings({
-    group: patched
-})
+const { priceName: reducedPriceName } = useFinancialSupportSettings({
+    group: patched,
+});
 const present = usePresent();
-const didSetAutomaticGroup = ref(false)
+const didSetAutomaticGroup = ref(false);
 
 const availableWaitingLists = computed(() => {
-    let base = externalOrganization?.value?.period?.groups.flatMap(g => g.waitingList ? [g.waitingList] : []) ?? []
+    let base = externalOrganization?.value?.period?.groups.flatMap(g => g.waitingList ? [g.waitingList] : []) ?? [];
 
     // Replace patched waiting lists
-    base = base.map(list => {
+    base = base.map((list) => {
         if (list.id === patched.value.waitingList?.id) {
-            return patched.value.waitingList
+            return patched.value.waitingList;
         }
-        return list
-    })
-    
+        return list;
+    });
+
     if (props.group.waitingList && props.group.waitingList.id !== patched.value.waitingList?.id) {
-        base.push(props.group.waitingList)
+        base.push(props.group.waitingList);
     }
 
     // Add patched waiting list and the end, to maintain ordering
     if (patched.value.waitingList) {
-        base.push(patched.value.waitingList)
+        base.push(patched.value.waitingList);
     }
 
     // Remove duplicates (removing last one)
-    base = base.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i)
+    base = base.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
 
     return base.map((list) => {
-        const usedByGroups = externalOrganization?.value?.period?.groups.filter(g => g.waitingList?.id === list.id)
+        const usedByGroups = externalOrganization?.value?.period?.groups.filter(g => g.waitingList?.id === list.id);
         return {
             list,
-            description: usedByGroups?.length ? 'Deze wachtlijst wordt gebruikt door ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' en ') : 'Niet gebruikt'
-        }
-    })
-})
+            description: usedByGroups?.length ? 'Deze wachtlijst wordt gebruikt door ' + Formatter.joinLast(usedByGroups.map(g => g.settings.name), ', ', ' en ') : 'Niet gebruikt',
+        };
+    });
+});
 
 const defaultAgeGroups = computed(() => {
-    return platform.value.config.defaultAgeGroups
-})
+    return platform.value.config.defaultAgeGroups;
+});
 
 const defaultAgeGroup = computed(() => {
-    return defaultAgeGroups.value.find(g => g.id === patched.value.defaultAgeGroupId)
-})
+    return defaultAgeGroups.value.find(g => g.id === patched.value.defaultAgeGroupId);
+});
 
 const name = computed({
     get: () => patched.value.settings.name,
     set: (name) => {
         addPatch({
             settings: GroupSettings.patch({
-                name
-            })
-        })
+                name,
+            }),
+        });
 
         if ((!defaultAgeGroupId.value || didSetAutomaticGroup.value)) {
-            const match = defaultAgeGroups.value.find(g => g.names.find(nn => StringCompare.typoCount(nn, name) === 0))
+            const match = defaultAgeGroups.value.find(g => g.names.find(nn => StringCompare.typoCount(nn, name) === 0));
             if (match) {
-                defaultAgeGroupId.value = match.id
-                didSetAutomaticGroup.value = true
-            } else {
-                defaultAgeGroupId.value = null
-                didSetAutomaticGroup.value = true
+                defaultAgeGroupId.value = match.id;
+                didSetAutomaticGroup.value = true;
+            }
+            else {
+                defaultAgeGroupId.value = null;
+                didSetAutomaticGroup.value = true;
             }
         }
-    }
-})
+    },
+});
 
 const virtualOpenStatus = computed({
     get: () => {
         if (patched.value.status !== GroupStatus.Open) {
-            return GroupStatus.Closed
+            return GroupStatus.Closed;
         }
 
         if (useRegistrationStartDate.value) {
             if (registrationStartDate.value !== props.group.settings.registrationStartDate || (registrationStartDate.value && registrationStartDate.value > new Date())) {
-                return 'RegistrationStartDate' as const
+                return 'RegistrationStartDate' as const;
             }
         }
 
         if (patched.value.closed && props.group.closed) {
-            return GroupStatus.Closed
+            return GroupStatus.Closed;
         }
 
-        return GroupStatus.Open
+        return GroupStatus.Open;
     },
     set: (val) => {
         if (val === 'RegistrationStartDate') {
             addPatch({
-                status: GroupStatus.Open
-            })
-            useRegistrationStartDate.value = true
+                status: GroupStatus.Open,
+            });
+            useRegistrationStartDate.value = true;
 
             if (patched.value.settings.registrationEndDate && patched.value.settings.registrationEndDate.getTime() <= Date.now()) {
                 addPatch({
                     settings: GroupSettings.patch({
-                        registrationEndDate: null
-                    })
-                })
+                        registrationEndDate: null,
+                    }),
+                });
             }
             return;
         }
 
-        if (val ===  GroupStatus.Open) {
+        if (val === GroupStatus.Open) {
             addPatch({
-                status: GroupStatus.Open
-            })
-            useRegistrationStartDate.value = false
+                status: GroupStatus.Open,
+            });
+            useRegistrationStartDate.value = false;
 
             if (patched.value.settings.registrationEndDate && patched.value.settings.registrationEndDate.getTime() <= Date.now()) {
                 addPatch({
                     settings: GroupSettings.patch({
-                        registrationEndDate: null
-                    })
-                })
+                        registrationEndDate: null,
+                    }),
+                });
             }
             return;
         }
 
-        if (val ===  GroupStatus.Closed) {
+        if (val === GroupStatus.Closed) {
             addPatch({
-                status: GroupStatus.Closed
-            })
+                status: GroupStatus.Closed,
+            });
         }
-    }
-})
+    },
+});
 
 const description = computed({
     get: () => patched.value.settings.description,
-    set: (description) => addPatch({
+    set: description => addPatch({
         settings: GroupSettings.patch({
-            description
-        })
-    })
-})
+            description,
+        }),
+    }),
+});
 
 const minAge = computed({
     get: () => patched.value.settings.minAge,
-    set: (minAge) => addPatch({
+    set: minAge => addPatch({
         settings: GroupSettings.patch({
-            minAge
-        })
-    })
-})
+            minAge,
+        }),
+    }),
+});
 
 const maxAge = computed({
     get: () => patched.value.settings.maxAge,
-    set: (maxAge) => addPatch({
+    set: maxAge => addPatch({
         settings: GroupSettings.patch({
-            maxAge
-        })
-    })
-})
+            maxAge,
+        }),
+    }),
+});
 
 const genderType = computed({
     get: () => patched.value.settings.genderType,
-    set: (genderType) => addPatch({
+    set: genderType => addPatch({
         settings: GroupSettings.patch({
-            genderType
-        })
-    })
+            genderType,
+        }),
+    }),
 });
 
 const requireGroupIds = computed({
     get: () => patched.value.settings.requireGroupIds,
-    set: (requireGroupIds) => addPatch({
+    set: requireGroupIds => addPatch({
         settings: GroupSettings.patch({
-            requireGroupIds: requireGroupIds as any
-        })
-    })
+            requireGroupIds: requireGroupIds as any,
+        }),
+    }),
 });
 
 const allowRegistrationsByOrganization = computed({
     get: () => patched.value.settings.allowRegistrationsByOrganization,
-    set: (allowRegistrationsByOrganization) => addPatch({
+    set: allowRegistrationsByOrganization => addPatch({
         settings: GroupSettings.patch({
-            allowRegistrationsByOrganization
-        })
-    })
-})
+            allowRegistrationsByOrganization,
+        }),
+    }),
+});
 
-const type = computed(() => patched.value.type)
+const type = computed(() => patched.value.type);
 
 const defaultAgeGroupId = computed({
     get: () => patched.value.defaultAgeGroupId,
     set: (defaultAgeGroupId) => {
         addPatch({
-            defaultAgeGroupId
-        })
-        didSetAutomaticGroup.value = false
-    }
-})
+            defaultAgeGroupId,
+        });
+        didSetAutomaticGroup.value = false;
+    },
+});
 
 const waitingListType = computed({
     get: () => patched.value.settings.waitingListType,
     set: (waitingListType) => {
         addPatch({
             settings: GroupSettings.patch({
-                waitingListType
-            })
-        })
+                waitingListType,
+            }),
+        });
 
         if (waitingListType === WaitingListType.PreRegistrations) {
             if (!preRegistrationsDate.value && registrationStartDate.value) {
-                const d = new Date(registrationStartDate.value)
-                d.setMonth(d.getMonth() - 1)
-                preRegistrationsDate.value = d
+                const d = new Date(registrationStartDate.value);
+                d.setMonth(d.getMonth() - 1);
+                preRegistrationsDate.value = d;
             }
-        } else {
-            preRegistrationsDate.value = null
         }
-
-    }
-})
+        else {
+            preRegistrationsDate.value = null;
+        }
+    },
+});
 
 const maxMembers = computed({
     get: () => patched.value.settings.maxMembers,
-    set: (maxMembers) => addPatch({
+    set: maxMembers => addPatch({
         settings: GroupSettings.patch({
-            maxMembers
-        })
-    })
-})
+            maxMembers,
+        }),
+    }),
+});
 
 const enableMaxMembers = computed({
     get: () => patched.value.settings.maxMembers !== null,
@@ -796,70 +797,71 @@ const enableMaxMembers = computed({
         if (!enableMaxMembers) {
             addPatch({
                 settings: GroupSettings.patch({
-                    maxMembers: null
-                })
-            })
-        } else {
+                    maxMembers: null,
+                }),
+            });
+        }
+        else {
             addPatch({
                 settings: GroupSettings.patch({
-                    maxMembers: props.group.settings.maxMembers ?? patched.value.settings.maxMembers ?? 200
-                })
-            })
+                    maxMembers: props.group.settings.maxMembers ?? patched.value.settings.maxMembers ?? 200,
+                }),
+            });
         }
-    }
-})
+    },
+});
 
 const registrationStartDate = computed({
     get: () => patched.value.settings.registrationStartDate,
-    set: (registrationStartDate) => addPatch({
+    set: registrationStartDate => addPatch({
         settings: GroupSettings.patch({
-            registrationStartDate
-        })
-    })
-})
+            registrationStartDate,
+        }),
+    }),
+});
 
 const registrationEndDate = computed({
     get: () => patched.value.settings.registrationEndDate,
-    set: (registrationEndDate) => addPatch({
+    set: registrationEndDate => addPatch({
         settings: GroupSettings.patch({
-            registrationEndDate
-        })
-    })
-})
+            registrationEndDate,
+        }),
+    }),
+});
 
 const preRegistrationsDate = computed({
     get: () => patched.value.settings.preRegistrationsDate,
-    set: (preRegistrationsDate) => addPatch({
+    set: preRegistrationsDate => addPatch({
         settings: GroupSettings.patch({
-            preRegistrationsDate
-        })
-    })
-})
+            preRegistrationsDate,
+        }),
+    }),
+});
 
 const priorityForFamily = computed({
     get: () => patched.value.settings.priorityForFamily,
-    set: (priorityForFamily) => addPatch({
+    set: priorityForFamily => addPatch({
         settings: GroupSettings.patch({
-            priorityForFamily
-        })
-    })
-})
+            priorityForFamily,
+        }),
+    }),
+});
 
 const waitingListIfFull = computed({
     get: () => patched.value.settings.waitingListIfFull,
-    set: (waitingListIfFull) => addPatch({
+    set: waitingListIfFull => addPatch({
         settings: GroupSettings.patch({
-            waitingListIfFull
-        })
-    })
-})
+            waitingListIfFull,
+        }),
+    }),
+});
 
 const waitingList = computed({
     get: () => patched.value.waitingList,
-    set: (waitingList) => addPatch({
-        waitingList
-    })
-})
+    set: waitingList => addPatch({
+        waitingList,
+    }),
+});
 
 const useRegistrationStartDate = computed({
     get: () => !!patched.value.settings.registrationStartDate,
@@ -867,18 +869,19 @@ const useRegistrationStartDate = computed({
         if (!useRegistrationStartDate) {
             addPatch({
                 settings: GroupSettings.patch({
-                    registrationStartDate: null
-                })
-            })
-        } else {
+                    registrationStartDate: null,
+                }),
+            });
+        }
+        else {
             addPatch({
                 settings: GroupSettings.patch({
-                    registrationStartDate: props.group.settings.registrationStartDate && props.group.settings.registrationStartDate > new Date() ? props.group.settings.registrationStartDate : new Date(Date.now() + 1000 * 60 * 60 * 24)
-                })
-            })
+                    registrationStartDate: props.group.settings.registrationStartDate && props.group.settings.registrationStartDate > new Date() ? props.group.settings.registrationStartDate : new Date(Date.now() + 1000 * 60 * 60 * 24),
+                }),
+            });
         }
-    }
-})
+    },
+});
 
 const useRegistrationEndDate = computed({
     get: () => !!patched.value.settings.registrationEndDate,
@@ -886,26 +889,27 @@ const useRegistrationEndDate = computed({
         if (!useRegistrationEndDate) {
             addPatch({
                 settings: GroupSettings.patch({
-                    registrationEndDate: null
-                })
-            })
-        } else {
+                    registrationEndDate: null,
+                }),
+            });
+        }
+        else {
             addPatch({
                 settings: GroupSettings.patch({
-                    registrationEndDate: props.group.settings.registrationEndDate ?? new Date()
-                })
-            })
+                    registrationEndDate: props.group.settings.registrationEndDate ?? new Date(),
+                }),
+            });
         }
-    }
-})
+    },
+});
 
 const title = computed(() => {
     if (props.group.type === GroupType.WaitingList) {
-        return props.isNew ? $t('5936be80-5f7a-429b-8bc2-7afdd47ff232') :$t('b3f49e49-2db8-46e3-8a9b-bc05a4b989c0');
+        return props.isNew ? $t('5936be80-5f7a-429b-8bc2-7afdd47ff232') : $t('b3f49e49-2db8-46e3-8a9b-bc05a4b989c0');
     }
 
     if (props.group.type === GroupType.EventRegistration) {
-        return props.isNew ? $t('bd6ad13b-be70-4d03-a1a0-3578786f4df3') :$t('8fd3a74f-5dae-4a7e-bcd3-7ac1da2e7e6c');
+        return props.isNew ? $t('bd6ad13b-be70-4d03-a1a0-3578786f4df3') : $t('8fd3a74f-5dae-4a7e-bcd3-7ac1da2e7e6c');
     }
     return props.isNew ? $t('c7944f69-c772-4cc5-b7c8-2ef96272dfe0') : $t('d886e927-86d1-48ed-93ed-60e924484db1');
 });
@@ -926,10 +930,12 @@ async function save() {
         if (props.showToasts) {
             await Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
         }
-        await pop({force: true})
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
-    } finally {
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    finally {
         saving.value = false;
     }
 }
@@ -948,10 +954,12 @@ async function deleteMe() {
         if (props.showToasts) {
             await Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
-    } finally {
+    }
+    finally {
         deleting.value = false;
     }
 }
@@ -959,9 +967,9 @@ async function deleteMe() {
 function addGroupPrice() {
     const price = GroupPrice.create({
         name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
-        price: patched.value.settings.prices[0]?.price?.clone()
-    })
-    addPricePut(price)
+        price: patched.value.settings.prices[0]?.price?.clone(),
+    });
+    addPricePut(price);
 }
 
 async function editGroupPrice(price: GroupPrice) {
@@ -972,15 +980,15 @@ async function editGroupPrice(price: GroupPrice) {
                 group: patched,
                 isNew: false,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupPrice>) => {
-                    addPricePatch(patch)
+                    addPricePatch(patch);
                 },
                 deleteHandler: async () => {
-                    addPriceDelete(price.id)
-                }
-            })
+                    addPriceDelete(price.id);
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function addGroupOptionMenu() {
@@ -988,11 +996,11 @@ async function addGroupOptionMenu() {
         name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
         options: [
             GroupOption.create({
-                name: $t('82b0f786-db14-4a2c-8514-3ca3b28ac65f')
-            })
-        ]
-    })
-    
+                name: $t('82b0f786-db14-4a2c-8514-3ca3b28ac65f'),
+            }),
+        ],
+    });
+
     await present({
         components: [
             new ComponentWithProperties(GroupOptionMenuView, {
@@ -1000,12 +1008,12 @@ async function addGroupOptionMenu() {
                 group: patched,
                 isNew: true,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
-                    addOptionMenuPut(optionMenu.patch(patch))
-                }
-            })
+                    addOptionMenuPut(optionMenu.patch(patch));
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function addWaitingList() {
@@ -1018,9 +1026,9 @@ async function addWaitingList() {
         periodId: patched.value.periodId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: 'Wachtlijst van ' + patched.value.settings.name
-        })
-    })
+            name: 'Wachtlijst van ' + patched.value.settings.name,
+        }),
+    });
 
     // Edit the group
     await present({
@@ -1031,22 +1039,22 @@ async function addWaitingList() {
                 showToasts: false,
                 saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                     addPatch({
-                        waitingList: waitingList.patch(patch)
-                    })
-                }
-            })
+                        waitingList: waitingList.patch(patch),
+                    });
+                },
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
-function isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address" | "gender") {
+function isPropertyEnabled(name: 'emailAddress' | 'birthDay' | 'phone' | 'address' | 'gender') {
     return !!OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: externalOrganization.value,
         group: patched.value,
-        includeGroup: true
-    })[name]
+        includeGroup: true,
+    })[name];
 }
 
 async function editWaitingList(waitingList: Group) {
@@ -1062,52 +1070,52 @@ async function editWaitingList(waitingList: Group) {
                 showToasts: false,
                 saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                     addPatch({
-                        waitingList: patch
-                    })
-                }
-            })
+                        waitingList: patch,
+                    });
+                },
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 const genderTypes = [
     {
         value: GroupGenderType.Mixed,
-        name: "Gemengd",
+        name: 'Gemengd',
     },
     {
         value: GroupGenderType.OnlyFemale,
-        name: "Enkel meisjes",
+        name: 'Enkel meisjes',
     },
     {
         value: GroupGenderType.OnlyMale,
-        name: "Enkel jongens",
+        name: 'Enkel jongens',
     },
-]
+];
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 function getAgeGroupAgeString(ageGroup: DefaultAgeGroup): string {
-    const {minAge, maxAge} = ageGroup;
-    if(minAge === null && maxAge === null) {
+    const { minAge, maxAge } = ageGroup;
+    if (minAge === null && maxAge === null) {
         return '';
     }
 
-    if(minAge && maxAge) {
+    if (minAge && maxAge) {
         return `${minAge} - ${maxAge} jaar`;
     }
 
-    if(minAge) {
+    if (minAge) {
         return `+${minAge}`;
     }
 
-    if(maxAge) {
+    if (maxAge) {
         return `-${maxAge}`;
     }
 
@@ -1118,11 +1126,11 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
     let text = ageGroup.name;
     const ageGroupAgeString = getAgeGroupAgeString(ageGroup);
 
-    if(ageGroupAgeString) {
+    if (ageGroupAgeString) {
         text = text + ': ' + ageGroupAgeString;
     }
 
-    if(!ageGroup.defaultMembershipTypeId) {
+    if (!ageGroup.defaultMembershipTypeId) {
         text = text + ' (niet automatisch)';
     }
 
@@ -1130,8 +1138,7 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
 }
 
 defineExpose({
-    shouldNavigateAway
-})
-
+    shouldNavigateAway,
+});
 
 </script>
