@@ -5,7 +5,7 @@
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <GroupPriceBox :price="patched" :group="group" :errors="errors" @patch:price="addPatch" />
+        <GroupPriceBox :price="patched" :group="group" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPatch" />
     </SaveView>
 </template>
 
@@ -28,16 +28,18 @@ const props = withDefaults(
         group: Group;
         isNew: boolean;
         saveHandler: (price: AutoEncoderPatchType<GroupPrice>) => Promise<void>;
-        deleteHandler?: (() => Promise<void>)|null,
-        showToasts?: boolean
+        deleteHandler?: (() => Promise<void>) | null;
+        showToasts?: boolean;
+        defaultMembershipTypeId?: string | null;
     }>(),
     {
         deleteHandler: null,
-        showToasts: true
-    }
+        showToasts: true,
+        defaultMembershipTypeId: null,
+    },
 );
 
-const {patched, hasChanges, addPatch, patch} = usePatch(props.price);
+const { patched, hasChanges, addPatch, patch } = usePatch(props.price);
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
@@ -60,10 +62,12 @@ async function save() {
             return;
         }
         await props.saveHandler(patch.value);
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
-    } finally {
+    }
+    finally {
         saving.value = false;
     }
 }
@@ -82,25 +86,24 @@ async function deleteMe() {
         if (props.showToasts) {
             await Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
-    } finally {
+    }
+    finally {
         deleting.value = false;
     }
 }
-
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
-
-
+    shouldNavigateAway,
+});
 </script>

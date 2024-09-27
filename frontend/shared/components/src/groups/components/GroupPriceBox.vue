@@ -10,7 +10,7 @@
             >
         </STInputBox>
 
-        <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" />
+        <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" />
 
         <STList>
             <STListItem v-if="!isSingle || hidden" :selectable="true" element-name="label">
@@ -46,47 +46,50 @@
 </template>
 
 <script setup lang="ts">
-import { NumberInput } from "@stamhoofd/components";
+import { NumberInput } from '@stamhoofd/components';
 import { Group, GroupPrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { ReduceablePriceInput } from '..';
 import { useErrors } from '../../errors/useErrors';
 import { useEmitPatch } from '../../hooks';
 
-const props = defineProps<{
-    price: GroupPrice,
-    group: Group,
-    errors: ReturnType<typeof useErrors>
-}>();
+const props = withDefaults(defineProps<{
+    price: GroupPrice;
+    group: Group;
+    errors: ReturnType<typeof useErrors>;
+    defaultMembershipTypeId?: string | null;
+}>(), {
+    defaultMembershipTypeId: null,
+});
 
-const emit = defineEmits(['patch:price'])
-const {patched, addPatch} = useEmitPatch<GroupPrice>(props, emit, 'price');
+const emit = defineEmits(['patch:price']);
+const { patched, addPatch } = useEmitPatch<GroupPrice>(props, emit, 'price');
 const isSingle = computed(() => props.group.settings.prices.length <= 1);
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name})
-})
+    set: name => addPatch({ name }),
+});
 const groupPrice = computed({
     get: () => patched.value.price,
-    set: (price) => addPatch({price})
-})
+    set: price => addPatch({ price }),
+});
 
 const hidden = computed({
     get: () => patched.value.hidden,
-    set: (hidden) => addPatch({hidden})
-})
+    set: hidden => addPatch({ hidden }),
+});
 
 const stock = computed({
     get: () => patched.value.stock,
-    set: (stock) => addPatch({stock})
-})
+    set: stock => addPatch({ stock }),
+});
 
 const usedStock = computed(() => patched.value.getUsedStock(props.group) || 0);
 
 const useStock = computed({
     get: () => patched.value.stock !== null,
-    set: (useStock) => addPatch({stock: useStock ? (patched.value.getUsedStock(props.group) || 10) : null})
-})
+    set: useStock => addPatch({ stock: useStock ? (patched.value.getUsedStock(props.group) || 10) : null }),
+});
 
 </script>
