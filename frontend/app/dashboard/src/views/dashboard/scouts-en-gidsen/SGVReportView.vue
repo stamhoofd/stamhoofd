@@ -30,6 +30,50 @@
                 </STListItem>
             </STList>
 
+            <template v-if="report.unmanagedInStamhoofd.length > 0">
+                <hr>
+                <h2>Leiding in Stamhoofd</h2>
+                <p>Hoera, deze leiding schreef ook in via Stamhoofd. Stamhoofd zet hun gegevens van Stamhoofd netjes over in de groepsadministratie, maar je moet zelf nog de juiste functies toekennen in de groepsadministratie (bv. wie is materiaalmeester, kapoenenleiding...). Kijk je dit na?</p>
+
+                <STList>
+                    <STListItem v-for="{member, lid} in report.unmanagedInStamhoofd" :key="member.id">
+                        <div>
+                            <h2 class="style-title-list">
+                                {{ member.details.firstName }} {{ member.details.lastName }}
+                            </h2>
+                            <p v-if="member.details.birthDay" class="style-description-small">
+                                {{ member.details.birthDay | date }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ getLidFuncties(lid) || 'Geen functies' }}
+                            </p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <template v-if="report.unmanagedMissingInStamhoofd.length > 0">
+                <hr>
+                <h2>Leiding niet in Stamhoofd</h2>
+                <p>Deze leiding staat in de groepsadministratie, maar niet in Stamhoofd. Hun gegevens worden niet aangepast door Stamhoofd. Kijk de gegevens én functies na in de groepsadministratie zelf (wie is materiaalmeester, kapoenenleiding...). Schrap ze uit de groepsadministratie indien nodig.</p>
+
+                <STList>
+                    <STListItem v-for="member in report.unmanagedMissingInStamhoofd" :key="member.id">
+                        <div>
+                            <h2 class="style-title-list">
+                                {{ getLidName(member) }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ getLidBirthDay(member) }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ getLidFuncties(member) || 'Geen functies' }}
+                            </p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </template>
+
             <template v-if="report.deleted.length > 0">
                 <hr>
                 <h2>Geschrapt in de groepsadministratie</h2>
@@ -51,13 +95,16 @@
                 <hr>
                 <h2>Nieuwe leden toegevoegd in de groepsadministratie</h2>
                 <STList>
-                    <STListItem v-for="member in report.created" :key="member.id">
+                    <STListItem v-for="{member, lid} in report.created" :key="member.id">
                         <div>
                             <h2 class="style-title-list">
                                 {{ member.details.firstName }} {{ member.details.lastName }}
                             </h2>
                             <p class="style-description-small">
                                 {{ member.details.birthDay | date }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ getLidFuncties(lid) || 'Geen functies' }}
                             </p>
                         </div>
                     </STListItem>
@@ -68,12 +115,34 @@
                 <hr>
                 <h2>Aangepaste leden in de groepsadministratie</h2>
                 <STList>
-                    <STListItem v-for="member in report.synced" :key="member.id">
+                    <STListItem v-for="{member, lid} in report.synced" :key="member.id">
                         <div>
                             <h2 class="style-title-list">
                                 {{ member.details.firstName }} {{ member.details.lastName }}
                             </h2>
                             <p class="style-description-small">
+                                {{ member.details.birthDay | date }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ getLidFuncties(lid) || 'Geen functies' }}
+                            </p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <template v-if="report.skipped.length > 0">
+                <hr>
+                <h2>Overgeslagen</h2>
+                <p>Deze leden werden recent nog gesynchroniseerd en zijn sindsdien niet gewijzigd in Stamhoofd.</p>
+
+                <STList>
+                    <STListItem v-for="member in report.skipped" :key="member.id">
+                        <div>
+                            <h2 class="style-title-list">
+                                {{ member.details.firstName }} {{ member.details.lastName }}
+                            </h2>
+                            <p v-if="member.details.birthDay" class="style-description-small">
                                 {{ member.details.birthDay | date }}
                             </p>
                         </div>
@@ -119,7 +188,7 @@ import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STLis
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { SGVSyncReport } from '../../../classes/SGVGroepsadministratieSync';
+import { getLidBirthDay, getLidFuncties, getLidName, SGVSyncReport } from '../../../classes/SGVGroepsadministratieSync';
 import { SGVMemberError } from "../../../classes/SGVStructures";
 import MemberView from '../member/MemberView.vue';
 
@@ -151,6 +220,18 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
         }
 
         this.dismiss({ force: true })
+    }
+
+    getLidFuncties(a) {
+        return getLidFuncties(a);
+    }
+
+    getLidBirthDay(a) {
+        return getLidBirthDay(a);
+    }
+
+    getLidName(a) {
+        return getLidName(a);
     }
 
     getErrorMessage(error: Error) {

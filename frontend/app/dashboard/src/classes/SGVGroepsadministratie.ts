@@ -13,7 +13,7 @@ import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVV
 import { MemberManager } from './MemberManager';
 import { OrganizationManager } from './OrganizationManager';
 import { getDefaultGroepFuncties, getPatch, GroepFunctie, isManaged, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
-import { SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
+import { SGVFoutenDecoder, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
 
 class SGVGroepsadministratieStatic implements RequestMiddleware {
     token: {accessToken: string; refreshToken: string; validUntil: Date} | null = null // null to keep reactive
@@ -287,7 +287,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
         while (offset < total) {
             // prevent brute force attack, spread the load
-            await sleep(250);
+            await sleep(100);
             const response = await this.authenticatedServer.request({
                 method: "GET",
                 path: "/ledenlijst",
@@ -368,7 +368,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                         // Is echt een nieuw lid
                         newMembers.push(member)
                     }
-                    await sleep(250)
+                    await sleep(100)
                 }
             }
         }
@@ -455,18 +455,28 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         return { matchedMembers, newMembers }
     }
 
-    async prepareSync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[]): Promise<{ oldMembers; action }> {
+    async prepareSync(component: NavigationMixin, report: SGVSyncReport, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[]): Promise<{ oldMembers; action }> {
         // Determine the missing members by checking the matches
         const oldMembers: SGVLid[] = []
+        const toast = new Toast("Controleren op gestopte leden...", "spinner").setHide(null).show()
 
-        for (const member of this.leden) {
-            const found = matched.find(m => m.sgvId == member.id)
-            if (!found) {
-                if (isManaged(member, this.functies)) {
-                    // Alleen vragen om leden te schrappen die een vaste functie hebben in de groepsadministratie
-                    oldMembers.push(member)
+        try {
+            for (const member of this.leden) {
+                const found = matched.find(m => m.sgvId == member.id)
+                if (!found) {
+                    const lid = await this.fetchLid(member.id)
+                    if (isManaged(lid, this.functies)) {
+                        // Alleen vragen om leden te schrappen die een vaste functie hebben in de groepsadministratie
+                        oldMembers.push(member)
+                    } else {
+                        // Add report warning
+                        report.markUnmanagedMissing(lid)
+                        //report?.addWarning(`${member.firstName} ${member.lastName} staat in de groepsadministratie en niet in Stamhoofd, maar de bijhorende functies worden niet beheerd door Stamhoofd (leiding of vrijwilliger) en zal daardoor ook niet automatisch geschrapt worden. Kijk de gegevens zelf na in de groepsadministratie en schrap indien nodig.`)
+                    }
                 }
             }
+        } finally {
+            toast.hide()
         }
 
         if (oldMembers.length > 0) {
@@ -505,12 +515,11 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
     }
 
-    async sync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], oldMembers: SGVLid[], action: "delete" | "import" | "nothing", onStatusChange?: (status: string, progress: number) => void) {
+    async sync(component: NavigationMixin, report: SGVSyncReport, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], oldMembers: SGVLid[], action: "delete" | "import" | "nothing", onStatusChange?: (status: string, progress: number) => void) {
 
         let progress = 0
         const total = (action != "nothing" ? oldMembers.length : 0) + matched.length + newMembers.length
 
-        const report = new SGVSyncReport()
         const deletedMembers: SGVLid[] = []
 
         if (action == "delete") {            
@@ -548,8 +557,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     onStatusChange(member.details!.firstName+" "+member.details!.lastName+" toevoegen...", progress/total)
                     progress++;
                 }
-                await this.createLid(member, report)
-                report.markCreated(member)
+                const lid = await this.createLid(member, report)
+                report.markCreated(member, lid)
             } catch (e) {
                 report.addError(new SGVMemberError(member, e))
             }
@@ -561,16 +570,17 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         for (const match of matched) {
             try {
                 // If updatedAt close to lastsynced at (5 seconds)
-                // if (match.stamhoofd.details.lastExternalSync && Math.abs(match.stamhoofd.details.lastExternalSync.getTime() - match.stamhoofd.updatedAt.getTime()) < 1000*5) {
-                //     //report.addWarning(match.stamhoofd.details.firstName+" "+match.stamhoofd.details.lastName+" werd overgeslagen: geen wijzigingen sinds laatste synchronisatie");
-                //     continue;
-                // }
+                if (match.stamhoofd.details.lastExternalSync && match.stamhoofd.details.lastExternalSync.getTime() > Date.now() - 60*1000*60*24 && Math.abs(match.stamhoofd.details.lastExternalSync.getTime() - match.stamhoofd.updatedAt.getTime()) < 1000*5) {
+                    //report.addWarning(match.stamhoofd.details.firstName+" "+match.stamhoofd.details.lastName+" werd overgeslagen: geen wijzigingen sinds laatste synchronisatie");
+                    report.markSkipped(match.stamhoofd)
+                    continue;
+                }
                 if (onStatusChange) {
                     onStatusChange(match.stamhoofd.details!.firstName+" "+match.stamhoofd.details!.lastName+" aanpassen...", progress/total)
                     progress++;
                 }
-                await this.syncLid(match, report)
-                report.markSynced(match.stamhoofd)
+                const lid = await this.syncLid(match, report)
+                report.markSynced(match.stamhoofd, lid)
             } catch (e) {
                 report.addError(new SGVMemberError(match.stamhoofd, e))
             }
@@ -592,7 +602,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const lidData = response.data;
         const patch = schrappen(lidData, this.functies)
 
-        await sleep(250);
+        await sleep(100);
             
         if (!this.dryRun) {
 
@@ -609,21 +619,24 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             }
         }
 
-        await sleep(250);
+        await sleep(100);
     }
 
-    async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
-        const details = match.stamhoofd.details!
-
+    async fetchLid(sgvId: string) {
         // Fetch full member from SGV
         const response = await this.authenticatedServer.request<any>({
             method: "GET",
-            path: "/lid/"+match.sgvId
+            path: "/lid/"+sgvId
         })
+        await sleep(100);
 
-        const lid = response.data;
+        return response.data;
+    }
 
-        const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, this.functies, report)
+    async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
+        let lid = await this.fetchLid(match.sgvId)
+
+        const patch = getPatch(match.stamhoofd, lid, this.groupNumber!, match.stamhoofd.groups, this.functies, report)
 
         if (patch.adressen && patch.adressen.length == 0) {
             throw new SimpleError({
@@ -631,8 +644,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
             })
         }
-
-        await sleep(250);
 
         if (!this.dryRun) {
             try {
@@ -646,12 +657,16 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
                 match.stamhoofd.details.lastExternalSync = new Date()
                 await MemberManager.patchMembersDetails([match.stamhoofd])
+
+                lid = updateResponse.data
             } catch (e) {
                 console.error(e)
                 throw e;
             }
         }
-        await sleep(250);
+        await sleep(100);
+
+        return lid;
     }
 
     
@@ -659,9 +674,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
      * Create a new one in SGV
      */
     async createLid(member: MemberWithRegistrations, report: SGVSyncReport) {
-        const details = member.details!
-
-        const post = getPatch(details, {
+        const post = getPatch(member, {
             adressen: [],
             contacten: [],
             functies: []
@@ -674,8 +687,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             })
         }
 
+        let lid: any;
+
         if (!this.dryRun) {
-            await sleep(250);
+            await sleep(100);
 
             try {
                 if (post.functies && post.functies.length > 1) {
@@ -703,6 +718,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     member.details.memberNumber = updateResponse.data.verbondsgegevens?.lidnummer ?? null
                     member.details.lastExternalSync = new Date()
                     await MemberManager.patchMembersDetails([member])
+
+                    lid = updateResponse.data
                 }
             } catch (e) {
                 console.error(e)
@@ -710,7 +727,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             }
         }
 
-        await sleep(250);
+        await sleep(100);
     }
 
     checkUrl(): boolean | null {

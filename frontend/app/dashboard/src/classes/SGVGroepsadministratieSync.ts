@@ -49,10 +49,14 @@ export class SGVSyncReport {
     errors: Error[] = []
     info: string[] = []
 
-    created: MemberWithRegistrations[] = []
-    synced: MemberWithRegistrations[] = []
+    unmanagedInStamhoofd: {member: MemberWithRegistrations, lid: any}[] = []
+    unmanagedMissingInStamhoofd: any[] = []
+
+    created: {member: MemberWithRegistrations, lid: any}[] = []
+    synced: {member: MemberWithRegistrations, lid: any}[] = []
     deleted: SGVLid[] = []
     imported: MemberWithRegistrations[] = []
+    skipped: MemberWithRegistrations[] = []
 
     addWarning(text: string) {
         this.warnings.push(text)
@@ -66,12 +70,16 @@ export class SGVSyncReport {
         this.errors.push(text)
     }
 
-    markCreated(member: MemberWithRegistrations) {
-        this.created.push(member)
+    markCreated(member: MemberWithRegistrations, lid: any) {
+        this.created.push({member, lid})
     }
 
-    markSynced(member: MemberWithRegistrations) {
-        this.synced.push(member)
+    markSynced(member: MemberWithRegistrations, lid: any) {
+        this.synced.push({member, lid})
+    }
+
+    markSkipped(member: MemberWithRegistrations) {
+        this.skipped.push(member)
     }
 
     markImported(member: MemberWithRegistrations) {
@@ -81,7 +89,28 @@ export class SGVSyncReport {
     markDeleted(member: SGVLid) {
         this.deleted.push(member)
     }
+
+    markUnmanaged(member: MemberWithRegistrations, lid: any) {
+        this.unmanagedInStamhoofd.push({member, lid})
+    }
+
+    markUnmanagedMissing(lid: any) {
+        this.unmanagedMissingInStamhoofd.push(lid)
+    }
 }
+
+export function getLidName(lid: any) {
+    return lid.vgagegevens.voornaam + ' ' + lid.vgagegevens.achternaam;
+}
+
+export function getLidBirthDay(lid: any) {
+    return lid.vgagegevens.geboortedatum;
+}
+
+export function getLidFuncties(lid: any) {
+    return lid.functies.filter(f => !f.einde).map(f => f.omschrijving || f.code || 'Onbekend').join(', ')
+}
+
 
 export function schrappen(lid: any, groepFuncties: GroepFunctie[]): any {
     const managedFuncties = getManagedFuncties(groepFuncties);
@@ -120,7 +149,8 @@ export function schrappen(lid: any, groepFuncties: GroepFunctie[]): any {
     return patch
 }
 
-export function getPatch(details: MemberDetails, lid: any, groepNummer: string, groups: Group[], groepFuncties: GroepFunctie[], report?: SGVSyncReport): any {
+export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer: string, groups: Group[], groepFuncties: GroepFunctie[], report?: SGVSyncReport): any {
+    const details = member.details
     const newAddresses: any[] = []
     const newContacts: any[] = []
 
@@ -224,7 +254,8 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
             // New members need a functie
             throw new Error(details.firstName+" "+details.lastName+": we konden niet automatisch bepalen welke functie we moeten toekennen. Ten minste één functie in de groepsadministratie is verplicht om een lid te kunnen toevoegen in de groepsadministratie. Voor nieuwe leiding moet je zelf eerst de leiding toevoegen met de juiste functies, daarna kan je de andere gegevens synchroniseren.")
         }
-        report?.addWarning("Je moet zelf de functies (kapoenenleiing...) voor " + details.firstName+" "+details.lastName+" beheren in de groepsadministratie. Voor leiding en vrijwilligers synchroniseert Stamhoofd enkel de gegevens, niet de functies.")
+        report?.markUnmanaged(member, lid)
+        //report?.addWarning("Je moet zelf de functies (bv. kapoenenleiding...) voor " + details.firstName+" "+details.lastName+" beheren in de groepsadministratie. Voor leiding en vrijwilligers synchroniseert Stamhoofd enkel de gegevens, niet de functies.")
     }
 
     // Construct the patch: compare and check the fields that need changes

@@ -8,6 +8,10 @@
             </h1>
             <p>Er staan leden in de groepsadministratie die nog niet in Stamhoofd staan. Je kan deze schrappen (bv. omdat ze gestopt zijn) of behouden (bv. omdat je ze nog even tijd wilt geven om opnieuw in te schrijven). Je schrapt leden best pas net voor de deadline van 15 oktober en daarna, zo blijven ze nog even verzekerd als de inschrijving niet meteen in orde is.</p>
         
+            <p class="info-box">
+                Gestopte leiding/vrijwilligers moet je zelf schrappen - Stamhoofd doet dit niet automatisch.
+            </p>
+
             <STList>
                 <STListItem v-for="member in members" :key="member.id">
                     <div>
@@ -66,13 +70,13 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
     didSetAction = false
 
     @Prop({ required: true })
-    members: SGVLid[]
+        members: SGVLid[]
 
     @Prop({ required: true })
-    setAction: (action: "delete" | "import" | "nothing") => void;
+        setAction: (action: "delete" | "import" | "nothing") => void;
 
     @Prop({ required: true })
-    onCancel: () => void
+        onCancel: () => void
 
     beforeDestroy() {
         if (!this.didSetAction) {

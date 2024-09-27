@@ -66,6 +66,7 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie";
+import { SGVSyncReport } from "../../../classes/SGVGroepsadministratieSync";
 
 @Component({
     components: {
@@ -117,6 +118,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
         const toast = new Toast("Synchroniseren voorbereiden...", "spinner").setHide(null).show()
 
         try {
+            const report = new SGVSyncReport()
             this.setLeave()
             await SGVGroepsadministratie.downloadAll()
             const { matchedMembers, newMembers } = await SGVGroepsadministratie.matchAndSync(this, () => {
@@ -124,11 +126,11 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
             })
             toast.hide();
 
-            const { oldMembers, action } = await SGVGroepsadministratie.prepareSync(this, matchedMembers, newMembers)
+            const { oldMembers, action } = await SGVGroepsadministratie.prepareSync(this, report, matchedMembers, newMembers)
             const toast2 = new Toast("Synchroniseren...", "spinner").setProgress(0).setHide(null).show()
 
             try {
-                await SGVGroepsadministratie.sync(this, matchedMembers, newMembers, oldMembers, action, (status, progress) => {
+                await SGVGroepsadministratie.sync(this, report, matchedMembers, newMembers, oldMembers, action, (status, progress) => {
                     toast2.message = status
                     toast2.setProgress(progress)
                 })

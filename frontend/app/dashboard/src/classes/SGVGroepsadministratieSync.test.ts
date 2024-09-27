@@ -1,4 +1,4 @@
-import { Address, Country, Group, GroupSettings, MemberDetails, Parent, ParentType } from "@stamhoofd/structures";
+import { Address, Country, Group, GroupSettings, MemberDetails, MemberWithRegistrations, Parent, ParentType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import groepFuncties from './SGVDefaultFuncties.json';
@@ -80,7 +80,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const p = getPatch(details, sgv, "groepnummer", [], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [], groepFuncties)
         expect(p.adressen).toHaveLength(1)
         expect(p.adressen[0]).toMatchObject({
             id: "SGVID",
@@ -93,7 +93,7 @@ describe("Groepsadministratie Sync", () => {
             postadres: true
         })
 
-        const p2 = getPatch(details2, sgv, "groepnummer", [], groepFuncties)
+        const p2 = getPatch(MemberWithRegistrations.create({details: details2}), sgv, "groepnummer", [], groepFuncties)
         expect(p2.adressen).toHaveLength(2)
 
         expect(p2.adressen[1]).toMatchObject({
@@ -157,7 +157,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const p = getPatch(details, sgv, "groepnummer", [], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [], groepFuncties)
         expect(p.adressen).not.toBeDefined()
     })
 
@@ -250,7 +250,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const p = getPatch(details, sgv, "groepnummer", [], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [], groepFuncties)
         expect(p.adressen).toHaveLength(2)
         expect(p.adressen[0]).toMatchObject({
             straat: "Teststraat",
@@ -345,7 +345,7 @@ describe("Groepsadministratie Sync", () => {
             ]
         };
 
-        const p = getPatch(details, sgv, "groepnummer", [], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [], groepFuncties)
         expect(p.adressen).toHaveLength(2)
         expect(p.contacten).toHaveLength(2)
 
@@ -412,7 +412,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [jin], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [jin], groepFuncties)
         expect(p.functies).toBeUndefined();
     });
 
@@ -455,7 +455,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [akabe], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [akabe], groepFuncties)
         expect(p.functies).toBeUndefined();
     });
 
@@ -494,7 +494,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [leiding], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [leiding], groepFuncties)
         expect(p.functies).toBeUndefined();
     });
 
@@ -540,7 +540,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [leiding], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [leiding], groepFuncties)
         expect(p.functies).toEqual([
             {"begin": "123", "einde": "586", "functie": "859"}, 
             {"begin": "123", "functie": "notmanaged"}, 
@@ -582,7 +582,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [akabe], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [akabe], groepFuncties)
         expect(p.functies).toEqual([
             {"begin": "123", "einde": "586", "functie": "859"}, 
             {"begin": "123", "functie": "notmanaged"}, 
@@ -623,7 +623,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [interneGroep], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [interneGroep], groepFuncties)
         expect(p.functies).toEqual([
             {"begin": "123", "einde": "586", "functie": "859"}, 
             {"begin": "123", "functie": "notmanaged"}, 
@@ -664,7 +664,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [kapoenen], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [kapoenen], groepFuncties)
         expect(p.functies).toEqual([
             {"begin": "123", "einde": "586", "functie": "859"}, 
             {"begin": "123", "functie": "notmanaged"}, 
@@ -715,7 +715,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [kapoenen, jin], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [kapoenen, jin], groepFuncties)
         expect(p.functies).toEqual([
             {"begin": "123", "einde": "586", "functie": "859"}, 
             {"begin": "123", "functie": "notmanaged"}, 
@@ -761,7 +761,7 @@ describe("Groepsadministratie Sync", () => {
             })
         });
 
-        const p = getPatch(details, sgv, "groepnummer", [interneGroep], groepFuncties)
+        const p = getPatch(MemberWithRegistrations.create({details: details}), sgv, "groepnummer", [interneGroep], groepFuncties)
         expect(p.functies).toEqual([
             {"begin": "123", "einde": "586", "functie": "859"}, 
             {"begin": "123", "functie": "notmanaged"}, 
@@ -769,7 +769,7 @@ describe("Groepsadministratie Sync", () => {
             {"begin": Formatter.dateIso(new Date()), "functie": "d5f75b320b812440010b8125567703cb", "groep": "groepnummer"} // = wouters gestart
         ])
 
-        const secondPatch = getPatch(details, {...sgv, ...p}, "groepnummer", [interneGroep], groepFuncties)
+        const secondPatch = getPatch(MemberWithRegistrations.create({details: details}), {...sgv, ...p}, "groepnummer", [interneGroep], groepFuncties)
         expect(secondPatch.functies).toBeUndefined();
     });
 
