@@ -507,18 +507,7 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
     }
 
     get recordCategories(): RecordCategory[] {
-        // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
-            if (category.childCategories.length > 0) {
-                return category.childCategories
-            }
-            return [category]
-        })
-    }
-
-    get records(): RecordSettings[] {
-        // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return this.recordCategories.flatMap(c => c.records)
+        return RecordCategory.flattenCategoriesWith(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, () => true)
     }
 
     async exportExcel() {

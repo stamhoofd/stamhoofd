@@ -281,18 +281,12 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
     ]
 
     get recordCategories(): RecordCategory[] {
-        // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
-            if (category.childCategories.length > 0) {
-                return category.childCategories
-            }
-            return [category]
-        })
+        return RecordCategory.flattenCategoriesWith(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, () => true)
     }
 
     get records(): RecordSettings[] {
         // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return this.recordCategories.flatMap(c => c.records)
+        return this.recordCategories.flatMap(c => c.getAllRecords())
     }
 
     created() {
