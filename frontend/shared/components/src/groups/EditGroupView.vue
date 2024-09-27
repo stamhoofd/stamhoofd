@@ -128,7 +128,7 @@
                             Uitverkocht
                         </p>
                         <p v-else-if="price.stock" class="style-description-small">
-                            Nog {{ pluralText(price.getRemainingStock(patched), 'stuk', 'stuks') }} beschikbaar
+                            Nog {{ pluralText(price.getRemainingStock(patched) ?? 0, 'stuk', 'stuks') }} beschikbaar
                         </p>
 
                         <template #right>
@@ -430,7 +430,7 @@
                     </h3>
                 </STListItem>
 
-                <STListItem v-for="{list, description} of availableWaitingLists" :key="list.id" :selectable="true" element-name="label">
+                <STListItem v-for="{list, description: waitingListDescription} of availableWaitingLists" :key="list.id" :selectable="true" element-name="label">
                     <template #left>
                         <Radio v-model="waitingList" :value="list" />
                     </template>
@@ -439,7 +439,7 @@
                         {{ list.settings.name }}
                     </h3>
                     <p class="style-description-small">
-                        {{ description }}
+                        {{ waitingListDescription }}
                     </p>
 
                     <template #right>
@@ -957,7 +957,7 @@ async function save() {
         }
         await props.saveHandler(patch.value);
         if (props.showToasts) {
-            await Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
+            Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
         }
         await pop({ force: true });
     }
@@ -981,7 +981,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            await Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
+            Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }
         await pop({ force: true });
     }
