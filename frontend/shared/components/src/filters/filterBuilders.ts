@@ -218,15 +218,22 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                     return {
                         platformMemberships: {
                             $elemMatch: {
-                                expireDate: {
-                                    $gt: {$: '$now'}
-                                },
                                 startDate: {
                                     $lte: {$: '$now'}
                                 },
+                                $or: [
+                                    {
+                                        expireDate: null
+                                    },
+                                    {
+                                        expireDate: {
+                                            $gt: {$: '$now'}
+                                        }
+                                    }
+                                ],
                                 // just in case, maybe not necessary if expireDate is always less than endDate?
                                 endDate: {
-                                    $gte: {$: '$now'}
+                                    $gt: {$: '$now'}
                                 }
                             }
                         }
@@ -246,9 +253,16 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                                             $lte: {$: '$now'}
                                         },
                                         // Just in case, maybe not necessary if expireDate is always less than endDate?
-                                        expireDate: {
-                                            $gt: {$: '$now'}
-                                        }
+                                        $or: [
+                                            {
+                                                expireDate: null
+                                            },
+                                            {
+                                                expireDate: {
+                                                    $gt: {$: '$now'}
+                                                }
+                                            }
+                                        ]
                                     }
                                 }
                             }
