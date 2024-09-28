@@ -32,7 +32,7 @@
         </template>
 
         <STList>
-            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :platform="patchedPlatform" @click="editPeriod(period)" />
+            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :platform="patchedPlatform" @click="editPeriod(period)" @contextmenu.prevent="showContextMenu($event, period)" />
         </STList>
 
         <p>
@@ -47,10 +47,10 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { RegistrationPeriod } from '@stamhoofd/structures';
+import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
 import RegistrationPeriodRow from './components/RegistrationPeriodRow.vue';
@@ -127,6 +127,22 @@ async function editPeriod(period: RegistrationPeriod) {
             }),
         ],
     });
+}
+
+async function showContextMenu(event: MouseEvent, period: RegistrationPeriod) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Instellen als huidige',
+                disabled: patchedPlatform.value.period.id === period.id,
+                action: () => {
+                    setCurrent(period);
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
 }
 
 async function save() {
