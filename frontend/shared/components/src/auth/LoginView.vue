@@ -5,7 +5,7 @@
         <main class="center small flex">
             <div class="st-view-vertical-center">
                 <div class="container">
-                    <h1>Inloggen bij KSA</h1>
+                    <h1>{{ $t('d54c9b23-2d3c-49cd-b1fc-7e821d36fd41') }}</h1>
 
                     <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -66,17 +66,17 @@ import PlatformFooter from './PlatformFooter.vue';
 
 const props = withDefaults(
     defineProps<{
-        initialEmail?: string
-        lock?: string | null
+        initialEmail?: string;
+        lock?: string | null;
     }>(), {
-        initialEmail: "",
-        lock: null
-    }
-)
+        initialEmail: '',
+        lock: null,
+    },
+);
 
 enum Routes {
-    ForgotPassword = "forgotPassword",
-    Signup = "signup"
+    ForgotPassword = 'forgotPassword',
+    Signup = 'signup',
 }
 
 defineRoutes([
@@ -86,8 +86,8 @@ defineRoutes([
         component: ForgotPasswordView as any,
         paramsToProps() {
             return {
-                initialEmail: email.value
-            }
+                initialEmail: email.value,
+            };
         },
     },
     {
@@ -96,55 +96,55 @@ defineRoutes([
         component: async () => (await import('./SignupView.vue')).default,
         paramsToProps() {
             return {
-                initialEmail: email.value
-            }
+                initialEmail: email.value,
+            };
         },
-    }
-])
+    },
+]);
 
-const errors = useErrors()
+const errors = useErrors();
 const $context = useContext();
-const present = usePresent()
-const dismiss = useDismiss()
+const present = usePresent();
+const dismiss = useDismiss();
 const $navigate = useNavigate();
 
-const loading = ref(false)
-const email = ref(props.initialEmail)
-const password = ref("");
-const animating = ref(true)
-const emailInput = ref<EmailInput | null>(null)
+const loading = ref(false);
+const email = ref(props.initialEmail);
+const password = ref('');
+const animating = ref(true);
+const emailInput = ref<EmailInput | null>(null);
 const showVersionFooter = computed(() => {
-    return email.value.toLocaleLowerCase().trim() === 'stamhoofd@dev.dev'
-})
+    return email.value.toLocaleLowerCase().trim() === 'stamhoofd@dev.dev';
+});
 
 async function submit() {
     if (loading.value) {
-        return
+        return;
     }
- 
-    const valid = await errors.validator.validate()
- 
+
+    const valid = await errors.validator.validate();
+
     if (!valid) {
-        return
+        return;
     }
-         
+
     if (email.value.length < 3 || password.value.length < 5) {
         errors.errorBox = new ErrorBox(
             new SimpleError({
-                code: "empty_fields",
-                message: "Je hebt geen correcte gegevens ingevuld"
-            })
-        )
+                code: 'empty_fields',
+                message: 'Je hebt geen correcte gegevens ingevuld',
+            }),
+        );
         return;
     }
- 
-    loading.value = true
-         
+
+    loading.value = true;
+
     try {
-        const result = await LoginHelper.login($context.value, email.value, password.value)
+        const result = await LoginHelper.login($context.value, email.value, password.value);
 
         if (email.value.toLocaleLowerCase() === 'appreview@stamhoofd.be' && STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL) {
-            //await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
+            // await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
             await AppManager.shared.checkUpdates({
                 // Always load the staging build
                 customText: 'Bezig met laden...',
@@ -152,37 +152,39 @@ async function submit() {
                 installAutomatically: true,
                 force: true,
                 channel: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
-                checkTimeout: 15 * 1000
-            })
-            //await Storage.keyValue.removeItem('next_url_load')
+                checkTimeout: 15 * 1000,
+            });
+            // await Storage.keyValue.removeItem('next_url_load')
         }
- 
+
         if (result.verificationToken) {
             await present({
                 components: [
-                    new ComponentWithProperties(ConfirmEmailView, { 
-                        login: true, 
-                        token: result.verificationToken, 
-                        email: email.value
-                    })
+                    new ComponentWithProperties(ConfirmEmailView, {
+                        login: true,
+                        token: result.verificationToken,
+                        email: email.value,
+                    }),
                 ],
-                modalDisplayStyle: "sheet"
-            })
-        } else {
+                modalDisplayStyle: 'sheet',
+            });
+        }
+        else {
             await dismiss({ force: true });
         }
-    } catch (e) {
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
 }
 
 async function gotoPasswordForgot() {
-    await $navigate(Routes.ForgotPassword)
+    await $navigate(Routes.ForgotPassword);
 }
 
 async function openSignup() {
-    await $navigate(Routes.Signup)
+    await $navigate(Routes.Signup);
 }
 
 onMounted(() => {
@@ -191,10 +193,11 @@ onMounted(() => {
             animating.value = false;
             // Needed the any here because typescript is getting mad only in production mode
             if (emailInput.value) {
-                emailInput.value.focus()
+                emailInput.value.focus();
             }
         }, 300);
-    } else {
+    }
+    else {
         setTimeout(() => {
             // Needed the any here because typescript is getting mad only in production mode
             animating.value = false;

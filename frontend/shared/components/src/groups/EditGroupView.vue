@@ -107,7 +107,7 @@
                     </button>
                 </div>
             </h2>
-            <p>{{ $t("Je kan één of meerdere tarieven instellen en elk tarief een eigen naam geven. Een lid kan bij het inschrijven zelf één van de beschikbare tarieven kiezen.") }}</p>
+            <p>{{ $t("de2222d9-c934-4d06-8702-9527686de012") }}</p>
 
             <STList v-if="patched.settings.prices.length !== 1" v-model="draggablePrices" :draggable="true">
                 <template #item="{item: price}">
