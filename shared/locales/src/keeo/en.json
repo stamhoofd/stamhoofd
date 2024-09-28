@@ -1,9 +1,9 @@
 {
     "replacements": {
-      "Vereniging": "Eenheid",
-      "vereniging": "eenheid",
       "Verenigingen": "Eenheden",
-      "verenigingen": "eenheden"
+      "verenigingen": "eenheden",
+      "Vereniging": "Eenheid",
+      "vereniging": "eenheid"
     },
     "81c91169-db1e-4819-8716-5382ffbaa43b": "Het eenheidsnummer is een unieke code voor deze eenheid. Deze wordt in de URL-balk van de browser gebruikt.",
     "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": "Eenheidsnummer",
