@@ -7,7 +7,6 @@ import {
     Platform as PlatformStruct,
     SetupStepType,
     SetupSteps,
-    minimumRegistrationCount,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import {
@@ -385,12 +384,14 @@ export class SetupStepUpdater {
         platform: PlatformStruct) {
         const defaultAgeGroupIds = platform.config.defaultAgeGroups.filter(g => g.minimumRequiredMembers > 0).map(x => x.id);
 
-        const groupsWithDefaultAgeGroups = await Group.select()
-            .where('organizationId', organization.id)
-            .where('periodId', organization.periodId)
-            .where('defaultAgeGroupId', defaultAgeGroupIds)
-            .where('deletedAt', null)
-            .fetch();
+        const groupsWithDefaultAgeGroups = defaultAgeGroupIds.length > 0
+            ? await Group.select()
+                .where('organizationId', organization.id)
+                .where('periodId', organization.periodId)
+                .where('defaultAgeGroupId', defaultAgeGroupIds)
+                .where('deletedAt', null)
+                .fetch()
+            : [];
 
         let totalSteps = 0;
 
