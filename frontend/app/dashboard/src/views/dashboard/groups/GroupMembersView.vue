@@ -37,6 +37,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
+import { isMemberManaged } from "../../../classes/SGVGroepsadministratieSync";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
@@ -95,6 +96,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         let base = 'ok';
 
         for (const member of this.allValues) {
+            if (!isMemberManaged(member)) {
+                continue    
+            }
             const status = member.syncStatus
             if (status === 'never') {
                 return 'never'
