@@ -117,26 +117,30 @@ export class SGVSyncReport {
         }
 
         for (const member of this.skipped) {
-            const post = getPatch(member, {
-                adressen: [],
-                contacten: [],
-                functies: []
-            }, '1234', member.groups, getDefaultGroepFuncties())
+            try {
+                const post = getPatch(member, {
+                    adressen: [],
+                    contacten: [],
+                    functies: []
+                }, '1234', member.groups, getDefaultGroepFuncties())
 
-            if (post.functies) {
-                for (const functie of post.functies) {
-                    const functieId = functie.functie;
-                    const f = getDefaultGroepFuncties().find(f => f.id === functieId)
-                    if (f) {
-                        const code = f?.beschrijving || f?.code || 'Onbekende functie';
-                        
-                        if (counts.has(code)) {
-                            counts.set(code, counts.get(code)! + 1)
-                        } else {
-                            counts.set(code, 1)
+                if (post.functies) {
+                    for (const functie of post.functies) {
+                        const functieId = functie.functie;
+                        const f = getDefaultGroepFuncties().find(f => f.id === functieId)
+                        if (f) {
+                            const code = f?.beschrijving || f?.code || 'Onbekende functie';
+                            
+                            if (counts.has(code)) {
+                                counts.set(code, counts.get(code)! + 1)
+                            } else {
+                                counts.set(code, 1)
+                            }
                         }
                     }
                 }
+            } catch (e) {
+                // ignore: member is not managed
             }
         }
 
@@ -150,17 +154,21 @@ export class SGVSyncReport {
 }
 
 export function isMemberManaged(member: MemberWithRegistrations) {
-    const post = getPatch(member, {
-        adressen: [],
-        contacten: [],
-        functies: []
-    }, '1234', member.groups, getDefaultGroepFuncties())
+    try {
+        const post = getPatch(member, {
+            adressen: [],
+            contacten: [],
+            functies: []
+        }, '1234', member.groups, getDefaultGroepFuncties())
 
-    if (post.functies.length > 0) {
-        return true;
+        if (post.functies.length > 0) {
+            return true;
+        }
+
+        return false;
+    } catch (e) {
+        return false;
     }
-
-    return false;
 }
 
 export function getLidName(lid: any) {
