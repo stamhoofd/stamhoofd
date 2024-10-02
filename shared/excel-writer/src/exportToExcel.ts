@@ -24,6 +24,7 @@ export async function exportToExcel<T>({ definitions, writer, dataGenerator, fil
         await writer.close();
     }
     catch (e) {
+        console.error('Error while exporting to excel', e, 'Aborting writer');
         await writer.abort();
         throw e;
     }

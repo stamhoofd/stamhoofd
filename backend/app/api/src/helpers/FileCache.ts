@@ -24,7 +24,7 @@ async function randomBytes(size: number): Promise<Buffer> {
 export class FileCache {
     static async getWriteStream(extension: '.xlsx'): Promise<{
         file: string;
-        stream: WritableStream;
+        stream: Writable;
     }> {
         if (!STAMHOOFD.CACHE_PATH) {
             throw new SimpleError({
@@ -51,7 +51,7 @@ export class FileCache {
 
         return {
             file: path + '/' + fileName,
-            stream: Writable.toWeb(s),
+            stream: s,
         };
     }
 

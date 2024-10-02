@@ -1,42 +1,65 @@
-import archiver from 'archiver';
 import { ZipWriterAdapter } from '../interfaces';
-import { PassThrough, Readable, Writable } from 'node:stream';
+import { Writable } from 'node:stream';
+import os from 'os';
+import { v4 as uuidv4 } from 'uuid';
+import fs from 'node:fs';
+import archiver from 'archiver';
 
 export class ArchiverWriterAdapter implements ZipWriterAdapter {
-    writer: WritableStream<Buffer>;
-    archive: archiver.Archiver;
-    finalizePromise: Promise<void> | undefined;
+    output: Writable;
+    fileStreams: { tmpFile: string; fileName: string; stream: WritableStream<Buffer> }[] = [];
+
+    constructor(output: Writable) {
+        this.output = output;
+
+        // setup
+        // todo
+    }
+
+    async addFile(name: string): Promise<WritableStream<Buffer>> {
+        const tmpDir = os.tmpdir() + '/stamhoofd-excel-writer';
+
+        // generate random filename
+        const tmpFilename = 'excel_writer_' + uuidv4();
+        const filePath = tmpDir + '/' + tmpFilename;
+
+        await fs.promises.mkdir(tmpDir, { recursive: true });
+
+        const s = fs.createWriteStream(filePath, 'binary');
+
+        s.on('close', () => {
+            console.log('PassThrough closed file: File written to disk', filePath);
+        });
+
+        const webStream = Writable.toWeb(s);
+
+        this.fileStreams.push({ tmpFile: filePath, fileName: name, stream: webStream });
+
+        return Promise.resolve(webStream);
+    }
+
+    async addDirectory(name: string): Promise<void> {
+        // Empty directories are not supported by archiver
+        // Directories should be created automatically when using addFile in this adapter
+    }
+
+    async ready() {
+        return Promise.resolve();
+    }
 
     /**
-     * All pending writes we'll need to await
+     * Note: make sure all writeable streams are closed before calling this
      */
-    pendingFileWrites: Promise<any>[] = [];
+    async close() {
+        // All streams should be closed now
 
-    /**
-     * @param writer The data of the zip file will be written to this stream
-     */
-    constructor(writer: WritableStream<Buffer>) {
-        const output = Writable.fromWeb(writer);
-
-        output.on('close', () => {
-            console.log('Archiver has been finalized and the output file descriptor has closed: ' + this.archive.pointer() + ' total bytes');
-        });
-
-        output.on('end', function () {
-            console.log('Data has been drained');
-        });
-
-        output.on('error', (e) => {
-            console.error('Error in output stream', e);
-            throw e;
-        });
-
-        this.archive = archiver('zip', {
+        const archive = archiver('zip', {
             zlib: { level: 9 }, // Sets the compression level.
+            highWaterMark: 1,
         });
 
         // good practice to catch warnings (ie stat failures and other non-blocking errors)
-        this.archive.on('warning', function (err) {
+        archive.on('warning', function (err) {
             if (err.code === 'ENOENT') {
                 console.warn(err);
             }
@@ -47,58 +70,53 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
         });
 
         // good practice to catch this error explicitly
-        this.archive.on('error', function (err) {
+        archive.on('error', function (err) {
             console.error('Archiver error', err);
             throw err;
         });
 
         // pipe archive data to the file
-        this.archive.pipe(output);
-    }
+        archive.pipe(this.output);
 
-    addFile(name: string): Promise<WritableStream<Buffer>> {
-        // Create a new writeable stream that writes to a reader that we'll pass to zipWriter
-        const stream = new PassThrough({});
+        // Pass to destionation stream
+        for (const { tmpFile, fileName } of this.fileStreams) {
+            console.log('File written to disk', tmpFile);
 
-        stream.on('end', () => {
-            console.log('Finished file', name);
-        });
+            // Create read stream
+            archive.append(fs.createReadStream(tmpFile), { name: fileName });
+        }
 
-        stream.on('close', () => {
-            console.log('Closed file stream', name);
-        });
+        await archive.finalize();
 
-        stream.on('error', (err) => {
-            console.error('Error in PassThrough stream', name, err);
-            // throw err;
-        });
-
-        this.archive.append(stream, { name });
-        return Promise.resolve(Writable.toWeb(stream));
-    }
-
-    async addDirectory(name: string): Promise<void> {
-        // Empty directories are not supported by archiver
-        // Directories should be created automatically when using addFile in this adapter
-    }
-
-    async ready() {
-        this.finalizePromise = this.archive.finalize();
-        return Promise.resolve();
-    }
-
-    /**
-     * Note: make sure all writeable streams are closed before calling this
-     */
-    async close() {
-        return await this.finalizePromise;
+        // Clear all tmp files
+        for (const { tmpFile } of this.fileStreams) {
+            try {
+                await fs.promises.unlink(tmpFile);
+            }
+            catch (e) {
+                console.error('Error while deleting tmp file', tmpFile, e);
+            }
+        }
     }
 
     async abort() {
-        if (!this.finalizePromise) {
-            this.archive.abort();
-            return;
+        for (const { stream } of this.fileStreams) {
+            try {
+                await stream.abort();
+            }
+            catch (e) {
+                // Ignore
+            }
         }
-        await this.finalizePromise;
+
+        // Clear all tmp files
+        for (const { tmpFile } of this.fileStreams) {
+            try {
+                await fs.promises.unlink(tmpFile);
+            }
+            catch (e) {
+                console.error('Error while deleting tmp file', tmpFile, e);
+            }
+        }
     }
 }
