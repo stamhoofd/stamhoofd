@@ -332,21 +332,6 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                 };
             },
         },
-        {
-            id: 'settlement.fee',
-            name: 'Uitbetalingstransactiekosten',
-            width: 25,
-            getValue: (object: PaymentGeneralWithStripeAccount) => {
-                return {
-                    value: object.settlement?.fee !== undefined ? (object.settlement?.fee / 100) : null,
-                    style: {
-                        numberFormat: {
-                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
-                        },
-                    },
-                };
-            },
-        },
     ];
 }
 

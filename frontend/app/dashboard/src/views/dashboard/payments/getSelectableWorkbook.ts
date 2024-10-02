@@ -150,12 +150,6 @@ function getSettlementColumns() {
             description: 'Totale bedrag dat werd uitbetaald door de betaalprovider in de uitbetaling (bevat dus ook andere betalingen)',
             category: 'Uitbetaling',
         }),
-        new SelectableColumn({
-            id: 'settlement.fee',
-            name: 'Uitbetalingstransactiekosten',
-            description: 'De totale transactiekosten die zijn afgehouden van deze uitbetaling door de betaalprovider (bevat dus ook de transactiekosten van andere betalingen)',
-            category: 'Uitbetaling',
-        }),
     ];
 }
 
