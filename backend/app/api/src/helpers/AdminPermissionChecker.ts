@@ -482,6 +482,10 @@ export class AdminPermissionChecker {
         }
 
         const { balanceItems } = await Payment.loadBalanceItems(payments);
+
+        if (balanceItems.length === 0) {
+            return false;
+        }
         return await this.canAccessBalanceItems(balanceItems, permissionLevel);
     }
 
