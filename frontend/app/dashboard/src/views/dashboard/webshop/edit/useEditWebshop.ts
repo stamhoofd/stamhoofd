@@ -4,7 +4,7 @@ import { CenteredMessage, ErrorBox, GlobalEventBus, Toast, useContext, useErrors
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
-import { computed, readonly, ref } from 'vue';
+import { computed, readonly, Ref, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 
 export type UseEditWebshopProps = {
@@ -124,7 +124,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
 
     return {
         isNew,
-        webshop: readonly(webshop),
+        webshop: readonly(webshop) as Readonly<Ref<PrivateWebshop>>,
         addPatch,
         patch,
         hasChanges: readonly(hasChanges),

@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ viewTitle }}
         </h1>
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="webshop.categories.length > 0">
             <STList v-model="draggableCategories" :draggable="true">
@@ -58,142 +58,148 @@
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
-
 import CategoryRow from './categories/CategoryRow.vue';
-import EditCategoryView from './categories/EditCategoryView.vue';
-import EditWebshopMixin from './EditWebshopMixin';
-import EditProductView from './products/EditProductView.vue';
 import ProductRow from './products/ProductRow.vue';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        STErrorsDefault,
-        ProductRow,
-        CategoryRow,
-        SaveView,
-        Checkbox,
-    },
-})
-export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
-    get viewTitle() {
-        if (this.isTickets) {
-            if (this.webshop.categories.length > 0) {
-                return 'Ticket categorieën';
-            }
-            return 'Aanbod tickets en vouchers';
+import { computed } from 'vue';
+import EditCategoryView from './categories/EditCategoryView.vue';
+import EditProductView from './products/EditProductView.vue';
+import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+
+const props = defineProps<UseEditWebshopProps>();
+
+const present = usePresent();
+
+const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+    getProps: () => props,
+});
+
+const viewTitle = computed(() => {
+    if (isTickets.value) {
+        if (webshop.value.categories.length > 0) {
+            return 'Ticket categorieën';
         }
-        if (this.webshop.categories.length > 0) {
-            return 'Product categorieën';
-        }
-        return 'Productaanbod';
+        return 'Aanbod tickets en vouchers';
     }
-
-    get isTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.Tickets;
+    if (webshop.value.categories.length > 0) {
+        return 'Product categorieën';
     }
+    return 'Productaanbod';
+});
 
-    get cartEnabled() {
-        return this.webshop.meta.cartEnabled;
-    }
+const isTickets = computed(() => webshop.value.meta.ticketType === WebshopTicketType.Tickets);
 
-    set cartEnabled(cartEnabled: boolean) {
+const cartEnabled = computed({
+    get: () => webshop.value.meta.cartEnabled,
+    set: (cartEnabled: boolean) => {
         const patch = WebshopMetaData.patch({ cartEnabled });
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
+
+function addProduct() {
+    const product = Product.create({
+        type: webshop.value.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
+    });
+    const p = PrivateWebshop.patch({});
+    p.products.addPut(product);
+
+    present(new ComponentWithProperties(EditProductView,
+        {
+            product,
+            webshop: webshop.value.patch(p),
+            isNew: true,
+            saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+                // Merge both patches
+                addPatch(p.patch(patch));
+
+                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            },
+        },
+    ).setDisplayStyle('popup'))
+        .catch(console.error);
+}
+
+function addCategory() {
+    const category = Category.create({});
+
+    if (webshop.value.categories.length === 0) {
+        // Also inherit all products (only on save)
+        category.productIds = webshop.value.products.map(p => p.id);
     }
 
-    addProduct() {
-        const product = Product.create({
-            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
-        });
-        const p = PrivateWebshop.patch({});
-        p.products.addPut(product);
-        this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
-            // Merge both patches
-            this.addPatch(p.patch(patch));
+    const p = PrivateWebshop.patch({});
+    p.categories.addPut(category);
 
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('popup'));
+    present(new ComponentWithProperties(
+        EditCategoryView,
+        {
+            category,
+            webshop: webshop.value.patch(p),
+            isNew: true,
+            saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+                // Merge both patches
+                addPatch(p.patch(patch));
+            },
+        }).setDisplayStyle('popup')).catch(console.error);
+}
+
+function moveCategoryUp(category: Category) {
+    const index = webshop.value.categories.findIndex(c => category.id === c.id);
+    if (index === -1 || index === 0) {
+        return;
     }
 
-    addCategory() {
-        const category = Category.create({});
+    const moveTo = index - 2;
+    const p = PrivateWebshop.patch({});
+    p.categories.addMove(category.id, webshop.value.categories[moveTo]?.id ?? null);
+    addPatch(p);
+}
 
-        if (this.webshop.categories.length === 0) {
-            // Also inherit all products (only on save)
-            category.productIds = this.webshop.products.map(p => p.id);
-        }
-
-        const p = PrivateWebshop.patch({});
-        p.categories.addPut(category);
-
-        this.present(new ComponentWithProperties(EditCategoryView, { category, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
-            // Merge both patches
-            this.addPatch(p.patch(patch));
-        } }).setDisplayStyle('popup'));
+function moveCategoryDown(category: Category) {
+    const index = webshop.value.categories.findIndex(c => category.id === c.id);
+    if (index === -1 || index >= webshop.value.categories.length - 1) {
+        return;
     }
 
-    moveCategoryUp(category: Category) {
-        const index = this.webshop.categories.findIndex(c => category.id === c.id);
-        if (index === -1 || index === 0) {
-            return;
-        }
+    const moveTo = index + 1;
+    const p = PrivateWebshop.patch({});
+    p.categories.addMove(category.id, webshop.value.categories[moveTo].id);
+    addPatch(p);
+}
 
-        const moveTo = index - 2;
-        const p = PrivateWebshop.patch({});
-        p.categories.addMove(category.id, this.webshop.categories[moveTo]?.id ?? null);
-        this.addPatch(p);
+function moveProductUp(product: Product) {
+    const index = webshop.value.products.findIndex(c => product.id === c.id);
+    if (index === -1 || index === 0) {
+        return;
     }
 
-    moveCategoryDown(category: Category) {
-        const index = this.webshop.categories.findIndex(c => category.id === c.id);
-        if (index === -1 || index >= this.webshop.categories.length - 1) {
-            return;
-        }
+    const moveTo = index - 2;
+    const p = PrivateWebshop.patch({});
+    p.products.addMove(product.id, webshop.value.products[moveTo]?.id ?? null);
+    addPatch(p);
+}
 
-        const moveTo = index + 1;
-        const p = PrivateWebshop.patch({});
-        p.categories.addMove(category.id, this.webshop.categories[moveTo].id);
-        this.addPatch(p);
+function moveProductDown(product: Product) {
+    const index = webshop.value.products.findIndex(c => product.id === c.id);
+    if (index === -1 || index >= webshop.value.products.length - 1) {
+        return;
     }
 
-    moveProductUp(product: Product) {
-        const index = this.webshop.products.findIndex(c => product.id === c.id);
-        if (index === -1 || index === 0) {
-            return;
-        }
+    const moveTo = index + 1;
+    const p = PrivateWebshop.patch({});
+    p.products.addMove(product.id, webshop.value.products[moveTo].id);
+    addPatch(p);
+}
 
-        const moveTo = index - 2;
-        const p = PrivateWebshop.patch({});
-        p.products.addMove(product.id, this.webshop.products[moveTo]?.id ?? null);
-        this.addPatch(p);
-    }
-
-    moveProductDown(product: Product) {
-        const index = this.webshop.products.findIndex(c => product.id === c.id);
-        if (index === -1 || index >= this.webshop.products.length - 1) {
-            return;
-        }
-
-        const moveTo = index + 1;
-        const p = PrivateWebshop.patch({});
-        p.products.addMove(product.id, this.webshop.products[moveTo].id);
-        this.addPatch(p);
-    }
-
-    get draggableProducts() {
-        return this.webshop.products;
-    }
-
-    set draggableProducts(products) {
-        if (products.length !== this.webshop.products.length) {
+const draggableProducts = computed({
+    get: () => webshop.value.products,
+    set: (products) => {
+        if (products.length !== webshop.value.products.length) {
             return;
         }
 
@@ -201,15 +207,14 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
         for (const p of products.slice().reverse()) {
             patch.products.addMove(p.id, null);
         }
-        this.addPatch(patch);
-    }
+        addPatch(patch);
+    },
+});
 
-    get draggableCategories() {
-        return this.webshop.categories;
-    }
-
-    set draggableCategories(categories) {
-        if (categories.length !== this.webshop.categories.length) {
+const draggableCategories = computed({
+    get: () => webshop.value.categories,
+    set: (categories) => {
+        if (categories.length !== webshop.value.categories.length) {
             return;
         }
 
@@ -217,7 +222,7 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
         for (const c of categories.slice().reverse()) {
             patch.categories.addMove(c.id, null);
         }
-        this.addPatch(patch);
-    }
-}
+        addPatch(patch);
+    },
+});
 </script>
