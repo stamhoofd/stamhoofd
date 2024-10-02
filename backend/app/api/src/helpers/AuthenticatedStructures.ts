@@ -31,8 +31,8 @@ export class AuthenticatedStructures {
             // Note: permission checking is moved here for performacne to avoid loading the data multiple times
             if (!(await Context.auth.canAccessBalanceItems(balanceItems, PermissionLevel.Read, { registrations, orders }))) {
                 throw new SimpleError({
-                    code: 'not_found',
-                    message: 'Payment not found',
+                    code: 'permission_denied',
+                    message: 'Permission denied',
                     human: 'Je hebt geen toegang tot deze betaling',
                 });
             }
