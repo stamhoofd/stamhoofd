@@ -501,7 +501,7 @@ export class AdminPermissionChecker {
         }
 
         if (balanceItems.length === 0) {
-            return false;
+            return true;
         }
 
         const organizationId = balanceItems[0].organizationId;
