@@ -403,14 +403,15 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { AccountSettingsView, BackButton, CenteredMessage, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
+import { AccountSettingsView, CenteredMessage, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, useContext, useOrganization } from '@stamhoofd/components';
 import { AccessRight, EmailTemplate, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { computed, onBeforeUnmount, ref } from 'vue';
 
+import { useOrganizationManager } from '@stamhoofd/networking';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
@@ -428,480 +429,398 @@ import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
 import { WebshopManager } from './WebshopManager';
 
-@Component({
-    components: {
-        STNavigationBar,
-        BackButton,
-        STList,
-        STListItem,
-        BillingWarningBox,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class WebshopOverview extends Mixins(NavigationMixin) {
-    @Prop()
-    preview!: WebshopPreview;
+const props = defineProps<{ preview: WebshopPreview }>();
+const context = useContext();
+const organizationManager = useOrganizationManager();
+const organization = useOrganization();
+const show = useShow();
+const present = usePresent();
+const pop = usePop();
+const canPop = useCanPop();
+const splitViewController = useSplitViewController();
 
-    loading = false;
+const loading = ref(false);
+const webshopManager = ref(new WebshopManager(context.value, props.preview));
+const webshop = computed(() => webshopManager.value.webshop);
 
-    webshopManager = new WebshopManager(this.$context, (this.$props! as unknown as any).preview);
+function reload() {
+    loading.value = true;
 
-    constructor() {
-        super();
-        console.log('Constructed new WebshopOverview', (this as any).$options.props);
+    webshopManager.value.loadWebshopIfNeeded().catch((e) => {
+        console.error(e);
+        Toast.fromError(e).show();
+    }).finally(() => {
+        loading.value = false;
+    });
+}
 
-        // Fix
-        // proxy to actual vm
-        const keys = Object.getOwnPropertyNames(this);
-        // 2.2.0 compat (props are no longer exposed as self properties)
-        if (this.$options.props) {
-            for (const key in this.$options.props) {
-                if (!Object.prototype.hasOwnProperty.call(this, key)) {
-                    console.log('does not has own property', key);
-                    keys.push(key);
-                }
-                else {
-                    console.log('has own property', key);
-                }
-            }
-        }
-        console.log('keys', keys);
-        // keys.forEach(key => {
-        //     Object.defineProperty(this, key, {
-        //         get: () => this[key],
-        //         set: value => { this[key] = value },
-        //         configurable: true
-        //     })
-        // })
-    }
+function getFeatureFlag(flag: string) {
+    return organization.value?.privateMeta?.featureFlags.includes(flag) ?? false;
+}
 
-    reload() {
-        this.loading = true;
+const isOpen = computed(() => !webshopManager.value.preview.isClosed());
+const isArchive = computed(() => webshopManager.value.preview.meta.status === WebshopStatus.Archived);
+const title = computed(() => props.preview.meta.name);
+const webshopUrl = computed(() => props.preview.getUrl(organization.value!));
+const hasFullPermissions = computed(() => props.preview.privateMeta.permissions.hasFullAccess(context.value.organizationPermissions));
+const hasWritePermissions = computed(() => props.preview.privateMeta.permissions.hasWriteAccess(context.value.organizationPermissions));
+const hasReadPermissions = computed(() => props.preview.privateMeta.permissions.hasReadAccess(context.value.organizationPermissions));
+const hasScanPermissions = computed(() => hasWritePermissions.value || props.preview.privateMeta.scanPermissions.hasWriteAccess(context.value.organizationPermissions));
+const isTicketsOnly = computed(() => webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets);
+const hasTickets = computed(() => webshopManager.value.preview.meta.ticketType !== WebshopTicketType.None);
+const hasSeating = computed(() => webshopManager.value.preview.meta.seatingPlans.length > 0 && (!webshop.value || !!webshop.value?.products?.find(p => p.seatingPlanId !== null)));
 
-        this.webshopManager.loadWebshopIfNeeded().catch((e) => {
-            console.error(e);
-            Toast.fromError(e).show();
-        }).finally(() => {
-            this.loading = false;
-        });
-    }
-
-    getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
-    }
-
-    get webshop() {
-        return this.webshopManager.webshop;
-    }
-
-    get isOpen() {
-        return !this.webshopManager.preview.isClosed();
-    }
-
-    get isArchive() {
-        return this.webshopManager.preview.meta.status === WebshopStatus.Archived;
-    }
-
-    get organization() {
-        return this.$organization;
-    }
-
-    get title() {
-        return this.preview.meta.name;
-    }
-
-    get webshopUrl() {
-        return this.preview.getUrl(this.$organization);
-    }
-
-    get hasFullPermissions() {
-        return this.preview.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions);
-    }
-
-    get hasWritePermissions() {
-        return this.preview.privateMeta.permissions.hasWriteAccess(this.$context.organizationPermissions);
-    }
-
-    get hasReadPermissions() {
-        return this.preview.privateMeta.permissions.hasReadAccess(this.$context.organizationPermissions);
-    }
-
-    get hasScanPermissions() {
-        return this.hasWritePermissions || this.preview.privateMeta.scanPermissions.hasWriteAccess(this.$context.organizationPermissions);
-    }
-
-    get isTicketsOnly() {
-        return this.webshopManager.preview.meta.ticketType === WebshopTicketType.Tickets;
-    }
-
-    get hasTickets() {
-        return this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None;
-    }
-
-    get hasSeating() {
-        return this.webshopManager.preview.meta.seatingPlans.length > 0 && (!this.webshop || !!this.webshop?.products?.find(p => p.seatingPlanId !== null));
-    }
-
-    openOrders(animated = true) {
-        this.show({
-            animated,
-            adjustHistory: animated,
-            components: [
-                new ComponentWithProperties(WebshopOrdersView, {
-                    webshopManager: this.webshopManager,
-                }),
-            ],
-        });
-    }
-
-    openSeating(animated = true) {
-        this.show({
-            animated,
-            adjustHistory: animated,
-            components: [
-                new ComponentWithProperties(WebshopSeatingView, {
-                    webshopManager: this.webshopManager,
-                }),
-            ],
-        });
-    }
-
-    openStatistics(animated = true) {
-        this.show({
-            animated,
-            adjustHistory: animated,
-            components: [
-                new ComponentWithProperties(WebshopStatisticsView, {
-                    webshopManager: this.webshopManager,
-                }),
-            ],
-        });
-    }
-
-    openTickets(animated = true) {
-        this.show({
-            animated,
-            adjustHistory: animated,
-            components: [
-                new ComponentWithProperties(TicketScannerSetupView, {
-                    webshopManager: this.webshopManager,
-                }),
-            ],
-        });
-    }
-
-    editGeneral(animated = true) {
-        this.displayEditComponent(EditWebshopGeneralView, animated);
-    }
-
-    editPage(animated = true) {
-        this.displayEditComponent(EditWebshopPageView, animated);
-    }
-
-    editLink(animated = true) {
-        this.displayEditComponent(EditWebshopLinkView, animated);
-    }
-
-    editProducts(animated = true) {
-        this.displayEditComponent(EditWebshopProductsView, animated);
-    }
-
-    editDiscounts(animated = true) {
-        this.displayEditComponent(EditWebshopDiscountsView, animated);
-    }
-
-    editPaymentMethods(animated = true) {
-        this.displayEditComponent(EditWebshopPaymentMethodsView, animated);
-    }
-
-    editInputFields(animated = true) {
-        this.displayEditComponent(EditWebshopInputFieldsView, animated);
-    }
-
-    editRecordSettings(animated = true) {
-        this.displayEditComponent(EditWebshopRecordSettings, animated);
-    }
-
-    editCheckoutMethods(animated = true) {
-        this.displayEditComponent(EditWebshopCheckoutMethodsView, animated);
-    }
-
-    editPermissions(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: 'popup',
-            components: [
-                new ComponentWithProperties(EditResourceRolesView, {
-                    description: 'Kies hier welke beheerdersrollen deze webshop kunnen bekijken, bewerken of beheren.',
-                    resource: {
-                        id: this.preview.id,
-                        name: this.preview.meta.name,
-                        type: PermissionsResourceType.Webshops,
-                    },
-                    configurableAccessRights: this.preview.hasTickets ? [AccessRight.WebshopScanTickets] : [],
-                }),
-            ],
-        });
-    }
-
-    editEmails(animated = true) {
-        // this.displayEditComponent(EditWebshopEmailsView, animated)
-    }
-
-    editNotifications(animated = true) {
-        this.displayEditComponent(EditWebshopNotificationsView, animated);
-    }
-
-    displayEditComponent(component, animated = true) {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PromiseView, {
-                promise: async () => {
-                    try {
-                        // Make sure we have an up to date webshop
-                        await this.webshopManager.loadWebshopIfNeeded(false, true);
-                        return new ComponentWithProperties(component, {
-                            webshopManager: this.webshopManager,
-                        });
-                    }
-                    catch (e) {
-                        Toast.fromError(e).show();
-                        throw e;
-                    }
-                },
+function openOrders(animated = true) {
+    show({
+        animated,
+        adjustHistory: animated,
+        components: [
+            new ComponentWithProperties(WebshopOrdersView, {
+                webshopManager: webshopManager.value,
             }),
-        });
+        ],
+    }).catch(console.error);
+}
 
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: 'popup',
-            components: [
-                displayedComponent,
-            ],
-        });
-    }
-
-    created() {
-        this.reload();
-    }
-
-    get canCreateWebshops() {
-        return this.$context.organizationAuth.hasAccessRight(AccessRight.OrganizationCreateWebshops);
-    }
-
-    duplicateWebshop() {
-        if (!this.canCreateWebshops) {
-            new Toast('Je hebt geen toegang om nieuwe webshops te maken. Vraag toegang aan een hoofdbeheerder van je vereniging.').show();
-            return;
-        }
-
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PromiseView, {
-                promise: async () => {
-                    try {
-                        // Make sure we have an up to date webshop
-                        const webshop = await this.webshopManager.loadWebshopIfNeeded(false);
-                        const duplicate = PrivateWebshop.create({
-                            ...webshop.clone(),
-                            id: undefined,
-                        }).patch({
-                            meta: WebshopMetaData.patch({
-                                status: WebshopStatus.Open,
-                            }),
-                        });
-
-                        // Set usedStock to 0
-                        duplicate.clearStock();
-
-                        const response = await this.$context.authenticatedServer.request({
-                            method: 'GET',
-                            path: '/email-templates',
-                            query: { webshopId: webshop.id },
-                            shouldRetry: false,
-                            owner: this,
-                            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
-                        });
-                        const templates = response.data;
-
-                        return new ComponentWithProperties(EditWebshopGeneralView, {
-                            initialWebshop: duplicate,
-                            savedHandler: async (duplicateWebshop: PrivateWebshop) => {
-                                // Copy over the templates
-                                try {
-                                    const patchedArray: PatchableArrayAutoEncoder<EmailTemplate> = new PatchableArray();
-                                    for (const t of templates) {
-                                        if (t.webshopId !== webshop.id) {
-                                            // Skip default templates
-                                            continue;
-                                        }
-
-                                        // Create a new duplicate
-                                        const template = EmailTemplate.create({
-                                            ...t,
-                                            webshopId: duplicateWebshop.id,
-                                            id: undefined,
-                                        });
-                                        patchedArray.addPut(template);
-                                    }
-
-                                    if (patchedArray.getPuts().length > 0) {
-                                        await this.$context.authenticatedServer.request({
-                                            method: 'PATCH',
-                                            path: '/email-templates',
-                                            body: patchedArray,
-                                            shouldRetry: false,
-                                            owner: this,
-                                        });
-                                    }
-                                }
-                                catch (e) {
-                                    console.error(e);
-                                    new Toast('Er ging iets mis bij het overnemen van de e-mails in de nieuwe webshop', 'warning').show();
-                                }
-                            },
-                        });
-                    }
-                    catch (e) {
-                        Toast.fromError(e).show();
-                        throw e;
-                    }
-                },
+function openSeating(animated = true) {
+    show({
+        animated,
+        adjustHistory: animated,
+        components: [
+            new ComponentWithProperties(WebshopSeatingView, {
+                webshopManager: webshopManager.value,
             }),
-        });
+        ],
+    }).catch(console.error);
+}
 
-        this.present({
-            animated: true,
-            adjustHistory: true,
-            modalDisplayStyle: 'popup',
-            components: [
-                displayedComponent,
-            ],
-        });
+function openStatistics(animated = true) {
+    show({
+        animated,
+        adjustHistory: animated,
+        components: [
+            new ComponentWithProperties(WebshopStatisticsView, {
+                webshopManager: webshopManager.value,
+            }),
+        ],
+    }).catch(console.error);
+}
+
+function openTickets(animated = true) {
+    show({
+        animated,
+        adjustHistory: animated,
+        components: [
+            new ComponentWithProperties(TicketScannerSetupView, {
+                webshopManager: webshopManager.value,
+            }),
+        ],
+    }).catch(console.error);
+}
+
+function editGeneral(animated = true) {
+    displayEditComponent(EditWebshopGeneralView, animated);
+}
+
+function editPage(animated = true) {
+    displayEditComponent(EditWebshopPageView, animated);
+}
+
+function editLink(animated = true) {
+    displayEditComponent(EditWebshopLinkView, animated);
+}
+
+function editProducts(animated = true) {
+    displayEditComponent(EditWebshopProductsView, animated);
+}
+
+function editDiscounts(animated = true) {
+    displayEditComponent(EditWebshopDiscountsView, animated);
+}
+
+function editPaymentMethods(animated = true) {
+    displayEditComponent(EditWebshopPaymentMethodsView, animated);
+}
+
+function editInputFields(animated = true) {
+    displayEditComponent(EditWebshopInputFieldsView, animated);
+}
+
+function editRecordSettings(animated = true) {
+    displayEditComponent(EditWebshopRecordSettings, animated);
+}
+
+function editCheckoutMethods(animated = true) {
+    displayEditComponent(EditWebshopCheckoutMethodsView, animated);
+}
+
+function editPermissions(animated = true) {
+    present({
+        animated,
+        adjustHistory: animated,
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(EditResourceRolesView, {
+                description: 'Kies hier welke beheerdersrollen deze webshop kunnen bekijken, bewerken of beheren.',
+                resource: {
+                    id: props.preview.id,
+                    name: props.preview.meta.name,
+                    type: PermissionsResourceType.Webshops,
+                },
+                configurableAccessRights: props.preview.hasTickets ? [AccessRight.WebshopScanTickets] : [],
+            }),
+        ],
+    }).catch(console.error);
+}
+
+function editEmails(animated = true) {
+    // this.displayEditComponent(EditWebshopEmailsView, animated)
+}
+
+function editNotifications(animated = true) {
+    displayEditComponent(EditWebshopNotificationsView, animated);
+}
+
+function displayEditComponent(component: any, animated = true) {
+    const displayedComponent = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                try {
+                    // Make sure we have an up to date webshop
+                    await webshopManager.value.loadWebshopIfNeeded(false, true);
+                    return new ComponentWithProperties(component, {
+                        webshopManager: webshopManager.value,
+                    });
+                }
+                catch (e) {
+                    Toast.fromError(e).show();
+                    throw e;
+                }
+            },
+        }),
+    });
+
+    present({
+        animated,
+        adjustHistory: animated,
+        modalDisplayStyle: 'popup',
+        components: [
+            displayedComponent,
+        ],
+    }).catch(console.error);
+}
+
+const canCreateWebshops = computed(() => context.value.organizationAuth.hasAccessRight(AccessRight.OrganizationCreateWebshops));
+
+function duplicateWebshop() {
+    if (!canCreateWebshops.value) {
+        new Toast('Je hebt geen toegang om nieuwe webshops te maken. Vraag toegang aan een hoofdbeheerder van je vereniging.').show();
+        return;
     }
 
-    async closeWebshop() {
-        if (this.isArchive) {
-            if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop wilt terugzetten?', 'Ja, terugzetten', 'Je kan daarna de webshop eventueel terug openen.')) {
-                return;
-            }
-        }
-        else {
-            if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop '" + this.webshopManager.preview.meta.name + "' wilt sluiten?", 'Ja, sluiten', 'Er kunnen daarna geen nieuwe bestellingen worden gemaakt. Je kan de webshop later terug openen.')) {
-                return;
-            }
-        }
-
-        try {
-            await this.webshopManager.patchWebshop(
-                PrivateWebshop.patch({
-                    meta: WebshopMetaData.patch({
-                        status: WebshopStatus.Closed,
-                    }),
-                }),
-            );
-            new Toast('De webshop is gesloten', 'success green').show();
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-    }
-
-    async openWebshop() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop terug wilt openen?', 'Ja, openen')) {
-            return;
-        }
-
-        try {
-            await this.webshopManager.patchWebshop(
-                PrivateWebshop.patch({
-                    meta: WebshopMetaData.patch({
-                        status: WebshopStatus.Open,
-                        availableUntil: null,
-                    }),
-                }),
-            );
-            new Toast('De webshop is terug open', 'success green').show();
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-    }
-
-    async archiveWebshop() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop wilt archiveren?', 'Ja, archiveren', 'De gegevens van de webshop blijven daarna nog bereikbaar, maar de webshop wordt niet meer zo prominent in het menu weergegeven.')) {
-            return;
-        }
-
-        try {
-            await this.webshopManager.patchWebshop(
-                PrivateWebshop.patch({
-                    meta: WebshopMetaData.patch({
-                        status: WebshopStatus.Archived,
-                    }),
-                }),
-            );
-            new Toast('De webshop is gearchiveerd', 'success green').show();
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-    }
-
-    async deleteWebshop() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop '" + this.webshopManager.preview.meta.name + "' wilt verwijderen?", 'Ja, verwijderen', 'Alle bijhorende bestellingen worden ook definitief verwijderd. Je kan dit niet ongedaan maken.')) {
-            return;
-        }
-
-        try {
-            await this.$context.authenticatedServer.request({
-                method: 'DELETE',
-                path: '/webshop/' + this.webshopManager.preview.id,
-                shouldRetry: false,
-            });
-            new Toast('Webshop verwijderd', 'success green').show();
-
-            this.$organization.webshops = this.$organization.webshops.filter(w => w.id !== this.webshopManager.preview.id);
-
-            // Save updated organization to cache
-            this.$organizationManager.save().catch(console.error);
-
-            if (this.canPop) {
-                this.pop({ force: true });
-            }
-            else {
-                await this.splitViewController!.showDetail({
-                    components: [
-                        new ComponentWithProperties(NavigationController, {
-                            root: new ComponentWithProperties(AccountSettingsView, {}),
+    const displayedComponent = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                try {
+                    // Make sure we have an up to date webshop
+                    const webshop = await webshopManager.value.loadWebshopIfNeeded(false);
+                    const duplicate = PrivateWebshop.create({
+                        ...webshop.clone(),
+                        id: undefined,
+                    }).patch({
+                        meta: WebshopMetaData.patch({
+                            status: WebshopStatus.Open,
                         }),
-                    ],
-                    animated: false,
-                });
-            }
+                    });
+
+                    // Set usedStock to 0
+                    duplicate.clearStock();
+
+                    const response = await context.value.authenticatedServer.request({
+                        method: 'GET',
+                        path: '/email-templates',
+                        query: { webshopId: webshop.id },
+                        shouldRetry: false,
+                        owner: this,
+                        decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
+                    });
+                    const templates = response.data;
+
+                    return new ComponentWithProperties(EditWebshopGeneralView, {
+                        initialWebshop: duplicate,
+                        savedHandler: async (duplicateWebshop: PrivateWebshop) => {
+                            // Copy over the templates
+                            try {
+                                const patchedArray: PatchableArrayAutoEncoder<EmailTemplate> = new PatchableArray();
+                                for (const t of templates) {
+                                    if (t.webshopId !== webshop.id) {
+                                        // Skip default templates
+                                        continue;
+                                    }
+
+                                    // Create a new duplicate
+                                    const template = EmailTemplate.create({
+                                        ...t,
+                                        webshopId: duplicateWebshop.id,
+                                        id: undefined,
+                                    });
+                                    patchedArray.addPut(template);
+                                }
+
+                                if (patchedArray.getPuts().length > 0) {
+                                    await context.value.authenticatedServer.request({
+                                        method: 'PATCH',
+                                        path: '/email-templates',
+                                        body: patchedArray,
+                                        shouldRetry: false,
+                                        owner: this,
+                                    });
+                                }
+                            }
+                            catch (e) {
+                                console.error(e);
+                                new Toast('Er ging iets mis bij het overnemen van de e-mails in de nieuwe webshop', 'warning').show();
+                            }
+                        },
+                    });
+                }
+                catch (e) {
+                    Toast.fromError(e).show();
+                    throw e;
+                }
+            },
+        }),
+    });
+
+    present({
+        animated: true,
+        adjustHistory: true,
+        modalDisplayStyle: 'popup',
+        components: [
+            displayedComponent,
+        ],
+    }).catch(console.error);
+}
+
+async function closeWebshop() {
+    if (isArchive.value) {
+        if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop wilt terugzetten?', 'Ja, terugzetten', 'Je kan daarna de webshop eventueel terug openen.')) {
+            return;
         }
-        catch (e) {
-            Toast.fromError(e).show();
+    }
+    else {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop '" + webshopManager.value.preview.meta.name + "' wilt sluiten?", 'Ja, sluiten', 'Er kunnen daarna geen nieuwe bestellingen worden gemaakt. Je kan de webshop later terug openen.')) {
+            return;
         }
     }
 
-    beforeUnmount() {
-        // Clear all pending requests
-        Request.cancelAll(this);
-        this.webshopManager.close();
-        document.removeEventListener('visibilitychange', this.doRefresh);
+    try {
+        await webshopManager.value.patchWebshop(
+            PrivateWebshop.patch({
+                meta: WebshopMetaData.patch({
+                    status: WebshopStatus.Closed,
+                }),
+            }),
+        );
+        new Toast('De webshop is gesloten', 'success green').show();
     }
-
-    refreshOnReturn() {
-        document.addEventListener('visibilitychange', this.doRefresh);
-    }
-
-    doRefresh() {
-        if (document.visibilityState === 'visible') {
-            this.webshopManager.backgroundReloadWebshop();
-        }
+    catch (e) {
+        Toast.fromError(e).show();
     }
 }
+
+async function openWebshop() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop terug wilt openen?', 'Ja, openen')) {
+        return;
+    }
+
+    try {
+        await webshopManager.value.patchWebshop(
+            PrivateWebshop.patch({
+                meta: WebshopMetaData.patch({
+                    status: WebshopStatus.Open,
+                    availableUntil: null,
+                }),
+            }),
+        );
+        new Toast('De webshop is terug open', 'success green').show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
+async function archiveWebshop() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop wilt archiveren?', 'Ja, archiveren', 'De gegevens van de webshop blijven daarna nog bereikbaar, maar de webshop wordt niet meer zo prominent in het menu weergegeven.')) {
+        return;
+    }
+
+    try {
+        await webshopManager.value.patchWebshop(
+            PrivateWebshop.patch({
+                meta: WebshopMetaData.patch({
+                    status: WebshopStatus.Archived,
+                }),
+            }),
+        );
+        new Toast('De webshop is gearchiveerd', 'success green').show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
+async function deleteWebshop() {
+    if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop '" + webshopManager.value.preview.meta.name + "' wilt verwijderen?", 'Ja, verwijderen', 'Alle bijhorende bestellingen worden ook definitief verwijderd. Je kan dit niet ongedaan maken.')) {
+        return;
+    }
+
+    try {
+        await context.value.authenticatedServer.request({
+            method: 'DELETE',
+            path: '/webshop/' + webshopManager.value.preview.id,
+            shouldRetry: false,
+        });
+        new Toast('Webshop verwijderd', 'success green').show();
+
+        if (organization.value) {
+            organization.value.webshops = organization.value.webshops.filter(w => w.id !== webshopManager.value.preview.id);
+        }
+
+        // Save updated organization to cache
+        organizationManager.value.save().catch(console.error);
+
+        if (canPop.value) {
+            await pop({ force: true });
+        }
+        else {
+            await splitViewController.value.showDetail({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(AccountSettingsView, {}),
+                    }),
+                ],
+                animated: false,
+            });
+        }
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
+onBeforeUnmount(() => {
+    // Clear all pending requests
+    Request.cancelAll(this);
+    webshopManager.value.close();
+    document.removeEventListener('visibilitychange', doRefresh);
+});
+
+function doRefresh() {
+    if (document.visibilityState === 'visible') {
+        webshopManager.value.backgroundReloadWebshop();
+    }
+}
+
+reload();
 </script>
