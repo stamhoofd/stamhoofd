@@ -7,10 +7,10 @@
             {{ name || typeName }} bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+            <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
                 <input
                     ref="firstInput"
                     v-model="name"
@@ -21,7 +21,7 @@
                     enterkeyhint="next"
                 >
             </STInputBox>
-            <STInputBox v-if="isTicket" title="Type" error-fields="type" :error-box="errorBox">
+            <STInputBox v-if="isTicket" title="Type" error-fields="type" :error-box="errors.errorBox">
                 <Dropdown
                     v-model="type"
                 >
@@ -34,7 +34,7 @@
                 </Dropdown>
             </STInputBox>
 
-            <STInputBox v-else title="Type" error-fields="type" :error-box="errorBox">
+            <STInputBox v-else title="Type" error-fields="type" :error-box="errors.errorBox">
                 <Dropdown
                     v-model="type"
                 >
@@ -48,7 +48,7 @@
             </STInputBox>
         </div>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
@@ -62,11 +62,11 @@
         <template v-if="isTicket">
             <hr>
             <h2>Locatie</h2>
-            <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="validator" @modify="modifyLocation" />
+            <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="errors.validator" @modify="modifyLocation" />
 
             <hr>
             <h2>Datum en tijd</h2>
-            <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="validator" @modify="modifyDateRange" />
+            <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="errors.validator" @modify="modifyDateRange" />
         </template>
 
         <hr>
@@ -81,15 +81,15 @@
         </h2>
         <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Naast meerdere prijzen kan je ook meerdere keuzemenu's toevoegen (zie onder).</p>
 
-        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
+        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
 
         <STList v-else v-model="draggablePrices" :draggable="true">
             <template #item="{item: price}">
-                <ProductPriceRow :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
+                <ProductPriceRow :product-price="price" :product="patchedProduct" @patch="addProductPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
             </template>
         </STList>
 
-        <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addPatch" />
+        <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addProductPatch" />
 
         <template v-if="fields.length">
             <hr>
@@ -194,7 +194,7 @@
             </h2>
 
             <div class="image-box">
-                <img v-if="image" :src="imageSrc" class="image">
+                <img v-if="image" :src="imageSrc ?? undefined" class="image">
             </div>
         </template>
 
@@ -246,10 +246,10 @@
                         </p>
 
                         <div v-if="useEnableAfter" class="split-inputs option">
-                            <STInputBox title="" error-fields="enableAfter" :error-box="errorBox">
+                            <STInputBox title="" error-fields="enableAfter" :error-box="errors.errorBox">
                                 <DateSelection v-model="enableAfter" />
                             </STInputBox>
-                            <TimeInput v-model="enableAfter" title="" :validator="validator" />
+                            <TimeInput v-model="enableAfter" title="" :validator="errors.validator" />
                         </div>
                     </STListItem>
 
@@ -266,10 +266,10 @@
                         </p>
 
                         <div v-if="useDisableAfter" class="split-inputs option">
-                            <STInputBox title="" error-fields="disableAfter" :error-box="errorBox">
+                            <STInputBox title="" error-fields="disableAfter" :error-box="errors.errorBox">
                                 <DateSelection v-model="disableAfter" />
                             </STInputBox>
-                            <TimeInput v-model="disableAfter" title="" :validator="validator" />
+                            <TimeInput v-model="disableAfter" title="" :validator="errors.validator" />
                         </div>
                     </STListItem>
 
@@ -287,7 +287,7 @@
                         </p>
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
-                            <STInputBox title="" error-fields="stock" :error-box="errorBox">
+                            <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
                                 <NumberInput v-model="stock" />
                             </STInputBox>
                         </div>
@@ -303,7 +303,7 @@
                         </h3>
 
                         <div v-if="resetStock" class="split-inputs option" @click.stop.prevent>
-                            <STInputBox title="" error-fields="usedStock" :error-box="errorBox">
+                            <STInputBox title="" error-fields="usedStock" :error-box="errors.errorBox">
                                 <NumberInput v-model="usedStock" />
                             </STInputBox>
                         </div>
@@ -327,7 +327,7 @@
                         </p>
 
                         <div v-if="useMaxPerOrder" class="split-inputs option" @click.stop.prevent>
-                            <STInputBox title="" error-fields="maxPerOrder" :error-box="errorBox">
+                            <STInputBox title="" error-fields="maxPerOrder" :error-box="errors.errorBox">
                                 <NumberInput v-model="maxPerOrder" :min="1" />
                             </STInputBox>
                         </div>
@@ -363,13 +363,13 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInput, SaveView, SeatSelectionBox, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, Validator } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, DateSelection, Dropdown, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, usePatch } from '@stamhoofd/components';
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
+import { computed, onBeforeUnmount, onMounted } from 'vue';
 import EditWebshopFieldView from '../fields/EditWebshopFieldView.vue';
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';
 import ChooseSeatingPlanView from '../seating/ChooseSeatingPlanView.vue';
@@ -381,431 +381,350 @@ import ProductPriceRow from './ProductPriceRow.vue';
 import ProductSelectDateRangeInput from './ProductSelectDateRangeInput.vue';
 import ProductSelectLocationInput from './ProductSelectLocationInput.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        NumberInput,
-        UploadButton,
-        ProductPriceRow,
-        STList,
-        STListItem,
-        OptionMenuSection,
-        ProductPriceBox,
-        WebshopFieldsBox,
-        ProductSelectLocationInput,
-        ProductSelectDateRangeInput,
-        Dropdown,
-        DateSelection,
-        TimeInput,
-        SeatSelectionBox,
-    },
-})
-export default class EditProductView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    product!: Product;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    product: Product;
+    isNew: boolean;
     webshop: PrivateWebshop;
-
-    /// For now only used to update locations and times of other products that are shared
-    patchWebshop: AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({});
-    patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id });
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+}>();
 
-    mounted() {
-        document.body.addEventListener('paste', this.onPaste);
-    }
+const errors = useErrors();
+const present = usePresent();
+const pop = usePop();
 
-    beforeUnmount() {
-        document.body.removeEventListener('paste', this.onPaste);
-    }
+/// For now only used to update locations and times of other products that are shared
+const { patch: patchWebshop, patched: patchedWebshop, addPatch: addWebshopPatch, hasChanges: hasWebshopChanges } = usePatch(props.webshop);
+const { patch: patchProduct, patched: patchedProduct, addPatch: addProductPatch, hasChanges: hasProductChanges } = usePatch(props.product);
 
-    async onPaste(event) {
-        console.log('Pasted data');
+onMounted(() => {
+    document.body.addEventListener('paste', onPastEventListener);
+});
 
-        try {
-            // Iterate over all clipboard items.
-            const clipboardItems = await navigator.clipboard.read();
-            for (const clipboardItem of clipboardItems) {
-                for (const type of clipboardItem.types) {
-                    // Discard any types that are not web custom formats.
-                    if (type === 'web stamhoofd/webshop-option-menu') {
-                        const blob = await clipboardItem.getType(type);
-                        const str = await blob.text();
+onBeforeUnmount(() => {
+    document.body.removeEventListener('paste', onPastEventListener);
+});
 
-                        const decoded = new VersionBoxDecoder(OptionMenu as Decoder<OptionMenu>).decode(new ObjectData(JSON.parse(str), { version: Version }));
-                        console.log('pasted option menu', decoded);
+function onPastEventListener(event: Event) {
+    onPaste(event).catch(console.error);
+}
 
-                        // Create a new id
-                        decoded.data.id = OptionMenu.create({}).id;
-                        const p = Product.patch({ id: this.product.id });
-                        p.optionMenus.addPut(decoded.data);
-                        this.addPatch(p);
+async function onPaste(event: Event) {
+    console.log('Pasted data');
 
-                        new Toast(`Keuzemenu ${decoded.data.name || 'Naamloos'} werd geplakt vanaf je klembord`, 'copy').show();
+    try {
+        // Iterate over all clipboard items.
+        const clipboardItems = await navigator.clipboard.read();
+        for (const clipboardItem of clipboardItems) {
+            for (const type of clipboardItem.types) {
+                // Discard any types that are not web custom formats.
+                if (type === 'web stamhoofd/webshop-option-menu') {
+                    const blob = await clipboardItem.getType(type);
+                    const str = await blob.text();
 
-                        event.preventDefault();
-                    }
+                    const decoded = new VersionBoxDecoder(OptionMenu as Decoder<OptionMenu>).decode(new ObjectData(JSON.parse(str), { version: Version }));
+                    console.log('pasted option menu', decoded);
 
-                    // Sanitize the blob if you need to, then process it in your app.
+                    // Create a new id
+                    decoded.data.id = OptionMenu.create({}).id;
+                    const p = Product.patch({ id: props.product.id });
+                    p.optionMenus.addPut(decoded.data);
+                    addProductPatch(p);
+
+                    new Toast(`Keuzemenu ${decoded.data.name || 'Naamloos'} werd geplakt vanaf je klembord`, 'copy').show();
+
+                    event.preventDefault();
                 }
+
+                // Sanitize the blob if you need to, then process it in your app.
             }
         }
-        catch (err) {
-            console.error(err.name, err.message);
-        }
     }
-
-    get isTicket() {
-        return this.type === ProductType.Ticket || this.type === ProductType.Voucher || this.webshop.meta.ticketType === WebshopTicketType.Tickets;
+    catch (err: any) {
+        console.error(err.name, err.message);
     }
+}
 
-    get patchedWebshop() {
-        return this.webshop.patch(this.patchWebshop);
+const isTicket = computed(() => type.value === ProductType.Ticket || type.value === ProductType.Voucher || props.webshop.meta.ticketType === WebshopTicketType.Tickets);
+
+const seatingPlan = computed(() => {
+    if (!patchedProduct.value.seatingPlanId) {
+        return null;
     }
+    return patchedWebshop.value.meta.seatingPlans.find(p => p.id === patchedProduct.value.seatingPlanId) ?? null;
+});
 
-    get patchedProduct() {
-        return this.product.patch(this.patchProduct);
+const typeName = computed(() => {
+    switch (props.product.type) {
+        case ProductType.Product:
+        case ProductType.Person:
+            return 'Artikel';
+        case ProductType.Ticket: return 'Ticket';
+        case ProductType.Voucher: return 'Voucher';
+        default: return '?';
     }
+});
 
-    get seatingPlan() {
-        if (!this.patchedProduct.seatingPlanId) {
-            return null;
-        }
-        return this.patchedWebshop.meta.seatingPlans.find(p => p.id === this.patchedProduct.seatingPlanId) ?? null;
-    }
+const fields = computed(() => patchedProduct.value.customFields);
 
-    get typeName(): string {
-        switch (this.product.type) {
-            case ProductType.Product:
-            case ProductType.Person:
-                return 'Artikel';
-            case ProductType.Ticket: return 'Ticket';
-            case ProductType.Voucher: return 'Voucher';
-        }
-    }
+function addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
+    addProductPatch(Product.patch({
+        customFields: patch,
+    }));
+}
 
-    get fields() {
-        return this.patchedProduct.customFields;
-    }
-
-    get organization() {
-        return this.$organization;
-    }
-
-    getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
-    }
-
-    addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
-        this.addPatch(Product.patch({
-            customFields: patch,
-        }));
-    }
-
-    chooseSeatingPlan() {
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(ChooseSeatingPlanView, {
-                        product: this.patchedProduct,
-                        webshop: this.patchedWebshop,
-                        saveHandler: (patchProduct: AutoEncoderPatchType<PrivateWebshop>, patch: AutoEncoderPatchType<PrivateWebshop>) => {
-                            this.patchProduct = this.patchProduct.patch(patchProduct);
-                            this.patchWebshop = this.patchWebshop.patch(patch);
-                        },
-                    }),
+function chooseSeatingPlan() {
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(ChooseSeatingPlanView, {
+                    product: patchedProduct.value,
+                    webshop: patchedWebshop.value,
+                    saveHandler: (patchProduct: AutoEncoderPatchType<PrivateWebshop>, patch: AutoEncoderPatchType<PrivateWebshop>) => {
+                        addProductPatch(patchProduct);
+                        addWebshopPatch(patch);
+                    },
                 }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
 
-    get name() {
-        return this.patchedProduct.name;
-    }
+const name = computed({
+    get: () => patchedProduct.value.name,
+    set: (name: string) => {
+        addProductPatch({ name });
+    },
+});
 
-    set name(name: string) {
-        this.patchProduct = this.patchProduct.patch({ name });
-    }
+const location = computed({
+    get: () => patchedProduct.value.location,
+    set: (location: ProductLocation | null) => {
+        addProductPatch({ location });
+    },
+});
 
-    get location() {
-        return this.patchedProduct.location;
-    }
+const allLocations = computed(() => {
+    const locations = new Map<string, ProductLocation>();
 
-    set location(location: ProductLocation | null) {
-        this.patchProduct = this.patchProduct.patch({ location });
-    }
-
-    get allLocations() {
-        const locations = new Map<string, ProductLocation>();
-
-        // Always use the non-patched product here -> only list the locations as they are before starting the editing
-        // But do use the patched webshop, because that is where we modify the locations in case of edits
-        for (const product of this.patchedWebshop.products) {
-            if (product.location) {
-                locations.set(product.location.id, product.location);
-            }
-        }
-        return [...locations.values()];
-    }
-
-    modifyLocation({ from, to }: { from: ProductLocation; to: ProductLocation }) {
-        // We edited/modified a location, so change it in all products
-        for (const product of this.patchedWebshop.products) {
-            if (product.location && product.location.id === from.id) {
-                this.patchWebshop.products.addPatch(Product.patch({
-                    id: product.id,
-                    location: to,
-                }));
-            }
+    // Always use the non-patched product here -> only list the locations as they are before starting the editing
+    // But do use the patched webshop, because that is where we modify the locations in case of edits
+    for (const product of patchedWebshop.value.products) {
+        if (product.location) {
+            locations.set(product.location.id, product.location);
         }
     }
+    return [...locations.values()];
+});
 
-    get dateRange() {
-        return this.patchedProduct.dateRange;
-    }
-
-    set dateRange(dateRange: ProductDateRange | null) {
-        this.patchProduct = this.patchProduct.patch({ dateRange });
-    }
-
-    get allDateRanges() {
-        const dateRanges = new Map<string, ProductDateRange>();
-
-        // Always use the non-patched product here -> only list the locations as they are before starting the editing
-        // But do use the patched webshop, because that is where we modify the locations in case of edits
-        for (const product of this.patchedWebshop.products) {
-            if (product.dateRange) {
-                dateRanges.set(product.dateRange.id, product.dateRange);
-            }
-        }
-        return [...dateRanges.values()];
-    }
-
-    modifyDateRange({ from, to }: { from: ProductDateRange; to: ProductDateRange }) {
-        // We edited/modified a location, so change it in all products
-        for (const product of this.patchedWebshop.products) {
-            if (product.dateRange && product.dateRange.id === from.id) {
-                this.patchWebshop.products.addPatch(Product.patch({
-                    id: product.id,
-                    dateRange: to,
-                }));
-            }
+function modifyLocation({ from, to }: { from: ProductLocation; to: ProductLocation }) {
+    // We edited/modified a location, so change it in all products
+    for (const product of patchedWebshop.value.products) {
+        if (product.location && product.location.id === from.id) {
+            patchWebshop.value.products.addPatch(Product.patch({
+                id: product.id,
+                location: to,
+            }));
         }
     }
+}
 
-    get type() {
-        return this.patchedProduct.type;
+const dateRange = computed({
+    get: () => patchedProduct.value.dateRange,
+    set: (dateRange: ProductDateRange | null) => {
+        addProductPatch({ dateRange });
+    },
+});
+
+const allDateRanges = computed(() => {
+    const dateRanges = new Map<string, ProductDateRange>();
+
+    // Always use the non-patched product here -> only list the locations as they are before starting the editing
+    // But do use the patched webshop, because that is where we modify the locations in case of edits
+    for (const product of patchedWebshop.value.products) {
+        if (product.dateRange) {
+            dateRanges.set(product.dateRange.id, product.dateRange);
+        }
     }
+    return [...dateRanges.values()];
+});
 
-    set type(type: ProductType) {
-        this.patchProduct = this.patchProduct.patch({ type });
+function modifyDateRange({ from, to }: { from: ProductDateRange; to: ProductDateRange }) {
+    // We edited/modified a location, so change it in all products
+    for (const product of patchedWebshop.value.products) {
+        if (product.dateRange && product.dateRange.id === from.id) {
+            patchWebshop.value.products.addPatch(Product.patch({
+                id: product.id,
+                dateRange: to,
+            }));
+        }
     }
+}
 
-    get description() {
-        return this.patchedProduct.description;
-    }
+const type = computed({
+    get: () => patchedProduct.value.type,
+    set: (type: ProductType) => {
+        addProductPatch({ type });
+    },
+});
 
-    set description(description: string) {
-        this.patchProduct = this.patchProduct.patch({ description });
-    }
+const description = computed({
+    get: () => patchedProduct.value.description,
+    set: (description: string) => {
+        addProductPatch({ description });
+    },
+});
 
-    get disabled() {
-        return !this.patchedProduct.enabled;
-    }
+const disabled = computed({
+    get: () => !patchedProduct.value.enabled,
+    set: (disabled: boolean) => {
+        addProductPatch({ enabled: !disabled });
+    },
+});
 
-    set disabled(disabled: boolean) {
-        this.patchProduct = this.patchProduct.patch({ enabled: !disabled });
-    }
+const hidden = computed({
+    get: () => patchedProduct.value.hidden,
+    set: (hidden: boolean) => {
+        addProductPatch({ hidden });
+    },
+});
 
-    get hidden() {
-        return this.patchedProduct.hidden;
-    }
-
-    set hidden(hidden: boolean) {
-        this.patchProduct = this.patchProduct.patch({ hidden });
-    }
-
-    get useDisableAfter() {
-        return this.patchedProduct.disableAfter !== null;
-    }
-
-    set useDisableAfter(use: boolean) {
-        if (use === this.useDisableAfter) {
+const useDisableAfter = computed({
+    get: () => patchedProduct.value.disableAfter !== null,
+    set: (use: boolean) => {
+        if (use === useDisableAfter.value) {
             return;
         }
         if (use) {
-            this.patchProduct = this.patchProduct.patch({ disableAfter: this.patchedProduct.disableAfter ?? this.product.disableAfter ?? new Date() });
+            addProductPatch({ disableAfter: patchedProduct.value.disableAfter ?? props.product.disableAfter ?? new Date() });
         }
         else {
-            this.patchProduct = this.patchProduct.patch({ disableAfter: null });
+            addProductPatch({ disableAfter: null });
         }
-    }
+    },
+});
 
-    get disableAfter() {
-        return this.patchedProduct.disableAfter ?? this.product.disableAfter ?? new Date();
-    }
+const disableAfter = computed({
+    get: () => patchedProduct.value.disableAfter ?? props.product.disableAfter ?? new Date(),
+    set: (disableAfter: Date) => {
+        addProductPatch({ disableAfter });
+    },
+});
 
-    set disableAfter(disableAfter: Date) {
-        this.patchProduct = this.patchProduct.patch({ disableAfter });
-    }
-
-    get useEnableAfter() {
-        return this.patchedProduct.enableAfter !== null;
-    }
-
-    set useEnableAfter(use: boolean) {
-        if (use === this.useEnableAfter) {
+const useEnableAfter = computed({
+    get: () => patchedProduct.value.enableAfter !== null,
+    set: (use: boolean) => {
+        if (use === useEnableAfter.value) {
             return;
         }
         if (use) {
-            this.patchProduct = this.patchProduct.patch({ enableAfter: this.patchedProduct.enableAfter ?? this.product.enableAfter ?? new Date() });
+            addProductPatch({ enableAfter: patchedProduct.value.enableAfter ?? props.product.enableAfter ?? new Date() });
         }
         else {
-            this.patchProduct = this.patchProduct.patch({ enableAfter: null });
+            addProductPatch({ enableAfter: null });
         }
-    }
+    },
+});
 
-    get enableAfter() {
-        return this.patchedProduct.enableAfter ?? this.product.enableAfter ?? new Date();
-    }
+const enableAfter = computed({
+    get: () => patchedProduct.value.enableAfter ?? props.product.enableAfter ?? new Date(),
+    set: (enableAfter: Date) => {
+        addProductPatch({ enableAfter });
+    },
+});
 
-    set enableAfter(enableAfter: Date) {
-        this.patchProduct = this.patchProduct.patch({ enableAfter });
-    }
+const notAllowMultiple = computed({
+    get: () => !patchedProduct.value.allowMultiple,
+    set: (notAllowMultiple: boolean) => {
+        addProductPatch({ allowMultiple: !notAllowMultiple });
+    },
+});
 
-    get notAllowMultiple() {
-        return !this.patchedProduct.allowMultiple;
-    }
+const remainingStock = computed(() => patchedProduct.value.remainingStock);
 
-    set notAllowMultiple(notAllowMultiple: boolean) {
-        this.patchProduct = this.patchProduct.patch({ allowMultiple: !notAllowMultiple });
-    }
+const useStock = computed({
+    get: () => patchedProduct.value.stock !== null,
+    set: (useStock: boolean) => {
+        addProductPatch({ stock: useStock ? (patchedProduct.value.stock ?? props.product.stock ?? (props.product.usedStock || 10)) : null });
+    },
+});
 
-    get remainingStock() {
-        return this.patchedProduct.remainingStock;
-    }
+const stock = computed({
+    get: () => patchedProduct.value.stock ?? props.product.stock ?? 0,
+    set: (stock: number) => {
+        addProductPatch({ stock });
+    },
+});
 
-    get useStock() {
-        return this.patchedProduct.stock !== null;
-    }
+const useMaxPerOrder = computed({
+    get: () => patchedProduct.value.maxPerOrder !== null,
+    set: (useMaxPerOrder: boolean) => {
+        addProductPatch({ maxPerOrder: useMaxPerOrder ? (patchedProduct.value.maxPerOrder ?? props.product.maxPerOrder ?? 1) : null });
+    },
+});
 
-    set useStock(useStock: boolean) {
-        this.patchProduct = this.patchProduct.patch({ stock: useStock ? (this.patchedProduct.stock ?? this.product.stock ?? (this.product.usedStock || 10)) : null });
-    }
+const maxPerOrder = computed({
+    get: () => patchedProduct.value.maxPerOrder ?? 1,
+    set: (maxPerOrder: number) => {
+        addProductPatch({ maxPerOrder });
+    },
+});
 
-    get stock() {
-        return this.patchedProduct.stock ?? this.product.stock ?? 0;
-    }
-
-    set stock(stock: number) {
-        this.patchProduct = this.patchProduct.patch({ stock });
-    }
-
-    get useMaxPerOrder() {
-        return this.patchedProduct.maxPerOrder !== null;
-    }
-
-    set useMaxPerOrder(useMaxPerOrder: boolean) {
-        this.patchProduct = this.patchProduct.patch({ maxPerOrder: useMaxPerOrder ? (this.patchedProduct.maxPerOrder ?? this.product.maxPerOrder ?? 1) : null });
-    }
-
-    get maxPerOrder() {
-        return this.patchedProduct.maxPerOrder ?? 1;
-    }
-
-    set maxPerOrder(maxPerOrder: number) {
-        this.patchProduct = this.patchProduct.patch({ maxPerOrder });
-    }
-
-    get resetStock() {
-        return this.patchProduct.usedStock !== undefined;
-    }
-
-    set resetStock(resetStock: boolean) {
-        if (resetStock === this.resetStock) {
+const resetStock = computed({
+    get: () => patchProduct.value.usedStock !== undefined,
+    set: (value: boolean) => {
+        if (value === resetStock.value) {
             return;
         }
-        if (resetStock) {
-            this.usedStockPatch = this.usedStock;
+        if (value) {
+            usedStockPatch.value = usedStock.value;
         }
         else {
-            this.usedStockPatch = null;
+            usedStockPatch.value = null;
         }
-    }
+    },
+});
 
-    get usedStockPatch() {
-        return this.patchProduct.usedStock ?? null;
-    }
-
-    set usedStockPatch(usedStock: null | number) {
-        if (usedStock === null) {
-            this.$set(this.patchProduct, 'usedStock', undefined);
+const usedStockPatch = computed({
+    get: () => patchProduct.value.usedStock ?? null,
+    set: (value: null | number) => {
+        if (value === null) {
+            patchProduct.value.usedStock = undefined;
             return;
         }
-        this.usedStock = usedStock;
-    }
+        usedStock.value = value;
+    },
+});
 
-    get usedStock() {
-        return this.patchedProduct.usedStock;
-    }
+const usedStock = computed({
+    get: () => patchedProduct.value.usedStock,
+    set: (usedStock: number) => {
+        addProductPatch({ usedStock });
+    },
+});
 
-    set usedStock(usedStock: number) {
-        this.patchProduct = this.patchProduct.patch({ usedStock });
-    }
+const resolutions = computed(() => [
+    ResolutionRequest.create({
+        width: 1200,
+    }),
+    ResolutionRequest.create({
+        width: 600,
+    }),
+    ResolutionRequest.create({
+        width: 300,
+    }),
+    ResolutionRequest.create({
+        width: 100,
+    }),
+]);
 
-    get price() {
-        return this.patchedProduct.prices[0]?.price ?? 0;
-    }
-
-    set price(price: number) {
-        const p = this.patchProduct.patch({ });
-        p.prices.addPatch(ProductPrice.patch({
-            id: this.patchedProduct.prices[0].id,
-            price,
-        }));
-    }
-
-    get resolutions() {
-        return [
-            ResolutionRequest.create({
-                width: 1200,
-            }),
-            ResolutionRequest.create({
-                width: 600,
-            }),
-            ResolutionRequest.create({
-                width: 300,
-            }),
-            ResolutionRequest.create({
-                width: 100,
-            }),
-        ];
-    }
-
-    get image() {
-        return this.patchedProduct.images[0] ?? null;
-    }
-
-    set image(image: Image | null) {
+const image = computed<Image | null>({
+    get: () => patchedProduct.value.images[0] ?? null,
+    set: (image: Image | null) => {
         const p = Product.patch({ });
 
-        for (const i of this.patchedProduct.images) {
+        for (const i of patchedProduct.value.images) {
             p.images.addDelete(i.id);
         }
 
@@ -813,98 +732,99 @@ export default class EditProductView extends Mixins(NavigationMixin) {
             p.images.addPut(image);
         }
 
-        this.patchProduct = this.patchProduct.patch(p);
+        addProductPatch(p);
+    },
+});
+
+const imageSrc = computed(() => {
+    if (!image.value) {
+        return null;
+    }
+    return image.value.getPathForSize(140, undefined);
+});
+
+function addOptionMenu() {
+    const optionMenu = OptionMenu.create({
+        name: 'Naamloos',
+    });
+    optionMenu.options[0].name = 'Naamloos';
+
+    const p = Product.patch({ id: props.product.id });
+    p.optionMenus.addPut(optionMenu);
+
+    present(new ComponentWithProperties(EditOptionMenuView,
+        {
+            product: patchedProduct.value.patch(p),
+            optionMenu,
+            isNew: true,
+            saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+                // Merge both patches
+                addProductPatch(p.patch(patch));
+                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            },
+        }).setDisplayStyle('popup'))
+        .catch(console.error);
+}
+
+function addField() {
+    const field = WebshopField.create({});
+    const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
+
+    p.addPut(field);
+
+    present(
+        new ComponentWithProperties(EditWebshopFieldView, {
+            field,
+            isNew: true,
+            saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
+                addFieldsPatch(p.patch(patch));
+            },
+        }).setDisplayStyle('sheet'),
+    ).catch(console.error);
+}
+
+function addProductPrice() {
+    const price = ProductPrice.create({});
+    const p = Product.patch({ id: props.product.id });
+    p.prices.addPut(price);
+
+    present(new ComponentWithProperties(EditProductPriceView, { product: patchedProduct.value.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+        // Merge both patches
+        addProductPatch(p.patch(patch));
+
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('popup'))
+        .catch(console.error);
+}
+
+function movePriceUp(price: ProductPrice) {
+    const index = patchedProduct.value.prices.findIndex(c => price.id === c.id);
+    if (index === -1 || index === 0) {
+        return;
     }
 
-    get imageSrc() {
-        const image = this.image;
-        if (!image) {
-            return null;
-        }
-        return image.getPathForSize(140, undefined);
+    const moveTo = index - 2;
+    const p = Product.patch({});
+    p.prices.addMove(price.id, patchedProduct.value.prices[moveTo]?.id ?? null);
+    addProductPatch(p);
+}
+
+function movePriceDown(price: ProductPrice) {
+    const index = patchedProduct.value.prices.findIndex(c => price.id === c.id);
+    if (index === -1 || index >= patchedProduct.value.prices.length - 1) {
+        return;
     }
 
-    addPatch(patch: AutoEncoderPatchType<Product>) {
-        this.patchProduct = this.patchProduct.patch(patch);
-    }
+    const moveTo = index + 1;
+    const p = Product.patch({});
+    p.prices.addMove(price.id, patchedProduct.value.prices[moveTo].id);
+    addProductPatch(p);
+}
 
-    addOptionMenu() {
-        const optionMenu = OptionMenu.create({
-            name: 'Naamloos',
-        });
-        optionMenu.options[0].name = 'Naamloos';
-
-        const p = Product.patch({ id: this.product.id });
-        p.optionMenus.addPut(optionMenu);
-
-        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.patchedProduct.patch(p), optionMenu, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
-            // Merge both patches
-            this.patchProduct = this.patchProduct.patch(p).patch(patch);
-
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('popup'));
-    }
-
-    addField() {
-        const field = WebshopField.create({});
-        const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
-
-        p.addPut(field);
-
-        this.present(
-            new ComponentWithProperties(EditWebshopFieldView, {
-                field,
-                isNew: true,
-                saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
-                    this.addFieldsPatch(p.patch(patch));
-                },
-            }).setDisplayStyle('sheet'),
-        );
-    }
-
-    addProductPrice() {
-        const price = ProductPrice.create({});
-        const p = Product.patch({ id: this.product.id });
-        p.prices.addPut(price);
-
-        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.patchedProduct.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
-            // Merge both patches
-            this.patchProduct = this.patchProduct.patch(p).patch(patch);
-
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('popup'));
-    }
-
-    movePriceUp(price: ProductPrice) {
-        const index = this.patchedProduct.prices.findIndex(c => price.id === c.id);
-        if (index === -1 || index === 0) {
-            return;
-        }
-
-        const moveTo = index - 2;
-        const p = Product.patch({});
-        p.prices.addMove(price.id, this.patchedProduct.prices[moveTo]?.id ?? null);
-        this.addPatch(p);
-    }
-
-    movePriceDown(price: ProductPrice) {
-        const index = this.patchedProduct.prices.findIndex(c => price.id === c.id);
-        if (index === -1 || index >= this.patchedProduct.prices.length - 1) {
-            return;
-        }
-
-        const moveTo = index + 1;
-        const p = Product.patch({});
-        p.prices.addMove(price.id, this.patchedProduct.prices[moveTo].id);
-        this.addPatch(p);
-    }
-
-    get draggablePrices() {
-        return this.patchedProduct.prices;
-    }
-
-    set draggablePrices(prices: ProductPrice[]) {
-        if (prices.length !== this.patchedProduct.prices.length) {
+const draggablePrices = computed({
+    get: () => patchedProduct.value.prices,
+    set: (prices: ProductPrice[]) => {
+        if (prices.length !== patchedProduct.value.prices.length) {
             return;
         }
 
@@ -912,42 +832,42 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         for (const price of prices.slice().reverse()) {
             p.prices.addMove(price.id, null);
         }
-        this.addPatch(p);
-    }
+        addProductPatch(p);
+    },
+});
 
-    async save() {
-        const isValid = await this.validator.validate();
-        if (!isValid) {
-            return;
-        }
-        const p = PrivateWebshop.patch(this.patchWebshop);
-        p.products.addPatch(this.patchProduct);
-        this.saveHandler(p);
-        this.pop({ force: true });
+async function save() {
+    const isValid = await errors.validator.validate();
+    if (!isValid) {
+        return;
     }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je dit artikel wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-
-        const p = PrivateWebshop.patch({});
-        p.products.addDelete(this.product.id);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchProduct, this.product, { version: Version }) || patchContainsChanges(this.patchWebshop, this.webshop, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+    const p = PrivateWebshop.patch(patchWebshop.value);
+    p.products.addPatch(patchProduct.value);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
 }
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je dit artikel wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+
+    const p = PrivateWebshop.patch({});
+    p.products.addDelete(props.product.id);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+const hasChanges = computed(() => hasWebshopChanges.value || hasProductChanges.value);
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({ shouldNavigateAway });
 </script>
 
 <style lang="scss">
