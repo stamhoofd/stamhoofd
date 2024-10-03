@@ -103,11 +103,18 @@ async function save() {
             limit: 100,
         });
 
+        const body = {
+            organizationId: null,
+            price: price.value,
+            description: description.value,
+        };
+
         await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/admin/charge-organizations',
             query: limitedFilteredRequest,
             shouldRetry: false,
+            body,
             owner,
         });
 
