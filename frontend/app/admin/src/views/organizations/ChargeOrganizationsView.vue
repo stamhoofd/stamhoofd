@@ -40,6 +40,7 @@ import { CenteredMessage, ErrorBox, NumberInput, PriceInput, Toast, useContext, 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import { useCountOrganizations } from './composables/useCountOrganizations';
 
@@ -63,6 +64,7 @@ const organizationCount = ref<number | null>(null);
 const description = ref('');
 const price = ref(0);
 const amount = ref(1);
+const total = computed(() => Formatter.price(price.value * amount.value));
 const hasChanges = computed(() => description.value !== '' || price.value !== 0);
 
 const saving = ref(false);
@@ -107,6 +109,19 @@ async function save() {
 
     const isValid = await errors.validator.validate();
     if (!isValid) {
+        saving.value = false;
+        return;
+    }
+
+    const isConfirm = await CenteredMessage.confirm(
+        $t('Weet je zeker dat je het bedrag wilt aanrekenen?', {
+            total: total.value,
+            count: organizationCount.value?.toString() ?? '?',
+        }),
+        $t('Reken aan')
+    );
+
+    if (!isConfirm) {
         saving.value = false;
         return;
     }
