@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
-import { Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { CachedOutstandingBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
+import { AccessRight, CachedOutstandingBalanceObject, CachedOutstandingBalanceObjectContact, CachedOutstandingBalance as CachedOutstandingBalanceStruct, CachedOutstandingBalanceType, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -415,6 +415,42 @@ export class AuthenticatedStructures {
             const struct = EventStruct.create({
                 ...event,
                 group,
+            });
+
+            result.push(struct);
+        }
+
+        return result;
+    }
+
+    static async cachedOutstandingBalances(balances: CachedOutstandingBalance[]): Promise<CachedOutstandingBalanceStruct[]> {
+        if (balances.length === 0) {
+            return [];
+        }
+
+        const organizationIds = Formatter.uniqueArray(balances.filter(b => b.objectType === CachedOutstandingBalanceType.organization).map(b => b.objectId));
+        const organizations = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
+        const admins = await User.getAdmins(organizationIds, { verified: true });
+
+        const organizationStructs = await this.organizations(organizations);
+
+        const result: CachedOutstandingBalanceStruct[] = [];
+        for (const balance of balances) {
+            const organization = organizationStructs.find(o => o.id == balance.objectId) ?? null;
+            let thisAdmins: User[] = [];
+            if (organization) {
+                thisAdmins = admins.filter(a => a.permissions && a.permissions.forOrganization(organization)?.hasAccessRight(AccessRight.OrganizationFinanceDirector));
+            }
+
+            const struct = CachedOutstandingBalanceStruct.create({
+                ...balance,
+                object: CachedOutstandingBalanceObject.create({
+                    name: organization?.name ?? 'Onbekend',
+                    contacts: thisAdmins.map(a => CachedOutstandingBalanceObjectContact.create({
+                        name: a.name ?? '',
+                        emails: [a.email],
+                    })),
+                }),
             });
 
             result.push(struct);

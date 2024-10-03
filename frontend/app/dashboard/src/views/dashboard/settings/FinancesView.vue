@@ -53,6 +53,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem v-if="cachedOutstandingBalancesEnabled && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.CachedOutstandingBalance)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Openstaande bedragen
+                    </h2>
+                    <p class="style-description">
+                        Lijst van alle leden en verenigingen die nog een openstaand bedrag hebben tegenover {{ organization!.name }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
             <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
@@ -107,18 +122,20 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, useAuth, useContext, useErrors, BillingStatusView } from '@stamhoofd/components';
+import { ErrorBox, useAuth, useContext, useErrors, BillingStatusView, useOrganization, useFeatureFlag } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, BalanceItemWithPayments, OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions, ref, Ref } from 'vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
+import CachedOutstandingBalanceTableView from '../../cached-outstanding-balance/CachedOutstandingBalanceTableView.vue';
 
 enum Routes {
     Transfers = 'Transfers',
     Export = 'Export',
     Payments = 'Payments',
     OutstandingBalance = 'OutstandingBalance',
+    CachedOutstandingBalance = 'CachedOutstandingBalance',
 }
 
 defineRoutes([
@@ -139,6 +156,11 @@ defineRoutes([
                 },
             };
         },
+    },
+    {
+        name: Routes.CachedOutstandingBalance,
+        url: 'openstaande-bedragen',
+        component: CachedOutstandingBalanceTableView as ComponentOptions,
     },
     {
         name: Routes.Payments,
@@ -201,7 +223,10 @@ const $navigate = useNavigate();
 const owner = useRequestOwner();
 const context = useContext();
 const errors = useErrors();
+const organization = useOrganization();
 const outstandingBalance = ref(null) as Ref<OrganizationDetailedBillingStatus | null>;
+
+const cachedOutstandingBalancesEnabled = useFeatureFlag()('cached-outstanding-balances');
 
 const balancePromise = updateBalance().catch(console.error);
 

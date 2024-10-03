@@ -1,6 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Group, Member } from '@stamhoofd/models';
+import { BalanceItem, Member } from '@stamhoofd/models';
 import { BalanceItemWithPayments } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';

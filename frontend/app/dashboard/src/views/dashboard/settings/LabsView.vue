@@ -109,6 +109,14 @@
                 Webshops
             </Checkbox>
 
+            <Checkbox :model-value="getFeatureFlag('cached-outstanding-balances')" @update:model-value="setFeatureFlag('cached-outstanding-balances', !!$event)">
+                Openstaande bedragen
+            </Checkbox>
+
+            <Checkbox :model-value="getFeatureFlag('registration-record-categories')" @update:model-value="setFeatureFlag('registration-record-categories', !!$event)">
+                Registratie vragenlijsten
+            </Checkbox>
+
             <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
                 Single-Sign-On
             </Checkbox>

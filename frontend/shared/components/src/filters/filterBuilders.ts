@@ -1,5 +1,5 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdFilter, User } from '@stamhoofd/structures';
+import { CachedOutstandingBalanceType, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdFilter, User } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
 import { usePlatform } from '../hooks';
@@ -386,6 +386,30 @@ export const checkoutUIFilterBuilders: UIFilterBuilders = [
 checkoutUIFilterBuilders.unshift(
     new GroupUIFilterBuilder({
         builders: checkoutUIFilterBuilders,
+    }),
+);
+
+// Cached outstanding balances
+
+export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
+    new MultipleChoiceFilterBuilder({
+        name: 'Type',
+        options: [
+            new MultipleChoiceUIFilterOption('Verenigingen', CachedOutstandingBalanceType.organization),
+            new MultipleChoiceUIFilterOption('Leden', CachedOutstandingBalanceType.member),
+            new MultipleChoiceUIFilterOption('Accounts', CachedOutstandingBalanceType.user),
+        ],
+        wrapper: {
+            objectType: {
+                $in: UIFilterWrapperMarker,
+            },
+        },
+    }),
+];
+
+cachedOutstandingBalanceUIFilterBuilders.unshift(
+    new GroupUIFilterBuilder({
+        builders: cachedOutstandingBalanceUIFilterBuilders,
     }),
 );
 

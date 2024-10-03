@@ -1,10 +1,8 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQL, SQLAlias, SQLCalculation, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere } from '@stamhoofd/sql';
-import { BalanceItemStatus } from '@stamhoofd/structures';
+import { BalanceItemStatus, CachedOutstandingBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
-
-export type CachedOutstandingBalanceType = 'organization' | 'member' | 'user';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -75,13 +73,13 @@ export class CachedOutstandingBalance extends Model {
 
     static async updateForObjects(organizationId: string, objectIds: string[], objectType: CachedOutstandingBalanceType) {
         switch (objectType) {
-            case 'organization':
+            case CachedOutstandingBalanceType.organization:
                 await this.updateForOrganizations(organizationId, objectIds);
                 break;
-            case 'member':
+            case CachedOutstandingBalanceType.member:
                 await this.updateForMembers(organizationId, objectIds);
                 break;
-            case 'user':
+            case CachedOutstandingBalanceType.user:
                 await this.updateForUsers(organizationId, objectIds);
                 break;
         }
@@ -206,7 +204,7 @@ export class CachedOutstandingBalance extends Model {
             return;
         }
         const results = await this.fetchForObjects(organizationId, organizationIds, 'payingOrganizationId');
-        await this.setForResults(organizationId, results, 'organization');
+        await this.setForResults(organizationId, results, CachedOutstandingBalanceType.organization);
     }
 
     static async updateForMembers(organizationId: string, memberIds: string[]) {
@@ -214,7 +212,7 @@ export class CachedOutstandingBalance extends Model {
             return;
         }
         const results = await this.fetchForObjects(organizationId, memberIds, 'memberId');
-        await this.setForResults(organizationId, results, 'member');
+        await this.setForResults(organizationId, results, CachedOutstandingBalanceType.member);
     }
 
     static async updateForUsers(organizationId: string, userIds: string[]) {
@@ -222,7 +220,7 @@ export class CachedOutstandingBalance extends Model {
             return;
         }
         const results = await this.fetchForObjects(organizationId, userIds, 'userId', SQL.where('memberId', null));
-        await this.setForResults(organizationId, results, 'user');
+        await this.setForResults(organizationId, results, CachedOutstandingBalanceType.user);
     }
 
     /**

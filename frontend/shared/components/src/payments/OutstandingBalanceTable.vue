@@ -44,7 +44,7 @@
                     <p class="style-description-small">
                         {{ formatFloat(group.amount) }} x {{ formatPrice(group.unitPrice) }}
                     </p>
-                    
+
                     <template #right>
                         <p class="style-price-base">
                             {{ formatPrice(group.price) }}
@@ -66,22 +66,22 @@
 </template>
 
 <script setup lang="ts">
-import { useDismiss } from "@simonbackx/vue-app-navigation";
-import { GlobalEventBus, PriceBreakdownBox, Toast, useAppContext, useOrganizationCart } from "@stamhoofd/components";
-import { useMemberManager } from "@stamhoofd/networking";
+import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { GlobalEventBus, PriceBreakdownBox, Toast, useAppContext, useOrganizationCart } from '@stamhoofd/components';
+import { useMemberManager } from '@stamhoofd/networking';
 import { BalanceItemCartItem, BalanceItemWithPayments, OrganizationDetailedBillingStatusItem, RegisterCheckout, getBalanceItemTypeIcon } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    item: OrganizationDetailedBillingStatusItem,
-    showName: boolean
+    item: OrganizationDetailedBillingStatusItem;
+    showName: boolean;
 }>();
 
-const items = computed(() => props.item.balanceItems)
-const openCart = useOrganizationCart()
+const items = computed(() => props.item.balanceItems);
+const openCart = useOrganizationCart();
 const app = useAppContext();
-const memberManager = useMemberManager()
-const dismiss = useDismiss()
+const memberManager = useMemberManager();
+const dismiss = useDismiss();
 
 class GroupedItems {
     items: BalanceItemWithPayments[];
@@ -99,7 +99,7 @@ class GroupedItems {
     }
 
     get balanceItem() {
-        return this.items[0]
+        return this.items[0];
     }
 
     /**
@@ -152,7 +152,7 @@ class GroupedItems {
 
 const filteredItems = computed(() => {
     return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).totalOpen !== 0);
-})
+});
 
 const groupedItems = computed(() => {
     const map = new Map<string, GroupedItems>();
@@ -167,47 +167,47 @@ const groupedItems = computed(() => {
     }
 
     return Array.from(map.values()).filter(v => v.price !== 0);
-})
+});
 
 const priceBreakdown = computed(() => {
     const c = BalanceItemWithPayments.getOutstandingBalance(filteredItems.value);
 
     return [
         { name: 'Totaal', price: c.totalOpen },
-    ]
-})
+    ];
+});
 
 async function checkout() {
     let checkout = new RegisterCheckout();
 
     if (app === 'registration') {
         // Use member manager
-        checkout = memberManager.family.checkout
+        checkout = memberManager.family.checkout;
     }
-    
+
     for (const g of filteredItems.value) {
         const open = g.priceOpen;
 
         if (open !== 0) {
             checkout.addBalanceItem(BalanceItemCartItem.create({
                 item: g,
-                price: open
-            }))
+                price: open,
+            }));
         }
     }
 
     if (app === 'registration') {
-        checkout.defaultOrganization = props.item.organization
+        checkout.defaultOrganization = props.item.organization;
         Toast.success('Openstaande rekening toegevoegd aan winkelmandje. Reken je winkelmandje af of voeg eventueel nog andere zaken toe.').setIcon('basket').show();
-        await dismiss({force: true})
-        await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
+        await dismiss({ force: true });
+        await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
         return;
     }
 
     await openCart({
         organization: props.item.organization,
-        checkout
-    })
+        checkout,
+    });
 }
 
 </script>
