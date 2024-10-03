@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,6 +11,7 @@ import { Image } from './files/Image';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
 import { PlatformMember } from './members/PlatformMember';
 import { RegisterItem } from './members/checkout/RegisterItem';
+import { RecordCategory } from './members/records/RecordCategory';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -306,6 +307,13 @@ export class GroupSettings extends AutoEncoder {
         defaultValue: () => OrganizationRecordsConfiguration.create({}),
     })
     recordsConfiguration: OrganizationRecordsConfiguration;
+
+    /**
+     * Note: these are saved in the registration, not the member.
+     * Do not confuse with the member's record categories in recordsConfiguration
+     */
+    @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), ...NextVersion })
+    recordCategories: RecordCategory[] = [];
 
     @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function (this: GroupSettings) { return this.startDate; } })
     @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function (this: GroupSettings) { return this.registrationStartDate ?? this.startDate; } })

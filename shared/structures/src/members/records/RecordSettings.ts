@@ -200,8 +200,13 @@ export class RecordSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[];
 
-    validate(answers: Map<string, RecordAnswer>) {
+    validate(answers: Map<string, RecordAnswer>, requiredCategory = true) {
         const answer = answers.get(this.id);
+
+        if (!requiredCategory && (!answer || answer.isEmpty)) {
+            // Okay to skip
+            return;
+        }
 
         if (this.required && !answer) {
             throw new SimpleError({

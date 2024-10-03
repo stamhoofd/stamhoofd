@@ -1,11 +1,17 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from '../Group';
 import { StockReservation } from '../StockReservation';
 import { GroupPrice } from '../GroupSettings';
 import { RegisterItemOption } from './checkout/RegisterItem';
+import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer';
+import { StamhoofdFilter } from '../filters/StamhoofdFilter';
+import { compileToInMemoryFilter } from '../filters/InMemoryFilter';
+import { registrationInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions';
+import { ObjectWithRecords } from './ObjectWithRecords';
+import { RecordSettings } from './records/RecordSettings';
 
-export class Registration extends AutoEncoder {
+export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -25,6 +31,9 @@ export class Registration extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(RegisterItemOption), version: 305 })
     options: RegisterItemOption[] = [];
+
+    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), ...NextVersion })
+    recordAnswers: Map<string, RecordAnswer> = new Map();
 
     get groupId() {
         return this.group.id;
@@ -91,6 +100,29 @@ export class Registration extends AutoEncoder {
             descriptions.push(option.optionMenu.name + ': ' + option.option.name + (option.option.allowAmount ? ` x ${option.amount}` : ''));
         }
 
+        for (const answer of this.recordAnswers.values()) {
+            descriptions.push(answer.descriptionValue);
+        }
+
         return descriptions.filter(d => !!d).join('\n');
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter) {
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, registrationInMemoryFilterCompilers);
+            return compiledFilter(this);
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
+    }
+
+    isRecordEnabled(_: RecordSettings): boolean {
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return this.recordAnswers;
     }
 }

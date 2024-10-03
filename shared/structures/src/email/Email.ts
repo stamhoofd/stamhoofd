@@ -1,10 +1,10 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, IntegerDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { EditorSmartButton } from '../email/EditorSmartButton';
 import { EditorSmartVariable } from '../email/EditorSmartVariable';
 import { EmailAttachment, Recipient, Replacement } from '../endpoints/EmailRequest';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest';
-import { mergeFilters, StamhoofdFilter } from '../filters/StamhoofdFilter';
+import { StamhoofdFilter } from '../filters/StamhoofdFilter';
 import { MemberDetails } from '../members/MemberDetails';
 import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob';
 import { EmailTemplateType } from './EmailTemplate';

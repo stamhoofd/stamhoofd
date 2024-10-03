@@ -3,7 +3,7 @@
         <h1>
             Persoonsgegevens van leden
         </h1>
-            
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr>
@@ -49,137 +49,50 @@
             Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
 
-        <p class="info-box">Gebruik vragenlijsten niet om tijdelijke gegevens te verzamelen. Voeg daarvoor keuzemenu's toe aan je inschrijvingsgroepen of activiteiten.</p>
-
-        <STList v-model="categories" :draggable="true">
-            <template #item="{item: category}">
-                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="settings" @patch="addCategoriesPatch" @edit="editCategory" />
-            </template>
-        </STList>
-
-        <p>
-            <button class="button text" type="button" @click="$navigate(Routes.NewRecordCategory)">
-                <span class="icon add" />
-                <span>Nieuwe vragenlijst</span>
-            </button>
+        <p class="info-box">
+            Gebruik vragenlijsten niet om tijdelijke gegevens te verzamelen. Voeg daarvoor keuzemenu's toe aan je inschrijvingsgroepen of activiteiten.
         </p>
+
+        <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="settings" @patch:categories="addCategoriesPatch" />
     </SaveView>
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
-import { ComponentOptions, computed, ref } from 'vue';
-import EditRecordCategoryView from './EditRecordCategoryView.vue';
+import { computed, ref } from 'vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import InheritedRecordsConfigurationBox from './components/InheritedRecordsConfigurationBox.vue';
-import RecordCategoryRow from './components/RecordCategoryRow.vue';
+import EditRecordCategoriesBox from './components/EditRecordCategoriesBox.vue';
 
-type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
+type PropertyName = 'emailAddress' | 'phone' | 'gender' | 'birthDay' | 'address' | 'parents' | 'emergencyContacts';
 
 const props = withDefaults(
     defineProps<{
-        recordsConfiguration: OrganizationRecordsConfiguration,
-        inheritedRecordsConfiguration?: OrganizationRecordsConfiguration|null,
-        saveHandler: (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => Promise<void>
+        recordsConfiguration: OrganizationRecordsConfiguration;
+        inheritedRecordsConfiguration?: OrganizationRecordsConfiguration | null;
+        saveHandler: (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => Promise<void>;
     }>(), {
-        inheritedRecordsConfiguration: null
-    }
-);
-
-enum Routes {
-    NewRecordCategory = "newRecordCategory",
-    EditRecordCategory = "editRecordCategory",
-    DataPermissions = "dataPermissions",
-    FinancialSupport = "financialSupport"
-}
-defineRoutes([
-    {
-        name: Routes.NewRecordCategory,
-        url: 'vragenlijst/nieuw',
-        component: EditRecordCategoryView as ComponentOptions,
-        paramsToProps() {
-            const category = RecordCategory.create({});
-            const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
-            arr.addPut(category)
-
-            return {
-                categoryId: category.id,
-                rootCategories: [...patched.value.recordCategories, category],
-                settings,
-                isNew: true,
-                allowChildCategories: true,
-                saveHandler: async (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                    addCategoriesPatch(arr.patch(patch))
-                }
-            }
-        },
-        present: 'popup'
+        inheritedRecordsConfiguration: null,
     },
-    {
-        name: Routes.EditRecordCategory,
-        url: 'vragenlijst/@categoryId',
-        params: {
-            categoryId: String
-        },
-        component: EditRecordCategoryView as ComponentOptions,
-        paramsToProps(params) {
-            const category = patched.value.recordCategories.find(c => c.id === params.categoryId);
-            if (!category) {
-                throw new Error('Category not found')
-            }
-            return {
-                categoryId: category.id,
-                rootCategories: patched.value.recordCategories,
-                settings,
-                isNew: false,
-                allowChildCategories: true,
-                saveHandler: async (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                    addCategoriesPatch(patch)
-                }
-            }
-        },
-        propsToParams(props) {
-            if (!('category' in props) || !(props.category instanceof RecordCategory)) {
-                throw new Error('Category is required')
-            }
-            return {
-                params: {
-                    categoryId: props.category.id
-                }
-            }
-        },
-        present: 'popup'
-    }
-])
+);
 
 // Hooks
 const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
-const {patch, patched, addPatch, hasChanges} = usePatch(props.recordsConfiguration);
+const { patch, patched, addPatch, hasChanges } = usePatch(props.recordsConfiguration);
 
-const $t = useTranslate();
-const $navigate = useNavigate();
-const organization = useOrganization()
+const organization = useOrganization();
 const app = useAppContext();
-
-// Data
-const categories = useDraggableArray(
-    () => patched.value.recordCategories, 
-    (p) => {
-        addPatch({recordCategories: p})
-    }
-);
 
 const settings = computed(() => {
     const family = new PlatformFamily({
         platform: Platform.shared,
-        contextOrganization: organization.value
-    })
+        contextOrganization: organization.value,
+    });
     const ss = new RecordEditorSettings({
         dataPermission: true,
         toggleDefaultEnabled: true,
@@ -192,50 +105,47 @@ const settings = computed(() => {
                 details: MemberDetails.create({
                     firstName: 'Voorbeeld',
                     lastName: 'Lid',
-                    dataPermissions: BooleanStatus.create({value: true}),
+                    dataPermissions: BooleanStatus.create({ value: true }),
                     birthDay: new Date('2020-01-01'),
                 }),
                 users: [],
-                registrations: []
+                registrations: [],
             }),
             isNew: true,
-            family
+            family,
         }),
         patchExampleValue(value: PlatformMember, patch) {
-            const cloned = value.clone()
+            const cloned = value.clone();
             value.addDetailsPatch(MemberDetails.patch({
-                recordAnswers: patch
-            }))
+                recordAnswers: patch,
+            }));
             return cloned;
         },
-    })
-    family.members.push(ss.exampleValue)
+    });
+    family.members.push(ss.exampleValue);
     return ss;
-})
+});
 
-function getFilterConfiguration(property: PropertyName): PropertyFilter|null {
-    return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property]
+function getFilterConfiguration(property: PropertyName): PropertyFilter | null {
+    return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property];
 }
 
 function addCategoriesPatch(p: PatchableArrayAutoEncoder<RecordCategory>) {
-    addPatch({recordCategories: p})
-}
-
-async function editCategory(category: RecordCategory) {
-    await $navigate(Routes.EditRecordCategory, {params: {categoryId: category.id}})
+    addPatch({ recordCategories: p });
 }
 
 async function save() {
     if (saving.value) {
-        return
+        return;
     }
     saving.value = true;
     errors.errorBox = null;
 
     try {
-        await props.saveHandler(patch.value);        
-        await pop({force: true})
-    } catch (e) {
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -246,10 +156,10 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

@@ -15,43 +15,43 @@ import { ErrorBox } from '../../../errors/ErrorBox';
 import { useOrganization } from '../../../hooks';
 
 const props = defineProps<{
-    member: PlatformMember,
-    validator: Validator,
-    category: RecordCategory,
-    parentErrorBox?: ErrorBox | null
-    level?: number
+    member: PlatformMember;
+    validator: Validator;
+    category: RecordCategory;
+    parentErrorBox?: ErrorBox | null;
+    level?: number;
 }>();
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const allOptional = useIsAllOptional(computed(() => props.member));
-const app = useAppContext()
+const app = useAppContext();
 const organization = useOrganization();
 
 const owningOrganization = computed(() => {
-    return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id === props.category.id))
-})
+    return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id === props.category.id));
+});
 const titleSuffix = computed(() => {
     if (allOptional.value && app === 'registration') {
-        return " (optioneel)"
+        return ' (optioneel)';
     }
     if (app === 'registration') {
-        return ""
+        return '';
     }
 
     // Platform admins can see who owns the record category
     if (owningOrganization.value && (!organization.value || owningOrganization.value.id !== organization.value.id)) {
-        return owningOrganization.value.name
+        return owningOrganization.value.name;
     }
 
-    return ""
-})
+    return '';
+});
 
 function addPatch(patch: PatchAnswers) {
     props.member.addDetailsPatch({
-        recordAnswers: patch
-    })
+        recordAnswers: patch,
+    });
 }
 </script>

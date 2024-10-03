@@ -229,7 +229,7 @@ export class RegisterCart {
         const errors = new SimpleErrors();
         for (const item of this.items) {
             try {
-                item.validate();
+                item.validate({ final: true });
                 item.cartError = null;
                 newItems.push(item);
             }

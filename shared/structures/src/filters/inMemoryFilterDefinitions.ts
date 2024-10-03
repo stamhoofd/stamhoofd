@@ -5,3 +5,11 @@ export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterD
     age: createInMemoryFilterCompiler('details.defaultAge'),
     gender: createInMemoryFilterCompiler('details.gender'),
 };
+
+export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+};
+
+export const registerItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+};

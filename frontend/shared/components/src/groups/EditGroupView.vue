@@ -466,22 +466,36 @@
         <hr>
         <h2>Persoonsgegevens verzamelen</h2>
         <p>Deze persoonsgegevens zijn verplicht (soms optioneel) in te vullen voor leden die inschrijven. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
-
+        <p v-if="auth.hasFullAccess()" class="info-box">
+            Voeg nieuwe persoonsgegevens toe via Instellingen → Persoonsgegevens van leden.
+        </p>
         <InheritedRecordsConfigurationBox :group-level="true" :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
+
+        <hr>
+        <h2>Eénmalige vragen</h2>
+        <p>Deze vragen zijn enkel van toepassing op deze specifieke inschrijving en gaan daarna verloren. <strong class="style-strong">Bij elke inschrijving moeten ze opnieuw worden ingegeven:</strong> het antwoord hangt dus vast aan de inschrijving, niet het lid zelf. De antwoorden zijn enkel zichtbaar in de context van een inschrijving, niet tussen de gegevens van een lid.</p>
+
+        <p class="warning-box">
+            <span>
+                Gebruik dit <strong class="style-strong style-underline">NIET</strong> om persoonsgegevens van leden te verzamelen (bv. GEEN allergieën, al dan niet kunnen zwemmen, dieetvoorkeur...) - anders moeten ze dit per inschrijving en elk jaar opnieuw ingeven en is het niet duidelijk welke gegevens nu de juiste zijn. Voeg hier enkel vragen toe die je éénmalig nodig hebt specifiek voor deze activiteit.
+            </span>
+        </p>
+
+        <EditRecordCategoriesBox :categories="patched.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch" />
     </SaveView>
 </template>
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AgeInput, DateSelection, Dropdown, EditGroupView, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, NumberInput, OrganizationAvatar, TimeInput } from '@stamhoofd/components';
+import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, NumberInput, OrganizationAvatar, RecordEditorSettings, registrationUIFilterBuilders, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, WaitingListType } from '@stamhoofd/structures';
+import { Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, RecordCategory, Registration, WaitingListType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
+import { useAuth, useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
@@ -512,6 +526,7 @@ const { patched, hasChanges, addPatch, patch } = usePatch(props.group);
 const period = useRegistrationPeriod(computed(() => patched.value.periodId));
 const forceShowRequireGroupIds = ref(false);
 const usedStock = computed(() => patched.value.settings.getUsedStock(patched.value) || 0);
+const auth = useAuth();
 
 function addRequireGroupIds() {
     forceShowRequireGroupIds.value = true;
@@ -533,6 +548,15 @@ const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
         }),
     });
 };
+
+function addRecordCategoriesPatch(categories: PatchableArrayAutoEncoder<RecordCategory>) {
+    addPatch({
+        settings: GroupSettings.patch({
+            recordCategories: categories,
+        }),
+    });
+}
+
 const { addPatch: addPricePatch, addPut: addPricePut, addDelete: addPriceDelete } = usePatchableArray(patchPricesArray);
 const draggablePrices = useDraggableArray(() => patched.value.settings.prices, patchPricesArray);
 
@@ -1136,6 +1160,24 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
 
     return text;
 }
+
+const recordEditorSettings = new RecordEditorSettings({
+    dataPermission: false,
+    toggleDefaultEnabled: false,
+    filterBuilder: (categories: RecordCategory[]) => {
+        return registrationUIFilterBuilders[0];
+    },
+    exampleValue: Registration.create({
+        group: patched.value,
+        groupPrice: patched.value.settings.prices[0],
+        organizationId: patched.value.organizationId,
+    }),
+    patchExampleValue(value: Registration, patch) {
+        return value.patch({
+            recordAnswers: patch,
+        });
+    },
+});
 
 defineExpose({
     shouldNavigateAway,

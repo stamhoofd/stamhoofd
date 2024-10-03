@@ -94,6 +94,11 @@
             </STList>
         </div>
 
+        <div v-for="category in categories" :key="category.id" class="container">
+            <hr>
+            <FillRecordCategoryBox :category="category" :value="item" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
+        </div>
+
         <div class="pricing-box max">
             <PriceBreakdownBox :price-breakdown="item.priceBreakown" />
         </div>
@@ -101,80 +106,96 @@
 </template>
 
 <script setup lang="ts">
+import { patchObject } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
-import { GroupOption, GroupOptionMenu, GroupType, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
+import { ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
+import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.vue';
 
 const props = defineProps<{
-    item: RegisterItem,
-    saveHandler: (newItem: RegisterItem, navigation: NavigationActions) => Promise<void>|void,
-    showGroupInformation: boolean
+    item: RegisterItem;
+    saveHandler: (newItem: RegisterItem, navigation: NavigationActions) => Promise<void> | void;
+    showGroupInformation: boolean;
 }>();
 
-const checkout = computed(() => props.item.member.family.checkout)
+const checkout = computed(() => props.item.member.family.checkout);
 const errors = useErrors();
-const saving = ref(false)
-const navigationActions = useNavigationActions()
-const isInCart = computed(() => checkout.value.cart.contains(props.item))
-const pop = usePop()
-const admin = computed(() => checkout.value.isAdminFromSameOrganization)
-const organization = useOrganization();
+const saving = ref(false);
+const navigationActions = useNavigationActions();
+const isInCart = computed(() => checkout.value.cart.contains(props.item));
+const pop = usePop();
+const admin = computed(() => checkout.value.isAdminFromSameOrganization);
+
+function addRecordAnswersPatch(patch: PatchAnswers) {
+    props.item.recordAnswers = patchObject(props.item.recordAnswers, patch);
+}
+
+const categories = computed(() => {
+    return props.item.group.settings.recordCategories;
+});
 
 onMounted(() => {
-    errors.errorBox = null
+    errors.errorBox = null;
     try {
-        props.item.validate()
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        props.item.validate();
     }
-})
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+});
 
 async function addToCart() {
     if (saving.value) {
-        return
+        return;
     }
-    saving.value = true
-    errors.errorBox = null
+    saving.value = true;
+    errors.errorBox = null;
     try {
-        await props.item.validate()
-        await props.saveHandler(props.item, navigationActions)
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
+        await props.item.validate();
+        await props.saveHandler(props.item, navigationActions);
     }
-    saving.value = false
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    saving.value = false;
 }
 
 function getOptionSelected(menu: GroupOptionMenu, option: GroupOption) {
-    return !!props.item.options.find(o => o.option.id === option.id)
+    return !!props.item.options.find(o => o.option.id === option.id);
 }
 
 function setOptionSelected(menu: GroupOptionMenu, option: GroupOption, selected: boolean) {
-    setOptionAmount(menu, option, selected ? Math.max(1, getOptionAmount(menu, option)) : 0)
+    setOptionAmount(menu, option, selected ? Math.max(1, getOptionAmount(menu, option)) : 0);
 }
 
 function getOptionAmount(menu: GroupOptionMenu, option: GroupOption) {
-    return props.item.options.find(o => o.optionMenu.id === menu.id && o.option.id === option.id)?.amount ?? 0
+    return props.item.options.find(o => o.optionMenu.id === menu.id && o.option.id === option.id)?.amount ?? 0;
 }
 
 function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: number) {
     if (!option.allowAmount && (amount !== 0 && amount !== 1)) {
-        amount = amount !== 0 ? 1 : 0
-    }
- 
-    if (amount === getOptionAmount(menu, option)) {
-        return
+        amount = amount !== 0 ? 1 : 0;
     }
 
-    let filteredOptions: RegisterItemOption[]
-    
+    if (amount === getOptionAmount(menu, option)) {
+        return;
+    }
+
+    let filteredOptions: RegisterItemOption[];
+
     if (!menu.multipleChoice && amount > 0) {
         // Clear all options from this menu
-        filteredOptions = props.item.options.filter(o => o.optionMenu.id !== menu.id)
-    } else {
+        filteredOptions = props.item.options.filter(o => o.optionMenu.id !== menu.id);
+    }
+    else {
         // Remove self
-        filteredOptions = props.item.options.filter(o => o.optionMenu.id !== menu.id || o.option.id !== option.id)
+        filteredOptions = props.item.options.filter(o => o.optionMenu.id !== menu.id || o.option.id !== option.id);
     }
 
     if (amount > 0) {
@@ -182,36 +203,36 @@ function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: num
             RegisterItemOption.create({
                 optionMenu: menu,
                 option,
-                amount
-            })
-        )
+                amount,
+            }),
+        );
     }
 
-    props.item.options = filteredOptions
+    props.item.options = filteredOptions;
 }
 
 async function deleteMe() {
-    props.item.checkout.cart.remove(props.item)
-    await pop({force: true})
+    props.item.checkout.cart.remove(props.item);
+    await pop({ force: true });
 }
 
 watch(() => [props.item.groupPrice, props.item.options], () => {
-    console.log('Recalculating prices')
+    console.log('Recalculating prices');
 
     // We need to do cart level calculation, because discounts might be applied
-    const clonedCart = checkout.value.cart.clone()
-    clonedCart.remove(props.item)
+    const clonedCart = checkout.value.cart.clone();
+    clonedCart.remove(props.item);
 
-    const clone = props.item.clone()
-    clonedCart.add(clone)
+    const clone = props.item.clone();
+    clonedCart.add(clone);
 
-    clonedCart.calculatePrices()
+    clonedCart.calculatePrices();
 
-    props.item.calculatedPrice = clone.calculatedPrice
-    props.item.calculatedRefund = clone.calculatedRefund
+    props.item.calculatedPrice = clone.calculatedPrice;
+    props.item.calculatedRefund = clone.calculatedRefund;
 
-    console.log('Updated price', props.item.calculatedPrice)
-}, {deep: true})
+    console.log('Updated price', props.item.calculatedPrice);
+}, { deep: true });
 
 </script>
 

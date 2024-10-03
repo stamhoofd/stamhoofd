@@ -90,6 +90,13 @@ export class RecordCategory extends AutoEncoder {
         return false;
     }
 
+    isRequired<T extends ObjectWithRecords>(filterValue: T) {
+        if (!this.filter || this.filter.isRequired(filterValue)) {
+            return true;
+        }
+        return false;
+    }
+
     static filterCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T): RecordCategory[] {
         return categories.filter((category) => {
             return category.isEnabled(filterValue);
@@ -189,24 +196,26 @@ export class RecordCategory extends AutoEncoder {
 
     static validate<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T) {
         const filteredCategories = RecordCategory.filterCategories(categories, filterValue);
-        const allRecords = filteredCategories.flatMap(c => c.getAllFilteredRecords(filterValue));
         const errors = new SimpleErrors();
 
         // Delete all records that are not in the list
-        for (const record of allRecords) {
-            try {
-                record.validate(filterValue.getRecordAnswers());
-            }
-            catch (e) {
-                if (isSimpleErrors(e) || isSimpleError(e)) {
-                    errors.addError(e);
+        for (const category of filteredCategories) {
+            const requiredCategory = category.isRequired(filterValue);
+
+            for (const record of category.getAllFilteredRecords(filterValue)) {
+                try {
+                    record.validate(filterValue.getRecordAnswers(), requiredCategory);
                 }
-                else {
-                    throw e;
+                catch (e) {
+                    if (isSimpleErrors(e) || isSimpleError(e)) {
+                        errors.addError(e);
+                    }
+                    else {
+                        throw e;
+                    }
                 }
             }
         }
-
         errors.throwIfNotEmpty();
     }
 }

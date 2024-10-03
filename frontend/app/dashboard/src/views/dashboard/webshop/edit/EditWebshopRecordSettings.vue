@@ -32,7 +32,7 @@
 
         <STList v-model="categories" :draggable="true">
             <template #item="{item: category}">
-                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch="addCategoriesPatch" @edit="editCategory" />
+                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch:categories="addCategoriesPatch" @edit="editCategory" />
             </template>
         </STList>
 

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +11,12 @@ import { StockReservation } from '../../StockReservation';
 import { PlatformMember } from '../PlatformMember';
 import { Registration } from '../Registration';
 import { RegisterContext } from './RegisterCheckout';
+import { StamhoofdFilter } from '../../filters/StamhoofdFilter';
+import { compileToInMemoryFilter } from '../../filters/InMemoryFilter';
+import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions';
+import { RecordSettings } from '../records/RecordSettings';
+import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer';
+import { RecordCategory } from '../records/RecordCategory';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -42,6 +48,9 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RegisterItemOption) })
     options: RegisterItemOption[] = [];
 
+    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), ...NextVersion })
+    recordAnswers: Map<string, RecordAnswer> = new Map();
+
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     replaceRegistrationIds: string[] = [];
 
@@ -59,6 +68,7 @@ export class RegisterItem {
 
     groupPrice: GroupPrice;
     options: RegisterItemOption[] = [];
+    recordAnswers: Map<string, RecordAnswer> = new Map();
 
     /**
      * Price for the new registration
@@ -94,6 +104,7 @@ export class RegisterItem {
             group: registration.group,
             organization,
             groupPrice: registration.groupPrice,
+            recordAnswers: registration.recordAnswers,
             options: registration.options,
         });
     }
@@ -119,6 +130,7 @@ export class RegisterItem {
         organization: Organization;
         groupPrice?: GroupPrice;
         options?: RegisterItemOption[];
+        recordAnswers?: Map<string, RecordAnswer>;
         replaceRegistrations?: Registration[];
         cartError?: SimpleError | SimpleErrors | null;
         calculatedPrice?: number;
@@ -150,6 +162,7 @@ export class RegisterItem {
 
         this.organization = data.organization;
         this.options = data.options ?? [];
+        this.recordAnswers = data.recordAnswers ?? new Map();
         this.replaceRegistrations = data.replaceRegistrations ?? [];
         this.cartError = data.cartError ?? null;
         this.calculatedPrice = data.calculatedPrice ?? 0;
@@ -259,6 +272,7 @@ export class RegisterItem {
             organization: this.organization,
             groupPrice: this.groupPrice.clone(),
             options: this.options.map(o => o.clone()),
+            recordAnswers: new Map([...this.recordAnswers.entries()].map(([k, v]) => [k, v.clone()])),
             replaceRegistrations: this.replaceRegistrations.map(r => r.clone()),
             cartError: this.cartError,
             calculatedPrice: this.calculatedPrice,
@@ -269,6 +283,7 @@ export class RegisterItem {
     copyFrom(item: RegisterItem) {
         this.groupPrice = item.groupPrice.clone();
         this.options = item.options.map(o => o.clone());
+        this.recordAnswers = new Map([...item.recordAnswers.entries()].map(([k, v]) => [k, v.clone()]));
         this.calculatedPrice = item.calculatedPrice;
         this.calculatedRefund = item.calculatedRefund;
     }
@@ -299,6 +314,7 @@ export class RegisterItem {
             groupPrice: this.groupPrice,
             options: this.options,
             replaceRegistrationIds: this.replaceRegistrations.map(r => r.id),
+            recordAnswers: this.recordAnswers,
         });
     }
 
@@ -325,7 +341,7 @@ export class RegisterItem {
     /**
      * Update self to the newest available data, and throw error if something failed (only after refreshing other ones)
      */
-    refresh(group: Group) {
+    refresh(group: Group, options?: { warnings?: boolean; forWaitingList?: boolean; final?: boolean }) {
         this.group = group;
 
         const errors = new SimpleErrors();
@@ -405,6 +421,21 @@ export class RegisterItem {
                     meta: { recoverable: true },
                 }),
             );
+        }
+
+        if (options?.final) {
+            // Check all answers are answered
+            try {
+                RecordCategory.validate(this.group.settings.recordCategories, this);
+            }
+            catch (e) {
+                if (isSimpleErrors(e) || isSimpleError(e)) {
+                    errors.addError(e);
+                }
+                else {
+                    throw e;
+                }
+            }
         }
 
         errors.throwIfNotEmpty();
@@ -669,8 +700,8 @@ export class RegisterItem {
         }
     }
 
-    validate(options?: { warnings?: boolean; forWaitingList?: boolean }) {
-        this.refresh(this.group);
+    validate(options?: { warnings?: boolean; forWaitingList?: boolean; final?: boolean }) {
+        this.refresh(this.group, options);
         const checkout = this.member.family.checkout;
         const admin = checkout.isAdminFromSameOrganization && !options?.warnings;
 
@@ -946,6 +977,7 @@ export class RegisterItem {
             organization,
             groupPrice: idRegisterItem.groupPrice,
             options: idRegisterItem.options,
+            recordAnswers: idRegisterItem.recordAnswers,
             replaceRegistrations,
         });
     }
@@ -1000,5 +1032,24 @@ export class RegisterItem {
 
         const freed = this.replaceRegistrations.flatMap(r => r.stockReservations);
         return StockReservation.removed(base, freed);
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter) {
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, registerItemInMemoryFilterCompilers);
+            return compiledFilter(this);
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
+    }
+
+    isRecordEnabled(_: RecordSettings): boolean {
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return this.recordAnswers;
     }
 }

@@ -260,6 +260,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.price = 0; // will get filled by balance items themselves
             registration.groupPrice = item.groupPrice;
             registration.options = item.options;
+            registration.recordAnswers = item.recordAnswers;
 
             payRegistrations.push({
                 registration,

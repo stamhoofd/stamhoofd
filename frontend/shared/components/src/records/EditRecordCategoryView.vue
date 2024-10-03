@@ -43,10 +43,10 @@
                     <Checkbox v-model="defaultEnabled" />
                 </template>
 
-                <h3 class="style-title-list" v-if="app === 'admin'">
+                <h3 v-if="app === 'admin'" class="style-title-list">
                     Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard-leeftijdsgroep
                 </h3>
-                <h3 class="style-title-list" v-else>
+                <h3 v-else class="style-title-list">
                     Verplicht ingeschakeld voor alle leden (behalve wachtlijsten en activiteiten)
                 </h3>
 
@@ -61,7 +61,6 @@
         <p v-if="records.length === 0 && categories.length === 0" class="info-box">
             Deze vragenlijst is leeg en zal nog niet getoond worden.
         </p>
-
 
         <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(patchedCategory).computed.value = newValue!">
             <template #item="{item: record}">
@@ -103,7 +102,7 @@
             </p>
 
             <p v-if="c.description" class="style-description-block style-em pre-wrap" v-text="c.description" />
-                
+
             <STList :model-value="getDraggableRecords(c).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(c).computed.value = newValue!">
                 <template #item="{item: record}">
                     <RecordRow :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" @edit="editRecord($event, c)" />
@@ -111,10 +110,13 @@
             </STList>
         </div>
 
-        <div v-if="defaultEnabled" class="container">
+        <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
             <hr>
             <h2>Slim in- en uitschakelen</h2>
-            <p v-if="allowChildCategories">
+            <p v-if="!hasFilters">
+                Je kan kiezen wanneer deze stap overgeslagen kan worden.
+            </p>
+            <p v-else-if="allowChildCategories && patchedCategory.getAllRecords().length > 1">
                 Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.
             </p>
             <p v-else>
@@ -165,6 +167,7 @@ import EditRecordView from './EditRecordView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
+import { GroupUIFilterBuilder } from '../filters';
 
 // Define
 const props = defineProps<{
@@ -173,19 +176,19 @@ const props = defineProps<{
     saveHandler: (category: PatchableArrayAutoEncoder<RecordCategory>) => void;
     settings: RecordEditorSettings<ObjectWithRecords>;
     isNew: boolean;
-    allowChildCategories: boolean
+    allowChildCategories: boolean;
 }>();
 
 // Hooks
 const errors = useErrors();
-const {patched: patchedRootCategories, hasChanges, patch, addPatch: addRootPatch, addArrayPatch: addRootCategoriesPatch} = usePatchArray(props.rootCategories);
+const { patched: patchedRootCategories, hasChanges, patch, addPatch: addRootPatch, addArrayPatch: addRootCategoriesPatch } = usePatchArray(props.rootCategories);
 const pop = usePop();
 const present = usePresent();
 
 // Data
 const saving = ref(false);
 const deleting = ref(false);
-const filterBuilder = props.settings.filterBuilder(props.rootCategories)
+const filterBuilder = props.settings.filterBuilder(props.rootCategories);
 const app = useAppContext();
 
 // Computed
@@ -201,7 +204,11 @@ const patchedCategory = computed(() => {
             }
         }
     }
-    throw new Error('CategoryId not found via rootCategories: ' + props.categoryId)
+    throw new Error('CategoryId not found via rootCategories: ' + props.categoryId);
+});
+
+const hasFilters = computed(() => {
+    return filterBuilder instanceof GroupUIFilterBuilder && filterBuilder.builders.length > 1;
 });
 
 const title = computed(() => props.isNew ? 'Nieuwe vragenlijst' : patchedCategory.value.name);
@@ -213,65 +220,65 @@ const name = computed({
         addPatch(
             RecordCategory.patch({
                 id: patchedCategory.value.id,
-                name: v
-            })
-        )
-    }
-})
+                name: v,
+            }),
+        );
+    },
+});
 const description = computed({
     get: () => patchedCategory.value.description,
     set: (v: string) => {
         addPatch(
             RecordCategory.patch({
                 id: patchedCategory.value.id,
-                description: v
-            })
-        )
-    }
-})
+                description: v,
+            }),
+        );
+    },
+});
 const defaultEnabled = computed({
     get: () => patchedCategory.value.defaultEnabled,
     set: (v: boolean) => {
         if (v && patchedCategory.value.containsSensitiveData && !props.settings.inheritedRecordsConfiguration?.dataPermission) {
-            Toast.error('Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.').show()
-            return
+            Toast.error('Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.').show();
+            return;
         }
 
         addPatch(
             RecordCategory.patch({
                 id: patchedCategory.value.id,
                 defaultEnabled: v,
-                filter: !defaultEnabled.value ? null : undefined
-            })
-        )
-    }
-})
+                filter: !defaultEnabled.value ? null : undefined,
+            }),
+        );
+    },
+});
 const filter = computed({
     get: () => patchedCategory.value.filter ?? PropertyFilter.createDefault(),
     set: (v: PropertyFilter) => {
         addPatch(
             RecordCategory.patch({
                 id: patchedCategory.value.id,
-                filter: v
-            })
-        )
-    }
-})
+                filter: v,
+            }),
+        );
+    },
+});
 
 // Mapped getters
 const cachedComputers = new Map<string, Ref<any>>();
-function getDraggableRecords(category: RecordCategory): {computed: Ref<RecordSettings[]>} {
+function getDraggableRecords(category: RecordCategory): { computed: Ref<RecordSettings[]> } {
     if (cachedComputers.has(category.id)) {
         return {
-            computed: cachedComputers.get(category.id) as Ref<RecordSettings[]>
-        }
+            computed: cachedComputers.get(category.id) as Ref<RecordSettings[]>,
+        };
     }
 
     const c = useDraggableArray(
         () => {
             // Need a getter here because category is not a ref
             if (patchedCategory.value.id === category.id) {
-                return patchedCategory.value.records
+                return patchedCategory.value.records;
             }
             return patchedCategory.value.childCategories.find(cc => cc.id === category.id)!.records;
         },
@@ -281,72 +288,72 @@ function getDraggableRecords(category: RecordCategory): {computed: Ref<RecordSet
                 addPatch(
                     RecordCategory.patch({
                         id: category.id,
-                        records: recordsPatch
-                    })
-                )
+                        records: recordsPatch,
+                    }),
+                );
                 return;
             }
 
             const p = RecordCategory.patch({
                 id: category.id,
-                records: recordsPatch
-            })
+                records: recordsPatch,
+            });
 
-            const arr: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
-            arr.addPatch(p)
-            
+            const arr: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray();
+            arr.addPatch(p);
+
             addPatch(
                 RecordCategory.patch({
                     id: props.categoryId,
-                    childCategories: arr
-                })
-            )
-        }
+                    childCategories: arr,
+                }),
+            );
+        },
     );
     cachedComputers.set(category.id, c);
-    return {computed: c};
+    return { computed: c };
 }
 
 // Methods
 function getPatchParentCategories(patch: PatchableArrayAutoEncoder<RecordCategory>, categoryId = props.categoryId): PatchableArrayAutoEncoder<RecordCategory> {
     // Is it a root category?
     if (props.rootCategories.find(r => r.id === categoryId)) {
-        return patch
+        return patch;
     }
 
-    const parentRootCategory = props.rootCategories.find(r => !!r.childCategories.find(c => c.id === categoryId))
+    const parentRootCategory = props.rootCategories.find(r => !!r.childCategories.find(c => c.id === categoryId));
     if (parentRootCategory) {
-        const rootPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>
+        const rootPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
         rootPatch.addPatch(RecordCategory.patch({
             id: parentRootCategory.id,
-            childCategories: patch
-        }))
+            childCategories: patch,
+        }));
         return rootPatch;
-
-    } else {
-        console.error('Could not patch inside EditRecordCategoryView: could not find parent category', patch)
     }
-    return new PatchableArray() 
+    else {
+        console.error('Could not patch inside EditRecordCategoryView: could not find parent category', patch);
+    }
+    return new PatchableArray();
 }
-
 
 // Methods
 function addPatch(patch: AutoEncoderPatchType<RecordCategory>) {
     // Is it a root category?
     if (props.rootCategories.find(r => r.id === patch.id)) {
-        return addRootPatch(patch)
+        return addRootPatch(patch);
     }
 
-    const parentRootCategory = props.rootCategories.find(r => !!r.childCategories.find(c => c.id === patch.id))
+    const parentRootCategory = props.rootCategories.find(r => !!r.childCategories.find(c => c.id === patch.id));
     if (parentRootCategory) {
-        const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>
-        arr.addPatch(patch)
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+        arr.addPatch(patch);
         addRootPatch(RecordCategory.patch({
             id: parentRootCategory.id,
-            childCategories: arr
-        }))
-    } else {
-        console.error('Could not patch inside EditRecordCategoryView: could not find parent category', patch)
+            childCategories: arr,
+        }));
+    }
+    else {
+        console.error('Could not patch inside EditRecordCategoryView: could not find parent category', patch);
     }
 }
 
@@ -357,15 +364,16 @@ async function save() {
     saving.value = true;
     try {
         await props.saveHandler(patch.value);
-        await pop({force: true});
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
 }
 
 async function addRecord(parent: RecordCategory = patchedCategory.value) {
-    const record = RecordSettings.create({})
+    const record = RecordSettings.create({});
 
     await present({
         components: [
@@ -378,14 +386,14 @@ async function addRecord(parent: RecordCategory = patchedCategory.value) {
                     addPatch(
                         RecordCategory.patch({
                             id: parent.id,
-                            records: patch
-                        })
-                    )
-                }
-            })
+                            records: patch,
+                        }),
+                    );
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function editRecord(record: RecordSettings, parent: RecordCategory = patchedCategory.value) {
@@ -400,30 +408,30 @@ async function editRecord(record: RecordSettings, parent: RecordCategory = patch
                     addPatch(
                         RecordCategory.patch({
                             id: parent.id,
-                            records: patch
-                        })
-                    )
-                }
-            })
+                            records: patch,
+                        }),
+                    );
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
-const Self = getCurrentInstance()!.type!
+const Self = getCurrentInstance()!.type!;
 
 async function addCategory() {
-    const category = RecordCategory.create({})
+    const category = RecordCategory.create({});
 
-    const childCategoryPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>
-    childCategoryPatch.addPut(category)
+    const childCategoryPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+    childCategoryPatch.addPut(category);
 
-    const temporaryRootPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>
+    const temporaryRootPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
     temporaryRootPatch.addPatch(RecordCategory.patch({
         id: props.categoryId,
-        childCategories: childCategoryPatch
-    }))
-    
+        childCategories: childCategoryPatch,
+    }));
+
     await present({
         components: [
             new ComponentWithProperties(Self, {
@@ -433,12 +441,12 @@ async function addCategory() {
                 settings: props.settings,
                 allowChildCategories: false,
                 saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                    addRootCategoriesPatch(temporaryRootPatch.patch(patch))
-                }
-            })
+                    addRootCategoriesPatch(temporaryRootPatch.patch(patch));
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function editCategory(category: RecordCategory) {
@@ -451,12 +459,12 @@ async function editCategory(category: RecordCategory) {
                 settings: props.settings,
                 allowChildCategories: false,
                 saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                    addRootCategoriesPatch(patch)
-                }
-            })
+                    addRootCategoriesPatch(patch);
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function deleteMe() {
@@ -468,22 +476,23 @@ async function deleteMe() {
         return;
     }
     // Note we create a patch, but don't use it internally because that would throw errors. The view itszelf is not aware of the delete
-    const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>
-    arr.addDelete(props.categoryId)
-    const patch = getPatchParentCategories(arr, props.categoryId)
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+    arr.addDelete(props.categoryId);
+    const patch = getPatchParentCategories(arr, props.categoryId);
 
     deleting.value = true;
     try {
-        await props.saveHandler(patch) 
-        await pop({force: true});
-    } catch (e) {
+        await props.saveHandler(patch);
+        await pop({ force: true });
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     deleting.value = false;
 }
 
 async function showExample() {
-    const reactiveValue = reactive(props.settings.exampleValue)
+    const reactiveValue = reactive(props.settings.exampleValue);
     await present({
         components: [
             new ComponentWithProperties(FillRecordCategoryView, {
@@ -491,25 +500,25 @@ async function showExample() {
                 value: reactiveValue,
                 saveText: 'Opslaan',
                 patchHandler: (patch: PatchAnswers) => {
-                    return props.settings.patchExampleValue(reactiveValue, patch)
+                    return props.settings.patchExampleValue(reactiveValue, patch);
                 },
                 saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
-                    await navigationActions.pop({force: true})
-                }
-            })
+                    await navigationActions.pop({ force: true });
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

@@ -80,79 +80,78 @@
     </div>
 </template>
 
-
 <script lang="ts" setup>
-import { Address, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
+import { Address, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 
-import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding";
-import { computed, nextTick, onMounted } from "vue";
-import { ErrorBox } from "../errors/ErrorBox";
-import STErrorsDefault from "../errors/STErrorsDefault.vue";
-import { Validator } from "../errors/Validator";
-import { useErrors } from "../errors/useErrors";
-import { useValidation } from "../errors/useValidation";
-import STList from "../layout/STList.vue";
-import STListItem from "../layout/STListItem.vue";
-import AddressInput from "./AddressInput.vue";
-import Checkbox from "./Checkbox.vue";
-import DateSelection from "./DateSelection.vue";
-import EmailInput from "./EmailInput.vue";
-import ImageInput from "./ImageInput.vue";
-import NumberInput from "./NumberInput.vue";
-import PhoneInput from "./PhoneInput.vue";
-import PriceInput from "./PriceInput.vue";
-import Radio from "./Radio.vue";
-import STInputBox from "./STInputBox.vue";
+import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
+import { computed, nextTick, onMounted } from 'vue';
+import { ErrorBox } from '../errors/ErrorBox';
+import STErrorsDefault from '../errors/STErrorsDefault.vue';
+import { Validator } from '../errors/Validator';
+import { useErrors } from '../errors/useErrors';
+import { useValidation } from '../errors/useValidation';
+import STList from '../layout/STList.vue';
+import STListItem from '../layout/STListItem.vue';
+import AddressInput from './AddressInput.vue';
+import Checkbox from './Checkbox.vue';
+import DateSelection from './DateSelection.vue';
+import EmailInput from './EmailInput.vue';
+import ImageInput from './ImageInput.vue';
+import NumberInput from './NumberInput.vue';
+import PhoneInput from './PhoneInput.vue';
+import PriceInput from './PriceInput.vue';
+import Radio from './Radio.vue';
+import STInputBox from './STInputBox.vue';
 
 const props = withDefaults(defineProps<{
-    record: RecordSettings,
+    record: RecordSettings;
     // Used to find the currently saved answer
-    answers: Map<string, RecordAnswer>,
-    validator: Validator,
-    allOptional?: boolean,
-    markReviewed?: boolean
+    answers: Map<string, RecordAnswer>;
+    validator: Validator;
+    allOptional?: boolean;
+    markReviewed?: boolean;
 }>(), {
     markReviewed: false,
-    allOptional: false
+    allOptional: false,
 });
 
 const emit = defineEmits<{
-    patch: [patch: PatchAnswers]
-}>()
-const errors = useErrors({validator: props.validator});
+    patch: [patch: PatchAnswers];
+}>();
+const errors = useErrors({ validator: props.validator });
 
 const answer = computed({
     get: () => {
-        const existing = props.answers.get(props.record.id)
-        const type = RecordAnswerDecoder.getClassForType(props.record.type)
+        const existing = props.answers.get(props.record.id);
+        const type = RecordAnswerDecoder.getClassForType(props.record.type);
         if (existing !== undefined && existing instanceof type) {
             if (existing.settings !== props.record) {
-                existing.settings = props.record
+                existing.settings = props.record;
             }
-            return existing
+            return existing;
         }
- 
+
         // Create a new one
-        return RecordAnswer.createDefaultAnswer(props.record)
+        return RecordAnswer.createDefaultAnswer(props.record);
     },
 
     set: (value: RecordAnswer) => {
         const patch = new PatchMap() as PatchAnswers;
 
         if (props.markReviewed) {
-            value.markReviewed()
+            value.markReviewed();
         }
         patch.set(props.record.id, value);
-        emit('patch', patch)
-    }
-})
+        emit('patch', patch);
+    },
+});
 
 function patchAnswer(patch: AutoEncoderPatchType<RecordAnswer>) {
     const patchMap = new PatchMap() as PatchAnswers;
 
     // PatchAnswer doesn't support pathces becase it is a generic type (needs type for decoding, which we don't support yet - See RecordAnswerDecoder)
     patchMap.set(props.record.id, answer.value.patch(patch));
-    emit('patch', patchMap)
+    emit('patch', patchMap);
 }
 
 const casted = {
@@ -167,157 +166,157 @@ const casted = {
     RecordIntegerAnswer: computed(() => answer.value instanceof RecordIntegerAnswer ? answer.value : null),
 };
 
-const label = computed(() => props.record.label || props.record.name)
-const required = computed(() => !props.allOptional && props.record.required)
+const label = computed(() => props.record.label || props.record.name);
+const required = computed(() => !props.allOptional && props.record.required);
 const inputPlaceholder = computed(() => {
     if (!required.value) {
         if (answer.value.settings.inputPlaceholder.length > 0) {
             if (props.record.type === RecordType.Integer) {
-                return answer.value.settings.inputPlaceholder
+                return answer.value.settings.inputPlaceholder;
             }
-            return "Optioneel. "+answer.value.settings.inputPlaceholder
+            return 'Optioneel. ' + answer.value.settings.inputPlaceholder;
         }
-        return "Optioneel"
+        return 'Optioneel';
     }
-    return answer.value.settings.inputPlaceholder || answer.value.settings.name
-})
+    return answer.value.settings.inputPlaceholder || answer.value.settings.name;
+});
 
 const selected = computed({
     get: () => {
-        return casted.RecordCheckboxAnswer.value?.selected ?? false
+        return casted.RecordCheckboxAnswer.value?.selected ?? false;
     },
     set: (selected: boolean) => {
         patchAnswer(RecordCheckboxAnswer.patch({
-            selected
-        }))
-    }
-})
+            selected,
+        }));
+    },
+});
 
 const comments = computed({
     get: () => {
-        return casted.RecordCheckboxAnswer.value?.comments ?? ""
+        return casted.RecordCheckboxAnswer.value?.comments ?? '';
     },
     set: (comments: string) => {
         patchAnswer(RecordCheckboxAnswer.patch({
-            comments
-        }))
-    }
-})
+            comments,
+        }));
+    },
+});
 
 const selectedChoice = computed({
     get: () => {
-        return casted.RecordChooseOneAnswer.value?.selectedChoice ?? null
+        return casted.RecordChooseOneAnswer.value?.selectedChoice ?? null;
     },
     set: (selectedChoice: RecordChoice | null) => {
         patchAnswer(RecordChooseOneAnswer.patch({
-            selectedChoice
-        }))
-    }
-})
+            selectedChoice,
+        }));
+    },
+});
 
 const integerValue = computed({
     get: () => {
-        return casted.RecordIntegerAnswer.value?.value ?? null
+        return casted.RecordIntegerAnswer.value?.value ?? null;
     },
     set: (value: number | null) => {
         patchAnswer(RecordIntegerAnswer.patch({
-            value
-        }))
-    }
-})
+            value,
+        }));
+    },
+});
 
 const textValue = computed({
     get: () => {
-        return casted.RecordTextAnswer.value?.value ?? ""
+        return casted.RecordTextAnswer.value?.value ?? '';
     },
     set: (value: string) => {
         patchAnswer(RecordTextAnswer.patch({
-            value
-        }))
-    }
-})
+            value,
+        }));
+    },
+});
 
 const addressValue = computed({
     get: () => {
-        return casted.RecordAddressAnswer.value?.address ?? null
+        return casted.RecordAddressAnswer.value?.address ?? null;
     },
-    set: (address: Address|null) => {
+    set: (address: Address | null) => {
         patchAnswer(RecordAddressAnswer.patch({
-            address
-        }))
-    }
-})
+            address,
+        }));
+    },
+});
 
 const dateValue = computed({
     get: () => {
-        return casted.RecordDateAnswer.value?.dateValue ?? null
+        return casted.RecordDateAnswer.value?.dateValue ?? null;
     },
-    set: (dateValue: Date|null) => {
+    set: (dateValue: Date | null) => {
         patchAnswer(RecordDateAnswer.patch({
-            dateValue
-        }))
-    }
-})
+            dateValue,
+        }));
+    },
+});
 
 const imageValue = computed({
     get: () => {
-        return casted.RecordImageAnswer.value?.image ?? null
+        return casted.RecordImageAnswer.value?.image ?? null;
     },
-    set: (image: Image|null) => {
+    set: (image: Image | null) => {
         patchAnswer(RecordImageAnswer.patch({
-            image
-        }))
-    }
-})
+            image,
+        }));
+    },
+});
 
 function getChoiceSelected(choice: RecordChoice): boolean {
-    return !!(casted.RecordMultipleChoiceAnswer.value)?.selectedChoices.find(c => c.id === choice.id)
+    return !!(casted.RecordMultipleChoiceAnswer.value)?.selectedChoices.find(c => c.id === choice.id);
 }
 
 function setChoiceSelected(choice: RecordChoice, selected: boolean) {
     if (selected === getChoiceSelected(choice)) {
-        return
+        return;
     }
-    const v = casted.RecordMultipleChoiceAnswer.value
+    const v = casted.RecordMultipleChoiceAnswer.value;
     if (!v) {
-        return
+        return;
     }
 
-    const choices = v.selectedChoices.filter(c => c.id !== choice.id)
+    const choices = v.selectedChoices.filter(c => c.id !== choice.id);
 
     if (selected) {
         patchAnswer(RecordMultipleChoiceAnswer.patch({
-            selectedChoices: [...choices, choice] as any
-        }))
-    } else {
+            selectedChoices: [...choices, choice] as any,
+        }));
+    }
+    else {
         patchAnswer(RecordMultipleChoiceAnswer.patch({
-            selectedChoices: choices as any
-        }))
+            selectedChoices: choices as any,
+        }));
     }
 }
 
 useValidation(props.validator, async () => {
-    const valid = await isValid()
+    const valid = await isValid();
 
     if (valid) {
         if (props.markReviewed) {
-            answer.value = answer.value as any
+            answer.value = answer.value as any;
             await nextTick();
         }
     }
 
     return valid;
-})
+});
 
 onMounted(() => {
     // Make sure the answer (updated one) is inside the recordAnswers
-    const existing = props.answers.get(props.record.id)
-    const readValue = answer.value
+    const existing = props.answers.get(props.record.id);
+    const readValue = answer.value;
     if (existing !== undefined && existing !== readValue) {
-        answer.value = readValue
+        answer.value = readValue;
     }
-    
-})
+});
 
 async function isValid() {
     if (props.allOptional && answer.value.isEmpty) {
@@ -325,12 +324,13 @@ async function isValid() {
     }
 
     try {
-        answer.value.validate()
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
-        return false
+        answer.value.validate();
     }
-    errors.errorBox = null
-    return true
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+        return false;
+    }
+    errors.errorBox = null;
+    return true;
 }
 </script>

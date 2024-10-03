@@ -1,9 +1,9 @@
 import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
-import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
+import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { Document, Group, Organization, User } from './';
@@ -35,6 +35,9 @@ export class Registration extends Model {
 
     @column({ type: 'json', decoder: new ArrayDecoder(RegisterItemOption) })
     options: RegisterItemOption[] = [];
+
+    @column({ type: 'json', decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
+    recordAnswers: Map<string, RecordAnswer> = new Map();
 
     /**
      * @deprecated
