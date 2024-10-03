@@ -26,6 +26,7 @@ import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, isEmptyFilt
 import { computed, Ref, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import OrganizationView from './OrganizationView.vue';
+import { useChargeOrganizationsSheet } from './composables/useChargeOrganizationsSheet';
 
 type ObjectType = Organization;
 const $t = useTranslate();
@@ -52,6 +53,7 @@ const present = usePresent();
 const platform = usePlatform();
 const auth = useAuth();
 const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
+const chargeOrganizationsSheet = useChargeOrganizationsSheet();
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const configurationId = computed(() => {
@@ -290,6 +292,16 @@ if (auth.hasPlatformFullAccess()) {
         groupIndex: 3,
         handler: async (selection: TableActionSelection<Organization>) => {
             await openMail(selection);
+        },
+    }));
+
+    actions.push(new AsyncTableAction({
+        name: 'Bedrag aanrekenen',
+        icon: 'calculator',
+        priority: 13,
+        groupIndex: 4,
+        handler: async (selection: TableActionSelection<Organization>) => {
+            await chargeOrganizationsSheet.show(selection.filter.filter);
         },
     }));
 }

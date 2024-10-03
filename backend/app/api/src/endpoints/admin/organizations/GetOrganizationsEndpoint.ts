@@ -95,12 +95,10 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
         return query;
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.authenticate();
-
+    static async buildData(requestQuery: LimitedFilteredRequest): Promise<PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>> {
         const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
 
-        if (request.query.limit > maxLimit) {
+        if (requestQuery.limit > maxLimit) {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'limit',
@@ -108,7 +106,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             });
         }
 
-        if (request.query.limit < 1) {
+        if (requestQuery.limit < 1) {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'limit',
@@ -116,34 +114,40 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             });
         }
 
-        const data = await GetOrganizationsEndpoint.buildQuery(request.query).fetch();
+        const data = await GetOrganizationsEndpoint.buildQuery(requestQuery).fetch();
         const organizations = Organization.fromRows(data, 'organizations');
 
         let next: LimitedFilteredRequest | undefined;
 
-        if (organizations.length >= request.query.limit) {
+        if (organizations.length >= requestQuery.limit) {
             const lastObject = organizations[organizations.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters, request.query.sort);
+            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
 
             next = new LimitedFilteredRequest({
-                filter: request.query.filter,
+                filter: requestQuery.filter,
                 pageFilter: nextFilter,
-                sort: request.query.sort,
-                limit: request.query.limit,
-                search: request.query.search,
+                sort: requestQuery.sort,
+                limit: requestQuery.limit,
+                search: requestQuery.search,
             });
 
-            if (JSON.stringify(nextFilter) === JSON.stringify(request.query.pageFilter)) {
-                console.error('Found infinite loading loop for', request.query);
+            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
+                console.error('Found infinite loading loop for', requestQuery);
                 next = undefined;
             }
         }
 
-        return new Response(
-            new PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>({
-                results: await AuthenticatedStructures.organizations(organizations),
-                next,
-            }),
-        );
+        return new PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>({
+            results: await AuthenticatedStructures.organizations(organizations),
+            next,
+        });
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>) {
+        await Context.authenticate();
+
+        const paginatedResponse = await GetOrganizationsEndpoint.buildData(request.query);
+
+        return new Response(paginatedResponse);
     }
 }
