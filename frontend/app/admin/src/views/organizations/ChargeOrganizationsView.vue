@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" :save-text="$t('Reken aan')" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" :save-text="$t('Reken aan')" save-icon="calculator" @save="save">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
