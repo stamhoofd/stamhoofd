@@ -14,16 +14,29 @@
             <input v-model="description" class="input" type="text" :placeholder="$t('Beschrijving van de aanrekening')" autocomplete="given-name">
         </STInputBox>
 
-        <STInputBox :title="$t('Bedrag')" error-fields="price" :error-box="errors.errorBox">
-            <PriceInput v-model="price" :placeholder="formatPrice(price)" :required="true" />
-        </STInputBox>
+        <div class="split-inputs">
+            <STInputBox :title="$t('Bedrag')" error-fields="price" :error-box="errors.errorBox">
+                <PriceInput v-model="price" :placeholder="formatPrice(price)" :required="true" />
+            </STInputBox>
+            <STInputBox :title="$t('Aantal')" error-fields="amount" :error-box="errors.errorBox">
+                <NumberInput v-model="amount" :title="$t('Aantal')" :validator="errors.validator" :min="1" />
+            </STInputBox>
+        </div>
+
+        <div class="container">
+            <hr>
+            <h2>
+                <span>{{ $t('Totaal:') }}</span>
+                <span>{{ formatPrice(price * amount) }}</span>
+            </h2>
+        </div>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, PriceInput, Toast, useContext, useErrors, useValidation } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, NumberInput, PriceInput, Toast, useContext, useErrors, useValidation } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
@@ -49,6 +62,7 @@ watch(() => props.filter, async (filter) => {
 const organizationCount = ref<number | null>(null);
 const description = ref('');
 const price = ref(0);
+const amount = ref(1);
 const hasChanges = computed(() => description.value !== '' || price.value !== 0);
 
 const saving = ref(false);
@@ -107,6 +121,7 @@ async function save() {
             organizationId: null,
             price: price.value,
             description: description.value,
+            amount: amount.value,
         };
 
         await context.value.authenticatedServer.request({
