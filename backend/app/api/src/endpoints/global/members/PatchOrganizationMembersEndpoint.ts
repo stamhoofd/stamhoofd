@@ -2,10 +2,11 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Platform, Registration, SetupStepUpdater, User } from '@stamhoofd/models';
-import { GroupType, MemberWithRegistrationsBlob, MembersBlob, PermissionLevel } from '@stamhoofd/structures';
+import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, SetupStepUpdater, User } from '@stamhoofd/models';
+import { GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import { Email } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
@@ -16,6 +17,16 @@ type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
 type ResponseBody = MembersBlob;
+
+export const securityCodeLimiter = new RateLimiter({
+    limits: [
+        {
+            // Max 10 a day
+            limit: 10,
+            duration: 24 * 60 * 1000 * 60,
+        },
+    ],
+});
 
 /**
  * One endpoint to create, patch and delete members and their registrations and payments
@@ -92,33 +103,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             struct.details.cleanData();
             member.details = struct.details;
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member);
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
             if (duplicate) {
                 // Merge data
-                duplicate.details.merge(member.details);
                 member = duplicate;
-
-                // You need write permissions, because a user can potentially earn write permissions on a member
-                // by registering it
-                if (!await Context.auth.canAccessMember(duplicate, PermissionLevel.Write)) {
-                    throw new SimpleError({
-                        code: 'known_member_missing_rights',
-                        message: 'Creating known member without sufficient access rights',
-                        human: 'Dit lid is al bekend in het systeem, maar je hebt er geen toegang tot. Vraag iemand met de juiste toegangsrechten om dit lid voor jou toe te voegen, of vraag het lid om zelf in te schrijven via het ledenportaal.',
-                        statusCode: 400,
-                    });
-                }
             }
 
             // We risk creating a new member without being able to access it manually afterwards
-            if ((organization && !await Context.auth.hasFullAccess(organization.id)) || (!organization && !Context.auth.hasPlatformFullAccess())) {
-                throw new SimpleError({
-                    code: 'missing_group',
-                    message: 'Missing group',
-                    human: 'Je moet hoofdbeheerder zijn om een lid toe te voegen in het systeem',
-                    statusCode: 400,
-                });
-            }
+            // Cache access to this member temporarily in memory
+            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Write);
 
             if (STAMHOOFD.userMode !== 'platform' && !member.organizationId) {
                 throw new SimpleError({
@@ -132,8 +125,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             /**
              * In development mode, we allow some secret usernames to create fake data
              */
-            if ((STAMHOOFD.environment == 'development' || STAMHOOFD.environment == 'staging') && organization) {
-                if (member.details.firstName.toLocaleLowerCase() == 'create' && parseInt(member.details.lastName) > 0) {
+            if ((STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'staging') && organization) {
+                if (member.details.firstName.toLocaleLowerCase() === 'create' && parseInt(member.details.lastName) > 0) {
                     const count = parseInt(member.details.lastName);
                     await this.createDummyMembers(organization, count);
 
@@ -155,9 +148,17 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (let patch of request.body.getPatches()) {
             const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id);
-            if (!member || !await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+            const securityCode = patch.details?.securityCode; // will get cleared after the filter
+
+            if (!member) {
                 throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang tot dit lid of het bestaat niet');
             }
+
+            if (!await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+                // Still allowed if you provide a security code
+                await PatchOrganizationMembersEndpoint.checkSecurityCode(member, securityCode);
+            }
+
             patch = await Context.auth.filterMemberPatch(member, patch);
 
             if (patch.details) {
@@ -177,6 +178,19 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if (wasReduced !== member.details.shouldApplyReducedPrice) {
                     updateMembershipMemberIds.add(member.id);
                 }
+            }
+
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
+            if (duplicate) {
+                // Remove the member from the list
+                const iii = members.findIndex(m => m.id === member.id);
+                if (iii !== -1) {
+                    members.splice(iii, 1);
+                }
+
+                // Add new
+                members.push(duplicate);
+                continue;
             }
 
             await member.save();
@@ -561,7 +575,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async checkDuplicate(member: Member) {
+    static async findExistingMember(member: Member) {
         if (!member.details.birthDay) {
             return;
         }
@@ -582,6 +596,69 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (withRegistrations.length > 0) {
                 return withRegistrations[0];
             }
+        }
+    }
+
+    static async checkSecurityCode(member: MemberWithRegistrations, securityCode: string | null | undefined) {
+        if (await member.isSafeToMergeDuplicateWithoutSecurityCode() || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+            console.log('checkSecurityCode: without security code: allowed for ' + member.id);
+        }
+        else if (securityCode) {
+            try {
+                securityCodeLimiter.track(member.details.name, 1);
+            }
+            catch (e) {
+                Email.sendWebmaster({
+                    subject: '[Limiet] Limiet bereikt voor aantal beveiligingscodes',
+                    text: 'Beste, \nDe limiet werd bereikt voor het aantal beveiligingscodes per dag. \nNaam lid: ' + member.details.name + ' (ID: ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
+                });
+
+                throw new SimpleError({
+                    code: 'too_many_tries',
+                    message: 'Too many securityCodes limited',
+                    human: 'Oeps! Om spam te voorkomen limiteren we het aantal beveiligingscodes die je kan proberen. Probeer morgen opnieuw.',
+                    field: 'details.securityCode',
+                });
+            }
+
+            // Entered the security code, so we can link the user to the member
+            if (STAMHOOFD.environment !== 'development') {
+                if (!member.details.securityCode || securityCode !== member.details.securityCode) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'details.securityCode',
+                        message: 'Invalid security code',
+                        human: Context.i18n.$t('49753d6a-7ca4-4145-8024-0be05a9ab063'),
+                        statusCode: 400,
+                    });
+                }
+            }
+
+            console.log('checkSecurityCode: security code is correct - for ' + member.id);
+
+            // Grant temporary access to this member without needing to enter the security code again
+            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Write);
+        }
+        else {
+            throw new SimpleError({
+                code: 'known_member_missing_rights',
+                message: 'Creating known member without sufficient access rights',
+                human: `${member.details.firstName} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.`,
+                statusCode: 400,
+            });
+        }
+    }
+
+    static async checkDuplicate(member: Member, securityCode: string | null | undefined) {
+        // Check for duplicates and prevent creating a duplicate member by a user
+        const duplicate = await this.findExistingMember(member);
+        if (duplicate) {
+            await this.checkSecurityCode(duplicate, securityCode);
+
+            // Merge data
+            // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
+            await mergeTwoMembers(duplicate, member);
+            return duplicate;
         }
     }
 

@@ -3,6 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedOutstandingBalance, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
 import { AccessRight, FinancialSupportSettings, GroupCategory, GroupStatus, LoadedPermissions, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -333,9 +334,9 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        if (member.registrations.length === 0 && permissionLevel !== PermissionLevel.Full && (this.organization && await this.hasFullAccess(this.organization.id, PermissionLevel.Full))) {
-            // Everyone with at least full access to at least one organization can access this member
-            // This allows organizations to register new members themselves
+        // Temporary access
+        if (hasTemporaryMemberAccess(this.user.id, member.id, permissionLevel)) {
+            console.log('User has temporary access to member', member.id, 'for user', this.user.id);
             return true;
         }
 
@@ -346,6 +347,15 @@ export class AdminPermissionChecker {
         }
 
         return false;
+    }
+
+    /**
+     * The server will temporarily grant the user access to this member, and store this in the server
+     * memory. This is required for adding new members to an organization (first add member -> then patch with registrations, which requires write access).
+     */
+    async temporarilyGrantMemberAccess(member: MemberWithRegistrations, permissionLevel: PermissionLevel = PermissionLevel.Write) {
+        console.log('Temporarily granting access to member', member.id, 'for user', this.user.id);
+        addTemporaryMemberAccess(this.user.id, member.id, permissionLevel);
     }
 
     /**

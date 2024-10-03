@@ -62,12 +62,14 @@ export async function mergeTwoMembers(base: Member, other: Member): Promise<void
 
     mergeMemberDetails(base, other);
 
-    await mergeRegistrations(base, other);
-    await mergeUsers(base, other);
-    await mergeResponsibilities(base, other);
-    await mergeBalanceItems(base, other);
-    await mergeDocuments(base, other);
-    await mergeMemberPlatformMemberships(base, other);
+    if (other.existsInDatabase) {
+        await mergeRegistrations(base, other);
+        await mergeUsers(base, other);
+        await mergeResponsibilities(base, other);
+        await mergeBalanceItems(base, other);
+        await mergeDocuments(base, other);
+        await mergeMemberPlatformMemberships(base, other);
+    }
 
     // Force review of all details
     base.details.reviewTimes.clearAll();

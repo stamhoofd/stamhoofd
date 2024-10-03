@@ -1,10 +1,9 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Document, Member, mergeTwoMembers, RateLimiter } from '@stamhoofd/models';
+import { Document, Member, RateLimiter } from '@stamhoofd/models';
 import { MemberDetails, MembersBlob, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
-import { Email } from '@stamhoofd/email';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
@@ -61,7 +60,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             this.throwIfInvalidDetails(member.details);
 
-            const duplicate = await this.checkDuplicate(member, struct.details.securityCode);
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
             if (duplicate) {
                 addedMembers.push(duplicate);
                 continue;
@@ -75,7 +74,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         let members = await Member.getMembersWithRegistrationForUser(user);
 
         for (let struct of request.body.getPatches()) {
-            const member = members.find(m => m.id == struct.id);
+            const member = members.find(m => m.id === struct.id);
             if (!member) {
                 throw new SimpleError({
                     code: 'invalid_member',
@@ -110,15 +109,15 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 });
             }
 
-            /* const duplicate = await this.checkDuplicate(member, securityCode)
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
             if (duplicate) {
                 // Remove the member from the list
-                members.splice(members.findIndex(m => m.id === member.id), 1)
+                members.splice(members.findIndex(m => m.id === member.id), 1);
 
                 // Add new
-                addedMembers.push(duplicate)
-                continue
-            } */
+                addedMembers.push(duplicate);
+                continue;
+            }
 
             await member.save();
             await MemberUserSyncer.onChangeMember(member);
@@ -155,62 +154,6 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         return new Response(
             await AuthenticatedStructures.membersBlob(members),
         );
-    }
-
-    async checkDuplicate(member: Member, securityCode: string | null | undefined) {
-        // Check for duplicates and prevent creating a duplicate member by a user
-        const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member);
-        if (duplicate) {
-            if (await duplicate.isSafeToMergeDuplicateWithoutSecurityCode()) {
-                console.log('Merging duplicate without security code: allowed for ' + duplicate.id);
-            }
-            else if (securityCode) {
-                try {
-                    securityCodeLimiter.track(member.details.name, 1);
-                }
-                catch (e) {
-                    Email.sendWebmaster({
-                        subject: '[Limiet] Limiet bereikt voor aantal beveiligingscodes',
-                        text: 'Beste, \nDe limiet werd bereikt voor het aantal beveiligingscodes per dag. \nNaam lid: ' + member.details.name + ' (ID: ' + duplicate.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
-                    });
-
-                    throw new SimpleError({
-                        code: 'too_many_tries',
-                        message: 'Too many securityCodes limited',
-                        human: 'Oeps! Om spam te voorkomen limiteren we het aantal beveiligingscodes die je kan proberen. Probeer morgen opnieuw.',
-                        field: 'details.securityCode',
-                    });
-                }
-
-                // Entered the security code, so we can link the user to the member
-                if (STAMHOOFD.environment !== 'development') {
-                    if (!duplicate.details.securityCode || securityCode !== duplicate.details.securityCode) {
-                        throw new SimpleError({
-                            code: 'invalid_field',
-                            field: 'details.securityCode',
-                            message: 'Invalid security code',
-                            human: Context.i18n.$t('49753d6a-7ca4-4145-8024-0be05a9ab063'),
-                            statusCode: 400,
-                        });
-                    }
-                }
-
-                console.log('Merging duplicate: security code is correct - for ' + duplicate.id);
-            }
-            else {
-                throw new SimpleError({
-                    code: 'known_member_missing_rights',
-                    message: 'Creating known member without sufficient access rights',
-                    human: `${member.details.firstName} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.`,
-                    statusCode: 400,
-                });
-            }
-
-            // Merge data
-            // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
-            await mergeTwoMembers(duplicate, member);
-            return duplicate;
-        }
     }
 
     private throwIfInvalidDetails(details: MemberDetails) {
