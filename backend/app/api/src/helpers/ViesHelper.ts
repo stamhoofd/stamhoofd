@@ -38,7 +38,7 @@ export class ViesHelperStatic {
             patch.VATNumber = await ViesHelper.checkVATNumber(company.address.country, company.VATNumber);
 
             if (company.address.country === Country.Belgium) {
-                patch.companyNumber = company.VATNumber;
+                patch.companyNumber = company.VATNumber.substring(2);
             }
         }
 
@@ -66,8 +66,14 @@ export class ViesHelperStatic {
         }
 
         // In Belgium, the company number syntax is the same as VAT number
+        let correctedVATNumber = companyNumber;
 
-        const result = jsvat.checkVAT(companyNumber, [jsvat.belgium]);
+        if (companyNumber.length > 2 && companyNumber.substr(0, 2) !== country) {
+            // Add required country in VAT number
+            correctedVATNumber = country + companyNumber;
+        }
+
+        const result = jsvat.checkVAT(correctedVATNumber, [jsvat.belgium]);
 
         if (!result.isValid) {
             throw new SimpleError({
@@ -79,11 +85,11 @@ export class ViesHelperStatic {
 
         // If this is a valid VAT number, we can assume it's a valid company number
         try {
-            const corrected = await this.checkVATNumber(Country.Belgium, companyNumber);
+            const corrected = await this.checkVATNumber(Country.Belgium, correctedVATNumber);
 
             // this is a VAT number, not a company number
             return {
-                companyNumber: corrected,
+                companyNumber: corrected.substring(2),
                 VATNumber: corrected,
             };
         }
@@ -98,7 +104,7 @@ export class ViesHelperStatic {
         }
 
         return {
-            companyNumber: result.value ?? companyNumber,
+            companyNumber: result.value?.substring(2) ?? companyNumber,
 
             // VATNumber should always be set to null if it is not a valid VAT number
             VATNumber: null,
@@ -144,6 +150,12 @@ export class ViesHelperStatic {
             }
             // Unavailable: ignore for now
             console.error('VIES error', e);
+
+            throw new SimpleError({
+                code: 'service_unavailable',
+                message: 'De BTW-nummer validatie service (VIES) is tijdelijk niet beschikbaar. Probeer het later opnieuw.',
+                field: 'VATNumber',
+            });
         }
 
         return formatted;
