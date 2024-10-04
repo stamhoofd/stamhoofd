@@ -16,27 +16,21 @@
 
         <div class="split-inputs">
             <STInputBox :title="$t('Bedrag')" error-fields="price" :error-box="errors.errorBox">
-                <PriceInput v-model="price" :placeholder="formatPrice(price)" :required="true" />
+                <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" />
             </STInputBox>
             <STInputBox :title="$t('Aantal')" error-fields="amount" :error-box="errors.errorBox">
                 <NumberInput v-model="amount" :title="$t('Aantal')" :validator="errors.validator" :min="1" />
             </STInputBox>
         </div>
 
-        <div class="container">
-            <hr>
-            <h2>
-                <span>{{ $t('Totaal:') }}</span>
-                <span>{{ formatPrice(price * amount) }}</span>
-            </h2>
-        </div>
+        <PriceBreakdownBox :price-breakdown="priceBreakdown" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, NumberInput, PriceInput, Toast, useContext, useErrors, useValidation } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useValidation } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
@@ -64,8 +58,14 @@ const organizationCount = ref<number | null>(null);
 const description = ref('');
 const price = ref(0);
 const amount = ref(1);
-const total = computed(() => Formatter.price(price.value * amount.value));
 const hasChanges = computed(() => description.value !== '' || price.value !== 0);
+const total = computed(() => price.value * amount.value);
+const priceBreakdown = computed(() => {
+    return [{
+        name: description.value,
+        price: total.value,
+    }];
+});
 
 const saving = ref(false);
 
@@ -115,10 +115,10 @@ async function save() {
 
     const isConfirm = await CenteredMessage.confirm(
         $t('Weet je zeker dat je het bedrag wilt aanrekenen?', {
-            total: total.value,
+            total: Formatter.price(total.value),
             count: organizationCount.value?.toString() ?? '?',
         }),
-        $t('Reken aan')
+        $t('Reken aan'),
     );
 
     if (!isConfirm) {
