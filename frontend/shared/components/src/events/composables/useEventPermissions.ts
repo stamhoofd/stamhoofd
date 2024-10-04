@@ -61,6 +61,10 @@ export function useEventPermissions() {
         if (!permissions) {
             return null;
         }
+        
+        if(permissions.hasAccessRightForAllResourcesOfType(type, AccessRight.EventWrite)) {
+            return null;
+        }
 
         const result = new Set<string>();
 

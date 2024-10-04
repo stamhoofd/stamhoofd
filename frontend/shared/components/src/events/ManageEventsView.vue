@@ -347,18 +347,14 @@ function createDefaultUIFilter(): UIFilter | null {
     let groupIds: string[] | undefined = undefined;
     let organizationTagIds: string[] | undefined = undefined;
 
-    if (eventPermissions.hasGroupRestrictions()) {
-        const groupsToFilterEventsOn = eventPermissions.groupsToFilterEventsOn();
-        if (groupsToFilterEventsOn) {
-            groupIds = groupsToFilterEventsOn;
-        }
+    const groupsToFilterEventsOn = eventPermissions.groupsToFilterEventsOn();
+    if (groupsToFilterEventsOn) {
+        groupIds = groupsToFilterEventsOn;
     }
 
-    if (eventPermissions.hasTagRestrictions()) {
-        const tagsToFilterEventsOn = eventPermissions.tagsToFilterEventsOn();
-        if (tagsToFilterEventsOn) {
-            organizationTagIds = tagsToFilterEventsOn;
-        }
+    const tagsToFilterEventsOn = eventPermissions.tagsToFilterEventsOn();
+    if (tagsToFilterEventsOn) {
+        organizationTagIds = tagsToFilterEventsOn;
     }
 
     if (groupIds === undefined && organizationTagIds === undefined) {
