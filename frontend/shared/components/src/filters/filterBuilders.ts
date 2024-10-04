@@ -214,30 +214,21 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                     return null;
                 }
 
-                if(choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
-                    return {
-                        platformMemberships: {
-                            $elemMatch: {
-                                startDate: {
-                                    $lte: {$: '$now'}
-                                },
-                                $or: [
-                                    {
-                                        expireDate: null
-                                    },
-                                    {
-                                        expireDate: {
-                                            $gt: {$: '$now'}
-                                        }
-                                    }
-                                ],
-                                // just in case, maybe not necessary if expireDate is always less than endDate?
-                                endDate: {
-                                    $gt: {$: '$now'}
-                                }
+                const activeOrExpiringFilter: StamhoofdFilter = {
+                    platformMemberships: {
+                        $elemMatch: {
+                            startDate: {
+                                $lte: {$: '$now'}
+                            },
+                            endDate: {
+                                $gt: {$: '$now'}
                             }
                         }
                     }
+                };
+
+                if(choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
+                    return activeOrExpiringFilter;
                 }
 
                 const getFilter = (choice: StamhoofdFilter<StamhoofdCompareValue>): StamhoofdFilter => {
@@ -252,7 +243,6 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                                         startDate: {
                                             $lte: {$: '$now'}
                                         },
-                                        // Just in case, maybe not necessary if expireDate is always less than endDate?
                                         $or: [
                                             {
                                                 expireDate: null
@@ -269,29 +259,8 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                         }
                         case 'Inactive': {
                             return {
-                                $not: {
-                                    platformMemberships: {
-                                        $elemMatch: {
-                                            $or: [
-                                                {
-                                                    expireDate: {
-                                                        $gt: { $: "$now" },
-                                                    },
-                                                },
-                                                // Just in case, maybe not necessary if endDate is always greater than endDate?
-                                                {
-                                                    endDate: {
-                                                        $gt: { $: "$now" },
-                                                    },
-                                                },
-                                            ],
-                                            startDate: {
-                                                $lte: { $: "$now" },
-                                            },
-                                        },
-                                    },
-                                },
-                            };
+                                $not: activeOrExpiringFilter
+                            }
                         }
                         case 'Expiring': {
                             return {
@@ -303,9 +272,6 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                                         },
                                         expireDate: {
                                             $lt: {$: '$now'}
-                                        },
-                                        startDate: {
-                                            $lte: {$: '$now'}
                                         }
                                     }
                                 }
