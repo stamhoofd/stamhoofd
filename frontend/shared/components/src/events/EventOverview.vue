@@ -154,7 +154,7 @@
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, EventPermissionChecker, Group, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
@@ -179,6 +179,7 @@ const context = useContext();
 const platform = usePlatform();
 const pop = usePop();
 const auth = useAuth();
+
 const groupOrganization: Ref<Organization | null> = ref(null);
 
 function setOrganization(o: Organization) {

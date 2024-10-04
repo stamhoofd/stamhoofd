@@ -1150,6 +1150,10 @@ export class AdminPermissionChecker {
         return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs);
     }
 
+    canAccess(accessRight: AccessRight): boolean {
+        return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(accessRight);
+    }
+
     hasPlatformFullAccess(): boolean {
         return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess();
     }
