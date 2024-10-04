@@ -204,8 +204,12 @@ export class LoadedPermissions {
         }
 
         const resource = this.resources.get(type);
-        if (resource && resource.size > 0) {
-            return true;
+        if (resource) {
+            for (const r of resource.values()) {
+                if (r.hasAccessRight(right)) {
+                    return true;
+                }
+            }
         }
 
         for (const r of this.roles) {

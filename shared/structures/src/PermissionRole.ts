@@ -187,7 +187,13 @@ export class PermissionRoleDetailed extends PermissionRole {
             return false;
         }
 
-        return resource.size > 0;
+        for (const r of resource.values()) {
+            if (r.hasAccessRight(right)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     add(other: PermissionRoleDetailed) {

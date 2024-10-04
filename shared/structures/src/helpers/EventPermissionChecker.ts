@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { AccessRight } from '../AccessRight';
 import { NamedObject } from '../Event';
 import { PermissionsResourceType } from '../PermissionsResourceType';
@@ -56,7 +56,7 @@ export class EventPermissionChecker {
                 });
             }
 
-            this.tryAdminOrganizationEvent(
+            this.throwIfNoPermissionToWriteEventForOrganization(
                 event,
                 organization,
                 platform,
@@ -65,7 +65,7 @@ export class EventPermissionChecker {
             return organization;
         }
 
-        this.tryAdminNationalOrRegionalEvent(event, userPermissions, platform);
+        this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform);
         return null;
     }
 
@@ -74,7 +74,7 @@ export class EventPermissionChecker {
      * @param event
      * @throws error if not allowed to write this event
      */
-    static checkEventAccess<O extends OrganizationForPermissionCalculation>(
+    static throwIfNoPermissionToWriteEvent<O extends OrganizationForPermissionCalculation>(
         event: EventDataForPermission,
         {
             organization,
@@ -99,7 +99,7 @@ export class EventPermissionChecker {
             if (organization === null) {
                 throw new Error('Organization not specified.');
             }
-            this.tryAdminOrganizationEvent(
+            this.throwIfNoPermissionToWriteEventForOrganization(
                 event,
                 organization,
                 platform,
@@ -107,11 +107,11 @@ export class EventPermissionChecker {
             );
         }
         else {
-            this.tryAdminNationalOrRegionalEvent(event, userPermissions, platform);
+            this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform);
         }
     }
 
-    static canAdminEvent<O extends OrganizationForPermissionCalculation>(
+    static hasPermissionToWriteEvent<O extends OrganizationForPermissionCalculation>(
         event: EventDataForPermission,
         options: {
             organization: O | null;
@@ -120,17 +120,19 @@ export class EventPermissionChecker {
         },
     ): boolean {
         try {
-            this.checkEventAccess(event, options);
+            this.throwIfNoPermissionToWriteEvent(event, options);
         }
         catch (error) {
-            console.error(error);
-            return false;
+            if (isSimpleError(error) || isSimpleErrors(error)) {
+                return false;
+            }
+            throw error;
         }
 
         return true;
     }
 
-    private static tryAdminOrganizationEvent<O extends OrganizationForPermissionCalculation>(
+    private static throwIfNoPermissionToWriteEventForOrganization<O extends OrganizationForPermissionCalculation>(
         event: EventDataForPermission,
         organization: O,
         platform: Platform,
@@ -139,8 +141,12 @@ export class EventPermissionChecker {
         const accessRight: AccessRight = AccessRight.EventWrite;
 
         if (event.organizationId !== organization.id) {
-            // todo
-            throw new Error('todo');
+            throw new SimpleError({
+                code: 'permission_denied',
+                message:
+                    'Je kan geen activiteit beheren voor deze organisatie.',
+                statusCode: 403,
+            });
         }
 
         const organizationPermissions = userPermissions.forOrganization(
@@ -193,7 +199,7 @@ export class EventPermissionChecker {
         }
     }
 
-    private static tryAdminNationalOrRegionalEvent(
+    private static throwIfNoPermissionToWriteNationalOrRegionalEvent(
         event: EventDataForPermission,
         userPermissions: UserPermissions,
         platform: Platform,
@@ -214,7 +220,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    'Een nationale of regionale activiteit kan (momenteel) niet beperkt worden tot specifieke groepen.',
+                    'Een nationale of regionale activiteit kan niet beperkt worden tot specifieke leeftijdsgroepen.',
                 statusCode: 403,
             });
         }
@@ -222,13 +228,11 @@ export class EventPermissionChecker {
         // organization tags
         if (event.meta.organizationTagIds === null) {
             if (
-                !(
-                    platformPermissions.hasAccessRight(accessRight)
-                    || platformPermissions.hasResourceAccessRight(
-                        PermissionsResourceType.OrganizationTags,
-                        '',
-                        accessRight,
-                    )
+                !(platformPermissions.hasResourceAccessRight(
+                    PermissionsResourceType.OrganizationTags,
+                    '',
+                    accessRight,
+                )
                 )
             ) {
                 throw new SimpleError({

@@ -2,7 +2,7 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar title="Activiteiten">
             <template #right>
-                <button v-if="canAdminSomeEvent" type="button" class="button text navigation" @click="addEvent()">
+                <button v-if="canWriteSomeEvent" type="button" class="button text navigation" @click="addEvent()">
                     <span class="icon add" />
                     <span>Nieuw</span>
                 </button>
@@ -101,7 +101,7 @@ const yearLabels = computed(() => {
     });
 });
 
-const canAdminSomeEvent = computed(() => eventPermissions.canAdminSome());
+const canWriteSomeEvent = computed(() => eventPermissions.canWriteSome());
 
 enum Routes {
     Event = 'activiteit',

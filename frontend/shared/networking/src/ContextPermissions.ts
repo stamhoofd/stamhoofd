@@ -1,103 +1,103 @@
-import { AccessRight, Group, GroupCategory, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User, UserWithMembers } from "@stamhoofd/structures";
-import { Ref, unref } from "vue";
+import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import { Ref, unref } from 'vue';
 
 export class ContextPermissions {
-    reactiveUser: UserWithMembers|null|Ref<UserWithMembers|null>
-    reactiveOrganization: Organization|null|Ref<Organization|null>
-    reactivePlatform: Platform|Ref<Platform>
+    reactiveUser: UserWithMembers | null | Ref<UserWithMembers | null>;
+    reactiveOrganization: Organization | null | Ref<Organization | null>;
+    reactivePlatform: Platform | Ref<Platform>;
 
     /**
      * Whether to allow inheriting platoform permissions
      * (mosty disabled when editing permissions)
      */
-    allowInheritingPermissions = true
-    
+    allowInheritingPermissions = true;
+
     constructor(
-        user: UserWithMembers|null|undefined|Ref<UserWithMembers|null>, 
-        organization: Organization|null|undefined|Ref<Organization|null>,
-        platform: Platform|Ref<Platform>,
-        options?: {allowInheritingPermissions?: boolean}
+        user: UserWithMembers | null | undefined | Ref<UserWithMembers | null>,
+        organization: Organization | null | undefined | Ref<Organization | null>,
+        platform: Platform | Ref<Platform>,
+        options?: { allowInheritingPermissions?: boolean },
     ) {
-        this.reactiveUser = user ?? null
-        this.reactiveOrganization = organization ?? null
-        this.reactivePlatform = platform
+        this.reactiveUser = user ?? null;
+        this.reactiveOrganization = organization ?? null;
+        this.reactivePlatform = platform;
         if (options?.allowInheritingPermissions !== undefined) {
-            this.allowInheritingPermissions = options.allowInheritingPermissions
+            this.allowInheritingPermissions = options.allowInheritingPermissions;
         }
     }
 
     get user() {
-        return unref(this.reactiveUser)
+        return unref(this.reactiveUser);
     }
 
     get userPermissions() {
-        return this.user?.permissions ?? null
+        return this.user?.permissions ?? null;
     }
 
     get organization() {
-        return unref(this.reactiveOrganization)
+        return unref(this.reactiveOrganization);
     }
 
     get platform() {
-        return unref(this.reactivePlatform)
+        return unref(this.reactivePlatform);
     }
 
     get platformPermissions() {
-        return unref(this.userPermissions)?.forPlatform(this.platform) ?? null
+        return unref(this.userPermissions)?.forPlatform(this.platform) ?? null;
     }
 
     get permissions() {
         if (!this.organization) {
-            return this.platformPermissions
+            return this.platformPermissions;
         }
-        return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null
+        return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null;
     }
 
     getPermissionsForOrganization(organization: Organization) {
-        return unref(this.userPermissions)?.forOrganization(organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null
+        return unref(this.userPermissions)?.forOrganization(organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null;
     }
 
-    get unloadedPermissions(): Permissions|null {
+    get unloadedPermissions(): Permissions | null {
         if (!this.organization) {
-            return unref(this.userPermissions)?.globalPermissions ?? null
+            return unref(this.userPermissions)?.globalPermissions ?? null;
         }
-        return unref(this.userPermissions)?.organizationPermissions.get(this.organization.id) ?? null
+        return unref(this.userPermissions)?.organizationPermissions.get(this.organization.id) ?? null;
     }
 
     hasFullAccess() {
-        return this.permissions?.hasFullAccess() ?? false
+        return this.permissions?.hasFullAccess() ?? false;
     }
 
     hasFullPlatformAccess() {
-        return this.platformPermissions?.hasFullAccess() ?? false
+        return this.platformPermissions?.hasFullAccess() ?? false;
     }
 
     hasAccessRight(right: AccessRight) {
-        return this.permissions?.hasAccessRight(right) ?? false
+        return this.permissions?.hasAccessRight(right) ?? false;
     }
 
     hasResourceAccessRight(resourceType: PermissionsResourceType, resourceId: string, right: AccessRight) {
-        return this.permissions?.hasResourceAccessRight(resourceType, resourceId, right) ?? false
+        return this.permissions?.hasResourceAccessRight(resourceType, resourceId, right) ?? false;
     }
 
     canManagePayments() {
-        return this.hasAccessRight(AccessRight.OrganizationManagePayments) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector)
+        return this.hasAccessRight(AccessRight.OrganizationManagePayments) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector);
     }
 
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!this.organization || group.organizationId !== this.organization.id) {
-            return this.hasFullPlatformAccess()
+            return this.hasFullPlatformAccess();
         }
 
-        return group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel)
+        return group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel);
     }
 
     canCreateGroupInCategory(category: GroupCategory) {
         if (!this.organization) {
-            return this.hasFullPlatformAccess()
+            return this.hasFullPlatformAccess();
         }
 
-        return category.canCreate(this.permissions, this.organization.period.settings.categories)
+        return category.canCreate(this.permissions, this.organization.period.settings.categories);
     }
 
     canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
@@ -116,7 +116,7 @@ export class ContextPermissions {
             return true;
         }
 
-        for (const registration of member.filterRegistrations({currentPeriod: true})) {
+        for (const registration of member.filterRegistrations({ currentPeriod: true })) {
             const organization = member.family.getOrganization(registration.organizationId);
             if (organization) {
                 if (this.canAccessRegistration(registration, organization, permissionLevel)) {
@@ -127,9 +127,9 @@ export class ContextPermissions {
         return false;
     }
 
-    canAccessPayment(payment: PaymentGeneral|null|undefined, level: PermissionLevel) {
+    canAccessPayment(payment: PaymentGeneral | null | undefined, level: PermissionLevel) {
         if (!payment) {
-            return false
+            return false;
         }
 
         if (this.organization && payment.organizationId !== this.organization.id) {
@@ -142,21 +142,21 @@ export class ContextPermissions {
 
         if (this.organization) {
             for (const webshopId of payment.webshopIds) {
-                const webshop = this.organization.webshops.find(w => w.id === webshopId)
+                const webshop = this.organization.webshops.find(w => w.id === webshopId);
                 if (webshop && webshop.privateMeta.permissions.hasAccess(this.permissions, level)) {
-                    return true
+                    return true;
                 }
             }
 
             for (const groupId of payment.groupIds) {
-                const group = this.organization.groups.find(w => w.id === groupId)
+                const group = this.organization.groups.find(w => w.id === groupId);
 
                 if (group && group.privateSettings?.permissions.hasAccess(this.permissions, level)) {
-                    return true
+                    return true;
                 }
             }
         }
-        return false
+        return false;
     }
 
     canAccessMemberPayments(member: PlatformMember, level: PermissionLevel) {
@@ -172,11 +172,11 @@ export class ContextPermissions {
     }
 
     hasSomePlatformAccess(): boolean {
-        return !!this.platformPermissions
+        return !!this.platformPermissions;
     }
 
     hasPlatformFullAccess(): boolean {
-        return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess()
+        return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess();
     }
 
     getPlatformAccessibleOrganizationTags(level: PermissionLevel): OrganizationTag[] | 'all' {
@@ -185,26 +185,40 @@ export class ContextPermissions {
         }
 
         if (this.hasPlatformFullAccess()) {
-            return 'all'
+            return 'all';
         }
 
         if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, '', level)) {
-            return 'all'
+            return 'all';
         }
 
-        const allTags = this.platform.config.tags
-        const tags: OrganizationTag[] = []
+        const allTags = this.platform.config.tags;
+        const tags: OrganizationTag[] = [];
 
         for (const tag of allTags) {
             if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, tag.id, level)) {
-                tags.push(tag)
+                tags.push(tag);
             }
         }
 
         if (tags.length === allTags.length) {
-            return 'all'
+            return 'all';
         }
 
-        return tags
+        return tags;
+    }
+
+    canWriteEventForCurrentOrganization(event: Event) {
+        return this.canWriteEventForOrganization(event, this.organization);
+    }
+
+    canWriteEventForOrganization(event: Event, organization: Organization | null) {
+        return EventPermissionChecker.hasPermissionToWriteEvent(
+            event,
+            {
+                userPermissions: this.userPermissions,
+                platform: this.platform,
+                organization,
+            });
     }
 }

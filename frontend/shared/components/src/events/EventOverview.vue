@@ -55,7 +55,7 @@
                     </template>
                 </EventInfoTable>
 
-                <template v-if="canAdminEvent">
+                <template v-if="canWriteEvent">
                     <hr>
                     <h2>
                         Instellingen
@@ -154,14 +154,14 @@
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplateType, Event, EventPermissionChecker, Group, Organization } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { appToUri } from '../context';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
-import { useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
+import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
 import { MembersTableView, useChooseOrganizationMembersForGroup } from '../members';
 import { Toast } from '../overlays/Toast';
 import ImageComponent from '../views/ImageComponent.vue';
@@ -178,25 +178,14 @@ const organization = useOrganization();
 const context = useContext();
 const platform = usePlatform();
 const pop = usePop();
+const auth = useAuth();
 const groupOrganization: Ref<Organization | null> = ref(null);
 
 function setOrganization(o: Organization) {
     groupOrganization.value = o;
 }
 
-const canAdminEvent = computed(() => {
-    if (props.event.organizationId) {
-        if (props.event.organizationId === organization.value?.id) {
-            return canAdminEventHelper(organization.value);
-        }
-        else if (groupOrganization.value) {
-            return canAdminEventHelper(groupOrganization.value);
-        }
-        return false;
-    }
-
-    return canAdminEventHelper(null);
-});
+const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, groupOrganization.value));
 
 const levelPrefix = computed(() => {
     const prefixes: string[] = [];
@@ -359,16 +348,6 @@ async function addMembers() {
         members: [],
         group: props.event.group,
     });
-}
-
-function canAdminEventHelper(organization: Organization | null) {
-    return EventPermissionChecker.canAdminEvent(
-        props.event,
-        {
-            userPermissions: context.value.auth.user?.permissions ?? null,
-            platform: platform.value,
-            organization,
-        });
 }
 
 useGlobalEventListener('event-deleted', async (event: Event) => {

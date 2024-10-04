@@ -136,7 +136,7 @@
             </h2>
             <p>Kies voor welke groepen deze activiteit zichtbaar is.</p>
 
-            <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-operator="isTagEnabledOperator" />
+            <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-predicate="isTagEnabledPredicate" />
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
@@ -524,8 +524,8 @@ const visible = computed({
     }),
 });
 
-const hasGroupRestrictions = computed(() => organization.value && eventPermissions.hasGroupRestrictions());
-const hasTagRestrictions = computed(() => eventPermissions.hasTagRestrictions());
+const hasGroupRestrictions = computed(() => organization.value && !eventPermissions.canWriteAllGroupEvents());
+const hasTagRestrictions = computed(() => !eventPermissions.canWriteAllTagEvents());
 
 watch(hasGroupRestrictions, (hasGroupRestrictions) => {
     if (hasGroupRestrictions && groups.value === null) {
@@ -547,12 +547,12 @@ const isGroupEnabledOperator = computed(() => {
     return eventPermissions.isGroupEnabledOperatorFactory();
 });
 
-const isTagEnabledOperator = computed(() => {
+const isTagEnabledPredicate = computed(() => {
     if (!hasTagRestrictions.value) {
         return undefined;
     }
 
-    return eventPermissions.isTagEnabledOperatorFactory();
+    return eventPermissions.isTagEnabledPredicateFactory();
 });
 
 const canSelectOrganization = (organization: Organization) => {

@@ -30,10 +30,10 @@ import { computed, ref, watch, watchEffect } from 'vue';
 const props = withDefaults(
     defineProps<{
         nullable?: boolean;
-        isTagEnabledOperator?: (tag: OrganizationTag) => boolean;
+        isTagEnabledPredicate?: (tag: OrganizationTag) => boolean;
     }>(), {
         nullable: false,
-        isTagEnabledOperator: undefined,
+        isTagEnabledPredicate: undefined,
     },
 );
 
@@ -50,7 +50,7 @@ watchEffect(() => {
 });
 
 const options = computed(() => {
-    const isEnabledOperator = props.isTagEnabledOperator;
+    const isEnabledOperator = props.isTagEnabledPredicate;
 
     let result: { tag: OrganizationTag; isEnabled: boolean; isLocked: boolean }[] = [];
 

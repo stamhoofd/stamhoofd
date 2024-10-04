@@ -6,7 +6,7 @@ export function useEventPermissions() {
     const platform = usePlatform();
     const permissions = auth.permissions;
 
-    function canAdminSome() {
+    function canWriteSome() {
         if (!permissions) {
             return false;
         }
@@ -14,42 +14,18 @@ export function useEventPermissions() {
         return permissions.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite) || permissions.hasAccessRightForSomeResource(PermissionsResourceType.Groups, AccessRight.EventWrite);
     }
 
-    function canAdminAllGroupEvents() {
+    function canWriteAllGroupEvents() {
         if (!permissions) {
             return false;
         }
         return permissions.hasAccessRightForAllResourcesOfType(PermissionsResourceType.Groups, AccessRight.EventWrite);
     }
 
-    function canAdminAllTagEvents() {
+    function canWriteAllTagEvents() {
         if (!permissions) {
             return false;
         }
         return permissions.hasAccessRightForAllResourcesOfType(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite);
-    }
-
-    function hasGroupRestrictions() {
-        if (!permissions) {
-            return false;
-        }
-
-        if (canAdminAllGroupEvents()) {
-            return false;
-        }
-
-        return permissions.hasAccessRightForSomeResource(PermissionsResourceType.Groups, AccessRight.EventWrite);
-    }
-
-    function hasTagRestrictions() {
-        if (!permissions) {
-            return false;
-        }
-
-        if (canAdminAllTagEvents()) {
-            return false;
-        }
-
-        return permissions.hasAccessRightForSomeResource(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite);
     }
 
     function isGroupEnabledOperatorFactory() {
@@ -60,7 +36,7 @@ export function useEventPermissions() {
         return (group: NamedObject) => permissions.hasResourceAccessRight(PermissionsResourceType.Groups, group.id, AccessRight.EventWrite);
     }
 
-    function isTagEnabledOperatorFactory() {
+    function isTagEnabledPredicateFactory() {
         if (!permissions) {
             return () => false;
         }
@@ -74,11 +50,11 @@ export function useEventPermissions() {
     }
 
     return {
-        canAdminSome,
-        hasGroupRestrictions,
-        hasTagRestrictions,
+        canWriteSome,
+        canWriteAllGroupEvents,
+        canWriteAllTagEvents,
         isGroupEnabledOperatorFactory,
-        isTagEnabledOperatorFactory,
+        isTagEnabledPredicateFactory,
         canAdminEventForExternalOrganization,
     };
 }
