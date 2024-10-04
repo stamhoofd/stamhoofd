@@ -1,14 +1,20 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" :save-text="$t('Reken aan')" save-icon="calculator" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" :save-text="$t('Aanrekenen')" save-icon="calculator" @save="save">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
+
         <p class="style-description">
             <span v-if="organizationCount === null" class="style-placeholder-skeleton" />
             <span v-else-if="organizationCount === 1">{{ $t("Reken een bedrag aan aan de geselecteerde groep.") }}</span>
             <span v-else>{{ $t('Reken een bedrag aan aan de geselecteerde groepen.', { count: organizationCount.toString() }) }}</span>
         </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
+
+        <STInputBox :title="$t('Aangerekend door')" error-fields="organization" :error-box="errors.errorBox">
+            <OrganizationSelect v-model="selectedOrganization" />
+        </STInputBox>
 
         <STInputBox :title="$t('Beschrijving')" error-fields="description" :error-box="errors.errorBox">
             <input v-model="description" class="input" type="text" :placeholder="$t('Beschrijving van de aanrekening')" autocomplete="given-name">
@@ -30,12 +36,13 @@
 <script lang="ts" setup>
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useValidation } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useExternalOrganization, usePlatform, useValidation } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, watch } from 'vue';
+import { computed, Ref, ref, watch } from 'vue';
+import OrganizationSelect from './components/OrganizationSelect.vue';
 import { useCountOrganizations } from './composables/useCountOrganizations';
 
 const props = defineProps<{ filter: StamhoofdFilter }>();
@@ -45,6 +52,7 @@ const $t = useTranslate();
 const pop = usePop();
 const owner = useRequestOwner();
 const context = useContext();
+const platform = usePlatform();
 const { count } = useCountOrganizations();
 
 watch(() => props.filter, async (filter) => {
@@ -55,6 +63,7 @@ watch(() => props.filter, async (filter) => {
 }, { immediate: true });
 
 const organizationCount = ref<number | null>(null);
+const selectedOrganization: Ref<Organization | null> = ref(null);
 const description = ref('');
 const price = ref(0);
 const amount = ref(1);
@@ -62,7 +71,7 @@ const hasChanges = computed(() => description.value !== '' || price.value !== 0)
 const total = computed(() => price.value * amount.value);
 const priceBreakdown = computed(() => {
     return [{
-        name: description.value,
+        name: 'Totaal',
         price: total.value,
     }];
 });
@@ -71,8 +80,25 @@ const saving = ref(false);
 
 const title = $t('Bedrag aanrekenen');
 
+const defaultOrganizationId = computed(() => platform.value.membershipOrganizationId);
+const { externalOrganization: defaultOrganization } = useExternalOrganization(defaultOrganizationId);
+
+watch(defaultOrganization, (organization) => {
+    if (organization !== null && selectedOrganization.value === null) {
+        selectedOrganization.value = organization;
+    }
+}, { immediate: true });
+
 useValidation(errors.validator, () => {
     const se = new SimpleErrors();
+
+    if (selectedOrganization.value === null) {
+        se.addError(new SimpleError({
+            code: 'invalid_field',
+            message: 'Organisatie is verplicht',
+            field: 'organization',
+        }));
+    }
 
     const descriptionNormalized = description.value.trim();
 
@@ -118,7 +144,7 @@ async function save() {
             total: Formatter.price(total.value),
             count: organizationCount.value?.toString() ?? '?',
         }),
-        $t('Reken aan'),
+        $t('Aanrekenen'),
     );
 
     if (!isConfirm) {
@@ -133,7 +159,7 @@ async function save() {
         });
 
         const body = {
-            organizationId: null,
+            organizationId: selectedOrganization.value!.id,
             price: price.value,
             description: description.value,
             amount: amount.value,
