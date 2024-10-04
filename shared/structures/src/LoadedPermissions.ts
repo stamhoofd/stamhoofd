@@ -194,6 +194,33 @@ export class LoadedPermissions {
         return false;
     }
 
+    hasAccessRightForAllResourcesOfType(type: PermissionsResourceType, right: AccessRight): boolean {
+        return this.hasResourceAccessRight(type, '', right);
+    }
+
+    hasAccessRightForSomeResource(type: PermissionsResourceType, right: AccessRight): boolean {
+        if (this.hasAccessRight(right)) {
+            return true;
+        }
+
+        const resource = this.resources.get(type);
+        if (resource) {
+            for (const r of resource.values()) {
+                if (r.hasAccessRight(right)) {
+                    return true;
+                }
+            }
+        }
+
+        for (const r of this.roles) {
+            if (r.hasAccessRightForSomeResource(type, right)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     hasReadAccess(): boolean {
         return this.hasAccess(PermissionLevel.Read);
     }

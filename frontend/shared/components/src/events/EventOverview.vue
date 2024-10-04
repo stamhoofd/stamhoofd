@@ -5,7 +5,7 @@
 
             <main class="center">
                 <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
-                
+
                 <p class="style-title-prefix">
                     {{ levelPrefix }}
                 </p>
@@ -55,7 +55,7 @@
                     </template>
                 </EventInfoTable>
 
-                <template v-if="hasFullAccess">
+                <template v-if="canWriteEvent">
                     <hr>
                     <h2>
                         Instellingen
@@ -113,7 +113,6 @@
                 <h2>Link kopiëren</h2>
                 <p>De link naar deze activiteit in 'Mijn account'. Deel deze link met leden.</p>
 
-                
                 <div class="input-with-buttons">
                     <div>
                         <input class="input" :value="link" readonly>
@@ -125,7 +124,6 @@
                         </button>
                     </div>
                 </div>
-
 
                 <template v-if="event.group && (!organization || event.organizationId === organization.id || (event.group.settings.allowRegistrationsByOrganization && !event.group.closed))">
                     <hr>
@@ -158,12 +156,12 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArr
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { EmailTemplateType, Event, Group, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, ref } from 'vue';
+import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { appToUri } from '../context';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
-import { useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
+import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
 import { MembersTableView, useChooseOrganizationMembersForGroup } from '../members';
 import { Toast } from '../overlays/Toast';
 import ImageComponent from '../views/ImageComponent.vue';
@@ -177,52 +175,53 @@ const props = defineProps<{
 const title = computed(() => props.event.name);
 const $navigate = useNavigate();
 const organization = useOrganization();
-const context = useContext()
-const platform = usePlatform()
+const context = useContext();
+const platform = usePlatform();
 const pop = usePop();
-const groupOrganization = ref<Organization | null>(null);
+const auth = useAuth();
+const groupOrganization: Ref<Organization | null> = ref(null);
 
 function setOrganization(o: Organization) {
-    groupOrganization.value = o as any;
+    groupOrganization.value = o;
 }
 
-const hasFullAccess = computed(() => {
-    return !organization.value || props.event.organizationId === organization.value.id;
-});
+const canWriteEvent = computed(() => auth.canWriteEventForOrganization(props.event, groupOrganization.value));
 
 const levelPrefix = computed(() => {
-    const prefixes: string[] = []
+    const prefixes: string[] = [];
 
     if (props.event.organizationId === null) {
         if (props.event.meta.organizationTagIds !== null) {
-            const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name)
-            prefixes.push(...tagNames)
-        } else {
-            prefixes.push('Nationaal')
+            const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name);
+            prefixes.push(...tagNames);
         }
-    } else {
+        else {
+            prefixes.push('Nationaal');
+        }
+    }
+    else {
         if (groupOrganization.value?.id === organization.value?.id) {
             // skip
-        } else {
+        }
+        else {
             // Name of the organization
-            prefixes.push(groupOrganization.value?.name ?? props.event.organizationId)
+            prefixes.push(groupOrganization.value?.name ?? props.event.organizationId);
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' en ')
+    return Formatter.joinLast(prefixes, ', ', ' en ');
 });
 
 const link = computed(() => {
-    return `https://${STAMHOOFD.domains.dashboard}/${appToUri('registration')}/activiteiten/${props.event.startDate.getFullYear()}/${Formatter.slug(props.event.name)}/${props.event.id}`
-})
-
+    return `https://${STAMHOOFD.domains.dashboard}/${appToUri('registration')}/activiteiten/${props.event.startDate.getFullYear()}/${Formatter.slug(props.event.name)}/${props.event.id}`;
+});
 
 enum Routes {
     Registrations = 'inschrijvingen',
     WaitingList = 'wachtlijst',
-    Edit = "instellingen",
-    EditGroup = "inschrijvingsinstellingen",
-    EditEmails = "emails"
+    Edit = 'instellingen',
+    EditGroup = 'inschrijvingsinstellingen',
+    EditEmails = 'emails',
 }
 
 defineRoutes([
@@ -231,24 +230,24 @@ defineRoutes([
         component: MembersTableView as ComponentOptions,
         paramsToProps: () => {
             if (!props.event.group) {
-                throw new Error("No group found")
+                throw new Error('No group found');
             }
             return {
-                group: props.event.group
-            }
-        }
+                group: props.event.group,
+            };
+        },
     },
     {
         url: Routes.WaitingList,
         component: MembersTableView as ComponentOptions,
         paramsToProps: () => {
             if (!props.event.group || !props.event.group.waitingList) {
-                throw new Error("No waiting list found")
+                throw new Error('No waiting list found');
             }
             return {
-                group: props.event.group.waitingList
-            }
-        }
+                group: props.event.group.waitingList,
+            };
+        },
     },
     {
         url: Routes.Edit,
@@ -257,9 +256,9 @@ defineRoutes([
         paramsToProps: () => {
             return {
                 event: props.event,
-                isNew: false
-            }
-        }
+                isNew: false,
+            };
+        },
     },
     {
         url: Routes.EditGroup,
@@ -267,7 +266,7 @@ defineRoutes([
         present: 'popup',
         paramsToProps: () => {
             if (!props.event.group) {
-                throw new Error('Missing group')
+                throw new Error('Missing group');
             }
 
             return {
@@ -277,42 +276,42 @@ defineRoutes([
                 showToasts: true,
                 saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
                     const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
-                    
+
                     arr.addPatch(Event.patch({
                         id: props.event.id,
-                        group: patch
-                    }))
+                        group: patch,
+                    }));
 
                     const response = await context.value.authenticatedServer.request({
                         method: 'PATCH',
                         path: '/events',
                         body: arr,
                         decoder: new ArrayDecoder(Event as Decoder<Event>),
-                    })
+                    });
 
                     // Make sure original event is patched
-                    deepSetArray([props.event], response.data)
+                    deepSetArray([props.event], response.data);
                 },
                 deleteHandler: async () => {
                     const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
-                    
+
                     arr.addPatch(Event.patch({
                         id: props.event.id,
-                        group: null
-                    }))
+                        group: null,
+                    }));
 
                     const response = await context.value.authenticatedServer.request({
                         method: 'PATCH',
                         path: '/events',
                         body: arr,
                         decoder: new ArrayDecoder(Event as Decoder<Event>),
-                    })
+                    });
 
                     // Make sure original event is patched
-                    deepSetArray([props.event], response.data)
-                }
-            }
-        }
+                    deepSetArray([props.event], response.data);
+                },
+            };
+        },
     },
     {
         url: Routes.EditEmails,
@@ -320,42 +319,42 @@ defineRoutes([
         present: 'popup',
         paramsToProps: () => {
             if (!props.event.group) {
-                throw new Error('Missing group')
+                throw new Error('Missing group');
             }
-            
+
             return {
                 groups: props.event.group.waitingList ? [props.event.group, props.event.group.waitingList] : [props.event.group],
                 allowEditGenerated: false,
                 types: [
-                    EmailTemplateType.RegistrationConfirmation
-                ]
-            }
-        }
+                    EmailTemplateType.RegistrationConfirmation,
+                ],
+            };
+        },
     },
-])
-const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup()
+]);
+const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 
 async function addMembers() {
     if (!props.event.group) {
         return;
     }
 
-    if (!organization.value ) {
+    if (!organization.value) {
         Toast.warning('Ga naar het beheerdersportaal van een groep om leden uit die groep toe te voegen. Dit kan niet via het administratieportaal.').show();
         return;
     }
 
     await chooseOrganizationMembersForGroup({
         members: [],
-        group: props.event.group
-    })
+        group: props.event.group,
+    });
 }
 
 useGlobalEventListener('event-deleted', async (event: Event) => {
-    if(event.id === props.event.id) {
-        await pop({force: true})
+    if (event.id === props.event.id) {
+        await pop({ force: true });
     }
-})
+});
 </script>
 
 <style lang="scss">

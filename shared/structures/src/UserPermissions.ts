@@ -9,7 +9,7 @@ import { PermissionsResourceType } from './PermissionsResourceType';
 import { Platform } from './Platform';
 import { ResourcePermissions } from './ResourcePermissions';
 
-type OrganizationForPermissionCalculation = {
+export type OrganizationForPermissionCalculation = {
     id: string;
     meta: {
         tags: string[];
@@ -66,6 +66,7 @@ export class UserPermissions extends AutoEncoder {
                             });
                             return LoadedPermissions.from(pp, [], [], []);
                         }
+
                         base = base ? base.merge(rp) : rp;
                     }
                 }
@@ -75,11 +76,18 @@ export class UserPermissions extends AutoEncoder {
         const specific = this.forWithoutInherit(organization);
 
         if (base) {
+            const roleWithBaseAccessRights: PermissionRoleDetailed[] = base.accessRights.length > 0
+                ? [PermissionRoleDetailed.create({
+                        accessRights: base.accessRights,
+                    })]
+                : [];
+
             const p = LoadedPermissions.from(
                 Permissions.create({
                     level: base.level,
+                    roles: roleWithBaseAccessRights,
                 }),
-                [],
+                roleWithBaseAccessRights,
                 [],
                 [],
             );
