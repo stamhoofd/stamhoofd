@@ -11,7 +11,7 @@
             </p>
 
             <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+                <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
 
                 <button class="button icon trash" @click="deleteCode(code)" />
             </p>
@@ -19,28 +19,28 @@
             <STErrorsDefault :error-box="errorBox" />
            
             <STList>
-                <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
+                <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
             </STList>
 
-
-            <p>
-                <button type="button" class="button text" @click="pop">
-                    <span class="icon add" />
-                    <span>Nog iets toevoegen</span>
-                </button>
-            </p>
-
-            <AddDiscountCodeBox :applyCode="applyCode" v-if="webshop.meta.allowDiscountCodeEntry" />
+            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
             <CheckoutPriceBreakdown :checkout="checkout" />
         </main>
 
-        <STToolbar v-if="cart.items.length > 0">
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" type="button" @click="goToCheckout">
-                    <span class="icon flag" />
-                    <span>Bestellen</span>
+        <STToolbar>
+            <template slot="right">
+                <button type="button" class="button secundary" @click="pop">
+                    <span class="icon add" />
+                    <span v-if="cart.items.length > 0">Meer toevoegen</span>
+                    <span v-else>Iets toevoegen</span>
                 </button>
-            </LoadingButton>
+
+                <LoadingButton v-if="cart.items.length > 0" :loading="loading">
+                    <button class="button primary" type="button" @click="goToCheckout">
+                        <span class="icon flag" />
+                        <span>Bestellen</span>
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </div>
 </template>
@@ -171,7 +171,7 @@ export default class CartView extends Mixins(NavigationMixin){
             console.error(e);
         }
 
-         try {
+        try {
             this.cart.validate(WebshopManager.webshop)
             this.errorBox = null
         } catch (e) {
