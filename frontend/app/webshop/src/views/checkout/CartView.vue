@@ -11,32 +11,29 @@
             </p>
 
             <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+                <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
 
                 <button class="button icon trash" @click="deleteCode(code)" />
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
-           
+
             <STList>
-                <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
+                <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
             </STList>
 
-
-            <p>
-                <button type="button" class="button text" @click="pop">
-                    <span class="icon add" />
-                    <span>Nog iets toevoegen</span>
-                </button>
-            </p>
-
-            <AddDiscountCodeBox :applyCode="applyCode" v-if="webshop.meta.allowDiscountCodeEntry" />
+            <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
             <PriceBreakdownBox :price-breakdown="checkout.priceBreakdown" />
         </main>
 
-        <STToolbar v-if="cart.items.length > 0">
+        <STToolbar>
             <template #right>
-                <LoadingButton :loading="loading">
+                <button type="button" class="button secundary" @click="pop">
+                    <span class="icon add" />
+                    <span v-if="cart.items.length > 0">Meer toevoegen</span>
+                    <span v-else>Iets toevoegen</span>
+                </button>
+                <LoadingButton v-if="cart.items.length > 0" :loading="loading">
                     <button class="button primary" type="button" @click="goToCheckout">
                         <span class="icon flag" />
                         <span>Bestellen</span>
@@ -46,7 +43,6 @@
         </STToolbar>
     </div>
 </template>
-
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
@@ -68,156 +64,161 @@ import { CheckoutStepsManager } from './CheckoutStepsManager';
         LoadingButton,
         CartItemRow,
         PriceBreakdownBox,
-        AddDiscountCodeBox
+        AddDiscountCodeBox,
     },
     filters: {
         price: Formatter.price.bind(Formatter),
-    }
+    },
 })
-export default class CartView extends Mixins(NavigationMixin){
-    CheckoutManager = CheckoutManager
+export default class CartView extends Mixins(NavigationMixin) {
+    CheckoutManager = CheckoutManager;
 
-    title = "Winkelmandje"
-    loading = false
-    errorBox: ErrorBox | null = null
+    title = 'Winkelmandje';
+    loading = false;
+    errorBox: ErrorBox | null = null;
 
     get cart() {
-        return this.$checkoutManager.cart
+        return this.$checkoutManager.cart;
     }
 
     get checkout() {
-        return this.$checkoutManager.checkout
+        return this.$checkoutManager.checkout;
     }
 
     get webshop() {
-        return this.$webshopManager.webshop
+        return this.$webshopManager.webshop;
     }
 
-    async goToCheckout() { 
+    async goToCheckout() {
         if (this.loading) {
-            return
+            return;
         }
 
-        this.loading = true
-        this.errorBox = null
+        this.loading = true;
+        this.errorBox = null;
 
         try {
-            await CheckoutStepsManager.for(this.$checkoutManager).goNext(undefined, this)
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
+            await CheckoutStepsManager.for(this.$checkoutManager).goNext(undefined, this);
         }
-        this.loading = false
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
+        }
+        this.loading = false;
     }
 
     deleteCode(code: DiscountCode) {
-        this.$checkoutManager.removeCode(code)
+        this.$checkoutManager.removeCode(code);
     }
 
     deleteItem(cartItem: CartItem) {
-        this.$checkoutManager.cart.removeItem(cartItem)
+        this.$checkoutManager.cart.removeItem(cartItem);
         this.$checkoutManager.checkout.update(this.webshop);
-        this.$checkoutManager.saveCart()
+        this.$checkoutManager.saveCart();
     }
 
     setCartItemAmount(cartItem: CartItem, amount: number) {
-        cartItem.amount = amount
+        cartItem.amount = amount;
         this.$checkoutManager.checkout.update(this.webshop);
-        this.$checkoutManager.saveCart()
+        this.$checkoutManager.saveCart();
     }
 
     async applyCode(code: string) {
-        return await this.$checkoutManager.applyCode(code)
+        return await this.$checkoutManager.applyCode(code);
     }
 
-    editCartItem(cartItem: CartItem ) {
+    editCartItem(cartItem: CartItem) {
         this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(CartItemView, { 
-                        cartItem: cartItem.clone(), 
+                    root: new ComponentWithProperties(CartItemView, {
+                        cartItem: cartItem.clone(),
                         oldItem: cartItem,
                         cart: this.$checkoutManager.cart,
                         webshop: this.$webshopManager.webshop,
                         checkout: this.$checkoutManager.checkout,
                         saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                            component?.dismiss({force: true})
+                            component?.dismiss({ force: true });
                             if (oldItem) {
-                                this.$checkoutManager.cart.replaceItem(oldItem, cartItem)
-                            } else {
-                                this.$checkoutManager.cart.addItem(cartItem)
+                                this.$checkoutManager.cart.replaceItem(oldItem, cartItem);
                             }
-                            this.$checkoutManager.saveCart()
-                        }
-                    })
-                })
+                            else {
+                                this.$checkoutManager.cart.addItem(cartItem);
+                            }
+                            this.$checkoutManager.saveCart();
+                        },
+                    }),
+                }),
             ],
-            modalDisplayStyle: "sheet"
-        })
+            modalDisplayStyle: 'sheet',
+        });
     }
 
     mounted() {
-        this.check().catch(console.error)
+        this.check().catch(console.error);
     }
 
     async check() {
         try {
-            await this.$webshopManager.reload()
-        } catch (e) {
+            await this.$webshopManager.reload();
+        }
+        catch (e) {
             // Possible: but don't skip validation
             console.error(e);
         }
 
-         try {
-            this.cart.validate(this.$webshopManager.webshop)
-            this.errorBox = null
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
+        try {
+            this.cart.validate(this.$webshopManager.webshop);
+            this.errorBox = null;
         }
-        this.$checkoutManager.saveCart()
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
+        }
+        this.$checkoutManager.saveCart();
 
         try {
-            await this.$checkoutManager.validateCodes()
-        }  catch (e) {
+            await this.$checkoutManager.validateCodes();
+        }
+        catch (e) {
             console.error(e);
         }
     }
 
-    activated() {     
-        this.errorBox = null   
-        this.check().catch(console.error)
+    activated() {
+        this.errorBox = null;
+        this.check().catch(console.error);
     }
 
     countFor(cartItem: CartItem) {
         return this.$checkoutManager.cart.items.reduce((prev, item) => {
             if (item.product.id !== cartItem.product.id) {
-                return prev
+                return prev;
             }
-            return prev + item.amount
-        }, 0)  - (cartItem.amount ?? 0)
+            return prev + item.amount;
+        }, 0) - (cartItem.amount ?? 0);
     }
 
     maximumRemainingStockFor(cartItem: CartItem) {
         if (cartItem.product.remainingStock === null) {
-            return null
+            return null;
         }
 
-        return cartItem.product.remainingStock - this.countFor(cartItem)
+        return cartItem.product.remainingStock - this.countFor(cartItem);
     }
 
     maximumRemainingOrderFor(cartItem: CartItem) {
         if (cartItem.product.maxPerOrder === null) {
-            return null
+            return null;
         }
 
-        return cartItem.product.maxPerOrder - this.countFor(cartItem)
+        return cartItem.product.maxPerOrder - this.countFor(cartItem);
     }
 
     maximumRemainingFor(cartItem: CartItem) {
         const admin = false;
         const remaining = cartItem.getMaximumRemaining(cartItem, this.cart, this.webshop, admin);
-        return remaining
+        return remaining;
     }
 }
 </script>
