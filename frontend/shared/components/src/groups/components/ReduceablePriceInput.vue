@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { PriceInput, STErrorsDefault, useErrors, useOrganization, usePlatform, useValidation, Validator } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, ReduceablePrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -56,6 +57,7 @@ const { enabled, financialSupportSettings } = useFinancialSupportSettings({
 });
 const platform = usePlatform();
 const organization = useOrganization();
+const $t = useTranslate();
 
 const $showReducedPrice = computed(() => enabled || reducedPrice.value !== null);
 
@@ -78,7 +80,7 @@ function getDefaultPrice(isReduced: boolean) {
 }
 
 function formatPriceForPlatform(price: number) {
-    return `Je betaalt ${Formatter.price(price)} aan KSA Nationaal.`;
+    return $t('Je betaalt ? euro aan KSA Nationaal.', {price: Formatter.price(price)});
 }
 
 useValidation(props.validator, () => {
@@ -87,7 +89,10 @@ useValidation(props.validator, () => {
             code: 'invalid_reduced_price',
             field: 'price',
             message: 'Financial support is not enabled, but you have set a reduced price',
-            human: `De functie ${financialSupportSettings.value.title} staat uit, maar je hebt nog ${financialSupportSettings.value.priceName} ingesteld`,
+            human: $t("De functie x staat uit, maar je hebt nog x ingesteld", {
+                financialSupportTitle: financialSupportSettings.value.title,
+                financialSupportPriceName: financialSupportSettings.value.priceName
+            }),
         }));
         return false;
     }
@@ -98,7 +103,10 @@ useValidation(props.validator, () => {
             code: 'invalid_reduced_price',
             field: 'price',
             message: 'Reduced price should be at least be the normal price minus the minimum difference between the normal and reduced price',
-            human: `${financialSupportSettings.value.priceName} moet minstens ${Formatter.price(minPriceDifference.value)} lager zijn dan de standaardprijs`,
+            human: $t("x moet minstens x lager zijn dan de standaardprijs", {
+                financialSupportPriceName: financialSupportSettings.value.priceName,
+                minDifference: Formatter.price(minPriceDifference.value),
+            }),
         }));
         return false;
     }

@@ -324,5 +324,8 @@
   "de2222d9-c934-4d06-8702-9527686de012": "Je kan één of meerdere tarieven instellen en elk tarief een eigen naam geven. Een lid kan bij het inschrijven zelf één van de beschikbare tarieven kiezen.",
   "ca88e88f-d859-4445-a13a-4b73c359cd6f": "Schrijf leden in",
   "d14ea349-afa8-49f3-bdb0-aac23a41887f": "Schrijf leden in bij elke leeftijdsgroep.",
-  "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": "Inloggen op Stamhoofd"
+  "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": "Inloggen op Stamhoofd",
+  "Je betaalt ? euro aan KSA Nationaal.": "Je betaalt {price} aan KSA Nationaal.",
+  "De functie x staat uit, maar je hebt nog x ingesteld": "De functie {financialSupportTitle} staat uit, maar je hebt nog {financialSupportPriceName} ingesteld",
+  "x moet minstens x lager zijn dan de standaardprijs": "{financialSupportPriceName} moet minstens {minDifference} lager zijn dan de standaardprijs"
 }
