@@ -128,7 +128,7 @@
                             Uitverkocht
                         </p>
                         <p v-else-if="price.stock" class="style-description-small">
-                            Nog {{ pluralText(price.getRemainingStock(patched), 'stuk', 'stuks') }} beschikbaar
+                            Nog {{ pluralText(price.getRemainingStock(patched) ?? 0, 'stuk', 'stuks') }} beschikbaar
                         </p>
 
                         <template #right>
@@ -139,7 +139,7 @@
                     </STListItem>
                 </template>
             </STList>
-            <GroupPriceBox v-else :price="patched.settings.prices[0]" :group="patched" :errors="errors" @patch:price="addPricePatch" />
+            <GroupPriceBox v-else :price="patched.settings.prices[0]" :group="patched" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPricePatch" />
         </div>
 
         <div v-for="optionMenu of patched.settings.optionMenus" :key="optionMenu.id" class="container">
@@ -430,7 +430,7 @@
                     </h3>
                 </STListItem>
 
-                <STListItem v-for="{list, description} of availableWaitingLists" :key="list.id" :selectable="true" element-name="label">
+                <STListItem v-for="{list, description: waitingListDescription} of availableWaitingLists" :key="list.id" :selectable="true" element-name="label">
                     <template #left>
                         <Radio v-model="waitingList" :value="list" />
                     </template>
@@ -439,7 +439,7 @@
                         {{ list.settings.name }}
                     </h3>
                     <p class="style-description-small">
-                        {{ description }}
+                        {{ waitingListDescription }}
                     </p>
 
                     <template #right>
@@ -941,6 +941,8 @@ const title = computed(() => {
     return props.isNew ? $t('c7944f69-c772-4cc5-b7c8-2ef96272dfe0') : $t('d886e927-86d1-48ed-93ed-60e924484db1');
 });
 
+const defaultMembershipTypeId = computed(() => defaultAgeGroup.value?.defaultMembershipTypeId ?? null);
+
 async function save() {
     if (deleting.value || saving.value) {
         return;
@@ -955,7 +957,7 @@ async function save() {
         }
         await props.saveHandler(patch.value);
         if (props.showToasts) {
-            await Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
+            Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
         }
         await pop({ force: true });
     }
@@ -979,7 +981,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            await Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
+            Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }
         await pop({ force: true });
     }
@@ -991,12 +993,16 @@ async function deleteMe() {
     }
 }
 
-function addGroupPrice() {
-    const price = GroupPrice.create({
-        name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
-        price: patched.value.settings.prices[0]?.price?.clone(),
-    });
-    addPricePut(price);
+async function addGroupPrice() {
+    const isValid = await errors.validator.validateByKey('price');
+
+    if (isValid) {
+        const price = GroupPrice.create({
+            name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
+            price: patched.value.settings.prices[0]?.price?.clone(),
+        });
+        addPricePut(price);
+    }
 }
 
 async function editGroupPrice(price: GroupPrice) {
@@ -1006,6 +1012,7 @@ async function editGroupPrice(price: GroupPrice) {
                 price,
                 group: patched,
                 isNew: false,
+                defaultMembershipTypeId,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupPrice>) => {
                     addPricePatch(patch);
                 },
