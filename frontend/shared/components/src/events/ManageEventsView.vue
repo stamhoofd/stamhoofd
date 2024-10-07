@@ -62,7 +62,7 @@ import { useEventsObjectFetcher } from '../fetchers';
 import { getEventUIFilterBuilders } from '../filters/filterBuilders';
 import { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
-import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform, useUser } from '../hooks';
+import { useAuth, useGlobalEventListener, useOrganization, usePlatform, useUser } from '../hooks';
 import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
 import { Toast } from '../overlays/Toast';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
@@ -75,7 +75,6 @@ type ObjectType = Event;
 
 const searchQuery = ref('');
 const present = usePresent();
-const context = useContext();
 
 const selectedYear = ref(null) as Ref<number | null>;
 const years = computed(() => {
@@ -343,21 +342,27 @@ function getRequiredFilter(): StamhoofdFilter | null {
     return filters;
 }
 
-function createDefaultUIFilter(): UIFilter | null {
-    let groupIds: string[] | undefined = undefined;
-    let organizationTagIds: string[] | undefined = undefined;
+function getDefaultStamhoofdFilter(): StamhoofdFilter {
+    let groupIds: (string | null)[] | undefined = undefined;
+    let organizationTagIds: (string | null)[] | undefined = undefined;
+    const isOrganizationScope = organization.value !== null;
 
-    const groupsToFilterEventsOn = eventPermissions.groupsToFilterEventsOn();
-    if (groupsToFilterEventsOn) {
-        groupIds = groupsToFilterEventsOn;
+    // // only show events for groups where user can edit event for if organization scope
+    if (isOrganizationScope) {
+        const groupsToFilterEventsOn = eventPermissions.groupsToFilterEventsOn();
+        if (groupsToFilterEventsOn) {
+            groupIds = [null, ...groupsToFilterEventsOn];
+        }
+    }
+    // only show events for organizations with tag where user can edit event for if platform scope
+    else {
+        const tagsToFilterEventsOn = eventPermissions.tagsToFilterEventsOn();
+        if (tagsToFilterEventsOn) {
+            organizationTagIds = [null, ...tagsToFilterEventsOn];
+        }
     }
 
-    const tagsToFilterEventsOn = eventPermissions.tagsToFilterEventsOn();
-    if (tagsToFilterEventsOn) {
-        organizationTagIds = tagsToFilterEventsOn;
-    }
-
-    if (groupIds === undefined && organizationTagIds === undefined) {
+    if(groupIds === undefined && organizationTagIds === undefined) {
         return null;
     }
 
@@ -375,6 +380,11 @@ function createDefaultUIFilter(): UIFilter | null {
         };
     }
 
+    return filter
+}
+
+function createDefaultUIFilter(): UIFilter | null {
+    const filter = getDefaultStamhoofdFilter();
     return filterBuilders[0].fromFilter(filter);
 }
 

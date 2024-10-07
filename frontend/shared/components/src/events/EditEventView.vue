@@ -524,8 +524,8 @@ const visible = computed({
     }),
 });
 
-const hasGroupRestrictions = computed(() => organization.value && !eventPermissions.canWriteAllGroupEvents());
-const hasTagRestrictions = computed(() => !eventPermissions.canWriteAllTagEvents());
+const hasGroupRestrictions = computed(() => !isNationalActivity.value && organization.value && !eventPermissions.canWriteAllGroupEvents());
+const hasTagRestrictions = computed(() => isNationalActivity.value && !eventPermissions.canWriteAllTagEvents());
 
 watch(hasGroupRestrictions, (hasGroupRestrictions) => {
     if (hasGroupRestrictions && groups.value === null) {
