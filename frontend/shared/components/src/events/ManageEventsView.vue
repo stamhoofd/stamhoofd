@@ -358,7 +358,7 @@ function getDefaultStamhoofdFilter(): StamhoofdFilter {
     else {
         const tagsToFilterEventsOn = eventPermissions.tagsToFilterEventsOn();
         if (tagsToFilterEventsOn) {
-            organizationTagIds = [null, ...tagsToFilterEventsOn];
+            organizationTagIds = tagsToFilterEventsOn;
         }
     }
 
