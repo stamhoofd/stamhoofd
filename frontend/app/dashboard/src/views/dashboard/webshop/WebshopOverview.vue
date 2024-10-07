@@ -411,7 +411,7 @@ import { AccountSettingsView, CenteredMessage, EditResourceRolesView, PromiseVie
 import { AccessRight, EmailTemplate, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
@@ -438,6 +438,7 @@ const present = usePresent();
 const pop = usePop();
 const canPop = useCanPop();
 const splitViewController = useSplitViewController();
+const owner = useRequestOwner();
 
 const loading = ref(false);
 const webshopManager = ref(new WebshopManager(context.value, props.preview));
@@ -641,7 +642,7 @@ function duplicateWebshop() {
                         path: '/email-templates',
                         query: { webshopId: webshop.id },
                         shouldRetry: false,
-                        owner: this,
+                        owner,
                         decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
                     });
                     const templates = response.data;
@@ -673,7 +674,7 @@ function duplicateWebshop() {
                                         path: '/email-templates',
                                         body: patchedArray,
                                         shouldRetry: false,
-                                        owner: this,
+                                        owner,
                                     });
                                 }
                             }
