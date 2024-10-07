@@ -51,7 +51,9 @@ import { computed, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{
+        allTags?: OrganizationTag[];
         tagIds?: string[];
+        filter?: (tag: OrganizationTag) => boolean;
         onAdd: (
             allTags: OrganizationTag[],
             addedTags: OrganizationTag[],
@@ -59,9 +61,13 @@ const props = withDefaults(
         ) => void;
     }>(),
     {
+        allTags: undefined,
         tagIds: () => [],
+        filter: undefined,
     },
 );
+
+const $platform = usePlatform();
 
 const title = 'Selecteer tags';
 const $saveText = computed(() => {
@@ -79,11 +85,11 @@ const $hasChanges = computed(() => {
 });
 
 const $searchString = ref('');
-
-const $platform = usePlatform();
 const pop = usePop();
 
-const tags = $platform.value.config.tags;
+const sourceTags = props.allTags ?? $platform.value.config.tags;
+const tags = props.filter ? sourceTags.filter(props.filter) : sourceTags;
+
 const initialSelection = props.tagIds.reduce((result, tagId) => {
     const tag = tags.find(tag => tag.id === tagId);
     if (tag) {

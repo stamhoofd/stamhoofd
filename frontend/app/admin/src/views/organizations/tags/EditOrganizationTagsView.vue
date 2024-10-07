@@ -3,33 +3,56 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
+
+        <p class="style-description">
+            {{ $t('Tags helpen bij het filteren van groepen en er kunnen rechten toegekend worden op basis van tags.') }}
+        </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STList v-model="draggableTags" :draggable="true">
-            <template #item="{item: tag}">
-                <TagRow :tag="tag" @click="editTag(tag)" />
-            </template>
-        </STList>
+        <div v-if="draggableTagsWithChildren.length" class="container">
+            <hr>
+            <h2>{{ $t('Categorieën') }}</h2>
+            <p>{{ $t('Organiseer tags door deze onder te verdelen in categorieën.') }}</p>
+            <STList v-model="draggableTagsWithChildren" :draggable="true">
+                <template #item="{item: tag}">
+                    <TagRow :tag="tag" @click="editTag(tag)" />
+                </template>
+            </STList>
+        </div>
 
-        <p>
-            <button class="button text" type="button" @click="addTag">
-                <span class="icon add" />
-                <span>Tag toevoegen</span>
-            </button>
-        </p>
+        <div class="container">
+            <template v-if="draggableTagsWithChildren.length">
+                <hr>
+                <h2>
+                    {{ $t('Andere tags') }}
+                </h2>
+            </template>
+            <STList v-model="draggableOtherTags" :draggable="true">
+                <template #item="{item: tag}">
+                    <TagRow :tag="tag" @click="editTag(tag)" />
+                </template>
+            </STList>
+            <p>
+                <button class="button text" type="button" @click="addTag">
+                    <span class="icon add" />
+                    <span>{{ $t('Tag toevoegen') }}</span>
+                </button>
+            </p>
+        </div>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
-import { computed, ref } from 'vue';
-import EditOrganizationTagView from './EditOrganizationTagView.vue';
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { OrganizationTag, Platform, PlatformConfig } from '@stamhoofd/structures';
-import TagRow from './components/TagRow.vue';
-import { usePlatformManager } from '@stamhoofd/networking';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { usePlatformManager } from '@stamhoofd/networking';
+import { OrganizationTag, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
+import TagRow from './components/TagRow.vue';
+import EditOrganizationTagView from './EditOrganizationTagView.vue';
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
@@ -39,11 +62,35 @@ const present = usePresent();
 const $t = useTranslate();
 
 const originalTags = computed(() => platform.value.config.tags);
+
 const { patched: tags, patch, addArrayPatch, hasChanges } = usePatchArray(originalTags);
-const draggableTags = useDraggableArray(() => tags.value, addArrayPatch);
 const saving = ref(false);
 
 const title = 'Tags';
+
+const draggableTagsWithChildren = useDraggableArray(() => tags.value.filter(tag => tag.childTags.length > 0), addArrayPatch);
+
+const draggableOtherTags = useDraggableArray(() => {
+    return tags.value.filter(tag => tag.childTags.length === 0 && !tags.value.some(t => t.childTags.includes(tag.id)));
+}, addArrayPatch);
+
+function applyPatches(patches: { tag: OrganizationTag; patch: AutoEncoderPatchType<OrganizationTag> }[], arr: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray()) {
+    for (const { tag, patch } of patches) {
+        if (patch.id !== tag.id) {
+            patch.id = tag.id;
+        }
+
+        arr.addPatch(patch);
+    }
+
+    addArrayPatch(arr);
+}
+
+const deleteHandler = (tagIds: string[]) => {
+    const arr: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray();
+    tagIds.forEach(id => arr.addDelete(id));
+    addArrayPatch(arr);
+};
 
 async function addTag() {
     const arr: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray();
@@ -54,13 +101,13 @@ async function addTag() {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditOrganizationTagView, {
+                allTags: tags.value,
                 tag,
                 isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<OrganizationTag>) => {
-                    patch.id = tag.id;
-                    arr.addPatch(patch);
-                    addArrayPatch(arr);
+                saveHandler: (patches: { tag: OrganizationTag; patch: AutoEncoderPatchType<OrganizationTag> }[]) => {
+                    applyPatches(patches, arr);
                 },
+                deleteHandler,
             }),
         ],
     });
@@ -71,18 +118,13 @@ async function editTag(tag: OrganizationTag) {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditOrganizationTagView, {
+                allTags: tags.value,
                 tag,
                 isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<OrganizationTag>) => {
-                    const arr: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray();
-                    arr.addPatch(patch);
-                    addArrayPatch(arr);
+                saveHandler: (patches: { tag: OrganizationTag; patch: AutoEncoderPatchType<OrganizationTag> }[]) => {
+                    applyPatches(patches);
                 },
-                deleteHandler: () => {
-                    const arr: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray();
-                    arr.addDelete(tag.id);
-                    addArrayPatch(arr);
-                },
+                deleteHandler,
             }),
         ],
     });
