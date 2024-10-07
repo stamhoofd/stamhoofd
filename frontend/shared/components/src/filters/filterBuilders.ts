@@ -1,13 +1,13 @@
-import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { CachedOutstandingBalanceType, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdFilter, User } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
-import { usePlatform } from '../hooks';
-import { GroupUIFilterBuilder } from './GroupUIFilter';
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
-import { NumberFilterBuilder } from './NumberUIFilter';
-import { StringFilterBuilder } from './StringUIFilter';
-import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from './UIFilter';
+import { useTranslate } from "@stamhoofd/frontend-i18n";
+import { Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
+import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
+import { usePlatform } from "../hooks";
+import { GroupUIFilterBuilder } from "./GroupUIFilter";
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
+import { NumberFilterBuilder } from "./NumberUIFilter";
+import { StringFilterBuilder } from "./StringUIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from "./UIFilter";
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
@@ -209,95 +209,89 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             ],
             wrapFilter: (f: StamhoofdFilter) => {
                 const choices = Array.isArray(f) ? f : [f];
-                const filters: StamhoofdFilter[] = [];
-                const invertedFilters: StamhoofdFilter[] = [];
 
-                if (choices.includes('Active') && choices.includes('Expiring')) {
-                    filters.push(...[
-                        {
-                            endDate: {
-                                $gt: { $: '$now' },
-                            },
-                        },
-                    ]);
+                if(choices.length === 3) {
+                    return null;
                 }
 
-                if (choices.includes('Active') && !choices.includes('Expiring')) {
-                    filters.push(...[
-                        {
-                            expireDate: null,
-                            endDate: {
-                                $gt: { $: '$now' },
-                            },
-                        },
-                        {
-                            expireDate: {
-                                $gt: { $: '$now' },
-                            },
-                        },
-                    ]);
-                }
-
-                if (!choices.includes('Active') && choices.includes('Expiring')) {
-                    filters.push(...[
-                        {
-                            expireDate: {
-                                $lt: { $: '$now' },
+                const activeOrExpiringFilter: StamhoofdFilter = {
+                    platformMemberships: {
+                        $elemMatch: {
+                            startDate: {
+                                $lte: {$: '$now'}
                             },
                             endDate: {
-                                $gt: { $: '$now' },
-                            },
-                        },
-                    ]);
+                                $gt: {$: '$now'}
+                            }
+                        }
+                    }
+                };
+
+                if(choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
+                    return activeOrExpiringFilter;
                 }
 
-                if (choices.includes('Inactive')) {
-                    invertedFilters.push(...[
-                        {
-                            endDate: {
-                                $gt: { $: '$now' },
-                            },
-                        },
-                    ]);
+                const getFilter = (choice: StamhoofdFilter<StamhoofdCompareValue>): StamhoofdFilter => {
+                    switch(choice) {
+                        case 'Active': {
+                            return {
+                                platformMemberships: {
+                                    $elemMatch: {
+                                        endDate: {
+                                            $gt: {$: '$now'}
+                                        },
+                                        startDate: {
+                                            $lte: {$: '$now'}
+                                        },
+                                        $or: [
+                                            {
+                                                expireDate: null
+                                            },
+                                            {
+                                                expireDate: {
+                                                    $gt: {$: '$now'}
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                        case 'Inactive': {
+                            return {
+                                $not: activeOrExpiringFilter
+                            }
+                        }
+                        case 'Expiring': {
+                            return {
+                                $not: getFilter('Active'),
+                                platformMemberships: {
+                                    $elemMatch: {
+                                        endDate: {
+                                            $gte: {$: '$now'}
+                                        },
+                                        expireDate: {
+                                            $lt: {$: '$now'}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        default: {
+                            return null;
+                        }
+                    }
                 }
 
-                const filter: StamhoofdFilter = [];
+                const filters = choices.map(getFilter);
 
-                if (filters.length > 0) {
-                    filter.push({
-                        platformMemberships: {
-                            $elemMatch: filters.length === 1
-                                ? filters[0]
-                                : {
-                                        $or: filters,
-                                    },
-                        },
-                    });
-                }
-
-                if (invertedFilters.length > 0) {
-                    filter.push({
-                        $not: {
-                            platformMemberships: {
-                                $elemMatch: {
-                                    $or: invertedFilters,
-                                },
-                            },
-                        },
-                    });
-                }
-
-                if (filter.length == 1) {
-                    return filter[0];
-                }
-
-                if (filter.length === 0) {
-                    return [];
+                if(filters.length === 1) {
+                    return filters[0];
                 }
 
                 return {
-                    $or: filter,
-                };
+                    $or: filters
+                }
             },
             unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
                 const activeAndExpiring = unwrapFilter(f, {
