@@ -534,8 +534,13 @@ watch(hasGroupRestrictions, (hasGroupRestrictions) => {
 }, { immediate: true });
 
 watch(hasTagRestrictions, (hasTagRestrictions) => {
-    if (hasTagRestrictions && organizationTagIds.value === null) {
-        addTagRestriction();
+    if (hasTagRestrictions) {
+        if (organizationTagIds.value === null) {
+            addTagRestriction();
+        }
+    }
+    else if (organizationTagIds.value?.length === 0) {
+        deleteTagRestriction();
     }
 }, { immediate: true });
 
