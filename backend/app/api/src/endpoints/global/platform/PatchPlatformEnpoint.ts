@@ -9,6 +9,7 @@ import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
 import { MembershipHelper } from '../../../helpers/MembershipHelper';
 import { PeriodHelper } from '../../../helpers/PeriodHelper';
+import { TagHelper } from '../../../helpers/TagHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -88,16 +89,24 @@ export class PatchPlatformEndpoint extends Endpoint<
 
             // Update config
             if (newConfig) {
-                if (newConfig.premiseTypes || newConfig.responsibilities) {
+                const shouldCheckSteps = newConfig.premiseTypes || newConfig.responsibilities;
+                const shouldCheckTags = newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0;
+                if (shouldCheckSteps || shouldCheckTags) {
                     const oldConfig = platform.config.clone();
                     platform.config = patchObject(platform.config, newConfig);
                     const currentConfig = platform.config;
 
-                    shouldUpdateSetupSteps = this.shouldUpdateSetupSteps(
-                        currentConfig,
-                        newConfig,
-                        oldConfig,
-                    );
+                    if (shouldCheckSteps) {
+                        shouldUpdateSetupSteps = this.shouldUpdateSetupSteps(
+                            currentConfig,
+                            newConfig,
+                            oldConfig,
+                        );
+                    }
+
+                    if (shouldCheckTags) {
+                        TagHelper.updateOrganizations(oldConfig.tags, currentConfig.tags);
+                    }
                 }
                 else {
                     platform.config = patchObject(platform.config, newConfig);

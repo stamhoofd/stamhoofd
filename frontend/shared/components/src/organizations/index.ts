@@ -1,2 +1,3 @@
-export { default as GeneralSettingsView } from "./GeneralSettingsView.vue"
-export * from './components'
+export { default as GeneralSettingsView } from './GeneralSettingsView.vue';
+export { default as OrganizationTagSelectorView } from './OrganizationTagSelectorView.vue';
+export * from './components';
