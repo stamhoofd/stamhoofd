@@ -7,11 +7,11 @@
             {{ locationTitleName }} bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <STInputBox title="Locatienaam" error-fields="name" :error-box="errorBox">
+                <STInputBox title="Locatienaam" error-fields="name" :error-box="errors.errorBox">
                     <input
                         ref="firstInput"
                         v-model="name"
@@ -22,7 +22,7 @@
                     >
                 </STInputBox>
 
-                <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
+                <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
                     <textarea
                         v-model="description"
                         class="input"
@@ -33,7 +33,7 @@
                 </STInputBox>
             </div>
             <div>
-                <AddressInput v-model="address" title="Adres" :validator="validator" :required="true" />
+                <AddressInput v-model="address" title="Adres" :validator="errors.validator" :required="true" />
             </div>
         </div>
 
@@ -58,131 +58,80 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from '@stamhoofd/components';
-import { Address, CheckoutMethodType, PrivateWebshop, Version, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlots } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { AddressInput, CenteredMessage, SaveView, STErrorsDefault, STInputBox, useErrors, usePatch } from '@stamhoofd/components';
+import { CheckoutMethodType, PrivateWebshop, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlots } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import EditTimeSlotsSection from './EditTimeSlotsSection.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        AddressInput,
-        STList,
-        EditTimeSlotsSection,
-    },
-})
-export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    takeoutMethod!: WebshopTakeoutMethod | WebshopOnSiteMethod;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    takeoutMethod: WebshopTakeoutMethod | WebshopOnSiteMethod;
+    isNew: boolean;
     webshop: PrivateWebshop;
-
-    patchTakeoutMethod: AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod> = this.takeoutMethod.type === CheckoutMethodType.Takeout ? WebshopTakeoutMethod.patch({ id: this.takeoutMethod.id }) : WebshopOnSiteMethod.patch({ id: this.takeoutMethod.id });
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+}>();
 
-    get isTakeout() {
-        return this.takeoutMethod.type === CheckoutMethodType.Takeout;
-    }
+const { patch: patchTakeoutMethod, patched: patchedTakeoutMethod, addPatch, hasChanges } = usePatch(props.takeoutMethod);
 
-    get locationTitleName() {
-        if (this.isTakeout) {
-            return 'Afhaallocatie';
-        }
-        return 'Ter plaatse consumeren';
-    }
+const errors = useErrors();
+const pop = usePop();
 
-    get patchedTakeoutMethod() {
-        return this.takeoutMethod.patch(this.patchTakeoutMethod);
-    }
+const isTakeout = computed(() => props.takeoutMethod.type === CheckoutMethodType.Takeout);
+const locationTitleName = computed(() => isTakeout.value ? 'Afhaallocatie' : 'Ter plaatse consumeren');
+const name = computed({
+    get: () => patchedTakeoutMethod.value.name,
+    set: name => addPatch({ name }),
+});
+const address = computed({
+    get: () => patchedTakeoutMethod.value.address,
+    set: address => addPatch({ address }),
+});
+const description = computed({
+    get: () => patchedTakeoutMethod.value.description,
+    set: description => addPatch({ description }),
+});
 
-    get name() {
-        return this.patchedTakeoutMethod.name;
-    }
-
-    set name(name: string) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ name });
-    }
-
-    get address() {
-        return this.patchedTakeoutMethod.address;
-    }
-
-    set address(address: Address) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ address });
-    }
-
-    get description() {
-        return this.patchedTakeoutMethod.description;
-    }
-
-    set description(description: string) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ description });
-    }
-
-    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod>>) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch(patch as any);
-    }
-
-    patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
-        this.addPatch({ timeSlots: patch });
-    }
-
-    async save() {
-        if (!await this.validator.validate()) {
-            return;
-        }
-        const p = PrivateWebshop.patch({});
-        const meta = WebshopMetaData.patch({});
-        meta.checkoutMethods.addPatch(this.patchTakeoutMethod);
-        p.meta = meta;
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze locatie wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-
-        const p = PrivateWebshop.patch({});
-        const meta = WebshopMetaData.patch({});
-        meta.checkoutMethods.addDelete(this.takeoutMethod.id);
-        p.meta = meta;
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    cancel() {
-        this.pop();
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchTakeoutMethod, this.takeoutMethod, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+function patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
+    addPatch({ timeSlots: patch });
 }
+
+async function save() {
+    if (!await errors.validator.validate()) {
+        return;
+    }
+    const p = PrivateWebshop.patch({});
+    const meta = WebshopMetaData.patch({});
+    meta.checkoutMethods.addPatch(patchTakeoutMethod.value);
+    p.meta = meta;
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze locatie wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+
+    const p = PrivateWebshop.patch({});
+    const meta = WebshopMetaData.patch({});
+    meta.checkoutMethods.addDelete(props.takeoutMethod.id);
+    p.meta = meta;
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
