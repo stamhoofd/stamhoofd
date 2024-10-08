@@ -56,16 +56,16 @@
                 <p>Je kan een beheerder volledige toegang geven tot alle verenigingen (en dus ook de leden van die vereniging), of per tag de toegang regelen.</p>
 
                 <STList>
-                    <ResourcePermissionRow 
-                        :role="patched" 
-                        :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" 
+                    <ResourcePermissionRow
+                        :role="patched"
+                        :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }"
                         :inherited-roles="inheritedRoles"
                         :configurable-access-rights="[AccessRight.EventWrite]"
                         type="resource"
-                        @patch:role="addPatch" 
+                        @patch:role="addPatch"
                     />
 
-                    <ResourcePermissionRow 
+                    <ResourcePermissionRow
                         v-for="tag in tags"
                         :key="tag.id"
                         :role="patched"
@@ -93,17 +93,17 @@
                     Inschrijvingscategorieën
                 </h2>
                 <p>Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.</p>
-           
+
                 <STList>
-                    <ResourcePermissionRow 
-                        v-for="category in categories" 
-                        :key="category.id" 
-                        :role="patched" 
+                    <ResourcePermissionRow
+                        v-for="category in categories"
+                        :key="category.id"
+                        :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" 
+                        :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }"
                         :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
-                        type="resource" 
-                        @patch:role="addPatch" 
+                        type="resource"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </template>
@@ -116,22 +116,22 @@
 
                 <STList>
                     <ResourcePermissionRow
-                        :role="patched" 
+                        :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: '', name: 'Alle groepen', type: PermissionsResourceType.Groups }" 
+                        :resource="{id: '', name: 'Alle groepen', type: PermissionsResourceType.Groups }"
                         :configurable-access-rights="[AccessRight.EventWrite]"
-                        type="resource" 
-                        @patch:role="addPatch" 
+                        type="resource"
+                        @patch:role="addPatch"
                     />
-                    <ResourcePermissionRow 
-                        v-for="group in groups" 
-                        :key="group.id" 
-                        :role="patched" 
+                    <ResourcePermissionRow
+                        v-for="group in groups"
+                        :key="group.id"
+                        :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }" 
+                        :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }"
                         :configurable-access-rights="[AccessRight.EventWrite]"
-                        type="resource" 
-                        @patch:role="addPatch" 
+                        type="resource"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </div>
@@ -145,18 +145,18 @@
                     <AccessRightPermissionRow
                         :access-right="AccessRight.OrganizationCreateWebshops"
                         :inherited-roles="inheritedRoles"
-                        :role="patched" 
-                        @patch:role="addPatch" 
+                        :role="patched"
+                        @patch:role="addPatch"
                     />
-                    <ResourcePermissionRow 
-                        v-for="webshop in webshops" 
-                        :key="webshop.id" 
-                        :role="patched" 
+                    <ResourcePermissionRow
+                        v-for="webshop in webshops"
+                        :key="webshop.id"
+                        :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" 
+                        :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }"
                         :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []"
-                        type="resource" 
-                        @patch:role="addPatch" 
+                        type="resource"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </div>
@@ -172,26 +172,26 @@
                     <AccessRightPermissionRow
                         :access-right="AccessRight.MemberReadFinancialData"
                         :inherited-roles="inheritedRoles"
-                        :role="patched" 
-                        @patch:role="addPatch" 
+                        :role="patched"
+                        @patch:role="addPatch"
                     />
 
                     <AccessRightPermissionRow
                         :access-right="AccessRight.MemberWriteFinancialData"
                         :inherited-roles="inheritedRoles"
-                        :role="patched" 
-                        @patch:role="addPatch" 
+                        :role="patched"
+                        @patch:role="addPatch"
                     />
 
-                    <ResourcePermissionRow 
-                        v-for="recordCategory in recordCategories" 
-                        :key="recordCategory.id" 
-                        :role="patched" 
+                    <ResourcePermissionRow
+                        v-for="recordCategory in recordCategories"
+                        :key="recordCategory.id"
+                        :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories }" 
+                        :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories }"
                         :configurable-access-rights="[]"
-                        type="resource" 
-                        @patch:role="addPatch" 
+                        type="resource"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </div>
@@ -204,15 +204,15 @@
                     <AccessRightPermissionRow
                         :access-right="AccessRight.OrganizationFinanceDirector"
                         :inherited-roles="inheritedRoles"
-                        :role="patched" 
-                        @patch:role="addPatch" 
+                        :role="patched"
+                        @patch:role="addPatch"
                     />
 
                     <AccessRightPermissionRow
                         :access-right="AccessRight.OrganizationManagePayments"
                         :inherited-roles="inheritedRoles"
-                        :role="patched" 
-                        @patch:role="addPatch" 
+                        :role="patched"
+                        @patch:role="addPatch"
                     />
                 </STList>
             </template>
@@ -257,12 +257,11 @@
     </SaveView>
 </template>
 
-
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useErrors, useFeatureFlag, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
 import { AccessRight, Group, GroupCategory, maximumPermissionlevel, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
@@ -275,64 +274,66 @@ const deleting = ref(false);
 
 const props = withDefaults(
     defineProps<{
-        role: PermissionRoleDetailed|PermissionRoleForResponsibility;
-        inheritedRoles: (PermissionRoleDetailed|PermissionRoleForResponsibility)[];
+        role: PermissionRoleDetailed | PermissionRoleForResponsibility;
+        inheritedRoles: (PermissionRoleDetailed | PermissionRoleForResponsibility)[];
         isNew: boolean;
-        saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed|PermissionRoleForResponsibility>) => Promise<void>,
-        deleteHandler: (() => Promise<void>)|null
-        scope?: 'organization'|'admin'|null
+        saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed | PermissionRoleForResponsibility>) => Promise<void>;
+        deleteHandler: (() => Promise<void>) | null;
+        scope?: 'organization' | 'admin' | null;
     }>(), {
         scope: null,
         inheritedRoles: () => [],
-        deleteHandler: null
-    }
-)
+        deleteHandler: null,
+    },
+);
 
-const app = useAppContext()
-const enableWebshopModule = computed(() => organization.value?.meta?.packages.useWebshops ?? false);
+const app = useAppContext();
+const webshopsFeature = useFeatureFlag()('webshops');
+const enableWebshopModule = computed(() => webshopsFeature && (organization.value?.meta?.packages.useWebshops ?? false));
 const enableMemberModule = computed(() => organization.value?.meta?.packages.useMembers ?? false);
 const enableActivities = computed(() => organization.value?.meta?.packages.useActivities ?? false);
 const pop = usePop();
-const isForResponsibility = props.role instanceof PermissionRoleForResponsibility
+const isForResponsibility = props.role instanceof PermissionRoleForResponsibility;
 const responsibility = computed(() => {
     if (!(props.role instanceof PermissionRoleForResponsibility)) {
-        return null
+        return null;
     }
 
-    const rid = props.role.responsibilityId
-    return platform.value.config.responsibilities.find(r => r.id === rid) ?? null
-})
+    const rid = props.role.responsibilityId;
+    return platform.value.config.responsibilities.find(r => r.id === rid) ?? null;
+});
 
 const title = computed(() => {
     if (props.role instanceof PermissionRoleForResponsibility) {
-        return 'Rechten voor ' + props.role.name
+        return 'Rechten voor ' + props.role.name;
     }
-    return props.isNew ? 'Nieuwe rol' : props.role.name
+    return props.isNew ? 'Nieuwe rol' : props.role.name;
 });
 
-const {sortedAdmins, loading, getPermissions} = useAdmins()
-const organization = useOrganization()
-const platform = usePlatform()
-const {patched, addPatch, hasChanges, patch} = usePatch(props.role);
-const groups: Ref<Group[]> = computed(() => organization.value?.adminAvailableGroups ?? [])
-const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? [])
-const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree().categories ?? [])
-const tags = computed(() => platform.value.config.tags)
+const { sortedAdmins, loading, getPermissions } = useAdmins();
+const organization = useOrganization();
+const platform = usePlatform();
+const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
+const groups: Ref<Group[]> = computed(() => organization.value?.adminAvailableGroups ?? []);
+const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? []);
+const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree().categories ?? []);
+const tags = computed(() => platform.value.config.tags);
 const recordCategories = computed(() => {
     const base = organization.value?.meta.recordsConfiguration.recordCategories?.slice() ?? [];
 
     for (const r of platform.value.config.recordsConfiguration.recordCategories) {
         if (r.defaultEnabled) {
-            base.push(r)
-        } else {
+            base.push(r);
+        }
+        else {
             if (organization.value?.meta.recordsConfiguration.inheritedRecordCategories.has(r.id)) {
-                base.push(r)
+                base.push(r);
             }
         }
     }
 
     return base;
-})
+});
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -342,15 +343,16 @@ const save = async () => {
     try {
         if (!isForResponsibility && name.value.length === 0) {
             throw new SimpleError({
-                code: "invalid_field",
-                message: "Gelieve een titel in te vullen",
-                field: "name"
-            })
+                code: 'invalid_field',
+                message: 'Gelieve een titel in te vullen',
+                field: 'name',
+            });
         }
-        await props.saveHandler(patch.value)
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
 };
@@ -364,16 +366,17 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm("Ben je zeker dat je deze rol wilt verwijderen?", "Verwijderen")) {
-        return
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze rol wilt verwijderen?', 'Verwijderen')) {
+        return;
     }
-        
+
     deleting.value = true;
     try {
-        await props.deleteHandler()
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.deleteHandler();
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     deleting.value = false;
@@ -384,27 +387,26 @@ const hasAdminRole = (admin: User) => {
     return permissions?.hasRole(props.role) ?? false;
 };
 
-const filteredAdmins = computed(() => sortedAdmins.value.filter((a) => hasAdminRole(a)));
+const filteredAdmins = computed(() => sortedAdmins.value.filter(a => hasAdminRole(a)));
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name}),
+    set: name => addPatch({ name }),
 });
 
 const lockedMinimumLevel = computed(() => {
-    const arr = []
+    const arr = [];
 
     for (const role of props.inheritedRoles) {
-        arr.push(role.level)
+        arr.push(role.level);
     }
 
-    return maximumPermissionlevel(...arr)
-})
-
+    return maximumPermissionlevel(...arr);
+});
 
 const basePermission = computed({
     get: () => maximumPermissionlevel(lockedMinimumLevel.value, patched.value.level),
-    set: (level) => addPatch({level}),
+    set: level => addPatch({ level }),
 });
 
 const createWebshops = useAccessRightSetter(AccessRight.OrganizationCreateWebshops);
@@ -418,15 +420,15 @@ function useAccessRightSetter(accessRight: AccessRight) {
     return computed({
         get: () => patched.value.hasAccessRight(accessRight),
         set: (value) => {
-            const patch = PermissionRoleDetailed.patch({})
-            
+            const patch = PermissionRoleDetailed.patch({});
+
             // Always delete to prevent duplicate insertions
-            patch.accessRights.addDelete(accessRight)
+            patch.accessRights.addDelete(accessRight);
             if (value) {
-                patch.accessRights.addPut(accessRight)
+                patch.accessRights.addPut(accessRight);
             }
 
-            addPatch(patch)
+            addPatch(patch);
         },
     });
 }
@@ -435,10 +437,10 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>
