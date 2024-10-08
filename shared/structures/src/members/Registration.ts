@@ -32,7 +32,7 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: new ArrayDecoder(RegisterItemOption), version: 305 })
     options: RegisterItemOption[] = [];
 
-    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), ...NextVersion })
+    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), version: 338 })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
     get groupId() {

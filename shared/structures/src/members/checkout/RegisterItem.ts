@@ -48,7 +48,7 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RegisterItemOption) })
     options: RegisterItemOption[] = [];
 
-    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), ...NextVersion })
+    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), version: 338 })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
     @field({ decoder: new ArrayDecoder(StringDecoder) })

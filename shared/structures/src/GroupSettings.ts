@@ -312,7 +312,7 @@ export class GroupSettings extends AutoEncoder {
      * Note: these are saved in the registration, not the member.
      * Do not confuse with the member's record categories in recordsConfiguration
      */
-    @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 338 })
     recordCategories: RecordCategory[] = [];
 
     @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function (this: GroupSettings) { return this.startDate; } })
