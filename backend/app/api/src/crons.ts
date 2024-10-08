@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Database } from '@simonbackx/simple-database';
 import { logger, StyledText } from '@simonbackx/simple-logging';
@@ -9,7 +8,8 @@ import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
 
-import { clearExcelCache } from './crons/clear-excel-cache';
+import { clearExcelCache } from './crons/clearExcelCache';
+import { endFunctionsOfUsersWithoutRegistration } from './crons/endFunctionsOfUsersWithoutRegistration';
 import { ExchangePaymentEndpoint } from './endpoints/organization/shared/ExchangePaymentEndpoint';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
@@ -737,6 +737,12 @@ registeredCronJobs.push({
 registeredCronJobs.push({
     name: 'clearExcelCache',
     method: clearExcelCache,
+    running: false,
+});
+
+registeredCronJobs.push({
+    name: 'endFunctionsOfUsersWithoutRegistration',
+    method: endFunctionsOfUsersWithoutRegistration,
     running: false,
 });
 
