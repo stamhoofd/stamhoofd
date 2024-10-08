@@ -1,11 +1,11 @@
-import { AutoEncoder, Data, Decoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, Decoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { EmailTemplate } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { StringNullableDecoder } from '../../../../decoders/StringNullableDecoder';
 import { StringArrayDecoder } from '../../../../decoders/StringArrayDecoder';
+import { StringNullableDecoder } from '../../../../decoders/StringNullableDecoder';
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -71,7 +71,16 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                         ? await EmailTemplate.where({ webshopId: request.query.webshopId ?? null, groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null, type: { sign: 'IN', value: types } })
                         : []
                 );
-        const defaultTemplates = await EmailTemplate.where({ organizationId: null, type: { sign: 'IN', value: types } });
-        return new Response([...templates, ...defaultTemplates].map(template => EmailTemplateStruct.create(template)));
+
+        const defaultTemplateTypes = organization ? types.filter(type => type !== EmailTemplateType.SavedMembersEmail) : types;
+        const defaultTemplates = await EmailTemplate.where({
+            organizationId: null,
+            type: {
+                sign: 'IN',
+                value: defaultTemplateTypes,
+            },
+        });
+
+        return new Response(templates.concat(defaultTemplates).map(template => EmailTemplateStruct.create(template)));
     }
 }
