@@ -7,23 +7,23 @@
             Tijdvak bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Datum" error-fields="date" :error-box="errorBox">
+        <STInputBox title="Datum" error-fields="date" :error-box="errors.errorBox">
             <DateSelection v-model="date" />
         </STInputBox>
 
-        <TimeMinutesInput v-model="startTime" title="Van" :validator="validator" />
-        <TimeMinutesInput v-model="endTime" title="Tot" :validator="validator" />
+        <TimeMinutesInput v-model="startTime" title="Van" :validator="errors.validator" />
+        <TimeMinutesInput v-model="endTime" title="Tot" :validator="errors.validator" />
 
-        <STInputBox error-fields="maxOrders" title="Maximum aantal bestellingen" :error-box="errorBox">
+        <STInputBox error-fields="maxOrders" title="Maximum aantal bestellingen" :error-box="errors.errorBox">
             <NumberInput v-model="maxOrders" :required="false" placeholder="Geen limiet" />
         </STInputBox>
         <p v-if="remainingOrders !== null && remainingOrders !== maxOrders" class="style-description">
             Nog {{ remainingOrders }} bestellingen
         </p>
 
-        <STInputBox error-fields="maxPersons" title="Maximum aantal personen" :error-box="errorBox">
+        <STInputBox error-fields="maxPersons" title="Maximum aantal personen" :error-box="errors.errorBox">
             <NumberInput v-model="maxPersons" :required="false" placeholder="Geen limiet" />
         </STInputBox>
         <p v-if="remainingPersons !== null && remainingPersons !== maxPersons" class="style-description">
@@ -39,150 +39,98 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, TimeMinutesInput, Validator } from '@stamhoofd/components';
-import { PrivateWebshop, ProductType, Version, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, TimeMinutesInput, useErrors, usePatch } from '@stamhoofd/components';
+import { PrivateWebshop, ProductType, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        TimeMinutesInput,
-        DateSelection,
-        Checkbox,
-        NumberInput,
-    },
-})
-export default class EditTimeSlotView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    timeSlot!: WebshopTimeSlot;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    timeSlot: WebshopTimeSlot;
+    isNew: boolean;
     webshop: PrivateWebshop;
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
+    saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => void;
+}>();
 
-    patchTimeSlot: AutoEncoderPatchType<WebshopTimeSlot> = WebshopTimeSlot.patch({ id: this.timeSlot.id });
+const errors = useErrors();
+const pop = usePop();
 
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<WebshopTimeSlots>) => void);
+const { patch: patchTimeSlot, patched: patchedTimeSlot, addPatch, hasChanges } = usePatch(props.timeSlot);
 
-    get patchedTimeSlot() {
-        return this.timeSlot.patch(this.patchTimeSlot);
+const date = computed({
+    get: () => patchedTimeSlot.value.date,
+    set: (date: Date) => addPatch({ date }),
+});
+
+const startTime = computed({
+    get: () => patchedTimeSlot.value.startTime,
+    set: (startTime: number) => addPatch({ startTime }),
+});
+
+const endTime = computed({
+    get: () => patchedTimeSlot.value.endTime,
+    set: (endTime: number) => addPatch({ endTime }),
+});
+
+const remainingOrders = computed(() => patchTimeSlot.value.remainingOrders);
+
+const maxOrders = computed({
+    get: () => patchedTimeSlot.value.maxOrders,
+    set: (maxOrders: number | null) => addPatch({ maxOrders }),
+});
+
+const remainingPersons = computed(() => patchTimeSlot.value.remainingPersons);
+
+const maxPersons = computed({
+    get: () => patchedTimeSlot.value.maxPersons,
+    set: (maxPersons: number | null) => addPatch({ maxPersons }),
+});
+
+async function save() {
+    if (!await errors.validator.validate()) {
+        return;
     }
 
-    get date() {
-        return this.patchedTimeSlot.date;
-    }
-
-    set date(date: Date) {
-        this.addPatch(WebshopTimeSlot.patch({ date }));
-    }
-
-    get startTime() {
-        return this.patchedTimeSlot.startTime;
-    }
-
-    set startTime(startTime: number) {
-        this.addPatch(WebshopTimeSlot.patch({ startTime }));
-    }
-
-    get endTime() {
-        return this.patchedTimeSlot.endTime;
-    }
-
-    set endTime(endTime: number) {
-        this.addPatch(WebshopTimeSlot.patch({ endTime }));
-    }
-
-    // Stock
-    get remainingOrders() {
-        return this.patchedTimeSlot.remainingOrders;
-    }
-
-    get maxOrders() {
-        return this.patchedTimeSlot.maxOrders;
-    }
-
-    set maxOrders(maxOrders: number | null) {
-        this.patchTimeSlot = this.patchTimeSlot.patch({ maxOrders });
-    }
-
-    get remainingPersons() {
-        return this.patchedTimeSlot.remainingPersons;
-    }
-
-    get maxPersons() {
-        return this.patchedTimeSlot.maxPersons;
-    }
-
-    set maxPersons(maxPersons: number | null) {
-        this.patchTimeSlot = this.patchTimeSlot.patch({ maxPersons });
-    }
-
-    addPatch(patch: AutoEncoderPatchType<WebshopTimeSlot>) {
-        this.patchTimeSlot = this.patchTimeSlot.patch(patch);
-    }
-
-    async save() {
-        if (!await this.validator.validate()) {
-            return;
+    try {
+        if (patchedTimeSlot.value.maxPersons !== null && !props.webshop.products.find(p => p.type === ProductType.Person)) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'maxPersons',
+                message: "Je hebt geen enkel artikel in jouw webshop met type 'Personen'. Het maximum aantal voor personen werkt dan niet. Voeg eerst een product toe aan je webshop met type 'Personen'.",
+            });
         }
-
-        try {
-            if (this.patchedTimeSlot.maxPersons !== null && !this.webshop.products.find(p => p.type === ProductType.Person)) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    field: 'maxPersons',
-                    message: "Je hebt geen enkel artikel in jouw webshop met type 'Personen'. Het maximum aantal voor personen werkt dan niet. Voeg eerst een product toe aan je webshop met type 'Personen'.",
-                });
-            }
-        }
-        catch (e) {
-            this.errorBox = new ErrorBox(e);
-            return;
-        }
-        const p = WebshopTimeSlots.patch({});
-        p.timeSlots.addPatch(this.patchTimeSlot);
-        this.saveHandler(p);
-        this.pop({ force: true });
     }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je dit tijdvak wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-        const p = WebshopTimeSlots.patch({});
-        p.timeSlots.addDelete(this.timeSlot.id);
-        this.saveHandler(p);
-        this.pop({ force: true });
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+        return;
     }
-
-    cancel() {
-        this.pop();
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchTimeSlot, this.timeSlot, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+    const p = WebshopTimeSlots.patch({});
+    p.timeSlots.addPatch(patchTimeSlot.value);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
 }
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je dit tijdvak wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+    const p = WebshopTimeSlots.patch({});
+    p.timeSlots.addDelete(props.timeSlot.id);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
