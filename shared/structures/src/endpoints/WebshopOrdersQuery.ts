@@ -5,6 +5,7 @@ export enum SortDirection {
     Descending = 'Descending',
 }
 
+// todo: remove?
 export class WebshopOrdersQuery extends AutoEncoder {
     /**
      * Usage in combination with updatedSince is special!

@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CachedOutstandingBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, CachedOutstandingBalanceObject, CachedOutstandingBalanceObjectContact, CachedOutstandingBalance as CachedOutstandingBalanceStruct, CachedOutstandingBalanceType, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { CachedOutstandingBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
+import { AccessRight, CachedOutstandingBalanceObject, CachedOutstandingBalanceObjectContact, CachedOutstandingBalance as CachedOutstandingBalanceStruct, CachedOutstandingBalanceType, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -415,6 +415,29 @@ export class AuthenticatedStructures {
             const struct = EventStruct.create({
                 ...event,
                 group,
+            });
+
+            result.push(struct);
+        }
+
+        return result;
+    }
+
+    static async orders(orders: Order[]): Promise<PrivateOrder[]> {
+        // Load groups
+        // const groupIds = orders.map(e => e.groupId).filter(id => id !== null);
+        // const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : [];
+        // const groupStructs = await this.groups(groups);
+
+        const result: PrivateOrder[] = [];
+
+        for (const order of orders) {
+            // const group = groupStructs.find(g => g.id == event.groupId) ?? null;
+
+            const struct = PrivateOrder.create({
+                ...order,
+                // todo!!!!!
+                balanceItems: [],
             });
 
             result.push(struct);

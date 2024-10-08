@@ -1,17 +1,25 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Order, Webshop } from '@stamhoofd/models';
-import { PaginatedResponse, PermissionLevel, PrivateOrder, WebshopOrdersQuery } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 
+import { Order } from '@stamhoofd/models';
+import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
+import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
+import { orderFilterCompilers } from '../../../../sql-filters/orders';
+import { orderSorters } from '../../../../sql-sorters/orders';
 
 type Params = { id: string };
-type Query = WebshopOrdersQuery;
+type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<PrivateOrder[], Query>;
+type ResponseBody = PaginatedResponse<PrivateOrder[], LimitedFilteredRequest>;
+
+const filterCompilers: SQLFilterDefinitions = orderFilterCompilers;
+const sorters: SQLSortDefinitions<Order> = orderSorters;
 
 export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = WebshopOrdersQuery as Decoder<WebshopOrdersQuery>;
+    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
@@ -26,17 +34,118 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         return [false];
     }
 
-    async handle(_: DecodedRequest<Params, Query, Body>): Promise<Response<ResponseBody>> {
-        await Promise.resolve();
-        throw new Error('Not implemented');
-        /* const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+    static buildQuery(webshopId: string, q: CountFilteredRequest | LimitedFilteredRequest) {
+        // todo: filter userId???
+        const organization = Context.organization!;
+
+        if (!webshopId) {
+            // todo
+            throw new Error();
+        }
+
+        const ordersTable: string = Order.table;
+
+        const query = SQL
+            .select(SQL.wildcard(ordersTable))
+            .from(SQL.table(ordersTable))
+            // todo: extra check on webshopId to prevent all orders are returned if webshopId is null?
+            .where('webshopId', webshopId)
+            .where(compileToSQLFilter({
+                $or: [
+                    {
+                        organizationId: organization.id,
+                    },
+                    {
+                        organizationId: null,
+                    },
+                ],
+            }, filterCompilers));
+
+        if (q.filter) {
+            query.where(compileToSQLFilter(q.filter, filterCompilers));
+        }
+
+        if (q.search) {
+            let searchFilter: StamhoofdFilter | null = null;
+
+            // todo: detect special search patterns and adjust search filter if needed
+            searchFilter = {
+                name: {
+                    $contains: q.search,
+                },
+            };
+
+            if (searchFilter) {
+                query.where(compileToSQLFilter(searchFilter, filterCompilers));
+            }
+        }
+
+        if (q instanceof LimitedFilteredRequest) {
+            if (q.pageFilter) {
+                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+            }
+
+            q.sort = assertSort(q.sort, [{ key: 'id' }]);
+            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            query.limit(q.limit);
+        }
+
+        return query;
+    }
+
+    static async buildData(webshopId: string, requestQuery: LimitedFilteredRequest) {
+        const query = this.buildQuery(webshopId, requestQuery);
+        const data = await query.fetch();
+
+        const orders: Order[] = Order.fromRows(data, Order.table);
+
+        let next: LimitedFilteredRequest | undefined;
+
+        if (orders.length >= requestQuery.limit) {
+            const lastObject = orders[orders.length - 1];
+            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+
+            next = new LimitedFilteredRequest({
+                filter: requestQuery.filter,
+                pageFilter: nextFilter,
+                sort: requestQuery.sort,
+                limit: requestQuery.limit,
+                search: requestQuery.search,
+            });
+
+            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
+                console.error('Found infinite loading loop for', requestQuery);
+                next = undefined;
+            }
+        }
+
+        return new PaginatedResponse<PrivateOrder[], LimitedFilteredRequest>({
+            results: await AuthenticatedStructures.orders(orders),
+            next,
+        });
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>): Promise<Response<ResponseBody>> {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
+        LimitedFilteredRequestHelper.throwIfInvalidLimit({
+            request: request.query,
+            maxLimit: Context.auth.hasSomePlatformAccess() ? 1000 : 100,
+        });
+
+        const webshopId = request.params.id;
+
+        return new Response(
+            await GetWebshopOrdersEndpoint.buildData(webshopId, request.query),
+        );
+
+        /*
         const webshop = await Webshop.getByID(request.params.id)
         if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
             throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot de bestellingen van deze webshop")
