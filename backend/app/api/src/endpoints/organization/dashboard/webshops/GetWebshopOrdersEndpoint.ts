@@ -1,8 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 
-import { Order } from '@stamhoofd/models';
+import { Order, Webshop } from '@stamhoofd/models';
 import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -141,15 +141,16 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
 
         const webshopId = request.params.id;
 
+        const webshop = await Webshop.getByID(webshopId);
+        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
+            throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang tot de bestellingen van deze webshop');
+        }
+
         return new Response(
             await GetWebshopOrdersEndpoint.buildData(webshopId, request.query),
         );
 
         /*
-        const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
-            throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot de bestellingen van deze webshop")
-        }
 
         let orders: Order[] | undefined = undefined
         const limit = 50

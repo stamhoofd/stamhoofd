@@ -1,7 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, PermissionLevel } from '@stamhoofd/structures';
 
+import { Webshop } from '@stamhoofd/models';
 import { Context } from '../../../../helpers/Context';
 import { GetWebshopOrdersEndpoint } from './GetWebshopOrdersEndpoint';
 
@@ -36,6 +37,12 @@ export class GetWebshopOrdersCountEndpoint extends Endpoint<Params, Query, Body,
         }
 
         const webshopId = request.params.id;
+
+        const webshop = await Webshop.getByID(webshopId);
+        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
+            throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang tot de bestellingen van deze webshop');
+        }
+
         const query = GetWebshopOrdersEndpoint.buildQuery(webshopId, request.query);
 
         const count = await query
