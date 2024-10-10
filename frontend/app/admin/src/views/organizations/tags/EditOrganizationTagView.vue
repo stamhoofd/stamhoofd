@@ -18,9 +18,9 @@
 
         <div class="container">
             <hr>
-            <h2>{{ $t('Tags in deze categorie') }}</h2>
+            <h2>{{ $t('Subtags') }}</h2>
             <p class="style-description">
-                {{ $t('Deze tag zal automatisch toegevoegd worden aan groepen met een tag uit deze categorie.') }}
+                {{ $t('Groepen met deze subtags hebben automatisch deze tag.') }}
             </p>
             <STList v-model="draggableChildTags" :draggable="true">
                 <template #item="{item}">
@@ -30,7 +30,7 @@
             <p>
                 <button class="button text" type="button" @click="selectTags">
                     <span class="icon add" />
-                    <span>{{ isEmpty ? $t('Voeg bestaande tags toe') : $t('Wijzig tags') }}</span>
+                    <span>{{ isEmpty ? $t('Voeg tags toe') : $t('Wijzig tags') }}</span>
                 </button>
             </p>
         </div>
@@ -41,7 +41,7 @@
                 {{ $t('Verwijder deze tag') }}
             </h2>
             <p v-if="!isEmpty" class="style-description">
-                {{ $t('De tags in deze categorie zullen niet verwijderd worden.') }}
+                {{ $t('Subtags zullen niet verwijderd worden.') }}
             </p>
 
             <button class="button secundary danger" type="button" @click="doDelete">
