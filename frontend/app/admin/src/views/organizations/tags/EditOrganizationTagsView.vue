@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
@@ -74,40 +74,19 @@ const draggableOtherTags = useDraggableArray(() => {
     return tags.value.filter(tag => tag.childTags.length === 0 && !tags.value.some(t => t.childTags.includes(tag.id)));
 }, addArrayPatch);
 
-function applyPatches(patches: { tag: OrganizationTag; patch: AutoEncoderPatchType<OrganizationTag> }[], arr: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray()) {
-    for (const { tag, patch } of patches) {
-        if (patch.id !== tag.id) {
-            patch.id = tag.id;
-        }
-
-        arr.addPatch(patch);
-    }
-
-    addArrayPatch(arr);
-}
-
-const deleteHandler = (tagIds: string[]) => {
-    const arr: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray();
-    tagIds.forEach(id => arr.addDelete(id));
-    addArrayPatch(arr);
-};
-
 async function addTag() {
-    const arr: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray();
     const tag = OrganizationTag.create({});
-    arr.addPut(tag);
 
     await present({
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditOrganizationTagView, {
-                allTags: tags.value,
+                allTags: [tag, ...tags.value],
                 tag,
                 isNew: true,
-                saveHandler: (patches: { tag: OrganizationTag; patch: AutoEncoderPatchType<OrganizationTag> }[]) => {
-                    applyPatches(patches, arr);
+                saveHandler: (patch: PatchableArrayAutoEncoder<OrganizationTag>) => {
+                    addArrayPatch(patch);
                 },
-                deleteHandler,
             }),
         ],
     });
@@ -121,10 +100,9 @@ async function editTag(tag: OrganizationTag) {
                 allTags: tags.value,
                 tag,
                 isNew: false,
-                saveHandler: (patches: { tag: OrganizationTag; patch: AutoEncoderPatchType<OrganizationTag> }[]) => {
-                    applyPatches(patches);
+                saveHandler: (newPatch: PatchableArrayAutoEncoder<OrganizationTag>) => {
+                    addArrayPatch(newPatch);
                 },
-                deleteHandler,
             }),
         ],
     });

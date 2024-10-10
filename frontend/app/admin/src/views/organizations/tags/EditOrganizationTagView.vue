@@ -53,12 +53,12 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, OrganizationTagSelectorView, SaveView, useDraggableArrayIds, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, OrganizationTagSelectorView, SaveView, useDraggableArrayIds, useErrors } from '@stamhoofd/components';
 import { OrganizationTag } from '@stamhoofd/structures';
-import { computed, ref, UnwrapNestedRefs } from 'vue';
+import { computed, ref, Ref } from 'vue';
 import TagRow from './components/TagRow.vue';
 import EditOrganizationTagView from './EditOrganizationTagView.vue';
 
@@ -71,50 +71,30 @@ const props = defineProps<{
     tag: OrganizationTag;
     allTags: OrganizationTag[];
     isNew: boolean;
-    saveHandler: (patches: { tag: OrganizationTag; patch: AutoEncoderPatchType<OrganizationTag> }[]) => Promise<void>;
-    deleteHandler: ((tagIds: string[]) => Promise<void>);
+    saveHandler: (patch: PatchableArrayAutoEncoder<OrganizationTag>) => Promise<void>;
 }>();
 
 const title = computed(() => props.isNew ? 'Nieuwe tag' : 'Tag bewerken');
 const pop = usePop();
-const platform = usePlatform();
 
-const { patched, addPatch, hasChanges: hasTagChanges, patch } = usePatch(props.tag);
+const patch = ref(new PatchableArray()) as Ref<PatchableArrayAutoEncoder<OrganizationTag>>;
+const allPatchedTags = computed(() => patch.value.applyTo(props.allTags) as OrganizationTag[]);
+const patched = computed(() => allPatchedTags.value.find(t => t.id === props.tag.id) ?? OrganizationTag.create({ name: 'Onbekende tag' }));
+const hasChanges = computed(() => patch.value.changes.length > 0);
 
-const deletedTags = ref<string[]>([]);
-type UseChildPatchMapValue = UnwrapNestedRefs<ReturnType<typeof usePatch<OrganizationTag>>>;
-const useChildPatchMap = ref<Map<string, UseChildPatchMapValue>>(new Map());
-const hasChanges = computed(() => {
-    if (hasTagChanges.value) {
-        return true;
-    }
+function addPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationTag>>) {
+    patch.value.addPatch((props.tag.static as typeof OrganizationTag).patch({ id: props.tag.id, ...newPatch }));
+}
 
-    if (deletedTags.value.length > 0) {
-        return true;
-    }
+function addDelete(id: string) {
+    patch.value.addDelete(id);
+}
 
-    for (const childPatch of useChildPatchMap.value.values()) {
-        if (childPatch.hasChanges) {
-            return true;
-        }
-    }
-
-    return false;
-});
-
-const allTags = computed(() => props.allTags ?? platform.value.config.tags);
 const isEmpty = computed(() => patched.value.childTags.length === 0);
 const draggableChildTags = useDraggableArrayIds(
-    () => patched.value.childTags.map((id) => {
-        const patchedChild = useChildPatchMap.value.get(id);
-        if (patchedChild) {
-            return patchedChild.patched;
-        }
-        return allTags.value.find(tag => tag.id === id) ?? OrganizationTag.create({ id, name: 'Onbekende tag' });
-    }),
-    (patch) => {
-        addPatch({ childTags: patch });
-    });
+    () => patched.value.childTags.map(id => allPatchedTags.value.find(patchedTag => patchedTag.id === id)).filter(x => x !== undefined),
+    patch => addPatch({ childTags: patch }),
+);
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -130,10 +110,7 @@ const save = async () => {
             });
         }
 
-        await props.saveHandler([{ tag: props.tag, patch: patch.value }, ...Array.from(useChildPatchMap.value.values()).map(v => ({ tag: v.patched, patch: v.patch }))]);
-        if (deletedTags.value.length > 0) {
-            await props.deleteHandler(deletedTags.value);
-        }
+        await props.saveHandler(patch.value);
 
         await pop({ force: true });
     }
@@ -148,17 +125,15 @@ const doDelete = async () => {
         return;
     }
 
-    if (!props.deleteHandler) {
-        return;
-    }
-
     if (!await CenteredMessage.confirm('Ben je zeker dat je deze tag wilt verwijderen?', 'Verwijderen')) {
         return;
     }
 
     deleting.value = true;
+
     try {
-        await props.deleteHandler([props.tag.id]);
+        addDelete(props.tag.id);
+        await props.saveHandler(patch.value);
         await pop({ force: true });
     }
     catch (e) {
@@ -178,7 +153,7 @@ async function selectTags() {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(OrganizationTagSelectorView, {
-                allTags: props.allTags,
+                allTags: allPatchedTags.value,
                 tagIds: patched.value.childTags.slice(),
                 filter: (tag: OrganizationTag) => tag.id !== props.tag.id,
                 onAdd: async (_allTags: OrganizationTag[], addedTags: OrganizationTag[], deletedTags: OrganizationTag[]) => {
@@ -199,33 +174,16 @@ async function selectTags() {
     });
 }
 
-function patchChildTag(tag: OrganizationTag, patch: AutoEncoderPatchType<OrganizationTag>) {
-    const id = tag.id;
-    let childPatch: UseChildPatchMapValue | undefined = useChildPatchMap.value.get(id);
-    if (!childPatch) {
-        childPatch = usePatch(tag) as unknown as UseChildPatchMapValue;
-        useChildPatchMap.value.set(id, childPatch);
-    }
-
-    childPatch.addPatch(patch);
-}
-
 async function editTag(tag: OrganizationTag) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditOrganizationTagView, {
-                allTags: props.allTags,
+                allTags: allPatchedTags.value,
                 tag,
                 isNew: false,
-                saveHandler: (patches: { tag: OrganizationTag; patch: AutoEncoderPatchType<OrganizationTag> }[]) => patches.forEach(({ tag, patch }) => patchChildTag(tag, patch)),
-                deleteHandler: async (tagIds: string[]) => {
-                    tagIds.forEach((tagId) => {
-                        removeChildTag(tagId);
-                        if (!deletedTags.value.includes(tagId)) {
-                            deletedTags.value.push(tagId);
-                        }
-                    });
+                saveHandler: (newPatch: PatchableArrayAutoEncoder<OrganizationTag>) => {
+                    patch.value = patch.value.patch(newPatch);
                 },
             }),
         ],
