@@ -327,5 +327,8 @@
   "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": "Inloggen op Stamhoofd",
   "Je betaalt ? euro aan KSA Nationaal.": "Je betaalt {price} aan KSA Nationaal.",
   "De functie x staat uit, maar je hebt nog x ingesteld": "De functie {financialSupportTitle} staat uit, maar je hebt nog {financialSupportPriceName} ingesteld",
-  "x moet minstens x lager zijn dan de standaardprijs": "{financialSupportPriceName} moet minstens {minDifference} lager zijn dan de standaardprijs"
+  "x moet minstens x lager zijn dan de standaardprijs": "{financialSupportPriceName} moet minstens {minDifference} lager zijn dan de standaardprijs",
+  "Reken een bedrag aan aan de geselecteerde groepen.": "Reken een bedrag aan aan de {count} geselecteerde groepen.",
+  "Reken een bedrag aan aan de geselecteerde groep.": "Reken een bedrag aan aan de geselecteerde groep.",
+  "Weet je zeker dat je het bedrag wilt aanrekenen?": "Weet je zeker dat je {total} wilt aanrekenen aan {count} groep(en)?"
 }

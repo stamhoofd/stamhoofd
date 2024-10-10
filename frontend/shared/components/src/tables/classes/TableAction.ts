@@ -1,61 +1,69 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
-import { LimitedFilteredRequest } from "@stamhoofd/structures";
-import { fetchAll, ObjectFetcher } from ".";
-import { Toast } from "../../..";
+import { LimitedFilteredRequest } from '@stamhoofd/structures';
+import { fetchAll, ObjectFetcher } from '.';
+import { Toast } from '../../..';
 
-export interface TableActionSelection<T extends {id: string}> {
+type ObjectWithId = { id: string };
+
+export interface TableActionSelection<T extends ObjectWithId> {
     /**
      * If you want to manually use the filter, or query data
      */
-    filter: LimitedFilteredRequest,
-    fetcher: ObjectFetcher<T>,
+    filter: LimitedFilteredRequest;
+    fetcher: ObjectFetcher<T>;
 
-    cachedAllValues?: T[],
+    cachedAllValues?: T[];
 
     // Manually selected rows that are already in memory
-    markedRows: Map<string, T>,
-    markedRowsAreSelected: boolean|null
+    markedRows: Map<string, T>;
+
+    /**
+     * When true: only the marked rows are selected.
+     * When false: all rows are selected, except the marked rows
+     */
+    markedRowsAreSelected: boolean | null;
 }
 
-export abstract class TableAction<T extends {id: string}> {
+export abstract class TableAction<T extends { id: string }> {
     name: string;
-    description: string = ''
+    description: string = '';
     icon: string;
-    tooltip = ""
-    enabled = true
-    destructive = false
+    tooltip = '';
+    enabled = true;
+    destructive = false;
 
     /// Determines order
     priority: number;
 
     /// For grouping
-    groupIndex: number
+    groupIndex: number;
 
     /**
-     * Whether this table action is on a whole selection. 
+     * Whether this table action is on a whole selection.
      * Set to false if you don't need any selection.
      * The action will be hidden if we are in selection modus on mobile
      */
-    needsSelection = true
+    needsSelection = true;
 
     /**
      * If this action needs a selection, we will not automatically select all items if none is selected, or when selection mode is disabled
      */
-    allowAutoSelectAll = true
+    allowAutoSelectAll = true;
 
-    singleSelection = false
+    singleSelection = false;
 
-    childActions: (TableAction<T>[]) | (() => TableAction<T>[])  = []
-    childMenu: ComponentWithProperties | null = null
+    childActions: (TableAction<T>[]) | (() => TableAction<T>[]) = [];
+    childMenu: ComponentWithProperties | null = null;
 
     get hasChildActions() {
         if (this.childMenu !== null) {
             return true;
         }
         if (this.childActions instanceof Array) {
-            return this.childActions.length > 0
-        } else {
+            return this.childActions.length > 0;
+        }
+        else {
             // function
             return true;
         }
@@ -65,21 +73,22 @@ export abstract class TableAction<T extends {id: string}> {
         if (!this.allowAutoSelectAll && !hasSelection && this.needsSelection) {
             return true;
         }
-        return false
+        return false;
     }
 
     getChildActions(): TableAction<T>[] {
         if (this.childActions instanceof Array) {
-            return this.childActions
-        } else {
-            return this.childActions()
+            return this.childActions;
+        }
+        else {
+            return this.childActions();
         }
     }
 
     constructor(settings: Partial<TableAction<T>>) {
-        this.name = settings.name ?? "";
-        this.description = settings.description ?? "";
-        this.icon = settings.icon ?? "";
+        this.name = settings.name ?? '';
+        this.description = settings.description ?? '';
+        this.icon = settings.icon ?? '';
         this.priority = settings.priority ?? 0;
         this.groupIndex = settings.groupIndex ?? 0;
         this.needsSelection = settings.needsSelection ?? true;
@@ -93,48 +102,48 @@ export abstract class TableAction<T extends {id: string}> {
     }
 
     setGroupIndex(index: number) {
-        this.groupIndex = index
-        return this
+        this.groupIndex = index;
+        return this;
     }
 
     setPriority(priority: number) {
-        this.priority = priority
-        return this
+        this.priority = priority;
+        return this;
     }
 
-    abstract handle(data: TableActionSelection<T>): Promise<void>
+    abstract handle(data: TableActionSelection<T>): Promise<void>;
 }
 
-export class MenuTableAction<T extends {id: string}> extends TableAction<T> {
+export class MenuTableAction<T extends { id: string }> extends TableAction<T> {
     async handle(data: TableActionSelection<T>) {
         // Do nothing
     }
 }
 
-export class AsyncTableAction<T extends {id: string}> extends TableAction<T> {
-    handler: (selection: TableActionSelection<T>) => Promise<void> | void
+export class AsyncTableAction<T extends { id: string }> extends TableAction<T> {
+    handler: (selection: TableActionSelection<T>) => Promise<void> | void;
 
-    constructor(settings: Partial<TableAction<T>> & { handler: (selection: TableActionSelection<T>) => Promise<void> | void } ) {
-        super(settings)
-        this.handler = settings.handler ?? (() => { throw new Error("No handler defined") });
+    constructor(settings: Partial<TableAction<T>> & { handler: (selection: TableActionSelection<T>) => Promise<void> | void }) {
+        super(settings);
+        this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
     }
 
     async handle(selection: TableActionSelection<T>) {
         // todo
-        await this.handler(selection)
+        await this.handler(selection);
     }
 }
 
-export class InMemoryTableAction<T extends {id: string}> extends TableAction<T> {
-    handler: (item: T[]) => Promise<void> | void
+export class InMemoryTableAction<T extends { id: string }> extends TableAction<T> {
+    handler: (item: T[]) => Promise<void> | void;
 
     constructor(settings: Partial<TableAction<T>> & { handler: (item: T[]) => Promise<void> | void }) {
-        super(settings)
-        this.handler = settings.handler ?? (() => { throw new Error("No handler defined") });
+        super(settings);
+        this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
     }
 
     async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions) {
-        return await fetchAll(initialRequest, objectFetcher, options)
+        return await fetchAll(initialRequest, objectFetcher, options);
     }
 
     async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions) {
@@ -144,29 +153,33 @@ export class InMemoryTableAction<T extends {id: string}> extends TableAction<T> 
 
         if (selection.markedRows.size && selection.markedRowsAreSelected === true) {
             // No async needed
-            return Array.from(selection.markedRows.values())
-        } else {
+            return Array.from(selection.markedRows.values());
+        }
+        else {
             return await this.fetchAll(selection.filter, selection.fetcher, options);
         }
     }
 
     async handle(data: TableActionSelection<T>) {
-        const toast: Toast = new Toast("Ophalen...", "spinner").setHide(null)
+        const toast: Toast = new Toast('Ophalen...', 'spinner').setHide(null);
         const timer = setTimeout(() => {
-            toast.show()
-        }, 1000)
+            toast.show();
+        }, 1000);
 
         try {
-            const items = this.needsSelection ? (await this.getSelection(data, {
-                onProgress(count, total) {
-                    toast.setProgress(total !== 0 ? (count / total) : 0)
-                }
-            })) : [];
-            toast.setProgress(1)
-            toast.message = 'Actie uitvoeren...'
+            const items = this.needsSelection
+                ? (await this.getSelection(data, {
+                        onProgress(count, total) {
+                            toast.setProgress(total !== 0 ? (count / total) : 0);
+                        },
+                    }))
+                : [];
+            toast.setProgress(1);
+            toast.message = 'Actie uitvoeren...';
             await this.handler(items);
-        } finally {
-            clearTimeout(timer)
+        }
+        finally {
+            clearTimeout(timer);
             toast.hide();
         }
     }
