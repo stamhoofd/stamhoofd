@@ -215,16 +215,6 @@ export class EventPermissionChecker {
             });
         }
 
-        if (event.meta.groups !== null) {
-            // not supported currently
-            throw new SimpleError({
-                code: 'permission_denied',
-                message:
-                    'Een nationale of regionale activiteit kan niet beperkt worden tot specifieke leeftijdsgroepen.',
-                statusCode: 403,
-            });
-        }
-
         // organization tags
         if (event.meta.organizationTagIds === null) {
             if (

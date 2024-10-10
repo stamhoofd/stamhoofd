@@ -53,6 +53,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.organizationId = put.organizationId;
             event.meta = put.meta;
 
+            if (event.organizationId === null && event.meta.groups !== null) {
+                event.meta.groups = null;
+                console.error('Removed groups because organizationId is null for new event');
+            }
+
             if (event.meta.groups && event.meta.groups.length === 0) {
                 throw new SimpleError({
                     code: 'invalid_field',
@@ -129,6 +134,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             if (patch.organizationId !== undefined) {
                 event.organizationId = patch.organizationId;
+            }
+
+            if (event.organizationId === null && event.meta.groups !== null) {
+                event.meta.groups = null;
+                console.error('Removed groups because organizationId is null for event', event.id);
             }
 
             if (event.meta.groups && event.meta.groups.length === 0) {
