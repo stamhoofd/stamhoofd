@@ -138,87 +138,86 @@
     </div>
 </template>
 
-
 <script lang="ts" setup generic="Value extends TableListable">
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
-import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet, useVisibilityChange } from "@stamhoofd/components";
-import { Storage } from "@stamhoofd/networking";
-import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { v4 as uuidv4 } from "uuid";
-import { computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from "vue";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { Storage } from '@stamhoofd/networking';
+import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
+import { computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from 'vue';
 
-import UIFilterEditor from "../filters/UIFilterEditor.vue";
-import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from "./classes";
-import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
-import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
-import TableActionsContextMenu from "./TableActionsContextMenu.vue";
- 
+import UIFilterEditor from '../filters/UIFilterEditor.vue';
+import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from './classes';
+import ColumnSelectorContextMenu from './ColumnSelectorContextMenu.vue';
+import ColumnSortingContextMenu from './ColumnSortingContextMenu.vue';
+import TableActionsContextMenu from './TableActionsContextMenu.vue';
+
 export interface TableListable {
-    id: string
+    id: string;
 }
- 
+
 class VisibleRow<T> {
-    id = uuidv4()
-    y = 0
- 
+    id = uuidv4();
+    y = 0;
+
     /**
       * currentIndex = null -> available for reause
       */
-    currentIndex: null | number = null
- 
+    currentIndex: null | number = null;
+
     /**
       * value = null -> show loading indicator
       */
-    value: T | null = null
- 
-    cachedSelectionValue = false
- 
-    skeletonPercentage = Math.random() * 0.5 + 0.5
+    value: T | null = null;
+
+    cachedSelectionValue = false;
+
+    skeletonPercentage = Math.random() * 0.5 + 0.5;
 }
- 
+
 class EnabledColumnConfiguration extends AutoEncoder {
     @field({ decoder: StringDecoder })
-        id: string
- 
+    id: string;
+
     @field({ decoder: NumberDecoder })
-        width: number
+    width: number;
 }
- 
+
 /**
   * We store this configuration in storage, so we can reuse the previous configuration every time
   */
 class ColumnConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EnabledColumnConfiguration) })
-        columns: EnabledColumnConfiguration[] = []
- 
+    columns: EnabledColumnConfiguration[] = [];
+
     @field({ decoder: BooleanDecoder, optional: true })
-        canCollapse = false
- 
+    canCollapse = false;
+
     @field({ decoder: StringDecoder, optional: true })
-        sortColumnId?: string
- 
+    sortColumnId?: string;
+
     @field({ decoder: new EnumDecoder(SortItemDirection), optional: true })
-        sortDirection:  SortItemDirection = SortItemDirection.ASC
+    sortDirection: SortItemDirection = SortItemDirection.ASC;
 }
 
 const props = withDefaults(
     defineProps<{
-        title: string,
-        backHint?: string|null,
-        actions?: TableAction<Value>[],
-        estimatedRows?: number,
-        tableObjectFetcher: TableObjectFetcher<Value>,
-        filterBuilders?: UIFilterBuilders|null,
-        columnConfigurationId: string,
+        title: string;
+        backHint?: string | null;
+        actions?: TableAction<Value>[];
+        estimatedRows?: number;
+        tableObjectFetcher: TableObjectFetcher<Value>;
+        filterBuilders?: UIFilterBuilders | null;
+        columnConfigurationId: string;
         // warning: do not use as these are not reactive
-        allColumns: Column<Value, any>[],
-        prefixColumn?: Column<Value, any>|null,
-        defaultSortColumn?: Column<Value, any>|null,
-        defaultSortDirection?: SortItemDirection|null,
-        defaultFilter?: StamhoofdFilter|null
+        allColumns: Column<Value, any>[];
+        prefixColumn?: Column<Value, any> | null;
+        defaultSortColumn?: Column<Value, any> | null;
+        defaultSortDirection?: SortItemDirection | null;
+        defaultFilter?: StamhoofdFilter | null;
     }>(), {
         backHint: null,
         estimatedRows: 30,
@@ -227,111 +226,112 @@ const props = withDefaults(
         defaultSortColumn: null,
         defaultSortDirection: null,
         actions: () => [],
-        defaultFilter: null
-    }
-)
-const reactiveColumns = reactive(props.allColumns) as Column<Value, any>[]
-const showPrefix = computed(() => props.prefixColumn !== null && wrapColumns.value && props.prefixColumn.enabled)
+        defaultFilter: null,
+    },
+);
+const reactiveColumns = reactive(props.allColumns) as Column<Value, any>[];
+const showPrefix = computed(() => props.prefixColumn !== null && wrapColumns.value && props.prefixColumn.enabled);
 const columns = computed(() => {
-    return reactiveColumns.filter(c => c.enabled && (!showPrefix.value || c.id !== props.prefixColumn?.id)).sort((a, b) => a.index - b.index)
-}) as ComputedRef<Column<Value, any>[]>
+    return reactiveColumns.filter(c => c.enabled && (!showPrefix.value || c.id !== props.prefixColumn?.id)).sort((a, b) => a.index - b.index);
+}) as ComputedRef<Column<Value, any>[]>;
 
 const canPop = useCanPop();
 const pop = usePop();
 const present = usePresent();
-const {presentPositionableSheet} = usePositionableSheet()
+const { presentPositionableSheet } = usePositionableSheet();
 
-const deviceWidth = useDeviceWidth()
-const isMobile = computed(() => deviceWidth.value < 600)
+const deviceWidth = useDeviceWidth();
+const isMobile = computed(() => deviceWidth.value < 600);
 const wrapColumns = isMobile;
 
-const showSelection = ref(!isMobile.value)
-const isIOS = useIsIOS()
+const showSelection = ref(!isMobile.value);
+const isIOS = useIsIOS();
 const titleSuffix = computed(() => {
     if (props.tableObjectFetcher.totalCount === null) {
         return '';
     }
 
-    const count = Formatter.integer(props.tableObjectFetcher.totalCount)
+    const count = Formatter.integer(props.tableObjectFetcher.totalCount);
 
     if (props.tableObjectFetcher.totalFilteredCount !== null && props.tableObjectFetcher.totalFilteredCount !== props.tableObjectFetcher.totalCount) {
-        const filtered = Formatter.integer(props.tableObjectFetcher.totalFilteredCount)
-        return `${filtered} van ${count}`
+        const filtered = Formatter.integer(props.tableObjectFetcher.totalFilteredCount);
+        return `${filtered} van ${count}`;
     }
 
-    return count
-})
+    return count;
+});
 
-const instance = getCurrentInstance()
-const hasClickListener = computed(() => !!instance?.vnode.props?.onClick)
-const canLeaveSelectionMode = computed(() => wrapColumns.value || !hasClickListener.value)
+const instance = getCurrentInstance();
+const hasClickListener = computed(() => !!instance?.vnode.props?.onClick);
+const canLeaveSelectionMode = computed(() => wrapColumns.value || !hasClickListener.value);
 
 const sortBy = ref(props.defaultSortColumn ?? columns.value[0]) as Ref<Column<Value, any>>;
 const sortDirection = ref(props.defaultSortDirection ?? SortItemDirection.ASC) as Ref<SortItemDirection>;
 
-const values = computed(() => props.tableObjectFetcher.objects)
+const values = computed(() => props.tableObjectFetcher.objects);
 const visibleRows = ref([]) as Ref<VisibleRow<Value>[]>;
-const searchQuery = ref("")
-const selectedUIFilter = ref(props.filterBuilders?.length && props.defaultFilter ? props.filterBuilders[0]?.fromFilter(props.defaultFilter) : null) as Ref<null|UIFilter>;
+const searchQuery = ref('');
+const selectedUIFilter = ref(props.filterBuilders?.length && props.defaultFilter ? props.filterBuilders[0]?.fromFilter(props.defaultFilter) : null) as Ref<null | UIFilter>;
 
 watchEffect(() => {
-    props.tableObjectFetcher.setSearchQuery(searchQuery.value)
+    props.tableObjectFetcher.setSearchQuery(searchQuery.value);
     const filter = selectedUIFilter.value ? selectedUIFilter.value.build() : null;
-    props.tableObjectFetcher.setFilter(filter)
-})
+    props.tableObjectFetcher.setFilter(filter);
+});
 
 function blurFocus() {
-    (document.activeElement as HTMLElement)?.blur()
+    (document.activeElement as HTMLElement)?.blur();
 }
 
-// If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows, 
+// If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows,
 // we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
 const markedRows = ref(new Map<string, Value>());
 const isRightClicking = ref(false);
-const customFocusedRows = ref(null) as Ref<null|Set<string>>;
+const customFocusedRows = ref(null) as Ref<null | Set<string>>;
 
 /**
  * When true: only the marked rows are selected.
  * When false: all rows are selected, except the marked rows
  */
-const markedRowsAreSelected = ref(true)
+const markedRowsAreSelected = ref(true);
 
 const isAllSelected = computed({
     get: () => {
         if (markedRowsAreSelected.value) {
-            return markedRows.value.size > 0 && markedRows.value.size === (props.tableObjectFetcher.totalFilteredCount ?? values.value.length)
-        } else {
-            return markedRows.value.size === 0
+            return markedRows.value.size > 0 && markedRows.value.size === (props.tableObjectFetcher.totalFilteredCount ?? values.value.length);
+        }
+        else {
+            return markedRows.value.size === 0;
         }
     },
     set: (selected: boolean) => {
-        markedRowsAreSelected.value = !selected
-        markedRows.value.clear()
- 
+        markedRowsAreSelected.value = !selected;
+        markedRows.value.clear();
+
         for (const visibleRow of visibleRows.value) {
-            visibleRow.cachedSelectionValue = selected
+            visibleRow.cachedSelectionValue = selected;
         }
-    }
-})
+    },
+});
 const hasSelection = computed(() => {
-    return  markedRowsAreSelected.value ? markedRows.value.size > 0 : (((props.tableObjectFetcher.totalFilteredCount ?? values.value.length) - markedRows.value.size) > 0)
-})
+    return markedRowsAreSelected.value ? markedRows.value.size > 0 : (((props.tableObjectFetcher.totalFilteredCount ?? values.value.length) - markedRows.value.size) > 0);
+});
 
 function setShowSelection(s: boolean) {
-    showSelection.value = s
+    showSelection.value = s;
     if (!s) {
-        isAllSelected.value = false
+        isAllSelected.value = false;
     }
 }
 
 const sortedActions = computed(() => {
     return props.actions.slice().sort((a, b) => {
         if (a.groupIndex !== b.groupIndex) {
-            return a.groupIndex - b.groupIndex
+            return a.groupIndex - b.groupIndex;
         }
-        return b.priority - a.priority
-    })
-})
+        return b.priority - a.priority;
+    });
+});
 
 const filteredActions = computed(() => {
     let maximum = 3;
@@ -341,18 +341,18 @@ const filteredActions = computed(() => {
     }
 
     if (!isMobile.value || !showSelection.value) {
-        return sortedActions.value.filter(action => action.enabled && !action.singleSelection && (!action.needsSelection || action.allowAutoSelectAll)).slice(0, maximum)
+        return sortedActions.value.filter(action => action.enabled && !action.singleSelection && (!action.needsSelection || action.allowAutoSelectAll)).slice(0, maximum);
     }
 
-    return sortedActions.value.filter(action => {
-        return action.enabled && action.needsSelection && !action.singleSelection && (!action.needsSelection || action.allowAutoSelectAll)
-    }).slice(0, maximum)
-})
+    return sortedActions.value.filter((action) => {
+        return action.enabled && action.needsSelection && !action.singleSelection && (!action.needsSelection || action.allowAutoSelectAll);
+    }).slice(0, maximum);
+});
 
 function getColumnContextMenu() {
     return new ComponentWithProperties(ColumnSelectorContextMenu, {
         columns: reactiveColumns,
-    })
+    });
 }
 
 function getSortingContextMenu() {
@@ -361,23 +361,23 @@ function getSortingContextMenu() {
         sortBy: sortBy.value,
         sortDirection: sortDirection.value,
         setSort: (column: Column<Value, any>, direction: SortItemDirection) => {
-            sortBy.value = column
-            sortDirection.value = direction
-        }
-    })
+            sortBy.value = column;
+            sortDirection.value = direction;
+        },
+    });
 }
 
 function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelected?: boolean): TableActionSelection<Value> {
     if (customMarkedRows === undefined) {
         if (showSelection.value && hasSelection.value) {
-            customMarkedRows = [...markedRows.value.values()] as Value[]
-            customMarkedRowsSelected = markedRowsAreSelected.value
+            customMarkedRows = [...markedRows.value.values()] as Value[];
+            customMarkedRowsSelected = markedRowsAreSelected.value;
 
             // Try to invert if we already have everything in memory (optimization)
             if (!customMarkedRowsSelected) {
                 if (props.tableObjectFetcher.totalFilteredCount === props.tableObjectFetcher.objects.length) {
-                    customMarkedRows = props.tableObjectFetcher.objects.filter(i => !markedRows.value.has(i.id))
-                    customMarkedRowsSelected = true
+                    customMarkedRows = props.tableObjectFetcher.objects.filter(i => !markedRows.value.has(i.id));
+                    customMarkedRowsSelected = true;
                 }
             }
         }
@@ -387,23 +387,25 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
         if (customMarkedRowsSelected === undefined) {
             customMarkedRowsSelected = true;
         }
-        
+
         const idFilter = {
             id: {
-                $in: customMarkedRows.map(i => i.id)
-            }
+                $in: customMarkedRows.map(i => i.id),
+            },
         };
 
-        const filter = customMarkedRowsSelected ? idFilter : (
-            customMarkedRows.length ?
-                mergeFilters([
-                    props.tableObjectFetcher.filter,
-                    {
-                        $not: idFilter
-                    }
-                ])
-                : props.tableObjectFetcher.filter
-        )
+        const filter = customMarkedRowsSelected
+            ? idFilter
+            : (
+                    customMarkedRows.length
+                        ? mergeFilters([
+                            props.tableObjectFetcher.filter,
+                            {
+                                $not: idFilter,
+                            },
+                        ])
+                        : props.tableObjectFetcher.filter
+                );
 
         return {
             filter: new LimitedFilteredRequest({
@@ -413,8 +415,8 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
             }),
             fetcher: props.tableObjectFetcher.objectFetcher,
             markedRows: new Map(customMarkedRows.map(i => [i.id, i])),
-            markedRowsAreSelected: customMarkedRowsSelected ?? true
-        }
+            markedRowsAreSelected: customMarkedRowsSelected ?? true,
+        };
     }
 
     // Optimization:
@@ -430,8 +432,8 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
             fetcher: props.tableObjectFetcher.objectFetcher,
             cachedAllValues: props.tableObjectFetcher.objects,
             markedRows: new Map(),
-            markedRowsAreSelected: null
-        }
+            markedRowsAreSelected: null,
+        };
     }
 
     return {
@@ -443,102 +445,105 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
         }),
         fetcher: props.tableObjectFetcher.objectFetcher,
         markedRows: new Map(),
-        markedRowsAreSelected: null
-    }
+        markedRowsAreSelected: null,
+    };
 }
 
 async function showActions(isOnTop: boolean, event: MouseEvent) {
     const el = event.currentTarget as HTMLElement;
-    const bounds = el.getBoundingClientRect()
+    const bounds = el.getBoundingClientRect();
 
-    const actions = (isMobile.value && showSelection.value ? props.actions.filter(a => a.needsSelection) : props.actions.slice())
+    const actions = (isMobile.value && showSelection.value ? props.actions.filter(a => a.needsSelection) : props.actions.slice());
 
     // Also add select all actions
     if (!showSelection.value) {
         // Add select action
         actions.push(new AsyncTableAction({
-            name: "Selecteer",
+            name: 'Selecteer',
             groupIndex: -1,
             priority: 10,
             needsSelection: false,
             handler: () => {
-                showSelection.value = true
-            }
-        }))
+                showSelection.value = true;
+            },
+        }));
     }
 
     // Add select all action
     if (!isAllSelected.value) {
         actions.push(new AsyncTableAction({
-            name: "Selecteer alles",
+            name: 'Selecteer alles',
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
             handler: () => {
-                showSelection.value = true
+                showSelection.value = true;
                 isAllSelected.value = true;
-            }
-        }))
-    } else {
+            },
+        }));
+    }
+    else {
         actions.push(new AsyncTableAction({
-            name: "Deselecteer alles",
+            name: 'Deselecteer alles',
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
             handler: () => {
                 isAllSelected.value = false;
-            }
-        }))
+            },
+        }));
     }
-     
+
     // Add action to change visible columns
     actions.push(new MenuTableAction({
-        name: wrapColumns.value ? "Wijzig zichtbare gegevens" : "Wijzig kolommen",
+        name: wrapColumns.value ? 'Wijzig zichtbare gegevens' : 'Wijzig kolommen',
         groupIndex: -1,
         priority: 8,
-        childMenu: getColumnContextMenu()
-    }))
+        childMenu: getColumnContextMenu(),
+    }));
 
     actions.push(new MenuTableAction({
-        name: "Sorteren",
+        name: 'Sorteren',
         groupIndex: -1,
         priority: 7,
-        childMenu: getSortingContextMenu()
-    }))
+        childMenu: getSortingContextMenu(),
+    }));
 
     const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
         x: bounds.right,
         y: bounds.top + (isOnTop ? el.offsetHeight : 0),
-        xPlacement: "left",
-        yPlacement: isOnTop ? "bottom" : "top",
+        xPlacement: 'left',
+        yPlacement: isOnTop ? 'bottom' : 'top',
         actions,
-        selection: buildSelectionObject()
+        selection: buildSelectionObject(),
     });
-    await present(displayedComponent.setDisplayStyle("overlay"));
+    await present(displayedComponent.setDisplayStyle('overlay'));
 }
 
 async function onTableHeadRightClick(event: MouseEvent) {
     // Show a context menu to select the available columns
     const displayedComponent = getColumnContextMenu();
-    displayedComponent.properties.x = event.clientX
-    displayedComponent.properties.y = event.clientY
-    await present(displayedComponent.setDisplayStyle("overlay"));
+    displayedComponent.properties.x = event.clientX;
+    displayedComponent.properties.y = event.clientY;
+    await present(displayedComponent.setDisplayStyle('overlay'));
 }
 
 const errorMessage = computed(() => {
     if (props.tableObjectFetcher.errorState) {
-        const errors = props.tableObjectFetcher.errorState
-        
-        let simpleErrors!: SimpleErrors
+        const errors = props.tableObjectFetcher.errorState;
+
+        let simpleErrors!: SimpleErrors;
         if (isSimpleError(errors)) {
-            simpleErrors = new SimpleErrors(errors)
-        } else if (isSimpleErrors(errors)) {
-            simpleErrors = errors
-        } else {
+            simpleErrors = new SimpleErrors(errors);
+        }
+        else if (isSimpleErrors(errors)) {
+            simpleErrors = errors;
+        }
+        else {
             simpleErrors = new SimpleErrors(new SimpleError({
-                code: "unknown_error",
-                message: errors.message
-            }))
+                code: 'unknown_error',
+                message: errors.message,
+            }));
         }
 
         return simpleErrors.getHuman();
@@ -547,19 +552,20 @@ const errorMessage = computed(() => {
     return null;
 });
 
-const lastRefresh = ref(new Date())
+const lastRefresh = ref(new Date());
 function refresh() {
-    lastRefresh.value = new Date()
-    props.tableObjectFetcher.reset(true, true)
+    lastRefresh.value = new Date();
+    props.tableObjectFetcher.objectFetcher.beforeRefresh?.();
+    props.tableObjectFetcher.reset(true, true);
 }
 
-const lastFilteredCount = ref(null) as Ref<number|null>
+const lastFilteredCount = ref(null) as Ref<number | null>;
 
 watchEffect(() => {
     if (props.tableObjectFetcher.totalFilteredCount !== null) {
-        lastFilteredCount.value = props.tableObjectFetcher.totalFilteredCount
+        lastFilteredCount.value = props.tableObjectFetcher.totalFilteredCount;
     }
-})
+});
 
 const totalFilteredCount = computed(() => {
     if (errorMessage.value) {
@@ -570,58 +576,59 @@ const totalFilteredCount = computed(() => {
 const totalItemsCount = computed(() => props.tableObjectFetcher.totalCount);
 
 function resetFilter() {
-    searchQuery.value = ""
-    selectedUIFilter.value = null
+    searchQuery.value = '';
+    selectedUIFilter.value = null;
 }
 
-const isColumnDragActive = ref(false)
+const isColumnDragActive = ref(false);
 
 // Column drag helpers:
-const isDraggingColumn = ref(null) as Ref<Column<any, any> | null>
-let draggingStartX = 0
-let draggingInitialWidth = 0
-let draggingInitialColumns: Column<any, any>[] = []
-const dragType = ref("width") as Ref<"width" | "order">
+const isDraggingColumn = ref(null) as Ref<Column<any, any> | null>;
+let draggingStartX = 0;
+let draggingInitialWidth = 0;
+let draggingInitialColumns: Column<any, any>[] = [];
+const dragType = ref('width') as Ref<'width' | 'order'>;
 
 function toggleSort(column: Column<any, any>) {
     if (isColumnDragActive.value) {
-        //console.log("Ignored sort toggle due to drag")
-        return
+        // console.log("Ignored sort toggle due to drag")
+        return;
     }
     if (column.allowSorting === false) {
-        return
+        return;
     }
     if (sortBy.value === column) {
         if (sortDirection.value === SortItemDirection.ASC) {
             sortDirection.value = SortItemDirection.DESC;
-        } else {
+        }
+        else {
             sortDirection.value = SortItemDirection.ASC;
         }
-    } else {
+    }
+    else {
         sortBy.value = column;
     }
-    saveColumnConfiguration()
+    saveColumnConfiguration();
 }
 
 watchEffect(() => {
     props.tableObjectFetcher.setSort([
         {
             key: sortBy.value.id,
-            order: sortDirection.value
-        }
-    ])
+            order: sortDirection.value,
+        },
+    ]);
 });
 
 const hiddenItemsCount = computed(() => {
-    if (props.tableObjectFetcher.totalCount ===  null || props.tableObjectFetcher.totalFilteredCount ===  null) {
+    if (props.tableObjectFetcher.totalCount === null || props.tableObjectFetcher.totalFilteredCount === null) {
         return 0;
     }
     return props.tableObjectFetcher.totalCount - props.tableObjectFetcher.totalFilteredCount;
 });
 
-
 const filteredText = computed(() => {
-    return props.tableObjectFetcher.totalFilteredCount !== null ? Formatter.integer(props.tableObjectFetcher.totalFilteredCount) : ''
+    return props.tableObjectFetcher.totalFilteredCount !== null ? Formatter.integer(props.tableObjectFetcher.totalFilteredCount) : '';
 });
 
 function getEventX(event: any) {
@@ -631,166 +638,167 @@ function getEventX(event: any) {
         for (const touch of touches) {
             x = touch.pageX;
         }
-    } else {
+    }
+    else {
         x = event.pageX;
     }
     return x;
 }
 
 const emit = defineEmits<{
-    click: [value: Value]
-}>()
+    click: [value: Value];
+}>();
 
 function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
     if (event.metaKey || event.ctrlKey) {
         // Multi select rows
-        setSelectionValue(row, !getSelectionValue(row))
-        return
+        setSelectionValue(row, !getSelectionValue(row));
+        return;
     }
 
     if (!hasClickListener.value || (wrapColumns.value && showSelection.value)) {
         // On mobile, tapping a column means selecting it when we are in editing modus
-        setSelectionValue(row, !getSelectionValue(row))
-        return
+        setSelectionValue(row, !getSelectionValue(row));
+        return;
     }
 
     if (hasClickListener.value && row.value) {
-        emit("click", row.value)
+        emit('click', row.value);
     }
 }
 
-async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent|TouchEvent) {
+async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | TouchEvent) {
     if (!row.value) {
         return;
     }
 
     if (isMobile.value && !showSelection.value && !isIOS) {
         // On Android, the default long press action is switching to editing mode
-        setSelectionValue(row, true)
-        setShowSelection(true)
-        return
+        setSelectionValue(row, true);
+        setShowSelection(true);
+        return;
     }
 
-    isRightClicking.value = true
+    isRightClicking.value = true;
     const filteredActions = props.actions.filter(a => a.needsSelection);
     let selection: TableActionSelection<Value>;
 
     if (row.cachedSelectionValue && showSelection.value) {
         // Use full selection
-        selection = buildSelectionObject()
+        selection = buildSelectionObject();
 
         filteredActions.push(new AsyncTableAction({
-            name: "Deselecteer",
+            name: 'Deselecteer',
             groupIndex: 1,
             priority: 10,
             handler: () => {
                 // Clear selection
-                isAllSelected.value = false
-            }
-        }))
+                isAllSelected.value = false;
+            },
+        }));
 
-        customFocusedRows.value = null
-    } else {
-        selection = buildSelectionObject([row.value!], true)
-        
+        customFocusedRows.value = null;
+    }
+    else {
+        selection = buildSelectionObject([row.value!], true);
+
         // Only focus this row
         // Add select action
         filteredActions.push(new AsyncTableAction({
-            name: "Selecteer",
+            name: 'Selecteer',
             groupIndex: !showSelection.value ? -1 : 1,
             priority: 10,
             handler: () => {
-                setSelectionValue(row, true)
-                setShowSelection(true)
-            }
-        }))
+                setSelectionValue(row, true);
+                setShowSelection(true);
+            },
+        }));
 
-        customFocusedRows.value = new Set([row.value.id])
+        customFocusedRows.value = new Set([row.value.id]);
     }
 
     // Show a context menu to select the available columns
     const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-        x: "changedTouches" in event ? event.changedTouches[0].pageX : event.clientX,
-        y: "changedTouches" in event ? event.changedTouches[0].pageY : event.clientY,
+        x: 'changedTouches' in event ? event.changedTouches[0].pageX : event.clientX,
+        y: 'changedTouches' in event ? event.changedTouches[0].pageY : event.clientY,
         actions: filteredActions,
         onDismiss: () => {
-            isRightClicking.value = false
+            isRightClicking.value = false;
         },
-        selection
+        selection,
     });
- 
-    await present(displayedComponent.setDisplayStyle("overlay"));
+
+    await present(displayedComponent.setDisplayStyle('overlay'));
 }
- 
- 
-function columnDragStart(event: MouseEvent|TouchEvent, column: Column<any, any>) {
+
+function columnDragStart(event: MouseEvent | TouchEvent, column: Column<any, any>) {
     // Don't allow drag with right mouse or other buttons
     if ('button' in event) {
         if (event.button !== 0) {
-            return
+            return;
         }
         if (event.button === 0 && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) {
             // Don't allow drag with ctrl+click
-            return
+            return;
         }
     }
     draggingStartX = getEventX(event);
-    isDraggingColumn.value = column
-    dragType.value = "order"
-    draggingInitialColumns = columns.value.slice() as Column<any, any>[]
-    isColumnDragActive.value = false
-    attachDragHandlers()
+    isDraggingColumn.value = column;
+    dragType.value = 'order';
+    draggingInitialColumns = columns.value.slice() as Column<any, any>[];
+    isColumnDragActive.value = false;
+    attachDragHandlers();
 }
 
-function handleDragStart(event: MouseEvent|TouchEvent, column: Column<any, any>) {
+function handleDragStart(event: MouseEvent | TouchEvent, column: Column<any, any>) {
     // Don't allow drag with right mouse or other buttons
     if ('button' in event) {
         if (event.button !== 0) {
-            return
+            return;
         }
         if (event.button === 0 && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) {
             // Don't allow drag with ctrl+click
-            return
+            return;
         }
     }
 
     draggingStartX = getEventX(event);
-    isDraggingColumn.value = column
-    dragType.value = "width"
-    draggingInitialWidth = column.width ?? 0
-    isColumnDragActive.value = false
-    attachDragHandlers()
+    isDraggingColumn.value = column;
+    dragType.value = 'width';
+    draggingInitialWidth = column.width ?? 0;
+    isColumnDragActive.value = false;
+    attachDragHandlers();
 }
 
-const horizontalPadding = ref(40)
-const tableElement = ref(null) as Ref<HTMLElement | null>
-const tableBody = ref(null) as Ref<HTMLElement | null>
-const canCollapse = ref(false)
+const horizontalPadding = ref(40);
+const tableElement = ref(null) as Ref<HTMLElement | null>;
+const tableBody = ref(null) as Ref<HTMLElement | null>;
+const canCollapse = ref(false);
 
 const selectionColumnWidth = computed(() => {
-    return showSelection.value ? (wrapColumns.value ? 40 : 50) : 0
+    return showSelection.value ? (wrapColumns.value ? 40 : 50) : 0;
 });
 
 const totalWidth = computed(() => {
-    const leftPadding = horizontalPadding.value
-    const rightPadding = horizontalPadding.value
-    return selectionColumnWidth.value + columns.value.reduce((acc, col) => acc + (col.width ?? 0), 0) + leftPadding + rightPadding
+    const leftPadding = horizontalPadding.value;
+    const rightPadding = horizontalPadding.value;
+    return selectionColumnWidth.value + columns.value.reduce((acc, col) => acc + (col.width ?? 0), 0) + leftPadding + rightPadding;
 });
 
 function updatePaddingIfNeeded() {
     if (horizontalPadding.value === 0) {
-        updatePadding()
+        updatePadding();
     }
 }
 
 function updatePadding() {
     if (!tableElement.value) {
-        return
+        return;
     }
     const padding = getComputedStyle(tableElement.value)
         .getPropertyValue('--st-horizontal-padding');
 
-    horizontalPadding.value = parseInt(padding)
+    horizontalPadding.value = parseInt(padding);
 }
 
 function attachDragHandlers() {
@@ -798,95 +806,96 @@ function attachDragHandlers() {
 
     if (isColumnDragActive.value) {
         if (tableElement.value) {
-            tableElement.value.style.cursor = dragType.value === "width" ? "col-resize" : "grabbing"
+            tableElement.value.style.cursor = dragType.value === 'width' ? 'col-resize' : 'grabbing';
         }
-
     }
-    document.addEventListener("mousemove", mouseMove, {
+    document.addEventListener('mousemove', mouseMove, {
         passive: false,
     });
-    document.addEventListener("touchmove", mouseMove, {
+    document.addEventListener('touchmove', mouseMove, {
         passive: false,
     });
 
-    document.addEventListener("mouseup", mouseUp, { passive: false });
-    document.addEventListener("touchend", mouseUp, { passive: false });
+    document.addEventListener('mouseup', mouseUp, { passive: false });
+    document.addEventListener('touchend', mouseUp, { passive: false });
 }
 
 function detachDragHandlers() {
     if (tableElement.value) {
-        tableElement.value.style.cursor = ""
+        tableElement.value.style.cursor = '';
     }
 
-    document.removeEventListener("mousemove", mouseMove);
-    document.removeEventListener("touchmove", mouseMove);
+    document.removeEventListener('mousemove', mouseMove);
+    document.removeEventListener('touchmove', mouseMove);
 
-    document.removeEventListener("mouseup", mouseUp);
-    document.removeEventListener("touchend", mouseUp);
+    document.removeEventListener('mouseup', mouseUp);
+    document.removeEventListener('touchend', mouseUp);
 
-    saveColumnConfiguration()
+    saveColumnConfiguration();
 }
 
-function mouseMove(event: MouseEvent|TouchEvent) {
+function mouseMove(event: MouseEvent | TouchEvent) {
     if (!isDraggingColumn.value) {
-        return
+        return;
     }
-    const currentX = getEventX(event)
-    const difference = currentX - draggingStartX
+    const currentX = getEventX(event);
+    const difference = currentX - draggingStartX;
 
     if (!isColumnDragActive.value) {
         if (Math.abs(difference) > 5) {
             isColumnDragActive.value = true;
             if (tableElement.value) {
-                tableElement.value.style.cursor = dragType.value === "width" ? "col-resize" : "grabbing"
+                tableElement.value.style.cursor = dragType.value === 'width' ? 'col-resize' : 'grabbing';
             }
-        } else {
-            return
+        }
+        else {
+            return;
         }
     }
 
-    if (dragType.value === "width") {
-        const currentWidth = totalWidth.value
+    if (dragType.value === 'width') {
+        const currentWidth = totalWidth.value;
 
-        const newWidth = draggingInitialWidth + difference
-        isDraggingColumn.value.width =  Math.max(newWidth, isDraggingColumn.value.minimumWidth)
-        isDraggingColumn.value.renderWidth = Math.floor(isDraggingColumn.value.width)
+        const newWidth = draggingInitialWidth + difference;
+        isDraggingColumn.value.width = Math.max(newWidth, isDraggingColumn.value.minimumWidth);
+        isDraggingColumn.value.renderWidth = Math.floor(isDraggingColumn.value.width);
 
-        updateColumnWidth(isDraggingColumn.value, "move", currentWidth)
-    } else {
-        // We swap columns if the startX of the column moves over the middle of a different column            
-        // Calculate how many columns we have moved in the X direction 
-        const startIndex = draggingInitialColumns.findIndex(c => c.id === isDraggingColumn.value?.id)
-        let columnMoveIndex = 0
-        let remainingDifference = difference
+        updateColumnWidth(isDraggingColumn.value, 'move', currentWidth);
+    }
+    else {
+        // We swap columns if the startX of the column moves over the middle of a different column
+        // Calculate how many columns we have moved in the X direction
+        const startIndex = draggingInitialColumns.findIndex(c => c.id === isDraggingColumn.value?.id);
+        let columnMoveIndex = 0;
+        let remainingDifference = difference;
         while (Math.sign(remainingDifference) === Math.sign(difference)) {
-            const shouldMove = (remainingDifference < 0) ? -1 : 1
-            const column = draggingInitialColumns[startIndex + shouldMove + columnMoveIndex]
+            const shouldMove = (remainingDifference < 0) ? -1 : 1;
+            const column = draggingInitialColumns[startIndex + shouldMove + columnMoveIndex];
             if (!column || column.width === null) {
-                break
+                break;
             }
             // Move the column if they overlap at least 50%
-            const neededMove = column.width / 2
+            const neededMove = column.width / 2;
             if (Math.abs(remainingDifference) > neededMove) {
-                remainingDifference -= column.width*shouldMove
-                columnMoveIndex += shouldMove
-            } else {
-                break
+                remainingDifference -= column.width * shouldMove;
+                columnMoveIndex += shouldMove;
+            }
+            else {
+                break;
             }
         }
 
-        const columns = draggingInitialColumns.slice()
+        const columns = draggingInitialColumns.slice();
         columns.splice(startIndex, 1);
         columns.splice(startIndex + columnMoveIndex, 0, isDraggingColumn.value);
 
         // Update indexes
         for (let i = 0; i < columns.length; i++) {
-            columns[i].index = i
+            columns[i].index = i;
         }
 
         // Translate moving column with mouse
-        tableElement.value?.style.setProperty("--drag-x", `${remainingDifference}px`);
-
+        tableElement.value?.style.setProperty('--drag-x', `${remainingDifference}px`);
     }
 
     // Prevent scrolling (on mobile) and other stuff
@@ -899,59 +908,59 @@ function mouseUp() {
         detachDragHandlers();
         isDraggingColumn.value = null;
     }
-    isColumnDragActive.value = false
+    isColumnDragActive.value = false;
 }
 
 onMounted(() => {
-    loadColumnConfiguration().catch(console.error)
+    loadColumnConfiguration().catch(console.error);
 
     if (tableElement.value) {
-        getScrollElement(tableElement.value).addEventListener("scroll", onScroll, { passive: true })
+        getScrollElement(tableElement.value).addEventListener('scroll', onScroll, { passive: true });
     }
 
     if (!canLeaveSelectionMode.value) {
-        showSelection.value = true
+        showSelection.value = true;
     }
 });
 
-// 
+//
 onActivated(() => {
     if (!wrapColumns.value) {
-        window.addEventListener("resize", onResize, { passive: true })
-        onResize()
+        window.addEventListener('resize', onResize, { passive: true });
+        onResize();
     }
 });
 
 onDeactivated(() => {
     // Better to remove event resize listener, because on resize, we don't need to rerender the table
-    window.removeEventListener("resize", onResize)
+    window.removeEventListener('resize', onResize);
 });
 
 useVisibilityChange(() => {
-    doRefresh()
-})
+    doRefresh();
+});
 
 onBeforeUnmount(() => {
     // Remove event listeners
     if (tableElement.value) {
-        getScrollElement(tableElement.value)?.removeEventListener("scroll", onScroll)
+        getScrollElement(tableElement.value)?.removeEventListener('scroll', onScroll);
     }
 
-    window.removeEventListener("resize", onResize)
+    window.removeEventListener('resize', onResize);
     props.tableObjectFetcher.destroy();
 });
 
 function doRefresh() {
     if (document.visibilityState === 'visible') {
-        refresh()
+        refresh();
     }
 }
 
-let ticking = false
+let ticking = false;
 function onScroll() {
     if (!ticking) {
         window.requestAnimationFrame(() => {
-            updateVisibleRows()
+            updateVisibleRows();
             ticking = false;
         });
 
@@ -961,77 +970,82 @@ function onScroll() {
 
 function onResize() {
     // Force padding update
-    updatePadding()
+    updatePadding();
 
     if (canCollapse.value) {
         // Keep existing width
-        updateCanCollapse()
-    } else {
-        // shrink or grow width
-        updateColumnWidth()
+        updateCanCollapse();
     }
-    updateVisibleRows()
+    else {
+        // shrink or grow width
+        updateColumnWidth();
+    }
+    updateVisibleRows();
 }
 
-// 
+//
 async function loadColumnConfiguration() {
     try {
-        const json = await Storage.keyValue.getItem("column-configuration-"+props.columnConfigurationId)
+        const json = await Storage.keyValue.getItem('column-configuration-' + props.columnConfigurationId);
         if (json !== null) {
-            const parsed = new ObjectData(JSON.parse(json), { version: Version })
-            const decoded = (new VersionBoxDecoder(ColumnConfiguration as Decoder<ColumnConfiguration>).decode(parsed)).data
- 
+            const parsed = new ObjectData(JSON.parse(json), { version: Version });
+            const decoded = (new VersionBoxDecoder(ColumnConfiguration as Decoder<ColumnConfiguration>).decode(parsed)).data;
+
             for (const col of reactiveColumns) {
-                const i = decoded.columns.findIndex(c => c.id === col.id)
+                const i = decoded.columns.findIndex(c => c.id === col.id);
                 if (i === -1) {
-                    col.enabled = false
-                } else {
-                    const config = decoded.columns[i]
-                    col.enabled = true
-                    col.width = config.width
-                    col.renderWidth = Math.floor(col.width)
-                    col.index = i
+                    col.enabled = false;
+                }
+                else {
+                    const config = decoded.columns[i];
+                    col.enabled = true;
+                    col.width = config.width;
+                    col.renderWidth = Math.floor(col.width);
+                    col.index = i;
                 }
             }
- 
+
             if (decoded.sortColumnId) {
-                const _sort = reactiveColumns.find(c => c.id === decoded.sortColumnId)
+                const _sort = reactiveColumns.find(c => c.id === decoded.sortColumnId);
                 if (_sort) {
-                    sortBy.value = _sort
-                    sortDirection.value = decoded.sortDirection ?? SortItemDirection.ASC
+                    sortBy.value = _sort;
+                    sortDirection.value = decoded.sortDirection ?? SortItemDirection.ASC;
                 }
             }
- 
+
             updateVisibleRows();
             updateRecommendedWidths();
- 
-            updateColumnWidth()
-        } else {
-            updateVisibleRows();
-            updateRecommendedWidths();
-            updateColumnWidth()
+
+            updateColumnWidth();
         }
-    } catch (error) {
-        console.error(error)
+        else {
+            updateVisibleRows();
+            updateRecommendedWidths();
+            updateColumnWidth();
+        }
+    }
+    catch (error) {
+        console.error(error);
     }
 }
 
 watch(columns, () => {
-    updateVisibleRows()
+    updateVisibleRows();
 
     if (canCollapse.value) {
         // Update width of new columns, without adjusting the width of any column
-        fixColumnWidths(columns.value as any)
-        updateCanCollapse()
+        fixColumnWidths(columns.value as any);
+        updateCanCollapse();
 
         if (!canCollapse.value) {
             // Redistribute
-            updateColumnWidth()
+            updateColumnWidth();
         }
-    } else {
-        updateColumnWidth()
     }
-    saveColumnConfiguration()
+    else {
+        updateColumnWidth();
+    }
+    saveColumnConfiguration();
 });
 
 function saveColumnConfiguration() {
@@ -1041,51 +1055,50 @@ function saveColumnConfiguration() {
         canCollapse: canCollapse.value,
         sortColumnId: sortBy.value.id,
         sortDirection: sortDirection.value,
-    })
+    });
 
-    const versionBox = new VersionBox(configuration)
-    const json = JSON.stringify(versionBox.encode({ version: Version }))
-    Storage.keyValue.setItem("column-configuration-"+props.columnConfigurationId, json).catch(console.error)
+    const versionBox = new VersionBox(configuration);
+    const json = JSON.stringify(versionBox.encode({ version: Version }));
+    Storage.keyValue.setItem('column-configuration-' + props.columnConfigurationId, json).catch(console.error);
 }
 
 /**
  * Loop all visible rows, and sets the recommended width of each column to the maximum width of the column.
  */
 function updateRecommendedWidths() {
-    //console.log("Update recommended width")
-    const measureDiv = document.createElement("div")
-    measureDiv.style.position = "absolute"
-    measureDiv.style.visibility = "hidden"
-    measureDiv.className = "table-column-content-style"
-    document.body.appendChild(measureDiv)
+    // console.log("Update recommended width")
+    const measureDiv = document.createElement('div');
+    measureDiv.style.position = 'absolute';
+    measureDiv.style.visibility = 'hidden';
+    measureDiv.className = 'table-column-content-style';
+    document.body.appendChild(measureDiv);
 
     for (const column of columns.value) {
-        let maximum = column.minimumWidth
+        let maximum = column.minimumWidth;
 
         // Title
-        const text = column.name
-        measureDiv.innerText = text
-        const width = measureDiv.clientWidth
+        const text = column.name;
+        measureDiv.innerText = text;
+        const width = measureDiv.clientWidth;
         if (width > maximum) {
-            maximum = width
+            maximum = width;
         }
-        let found = false
+        let found = false;
 
         for (const visibleRow of visibleRows.value) {
-            const value = visibleRow.value
+            const value = visibleRow.value;
 
             if (!value) {
-                continue
+                continue;
             }
-            found = true
+            found = true;
 
-            const text = column.getFormattedValue(value)
-                
+            const text = column.getFormattedValue(value);
 
-            measureDiv.innerText = text
-            const width = measureDiv.clientWidth
+            measureDiv.innerText = text;
+            const width = measureDiv.clientWidth;
             if (width > maximum) {
-                maximum = width
+                maximum = width;
             }
         }
 
@@ -1095,93 +1108,91 @@ function updateRecommendedWidths() {
         }
     }
 
-    document.body.removeChild(measureDiv)
+    document.body.removeChild(measureDiv);
 }
 
- 
 function fixColumnWidths(columns: Column<any, any>[]) {
     // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
     // Also update columns that are smaller than the minimumWidth
-    let distributeWidth = 0
+    let distributeWidth = 0;
     for (const col of columns) {
         if (col.renderWidth === null && col.width !== null) {
             col.renderWidth = Math.floor(col.width);
         }
         if (col.width === null || col.width === 0) {
-            col.width = col.recommendedWidth
-            distributeWidth -= col.recommendedWidth
+            col.width = col.recommendedWidth;
+            distributeWidth -= col.recommendedWidth;
             col.renderWidth = Math.floor(col.width);
         }
 
         if (col.width < col.minimumWidth) {
-            distributeWidth -= col.minimumWidth - col.width
-            col.width = col.minimumWidth
+            distributeWidth -= col.minimumWidth - col.width;
+            col.width = col.minimumWidth;
             col.renderWidth = Math.floor(col.width);
         }
     }
-    return distributeWidth
+    return distributeWidth;
 }
-// 
+//
 /**
  * Update the width of the columns by distributing the available width across the columns, except the ignored column (optional)
  */
-function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
-    updatePaddingIfNeeded()
+function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy: 'grow' | 'move' = 'grow', forceWidth: number | null = null) {
+    updatePaddingIfNeeded();
     // console.log("Update column width")
-        
+
     if (wrapColumns.value) {
-        return
+        return;
     }
 
     if (!tableElement.value) {
         return;
     }
-        
-    const leftPadding = horizontalPadding.value
-    const rightPadding = horizontalPadding.value
+
+    const leftPadding = horizontalPadding.value;
+    const rightPadding = horizontalPadding.value;
 
     const availableWidth = (forceWidth ?? tableElement.value.clientWidth) - selectionColumnWidth.value - leftPadding - rightPadding;
 
     if (isNaN(availableWidth) || availableWidth <= 0) {
-        console.warn("Available width is NaN or <= 0")
-        return
+        console.warn('Available width is NaN or <= 0');
+        return;
     }
     const currentWidth = columns.value.reduce((acc, col) => acc + (col.width ?? 0), 0);
     let distributeWidth = availableWidth - currentWidth;
 
-    const affectedColumns = afterColumn ? columns.value.slice(columns.value.findIndex(c => c === afterColumn ) + 1) : columns.value
-        
+    const affectedColumns = afterColumn ? columns.value.slice(columns.value.findIndex(c => c === afterColumn) + 1) : columns.value;
+
     // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
     // Also update columns that are smaller than the minimumWidth
-    distributeWidth += fixColumnWidths(affectedColumns)
+    distributeWidth += fixColumnWidths(affectedColumns);
 
-    if (strategy === "grow") {
-
+    if (strategy === 'grow') {
         // Get columns with the highest priority for shrinking or growing
         // growing: the ones with a width lower than the recommendedWidth
         // shrinking: the ones with a width higher than the recommendedWidth
 
-        const shrinking = distributeWidth < 0
+        const shrinking = distributeWidth < 0;
 
         const columnPriorities: ((col: Column<any, any>) => boolean)[] = shrinking ? [
             // First, shrink all the columns that are larger than the recommendedWidth
-            (c) => c.width !== null && c.width > c.recommendedWidth,
+            c => c.width !== null && c.width > c.recommendedWidth,
 
             // At last, only shrink columns larger than the minimum width
-            (c) => c.width !== null && c.width > c.minimumWidth
+            c => c.width !== null && c.width > c.minimumWidth,
         ] : [
             // First grow all the columns that are smaller than the recommendedWidth
-            (c) => c.width !== null && c.width < c.minimumWidth,
-            (c) => c.width !== null && c.width < c.recommendedWidth,
+            c => c.width !== null && c.width < c.minimumWidth,
+            c => c.width !== null && c.width < c.recommendedWidth,
 
             // Grow only columns that have grow = true (unless none of the columns have grow = true, in which case this step is skipped automatically)
-            (c) => c.width !== null && c.grow === true,
+            c => c.width !== null && c.grow === true,
 
             // At last, grow any column, exept when they don't have width yet
-            (c) => c.width !== null
-        ]
+            c => c.width !== null,
+        ];
 
-        const columnLimits: {minimum?: (col: Column<any, any>) => number, maximum?: (col: Column<any, any>) => number}[] = shrinking ? [
+        const columnLimits: { minimum?: (col: Column<any, any>) => number; maximum?: (col: Column<any, any>) => number }[] = shrinking ? [
             { minimum: c => c.recommendedWidth },
             { minimum: c => c.minimumWidth },
         ] : [
@@ -1189,29 +1200,29 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
             { maximum: c => c.recommendedWidth }, // Grow to recommended size and continue to next step
             { },
             { },
-        ]
-            
-        let columnPriorityIndex = 0
+        ];
 
-        let columns = affectedColumns // use same type, and don't allocate a new array because we'll override it shortly
+        let columnPriorityIndex = 0;
 
-        //console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
+        let columns = affectedColumns; // use same type, and don't allocate a new array because we'll override it shortly
+
+        // console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
 
         const updateColumns = () => {
-            columns = affectedColumns.filter(c => columnPriorities[columnPriorityIndex](c))
-        }
-        updateColumns()
+            columns = affectedColumns.filter(c => columnPriorities[columnPriorityIndex](c));
+        };
+        updateColumns();
 
         while (distributeWidth !== 0 && (columns.length > 0 || columnPriorityIndex < columnPriorities.length - 1)) {
             if (columns.length === 0) {
-                columnPriorityIndex++
-                    
-                updateColumns()
+                columnPriorityIndex++;
+
+                updateColumns();
                 // console.log("Moving to columnPriorityIndex", columnPriorityIndex)
                 // console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
 
                 // Check loop conditions again, and if needed, jump to the next priority or start distributing
-                continue
+                continue;
             }
 
             // Always try to grow with rounded numbers, because else we'll get rounding errors
@@ -1219,39 +1230,40 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
 
             if (Math.abs(change) < 1) {
                 // Make sure change is never zero, or we'll have an infinite loop
-                change = Math.sign(distributeWidth)
+                change = Math.sign(distributeWidth);
             }
 
             // console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
-                
+
             // We'll make sure we never grow or shrink more than the distribute width
 
             for (const col of columns) {
                 if (col.width === null) {
-                    throw new Error("Impossible. Typescript type checking error")
-                } 
+                    throw new Error('Impossible. Typescript type checking error');
+                }
 
-                const start = col.width
+                const start = col.width;
 
                 if ((shrinking && change < distributeWidth) || (!shrinking && change > distributeWidth)) {
                     // Prevent growing more than the distributeWidth
-                    //console.log("Limited change to distributeWidth", change, distributeWidth)
-                    change = distributeWidth
+                    // console.log("Limited change to distributeWidth", change, distributeWidth)
+                    change = distributeWidth;
                 }
 
                 col.width += change;
-                    
+
                 // A column can never shrink more than its recommended width, or it's start width, if that was already smaller (only in case of minimum)
-                const limits = columnLimits[columnPriorityIndex]
-                    
-                const min = limits.minimum ? Math.min(start, limits.minimum(col)) : undefined
-                const max = limits.maximum ? Math.max(start, limits.maximum(col)) : undefined
+                const limits = columnLimits[columnPriorityIndex];
+
+                const min = limits.minimum ? Math.min(start, limits.minimum(col)) : undefined;
+                const max = limits.maximum ? Math.max(start, limits.maximum(col)) : undefined;
 
                 if (min !== undefined && col.width <= min) {
                     // we hit the minimum width, so we need to distribute the width that we couldn't absorb
                     col.width = min;
-                    //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
-                } else if (max !== undefined && col.width >= max) {
+                    // console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
+                }
+                else if (max !== undefined && col.width >= max) {
                     // we hit the minimum width, so we need to distribute the width that we couldn't absorb
                     col.width = max;
                     //
@@ -1259,16 +1271,17 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
 
                 const absorbed = col.width - start;
                 distributeWidth -= absorbed;
-                //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at ", col.width)
+                // console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at ", col.width)
                 col.renderWidth = Math.floor(col.width);
             }
 
             // Update columns
-            updateColumns()
+            updateColumns();
         }
 
-        //console.log("Done distributing with distributeWidth left: ", distributeWidth)
-    } else {
+        // console.log("Done distributing with distributeWidth left: ", distributeWidth)
+    }
+    else {
         // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
 
         for (const column of affectedColumns) {
@@ -1279,19 +1292,20 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
             if (distributeWidth < 0) {
                 if (column.width > column.recommendedWidth) {
                     const shrinkAmount = Math.min(-distributeWidth, column.width - column.recommendedWidth);
-                    column.width -= shrinkAmount
+                    column.width -= shrinkAmount;
                     column.renderWidth = Math.floor(column.width);
                     distributeWidth += shrinkAmount;
 
                     if (distributeWidth >= 0) {
-                        break
+                        break;
                     }
                 }
-            } else {
-                column.width += distributeWidth
+            }
+            else {
+                column.width += distributeWidth;
                 column.renderWidth = Math.floor(column.width);
-                distributeWidth = 0
-                break
+                distributeWidth = 0;
+                break;
             }
         }
 
@@ -1304,19 +1318,20 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
             if (distributeWidth < 0) {
                 if (column.width > column.minimumWidth) {
                     const shrinkAmount = Math.min(-distributeWidth, column.width - column.minimumWidth);
-                    column.width -= shrinkAmount
+                    column.width -= shrinkAmount;
                     column.renderWidth = Math.floor(column.width);
                     distributeWidth += shrinkAmount;
 
                     if (distributeWidth >= 0) {
-                        break
+                        break;
                     }
                 }
-            } else {
-                column.width += distributeWidth
+            }
+            else {
+                column.width += distributeWidth;
                 column.renderWidth = Math.floor(column.width);
-                distributeWidth = 0
-                break
+                distributeWidth = 0;
+                break;
             }
         }
 
@@ -1324,66 +1339,64 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
         if (distributeWidth !== 0) {
             // Add back to afterColumn
             if (afterColumn && afterColumn.width !== null) {
-                afterColumn.width += distributeWidth
+                afterColumn.width += distributeWidth;
                 afterColumn.renderWidth = Math.floor(afterColumn.width);
 
-                updateColumnWidth(null, 'grow')
+                updateColumnWidth(null, 'grow');
             }
         }
     }
 
-    updateCanCollapse()
+    updateCanCollapse();
 }
 
 function updateCanCollapse() {
-    updatePaddingIfNeeded()
+    updatePaddingIfNeeded();
 
     if (wrapColumns.value) {
-        return
+        return;
     }
     if (!tableElement.value) {
-        return
+        return;
     }
-    const n = canCollapse.value
+    const n = canCollapse.value;
     canCollapse.value = Math.floor(totalWidth.value) > Math.floor(tableElement.value.clientWidth);
 
     if (n !== canCollapse.value) {
-        saveColumnConfiguration()
+        saveColumnConfiguration();
     }
 }
 
 function collapse() {
-    updateColumnWidth(null, "grow")
-    saveColumnConfiguration()
+    updateColumnWidth(null, 'grow');
+    saveColumnConfiguration();
 }
 
 const totalRenderWidth = computed(() => {
-    const leftPadding = horizontalPadding.value
-    const rightPadding = horizontalPadding.value
-    return selectionColumnWidth.value + columns.value.reduce((acc, col) => acc + (col.renderWidth ?? 0), 0) + leftPadding + rightPadding
+    const leftPadding = horizontalPadding.value;
+    const rightPadding = horizontalPadding.value;
+    return selectionColumnWidth.value + columns.value.reduce((acc, col) => acc + (col.renderWidth ?? 0), 0) + leftPadding + rightPadding;
 });
 
-
 const gridTemplateColumns = computed(() => {
-    return columns.value.map(col => `${(col.renderWidth ?? 0)}px`).join(" ")
+    return columns.value.map(col => `${(col.renderWidth ?? 0)}px`).join(' ');
 });
 
 watchEffect(() => {
     if (!wrapColumns.value) {
-        tableElement.value?.style.setProperty("--table-columns", gridTemplateColumns.value);
+        tableElement.value?.style.setProperty('--table-columns', gridTemplateColumns.value);
     }
 });
 
 const canFilter = computed(() => {
-    return !!props.filterBuilders
+    return !!props.filterBuilders;
 });
-
 
 async function editFilter(event: MouseEvent) {
     if (!props.filterBuilders) {
-        return
+        return;
     }
-    const filter = selectedUIFilter.value ?? props.filterBuilders[0].create()
+    const filter = selectedUIFilter.value ?? props.filterBuilders[0].create();
     if (!selectedUIFilter.value) {
         selectedUIFilter.value = filter;
     }
@@ -1392,109 +1405,114 @@ async function editFilter(event: MouseEvent) {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(UIFilterEditor, {
-                    filter
-                })
-            })
-        ]
-    })
+                    filter,
+                }),
+            }),
+        ],
+    });
 }
 
 function isValueSelected(value: Value) {
-    const found = markedRows.value.has(value.id)
+    const found = markedRows.value.has(value.id);
 
     if (markedRowsAreSelected.value) {
-        return found
-    } else {
-        return !found
+        return found;
+    }
+    else {
+        return !found;
     }
 }
 
 function isRowFocused(row: VisibleRow<Value>) {
     if (!isRightClicking.value) {
-        return false
+        return false;
     }
 
     if (customFocusedRows.value !== null) {
         if (!row.value) {
-            return false
+            return false;
         }
-        return customFocusedRows.value.has(row.value.id)
+        return customFocusedRows.value.has(row.value.id);
     }
 
-    return row.cachedSelectionValue
+    return row.cachedSelectionValue;
 }
 
 function getSelectionValue(row: VisibleRow<Value>) {
-    const value = row.value
+    const value = row.value;
     if (!value) {
-        return isAllSelected.value
+        return isAllSelected.value;
     }
 
-    return isValueSelected(value)
+    return isValueSelected(value);
 }
 
 function setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
-    const value = row.value
+    const value = row.value;
     if (!value) {
-        return
+        return;
     }
     if (selected) {
         if (markedRowsAreSelected.value) {
-            markedRows.value.set(value.id, value)
-        } else {
-            markedRows.value.delete(value.id)
+            markedRows.value.set(value.id, value);
         }
-    } else {
+        else {
+            markedRows.value.delete(value.id);
+        }
+    }
+    else {
         if (!markedRowsAreSelected.value) {
-            markedRows.value.set(value.id, value)
-        } else {
-            markedRows.value.delete(value.id)
+            markedRows.value.set(value.id, value);
+        }
+        else {
+            markedRows.value.delete(value.id);
         }
     }
 
-    row.cachedSelectionValue = selected
+    row.cachedSelectionValue = selected;
 }
 
 function getExpectedSelectionLength(): number {
     if (!showSelection.value || !hasSelection.value) {
-        return props.tableObjectFetcher.totalFilteredCount ?? values.value.length ?? 0
+        return props.tableObjectFetcher.totalFilteredCount ?? values.value.length ?? 0;
     }
 
     if (markedRowsAreSelected.value) {
-        return markedRows.value.size
-    } else {
-        return (props.tableObjectFetcher.totalFilteredCount  ?? values.value.length ?? 0) - markedRows.value.size
+        return markedRows.value.size;
+    }
+    else {
+        return (props.tableObjectFetcher.totalFilteredCount ?? values.value.length ?? 0) - markedRows.value.size;
     }
 }
 
 async function handleAction(action: TableAction<Value>, event: MouseEvent) {
     if (action.needsSelection && getExpectedSelectionLength() === 0) {
-        return
+        return;
     }
 
-    const selection: TableActionSelection<Value> = buildSelectionObject()
+    const selection: TableActionSelection<Value> = buildSelectionObject();
 
     if (action.hasChildActions) {
         const el = event.currentTarget as HTMLElement;
-        const bounds = el.getBoundingClientRect()
-        const isOnTop = !(isIOS && isMobile.value)
+        const bounds = el.getBoundingClientRect();
+        const isOnTop = !(isIOS && isMobile.value);
 
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: bounds.left,
             y: isOnTop ? bounds.bottom : bounds.top,
-            xPlacement: "right",
-            yPlacement: isOnTop ? "bottom" : "top",
+            xPlacement: 'right',
+            yPlacement: isOnTop ? 'bottom' : 'top',
             actions: action.getChildActions(),
-            selection
+            selection,
         });
-        await present(displayedComponent.setDisplayStyle("overlay"));
-        return
+        await present(displayedComponent.setDisplayStyle('overlay'));
+        return;
     }
 
     action.handle(selection)?.catch((e) => {
-        console.error(e)
-        Toast.fromError(e).show
-    })
+        console.error(e);
+        Toast.fromError(e).show;
+    });
 }
 
 watch(values, () => {
@@ -1503,29 +1521,30 @@ watch(values, () => {
         // has this row changed and should it now display a different value? -> clear it and mark it for reuse
         if (visibleRow.currentIndex !== null && (visibleRow.currentIndex >= values.value.length || visibleRow.value !== values.value[visibleRow.currentIndex])) {
             // Mark this row to be reused
-            visibleRow.value = null
-            visibleRow.currentIndex = null
+            visibleRow.value = null;
+            visibleRow.currentIndex = null;
         }
     }
 
     // Update all rows
-    updateVisibleRows()
-    updateRecommendedWidths()
+    updateVisibleRows();
+    updateRecommendedWidths();
 }, { deep: true });
 
 function getScrollElement(element: HTMLElement): HTMLElement {
     const style = window.getComputedStyle(element);
     if (
-        style.overflowY === "scroll" ||
-        style.overflow === "scroll" ||
-        style.overflow === "auto" ||
-        style.overflowY === "auto" ||
+        style.overflowY === 'scroll'
+        || style.overflow === 'scroll'
+        || style.overflow === 'auto'
+        || style.overflowY === 'auto'
         // Windows fix
-        style.overflow === "overlay" ||
-        style.overflowY === "overlay"
+        || style.overflow === 'overlay'
+        || style.overflowY === 'overlay'
     ) {
         return element;
-    } else {
+    }
+    else {
         if (!element.parentElement) {
             return document.documentElement;
         }
@@ -1533,18 +1552,18 @@ function getScrollElement(element: HTMLElement): HTMLElement {
     }
 }
 
-let cachedScrollElement: HTMLElement | null = null
-let cachedTableYPosition: number | null = 0
+let cachedScrollElement: HTMLElement | null = null;
+let cachedTableYPosition: number | null = 0;
 
 function updateVisibleRows() {
     if (!tableElement.value) {
         return;
     }
-    
-    let topOffset = 0
 
-    const scrollElement = cachedScrollElement ?? getScrollElement(tableElement.value)
-    cachedScrollElement = scrollElement
+    let topOffset = 0;
+
+    const scrollElement = cachedScrollElement ?? getScrollElement(tableElement.value);
+    cachedScrollElement = scrollElement;
 
     // innerHeight is a fix for animations, causing wrong initial bouding client rect
     if (!cachedTableYPosition || cachedTableYPosition > window.innerHeight) {
@@ -1554,78 +1573,78 @@ function updateVisibleRows() {
 
         const rect = tableBody.value.getBoundingClientRect();
 
-        const top = rect.top
-        cachedTableYPosition = top + scrollElement.scrollTop
+        const top = rect.top;
+        cachedTableYPosition = top + scrollElement.scrollTop;
     }
 
     // During animations, the scrollTop often jumps temporarily to a negative value
-    topOffset = Math.max(0, (scrollElement.scrollTop - cachedTableYPosition))
+    topOffset = Math.max(0, (scrollElement.scrollTop - cachedTableYPosition));
 
-    const totalItems = totalFilteredCount.value
-    const extraItems = 5
+    const totalItems = totalFilteredCount.value;
+    const extraItems = 5;
 
-    const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / rowHeight.value) - extraItems, totalItems - 1))
+    const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / rowHeight.value) - extraItems, totalItems - 1));
 
-    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
 
-    const unBoundedLastVisibleItemIndex =  Math.max(0, Math.floor((topOffset + vh) / rowHeight.value) + extraItems)
+    const unBoundedLastVisibleItemIndex = Math.max(0, Math.floor((topOffset + vh) / rowHeight.value) + extraItems);
 
-    const lastVisibleItemIndex = Math.min(unBoundedLastVisibleItemIndex, totalItems - 1)
+    const lastVisibleItemIndex = Math.min(unBoundedLastVisibleItemIndex, totalItems - 1);
 
     // Make all visible rows available if not visible any longer
     for (const visibleRow of visibleRows.value) {
         if (visibleRow.currentIndex === null || visibleRow.currentIndex < firstVisibleItemIndex || visibleRow.currentIndex > lastVisibleItemIndex) {
-            visibleRow.value = null
-            visibleRow.currentIndex = null
+            visibleRow.value = null;
+            visibleRow.currentIndex = null;
         }
     }
 
     for (let index = firstVisibleItemIndex; index <= lastVisibleItemIndex; index++) {
         // Is this already visible?
-        let visibleRow = visibleRows.value.find(r => r.currentIndex === index)
+        let visibleRow = visibleRows.value.find(r => r.currentIndex === index);
         if (visibleRow) {
             // Nothing to do, it's already visible
-            visibleRow.y = index * rowHeight.value
-            continue
+            visibleRow.y = index * rowHeight.value;
+            continue;
         }
 
-        visibleRow = visibleRows.value.find(r => r.currentIndex === null)
+        visibleRow = visibleRows.value.find(r => r.currentIndex === null);
 
         if (!visibleRow) {
-            visibleRow = new VisibleRow<Value>()
-            visibleRows.value.push(visibleRow)
+            visibleRow = new VisibleRow<Value>();
+            visibleRows.value.push(visibleRow);
         }
 
-        const value = values.value[index] ?? null
+        const value = values.value[index] ?? null;
 
-        visibleRow.value = value
-        visibleRow.y = index * rowHeight.value
-        visibleRow.currentIndex = index
-        visibleRow.cachedSelectionValue = getSelectionValue(visibleRow)
+        visibleRow.value = value;
+        visibleRow.y = index * rowHeight.value;
+        visibleRow.currentIndex = index;
+        visibleRow.cachedSelectionValue = getSelectionValue(visibleRow);
     }
 
-    //console.log("Rendered rows: "+visibleRows.value.length)
-    props.tableObjectFetcher.setVisible(firstVisibleItemIndex, unBoundedLastVisibleItemIndex)
+    // console.log("Rendered rows: "+visibleRows.value.length)
+    props.tableObjectFetcher.setVisible(firstVisibleItemIndex, unBoundedLastVisibleItemIndex);
 }
 
 const rowHeight = computed(() => {
     if (wrapColumns.value) {
-        const padding = 15
-        const firstColumnHeight = 16
-        const otherColumnsHeight = 14
-        const borderHeight = 2
-        const margin = 6
-        return padding * 2 + firstColumnHeight + ((otherColumnsHeight + margin) * Math.max(columns.value.length - 1, 0)) + borderHeight
+        const padding = 15;
+        const firstColumnHeight = 16;
+        const otherColumnsHeight = 14;
+        const borderHeight = 2;
+        const margin = 6;
+        return padding * 2 + firstColumnHeight + ((otherColumnsHeight + margin) * Math.max(columns.value.length - 1, 0)) + borderHeight;
     }
-    return 60
+    return 60;
 });
 
 watchEffect(() => {
-    tableElement.value?.style.setProperty("--table-row-height", `${rowHeight.value}px`);
+    tableElement.value?.style.setProperty('--table-row-height', `${rowHeight.value}px`);
 });
 
 const totalHeight = computed(() => {
-    return rowHeight.value * totalFilteredCount.value
+    return rowHeight.value * totalFilteredCount.value;
 });
 
 function getPrevious(value: Value): Value | null {
@@ -1656,8 +1675,8 @@ function getNext(value: Value): Value | null {
 
 defineExpose({
     getPrevious,
-    getNext
-})
+    getNext,
+});
 
 </script>
 
@@ -1710,7 +1729,7 @@ defineExpose({
             max-width: 100%;
             box-sizing: border-box;
         }
-        
+
     }
 
     &[data-style="success"] > span {
@@ -1726,7 +1745,7 @@ defineExpose({
     &[data-style="info"] > span {
         background: $color-primary-background;
         color: $color-primary;
-        
+
         @media (prefers-color-scheme: dark) {
             color: $color-primary-dark;
         }
@@ -1844,7 +1863,6 @@ defineExpose({
 
             @extend .column-style;
 
-            
         }
 
         .columns {
@@ -1854,7 +1872,6 @@ defineExpose({
             transform: translateX(0);
             transition: transform 0.2s;
 
-           
         }
     }
 
@@ -1908,7 +1925,7 @@ defineExpose({
 
                     // Give numbers equal width
                     font-variant-numeric: tabular-nums;
-                    
+
                     &.isDragging {
                         opacity: 0.5;
                     }
@@ -1973,7 +1990,6 @@ defineExpose({
                     }
                 }
 
-                
             }
         }
     }
@@ -1990,7 +2006,7 @@ defineExpose({
 
         .columns > div {
             @extend .style-table-head;
-            
+
             user-select: none;
 
             display: flex;
@@ -2022,7 +2038,7 @@ defineExpose({
             }
 
             &.isDragging {
-                
+
                 // During drag, we move all, except the column drag indicator
                 > button:first-child {
                     transform: translateX(var(--drag-x, 0px));
@@ -2113,7 +2129,6 @@ defineExpose({
                     }
                 }
             }
-            
 
             &:last-child {
                 padding-right: 0;
@@ -2124,7 +2139,7 @@ defineExpose({
     .table-row {
         contain: layout;
         position: absolute;
-        
+
         will-change: transform;
         height: var(--table-row-height, 60px);
 
@@ -2170,7 +2185,7 @@ defineExpose({
 
         &.focused {
             background-color: $color-primary-light;
-            
+
             &:after {
                 content: '';
                 position: absolute;

@@ -627,7 +627,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         // Listen for patches in payments
         GlobalEventBus.addListener(this, 'paymentPatch', async (payment) => {
             if (payment && payment.id && this.order.payments.find(p => p.id === payment.id as string)) {
-                await this.webshopManager.fetchNewOrders(false, false);
+                await this.webshopManager.fetchNewOrdersDeprecated(false, false);
             }
             return Promise.resolve();
         });
@@ -669,7 +669,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
                 });
 
                 // Update order
-                await this.webshopManager.fetchNewOrders(false, false);
+                await this.webshopManager.fetchNewOrdersDeprecated(false, false);
             },
         });
         this.present({

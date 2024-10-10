@@ -1,28 +1,58 @@
 <template>
-    <div>
-        Work in progress
-    </div>
+    <ModernTableView
+        ref="modernTableView"
+        :table-object-fetcher="tableObjectFetcher"
+        :filter-builders="filterBuilders"
+        :title="title"
+        :column-configuration-id="configurationId"
+        :actions="actions"
+        :all-columns="allColumns"
+        :prefix-column="allColumns[0]"
+        @click="$event => openOrder($event)"
+    >
+        <template #empty>
+            {{ $t('Er zijn nog geen bestellingen.') }}
+        </template>
+    </ModernTableView>
 </template>
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { Column, GlobalEventBus, InMemoryTableAction, Toast, useContext, useIsMobile, useOrganization } from '@stamhoofd/components';
+import { Column, GlobalEventBus, InMemoryTableAction, ModernTableView, Toast, UIFilterBuilder, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
 import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
 
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, Ref, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';
 import OrderView from './OrderView.vue';
+import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
-const organization = useOrganization();
+const title = 'Bestellingen';
+// todo?
+const configurationId = 'orders';
+
+const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
+    onUpdatedOrders: () => {
+        console.log('on updated orders');
+        tableObjectFetcher.reset();
+    },
+});
+
+const tableObjectFetcher = useTableObjectFetcher<PrivateOrder>(objectFetcher);
+
+// todo
+const filterBuilders: UIFilterBuilder[] = [];
+
+// const organization = useOrganization();
 const organizationManager = useOrganizationManager();
-const context = useContext();
+// const context = useContext();
+const owner = useRequestOwner();
 const show = useShow();
 const present = usePresent();
 const isMobile = useIsMobile();
@@ -33,16 +63,16 @@ const isRefreshingOrders = ref(false);
 const orders: Ref<PrivateOrderWithTickets[]> = ref([]);
 
 const preview = computed(() => props.webshopManager.preview);
-const webshop = computed(() => props.webshopManager.webshop);
+// const webshop = computed(() => props.webshopManager.webshop);
 const hasSingleTickets = computed(() => preview.value.hasSingleTickets);
 const hasTickets = computed(() => preview.value.hasTickets);
-const estimatedRows = computed(() => {
-    if (isLoadingOrders.value) {
-        return orders.value.length === 0 ? 30 : orders.value.length;
-    }
+// const estimatedRows = computed(() => {
+//     if (isLoadingOrders.value) {
+//         return orders.value.length === 0 ? 30 : orders.value.length;
+//     }
 
-    return 0;
-});
+//     return 0;
+// });
 const actions = computed(() => {
     const builder = new OrderActionBuilder({
         organizationManager: organizationManager.value,
@@ -474,10 +504,11 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
             }));
         }
     }
+
     return cols;
 })();
 
-const prefixColumn = computed(() => allColumns[0]);
+// const prefixColumn = computed(() => allColumns[0]);
 
 /**
 * Insert or update an order
@@ -520,17 +551,17 @@ function onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
 }
 
 function created() {
-    props.webshopManager.ordersEventBus.addListener(this, 'fetched', onNewOrders.bind(this));
-    props.webshopManager.ordersEventBus.addListener(this, 'deleted', onDeleteOrders.bind(this));
+    props.webshopManager.ordersEventBus.addListener(owner, 'fetched', orders => onNewOrders(orders));
+    props.webshopManager.ordersEventBus.addListener(owner, 'deleted', orders => onDeleteOrders(orders));
 
-    props.webshopManager.ticketsEventBus.addListener(this, 'fetched', onNewTickets.bind(this));
-    props.webshopManager.ticketPatchesEventBus.addListener(this, 'patched', onNewTicketPatches.bind(this));
+    props.webshopManager.ticketsEventBus.addListener(owner, 'fetched', tickets => onNewTickets(tickets));
+    props.webshopManager.ticketPatchesEventBus.addListener(owner, 'patched', tickets => onNewTicketPatches(tickets));
 
     reload();
     loadOrders().catch(console.error);
 
     // Listen for patches in payments
-    GlobalEventBus.addListener(this, 'paymentPatch', async (payment: PaymentGeneral) => {
+    GlobalEventBus.addListener(owner, 'paymentPatch', async (payment: PaymentGeneral) => {
         if (payment && payment.id && payment.webshopIds.find(webshopId => webshopId === props.webshopManager.preview.id)) {
             await props.webshopManager.fetchNewTickets(false, false);
         }
@@ -538,15 +569,15 @@ function created() {
     });
 }
 
-created();
+// created();
 
-const hasWrite = computed(() => {
-    const p = context.value.organizationPermissions;
-    if (!p) {
-        return false;
-    }
-    return preview.value.privateMeta.permissions.hasWriteAccess(p);
-});
+// const hasWrite = computed(() => {
+//     const p = context.value.organizationPermissions;
+//     if (!p) {
+//         return false;
+//     }
+//     return preview.value.privateMeta.permissions.hasWriteAccess(p);
+// });
 
 onBeforeUnmount(() => {
     props.webshopManager.ordersEventBus.removeListener(this);
@@ -580,7 +611,7 @@ async function loadOrders() {
         // We use a buffer to prevent DOM updates or Vue slowdown during streaming
         const arrayBuffer: PrivateOrderWithTickets[] = [];
 
-        await props.webshopManager.streamOrders((order) => {
+        await props.webshopManager.streamOrdersDeprecated((order) => {
             // Same orders could be seen twice
             arrayBuffer.push(
                 PrivateOrderWithTickets.create(order),
@@ -632,7 +663,7 @@ async function refresh(reset = false) {
         if (reset) {
             orders.value = [];
         }
-        await props.webshopManager.fetchNewOrders(false, reset);
+        await props.webshopManager.fetchNewOrdersDeprecated(false, reset);
     }
     catch (e) {
         // Fetching failed
@@ -665,9 +696,9 @@ async function refreshTickets() {
     }
 }
 
-const webshopUrl = computed(() => preview.value.getUrl(organization.value!));
+// const webshopUrl = computed(() => preview.value.getUrl(organization.value!));
 
-const hasFullPermissions = computed(() => preview.value.privateMeta.permissions.hasFullAccess(context.value.organizationPermissions));
+// const hasFullPermissions = computed(() => preview.value.privateMeta.permissions.hasFullAccess(context.value.organizationPermissions));
 
 function reload() {
     loading.value = true;
@@ -680,22 +711,22 @@ function reload() {
     });
 }
 
-const deliveryCities = computed(() => {
-    const cities = new Map<string, string>();
-    for (const order of orders.value) {
-        if (order.data.checkoutMethod && order.data.checkoutMethod.type === CheckoutMethodType.Delivery && order.data.address) {
-            cities.set(Formatter.slug(order.data.address.postalCode + ' ' + order.data.address.city), order.data.address.postalCode + ' ' + order.data.address.city);
-        }
-    }
+// const deliveryCities = computed(() => {
+//     const cities = new Map<string, string>();
+//     for (const order of orders.value) {
+//         if (order.data.checkoutMethod && order.data.checkoutMethod.type === CheckoutMethodType.Delivery && order.data.address) {
+//             cities.set(Formatter.slug(order.data.address.postalCode + ' ' + order.data.address.city), order.data.address.postalCode + ' ' + order.data.address.city);
+//         }
+//     }
 
-    return [...cities.entries()].sort((a, b) => Sorter.byStringValue(a[0], b[0]));
-});
+//     return [...cities.entries()].sort((a, b) => Sorter.byStringValue(a[0], b[0]));
+// });
 
-const filterDefinitions = [];
+// const filterDefinitions = [];
 
-const title = 'Bestellingen';
-
-function openOrder(order: PrivateOrderWithTickets) {
+// todo: get private order with tickets??
+// function openOrder(order: PrivateOrderWithTickets) {
+function openOrder(order: PrivateOrder) {
     const component = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(OrderView, {
             initialOrder: order,

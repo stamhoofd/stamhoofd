@@ -1,29 +1,31 @@
-import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from "@stamhoofd/structures";
+import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 
 export interface ObjectFetcher<O> {
-    extendSort?(list: SortList): SortList
-    requiredFilter?: StamhoofdFilter|null|undefined
-    fetch(data: LimitedFilteredRequest): Promise<{results: O[], next?: LimitedFilteredRequest}>
+    extendSort?(list: SortList): SortList;
+    requiredFilter?: StamhoofdFilter | null | undefined;
+    fetch(data: LimitedFilteredRequest): Promise<{ results: O[]; next?: LimitedFilteredRequest }>;
 
-    fetchCount(data: CountFilteredRequest): Promise<number>
+    fetchCount(data: CountFilteredRequest): Promise<number>;
+    beforeRefresh?(): void;
 
-    destroy?(): void
+    destroy?(): void;
 }
 
-export type FetchAllOptions = {
-    onProgress?: (count: number, total: number) => void
-}
+export type FetchAllOptions<T> = {
+    onProgress?: (count: number, total: number) => void;
+    onResultsReceived?: (results: T[]) => void;
+};
 
-export async function fetchAll<T>(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions) {
+export async function fetchAll<T>(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions<T>) {
     // todo: check if we have all or nearly all already.
-    let next: LimitedFilteredRequest|null = initialRequest
+    let next: LimitedFilteredRequest | null = initialRequest;
 
     let totalFilteredCount: number | null = null;
     if (options?.onProgress) {
-        totalFilteredCount = await objectFetcher.fetchCount(initialRequest)
+        totalFilteredCount = await objectFetcher.fetchCount(initialRequest);
     }
 
-    const results: T[] = []
+    const results: T[] = [];
 
     while (next) {
         // Override filter
@@ -36,17 +38,21 @@ export async function fetchAll<T>(initialRequest: LimitedFilteredRequest, object
         if (objectFetcher.extendSort) {
             next.sort = objectFetcher.extendSort(initialRequest.sort);
         }
-        
-        const data = await objectFetcher.fetch(next)
+
+        const data = await objectFetcher.fetch(next);
         next = data.next ?? null;
-        results.push(...data.results)
+        results.push(...data.results);
 
         if (data.results.length === 0) {
             next = null;
         }
 
         if (options?.onProgress) {
-            options.onProgress(results.length, totalFilteredCount ?? results.length)
+            options.onProgress(results.length, totalFilteredCount ?? results.length);
+        }
+
+        if (options?.onResultsReceived) {
+            options.onResultsReceived(results);
         }
     }
 

@@ -1,62 +1,60 @@
-import { Request } from "@simonbackx/simple-networking";
-import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter, mergeFilters } from "@stamhoofd/structures";
-import { onBeforeUnmount, reactive } from "vue";
-import { useAuth } from "../../hooks";
-import { ObjectFetcher } from "./ObjectFetcher";
+import { Request } from '@simonbackx/simple-networking';
+import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter, mergeFilters } from '@stamhoofd/structures';
+import { onBeforeUnmount, reactive } from 'vue';
+import { useAuth } from '../../hooks';
+import { ObjectFetcher } from './ObjectFetcher';
 
-
-
-export function useTableObjectFetcher<O extends {id: string}, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): TableObjectFetcher<O> {
+export function useTableObjectFetcher<O extends { id: string }, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): TableObjectFetcher<O> {
     const auth = useAuth();
     const fetcher = reactive(new TableObjectFetcher<O>({
         objectFetcher,
-        maxLimit: auth.hasSomePlatformAccess() ? 1000 : 100
-    })) as any
+        maxLimit: auth.hasSomePlatformAccess() ? 1000 : 100,
+    })) as any;
 
     onBeforeUnmount(() => {
-        fetcher.destroy()
+        fetcher.destroy();
     });
 
     return fetcher;
 }
 
-export class TableObjectFetcher<O extends {id: string}> {
-    objectFetcher: ObjectFetcher<O>
-    
-    objects: O[] = []
-    baseFilter: StamhoofdFilter|null = null
-    searchQuery = ''
-    
+export class TableObjectFetcher<O extends { id: string }> {
+    objectFetcher: ObjectFetcher<O>;
+
+    objects: O[] = [];
+    baseFilter: StamhoofdFilter | null = null;
+    searchQuery = '';
+
     currentStartIndex = 0;
     currentEndIndex = 0;
-    fetchMargin = 0
+    fetchMargin = 0;
 
-    totalCount: number|null = null
-    totalFilteredCount: number|null = null
+    totalCount: number | null = null;
+    totalFilteredCount: number | null = null;
 
     fetchingCount = false;
     fetchingFilteredCount = false;
     fetchingData = false;
-    delayFetchUntil: Date|null = null;
+    delayFetchUntil: Date | null = null;
 
-    limit = STAMHOOFD.environment === 'development' ? 1 : 100 // To help catch bugs in pagination
-    maxLimit = 100
-    minimumLimit = STAMHOOFD.environment === 'development' ? 1 : 20 // To help catch bugs in pagination
-    sort: SortList = []
+    limit = STAMHOOFD.environment === 'development' ? 1 : 100; // To help catch bugs in pagination
+    maxLimit = 100;
+    minimumLimit = STAMHOOFD.environment === 'development' ? 1 : 20; // To help catch bugs in pagination
+    sort: SortList = [];
 
-    retryTimer: NodeJS.Timeout|null = null;
+    retryTimer: NodeJS.Timeout | null = null;
     retryCount = 0;
 
-    errorState: Error|null = null;
+    errorState: Error | null = null;
 
     // todo: add rate limits if scrolling too fast
     _clearIndex = 0;
 
-    nextRequest: LimitedFilteredRequest|null = null;
+    nextRequest: LimitedFilteredRequest | null = null;
 
-    constructor({objectFetcher, maxLimit}: {objectFetcher: ObjectFetcher<O>, maxLimit?: number}) {
-        this.objectFetcher = objectFetcher
-        this.maxLimit = maxLimit ?? this.maxLimit
+    constructor({ objectFetcher, maxLimit }: { objectFetcher: ObjectFetcher<O>; maxLimit?: number }) {
+        this.objectFetcher = objectFetcher;
+        this.maxLimit = maxLimit ?? this.maxLimit;
     }
 
     get filter() {
@@ -65,11 +63,11 @@ export class TableObjectFetcher<O extends {id: string}> {
 
     destroy() {
         this._clearIndex += 1;
-        Request.cancelAll(this.objectFetcher)
+        Request.cancelAll(this.objectFetcher);
         if (this.objectFetcher.destroy) {
-            this.objectFetcher.destroy()
+            this.objectFetcher.destroy();
         }
-        this.objects = [] // Fast memory cleanup
+        this.objects = []; // Fast memory cleanup
     }
 
     resetRetryCount() {
@@ -78,7 +76,7 @@ export class TableObjectFetcher<O extends {id: string}> {
 
     cancelRetry() {
         if (this.retryTimer) {
-            clearTimeout(this.retryTimer)
+            clearTimeout(this.retryTimer);
             this.retryTimer = null;
         }
     }
@@ -91,28 +89,28 @@ export class TableObjectFetcher<O extends {id: string}> {
         if (!Request.isNetworkError(error)) {
             // Do not retry but display the message and ask a manual retry
             this.errorState = error;
-            return
+            return;
         }
 
         this.retryCount += 1;
 
-        const waitTime = Math.min(this.retryCount * 5 * 1000, 20000)
-        const shorterWaitTime = Math.min(this.retryCount * 200, 20000)
+        const waitTime = Math.min(this.retryCount * 5 * 1000, 20000);
+        const shorterWaitTime = Math.min(this.retryCount * 200, 20000);
 
         // Require mininmum wait time, if a reset happens before the wait time
-        this.delayFetchUntil = new Date(new Date().getTime() + shorterWaitTime)
+        this.delayFetchUntil = new Date(new Date().getTime() + shorterWaitTime);
 
         this.retryTimer = setTimeout(() => {
-            console.info('Retrying fetching after '+waitTime/1000+'s: now')
-            this.fetchIfNeeded().catch(console.error)
-        }, waitTime)
+            console.info('Retrying fetching after ' + waitTime / 1000 + 's: now');
+            this.fetchIfNeeded().catch(console.error);
+        }, waitTime);
     }
 
     reset(total = false, filteredCount = false) {
-        console.info('Reset')
+        console.info('Reset');
 
         this._clearIndex += 1;
-        this.objects = []
+        this.objects = [];
 
         if (total) {
             this.totalCount = null;
@@ -122,26 +120,26 @@ export class TableObjectFetcher<O extends {id: string}> {
         }
 
         if (this.totalCount !== null && !this.filter && !this.searchQuery) {
-            this.totalFilteredCount = this.totalCount
+            this.totalFilteredCount = this.totalCount;
         }
-        
+
         this.fetchingCount = false;
         this.fetchingFilteredCount = false;
         this.fetchingData = false;
         this.errorState = null;
         this.resetRetryCount();
-        this.cancelRetry()
+        this.cancelRetry();
 
         this.nextRequest = new LimitedFilteredRequest({
             filter: this.filter,
             pageFilter: null,
             sort: this.sort,
             limit: this.minimumLimit,
-            search: this.searchQuery
-        })
-        this.fetchIfNeeded().catch(console.error)
+            search: this.searchQuery,
+        });
+        this.fetchIfNeeded().catch(console.error);
     }
-    
+
     setSearchQuery(query: string) {
         if (query === this.searchQuery) {
             return;
@@ -149,21 +147,22 @@ export class TableObjectFetcher<O extends {id: string}> {
 
         if (this.searchQuery || query) {
             // force debounce for search queries
-            this.delayFetchUntil = new Date(new Date().getTime() + 500)
-        } else {
+            this.delayFetchUntil = new Date(new Date().getTime() + 500);
+        }
+        else {
             this.delayFetchUntil = null;
         }
 
         this.searchQuery = query;
-        this.reset(false, true)
+        this.reset(false, true);
     }
-    
-    setFilter(filter: StamhoofdFilter|null) {
+
+    setFilter(filter: StamhoofdFilter | null) {
         if (JSON.stringify(this.baseFilter ?? {}) == JSON.stringify(filter ?? {})) {
-            console.log('setFilter unchanged')
+            console.log('setFilter unchanged');
             return;
         }
-        console.log('setFilter', filter)
+        console.log('setFilter', filter);
 
         this.baseFilter = filter;
         this.reset(false, true);
@@ -173,7 +172,7 @@ export class TableObjectFetcher<O extends {id: string}> {
         if (JSON.stringify(this.sort) == JSON.stringify(sort)) {
             return;
         }
-        console.log('setSort', this.sort)
+        console.log('setSort', this.sort);
 
         this.sort = sort;
         this.reset(false, false);
@@ -183,17 +182,17 @@ export class TableObjectFetcher<O extends {id: string}> {
         if (this.currentStartIndex === startIndex && this.currentEndIndex === endIndex) {
             return;
         }
-        console.log('Set visible', startIndex, endIndex)
+        console.log('Set visible', startIndex, endIndex);
 
         // Load more if needed
-        this.currentStartIndex = startIndex
-        this.currentEndIndex = endIndex
-        this.fetchIfNeeded().catch(console.error)
+        this.currentStartIndex = startIndex;
+        this.currentEndIndex = endIndex;
+        this.fetchIfNeeded().catch(console.error);
     }
 
     async fetchIfNeeded() {
         if (this.fetchingData) {
-            console.warn('Already fetching data')
+            console.warn('Already fetching data');
             return;
         }
 
@@ -213,8 +212,8 @@ export class TableObjectFetcher<O extends {id: string}> {
                 if (!this.retryTimer) {
                     this.retryTimer = setTimeout(() => {
                         console.info('Run delayed fetching');
-                        this.fetchIfNeeded().catch(console.error)
-                    }, this.delayFetchUntil.getTime() - Date.now() + 5)
+                        this.fetchIfNeeded().catch(console.error);
+                    }, this.delayFetchUntil.getTime() - Date.now() + 5);
                 }
                 return;
             }
@@ -225,8 +224,8 @@ export class TableObjectFetcher<O extends {id: string}> {
             return;
         }
 
-        console.info('Started fetching')
-        this.cancelRetry()
+        console.info('Started fetching');
+        this.cancelRetry();
 
         this.fetchingData = true;
         const currentClearIndex = this._clearIndex;
@@ -242,7 +241,7 @@ export class TableObjectFetcher<O extends {id: string}> {
 
                 // Fetch count in parallel
                 this.objectFetcher.fetchCount(new CountFilteredRequest({
-                    filter: this.objectFetcher.requiredFilter
+                    filter: this.objectFetcher.requiredFilter,
                 })).then((c) => {
                     if (currentClearIndex !== this._clearIndex) {
                         // Discard old requests
@@ -257,29 +256,29 @@ export class TableObjectFetcher<O extends {id: string}> {
                     }
 
                     this.fetchIfNeeded().catch(console.error);
-                }).catch(console.error)
+                }).catch(console.error);
             }
 
             if (!this.fetchingFilteredCount && this.totalFilteredCount === null && hasFilter) {
                 this.fetchingFilteredCount = true;
 
                 // Fetch count in parallel
-                this.objectFetcher.fetchCount(new CountFilteredRequest({filter: this.filter, search: this.searchQuery})).then((c) => {
+                this.objectFetcher.fetchCount(new CountFilteredRequest({ filter: this.filter, search: this.searchQuery })).then((c) => {
                     if (currentClearIndex !== this._clearIndex) {
                         // Discard old requests
                         return;
                     }
                     this.totalFilteredCount = c;
                     this.fetchingFilteredCount = false;
-                }).catch(console.error)
+                }).catch(console.error);
             }
 
-            const fetchUntil = this.totalFilteredCount !== null ? Math.min(this.totalFilteredCount, this.currentEndIndex + 1 + this.fetchMargin) : (this.currentEndIndex + 1 + this.fetchMargin) // +1 is required to convert index to total items
+            const fetchUntil = this.totalFilteredCount !== null ? Math.min(this.totalFilteredCount, this.currentEndIndex + 1 + this.fetchMargin) : (this.currentEndIndex + 1 + this.fetchMargin); // +1 is required to convert index to total items
             if (fetchUntil > this.objects.length) {
-                console.log('has ', this.objects.length, 'objects', 'fetch until', fetchUntil)
+                console.log('has ', this.objects.length, 'objects', 'fetch until', fetchUntil);
 
                 // Fetch next page
-                const limit = Math.max(this.minimumLimit, Math.min(this.limit, fetchUntil - this.objects.length))
+                const limit = Math.max(this.minimumLimit, Math.min(this.limit, fetchUntil - this.objects.length));
 
                 // Override limit
                 this.nextRequest.limit = limit;
@@ -291,11 +290,11 @@ export class TableObjectFetcher<O extends {id: string}> {
 
                 // Same for sorting
                 this.nextRequest.sort = this.objectFetcher.extendSort ? this.objectFetcher.extendSort([...this.sort]) : this.sort;
-                
-                const data = await this.objectFetcher.fetch(this.nextRequest)
+
+                const data = await this.objectFetcher.fetch(this.nextRequest);
                 if (currentClearIndex !== this._clearIndex) {
                     // Discard old requests
-                    console.warn('Discarded fetch result')
+                    console.warn('Discarded fetch result');
                     return;
                 }
 
@@ -308,40 +307,42 @@ export class TableObjectFetcher<O extends {id: string}> {
                     for (const o of this.objects) {
                         for (const oo of objects) {
                             if (oo.id === o.id) {
-                                console.warn('Duplicate objects found. Fetched ' + oo.id)
+                                console.warn('Duplicate objects found. Fetched ' + oo.id);
                                 break;
                             }
                         }
                     }
                 }
-                this.objects.push(...objects)
+                this.objects.push(...objects);
 
                 if (objects.length < limit && (this.totalFilteredCount === null || this.objects.length < this.totalFilteredCount)) {
-                    console.warn('Unexpected end of data')
+                    console.warn('Unexpected end of data');
                     this.totalFilteredCount = this.objects.length;
-                    console.info('Stopped fetching')
+                    console.info('Stopped fetching');
                     this.fetchingData = false;
 
                     if (!hasFilter) {
-                        this.totalCount = this.objects.length
+                        this.totalCount = this.objects.length;
                     }
                     return;
                 }
-                
-                console.info('Stopped fetching')
+
+                console.info('Stopped fetching');
                 this.fetchingData = false;
-                this.fetchIfNeeded().catch(console.error)
-            } else {
-                console.info('Stopped fetching')
-                this.fetchingData = false;
-                console.log('No fetch required.', this.objects.length, '/', this.totalFilteredCount)
+                this.fetchIfNeeded().catch(console.error);
             }
-        } catch (e) {
-            if (currentClearIndex === this._clearIndex) {
-                console.error('Stopped fetching due to error')
-                console.error(e)
+            else {
+                console.info('Stopped fetching');
                 this.fetchingData = false;
-                this.scheduleRetry(e as Error)
+                console.log('No fetch required.', this.objects.length, '/', this.totalFilteredCount);
+            }
+        }
+        catch (e) {
+            if (currentClearIndex === this._clearIndex) {
+                console.error('Stopped fetching due to error');
+                console.error(e);
+                this.fetchingData = false;
+                this.scheduleRetry(e as Error);
             }
             throw e;
         }

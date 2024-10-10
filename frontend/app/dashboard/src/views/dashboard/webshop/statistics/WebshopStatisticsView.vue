@@ -228,7 +228,7 @@ async function loadOrderGraph(range: DateOption, type: 'revenue' | 'count'): Pro
     const orderIds = new Set<string>();
 
     return await createGroupedChart(range, async (callback) => {
-        await props.webshopManager.streamOrders((order: Order) => {
+        await props.webshopManager.streamOrdersDeprecated((order: Order) => {
             if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                 // Check in range
                 if (order.createdAt < range.range.start || order.createdAt > range.range.end) {
@@ -257,7 +257,7 @@ async function loadScanGraph(range: DateOption, filterVouchers: boolean): Promis
         // Keep track of all the order item ids that are a voucher, so we can count them separately
         const voucherItemMap = new Set<string>();
 
-        await props.webshopManager.streamOrders((order: Order) => {
+        await props.webshopManager.streamOrdersDeprecated((order: Order) => {
             if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                 orderIds.add(order.id);
 
@@ -449,7 +449,7 @@ async function reload() {
         // Keep track of all the order item ids that are a voucher, so we can count them separately
         const voucherItemMap = new Set<string>();
 
-        await props.webshopManager.streamOrders((order: Order) => {
+        await props.webshopManager.streamOrdersDeprecated((order: Order) => {
             if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                 orderIds.add(order.id);
                 totalRevenue.value += order.data.totalPrice;

@@ -308,7 +308,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
             // We use a buffer to prevent DOM updates or Vue slowdown during streaming
             const arrayBuffer: PrivateOrderWithTickets[] = [];
 
-            await this.webshopManager.streamOrders((order) => {
+            await this.webshopManager.streamOrdersDeprecated((order) => {
                 // Same orders could be seen twice
                 arrayBuffer.push(
                     PrivateOrderWithTickets.create(order),
@@ -364,7 +364,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
             if (reset) {
                 this.orders = [];
             }
-            await this.webshopManager.fetchNewOrders(false, reset);
+            await this.webshopManager.fetchNewOrdersDeprecated(false, reset);
         }
         catch (e) {
             // Fetching failed

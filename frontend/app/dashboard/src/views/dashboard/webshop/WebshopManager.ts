@@ -1,10 +1,12 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
-import { EventBus, Toast } from '@stamhoofd/components';
+import { EventBus, fetchAll, ObjectFetcher, Toast } from '@stamhoofd/components';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
-import { toRaw, unref } from 'vue';
+import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
+import { toRaw } from 'vue';
+
+class CallbackError extends Error {}
 
 /**
  * Responsible for managing a single webshop orders and tickets
@@ -365,16 +367,6 @@ export class WebshopManager {
         return new Promise<void>((resolve, reject) => {
             const transaction = db.transaction(['orders'], 'readwrite');
 
-            transaction.oncomplete = () => {
-                resolve();
-            };
-
-            transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                this.deleteDatabase();
-                reject(event);
-            };
-
             // Do the actual saving
             const objectStore = transaction.objectStore('orders');
 
@@ -386,6 +378,16 @@ export class WebshopManager {
                     objectStore.put(order.encode({ version: Version }));
                 }
             }
+
+            transaction.oncomplete = () => {
+                resolve();
+            };
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                this.deleteDatabase();
+                reject(event);
+            };
         });
     }
 
@@ -529,73 +531,79 @@ export class WebshopManager {
         });
     }
 
-    /**
-     * Warning: might stream same orders multiple times if they have been changed
-     */
-    async streamOrders(callback: (order: PrivateOrder) => void, networkFetch = true): Promise<void> {
-        let callbackError = false;
-        try {
-            const db = await this.getDatabase();
+    async streamOrders(callback: (order: PrivateOrder) => void): Promise<void> {
+        const db = await this.getDatabase();
 
-            await new Promise<void>((resolve, reject) => {
-                const transaction = db.transaction(['orders'], 'readonly');
+        await new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(['orders'], 'readonly');
 
-                transaction.onerror = (event) => {
-                    // Don't forget to handle errors!
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                try {
+                    this.deleteDatabase();
+                }
+                catch (e) {
+                    console.error(e);
+                }
+                reject(event);
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore('orders');
+
+            const request = objectStore.openCursor();
+            request.onsuccess = (event: any) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const rawOrder = cursor.value;
+
+                    let order: PrivateOrder;
                     try {
-                        this.deleteDatabase();
+                        order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }));
                     }
                     catch (e) {
-                        console.error(e);
+                        // Decoding error: ignore
+                        // force fetch all again
+                        this.clearLastFetchedOrder().catch(console.error);
+
+                        // Stop reading without throwing an error
+                        return;
                     }
-                    reject(event);
-                };
 
-                // Do the actual saving
-                const objectStore = transaction.objectStore('orders');
-
-                const request = objectStore.openCursor();
-                request.onsuccess = (event: any) => {
-                    const cursor = event.target.result;
-                    if (cursor) {
-                        const rawOrder = cursor.value;
-
-                        let order: PrivateOrder;
-                        try {
-                            order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }));
-                        }
-                        catch (e) {
-                            // Decoding error: ignore
-                            // force fetch all again
-                            this.clearLastFetchedOrder().catch(console.error);
-
-                            // Stop reading without throwing an error
-                            return;
-                        }
-
-                        try {
-                            callback(order);
-                        }
-                        catch (e) {
-                            console.error('callback failed', e);
-                            // Propagate error
-                            callbackError = true;
-                            reject(e);
-                            return;
-                        }
-
-                        cursor.continue();
+                    try {
+                        callback(order);
                     }
-                    else {
-                        // no more results
-                        resolve();
+                    catch (e: any) {
+                        console.error('callback failed', e);
+                        // Propagate error
+                        reject(new CallbackError((e.message as string | undefined) ?? 'Callback failed'));
+                        return;
                     }
-                };
-            });
+
+                    cursor.continue();
+                }
+                else {
+                    // no more results
+                    resolve();
+                }
+            };
+        }).catch((e) => {
+            if (e instanceof CallbackError) {
+                throw e;
+            }
+        });
+    }
+
+    /**
+     * Warning: might stream same orders multiple times if they have been changed
+     * @deprecated
+     */
+    async streamOrdersDeprecated(callback: (order: PrivateOrder) => void, networkFetch = true): Promise<void> {
+        try {
+            await this.streamOrders(callback);
         }
         catch (e) {
-            console.error(e);
-            if (!networkFetch || callbackError) {
+            if (!networkFetch || e instanceof CallbackError) {
                 throw e;
             }
         }
@@ -609,7 +617,7 @@ export class WebshopManager {
                 return Promise.resolve();
             });
             try {
-                await this.fetchNewOrders(false, false);
+                await this.fetchNewOrdersDeprecated(false, false);
             }
             finally {
                 this.ordersEventBus.removeListener(owner);
@@ -635,6 +643,26 @@ export class WebshopManager {
             request.onsuccess = () => {
                 resolve();
             };
+        });
+    }
+
+    async getOrdersCountFromDatabase(): Promise<number> {
+        const db = await this.getDatabase();
+
+        return new Promise<number>((resolve, reject) => {
+            const transaction = db.transaction(['orders'], 'readonly');
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event);
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore('orders');
+
+            const request = objectStore.count();
+
+            request.onsuccess = () => resolve(request.result);
         });
     }
 
@@ -733,8 +761,15 @@ export class WebshopManager {
     }
 
     async setlastFetchedOrder(order: PrivateOrder) {
+        const updatedAt = order.updatedAt;
+
+        // todo!!!! is this correct?
+        if (this.lastFetchedOrder && this.lastFetchedOrder.updatedAt >= updatedAt) {
+            return;
+        }
+
         this.lastFetchedOrder = {
-            updatedAt: order.updatedAt,
+            updatedAt,
             number: order.number!,
         };
         await this.storeSettingKey('lastFetchedOrder', this.lastFetchedOrder);
@@ -839,11 +874,175 @@ export class WebshopManager {
         return response.data;
     }
 
+    private createBackendOrdersObjectFetcher(): ObjectFetcher<PrivateOrder> {
+        return {
+            fetch: async (data: LimitedFilteredRequest) => {
+                const webshopId = this.preview.id;
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/${webshopId}/orders`,
+                    decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+
+                return response.data;
+            },
+            fetchCount: async (data: CountFilteredRequest): Promise<number> => {
+                const webshopId = this.preview.id;
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/${webshopId}/orders/count`,
+                    decoder: CountResponse as Decoder<CountResponse>,
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+                return response.data.count;
+            },
+        };
+    }
+
+    private async initLastFetchedOrder() {
+        if (this.lastFetchedOrder === undefined) {
+            // Only once (if undefined)
+            try {
+                this.lastFetchedOrder = await this.readSettingKey('lastFetchedOrder') ?? null;
+                if (this.lastFetchedOrder?.updatedAt && !this.lastUpdatedOrders) {
+                    // Set initial timestamp in case of network error later on
+                    this.lastUpdatedOrders = this.lastFetchedOrder.updatedAt;
+                }
+            }
+            catch (e) {
+                console.error(e);
+                // Probably no database support. Ignore it and load everything.
+                this.lastFetchedOrder = null;
+            }
+        }
+    }
+
+    // todo: rename
+
+    /**
+     * Get the orders from the backend and store them in  the indexed db
+     * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
+     * @returns true if the backend returned updated orders
+     */
+    async fetchOrders2({ isFetchAll }: { isFetchAll?: boolean } = {}): Promise<boolean> {
+        if (this.isLoadingOrders) {
+            return false;
+        }
+
+        this.isLoadingOrders = true;
+
+        await this.initLastFetchedOrder();
+
+        const fetcher = this.createBackendOrdersObjectFetcher();
+
+        // todo: only get updated orders?
+        // todo: sort orders on updatedAt? (because lastFetchedOrder is updated)
+        const filteredRequest = new LimitedFilteredRequest({
+            // todo
+            limit: 100,
+        });
+
+        let hadSuccessfulFetch = false;
+        let clearOrdersPromise: Promise<void> | undefined = undefined;
+
+        const triedClearOrdersPromise = new Promise<void>((resolve) => {
+            if (clearOrdersPromise) {
+                clearOrdersPromise
+                    .then(() => {
+                        console.log('Cleared orders from indexed db.');
+                    })
+                    .catch((e) => {
+                        // Clear only if we have internet access
+                        // ignore since some browsers don't support databases
+                        console.error('Failed clear orders from indexed db.');
+                        console.error(e);
+                    })
+                    .finally(resolve);
+                return;
+            }
+
+            resolve();
+        });
+
+        const storeOrdersPromises: Promise<void>[] = [];
+        let hasUpdatedOrders = false;
+
+        const onResultsReceivedHelper = async (orders: PrivateOrder[]): Promise<void> => {
+            if (isFetchAll && !hadSuccessfulFetch) {
+                hadSuccessfulFetch = true;
+                clearOrdersPromise = this.clearOrdersFromDatabase();
+            }
+
+            // prevent that orders get added to indexed db before the db was cleared
+            await triedClearOrdersPromise;
+
+            if (orders.length > 0) {
+                if (!hasUpdatedOrders) {
+                    hasUpdatedOrders = true;
+                }
+                const deletedOrders: PrivateOrderWithTickets[] = [];
+                const nonDeletedOrders: PrivateOrderWithTickets[] = [];
+
+                for (const order of orders) {
+                    if (order.status === OrderStatus.Deleted) {
+                        deletedOrders.push(order);
+                        continue;
+                    }
+
+                    nonDeletedOrders.push(order);
+                }
+
+                const storeOrdersPromise = this.storeOrders(orders);
+                storeOrdersPromises.push(storeOrdersPromise);
+
+                const promises: Promise<unknown>[] = [
+                    storeOrdersPromise,
+                    // todo: this should be run sync?
+                    this.setlastFetchedOrder(orders[orders.length - 1]),
+                ];
+
+                if (nonDeletedOrders.length > 0) {
+                    // todo: is this necessary and should this always be broadcasted (thus without if statement)?
+                    promises.push(this.ordersEventBus.sendEvent('fetched', nonDeletedOrders));
+                }
+
+                if (deletedOrders.length > 0) {
+                    // todo: is this necessary
+                    promises.push(this.ordersEventBus.sendEvent('deleted', deletedOrders));
+                }
+
+                await Promise.all(promises.map(promise => promise.catch(console.error)));
+            }
+        };
+
+        // run async
+        const onResultsReceived: (orders: PrivateOrder[]) => void = (orders) => {
+            onResultsReceivedHelper(orders).catch(console.error);
+        };
+
+        try {
+            await fetchAll(filteredRequest, fetcher, { onResultsReceived });
+        }
+        finally {
+            this.isLoadingOrders = false;
+        }
+
+        // wait for all orders to be stored
+        await Promise.all(storeOrdersPromises);
+        return hasUpdatedOrders;
+    }
+
     /**
      * Fetch new orders from the server.
      * Try to avoid this if needed and use the cache first + fetch changes
+     * @deprecated
      */
-    async fetchNewOrders(retry = false, reset = false) {
+    async fetchNewOrdersDeprecated(retry = false, reset = false) {
         // TODO: clear local database if resetting
         if (this.isLoadingOrders) {
             return;
@@ -851,20 +1050,8 @@ export class WebshopManager {
         this.isLoadingOrders = true;
 
         try {
-            if (!reset && this.lastFetchedOrder === undefined) {
-                // Only once (if undefined)
-                try {
-                    this.lastFetchedOrder = await this.readSettingKey('lastFetchedOrder') ?? null;
-                    if (this.lastFetchedOrder?.updatedAt && !this.lastUpdatedOrders) {
-                        // Set initial timestamp in case of network error later on
-                        this.lastUpdatedOrders = this.lastFetchedOrder.updatedAt;
-                    }
-                }
-                catch (e) {
-                    console.error(e);
-                    // Probably no database support. Ignore it and load everything.
-                    this.lastFetchedOrder = null;
-                }
+            if (!reset) {
+                await this.initLastFetchedOrder();
             }
 
             let didClear = false;

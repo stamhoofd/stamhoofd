@@ -701,7 +701,7 @@ export default class OrderView extends Mixins(NavigationMixin) {
     }
 
     async downloadNewOrders() {
-        await this.webshopManager.fetchNewOrders(false, false);
+        await this.webshopManager.fetchNewOrdersDeprecated(false, false);
     }
 
     downloadNewTickets() {

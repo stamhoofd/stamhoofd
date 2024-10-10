@@ -13,3 +13,8 @@ export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
 export const registerItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
 };
+
+export const privateOrderInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    '#': createInMemoryFilterCompiler('number'),
+};

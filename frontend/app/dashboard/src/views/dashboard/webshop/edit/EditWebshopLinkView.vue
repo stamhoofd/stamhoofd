@@ -180,7 +180,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
         this.hasOrders = !!this.webshopManager?.lastFetchedOrder;
 
         if (!this.hasOrders && this.webshopManager) {
-            this.webshopManager.streamOrders(() => {
+            this.webshopManager.streamOrdersDeprecated(() => {
                 this.hasOrders = true;
                 throw new Error('Stop streaming');
             }, true).then().catch(console.error);

@@ -214,7 +214,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         try {
             await Promise.all([
                 this.webshopManager.fetchNewTickets(false, false),
-                this.webshopManager.fetchNewOrders(false, false),
+                this.webshopManager.fetchNewOrdersDeprecated(false, false),
             ]);
 
             this.hadNetworkError = false;
