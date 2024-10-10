@@ -1,5 +1,6 @@
-import { MemberResponsibilityRecord, Platform, Registration } from '@stamhoofd/models';
+import { Group, MemberResponsibilityRecord, Platform, Registration } from '@stamhoofd/models';
 import { SQL, SQLWhereExists, SQLWhereSign } from '@stamhoofd/sql';
+import { GroupType } from '@stamhoofd/structures';
 
 export class FlagMomentCleanup {
     /**
@@ -37,11 +38,29 @@ export class FlagMomentCleanup {
                 new SQLWhereExists(
                     SQL.select()
                         .from(Registration.table)
-                        .where('memberId', SQL.column(MemberResponsibilityRecord.table, 'memberId'))
-                        .where('organizationId', SQL.column(MemberResponsibilityRecord.table, 'organizationId'))
-                        .where('periodId', currentPeriodId)
-                        .where('deactivatedAt', null)
-                        .where('waitingList', 0),
+                        .join(
+                            SQL.innerJoin(SQL.table(Group.table))
+                                .where(
+                                    SQL.column(Group.table, 'id'),
+                                    SQL.column(Registration.table, 'groupId'),
+                                ),
+                        )
+                        .where(
+                            SQL.column(Registration.table, 'memberId'),
+                            SQL.column(MemberResponsibilityRecord.table, 'memberId'),
+                        ).where(
+                            SQL.column(Registration.table, 'organizationId'),
+                            SQL.column(MemberResponsibilityRecord.table, 'organizationId'),
+                        ).where(
+                            SQL.column(Registration.table, 'periodId'),
+                            currentPeriodId,
+                        ).where(
+                            SQL.column(Registration.table, 'deactivatedAt'),
+                            null,
+                        ).where(
+                            SQL.column(Group.table, 'type'),
+                            GroupType.Membership,
+                        ),
                 ),
             )
             .fetch();
