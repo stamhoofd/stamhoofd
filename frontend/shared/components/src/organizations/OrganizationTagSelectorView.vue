@@ -67,7 +67,7 @@ const props = withDefaults(
     },
 );
 
-const $platform = usePlatform();
+const platform = usePlatform();
 
 const title = 'Selecteer tags';
 const $saveText = computed(() => {
@@ -87,7 +87,7 @@ const $hasChanges = computed(() => {
 const $searchString = ref('');
 const pop = usePop();
 
-const sourceTags = props.allTags ?? $platform.value.config.tags;
+const sourceTags = props.allTags ?? platform.value.config.tags;
 const tags = props.filter ? sourceTags.filter(props.filter) : sourceTags;
 
 const initialSelection = props.tagIds.reduce((result, tagId) => {
