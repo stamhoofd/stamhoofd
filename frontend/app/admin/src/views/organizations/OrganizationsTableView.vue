@@ -43,7 +43,9 @@ const props = withDefaults(
 
 const title = computed(() => {
     if (props.tag) {
-        return props.tag.name;
+        if (props.tag.id !== '') {
+            return props.tag.name;
+        }
     }
     return $t('d4a9ca3f-72c9-4418-90fa-5d648b23ee7e');
 });
@@ -62,15 +64,27 @@ const configurationId = computed(() => {
 const filterBuilders = computed(() => getOrganizationUIFilterBuilders(auth.user));
 
 function getRequiredFilter(): StamhoofdFilter | null {
-    if (!props.tag) {
-        return null;
+    if (props.tag) {
+        if (props.tag.id === '') {
+            return null;
+        }
+
+        if (props.tag.childTags.length > 0) {
+            return {
+                tags: {
+                    $in: [...props.tag.childTags, props.tag.id],
+                },
+            };
+        }
+
+        return {
+            tags: {
+                $eq: props.tag.id,
+            },
+        };
     }
 
-    return {
-        tags: {
-            $eq: props.tag.id,
-        },
-    };
+    return null;
 }
 
 const objectFetcher = useOrganizationsObjectFetcher({

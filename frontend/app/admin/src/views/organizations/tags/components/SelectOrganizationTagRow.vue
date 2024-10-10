@@ -1,7 +1,7 @@
 <template>
     <STListItem :selectable="true" element-name="label">
         <template #left>
-            <Checkbox v-model="enabled" />
+            <Checkbox v-model="enabled" :disabled="lockValue !== null" />
         </template>
 
         <h2 class="style-title-list">
@@ -12,19 +12,22 @@
 
 <script lang="ts" setup>
 import { useEmitPatch } from '@stamhoofd/components';
-import { OrganizationTag, Organization, OrganizationMetaData } from '@stamhoofd/structures';
+import { Organization, OrganizationMetaData, OrganizationTag } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     tag: OrganizationTag;
     organization: Organization;
-}>();
+    lockValue?: boolean | null;
+}>(), {
+    lockValue: null,
+});
 const emit = defineEmits(['patch:organization']);
 
 const { patched, addPatch } = useEmitPatch<Organization>(props, emit, 'organization');
 
 const enabled = computed({
-    get: () => patched.value.meta.tags.includes(props.tag.id),
+    get: () => props.lockValue !== null ? props.lockValue : patched.value.meta.tags.includes(props.tag.id),
     set: (value: boolean) => {
         if (value === patched.value.meta.tags.includes(props.tag.id)) {
             return;

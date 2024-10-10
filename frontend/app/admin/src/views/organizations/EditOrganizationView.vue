@@ -45,7 +45,7 @@
         <hr>
         <h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}</h2>
         <STList>
-            <SelectOrganizationTagRow v-for="tag in tags" :key="tag.id" :organization="patched" :tag="tag" @patch:organization="addPatch" />
+            <SelectOrganizationTagRow v-for="tag in tags" :key="tag.id" :organization="patched" :tag="tag" :lock-value="isAutoAdded(tag) ? true : null" @patch:organization="addPatch" />
         </STList>
 
         <template v-if="auth.hasFullPlatformAccess()">
@@ -65,7 +65,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { AddressInput, CenteredMessage, CheckboxListItem, ErrorBox, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Organization } from '@stamhoofd/structures';
+import { Organization, OrganizationTag, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationUriInput from './components/OrganizationUriInput.vue';
@@ -84,6 +84,17 @@ const props = defineProps<{
 
 const { patched, hasChanges, addPatch, patch } = usePatch(props.organization);
 const $t = useTranslate();
+
+const automaticallyAddedTags = computed(() => {
+    const tagMap = new Map<string, OrganizationTag>(platform.value.config.tags.map(t => [t.id, t]));
+    const map = TagHelper.createAutoAddTagMap(tagMap);
+    const manuallyAddedTags = TagHelper.getManuallyAddedTags(patched.value.meta.tags, map);
+    return TagHelper.getTagsThatWillBeAddedAutomatically(manuallyAddedTags, map).map((id: string) => tagMap.get(id)!);
+});
+
+function isAutoAdded(tag: OrganizationTag) {
+    return automaticallyAddedTags.value.some(autoAddedTag => autoAddedTag.id === tag.id);
+}
 
 const saving = ref(false);
 

@@ -1,6 +1,10 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar title="Groepen" />
+        <STNavigationBar title="Groepen">
+            <template #right>
+                <button v-if="hasFullAccess" class="navigation button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)" />
+            </template>
+        </STNavigationBar>
 
         <main>
             <h1>Groepen</h1>
@@ -16,21 +20,32 @@
 
             <hr>
 
-            <div class="container">
-                <component :is="hasFullAccess ? 'button' : 'p'" type="button" class="menu-button" :class="{ button: hasFullAccess, selected: hasFullAccess && checkRoute(Routes.Tags) }" @click="hasFullAccess && navigate(Routes.Tags)">
-                    <span class="icon label" />
-                    <span>
-                        Tags
-                    </span>
-                    <span v-if="hasFullAccess" class="icon gray settings right-icon" />
-                </component>
+            <div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
+                <div class="grouped">
+                    <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag}}) }" @click="navigate(Routes.Tag, {properties: {tag}})">
+                        <span class="icon label" />
+                        <span>
+                            {{ tag.name }}
+                        </span>
+                        <span v-if="tag.childTags.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: collapsed.isCollapsed(tag.id)}" @click.stop="collapsed.toggle(tag.id)" />
+                    </button>
 
-                <button v-for="tag of tags" :key="tag.id" type="button" class="button menu-button sub-button" :class="{ selected: checkRoute(Routes.Tag, { properties: {tag} }) }" @click="navigate(Routes.Tag, { properties: {tag} })">
-                    <span class="icon" />
-                    <span>
-                        {{ tag.name }}
-                    </span>
-                </button>
+                    <div :class="{collapsable: true, hide: collapsed.isCollapsed(tag.id)}">
+                        <button
+                            v-for="childTag in tagIdsToTags(tag.childTags)"
+                            :key="childTag.id"
+                            class="menu-button button sub-button"
+                            :class="{ selected: checkRoute(Routes.Tag, {properties: {tag: childTag}}) }"
+                            type="button"
+                            @click="navigate(Routes.Tag, {properties: {tag: childTag}})"
+                        >
+                            <span class="icon" />
+                            <span>{{ childTag.name }}</span>
+                        </button>
+
+                        <hr v-if="index < rootTags.length - 1">
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -39,6 +54,7 @@
 <script setup lang="ts">
 import { Route, defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth, usePlatform } from '@stamhoofd/components';
+import { useCollapsed } from '@stamhoofd/dashboard/src/hooks/useCollapsed';
 import { OrganizationTag, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed } from 'vue';
@@ -50,6 +66,7 @@ enum Routes {
     Tag = 'tag',
     Tags = 'tags',
 }
+
 const auth = useAuth();
 const hasFullAccess = auth.hasFullPlatformAccess();
 
@@ -72,6 +89,12 @@ defineRoutes([
             slug: String,
         },
         paramsToProps(params: { slug: string }) {
+            if (params.slug === Formatter.slug(otherTags.value.name)) {
+                return {
+                    tag: null,
+                };
+            }
+
             const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
             if (!tag) {
                 throw new Error('Tag not found');
@@ -85,6 +108,7 @@ defineRoutes([
             if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
                 throw new Error('Missing tag');
             }
+
             return {
                 params: {
                     slug: Formatter.slug(props.tag.name),
@@ -101,9 +125,12 @@ defineRoutes([
             } as Route<any, undefined>]
         : []),
 ]);
+
 const checkRoute = useCheckRoute();
 const navigate = useNavigate();
 const platform = usePlatform();
+const collapsed = useCollapsed('tags');
+const otherTagsId = '';
 
 const tags = computed(() => {
     const t = auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
@@ -113,4 +140,23 @@ const tags = computed(() => {
     return t;
 });
 
+const tagsWithChildren = computed(() => tags.value.filter(tag => tag.childTags.length > 0));
+
+const otherTags = computed(() => {
+    return OrganizationTag.create({
+        id: otherTagsId,
+        name: tagsWithChildren.value.length === 0 ? 'Tags' : 'Andere tags',
+        childTags: tags.value.filter(tag => tag.childTags.length === 0 && !tags.value.some(t => t.childTags.includes(tag.id))).map(t => t.id),
+    });
+});
+
+const rootTags = computed(() => [...tagsWithChildren.value, otherTags.value]);
+
+function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
+    return tagIds.map(id => getTagById(id));
+}
+
+function getTagById(id: string): OrganizationTag {
+    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: 'Onbekende tag' });
+}
 </script>

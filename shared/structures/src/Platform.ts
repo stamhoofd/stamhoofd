@@ -28,6 +28,9 @@ export class OrganizationTag extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     name = '';
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    childTags: string[] = [];
 }
 
 export class PlatformPremiseType extends AutoEncoder {

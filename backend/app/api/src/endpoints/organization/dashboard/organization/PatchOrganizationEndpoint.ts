@@ -8,6 +8,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
 import { Context } from '../../../../helpers/Context';
+import { TagHelper } from '../../../../helpers/TagHelper';
 import { ViesHelper } from '../../../../helpers/ViesHelper';
 
 type Params = Record<string, never>;
@@ -282,9 +283,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw Context.auth.error();
                     }
 
+                    const originalTags = organization.meta.tags.slice();
+
                     const cleanedPatch = OrganizationMetaData.patch({
                         tags: request.body.meta.tags as any,
                     });
+
                     const platform = await Platform.getShared();
                     const patchedMeta = organization.meta.patch(cleanedPatch);
                     for (const tag of patchedMeta.tags) {
@@ -300,7 +304,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         return aIndex - bIndex;
                     });
 
-                    organization.meta.tags = patchedMeta.tags;
+                    const newTags = patchedMeta.tags;
+
+                    organization.meta.tags = TagHelper.getTagIdsAfterSyncWithPlatformTags(originalTags, newTags, platform.config.tags);
                 }
             }
 
