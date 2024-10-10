@@ -55,12 +55,13 @@ const context = useContext();
 const platform = usePlatform();
 const { count } = useCountOrganizations();
 
-watch(() => props.filter, async (filter) => {
-    const result = await count(filter);
-    if (result !== null) {
-        organizationCount.value = result;
-    }
-}, { immediate: true });
+count(props.filter)
+    .then((result) => {
+        if (result !== null) {
+            organizationCount.value = result;
+        }
+    })
+    .catch(console.error);
 
 const organizationCount = ref<number | null>(null);
 const selectedOrganization: Ref<Organization | null> = ref(null);

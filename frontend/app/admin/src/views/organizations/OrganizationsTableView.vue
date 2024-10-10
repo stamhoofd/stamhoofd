@@ -301,7 +301,7 @@ if (auth.hasPlatformFullAccess()) {
         priority: 13,
         groupIndex: 4,
         handler: async (selection: TableActionSelection<Organization>) => {
-            await chargeOrganizationsSheet.show(selection.filter.filter);
+            await chargeOrganizationsSheet.present(selection.filter.filter);
         },
     }));
 }
