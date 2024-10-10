@@ -22,7 +22,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
             });
         },
     },
-    id: {
+    'id': {
         getValue(a) {
             return a.id;
         },
@@ -33,7 +33,18 @@ export const orderSorters: SQLSortDefinitions<Order> = {
             });
         },
     },
-    createdAt: {
+    'name': {
+        getValue(a) {
+            return a.id;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('name'),
+                direction,
+            });
+        },
+    },
+    'createdAt': {
         getValue(a) {
             return Formatter.dateTimeIso(a.createdAt);
         },

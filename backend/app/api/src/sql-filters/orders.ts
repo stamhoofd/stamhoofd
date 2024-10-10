@@ -2,9 +2,10 @@ import { baseSQLFilterCompilers, createSQLColumnFilterCompiler, SQLFilterDefinit
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
-    // 'name': createSQLColumnFilterCompiler('name'),
-    organizationId: createSQLColumnFilterCompiler('organizationId'),
+    'id': createSQLColumnFilterCompiler('id'),
+    'name': createSQLColumnFilterCompiler('name'),
+    'organizationId': createSQLColumnFilterCompiler('organizationId'),
+    '#': createSQLColumnFilterCompiler('number'),
     // 'startDate': createSQLColumnFilterCompiler('startDate'),
     // 'endDate': createSQLColumnFilterCompiler('endDate'),
     // 'groupIds': createSQLExpressionFilterCompiler(
