@@ -1,41 +1,41 @@
-import { SimpleError } from "@simonbackx/simple-errors";
-import { StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
-import { SQL } from "../SQL";
-import { SQLExpression } from "../SQLExpression";
-import { SQLArray, SQLCast, SQLColumnExpression, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from "../SQLExpressions";
-import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote } from "../SQLJsonExpressions";
-import { SQLSelect } from "../SQLSelect";
-import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from "../SQLWhere";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
+import { SQL } from '../SQL';
+import { SQLExpression } from '../SQLExpression';
+import { SQLArray, SQLCast, SQLColumnExpression, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from '../SQLExpressions';
+import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote } from '../SQLJsonExpressions';
+import { SQLSelect } from '../SQLSelect';
+import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from '../SQLWhere';
 
-export type SQLFilterCompiler = (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => SQLWhere|null;
-export type SQLFilterDefinitions = Record<string, SQLFilterCompiler>
+export type SQLFilterCompiler = (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => SQLWhere | null;
+export type SQLFilterDefinitions = Record<string, SQLFilterCompiler>;
 
 export function andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLWhere {
     const runners = compileSQLFilter(filter, filters);
-    return new SQLWhereAnd(runners)
+    return new SQLWhereAnd(runners);
 }
 
 export function orSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLWhere {
     const runners = compileSQLFilter(filter, filters);
-    return new SQLWhereOr(runners)
+    return new SQLWhereOr(runners);
 }
 
 export function notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLWhere {
     const andRunner = andSQLFilterCompiler(filter, filters);
-    return new SQLWhereNot(andRunner)
+    return new SQLWhereNot(andRunner);
 }
 
 function guardFilterCompareValue(val: any): StamhoofdCompareValue {
     if (val instanceof Date) {
-        return val
+        return val;
     }
 
     if (typeof val === 'string') {
-        return val
+        return val;
     }
 
     if (typeof val === 'number') {
-        return val
+        return val;
     }
 
     if (typeof val === 'boolean') {
@@ -46,34 +46,34 @@ function guardFilterCompareValue(val: any): StamhoofdCompareValue {
         return null;
     }
 
-    if (typeof val === 'object' && "$" in val) {
-        if (val["$"] === '$now') {
+    if (typeof val === 'object' && '$' in val) {
+        if (val['$'] === '$now') {
             return val;
         }
     }
 
-    throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.')
+    throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.');
 }
 
-function doNormalizeValue(val: StamhoofdCompareValue, options?: SQLExpressionFilterOptions): string|number|Date|null|boolean {
+function doNormalizeValue(val: StamhoofdCompareValue, options?: SQLExpressionFilterOptions): string | number | Date | null | boolean {
     if (val instanceof Date) {
-        return val
+        return val;
     }
 
     if (typeof val === 'string') {
-        return val.toLocaleLowerCase()
+        return val.toLocaleLowerCase();
     }
 
     if (typeof val === 'boolean') {
         if (options?.type === SQLValueType.JSONBoolean) {
-            return val
+            return val;
         }
         return val === true ? 1 : 0;
     }
 
     if (typeof val === 'number') {
         if (options?.type === SQLValueType.JSONBoolean) {
-            return val === 1 ? true : false
+            return val === 1 ? true : false;
         }
 
         return val;
@@ -83,14 +83,14 @@ function doNormalizeValue(val: StamhoofdCompareValue, options?: SQLExpressionFil
         return null;
     }
 
-    if (typeof val === 'object' && "$" in val) {
-        const specialValue = val["$"];
+    if (typeof val === 'object' && '$' in val) {
+        const specialValue = val['$'];
 
         switch (specialValue) {
             case '$now':
-                return doNormalizeValue(new Date())
+                return doNormalizeValue(new Date());
             default:
-                throw new Error('Unsupported magic value ' + specialValue)
+                throw new Error('Unsupported magic value ' + specialValue);
         }
     }
 
@@ -102,54 +102,54 @@ export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof 
         const f = filter as any;
 
         if ('$elemMatch' in f) {
-            const w = compileToSQLFilter(f['$elemMatch'], definitions)
+            const w = compileToSQLFilter(f['$elemMatch'], definitions);
             const q = baseSelect.clone().where(w);
-            return new SQLWhereExists(q)
+            return new SQLWhereExists(q);
         }
 
-        throw new Error('Invalid filter')
-    }
+        throw new Error('Invalid filter');
+    };
 }
 
 // Already joined, but creates a namespace
 export function createSQLFilterNamespace(definitions: SQLFilterDefinitions): SQLFilterCompiler {
     return (filter: StamhoofdFilter) => {
-        return andSQLFilterCompiler(filter, definitions)
-    }
+        return andSQLFilterCompiler(filter, definitions);
+    };
 }
 
 export enum SQLValueType {
-    'JSONBoolean' = 'JSONBoolean',
-    'JSONString' = 'JSONString'
+    JSONBoolean = 'JSONBoolean',
+    JSONString = 'JSONString',
 }
 
 type SQLExpressionFilterOptions = {
-    normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null, 
-    isJSONValue?: boolean, 
-    isJSONObject?: boolean, 
-    nullable?: boolean,
+    normalizeValue?: (v: SQLScalarValue | null) => SQLScalarValue | null;
+    isJSONValue?: boolean;
+    isJSONObject?: boolean;
+    nullable?: boolean;
 
     /**
      * Type of this column, use to normalize values received from filters
      */
-    type?: SQLValueType
-}
+    type?: SQLValueType;
+};
 
 export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, options: SQLExpressionFilterOptions = {}): SQLFilterCompiler {
-    let {normalizeValue, isJSONObject = false, isJSONValue = false, nullable = false} = options;
-    normalizeValue = normalizeValue ?? ((v) => v);
+    let { normalizeValue, isJSONObject = false, isJSONValue = false, nullable = false } = options;
+    normalizeValue = normalizeValue ?? (v => v);
     const norm = (val: any) => {
         const n = doNormalizeValue(guardFilterCompareValue(val), options);
         return normalizeValue(n);
-    }
+    };
 
-    if(isJSONValue) {
+    if (isJSONValue) {
         const castJsonType = (expression: SQLExpression, type: SQLValueType | undefined): SQLExpression => {
-            if(type === undefined) {
+            if (type === undefined) {
                 return expression;
             }
-    
-            switch(type) {
+
+            switch (type) {
                 case SQLValueType.JSONBoolean: {
                     return expression;
                 }
@@ -157,24 +157,24 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                     return new SQLCast(new SQLJsonUnquote(expression), 'CHAR');
                 }
             }
-        }
-        
+        };
+
         sqlExpression = castJsonType(sqlExpression, options.type);
     }
 
-    const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression
+    const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression;
 
     return (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => {
         if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined) {
             filter = {
-                $eq: filter
-            }
+                $eq: filter,
+            };
         }
 
         if (Array.isArray(filter)) {
-            throw new Error('Unexpected array in filter')
+            throw new Error('Unexpected array in filter');
         }
-        
+
         const f = filter;
 
         if ('$eq' in f) {
@@ -183,16 +183,16 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
 
                 // if (typeof v === 'string') {
                 //     return new SQLWhereEqual(
-                //         new SQLJsonSearch(sqlExpression, 'one', convertToExpression(v)), 
-                //         SQLWhereSign.NotEqual, 
+                //         new SQLJsonSearch(sqlExpression, 'one', convertToExpression(v)),
+                //         SQLWhereSign.NotEqual,
                 //         new SQLNull()
                 //     );
                 // }
 
                 // else
                 return new SQLJsonContains(
-                    sqlExpression, 
-                    convertToExpression(JSON.stringify(v))
+                    sqlExpression,
+                    convertToExpression(JSON.stringify(v)),
                 );
             }
 
@@ -203,8 +203,8 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             if (!Array.isArray(f.$in)) {
                 throw new SimpleError({
                     code: 'invalid_filter',
-                    message: 'Expected array at $in filter'
-                })
+                    message: 'Expected array at $in filter',
+                });
             }
 
             if (f.$in.length === 0) {
@@ -221,24 +221,24 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                     return new SQLWhereOr([
                         new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()), // checks path not exists (= mysql null)
                         new SQLJsonOverlaps(
-                            sqlExpression, 
-                            convertToExpression(JSON.stringify(v)) // contains json null
-                        )
+                            sqlExpression,
+                            convertToExpression(JSON.stringify(v)), // contains json null
+                        ),
                     ]);
                 }
 
                 // else
                 return new SQLJsonOverlaps(
-                    sqlExpression, 
-                    convertToExpression(JSON.stringify(v))
+                    sqlExpression,
+                    convertToExpression(JSON.stringify(v)),
                 );
             }
 
             const createSqlArray = (value: SQLScalarValue[]): SQLArray => {
-                if(isJSONValue) {
+                if (isJSONValue) {
                     const type = options.type;
 
-                    switch(type) {
+                    switch (type) {
                         case SQLValueType.JSONBoolean: {
                             // todo;
                             break;
@@ -250,7 +250,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 }
 
                 return new SQLArray(value);
-            }
+            };
 
             if (nullIncluded) {
                 const remaining = v.filter(v => v !== null);
@@ -259,7 +259,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 }
                 return new SQLWhereOr([
                     new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()),
-                    new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, createSqlArray(remaining))
+                    new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, createSqlArray(remaining)),
                 ]);
             }
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, createSqlArray(v as SQLScalarValue[]));
@@ -271,9 +271,9 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
 
                 return new SQLWhereNot(
                     new SQLJsonContains(
-                        sqlExpression, 
-                        convertToExpression(JSON.stringify(v))
-                    )
+                        sqlExpression,
+                        convertToExpression(JSON.stringify(v)),
+                    ),
                 );
             }
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.NotEqual, convertToExpression(norm(f.$neq)));
@@ -281,7 +281,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
 
         if ('$gt' in f) {
             if (isJSONObject) {
-                throw new Error('Greater than is not supported in this place')
+                throw new Error('Greater than is not supported in this place');
             }
 
             if (f.$gt === null) {
@@ -295,7 +295,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
 
         if ('$gte' in f) {
             if (isJSONObject) {
-                throw new Error('Greater than is not supported in this place')
+                throw new Error('Greater than is not supported in this place');
             }
 
             if (f.$gte === null) {
@@ -307,7 +307,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
 
         if ('$lte' in f) {
             if (isJSONObject) {
-                throw new Error('Greater than is not supported in this place')
+                throw new Error('Greater than is not supported in this place');
             }
 
             if (f.$lte === null) {
@@ -321,17 +321,16 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 return new SQLWhereOr([
                     // Null values are also smaller than any value  - required for sorting
                     new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()),
-                   base
+                    base,
                 ]);
             }
-            
+
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.LessEqual, convertToExpression(norm(f.$lte)));
         }
 
-
         if ('$lt' in f) {
             if (isJSONObject) {
-                throw new Error('Less than is not supported in this place')
+                throw new Error('Less than is not supported in this place');
             }
 
             if (f.$lt === null) {
@@ -339,13 +338,13 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 return new SQLWhereEqual(new SQLSafeValue(1), SQLWhereSign.Equal, new SQLSafeValue(0));
             }
 
-            const base = new SQLWhereEqual(sqlExpression, SQLWhereSign.Less, convertToExpression(norm(f.$lt)))
+            const base = new SQLWhereEqual(sqlExpression, SQLWhereSign.Less, convertToExpression(norm(f.$lt)));
 
             if (nullable) {
                 return new SQLWhereOr([
                     // Null values are also smaller than any value  - required for sorting
                     new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()),
-                   base
+                    base,
                 ]);
             }
 
@@ -356,54 +355,62 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             const needle = norm(f.$contains);
 
             if (typeof needle !== 'string') {
-                throw new Error('Invalid needle for contains filter')
+                throw new Error('Invalid needle for contains filter');
             }
 
             if (isJSONObject) {
                 return new SQLWhereEqual(
                     new SQLJsonSearch(
-                        sqlExpression, 
+                        sqlExpression,
                         'one',
                         convertToExpression(
-                            '%'+SQLWhereLike.escape(needle)+'%'
-                        )
-                    ), 
-                    SQLWhereSign.NotEqual, 
-                    new SQLNull()
+                            '%' + SQLWhereLike.escape(needle) + '%',
+                        ),
+                    ),
+                    SQLWhereSign.NotEqual,
+                    new SQLNull(),
                 );
             }
 
             if (isJSONValue) {
                 // We need to do case insensitive search, so need to convert the sqlExpression from utf8mb4 to varchar
                 return new SQLWhereLike(
-                    new SQLCast(new SQLJsonUnquote(sqlExpression), 'CHAR'), 
+                    new SQLCast(new SQLJsonUnquote(sqlExpression), 'CHAR'),
                     convertToExpression(
-                        '%'+SQLWhereLike.escape(needle)+'%'
-                    )
+                        '%' + SQLWhereLike.escape(needle) + '%',
+                    ),
                 );
             }
-            
+
             return new SQLWhereLike(
-                sqlExpression, 
+                sqlExpression,
                 convertToExpression(
-                    '%'+SQLWhereLike.escape(needle)+'%'
-                )
+                    '%' + SQLWhereLike.escape(needle) + '%',
+                ),
             );
         }
 
-        throw new Error('Invalid filter ' + JSON.stringify(f))
-    }
+        throw new Error('Invalid filter ' + JSON.stringify(f));
+    };
 }
 
 export function createSQLColumnFilterCompiler(name: string | SQLColumnExpression, options?: SQLExpressionFilterOptions): SQLFilterCompiler {
     const column = name instanceof SQLColumnExpression ? name : SQL.column(name);
-    return createSQLExpressionFilterCompiler(column, options)
+    return createSQLExpressionFilterCompiler(column, options);
 }
 
 export const baseSQLFilterCompilers: SQLFilterDefinitions = {
-    '$and': andSQLFilterCompiler,
-    '$or': orSQLFilterCompiler,
-    '$not': notSQLFilterCompiler,
+    $and: andSQLFilterCompiler,
+    $or: orSQLFilterCompiler,
+    $not: notSQLFilterCompiler,
+};
+
+function objectToArray(f: StamhoofdFilter & object): StamhoofdFilter[] {
+    const splitted: StamhoofdFilter[] = [];
+    for (const key of Object.keys(f)) {
+        splitted.push({ [key]: f[key] });
+    }
+    return splitted;
 }
 
 function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterDefinitions): SQLWhere[] {
@@ -411,36 +418,36 @@ function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterDefinit
         return [];
     }
 
-    const runners: SQLWhere[] = []
+    const runners: SQLWhere[] = [];
 
-    for (const f of (Array.isArray(filter) ? filter : [filter])) {
+    for (const f of (Array.isArray(filter) ? filter : (typeof filter === 'object' && filter !== null ? objectToArray(filter) : [filter]))) {
         if (!f) {
             continue;
         }
+        if (!(typeof f === 'object' && f !== null)) {
+            throw new Error('Unsupported filter at this position: ' + f);
+        }
+
         if (Object.keys(f).length > 1) {
             // Multiple keys in the same object should always be combined with AND
-            const splitted: StamhoofdFilter[] = [];
-            for (const key of Object.keys(f)) {
-                splitted.push({ [key]: f[key] })
-            }
-            runners.push(andSQLFilterCompiler(splitted, definitions));
+            runners.push(andSQLFilterCompiler(objectToArray(f), definitions));
             continue;
         }
         for (const key of Object.keys(f)) {
             const filter = definitions[key];
             if (!filter) {
-                throw new Error('Unsupported filter ' + key)
+                throw new Error('Unsupported filter ' + key);
             }
 
-            const s = filter(f[key] as StamhoofdFilter, definitions)
+            const s = filter(f[key] as StamhoofdFilter, definitions);
             if (s === undefined || s === null) {
-                throw new Error('Unsupported filter value for ' + key)
+                throw new Error('Unsupported filter value for ' + key);
             }
             runners.push(s);
         }
     }
 
-    return runners
+    return runners;
 }
 
-export const compileToSQLFilter = andSQLFilterCompiler
+export const compileToSQLFilter = andSQLFilterCompiler;
