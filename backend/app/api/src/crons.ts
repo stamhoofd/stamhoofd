@@ -736,11 +736,11 @@ async function checkSGV() {
 
     // Send to S&GV
     Email.sendInternal({
-        to: 'hallo@stamhoofd.be',
+        to: 'groepsadministratie@scoutsengidsenvlaanderen.be',
         bcc: 'hallo@stamhoofd.be',
         subject: 'Stamhoofd: synchronisatieoverzicht',
         replyTo: 'hallo@stamhoofd.be',
-        text: 'In bijlage het overzicht van de laatste synchronisatie van alle groepen.',
+        text: 'Beste,\n\nIn bijlage kan je het overzicht van de laatste synchronisaties tussen Stamhoofd en de groepsadministratie terug vinden voor alle aangesloten groepen. Synchronisaties voor 27 september 2024 zijn hierop nog niet inbegrepen.',
         attachments: [
             {
                 filename: 'rapport-'+Formatter.dateIso(new Date())+'.xlsx',
