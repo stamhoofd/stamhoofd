@@ -20,9 +20,9 @@
 
             <hr>
 
-            <div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
+            <div v-for="(tag, index) in tagsToShow" :key="tag.id" class="container">
                 <div class="grouped">
-                    <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag}}) }" @click="navigate(Routes.Tag, {properties: {tag}})">
+                    <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag}}) }" @click="navigateToTag(tag)">
                         <span class="icon label" />
                         <span>
                             {{ tag.name }}
@@ -37,7 +37,7 @@
                             class="menu-button button sub-button"
                             :class="{ selected: checkRoute(Routes.Tag, {properties: {tag: childTag}}) }"
                             type="button"
-                            @click="navigate(Routes.Tag, {properties: {tag: childTag}})"
+                            @click="navigateToTag(childTag)"
                         >
                             <span class="icon" />
                             <span>{{ childTag.name }}</span>
@@ -55,10 +55,11 @@
 import { Route, defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth, usePlatform } from '@stamhoofd/components';
 import { useCollapsed } from '@stamhoofd/dashboard/src/hooks/useCollapsed';
-import { OrganizationTag, PermissionLevel } from '@stamhoofd/structures';
+import { OrganizationTag, PermissionLevel, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
+import OrganizationTagView from './OrganizationTagView.vue';
 import EditOrganizationTagsView from './tags/EditOrganizationTagsView.vue';
 
 enum Routes {
@@ -84,14 +85,14 @@ defineRoutes([
         url: 'tag/@slug',
         name: Routes.Tag,
         show: 'detail',
-        component: OrganizationsTableView as unknown as ComponentOptions,
+        component: OrganizationTagView as unknown as ComponentOptions,
         params: {
             slug: String,
         },
         paramsToProps(params: { slug: string }) {
             if (params.slug === Formatter.slug(otherTags.value.name)) {
                 return {
-                    tag: null,
+                    tag: otherTags.value,
                 };
             }
 
@@ -140,17 +141,20 @@ const tags = computed(() => {
     return t;
 });
 
-const tagsWithChildren = computed(() => tags.value.filter(tag => tag.childTags.length > 0));
+const rootTags = computed(() => TagHelper.getRootTags(tags.value));
+
+const rootTagsWithChildren = computed(() => rootTags.value.filter(tag => tag.childTags.length > 0));
+const otherRootTags = computed(() => rootTags.value.filter(tag => tag.childTags.length === 0));
 
 const otherTags = computed(() => {
     return OrganizationTag.create({
         id: otherTagsId,
-        name: tagsWithChildren.value.length === 0 ? 'Tags' : 'Andere tags',
-        childTags: tags.value.filter(tag => tag.childTags.length === 0 && !tags.value.some(t => t.childTags.includes(tag.id))).map(t => t.id),
+        name: rootTagsWithChildren.value.length === 0 ? 'Tags' : 'Andere tags',
+        childTags: otherRootTags.value.map(t => t.id),
     });
 });
 
-const rootTags = computed(() => [...tagsWithChildren.value, otherTags.value]);
+const tagsToShow = computed(() => rootTagsWithChildren.value.concat(otherTags.value));
 
 function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
     return tagIds.map(id => getTagById(id));
@@ -158,5 +162,9 @@ function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
 
 function getTagById(id: string): OrganizationTag {
     return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: 'Onbekende tag' });
+}
+
+async function navigateToTag(tag: OrganizationTag) {
+    await navigate(Routes.Tag, { properties: { tag } });
 }
 </script>

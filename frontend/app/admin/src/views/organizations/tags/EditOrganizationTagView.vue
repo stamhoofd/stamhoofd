@@ -24,13 +24,13 @@
             </p>
             <STList v-model="draggableChildTags" :draggable="true">
                 <template #item="{item}">
-                    <TagRow :tag="item" :show-delete="true" @click="editTag(item)" @delete="removeChildTag(item.id)" />
+                    <TagRow :tag="item" @click="editTag(item)" />
                 </template>
             </STList>
             <p>
-                <button class="button text" type="button" @click="selectTags">
+                <button class="button text" type="button" @click="addTag">
                     <span class="icon add" />
-                    <span>{{ isEmpty ? $t('Voeg tags toe') : $t('Wijzig tags') }}</span>
+                    <span>{{ $t('Voeg tag toe') }}</span>
                 </button>
             </p>
         </div>
@@ -41,7 +41,7 @@
                 {{ $t('Verwijder deze tag') }}
             </h2>
             <p v-if="!isEmpty" class="style-description">
-                {{ $t('Subtags zullen niet verwijderd worden.') }}
+                {{ $t('Subtags zullen ook verwijderd worden.') }}
             </p>
 
             <button class="button secundary danger" type="button" @click="doDelete">
@@ -56,7 +56,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, OrganizationTagSelectorView, SaveView, useDraggableArrayIds, useErrors } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, SaveView, useDraggableArrayIds, useErrors } from '@stamhoofd/components';
 import { OrganizationTag } from '@stamhoofd/structures';
 import { computed, ref, Ref } from 'vue';
 import TagRow from './components/TagRow.vue';
@@ -153,32 +153,6 @@ const name = computed({
     set: name => addPatch({ name }),
 });
 
-async function selectTags() {
-    await present({
-        modalDisplayStyle: 'popup',
-        components: [
-            new ComponentWithProperties(OrganizationTagSelectorView, {
-                allTags: allPatchedTags.value,
-                tagIds: patched.value.childTags.slice(),
-                filter: (tag: OrganizationTag) => tag.id !== props.tag.id,
-                onAdd: async (_allTags: OrganizationTag[], addedTags: OrganizationTag[], deletedTags: OrganizationTag[]) => {
-                    const recordsPatch = new PatchableArray<string, string, string>();
-
-                    addedTags.forEach((tag) => {
-                        recordsPatch.addPut(tag.id);
-                    });
-
-                    deletedTags.forEach((tag) => {
-                        recordsPatch.addDelete(tag.id);
-                    });
-
-                    addPatch({ childTags: recordsPatch });
-                },
-            }),
-        ],
-    });
-}
-
 async function editTag(tag: OrganizationTag) {
     await present({
         modalDisplayStyle: 'popup',
@@ -195,8 +169,27 @@ async function editTag(tag: OrganizationTag) {
     });
 }
 
-function removeChildTag(tagId: string) {
-    draggableChildTags.value = draggableChildTags.value.filter(tag => tag.id !== tagId);
+async function addTag() {
+    const tag = OrganizationTag.create({});
+
+    await present({
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(EditOrganizationTagView, {
+                allTags: allPatchedTags.value,
+                tag,
+                isNew: true,
+                saveHandler: (newPatch: PatchableArrayAutoEncoder<OrganizationTag>) => {
+                    patch.value = patch.value.patch(newPatch);
+
+                    const recordsPatch = new PatchableArray<string, string, string>();
+                    recordsPatch.addPut(tag.id);
+
+                    addPatch({ childTags: recordsPatch });
+                },
+            }),
+        ],
+    });
 }
 
 const shouldNavigateAway = async () => {

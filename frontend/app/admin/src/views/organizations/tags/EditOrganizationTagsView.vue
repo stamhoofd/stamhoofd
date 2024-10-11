@@ -4,42 +4,19 @@
             {{ title }}
         </h1>
 
-        <p class="style-description">
-            {{ $t('Tags helpen bij het filteren van groepen en er kunnen rechten toegekend worden op basis van tags.') }}
-        </p>
-
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <div v-if="draggableTagsWithChildren.length" class="container">
-            <hr>
-            <h2>{{ $t('Categorieën') }}</h2>
-            <p>{{ $t('Organiseer tags door deze onder te verdelen in categorieën.') }}</p>
-            <STList v-model="draggableTagsWithChildren" :draggable="true">
-                <template #item="{item: tag}">
-                    <TagRow :tag="tag" @click="editTag(tag)" />
-                </template>
-            </STList>
-        </div>
-
-        <div class="container">
-            <template v-if="draggableTagsWithChildren.length">
-                <hr>
-                <h2>
-                    {{ $t('Andere tags') }}
-                </h2>
+        <STList v-model="draggableTags" :draggable="true">
+            <template #item="{item: tag}">
+                <TagRow :tag="tag" @click="editTag(tag)" />
             </template>
-            <STList v-model="draggableOtherTags" :draggable="true">
-                <template #item="{item: tag}">
-                    <TagRow :tag="tag" @click="editTag(tag)" />
-                </template>
-            </STList>
-            <p>
-                <button class="button text" type="button" @click="addTag">
-                    <span class="icon add" />
-                    <span>{{ $t('Tag toevoegen') }}</span>
-                </button>
-            </p>
-        </div>
+        </STList>
+        <p>
+            <button class="button text" type="button" @click="addTag">
+                <span class="icon add" />
+                <span>{{ $t('Tag toevoegen') }}</span>
+            </button>
+        </p>
     </SaveView>
 </template>
 
@@ -68,11 +45,7 @@ const saving = ref(false);
 
 const title = 'Tags';
 
-const draggableTagsWithChildren = useDraggableArray(() => tags.value.filter(tag => tag.childTags.length > 0), addArrayPatch);
-
-const draggableOtherTags = useDraggableArray(() => {
-    return tags.value.filter(tag => tag.childTags.length === 0 && !tags.value.some(t => t.childTags.includes(tag.id)));
-}, addArrayPatch);
+const draggableTags = useDraggableArray(() => tags.value, addArrayPatch);
 
 async function addTag() {
     const tag = OrganizationTag.create({});
