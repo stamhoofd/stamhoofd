@@ -37,10 +37,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { STList, STListItem, STNavigationBar, usePlatform } from '@stamhoofd/components';
 import { OrganizationTag } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { Formatter } from '@stamhoofd/utility';
+import { ComponentOptions, computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
 import OrganizationTagView from './OrganizationTagView.vue';
 
@@ -48,8 +49,89 @@ const props = defineProps<{
     tag: OrganizationTag;
 }>();
 
-const show = useShow();
+const navigate = useNavigate();
 const platform = usePlatform();
+
+enum Routes {
+    All = 'all',
+    Tag = 'tag',
+    Organizations = 'organizations',
+}
+
+defineRoutes([
+    {
+        url: 'groepen',
+        name: Routes.All,
+        component: OrganizationsTableView as unknown as ComponentOptions,
+        params: {
+            slug: String,
+        },
+        paramsToProps() {
+            return {
+                tag: props.tag,
+            };
+        },
+    },
+    {
+        url: 'tag/@slug/groepen',
+        name: Routes.Organizations,
+        component: OrganizationsTableView as unknown as ComponentOptions,
+        params: {
+            slug: String,
+        },
+        paramsToProps(params: { slug: string }) {
+            const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
+            if (!tag) {
+                throw new Error('Tag not found');
+            }
+
+            return {
+                tag,
+            };
+        },
+        propsToParams(props) {
+            if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
+                throw new Error('Missing tag');
+            }
+
+            return {
+                params: {
+                    slug: Formatter.slug(props.tag.name),
+                },
+            };
+        },
+    },
+    {
+        url: 'tag/@slug',
+        name: Routes.Tag,
+        component: OrganizationTagView as unknown as ComponentOptions,
+        params: {
+            slug: String,
+        },
+        paramsToProps(params: { slug: string }) {
+            const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
+            if (!tag) {
+                throw new Error('Tag not found');
+            }
+
+            return {
+                tag,
+            };
+        },
+        propsToParams(props) {
+            if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
+                throw new Error('Missing tag');
+            }
+
+            return {
+                params: {
+                    slug: Formatter.slug(props.tag.name),
+                },
+            };
+        },
+    },
+
+]);
 
 const title = computed(() => props.tag.name);
 
@@ -61,15 +143,15 @@ const childTags = computed(() => {
 const isShowTable = computed(() => childTags.value.length === 0);
 
 async function openChildTag(tag: OrganizationTag) {
-    await show(new ComponentWithProperties(OrganizationTagView, {
-        tag,
-    }));
+    if (tag.childTags.length > 0) {
+        await navigate(Routes.Tag, { properties: { tag } });
+        return;
+    }
+    await navigate(Routes.Organizations, { properties: { tag } });
 }
 
 async function openThisTag() {
-    await show(new ComponentWithProperties(OrganizationsTableView, {
-        tag: props.tag,
-    }));
+    await navigate(Routes.All);
 }
 </script>
 

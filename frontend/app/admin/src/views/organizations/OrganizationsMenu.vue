@@ -66,6 +66,7 @@ enum Routes {
     All = 'all',
     Tag = 'tag',
     Tags = 'tags',
+    Organizations = 'organizations',
 }
 
 const auth = useAuth();
@@ -79,6 +80,42 @@ defineRoutes([
         component: OrganizationsTableView as unknown as ComponentOptions,
         isDefault: {
             properties: {},
+        },
+    },
+    {
+        url: 'tag/@slug/groepen',
+        name: Routes.Organizations,
+        show: 'detail',
+        component: OrganizationsTableView as unknown as ComponentOptions,
+        params: {
+            slug: String,
+        },
+        paramsToProps(params: { slug: string }) {
+            if (params.slug === Formatter.slug(otherTags.value.name)) {
+                return {
+                    tag: otherTags.value,
+                };
+            }
+
+            const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
+            if (!tag) {
+                throw new Error('Tag not found');
+            }
+
+            return {
+                tag,
+            };
+        },
+        propsToParams(props) {
+            if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
+                throw new Error('Missing tag');
+            }
+
+            return {
+                params: {
+                    slug: Formatter.slug(props.tag.name),
+                },
+            };
         },
     },
     {
@@ -165,6 +202,10 @@ function getTagById(id: string): OrganizationTag {
 }
 
 async function navigateToTag(tag: OrganizationTag) {
+    if (tag.childTags.length === 0) {
+        await navigate(Routes.Organizations, { properties: { tag } });
+        return;
+    }
     await navigate(Routes.Tag, { properties: { tag } });
 }
 </script>
