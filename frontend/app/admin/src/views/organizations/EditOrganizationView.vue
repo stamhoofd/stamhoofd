@@ -45,8 +45,18 @@
         <hr>
         <h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}</h2>
         <STList>
-            <SelectOrganizationTagRow v-for="tag in tags" :key="tag.id" :organization="patched" :tag="tag" :lock-value="isAutoAdded(tag) ? true : null" @patch:organization="addPatch" />
+            <SelectOrganizationTagRow v-for="tag in rootTags" :key="tag.id" :organization="patched" :tag="tag" @patch:organization="addPatch" />
         </STList>
+
+        <div v-for="tag in allTagsWithChildren" :key="tag.id" class="container">
+            <JumpToContainer :visible="isSelected(tag)">
+                <hr>
+                <h2>{{ tag.name }}</h2>
+                <STList>
+                    <SelectOrganizationTagRow v-for="childTag in tagIdsToTags(tag.childTags)" :key="childTag.id" :organization="patched" :tag="childTag" @patch:organization="addPatch" />
+                </STList>
+            </JumpToContainer>
+        </div>
 
         <template v-if="auth.hasFullPlatformAccess()">
             <hr>
@@ -63,11 +73,11 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, CheckboxListItem, ErrorBox, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, CheckboxListItem, ErrorBox, JumpToContainer, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Organization, OrganizationTag, TagHelper } from '@stamhoofd/structures';
+import { Organization, OrganizationMetaData, OrganizationTag, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import OrganizationUriInput from './components/OrganizationUriInput.vue';
 import SelectOrganizationTagRow from './tags/components/SelectOrganizationTagRow.vue';
 
@@ -84,17 +94,6 @@ const props = defineProps<{
 
 const { patched, hasChanges, addPatch, patch } = usePatch(props.organization);
 const $t = useTranslate();
-
-const automaticallyAddedTags = computed(() => {
-    const tagMap = new Map<string, OrganizationTag>(platform.value.config.tags.map(t => [t.id, t]));
-    const map = TagHelper.createAutoAddTagMap(tagMap);
-    const manuallyAddedTags = TagHelper.getManuallyAddedTags(patched.value.meta.tags, map);
-    return TagHelper.getTagsThatWillBeAddedAutomatically(manuallyAddedTags, map).map((id: string) => tagMap.get(id)!);
-});
-
-function isAutoAdded(tag: OrganizationTag) {
-    return automaticallyAddedTags.value.some(autoAddedTag => autoAddedTag.id === tag.id);
-}
 
 const saving = ref(false);
 
@@ -131,7 +130,30 @@ const active = computed({
     set: value => addPatch({ active: value }),
 });
 
-const tags = computed(() => platform.value.config.tags);
+const platformTags = computed(() => platform.value.config.tags);
+const rootTags = computed(() => TagHelper.getRootTags(platformTags.value));
+const selectedTagIds = computed(() => patched.value.meta.tags);
+const selectedTags = computed(() => tagIdsToTags(selectedTagIds.value));
+const allTagsWithChildren = computed(() => platformTags.value.filter(tag => tag.childTags.length > 0));
+const selectedTagsWithChildren = computed(() => selectedTags.value.filter(tag => tag.childTags.length > 0));
+
+watch(() => selectedTagsWithChildren.value, (selectedTagsWithChildren) => {
+    const tagIds = selectedTagIds.value;
+
+    // delete tags that are subtags of tags that are not selected
+    const tagsToDelete = tagIds.filter(tagId =>
+        !(rootTags.value.some(rootTag => rootTag.id === tagId)
+            || selectedTagsWithChildren.some(tagWithChildren => tagWithChildren.childTags.includes(tagId))
+        ));
+
+    if (tagsToDelete.length > 0) {
+        setTagIds(tagIds.filter(id => !tagsToDelete.includes(id)));
+    }
+}, { immediate: true });
+
+function isSelected(tag: OrganizationTag): boolean {
+    return selectedTagIds.value.includes(tag.id);
+}
 
 async function save() {
     if (saving.value) {
@@ -169,6 +191,18 @@ const shouldNavigateAway = async () => {
     }
     return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
+
+function tagIdsToTags(ids: string[]) {
+    return ids.map(id => platformTags.value.find(pt => pt.id === id)).filter(x => x !== undefined);
+}
+
+function setTagIds(tagIds: string[]) {
+    addPatch({
+        meta: OrganizationMetaData.patch({
+            tags: tagIds as any,
+        }),
+    });
+}
 
 defineExpose({
     shouldNavigateAway,
