@@ -124,7 +124,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, useAuth, useContext, useErrors, BillingStatusView, useOrganization, useFeatureFlag } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, BalanceItemWithPayments, OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemWithPayments, DetailedPayableBalanceCollection, DetailedPayableBalance, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions, ref, Ref } from 'vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
@@ -205,7 +205,7 @@ defineRoutes([
             };
         },
         propsToParams(props) {
-            if (!('items' in props) || (!Array.isArray(props.items)) || !(props.items[0] instanceof OrganizationDetailedBillingStatusItem)) {
+            if (!('items' in props) || (!Array.isArray(props.items)) || !(props.items[0] instanceof DetailedPayableBalance)) {
                 throw new Error('Missing items');
             }
 
@@ -224,7 +224,7 @@ const owner = useRequestOwner();
 const context = useContext();
 const errors = useErrors();
 const organization = useOrganization();
-const outstandingBalance = ref(null) as Ref<OrganizationDetailedBillingStatus | null>;
+const outstandingBalance = ref(null) as Ref<DetailedPayableBalanceCollection | null>;
 
 const cachedOutstandingBalancesEnabled = useFeatureFlag()('cached-outstanding-balances');
 
@@ -235,8 +235,8 @@ async function updateBalance() {
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
-            path: `/organization/billing/status/detailed`,
-            decoder: OrganizationDetailedBillingStatus as Decoder<OrganizationDetailedBillingStatus>,
+            path: `/organization/payable-balance/detailed`,
+            decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
             shouldRetry: true,
             owner,
             timeout: 5 * 60 * 1000,

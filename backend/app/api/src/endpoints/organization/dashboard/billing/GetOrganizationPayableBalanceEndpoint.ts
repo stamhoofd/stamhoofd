@@ -1,22 +1,23 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { OrganizationBillingStatus } from '@stamhoofd/structures';
+import { PayableBalanceCollection } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
-import { GetUserBilingStatusEndpoint } from '../../../global/registration/GetUserBillingStatusEndpoint';
+import { GetUserPayableBalanceEndpoint } from '../../../global/registration/GetUserPayableBalanceEndpoint';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type ResponseBody = OrganizationBillingStatus;
+type ResponseBody = PayableBalanceCollection;
 type Body = undefined;
 
-// Todo: rename to PayableBalance
-export class GetOrganizationBillingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/billing/status', {});
+        const params = request.getVersion() >= 339
+            ? Endpoint.parseParameters(request.url, '/organization/payable-balance', {})
+            : Endpoint.parseParameters(request.url, '/organization/billing/status', {});
 
         if (params) {
             return [true, params as Params];
@@ -33,6 +34,6 @@ export class GetOrganizationBillingStatusEndpoint extends Endpoint<Params, Query
             throw Context.auth.error();
         }
 
-        return new Response(await GetUserBilingStatusEndpoint.getBillingStatusForObjects([organization.id], null));
+        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([organization.id], null));
     }
 }

@@ -1,34 +1,29 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { OrganizationDetailedBillingStatus, PaymentStatus } from '@stamhoofd/structures';
+import { DetailedPayableBalanceCollection, PaymentStatus } from '@stamhoofd/structures';
 
 import { BalanceItem, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { Context } from '../../../../helpers/Context';
-import { GetUserDetailedBilingStatusEndpoint } from '../../../global/registration/GetUserDetailedBillingStatusEndpoint';
+import { GetUserDetailedPayableBalanceEndpoint } from '../../../global/registration/GetUserDetailedPayableBalanceEndpoint';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type ResponseBody = OrganizationDetailedBillingStatus;
+type ResponseBody = DetailedPayableBalanceCollection;
 type Body = undefined;
 
-// Todo: rename to PayableBalance
-export class GetOrganizationDetailedBillingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        if (request.getVersion() <= 334) {
-            // Deprecated
-            const params = Endpoint.parseParameters(request.url, '/billing/status/detailed', {});
-
-            if (params) {
-                return [true, params as Params];
-            }
-            return [false];
-        }
-
-        const params = Endpoint.parseParameters(request.url, '/organization/billing/status/detailed', {});
+        const params = request.getVersion() >= 339
+            ? Endpoint.parseParameters(request.url, '/organization/payable-balance/detailed', {})
+            : (
+                    request.getVersion() <= 334
+                        ? Endpoint.parseParameters(request.url, '/organization/billing/status', {})
+                        : Endpoint.parseParameters(request.url, '/organization/billing/status/detailed', {})
+                );
 
         if (params) {
             return [true, params as Params];
@@ -54,6 +49,6 @@ export class GetOrganizationDetailedBillingStatusEndpoint extends Endpoint<Param
             )
             .fetch();
 
-        return new Response(await GetUserDetailedBilingStatusEndpoint.getDetailedBillingStatus(balanceItemModels, paymentModels));
+        return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, paymentModels));
     }
 }

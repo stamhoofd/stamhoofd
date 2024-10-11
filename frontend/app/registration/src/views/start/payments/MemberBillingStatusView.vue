@@ -7,33 +7,33 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { BillingStatusView, ErrorBox, useContext, useErrors } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { OrganizationDetailedBillingStatus } from '@stamhoofd/structures';
+import { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
 
 const owner = useRequestOwner();
-const context = useContext()
-const errors = useErrors()
-const outstandingBalance = ref(null) as Ref<OrganizationDetailedBillingStatus | null>
+const context = useContext();
+const errors = useErrors();
+const outstandingBalance = ref(null) as Ref<DetailedPayableBalanceCollection | null>;
 
-updateBalance().catch(console.error)
+updateBalance().catch(console.error);
 
 // Fetch balance
 async function updateBalance() {
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
-            path: `/user/billing/status/detailed`,
-            decoder: OrganizationDetailedBillingStatus as Decoder<OrganizationDetailedBillingStatus>,
+            path: `/user/payable-balance/detailed`,
+            decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
             shouldRetry: true,
             owner,
-            timeout: 5 * 60 * 1000
-        })
+            timeout: 5 * 60 * 1000,
+        });
 
-        outstandingBalance.value = response.data
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        outstandingBalance.value = response.data;
     }
-
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
 }
 
 </script>

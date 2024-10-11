@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { CachedBalance, Member, Organization } from '@stamhoofd/models';
-import { OrganizationBillingStatus, OrganizationBillingStatusItem } from '@stamhoofd/structures';
+import { PayableBalanceCollection, PayableBalance } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -9,16 +9,17 @@ import { Context } from '../../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
-type ResponseBody = OrganizationBillingStatus;
+type ResponseBody = PayableBalanceCollection;
 
-// Todo: rename to PayableBalance
-export class GetUserBilingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/user/billing/status', {});
+        const params = request.getVersion() >= 339
+            ? Endpoint.parseParameters(request.url, '/user/payable-balance', {})
+            : Endpoint.parseParameters(request.url, '/user/billing/status', {});
 
         if (params) {
             return [true, params as Params];
@@ -32,7 +33,7 @@ export class GetUserBilingStatusEndpoint extends Endpoint<Params, Query, Body, R
 
         const memberIds = await Member.getMemberIdsWithRegistrationForUser(user);
 
-        return new Response(await GetUserBilingStatusEndpoint.getBillingStatusForObjects([user.id, ...memberIds], organization));
+        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([user.id, ...memberIds], organization));
     }
 
     static async getBillingStatusForObjects(objectIds: string[], organization?: Organization | null) {
@@ -56,7 +57,7 @@ export class GetUserBilingStatusEndpoint extends Endpoint<Params, Query, Body, R
 
         const authenticatedOrganizations = await AuthenticatedStructures.organizations(organizations);
 
-        const billingStatus = OrganizationBillingStatus.create({});
+        const billingStatus = PayableBalanceCollection.create({});
 
         for (const organization of authenticatedOrganizations) {
             const items = cachedOutstandingBalances.filter(b => b.organizationId === organization.id);
@@ -69,7 +70,7 @@ export class GetUserBilingStatusEndpoint extends Endpoint<Params, Query, Body, R
                 amountPending += item.amountPending;
             }
 
-            billingStatus.organizations.push(OrganizationBillingStatusItem.create({
+            billingStatus.organizations.push(PayableBalance.create({
                 organization,
                 amount,
                 amountPending,

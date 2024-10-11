@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { PaymentView } from '@stamhoofd/components';
-import { OrganizationDetailedBillingStatusItem, PaymentGeneral } from '@stamhoofd/structures';
+import { DetailedPayableBalance, PaymentGeneral } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OutstandingBalanceTable from './OutstandingBalanceTable.vue';
@@ -46,7 +46,7 @@ const props = withDefaults(
          * Whether the view is dedicated to a single organization (so we can hide organization names in the view)
          */
         singleOrganization?: boolean;
-        items: OrganizationDetailedBillingStatusItem[];
+        items: DetailedPayableBalance[];
     }>(), {
         singleOrganization: false,
     },

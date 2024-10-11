@@ -3,7 +3,7 @@ import { Organization } from '../Organization';
 import { BalanceItemWithPayments } from '../BalanceItem';
 import { PaymentGeneral } from '../members/PaymentGeneral';
 
-export class OrganizationBillingStatusItem extends AutoEncoder {
+export class PayableBalance extends AutoEncoder {
     @field({ decoder: Organization })
     organization: Organization;
 
@@ -14,15 +14,15 @@ export class OrganizationBillingStatusItem extends AutoEncoder {
     amountPending = 0;
 }
 
-export class OrganizationBillingStatus extends AutoEncoder {
+export class PayableBalanceCollection extends AutoEncoder {
     /**
      * Debt you have to other organizations
      */
-    @field({ decoder: new ArrayDecoder(OrganizationBillingStatusItem) })
-    organizations: OrganizationBillingStatusItem[] = [];
+    @field({ decoder: new ArrayDecoder(PayableBalance) })
+    organizations: PayableBalance[] = [];
 }
 
-export class OrganizationDetailedBillingStatusItem extends AutoEncoder {
+export class DetailedPayableBalance extends AutoEncoder {
     @field({ decoder: Organization })
     organization: Organization;
 
@@ -33,10 +33,10 @@ export class OrganizationDetailedBillingStatusItem extends AutoEncoder {
     payments: PaymentGeneral[] = [];
 }
 
-export class OrganizationDetailedBillingStatus extends AutoEncoder {
+export class DetailedPayableBalanceCollection extends AutoEncoder {
     /**
      * Debt you have to other organizations
      */
-    @field({ decoder: new ArrayDecoder(OrganizationDetailedBillingStatusItem) })
-    organizations: OrganizationDetailedBillingStatusItem[] = [];
+    @field({ decoder: new ArrayDecoder(DetailedPayableBalance) })
+    organizations: DetailedPayableBalance[] = [];
 }

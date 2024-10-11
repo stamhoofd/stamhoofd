@@ -74,7 +74,7 @@ export * from './src/endpoints/EmailRequest';
 export * from './src/endpoints/ForgotPasswordRequest';
 export * from './src/endpoints/GroupsWithOrganizations';
 export * from './src/endpoints/OrganizationAdmins';
-export * from './src/endpoints/OrganizationBillingStatus';
+export * from './src/endpoints/PayableBalanceCollection';
 export * from './src/endpoints/OrganizationDomains';
 export * from './src/endpoints/RegisterMember';
 export * from './src/endpoints/RegisterResponse';

@@ -1,12 +1,12 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { OrganizationBillingStatus } from '@stamhoofd/structures';
+import { PayableBalanceCollection } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
-import { GetUserBilingStatusEndpoint } from '../../../global/registration/GetUserBillingStatusEndpoint';
+import { GetUserPayableBalanceEndpoint } from '../../../global/registration/GetUserPayableBalanceEndpoint';
 
 type Params = { id: string; type: string };
 type Query = undefined;
-type ResponseBody = OrganizationBillingStatus;
+type ResponseBody = PayableBalanceCollection;
 type Body = undefined;
 
 export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -35,6 +35,6 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
             throw Context.auth.error();
         }
 
-        return new Response(await GetUserBilingStatusEndpoint.getBillingStatusForObjects([organization.id], null));
+        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([organization.id], null));
     }
 }

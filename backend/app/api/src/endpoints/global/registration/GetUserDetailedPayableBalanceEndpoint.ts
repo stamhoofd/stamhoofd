@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { BalanceItem, Member, Organization, Payment } from '@stamhoofd/models';
-import { OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem } from '@stamhoofd/structures';
+import { DetailedPayableBalanceCollection, DetailedPayableBalance } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -9,16 +9,17 @@ import { Context } from '../../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
-type ResponseBody = OrganizationDetailedBillingStatus;
+type ResponseBody = DetailedPayableBalanceCollection;
 
-// Todo: rename to PayableBalance
-export class GetUserDetailedBilingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/user/billing/status/detailed', {});
+        const params = request.getVersion() >= 339
+            ? Endpoint.parseParameters(request.url, '/user/payable-balance/detailed', {})
+            : Endpoint.parseParameters(request.url, '/user/billing/status/detailed', {});
 
         if (params) {
             return [true, params as Params];
@@ -37,7 +38,7 @@ export class GetUserDetailedBilingStatusEndpoint extends Endpoint<Params, Query,
         // todo: this is a duplicate query
         const { payments, balanceItemPayments } = await BalanceItem.loadPayments(balanceItemModels);
 
-        return new Response(await GetUserDetailedBilingStatusEndpoint.getDetailedBillingStatus(balanceItemModels, payments));
+        return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, payments));
     }
 
     static async getDetailedBillingStatus(balanceItemModels: BalanceItem[], paymentModels: Payment[]) {
@@ -48,7 +49,7 @@ export class GetUserDetailedBilingStatusEndpoint extends Endpoint<Params, Query,
 
         // Group by organization you'll have to pay to
         if (organizationIds.length === 0) {
-            return OrganizationDetailedBillingStatus.create({});
+            return DetailedPayableBalanceCollection.create({});
         }
 
         // Optimization: prevent fetching the organization we already have
@@ -71,9 +72,9 @@ export class GetUserDetailedBilingStatusEndpoint extends Endpoint<Params, Query,
         const organizations = await AuthenticatedStructures.organizations(organizationModels);
         const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);
 
-        return OrganizationDetailedBillingStatus.create({
+        return DetailedPayableBalanceCollection.create({
             organizations: organizations.map((o) => {
-                return OrganizationDetailedBillingStatusItem.create({
+                return DetailedPayableBalance.create({
                     organization: o,
                     balanceItems: balanceItems.filter(b => b.organizationId == o.id),
                     payments: payments.filter(p => p.organizationId === o.id),

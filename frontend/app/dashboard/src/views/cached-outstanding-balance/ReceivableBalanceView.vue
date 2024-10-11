@@ -121,7 +121,7 @@
 <script lang="ts" setup>
 import { LoadingView, useBackForward } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { ReceivableBalance, getReceivableBalanceTypeName, OrganizationDetailedBillingStatusItem } from '@stamhoofd/structures';
+import { ReceivableBalance, getReceivableBalanceTypeName, DetailedPayableBalance } from '@stamhoofd/structures';
 import { computed, ref, Ref } from 'vue';
 
 const props = defineProps<{
@@ -132,7 +132,7 @@ const props = defineProps<{
 
 const $t = useTranslate();
 const { goBack, goForward, hasNext, hasPrevious } = useBackForward('item', props);
-const billingStatus = ref(null) as Ref<null | OrganizationDetailedBillingStatusItem>;
+const billingStatus = ref(null) as Ref<null | DetailedPayableBalance>;
 
 const title = computed(() => {
     return $t('Openstaand bedrag');

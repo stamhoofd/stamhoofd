@@ -69,11 +69,11 @@
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { GlobalEventBus, PriceBreakdownBox, Toast, useAppContext, useOrganizationCart } from '@stamhoofd/components';
 import { useMemberManager } from '@stamhoofd/networking';
-import { BalanceItemCartItem, BalanceItemWithPayments, OrganizationDetailedBillingStatusItem, RegisterCheckout, getBalanceItemTypeIcon } from '@stamhoofd/structures';
+import { BalanceItemCartItem, BalanceItemWithPayments, DetailedPayableBalance, RegisterCheckout, getBalanceItemTypeIcon } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    item: OrganizationDetailedBillingStatusItem;
+    item: DetailedPayableBalance;
     showName: boolean;
 }>();
 
