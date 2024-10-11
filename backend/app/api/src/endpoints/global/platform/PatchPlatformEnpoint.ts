@@ -109,8 +109,9 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
 
             if (newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0) {
-                const newTags = (platform.config as PlatformConfig).tags;
-                TagHelper.cleanupTags(newTags);
+                let newTags = (platform.config as PlatformConfig).tags;
+                newTags = TagHelper.getCleanedUpTags(newTags);
+                platform.config.tags = newTags;
                 const areTagsValid = TagHelper.validateTags(newTags);
                 if (!areTagsValid) {
                     throw new SimpleError({

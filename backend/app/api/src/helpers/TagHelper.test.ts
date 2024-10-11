@@ -133,7 +133,7 @@ describe('TagHelper', () => {
         });
     });
 
-    describe('cleanupTags', () => {
+    describe('getCleanedUpTags', () => {
         it('should remove child tag ids that do not exist', () => {
             // arrange
             const tag5 = OrganizationTag.create({
@@ -194,12 +194,16 @@ describe('TagHelper', () => {
             ];
 
             // act
-            TagHelper.cleanupTags(platformTags);
+            TagHelper.getCleanedUpTags(platformTags);
 
             // assert
             expect(tag5.childTags).toHaveLength(0);
             expect(tag7.childTags).toHaveLength(3);
             expect(tag7.childTags).not.toInclude('doesNotExist1');
+        });
+
+        it('should return array of tags in the correct order', () => {
+            throw new Error('Not implemented');
         });
     });
 

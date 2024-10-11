@@ -23,12 +23,42 @@ export class TagHelper extends SharedTagHelper {
         await loopModels(Organization, 'id', onBatchReceived, { limit: 10 });
     }
 
-    static cleanupTags(platformTags: OrganizationTag[]) {
+    static getCleanedUpTags(platformTags: OrganizationTag[]): OrganizationTag[] {
         const existingTags = new Set(platformTags.map(t => t.id));
 
         for (const tag of platformTags) {
             tag.childTags = tag.childTags.filter(tag => existingTags.has(tag));
         }
+
+        return this.getSortedTags(platformTags);
+    }
+
+    private static getSortedTags(tags: OrganizationTag[]): OrganizationTag[] {
+        // keep original order, but add child tags below parent tag
+        const map = new Map(tags.map(tag => [tag.id, tag]));
+        const rootTags = this.getRootTags(tags);
+
+        const sortedTags = this.sortTagsHelper(rootTags, map);
+        if (sortedTags.length !== tags.length) {
+            throw new Error('Sort tags failed, length of sorted tags does not equal original array.');
+        }
+
+        return sortedTags;
+    }
+
+    private static sortTagsHelper(tags: OrganizationTag[], allTagsMap: Map<string, OrganizationTag>): OrganizationTag[] {
+        const result: OrganizationTag[] = [];
+        const rootTags = this.getRootTags(tags);
+
+        for (const tag of rootTags) {
+            result.push(tag);
+            if (tag.childTags) {
+                const childTags = tag.childTags.map(id => allTagsMap.get(id)).filter(x => x !== undefined);
+                result.push(...this.sortTagsHelper(childTags, allTagsMap));
+            }
+        }
+
+        return result;
     }
 
     static validateTags(platformTags: OrganizationTag[]): boolean {
