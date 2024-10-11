@@ -76,7 +76,7 @@
                 <p>Hier vind je een overzicht van wat je moet betalen aan {{ item.organization.name }}, bv. voor de aansluitingkosten van leden.</p>
 
                 <STList class="illustration-list">
-                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.OutstandingBalance, {properties: {items: [item]}})">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.PayableBalance, {properties: {collection: DetailedPayableBalanceCollection.create({ organizations: [item] })}})">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                         </template>
@@ -99,7 +99,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OutstandingBalance, {properties: {items: [item]}})">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PayableBalance, {properties: {collection: DetailedPayableBalanceCollection.create({ organizations: [item] })}})">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                         </template>
@@ -122,19 +122,19 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, useAuth, useContext, useErrors, BillingStatusView, useOrganization, useFeatureFlag } from '@stamhoofd/components';
+import { ErrorBox, PayableBalanceCollectionView, useAuth, useContext, useErrors, useFeatureFlag, useOrganization } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, BalanceItemWithPayments, DetailedPayableBalanceCollection, DetailedPayableBalance, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemWithPayments, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions, ref, Ref } from 'vue';
+import ReceivableBalancesTableView from '../../cached-outstanding-balance/ReceivableBalancesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
-import ReceivableBalancesTableView from '../../cached-outstanding-balance/ReceivableBalancesTableView.vue';
 
 enum Routes {
     Transfers = 'Transfers',
     Export = 'Export',
     Payments = 'Payments',
-    OutstandingBalance = 'OutstandingBalance',
+    PayableBalance = 'PayableBalance',
     ReceivableBalance = 'ReceivableBalance',
 }
 
@@ -185,13 +185,13 @@ defineRoutes([
         component: ConfigurePaymentExportView as unknown as ComponentOptions,
     },
     {
-        name: Routes.OutstandingBalance,
+        name: Routes.PayableBalance,
         url: 'openstaand/@uri',
         present: 'popup',
         params: {
             uri: String,
         },
-        component: BillingStatusView as ComponentOptions,
+        component: PayableBalanceCollectionView as ComponentOptions,
         async paramsToProps(params: { uri: string }) {
             await balancePromise;
             const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
@@ -201,17 +201,17 @@ defineRoutes([
             }
 
             return {
-                items: [item],
+                collection: DetailedPayableBalanceCollection.create({ organizations: [item] }),
             };
         },
         propsToParams(props) {
-            if (!('items' in props) || (!Array.isArray(props.items)) || !(props.items[0] instanceof DetailedPayableBalance)) {
-                throw new Error('Missing items');
+            if (!('collection' in props) || !(props.collection instanceof DetailedPayableBalanceCollection)) {
+                throw new Error('Missing collection');
             }
 
             return {
                 params: {
-                    uri: props.items[0].organization.uri,
+                    uri: props.collection.organizations[0].organization.uri,
                 },
             };
         },

@@ -25,7 +25,7 @@
                     <span>Hulp nodig?</span>
                 </a>
             </p>
-            
+
             <QuickActionsBox :quick-actions="quickActions" />
 
             <div v-if="members.length > 0" class="container">
@@ -53,7 +53,6 @@
                         <p v-else class="style-description-small">
                             {{ member.patchedMember.firstName }} is momenteel niet ingeschreven.
                         </p>
-
 
                         <template #right>
                             <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">Dit ben jij</span>
@@ -145,26 +144,26 @@ enum Routes {
     RegisterMembers = 'registerMembers',
     CheckData = 'checkData',
     ViewMember = 'viewMember',
-    Payments = 'payments'
+    Payments = 'payments',
 }
 defineRoutes([
     {
         name: Routes.RegisterMembers,
         url: 'registreren',
         component: async () => (await import('../members/RegisterMembersView.vue')).default as any,
-        present: 'popup'
+        present: 'popup',
     },
     {
         name: Routes.CheckData,
         url: 'gegevens',
         component: async () => (await import('../members/CheckDataView.vue')).default as any,
-        present: 'popup'
+        present: 'popup',
     },
     {
         name: Routes.Payments,
         url: 'betalingen',
-        component: async () => (await import('./payments/MemberBillingStatusView.vue')).default as any,
-        present: 'popup'
+        component: async () => (await import('./payments/MemberPayableBalanceView.vue')).default as any,
+        present: 'popup',
     },
     {
         name: Routes.ViewMember,
@@ -172,40 +171,40 @@ defineRoutes([
         component: async () => (await import('../members/MemberView.vue')).default as any,
         present: 'popup',
         params: {
-            id: String
+            id: String,
         },
-        paramsToProps: async (params: {id: string}) => {
-            const member = members.value.find(m => m.id === params.id)
+        paramsToProps: async (params: { id: string }) => {
+            const member = members.value.find(m => m.id === params.id);
             if (member) {
                 return {
-                    member
-                }
+                    member,
+                };
             }
-            Toast.error('Lid niet gevonden').show()
-            throw new Error('member not found')
+            Toast.error('Lid niet gevonden').show();
+            throw new Error('member not found');
         },
 
         propsToParams(props) {
-            if (!("member" in props) || typeof props.member !== 'object' || props.member === null || !("id" in props.member)) {
-                throw new Error('Missing member')
+            if (!('member' in props) || typeof props.member !== 'object' || props.member === null || !('id' in props.member)) {
+                throw new Error('Missing member');
             }
             return {
                 params: {
-                    id: props.member.id
-                }
-            }
-        }
-    }
-])
+                    id: props.member.id,
+                },
+            };
+        },
+    },
+]);
 const $navigate = useNavigate();
 const memberManager = useMemberManager();
 const user = useUser();
-const quickActions = useRegistrationQuickActions()
+const quickActions = useRegistrationQuickActions();
 
 const members = computed(() => memberManager.family.members);
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
-const chooseGroupForMember = useChooseGroupForMember()
-const addMember = useAddMember()
+const chooseGroupForMember = useChooseGroupForMember();
+const addMember = useAddMember();
 
 async function registerMembers() {
     await $navigate(Routes.RegisterMembers);
@@ -216,22 +215,22 @@ async function checkData() {
 }
 
 function getRegistrationsForMember(member: PlatformMember) {
-    return member.filterRegistrations({currentPeriod: true, types: [GroupType.Membership, GroupType.WaitingList]}).sort((a, b) => 
+    return member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership, GroupType.WaitingList] }).sort((a, b) =>
         Sorter.stack(
-            Sorter.byDateValue(b.registeredAt ?? b.createdAt, a.registeredAt ?? a.createdAt)
-        )
+            Sorter.byDateValue(b.registeredAt ?? b.createdAt, a.registeredAt ?? a.createdAt),
+        ),
     );
 }
 
 async function addNewMember() {
     await addMember(memberManager.family, {
-        displayOptions: {action: 'present', modalDisplayStyle: 'popup'},
+        displayOptions: { action: 'present', modalDisplayStyle: 'popup' },
         async finishHandler(member, navigate) {
             await chooseGroupForMember({
                 member,
-                displayOptions: {action: 'show', replace: 100, force: true},
-                customNavigate: navigate
-            })
+                displayOptions: { action: 'show', replace: 100, force: true },
+                customNavigate: navigate,
+            });
         },
     });
 }
