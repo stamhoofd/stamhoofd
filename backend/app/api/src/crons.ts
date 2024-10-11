@@ -665,6 +665,13 @@ async function checkSGV() {
         console.log("[S&GV] Skipped.")
         return
     }
+
+    // Check today is a monday
+    if (new Date().getDay() !== 1) {
+        console.log("[S&GV] Not a Monday, skipping.")
+        return
+    }
+    
     lastSGVCheck = new Date()
 
     console.log("[S&GV] Generating report...")
