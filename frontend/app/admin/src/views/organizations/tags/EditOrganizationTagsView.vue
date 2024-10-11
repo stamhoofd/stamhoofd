@@ -81,7 +81,7 @@ async function addTag() {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditOrganizationTagView, {
-                allTags: [tag, ...tags.value],
+                allTags: tags.value,
                 tag,
                 isNew: true,
                 saveHandler: (patch: PatchableArrayAutoEncoder<OrganizationTag>) => {
