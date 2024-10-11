@@ -5,7 +5,7 @@
         <main>
             <h1>Betalingen</h1>
 
-            <OutstandingBalanceTable v-for="item in items" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
+            <PayableBalanceTable v-for="item in items" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
 
             <template v-if="pendingPayments.length > 0">
                 <hr>
@@ -37,7 +37,7 @@ import { PaymentView } from '@stamhoofd/components';
 import { DetailedPayableBalance, PaymentGeneral } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import OutstandingBalanceTable from './OutstandingBalanceTable.vue';
+import PayableBalanceTable from './PayableBalanceTable.vue';
 import PaymentRow from './components/PaymentRow.vue';
 
 const props = withDefaults(
