@@ -48,9 +48,8 @@ export class TagHelper extends SharedTagHelper {
 
     private static sortTagsHelper(tags: OrganizationTag[], allTagsMap: Map<string, OrganizationTag>): OrganizationTag[] {
         const result: OrganizationTag[] = [];
-        const rootTags = this.getRootTags(tags);
 
-        for (const tag of rootTags) {
+        for (const tag of tags) {
             result.push(tag);
             if (tag.childTags) {
                 const childTags = tag.childTags.map(id => allTagsMap.get(id)).filter(x => x !== undefined);
