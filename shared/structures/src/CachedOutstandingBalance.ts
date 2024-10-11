@@ -63,4 +63,8 @@ export class CachedOutstandingBalance extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     amountPending = 0;
+
+    get amountOpen() {
+        return this.amount - this.amountPending;
+    }
 }

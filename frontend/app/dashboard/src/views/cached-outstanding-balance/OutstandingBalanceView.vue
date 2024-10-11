@@ -26,8 +26,20 @@
                     <h3 class="style-definition-label">
                         {{ $t('Naam') }}
                     </h3>
-                    <p v-copyable class="style-definition-text">
+                    <p v-copyable class="style-definition-text style-copyable">
                         {{ item.object.name }}
+                    </p>
+                </STListItem>
+
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        {{ $t('Openstaand bedrag') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatPrice(item.amountOpen) }}
+                    </p>
+                    <p v-if="item.amountPending !== 0" class="style-description-small">
+                        {{ formatPrice(item.amount) }} waarvan {{ formatPrice(item.amountPending) }} in verwerking
                     </p>
                 </STListItem>
             </STList>
@@ -43,7 +55,7 @@
                     <h3 class="style-definition-label">
                         {{ contact.firstName || 'Onbekende naam' }} {{ contact.lastName }}
                     </h3>
-                    <p v-for="(email, j) of contact.emails" :key="j" v-copyable class="style-definition-text">
+                    <p v-for="(email, j) of contact.emails" :key="j" v-copyable class="style-definition-text style-copyable">
                         {{ email }}
                     </p>
                 </STListItem>
