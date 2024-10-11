@@ -90,11 +90,10 @@ export class PatchPlatformEndpoint extends Endpoint<
             // Update config
             if (newConfig) {
                 const shouldCheckSteps = newConfig.premiseTypes || newConfig.responsibilities;
-                const shouldCheckTags = newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0;
-                if (shouldCheckSteps || shouldCheckTags) {
-                    const oldConfig = platform.config.clone();
+                if (shouldCheckSteps) {
+                    const oldConfig: PlatformConfig = platform.config.clone();
                     platform.config = patchObject(platform.config, newConfig);
-                    const currentConfig = platform.config;
+                    const currentConfig: PlatformConfig = platform.config;
 
                     if (shouldCheckSteps) {
                         shouldUpdateSetupSteps = this.shouldUpdateSetupSteps(
@@ -103,14 +102,14 @@ export class PatchPlatformEndpoint extends Endpoint<
                             oldConfig,
                         );
                     }
-
-                    if (shouldCheckTags) {
-                        TagHelper.updateOrganizations(oldConfig.tags, currentConfig.tags);
-                    }
                 }
                 else {
                     platform.config = patchObject(platform.config, newConfig);
                 }
+            }
+
+            if (newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0) {
+                TagHelper.updateOrganizations((platform.config as PlatformConfig).tags);
             }
 
             if (newConfig.membershipTypes && isPatchableArray(newConfig.membershipTypes) && newConfig.membershipTypes.changes.length > 0) {

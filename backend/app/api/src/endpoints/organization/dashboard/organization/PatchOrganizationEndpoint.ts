@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder, isPatchableArray, ObjectData, PatchableA
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, SetupStepUpdater, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel } from '@stamhoofd/structures';
+import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PlatformConfig } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -283,14 +283,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw Context.auth.error();
                     }
 
-                    const originalTags = organization.meta.tags.slice();
-
                     const cleanedPatch = OrganizationMetaData.patch({
                         tags: request.body.meta.tags as any,
                     });
 
-                    const platform = await Platform.getShared();
-                    const patchedMeta = organization.meta.patch(cleanedPatch);
+                    const platform: Platform = await Platform.getShared();
+                    const patchedMeta: OrganizationMetaData = organization.meta.patch(cleanedPatch);
                     for (const tag of patchedMeta.tags) {
                         if (!platform.config.tags.find(t => t.id === tag)) {
                             throw new SimpleError({ code: 'invalid_tag', message: 'Invalid tag', statusCode: 400 });
@@ -304,9 +302,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         return aIndex - bIndex;
                     });
 
-                    const newTags = patchedMeta.tags;
-
-                    organization.meta.tags = TagHelper.getTagIdsAfterSyncWithPlatformTags(originalTags, newTags, platform.config.tags);
+                    const platformConfig: PlatformConfig = platform.config;
+                    organization.meta.tags = TagHelper.getAllTagsFromHierarchy(patchedMeta.tags, platformConfig.tags);
                 }
             }
 

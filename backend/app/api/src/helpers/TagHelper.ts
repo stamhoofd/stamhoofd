@@ -4,19 +4,14 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { OrganizationTag, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
 
 export class TagHelper extends SharedTagHelper {
-    static updateOrganizations(oldTags: OrganizationTag[], newTags: OrganizationTag[]) {
+    static updateOrganizations(platformTags: OrganizationTag[]) {
         const queueId = 'update-tags-on-organizations';
         QueueHandler.cancel(queueId);
-
-        const newTagsMap = new Map<string, OrganizationTag>(newTags.map(t => [t.id, t]));
-        const oldTagsMap = new Map<string, OrganizationTag>(oldTags.map(t => [t.id, t]));
-        const newAutoAddTagMap = this.createAutoAddTagMap(newTagsMap);
-        const oldAutoAddTagMap = this.createAutoAddTagMap(oldTagsMap);
 
         QueueHandler.schedule(queueId, async () => {
             await this.loopOrganizations(async (organizations) => {
                 for (const organization of organizations) {
-                    organization.meta.tags = this.getUpdatedOrganizationTagIds(organization.meta.tags, newAutoAddTagMap, oldAutoAddTagMap);
+                    organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platformTags);
                 }
 
                 await Promise.all(organizations.map(organization => organization.save()));
@@ -26,6 +21,41 @@ export class TagHelper extends SharedTagHelper {
 
     private static async loopOrganizations(onBatchReceived: (batch: Organization[]) => Promise<void>) {
         await loopModels(Organization, 'id', onBatchReceived, { limit: 10 });
+    }
+
+    static getAllTagsFromHierarchy(tagIds: string[], platformTags: OrganizationTag[]) {
+        const result = new Set<string>();
+        const tagMap = new Map(platformTags.map(tag => [tag.id, tag]));
+
+        this.recursivelyGetAllTagsFromHierarchy(tagIds, tagMap, result);
+        return Array.from(result);
+    }
+
+    private static recursivelyGetAllTagsFromHierarchy(tagIds: string[], tagMap: Map<string, OrganizationTag>, result: Set<string>): void {
+        for (const tagId of tagIds) {
+            const tag = tagMap.get(tagId);
+            if (tag) {
+                result.add(tagId);
+
+                const addedChildTags: string[] = [];
+
+                for (const [otherId, otherTag] of tagMap.entries()) {
+                    if (otherId === tagId) {
+                        tagMap.delete(tagId);
+                        continue;
+                    }
+                    if (otherTag.childTags.some(childTagId => childTagId === tagId)) {
+                        if (!result.has(otherId)) {
+                            addedChildTags.push(otherId);
+                        }
+                    }
+                }
+
+                if (addedChildTags.length > 0) {
+                    this.recursivelyGetAllTagsFromHierarchy(addedChildTags, tagMap, result);
+                }
+            }
+        }
     }
 }
 
