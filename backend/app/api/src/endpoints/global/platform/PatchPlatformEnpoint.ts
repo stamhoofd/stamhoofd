@@ -109,6 +109,15 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
 
             if (newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0) {
+                const newTags = (platform.config as PlatformConfig).tags;
+                TagHelper.cleanupTags(newTags);
+                const areTagsValid = TagHelper.validateTags(newTags);
+                if (!areTagsValid) {
+                    throw new SimpleError({
+                        code: 'invalid_tags',
+                        message: 'Invalid tags',
+                    });
+                }
                 TagHelper.updateOrganizations((platform.config as PlatformConfig).tags);
             }
 
