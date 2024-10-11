@@ -1,6 +1,5 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Organization } from './Organization';
 
 export enum CachedOutstandingBalanceType {
     organization = 'organization',
@@ -10,7 +9,10 @@ export enum CachedOutstandingBalanceType {
 
 export class CachedOutstandingBalanceObjectContact extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
-    name: string | null = null;
+    firstName: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    lastName: string | null = null;
 
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     emails: string[] = [];

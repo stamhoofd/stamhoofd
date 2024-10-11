@@ -454,26 +454,57 @@ export class AuthenticatedStructures {
         const organizationIds = Formatter.uniqueArray(balances.filter(b => b.objectType === CachedOutstandingBalanceType.organization).map(b => b.objectId));
         const organizations = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
         const admins = await User.getAdmins(organizationIds, { verified: true });
-
         const organizationStructs = await this.organizations(organizations);
+
+        const memberIds = Formatter.uniqueArray(balances.filter(b => b.objectType === CachedOutstandingBalanceType.member).map(b => b.objectId));
+        const members = memberIds.length > 0 ? await Member.getBlobByIds(...memberIds) : [];
 
         const result: CachedOutstandingBalanceStruct[] = [];
         for (const balance of balances) {
-            const organization = organizationStructs.find(o => o.id == balance.objectId) ?? null;
-            let thisAdmins: User[] = [];
-            if (organization) {
-                thisAdmins = admins.filter(a => a.permissions && a.permissions.forOrganization(organization)?.hasAccessRight(AccessRight.OrganizationFinanceDirector));
+            let object = CachedOutstandingBalanceObject.create({
+                name: 'Onbekend',
+            });
+
+            if (balance.objectType === CachedOutstandingBalanceType.organization) {
+                const organization = organizationStructs.find(o => o.id == balance.objectId) ?? null;
+                if (organization) {
+                    const thisAdmins = admins.filter(a => a.permissions && a.permissions.forOrganization(organization)?.hasAccessRight(AccessRight.OrganizationFinanceDirector));
+                    object = CachedOutstandingBalanceObject.create({
+                        name: organization.name,
+                        contacts: thisAdmins.map(a => CachedOutstandingBalanceObjectContact.create({
+                            firstName: a.firstName ?? '',
+                            lastName: a.lastName ?? '',
+                            emails: [a.email],
+                        })),
+                    });
+                }
+            }
+            else if (balance.objectType === CachedOutstandingBalanceType.member) {
+                const member = members.find(m => m.id === balance.objectId) ?? null;
+                if (member) {
+                    object = CachedOutstandingBalanceObject.create({
+                        name: member.details.name,
+                        contacts: [
+                            CachedOutstandingBalanceObjectContact.create({
+                                firstName: member.details.firstName ?? '',
+                                lastName: member.details.lastName ?? '',
+                                emails: member.details.getMemberEmails(),
+                            }),
+                            ...member.users.filter(u => !member.details.getMemberEmails().includes(u.email)).map((a) => {
+                                return CachedOutstandingBalanceObjectContact.create({
+                                    firstName: a.firstName ?? '',
+                                    lastName: a.lastName ?? '',
+                                    emails: [a.email],
+                                });
+                            }),
+                        ],
+                    });
+                }
             }
 
             const struct = CachedOutstandingBalanceStruct.create({
                 ...balance,
-                object: CachedOutstandingBalanceObject.create({
-                    name: organization?.name ?? 'Onbekend',
-                    contacts: thisAdmins.map(a => CachedOutstandingBalanceObjectContact.create({
-                        name: a.name ?? '',
-                        emails: [a.email],
-                    })),
-                }),
+                object,
             });
 
             result.push(struct);
