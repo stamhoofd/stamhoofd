@@ -26,7 +26,7 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { OrganizationTag, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { OrganizationTag, Platform, PlatformConfig, TagHelper } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import TagRow from './components/TagRow.vue';
 import EditOrganizationTagView from './EditOrganizationTagView.vue';
@@ -45,7 +45,7 @@ const saving = ref(false);
 
 const title = 'Tags';
 
-const draggableTags = useDraggableArray(() => tags.value, addArrayPatch);
+const draggableTags = useDraggableArray(() => TagHelper.getRootTags(tags.value), addArrayPatch);
 
 async function addTag() {
     const tag = OrganizationTag.create({});
