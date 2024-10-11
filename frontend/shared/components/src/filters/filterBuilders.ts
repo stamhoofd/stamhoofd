@@ -1,5 +1,5 @@
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { CachedOutstandingBalanceType, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User } from "@stamhoofd/structures";
+import { ReceivableBalanceType, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
 import { usePlatform } from "../hooks";
@@ -389,9 +389,9 @@ export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
         name: 'Type',
         options: [
-            new MultipleChoiceUIFilterOption('Verenigingen', CachedOutstandingBalanceType.organization),
-            new MultipleChoiceUIFilterOption('Leden', CachedOutstandingBalanceType.member),
-            new MultipleChoiceUIFilterOption('Accounts', CachedOutstandingBalanceType.user),
+            new MultipleChoiceUIFilterOption('Verenigingen', ReceivableBalanceType.organization),
+            new MultipleChoiceUIFilterOption('Leden', ReceivableBalanceType.member),
+            new MultipleChoiceUIFilterOption('Accounts', ReceivableBalanceType.user),
         ],
         wrapper: {
             objectType: {

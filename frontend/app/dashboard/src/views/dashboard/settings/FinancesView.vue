@@ -54,12 +54,12 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="cachedOutstandingBalancesEnabled && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.CachedOutstandingBalance)">
+                <STListItem v-if="cachedOutstandingBalancesEnabled && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.ReceivableBalance)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Openstaande bedragen
+                        Te ontvangen bedragen
                     </h2>
                     <p class="style-description">
                         Lijst van alle leden en verenigingen die nog een openstaand bedrag hebben tegenover {{ organization!.name }}
@@ -128,14 +128,14 @@ import { AccessRight, BalanceItemWithPayments, OrganizationDetailedBillingStatus
 import { ComponentOptions, ref, Ref } from 'vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
-import CachedOutstandingBalanceTableView from '../../cached-outstanding-balance/CachedOutstandingBalanceTableView.vue';
+import ReceivableBalancesTableView from '../../cached-outstanding-balance/ReceivableBalancesTableView.vue';
 
 enum Routes {
     Transfers = 'Transfers',
     Export = 'Export',
     Payments = 'Payments',
     OutstandingBalance = 'OutstandingBalance',
-    CachedOutstandingBalance = 'CachedOutstandingBalance',
+    ReceivableBalance = 'ReceivableBalance',
 }
 
 defineRoutes([
@@ -158,9 +158,9 @@ defineRoutes([
         },
     },
     {
-        name: Routes.CachedOutstandingBalance,
+        name: Routes.ReceivableBalance,
         url: 'openstaande-bedragen',
-        component: CachedOutstandingBalanceTableView as ComponentOptions,
+        component: ReceivableBalancesTableView as ComponentOptions,
     },
     {
         name: Routes.Payments,

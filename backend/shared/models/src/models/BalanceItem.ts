@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { Organization, Payment, Webshop } from './';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
-import { CachedOutstandingBalance } from './CachedOutstandingBalance';
+import { CachedBalance } from './CachedBalance';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -315,7 +315,7 @@ export class BalanceItem extends Model {
         await BalanceItem.updatePricePaid(items.map(i => i.id));
         await BalanceItem.updatePricePending(items.map(i => i.id));
 
-        // Deprecated: the member balances have moved to CachedOutstandingBalance
+        // Deprecated: the member balances have moved to CachedBalance
         // Update outstanding amount of related members and registrations
         const memberIds: string[] = Formatter.uniqueArray(items.map(p => p.memberId).filter(id => id !== null));
 
@@ -329,15 +329,15 @@ export class BalanceItem extends Model {
             const filteredItems = items.filter(i => i.organizationId === organizationId);
 
             const memberIds = Formatter.uniqueArray(filteredItems.map(p => p.memberId).filter(id => id !== null));
-            await CachedOutstandingBalance.updateForMembers(organizationId, memberIds);
+            await CachedBalance.updateForMembers(organizationId, memberIds);
 
             const userIds = Formatter.uniqueArray(filteredItems.filter(p => p.memberId === null && p.userId !== null).map(p => p.userId!));
-            await CachedOutstandingBalance.updateForUsers(organizationId, userIds);
+            await CachedBalance.updateForUsers(organizationId, userIds);
 
             const organizationIds = Formatter.uniqueArray(filteredItems.map(p => p.payingOrganizationId).filter(id => id !== null));
-            await CachedOutstandingBalance.updateForOrganizations(organizationId, organizationIds);
+            await CachedBalance.updateForOrganizations(organizationId, organizationIds);
 
-            // Deprecated: we'll need to move the outstanding balance of registrations to CachedOutstandingBalance
+            // Deprecated: we'll need to move the outstanding balance of registrations to CachedBalance
             const registrationIds: string[] = Formatter.uniqueArray(filteredItems.map(p => p.registrationId).filter(id => id !== null));
             await Registration.updateOutstandingBalance(registrationIds, organizationId);
         }

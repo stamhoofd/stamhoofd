@@ -57,7 +57,7 @@ export * from './src/StripeAccount';
 export * from './src/Token';
 export * from './src/UmbrellaOrganization';
 export * from './src/User';
-export * from './src/CachedOutstandingBalance';
+export * from './src/ReceivableBalance';
 
 export * from './src/LoadedPermissions';
 
@@ -188,4 +188,3 @@ export * from './src/SponsorConfig';
 
 export * from './src/filters/ExcelExportRequest';
 export * from './src/helpers';
-

@@ -51,4 +51,4 @@ export * from './MemberPlatformMembership';
 export * from './Email';
 export * from './EmailRecipient';
 export * from './Event';
-export * from './CachedOutstandingBalance';
+export * from './CachedBalance';

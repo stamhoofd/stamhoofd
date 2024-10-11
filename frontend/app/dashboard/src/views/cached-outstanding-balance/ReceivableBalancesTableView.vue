@@ -18,24 +18,24 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, ModernTableView, TableAction, useCachedOutstandingBalanceObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, ModernTableView, TableAction, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { CachedOutstandingBalance, getCachedOutstandingBalanceTypeName, StamhoofdFilter } from '@stamhoofd/structures';
+import { ReceivableBalance, getReceivableBalanceTypeName, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
-import OutstandingBalanceView from './OutstandingBalanceView.vue';
+import ReceivableBalanceView from './ReceivableBalanceView.vue';
 
-type ObjectType = CachedOutstandingBalance;
+type ObjectType = ReceivableBalance;
 const $t = useTranslate();
 const present = usePresent();
 
 const title = computed(() => {
-    return $t('Openstaande bedragen');
+    return $t('Te ontvangen bedragen');
 });
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const configurationId = computed(() => {
-    return 'cached-outstanding-balance';
+    return 'receivable-balances';
 });
 const filterBuilders = cachedOutstandingBalanceUIFilterBuilders;
 
@@ -43,7 +43,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
     return null;
 }
 
-const objectFetcher = useCachedOutstandingBalanceObjectFetcher({
+const objectFetcher = useReceivableBalancesObjectFetcher({
     requiredFilter: getRequiredFilter(),
 });
 
@@ -62,7 +62,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'objectType',
         name: 'Type',
-        getValue: object => Formatter.capitalizeFirstLetter(getCachedOutstandingBalanceTypeName(object.objectType, $t)),
+        getValue: object => Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(object.objectType, $t)),
         minimumWidth: 100,
         recommendedWidth: 200,
         allowSorting: false,
@@ -114,7 +114,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
 const actions: TableAction<ObjectType>[] = [];
 
-async function showBalance(item: CachedOutstandingBalance) {
+async function showBalance(item: ReceivableBalance) {
     if (!modernTableView.value) {
         return;
     }
@@ -122,7 +122,7 @@ async function showBalance(item: CachedOutstandingBalance) {
     // todo
     const table = modernTableView.value;
     const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(OutstandingBalanceView, {
+        root: new ComponentWithProperties(ReceivableBalanceView, {
             item,
             getNext: table.getNext,
             getPrevious: table.getPrevious,

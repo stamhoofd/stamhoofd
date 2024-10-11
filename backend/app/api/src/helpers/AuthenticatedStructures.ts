@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CachedOutstandingBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, CachedOutstandingBalanceObject, CachedOutstandingBalanceObjectContact, CachedOutstandingBalance as CachedOutstandingBalanceStruct, CachedOutstandingBalanceType, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { CachedBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
+import { AccessRight, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -446,32 +446,32 @@ export class AuthenticatedStructures {
         return result;
     }
 
-    static async cachedOutstandingBalances(balances: CachedOutstandingBalance[]): Promise<CachedOutstandingBalanceStruct[]> {
+    static async cachedOutstandingBalances(balances: CachedBalance[]): Promise<ReceivableBalanceStruct[]> {
         if (balances.length === 0) {
             return [];
         }
 
-        const organizationIds = Formatter.uniqueArray(balances.filter(b => b.objectType === CachedOutstandingBalanceType.organization).map(b => b.objectId));
+        const organizationIds = Formatter.uniqueArray(balances.filter(b => b.objectType === ReceivableBalanceType.organization).map(b => b.objectId));
         const organizations = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
         const admins = await User.getAdmins(organizationIds, { verified: true });
         const organizationStructs = await this.organizations(organizations);
 
-        const memberIds = Formatter.uniqueArray(balances.filter(b => b.objectType === CachedOutstandingBalanceType.member).map(b => b.objectId));
+        const memberIds = Formatter.uniqueArray(balances.filter(b => b.objectType === ReceivableBalanceType.member).map(b => b.objectId));
         const members = memberIds.length > 0 ? await Member.getBlobByIds(...memberIds) : [];
 
-        const result: CachedOutstandingBalanceStruct[] = [];
+        const result: ReceivableBalanceStruct[] = [];
         for (const balance of balances) {
-            let object = CachedOutstandingBalanceObject.create({
+            let object = ReceivableBalanceObject.create({
                 name: 'Onbekend',
             });
 
-            if (balance.objectType === CachedOutstandingBalanceType.organization) {
+            if (balance.objectType === ReceivableBalanceType.organization) {
                 const organization = organizationStructs.find(o => o.id == balance.objectId) ?? null;
                 if (organization) {
                     const thisAdmins = admins.filter(a => a.permissions && a.permissions.forOrganization(organization)?.hasAccessRight(AccessRight.OrganizationFinanceDirector));
-                    object = CachedOutstandingBalanceObject.create({
+                    object = ReceivableBalanceObject.create({
                         name: organization.name,
-                        contacts: thisAdmins.map(a => CachedOutstandingBalanceObjectContact.create({
+                        contacts: thisAdmins.map(a => ReceivableBalanceObjectContact.create({
                             firstName: a.firstName ?? '',
                             lastName: a.lastName ?? '',
                             emails: [a.email],
@@ -479,19 +479,19 @@ export class AuthenticatedStructures {
                     });
                 }
             }
-            else if (balance.objectType === CachedOutstandingBalanceType.member) {
+            else if (balance.objectType === ReceivableBalanceType.member) {
                 const member = members.find(m => m.id === balance.objectId) ?? null;
                 if (member) {
-                    object = CachedOutstandingBalanceObject.create({
+                    object = ReceivableBalanceObject.create({
                         name: member.details.name,
                         contacts: [
-                            CachedOutstandingBalanceObjectContact.create({
+                            ReceivableBalanceObjectContact.create({
                                 firstName: member.details.firstName ?? '',
                                 lastName: member.details.lastName ?? '',
                                 emails: member.details.getMemberEmails(),
                             }),
                             ...member.users.filter(u => !member.details.getMemberEmails().includes(u.email)).map((a) => {
-                                return CachedOutstandingBalanceObjectContact.create({
+                                return ReceivableBalanceObjectContact.create({
                                     firstName: a.firstName ?? '',
                                     lastName: a.lastName ?? '',
                                     emails: [a.email],
@@ -502,7 +502,7 @@ export class AuthenticatedStructures {
                 }
             }
 
-            const struct = CachedOutstandingBalanceStruct.create({
+            const struct = ReceivableBalanceStruct.create({
                 ...balance,
                 object,
             });

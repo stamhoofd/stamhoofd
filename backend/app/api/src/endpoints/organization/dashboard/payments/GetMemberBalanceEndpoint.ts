@@ -9,6 +9,7 @@ type Query = undefined;
 type Body = undefined;
 type ResponseBody = BalanceItemWithPayments[];
 
+// Rename to ReceiveableBalance
 export class GetMemberBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {

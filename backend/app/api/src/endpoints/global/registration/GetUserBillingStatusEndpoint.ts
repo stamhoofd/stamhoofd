@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { CachedOutstandingBalance, Member, Organization } from '@stamhoofd/models';
+import { CachedBalance, Member, Organization } from '@stamhoofd/models';
 import { OrganizationBillingStatus, OrganizationBillingStatusItem } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
@@ -11,6 +11,7 @@ type Query = undefined;
 type Body = undefined;
 type ResponseBody = OrganizationBillingStatus;
 
+// Todo: rename to PayableBalance
 export class GetUserBilingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
@@ -36,7 +37,7 @@ export class GetUserBilingStatusEndpoint extends Endpoint<Params, Query, Body, R
 
     static async getBillingStatusForObjects(objectIds: string[], organization?: Organization | null) {
         // Load cached balances
-        const cachedOutstandingBalances = await CachedOutstandingBalance.getForObjects(objectIds, organization?.id);
+        const cachedOutstandingBalances = await CachedBalance.getForObjects(objectIds, organization?.id);
 
         const organizationIds = Formatter.uniqueArray(cachedOutstandingBalances.map(b => b.organizationId));
 

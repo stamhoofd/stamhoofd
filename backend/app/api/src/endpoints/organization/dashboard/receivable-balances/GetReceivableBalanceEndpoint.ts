@@ -4,19 +4,21 @@ import { OrganizationBillingStatus } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context';
 import { GetUserBilingStatusEndpoint } from '../../../global/registration/GetUserBillingStatusEndpoint';
 
-type Params = Record<string, never>;
+type Params = { id: string; type: string };
 type Query = undefined;
 type ResponseBody = OrganizationBillingStatus;
 type Body = undefined;
 
-// Todo: rename to PayableBalance
-export class GetOrganizationBillingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/billing/status', {});
+        const params = Endpoint.parseParameters(request.url, '/receivable-balances/@type/@id', {
+            type: String,
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];

@@ -11,6 +11,7 @@ type Query = undefined;
 type Body = undefined;
 type ResponseBody = OrganizationDetailedBillingStatus;
 
+// Todo: rename to PayableBalance
 export class GetUserDetailedBilingStatusEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {

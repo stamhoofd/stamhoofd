@@ -3,7 +3,7 @@ import { SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterComp
 /**
  * Defines how to filter cached balance items in the database from StamhoofdFilter objects
  */
-export const cachedOutstandingBalanceFilterCompilers: SQLFilterDefinitions = {
+export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),

@@ -2,21 +2,21 @@ import { ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDe
 import { v4 as uuidv4 } from 'uuid';
 import { TranslateMethod } from './I18nInterface';
 
-export enum CachedOutstandingBalanceType {
+export enum ReceivableBalanceType {
     organization = 'organization',
     member = 'member',
     user = 'user',
 }
 
-export function getCachedOutstandingBalanceTypeName(type: CachedOutstandingBalanceType, $t: TranslateMethod): string {
+export function getReceivableBalanceTypeName(type: ReceivableBalanceType, $t: TranslateMethod): string {
     switch (type) {
-        case CachedOutstandingBalanceType.organization: return $t('vereniging');
-        case CachedOutstandingBalanceType.member: return $t('lid');
-        case CachedOutstandingBalanceType.user: return $t('account');
+        case ReceivableBalanceType.organization: return $t('vereniging');
+        case ReceivableBalanceType.member: return $t('lid');
+        case ReceivableBalanceType.user: return $t('account');
     }
 }
 
-export class CachedOutstandingBalanceObjectContact extends AutoEncoder {
+export class ReceivableBalanceObjectContact extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     firstName: string | null = null;
 
@@ -27,7 +27,7 @@ export class CachedOutstandingBalanceObjectContact extends AutoEncoder {
     emails: string[] = [];
 }
 
-export class CachedOutstandingBalanceObject extends AutoEncoder {
+export class ReceivableBalanceObject extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -35,22 +35,22 @@ export class CachedOutstandingBalanceObject extends AutoEncoder {
     name = '';
 
     // E-mail addresses to reach out to this entity
-    @field({ decoder: new ArrayDecoder(CachedOutstandingBalanceObjectContact) })
-    contacts: CachedOutstandingBalanceObjectContact[] = [];
+    @field({ decoder: new ArrayDecoder(ReceivableBalanceObjectContact) })
+    contacts: ReceivableBalanceObjectContact[] = [];
 }
 
 /**
  * An entity (organization, member or user) that has an outstanding balance towards an organization
  */
-export class CachedOutstandingBalance extends AutoEncoder {
+export class ReceivableBalance extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    @field({ decoder: new EnumDecoder(CachedOutstandingBalanceType) })
-    objectType: CachedOutstandingBalanceType;
+    @field({ decoder: new EnumDecoder(ReceivableBalanceType) })
+    objectType: ReceivableBalanceType;
 
-    @field({ decoder: CachedOutstandingBalanceObject })
-    object: CachedOutstandingBalanceObject;
+    @field({ decoder: ReceivableBalanceObject })
+    object: ReceivableBalanceObject;
 
     /**
      * The organization that should receive the outstanding balance

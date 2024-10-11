@@ -3,14 +3,14 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
-import { GetCachedOutstandingBalanceEndpoint } from './GetCachedOutstandingBalanceEndpoint';
+import { GetReceivableBalancesEndpoint } from './GetReceivableBalancesEndpoint';
 
 type Params = Record<string, never>;
 type Query = CountFilteredRequest;
 type Body = undefined;
 type ResponseBody = CountResponse;
 
-export class GetCachedOutstandingBalanceCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetReceivableBalancesCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -18,7 +18,7 @@ export class GetCachedOutstandingBalanceCountEndpoint extends Endpoint<Params, Q
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/cached-outstanding-balance/count', {});
+        const params = Endpoint.parseParameters(request.url, '/receivable-balances/count', {});
 
         if (params) {
             return [true, params as Params];
@@ -29,7 +29,7 @@ export class GetCachedOutstandingBalanceCountEndpoint extends Endpoint<Params, Q
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOrganizationScope();
         await Context.authenticate();
-        const query = await GetCachedOutstandingBalanceEndpoint.buildQuery(request.query);
+        const query = await GetReceivableBalancesEndpoint.buildQuery(request.query);
 
         const count = await query
             .count();

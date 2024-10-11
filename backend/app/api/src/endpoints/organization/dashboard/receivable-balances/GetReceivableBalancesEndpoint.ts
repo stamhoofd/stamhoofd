@@ -1,24 +1,24 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CachedOutstandingBalance } from '@stamhoofd/models';
+import { CachedBalance } from '@stamhoofd/models';
 import { compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
-import { CachedOutstandingBalance as CachedOutstandingBalanceStruct, CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { ReceivableBalance as ReceivableBalanceStruct, CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
-import { cachedOutstandingBalanceFilterCompilers } from '../../../../sql-filters/cached-outstanding-balance';
-import { cachedOutstandingBalanceSorters } from '../../../../sql-sorters/cached-outstanding-balance';
+import { receivableBalanceFilterCompilers } from '../../../../sql-filters/receivable-balances';
+import { receivableBalanceSorters } from '../../../../sql-sorters/receivable-balances';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<CachedOutstandingBalanceStruct[], LimitedFilteredRequest>;
+type ResponseBody = PaginatedResponse<ReceivableBalanceStruct[], LimitedFilteredRequest>;
 
-const sorters = cachedOutstandingBalanceSorters;
-const filterCompilers = cachedOutstandingBalanceFilterCompilers;
+const sorters = receivableBalanceSorters;
+const filterCompilers = receivableBalanceFilterCompilers;
 
-export class GetCachedOutstandingBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -26,7 +26,7 @@ export class GetCachedOutstandingBalanceEndpoint extends Endpoint<Params, Query,
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/cached-outstanding-balance', {});
+        const params = Endpoint.parseParameters(request.url, '/receivable-balances', {});
 
         if (params) {
             return [true, params as Params];
@@ -54,7 +54,7 @@ export class GetCachedOutstandingBalanceEndpoint extends Endpoint<Params, Query,
             },
         };
 
-        const query = CachedOutstandingBalance
+        const query = CachedBalance
             .select();
 
         if (scopeFilter) {
@@ -86,7 +86,7 @@ export class GetCachedOutstandingBalanceEndpoint extends Endpoint<Params, Query,
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
-        const query = await GetCachedOutstandingBalanceEndpoint.buildQuery(requestQuery);
+        const query = await GetReceivableBalancesEndpoint.buildQuery(requestQuery);
         const data = await query.fetch();
 
         // todo: Create objects from data
@@ -111,7 +111,7 @@ export class GetCachedOutstandingBalanceEndpoint extends Endpoint<Params, Query,
             }
         }
 
-        return new PaginatedResponse<CachedOutstandingBalanceStruct[], LimitedFilteredRequest>({
+        return new PaginatedResponse<ReceivableBalanceStruct[], LimitedFilteredRequest>({
             results: await AuthenticatedStructures.cachedOutstandingBalances(data),
             next,
         });
@@ -140,7 +140,7 @@ export class GetCachedOutstandingBalanceEndpoint extends Endpoint<Params, Query,
         }
 
         return new Response(
-            await GetCachedOutstandingBalanceEndpoint.buildData(request.query),
+            await GetReceivableBalancesEndpoint.buildData(request.query),
         );
     }
 }

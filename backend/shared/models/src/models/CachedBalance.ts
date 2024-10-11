@@ -1,13 +1,13 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQL, SQLAlias, SQLCalculation, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere } from '@stamhoofd/sql';
-import { BalanceItemStatus, CachedOutstandingBalanceType } from '@stamhoofd/structures';
+import { BalanceItemStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
  */
-export class CachedOutstandingBalance extends Model {
+export class CachedBalance extends Model {
     static table = 'cached_outstanding_balances';
 
     @column({
@@ -30,7 +30,7 @@ export class CachedOutstandingBalance extends Model {
      * user: all balance items with that user id, but without a member id
      */
     @column({ type: 'string' })
-    objectType: CachedOutstandingBalanceType;
+    objectType: ReceivableBalanceType;
 
     @column({ type: 'integer' })
     amount = 0;
@@ -60,7 +60,7 @@ export class CachedOutstandingBalance extends Model {
     })
     updatedAt: Date;
 
-    static async getForObjects(objectIds: string[], limitOrganizationId?: string | null): Promise<CachedOutstandingBalance[]> {
+    static async getForObjects(objectIds: string[], limitOrganizationId?: string | null): Promise<CachedBalance[]> {
         const query = this.select()
             .where('objectId', objectIds);
 
@@ -71,15 +71,15 @@ export class CachedOutstandingBalance extends Model {
         return await query.fetch();
     }
 
-    static async updateForObjects(organizationId: string, objectIds: string[], objectType: CachedOutstandingBalanceType) {
+    static async updateForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
         switch (objectType) {
-            case CachedOutstandingBalanceType.organization:
+            case ReceivableBalanceType.organization:
                 await this.updateForOrganizations(organizationId, objectIds);
                 break;
-            case CachedOutstandingBalanceType.member:
+            case ReceivableBalanceType.member:
                 await this.updateForMembers(organizationId, objectIds);
                 break;
-            case CachedOutstandingBalanceType.user:
+            case ReceivableBalanceType.user:
                 await this.updateForUsers(organizationId, objectIds);
                 break;
         }
@@ -162,7 +162,7 @@ export class CachedOutstandingBalance extends Model {
         return results;
     }
 
-    private static async setForResults(organizationId: string, result: [string, { amount: number; amountPending: number }][], objectType: CachedOutstandingBalanceType) {
+    private static async setForResults(organizationId: string, result: [string, { amount: number; amountPending: number }][], objectType: ReceivableBalanceType) {
         if (result.length === 0) {
             return;
         }
@@ -204,7 +204,7 @@ export class CachedOutstandingBalance extends Model {
             return;
         }
         const results = await this.fetchForObjects(organizationId, organizationIds, 'payingOrganizationId');
-        await this.setForResults(organizationId, results, CachedOutstandingBalanceType.organization);
+        await this.setForResults(organizationId, results, ReceivableBalanceType.organization);
     }
 
     static async updateForMembers(organizationId: string, memberIds: string[]) {
@@ -212,7 +212,7 @@ export class CachedOutstandingBalance extends Model {
             return;
         }
         const results = await this.fetchForObjects(organizationId, memberIds, 'memberId');
-        await this.setForResults(organizationId, results, CachedOutstandingBalanceType.member);
+        await this.setForResults(organizationId, results, ReceivableBalanceType.member);
     }
 
     static async updateForUsers(organizationId: string, userIds: string[]) {
@@ -220,15 +220,15 @@ export class CachedOutstandingBalance extends Model {
             return;
         }
         const results = await this.fetchForObjects(organizationId, userIds, 'userId', SQL.where('memberId', null));
-        await this.setForResults(organizationId, results, CachedOutstandingBalanceType.user);
+        await this.setForResults(organizationId, results, ReceivableBalanceType.user);
     }
 
     /**
      * Experimental: needs to move to library
      */
     static select() {
-        const transformer = (row: SQLResultNamespacedRow): CachedOutstandingBalance => {
-            const d = (this as typeof CachedOutstandingBalance & typeof Model).fromRow(row[this.table] as any) as CachedOutstandingBalance | undefined;
+        const transformer = (row: SQLResultNamespacedRow): CachedBalance => {
+            const d = (this as typeof CachedBalance & typeof Model).fromRow(row[this.table] as any) as CachedBalance | undefined;
 
             if (!d) {
                 throw new Error('EmailTemplate not found');
