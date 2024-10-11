@@ -83,7 +83,7 @@ if (props.isNew) {
 }
 
 const allPatchedTags = computed(() => patch.value.applyTo(props.allTags) as OrganizationTag[]);
-const patched = computed(() => allPatchedTags.value.find(t => t.id === props.tag.id) ?? OrganizationTag.create({ name: 'Onbekende tag' }));
+const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: 'Onbekende tag' }));
 
 const hasChanges = computed(() => patch.value.changes.length > 0);
 
@@ -137,7 +137,7 @@ const doDelete = async () => {
     deleting.value = true;
 
     try {
-        addDelete(props.tag.id);
+        addDeleteRecursive(props.tag.id);
         await props.saveHandler(patch.value);
         await pop({ force: true });
     }
@@ -147,6 +147,22 @@ const doDelete = async () => {
 
     deleting.value = false;
 };
+
+function addDeleteRecursive(tagId: string) {
+    const tag = getPatchedTag(tagId);
+
+    if (tag) {
+        for (const childTagId of tag.childTags) {
+            addDeleteRecursive(childTagId);
+        }
+
+        addDelete(tagId);
+    }
+}
+
+function getPatchedTag(tagId: string): OrganizationTag | undefined {
+    return allPatchedTags.value.find(t => t.id === tagId);
+}
 
 const name = computed({
     get: () => patched.value.name,
