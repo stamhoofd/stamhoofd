@@ -78,8 +78,13 @@ const title = computed(() => props.isNew ? 'Nieuwe tag' : 'Tag bewerken');
 const pop = usePop();
 
 const patch = ref(new PatchableArray()) as Ref<PatchableArrayAutoEncoder<OrganizationTag>>;
+if (props.isNew) {
+    patch.value.addPut(props.tag);
+}
+
 const allPatchedTags = computed(() => patch.value.applyTo(props.allTags) as OrganizationTag[]);
 const patched = computed(() => allPatchedTags.value.find(t => t.id === props.tag.id) ?? OrganizationTag.create({ name: 'Onbekende tag' }));
+
 const hasChanges = computed(() => patch.value.changes.length > 0);
 
 function addPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationTag>>) {
