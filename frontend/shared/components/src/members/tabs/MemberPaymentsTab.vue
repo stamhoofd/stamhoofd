@@ -12,7 +12,7 @@
                 <p v-if="filteredBalanceItems.length === 0" class="info-box">
                     Geen openstaande rekening
                 </p>
-                
+
                 <STList>
                     <STListItem v-for="item in filteredBalanceItems" :key="item.id" :selectable="hasWrite" @click="editBalanceItem(item)">
                         <template #left>
@@ -26,7 +26,6 @@
                             {{ item.itemPrefix }}
                         </p>
 
-                        
                         <h3 class="style-title-list">
                             {{ item.itemTitle }}
                         </h3>
@@ -86,7 +85,7 @@
                         Je kan zelf ook manueel een betaling toevoegen (bv. als er ter plaatse werd betaald, of via een overschrijving die niet in het systeem is opgenomen) via de knop 'Betaling/terugbetaling registreren' hierboven.
                     </p>
                 </template>
-               
+
                 <template v-if="pendingPayments.length > 0">
                     <hr>
                     <h2>In verwerking</h2>
@@ -115,14 +114,14 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableA
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncPaymentView, ErrorBox, GlobalEventBus, PaymentRow, PriceBreakdownBox, Spinner, useAuth, useContext, useErrors, useFinancialSupportSettings, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItemWithPayments, FinancialSupportSettings, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditBalanceItemView from '../../payments/EditBalanceItemView.vue';
 import EditPaymentView from '../../payments/EditPaymentView.vue';
 
 const props = defineProps<{
-    member: PlatformMember
+    member: PlatformMember;
 }>();
 
 const loadingPayments = ref(true);
@@ -139,100 +138,100 @@ const present = usePresent();
 reload().catch(console.error);
 
 // Listen for patches in payments
-GlobalEventBus.addListener(this, "paymentPatch", async (payment) => {
+GlobalEventBus.addListener(this, 'paymentPatch', async (payment) => {
     if (payment && payment.id && paymentIds.value.has(payment.id as string)) {
         // Reload members and family
-        reloadFamily().catch(console.error)
+        reloadFamily().catch(console.error);
 
         // We need to reload because pricePaid doesn't update from balace items
-        reload().catch(console.error)
+        reload().catch(console.error);
     }
-    return Promise.resolve()
-})
+    return Promise.resolve();
+});
 
 const priceBreakown = computed(() => {
-    const balance = outstandingBalance.value
+    const balance = outstandingBalance.value;
 
     const all = [
         {
             name: 'Reeds betaald',
-            price: balance.pricePaid
+            price: balance.pricePaid,
         },
         {
             name: 'In verwerking',
             price: balance.pricePending,
-        }
-    ].filter(a => a.price !== 0)
+        },
+    ].filter(a => a.price !== 0);
 
     if (all.length > 0) {
         all.unshift({
             name: 'Totaalprijs',
-            price: balance.price
-        })
+            price: balance.price,
+        });
     }
 
     return [
         ...all,
         {
             name: balance.priceOpen < 0 ? 'Terug te krijgen' : 'Te betalen',
-            price: Math.abs(balance.priceOpen)
-        }
+            price: Math.abs(balance.priceOpen),
+        },
     ];
 });
 
 const filteredBalanceItems = computed(() => {
-    return balanceItems.value.filter(b => b.priceOpen !== 0)
+    return balanceItems.value.filter(b => b.priceOpen !== 0);
 });
-const {financialSupportSettings} = useFinancialSupportSettings()
+const { financialSupportSettings } = useFinancialSupportSettings();
 
 const financialSupportWarningText = computed(() => {
-    return financialSupportSettings.value.warningText
+    return financialSupportSettings.value.warningText;
 });
 
 const outstandingBalance = computed(() => {
-    return BalanceItemWithPayments.getOutstandingBalance(filteredBalanceItems.value)
+    return BalanceItemWithPayments.getOutstandingBalance(filteredBalanceItems.value);
 });
 
 const paymentIds = computed(() => {
-    const payments = new Set<string>()
+    const payments = new Set<string>();
     for (const item of balanceItems.value) {
         for (const payment of item.payments) {
-            payments.add(payment.payment.id)
+            payments.add(payment.payment.id);
         }
     }
-    return payments
+    return payments;
 });
 
 const hasWrite = computed(() => {
-    return auth.canAccessMemberPayments(props.member, PermissionLevel.Write)
-})
+    return auth.canAccessMemberPayments(props.member, PermissionLevel.Write);
+});
 
 const pendingPayments = computed(() => {
-    const payments = new Map<string, Payment>()
+    const payments = new Map<string, Payment>();
     for (const item of balanceItems.value) {
         for (const payment of item.payments) {
             if (payment.payment.isPending) {
-                payments.set(payment.payment.id, payment.payment)
+                payments.set(payment.payment.id, payment.payment);
             }
         }
     }
-    return [...payments.values()].sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
-})
+    return [...payments.values()].sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
+});
 
 const succeededPayments = computed(() => {
-    const payments = new Map<string, Payment>()
+    const payments = new Map<string, Payment>();
     for (const item of balanceItems.value) {
         for (const payment of item.payments) {
             if (payment.payment.isSucceeded) {
-                payments.set(payment.payment.id, payment.payment)
+                payments.set(payment.payment.id, payment.payment);
             }
         }
     }
-    return [...payments.values()].sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
-})
+    return [...payments.values()].sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
+});
 
 async function reloadFamily() {
-    await platformFamilyManager.loadFamilyMembers(props.member, {shouldRetry: false})
+    await platformFamilyManager.loadFamilyMembers(props.member, { shouldRetry: false });
 }
 
 async function reload() {
@@ -242,37 +241,38 @@ async function reload() {
             method: 'GET',
             path: `/organization/members/${props.member.id}/balance`,
             decoder: new ArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>),
-            owner
+            owner,
         });
         response.data.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
-        
+
         // Try to reuse existing references
-        const newItems = response.data
+        const newItems = response.data;
 
         for (const item of balanceItems.value) {
-            const found = newItems.findIndex(i => i.id === item.id)
+            const found = newItems.findIndex(i => i.id === item.id);
             if (found !== -1) {
                 // Replace with existing reference
                 const newItem = newItems[found];
 
                 // Same for payments
                 for (const payment of item.payments) {
-                    const foundPayment = newItem.payments.findIndex(p => p.payment.id === payment.payment.id)
+                    const foundPayment = newItem.payments.findIndex(p => p.payment.id === payment.payment.id);
                     if (foundPayment !== -1) {
                         // Replace with existing reference
-                        payment.set(newItem.payments[foundPayment])
-                        newItem.payments[foundPayment] = payment
+                        payment.set(newItem.payments[foundPayment]);
+                        newItem.payments[foundPayment] = payment;
                     }
                 }
-                
-                item.set(newItem)
-                newItems[found] = item
+
+                item.set(newItem);
+                newItems[found] = item;
             }
         }
-        
+
         balanceItems.value = newItems;
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     loadingPayments.value = false;
 }
@@ -286,8 +286,8 @@ async function createPayment() {
             firstName: props.member.patchedMember.details.firstName,
             lastName: props.member.patchedMember.details.lastName,
             email: props.member.patchedMember.details.email ?? props.member.patchedMember.details.getParentEmails()[0] ?? null,
-        })
-    })
+        }),
+    });
 
     const component = new ComponentWithProperties(EditPaymentView, {
         payment,
@@ -296,38 +296,38 @@ async function createPayment() {
         isNew: true,
         saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
             const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-            arr.addPut(payment.patch(patch))
+            arr.addPut(payment.patch(patch));
             await context.value.authenticatedServer.request({
                 method: 'PATCH',
                 path: '/organization/payments',
                 body: arr,
                 decoder: new ArrayDecoder(PaymentGeneral),
-                shouldRetry: false
+                shouldRetry: false,
             });
             await reload();
             // Also reload member outstanding amount of the whole family
             await reloadFamily();
-        }
-    })
+        },
+    });
     await present({
         components: [component],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function openPayment(payment: Payment) {
     const component = new ComponentWithProperties(AsyncPaymentView, {
-        payment
-    })
+        payment,
+    });
     await present({
         components: [component],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function editBalanceItem(balanceItem: BalanceItemWithPayments) {
     if (!hasWrite.value) {
-        return
+        return;
     }
     const component = new ComponentWithProperties(EditBalanceItemView, {
         balanceItem,
@@ -335,51 +335,51 @@ async function editBalanceItem(balanceItem: BalanceItemWithPayments) {
         saveHandler: async (patch: AutoEncoderPatchType<BalanceItemWithPayments>) => {
             const arr: PatchableArrayAutoEncoder<BalanceItemWithPayments> = new PatchableArray();
             patch.id = balanceItem.id;
-            arr.addPatch(patch)
+            arr.addPatch(patch);
             await context.value.authenticatedServer.request({
                 method: 'PATCH',
                 path: '/organization/balance',
                 body: arr,
                 decoder: new ArrayDecoder(BalanceItemWithPayments),
-                shouldRetry: false
+                shouldRetry: false,
             });
             await reload();
 
             // Also reload member outstanding amount of the whole family
             await reloadFamily();
-        }
-    })
+        },
+    });
     await present({
         components: [component],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function createBalanceItem() {
     const balanceItem = BalanceItemWithPayments.create({
-        memberId: props.member.id
-    })
+        memberId: props.member.id,
+    });
     const component = new ComponentWithProperties(EditBalanceItemView, {
         balanceItem,
         isNew: true,
         saveHandler: async (patch: AutoEncoderPatchType<BalanceItemWithPayments>) => {
             const arr: PatchableArrayAutoEncoder<BalanceItemWithPayments> = new PatchableArray();
-            arr.addPut(balanceItem.patch(patch))
+            arr.addPut(balanceItem.patch(patch));
             await context.value.authenticatedServer.request({
                 method: 'PATCH',
                 path: '/organization/balance',
                 body: arr,
                 decoder: new ArrayDecoder(BalanceItemWithPayments),
-                shouldRetry: false
+                shouldRetry: false,
             });
             await reload();
             // Also reload member outstanding amount of the whole family
             await reloadFamily();
-        }
-    })
+        },
+    });
     await present({
         components: [component],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 </script>

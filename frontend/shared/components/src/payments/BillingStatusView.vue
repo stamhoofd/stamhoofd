@@ -37,7 +37,7 @@ import { PaymentView } from '@stamhoofd/components';
 import { OrganizationDetailedBillingStatusItem, PaymentGeneral } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import OutstandingBalanceTable from "./OutstandingBalanceTable.vue";
+import OutstandingBalanceTable from './OutstandingBalanceTable.vue';
 import PaymentRow from './components/PaymentRow.vue';
 
 const props = withDefaults(
@@ -45,22 +45,22 @@ const props = withDefaults(
         /**
          * Whether the view is dedicated to a single organization (so we can hide organization names in the view)
          */
-        singleOrganization?: boolean,
-        items: OrganizationDetailedBillingStatusItem[]
+        singleOrganization?: boolean;
+        items: OrganizationDetailedBillingStatusItem[];
     }>(), {
-        singleOrganization: false
-    }
+        singleOrganization: false,
+    },
 );
 
-const present = usePresent()
+const present = usePresent();
 
 const pendingPayments = computed(() => {
-    return props.items.flatMap(i => i.payments).filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
+    return props.items.flatMap(i => i.payments).filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
 });
 
 const succeededPayments = computed(() => {
-    return props.items.flatMap(i => i.payments).filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
-}); 
+    return props.items.flatMap(i => i.payments).filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
+});
 
 async function openPayment(payment: PaymentGeneral) {
     await present({
@@ -81,12 +81,12 @@ async function openPayment(payment: PaymentGeneral) {
                             return null;
                         }
                         return succeededPayments.value[index - 1];
-                    }
-                })
-            })
+                    },
+                }),
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 </script>
