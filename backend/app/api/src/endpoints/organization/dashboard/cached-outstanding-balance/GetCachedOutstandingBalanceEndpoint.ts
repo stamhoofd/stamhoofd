@@ -48,6 +48,10 @@ export class GetCachedOutstandingBalanceEndpoint extends Endpoint<Params, Query,
 
         scopeFilter = {
             organizationId: organization.id,
+            $or: {
+                amount: { $neq: 0 },
+                amountPending: { $neq: 0 },
+            },
         };
 
         const query = CachedOutstandingBalance
