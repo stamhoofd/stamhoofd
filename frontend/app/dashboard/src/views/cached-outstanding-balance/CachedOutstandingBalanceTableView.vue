@@ -8,6 +8,7 @@
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
+        @click="showBalance"
     >
         <template #empty>
             {{ $t('Er zijn geen openstaande bedragen') }}
@@ -16,14 +17,17 @@
 </template>
 
 <script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, ModernTableView, TableAction, useCachedOutstandingBalanceObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { CachedOutstandingBalance, StamhoofdFilter } from '@stamhoofd/structures';
+import { CachedOutstandingBalance, getCachedOutstandingBalanceTypeName, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
+import OutstandingBalanceView from './OutstandingBalanceView.vue';
 
 type ObjectType = CachedOutstandingBalance;
 const $t = useTranslate();
+const present = usePresent();
 
 const title = computed(() => {
     return $t('Openstaande bedragen');
@@ -58,7 +62,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'objectType',
         name: 'Type',
-        getValue: object => object.objectType,
+        getValue: object => Formatter.capitalizeFirstLetter(getCachedOutstandingBalanceTypeName(object.objectType, $t)),
         minimumWidth: 100,
         recommendedWidth: 200,
         allowSorting: false,
@@ -109,4 +113,26 @@ const allColumns: Column<ObjectType, any>[] = [
 ];
 
 const actions: TableAction<ObjectType>[] = [];
+
+async function showBalance(item: CachedOutstandingBalance) {
+    if (!modernTableView.value) {
+        return;
+    }
+
+    // todo
+    const table = modernTableView.value;
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(OutstandingBalanceView, {
+            item,
+            getNext: table.getNext,
+            getPrevious: table.getPrevious,
+        }),
+    });
+
+    await present({
+        components: [component],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 </script>

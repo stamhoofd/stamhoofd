@@ -1,10 +1,19 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
+import { TranslateMethod } from './I18nInterface';
 
 export enum CachedOutstandingBalanceType {
     organization = 'organization',
     member = 'member',
     user = 'user',
+}
+
+export function getCachedOutstandingBalanceTypeName(type: CachedOutstandingBalanceType, $t: TranslateMethod): string {
+    switch (type) {
+        case CachedOutstandingBalanceType.organization: return $t('vereniging');
+        case CachedOutstandingBalanceType.member: return $t('lid');
+        case CachedOutstandingBalanceType.user: return $t('account');
+    }
 }
 
 export class CachedOutstandingBalanceObjectContact extends AutoEncoder {
