@@ -123,7 +123,7 @@ class GroupedItems {
 }
 
 const filteredItems = computed(() => {
-    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).totalOpen !== 0);
+    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0);
 });
 
 const groupedItems = computed(() => {

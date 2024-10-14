@@ -37,22 +37,24 @@
                         {{ $t('Openstaand bedrag') }}
                     </h3>
                     <p class="style-definition-text">
-                        {{ formatPrice(item.amountOpen) }}
+                        {{ formatPrice(item.amount) }}
                     </p>
                     <p v-if="item.amountPending !== 0" class="style-description-small">
-                        {{ formatPrice(item.amount) }} waarvan {{ formatPrice(item.amountPending) }} in verwerking
+                        waarvan {{ formatPrice(item.amountPending) }} in verwerking
                     </p>
                 </STListItem>
             </STList>
 
-            <hr>
+            <template v-if="filteredItems.length">
+                <hr>
 
-            <h2>Overzicht</h2>
+                <h2>Overzicht</h2>
 
-            <SegmentedControl v-model="selectedTab" :items="['Gegroepeerd', 'Individueel']" />
+                <SegmentedControl v-model="selectedTab" :items="['Gegroepeerd', 'Individueel']" />
 
-            <ReceivableBalanceList v-if="selectedTab === 'Individueel'" :item="detailedItem" />
-            <GroupedBalanceList v-else :item="detailedItem" />
+                <ReceivableBalanceList v-if="selectedTab === 'Individueel'" :item="detailedItem" />
+                <GroupedBalanceList v-else :item="detailedItem" />
+            </template>
 
             <template v-if="pendingPayments.length > 0">
                 <hr>
@@ -99,7 +101,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { LoadingView, useBackForward, useContext, PaymentRow, SegmentedControl, GroupedBalanceList } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { ReceivableBalance, getReceivableBalanceTypeName, DetailedReceivableBalance } from '@stamhoofd/structures';
+import { ReceivableBalance, getReceivableBalanceTypeName, DetailedReceivableBalance, BalanceItemWithPayments } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref } from 'vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
@@ -126,6 +128,10 @@ const pendingPayments = computed(() => {
 
 const succeededPayments = computed(() => {
     return detailedItem.value?.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt)) ?? [];
+});
+
+const filteredItems = computed(() => {
+    return detailedItem.value?.balanceItems.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0) ?? [];
 });
 
 // Load detailed item

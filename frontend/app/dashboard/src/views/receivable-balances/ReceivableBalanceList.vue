@@ -1,6 +1,6 @@
 <template>
     <STList>
-        <STListItem v-for="item in item.balanceItems" :key="item.id">
+        <STListItem v-for="item in filteredItems" :key="item.id">
             <template #left>
                 <span v-if="item.amount === 0" class="style-amount min-width">
                     <span class="icon disabled gray" />
@@ -50,10 +50,16 @@
 </template>
 
 <script lang="ts" setup>
-import { DetailedReceivableBalance } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, DetailedReceivableBalance } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     item: DetailedReceivableBalance;
 }>();
+const items = computed(() => props.item.balanceItems);
+
+const filteredItems = computed(() => {
+    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0);
+});
 
 </script>
