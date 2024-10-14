@@ -23,6 +23,11 @@ export class TagHelper extends SharedTagHelper {
         await loopModels(Organization, 'id', onBatchReceived, { limit: 10 });
     }
 
+    /**
+     * Removes child tag ids that do not exist and sorts the tags.
+     * @param platformTags
+     * @returns
+     */
     static getCleanedUpTags(platformTags: OrganizationTag[]): OrganizationTag[] {
         const existingTags = new Set(platformTags.map(t => t.id));
 
@@ -37,23 +42,20 @@ export class TagHelper extends SharedTagHelper {
         // keep original order, but add child tags below parent tag
         const map = new Map(tags.map(tag => [tag.id, tag]));
         const rootTags = this.getRootTags(tags);
-
         const sortedTags = this.sortTagsHelper(rootTags, map);
-        if (sortedTags.length !== tags.length) {
-            throw new Error('Sort tags failed, length of sorted tags does not equal original array.');
-        }
 
-        return sortedTags;
+        return Array.from(sortedTags);
     }
 
-    private static sortTagsHelper(tags: OrganizationTag[], allTagsMap: Map<string, OrganizationTag>): OrganizationTag[] {
-        const result: OrganizationTag[] = [];
+    private static sortTagsHelper(tags: OrganizationTag[], allTagsMap: Map<string, OrganizationTag>): Set<OrganizationTag> {
+        // set to prevent duplicates
+        const result = new Set<OrganizationTag>();
 
         for (const tag of tags) {
-            result.push(tag);
+            result.add(tag);
             if (tag.childTags) {
                 const childTags = tag.childTags.map(id => allTagsMap.get(id)).filter(x => x !== undefined);
-                result.push(...this.sortTagsHelper(childTags, allTagsMap));
+                this.sortTagsHelper(childTags, allTagsMap).forEach(tag => result.add(tag));
             }
         }
 
