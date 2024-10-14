@@ -25,19 +25,19 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     props: {
         items: Array,
         value: String,
     },
-    emits: ['update:modelValue']
+    emits: ['update:modelValue'],
 })
 export default class SegmentedControl extends VueComponent {
     @Prop({ type: Array })
     public items!: any[];
-    
+
     @Prop({ default: null })
     public labels!: string[] | null;
 
@@ -49,8 +49,8 @@ export default class SegmentedControl extends VueComponent {
     }
 
     get pointerTransform() {
-        const percentage = (this.selectedIndex / this.items.length) * 100
-        return "translateX("+percentage.toFixed(2)+"%)";
+        const percentage = (this.selectedIndex / this.items.length) * 100;
+        return 'translateX(' + percentage.toFixed(2) + '%)';
     }
 
     selectItem(index) {
@@ -66,7 +66,6 @@ export default class SegmentedControl extends VueComponent {
 $segmented-control-border-width: 2px;
 $segmented-control-height: 38px;
 $segmented-control-inner-height: $segmented-control-height - $segmented-control-border-width * 2;
-
 
 $border-radius: 9px;
 
