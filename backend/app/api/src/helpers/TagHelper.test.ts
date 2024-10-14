@@ -203,7 +203,63 @@ describe('TagHelper', () => {
         });
 
         it('should return array of tags in the correct order', () => {
-            throw new Error('Not implemented');
+            // arrange
+            const platformTags: OrganizationTag[] = [
+                OrganizationTag.create({
+                    id: 'id2b1',
+                    name: 'tag2b1',
+                    childTags: [],
+                }),
+                OrganizationTag.create({
+                    id: 'id1',
+                    name: 'tag1',
+                    childTags: [],
+                }),
+                OrganizationTag.create({
+                    id: 'id2',
+                    name: 'tag2',
+                    childTags: ['id2a', 'id2b'],
+                }),
+                OrganizationTag.create({
+                    id: 'id3',
+                    name: 'tag3',
+                    childTags: [],
+                }),
+                OrganizationTag.create({
+                    id: 'id2a',
+                    name: 'tag2a',
+                    childTags: ['id2a1', 'id2a2'],
+                }),
+                OrganizationTag.create({
+                    id: 'id2b',
+                    name: 'tag2b',
+                    childTags: ['id2b1'],
+                }),
+                OrganizationTag.create({
+                    id: 'id2a1',
+                    name: 'tag2a1',
+                    childTags: [],
+                }),
+                OrganizationTag.create({
+                    id: 'id2a2',
+                    name: 'tag2a2',
+                    childTags: [],
+                }),
+            ];
+
+            // act
+            const result = TagHelper.getCleanedUpTags(platformTags);
+
+            // assert
+            expect(result).toHaveLength(8);
+            expect(result[0].id).toBe('id1');
+            expect(result[1].id).toBe('id2');
+            expect(result[2].id).toBe('id2a');
+            expect(result[3].id).toBe('id2a1');
+            expect(result[4].id).toBe('id2a2');
+            expect(result[5].id).toBe('id2b');
+            expect(result[6].id).toBe('id2b1');
+            expect(result[7].id).toBe('id3');
         });
     });
 
