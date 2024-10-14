@@ -126,7 +126,7 @@ import { ErrorBox, PayableBalanceCollectionView, useAuth, useContext, useErrors,
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, BalanceItemWithPayments, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions, ref, Ref } from 'vue';
-import ReceivableBalancesTableView from '../../cached-outstanding-balance/ReceivableBalancesTableView.vue';
+import ReceivableBalancesTableView from '../../receivable-balances/ReceivableBalancesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 
