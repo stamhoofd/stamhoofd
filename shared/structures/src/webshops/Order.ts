@@ -3,7 +3,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../BalanceItem';
 import { Recipient, Replacement } from '../endpoints/EmailRequest';
-import { compileToInMemoryFilter } from '../filters/InMemoryFilter';
+import { compileToInMemoryFilter, InMemoryFilterDefinitions } from '../filters/InMemoryFilter';
 import { privateOrderInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter';
 import { Payment, PrivatePayment } from '../members/Payment';
@@ -451,15 +451,9 @@ export class PrivateOrder extends Order {
         return this.balanceItems.flatMap(i => i.payments.map(p => p.payment)).filter(p => p.status !== PaymentStatus.Failed).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     }
 
-    doesMatchFilter(filter: StamhoofdFilter) {
-        try {
-            const compiledFilter = compileToInMemoryFilter(filter, privateOrderInMemoryFilterCompilers);
-            return compiledFilter(this);
-        }
-        catch (e) {
-            console.error('Error while compiling filter', e, filter);
-        }
-        return false;
+    static createCompiledFilter(filter: StamhoofdFilter) {
+        const definitions: InMemoryFilterDefinitions = privateOrderInMemoryFilterCompilers;
+        return compileToInMemoryFilter(filter, definitions);
     }
 }
 

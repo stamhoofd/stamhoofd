@@ -11,7 +11,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    '#': {
+    number: {
         getValue(a) {
             return a.number;
         },
@@ -22,7 +22,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
             });
         },
     },
-    'id': {
+    id: {
         getValue(a) {
             return a.id;
         },
@@ -33,18 +33,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
             });
         },
     },
-    'name': {
-        getValue(a) {
-            return a.id;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('name'),
-                direction,
-            });
-        },
-    },
-    'createdAt': {
+    createdAt: {
         getValue(a) {
             return Formatter.dateTimeIso(a.createdAt);
         },

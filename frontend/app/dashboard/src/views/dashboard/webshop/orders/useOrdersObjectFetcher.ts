@@ -1,6 +1,6 @@
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, LimitedFilteredRequest, PrivateOrder, PrivateOrderWithTickets, SortList, TicketPrivate } from '@stamhoofd/structures';
-import { WebshopManager } from '../WebshopManager';
+import { assertSort, CountFilteredRequest, LimitedFilteredRequest, PrivateOrder, PrivateOrderWithTickets, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
+import { OrderStoreIndexedDbIndex, WebshopManager } from '../WebshopManager';
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -15,33 +15,42 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
     overrides?: Partial<ObjectFetcher<ObjectType>>;
 } = {}): ObjectFetcher<ObjectType> {
     let startedFetchOrders = false;
-    // let count: number | null = null;
 
     return {
         extendSort,
         async fetch(data: LimitedFilteredRequest) {
+            console.error(JSON.stringify(data.sort));
             const arrayBuffer: PrivateOrderWithTickets[] = [];
 
-            // data = {
-            //     ...data,
-            //     filter: {
-            //         number: 12,
-            //     },
-            // };
+            const compiledFilters = [data.filter, data.search].map(filter => PrivateOrder.createCompiledFilter(filter));
 
-            // data.filter = {
-            //     '#': 12,
-            // };
+            const availableIndexes = Object.values(OrderStoreIndexedDbIndex);
+            const sortItems = (data.sort as (SortItem & { key: OrderStoreIndexedDbIndex })[]).filter((item) => {
+                const key = item.key;
+                // skip id
+                if ((key as string) === 'id') {
+                    return false;
+                }
+                const doesIndexExist = availableIndexes.includes(key);
+                if (!doesIndexExist) {
+                    console.error(`Index ${key} for IndexedDb order store is not supported.`);
+                }
+                return doesIndexExist;
+            });
+
+            if (sortItems.length > 1) {
+                console.error('Only 1 sort item is supported for the IndexedDb order store');
+            }
+
+            const sortItem: (SortItem & { key: OrderStoreIndexedDbIndex }) | undefined = sortItems[0];
 
             const streamOrdersPromise = manager.streamOrders((order: PrivateOrder) => {
-                // todo: filter
-                // todo: sort
-                if (order.doesMatchFilter(data.filter) && order.doesMatchFilter(data.search)) {
+                if (compiledFilters.every(filter => filter(order))) {
                     arrayBuffer.push(
                         PrivateOrderWithTickets.create(order),
                     );
                 }
-            });
+            }, sortItem);
 
             let fetchOrdersPromise: Promise<boolean> | null = null;
 
@@ -69,7 +78,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
             }
 
             await streamOrdersPromise;
-            count = arrayBuffer.length;
 
             if (shouldAddTickets) {
                 await addTickets(manager, arrayBuffer);
@@ -79,8 +87,17 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
         },
 
         async fetchCount(data: CountFilteredRequest): Promise<number> {
-            // todo: should filter the results, but best to only stream orders once?
-            return await manager.getOrdersCountFromDatabase();
+            let count = 0;
+
+            const compiledFilters = [data.filter, data.search].map(filter => PrivateOrder.createCompiledFilter(filter));
+
+            await manager.streamOrders((order: PrivateOrder) => {
+                if (compiledFilters.every(filter => filter(order))) {
+                    count++;
+                }
+            });
+
+            return count;
         },
         beforeRefresh: () => {
             startedFetchOrders = false;

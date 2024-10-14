@@ -3,10 +3,15 @@ import { isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { EventBus, fetchAll, ObjectFetcher, Toast } from '@stamhoofd/components';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, SortItem, SortItemDirection, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
 import { toRaw } from 'vue';
 
 class CallbackError extends Error {}
+
+export enum OrderStoreIndexedDbIndex {
+    Number = 'number',
+    CreatedAt = 'createdAt',
+};
 
 /**
  * Responsible for managing a single webshop orders and tickets
@@ -233,6 +238,8 @@ export class WebshopManager {
 
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
+            // remark: I think this should not be the version of the structures but the version of the IndexedDb
+            // because onupgradeneeded does only get called if the version changes
             const version = Version;
             let resolved = false;
 
@@ -274,15 +281,33 @@ export class WebshopManager {
             DBOpenRequest.onupgradeneeded = (event: IDBVersionChangeEvent) => {
                 const db = DBOpenRequest.result;
 
+                function addTicketStoreIndexes(ticketStore: IDBObjectStore) {
+                    // Search tickets by order id
+                    ticketStore.createIndex('orderId', 'orderId', { unique: false });
+                }
+
+                function addOrderStoreIndexes(orderStore: IDBObjectStore) {
+                    // typescript will show an error if an index is missing
+                    const indexes: Record<OrderStoreIndexedDbIndex, IDBIndexParameters> = {
+                        // todo: is number unique?
+                        [OrderStoreIndexedDbIndex.Number]: { unique: false },
+                        [OrderStoreIndexedDbIndex.CreatedAt]: { unique: false },
+                    };
+
+                    Object.entries(indexes).forEach(([index, options]) => {
+                        orderStore.createIndex(index, index, options);
+                    });
+                }
+
                 if (event.oldVersion < 1) {
                     // Version 1 is the first version of the database.
-                    db.createObjectStore('orders', { keyPath: 'id' });
+                    const orderStore = db.createObjectStore('orders', { keyPath: 'id' });
                     const ticketStore = db.createObjectStore('tickets', { keyPath: 'secret' });
                     db.createObjectStore('ticketPatches', { keyPath: 'secret' });
                     db.createObjectStore('settings', {});
 
-                    // Search tickets by order id
-                    ticketStore.createIndex('orderId', 'orderId', { unique: false });
+                    addOrderStoreIndexes(orderStore);
+                    addTicketStoreIndexes(ticketStore);
                 }
                 else {
                     // For now: we clear all stores if we have a version update
@@ -293,7 +318,13 @@ export class WebshopManager {
 
                     if (event.oldVersion < 114) {
                         const ticketStore = DBOpenRequest.transaction!.objectStore('tickets');
-                        ticketStore.createIndex('orderId', 'orderId', { unique: false });
+                        addTicketStoreIndexes(ticketStore);
+                    }
+
+                    // todo: determine version!!!
+                    if (event.oldVersion < 999999999) {
+                        const orderStore = DBOpenRequest.transaction!.objectStore('orders');
+                        addOrderStoreIndexes(orderStore);
                     }
                 }
             };
@@ -531,7 +562,7 @@ export class WebshopManager {
         });
     }
 
-    async streamOrders(callback: (order: PrivateOrder) => void): Promise<void> {
+    async streamOrders(callback: (order: PrivateOrder) => void, sortItem?: SortItem & { key: OrderStoreIndexedDbIndex }): Promise<void> {
         const db = await this.getDatabase();
 
         await new Promise<void>((resolve, reject) => {
@@ -551,7 +582,32 @@ export class WebshopManager {
             // Do the actual saving
             const objectStore = transaction.objectStore('orders');
 
-            const request = objectStore.openCursor();
+            let request: IDBRequest<IDBCursorWithValue | null>;
+
+            if (sortItem) {
+                const indexName = sortItem.key;
+                const order = sortItem.order;
+                let direction: IDBCursorDirection | undefined = undefined;
+
+                if (order === SortItemDirection.ASC) {
+                    direction = 'next';
+                }
+                else if (order === SortItemDirection.DESC) {
+                    direction = 'prev';
+                }
+                else {
+                    // in case another SortItemDirection is added in the future
+                    console.error(`Order ${order as string} is not supported.`);
+                }
+
+                request = objectStore.index(indexName)
+                    .openCursor(null, direction);
+            }
+            else {
+                request = objectStore.openCursor();
+            }
+
+            // const request = cursorTarget.openCursor();
             request.onsuccess = (event: any) => {
                 const cursor = event.target.result;
                 if (cursor) {
@@ -643,26 +699,6 @@ export class WebshopManager {
             request.onsuccess = () => {
                 resolve();
             };
-        });
-    }
-
-    async getOrdersCountFromDatabase(): Promise<number> {
-        const db = await this.getDatabase();
-
-        return new Promise<number>((resolve, reject) => {
-            const transaction = db.transaction(['orders'], 'readonly');
-
-            transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                reject(event);
-            };
-
-            // Do the actual saving
-            const objectStore = transaction.objectStore('orders');
-
-            const request = objectStore.count();
-
-            request.onsuccess = () => resolve(request.result);
         });
     }
 

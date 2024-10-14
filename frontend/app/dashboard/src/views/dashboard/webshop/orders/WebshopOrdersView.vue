@@ -44,7 +44,7 @@ const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
     },
 });
 
-const tableObjectFetcher = useTableObjectFetcher<PrivateOrder>(objectFetcher);
+const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
 
 // todo
 const filterBuilders: UIFilterBuilder[] = [];
@@ -99,6 +99,7 @@ const actions = computed(() => {
 const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     const cols: Column<PrivateOrderWithTickets, any>[] = [
         new Column<PrivateOrder, number>({
+            id: 'number',
             name: '#',
             getValue: order => order.number ?? 0,
             compare: (a, b) => Sorter.byNumberValue(b, a),
@@ -127,6 +128,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         }),
 
         new Column<PrivateOrder, string>({
+            id: 'name',
             name: 'Naam',
             getValue: order => order.data.customer.name,
             compare: (a, b) => Sorter.byStringValue(a, b),
