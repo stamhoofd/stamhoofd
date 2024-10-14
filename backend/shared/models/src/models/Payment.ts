@@ -228,7 +228,7 @@ export class Payment extends Model {
             return d;
         };
 
-        const select = new SQLSelect(transformer, SQL.wildcard());
+        const select = new SQLSelect(transformer, SQL.wildcard(this.table));
         return select.from(SQL.table(this.table));
     }
 }

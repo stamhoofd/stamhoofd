@@ -6,3 +6,4 @@ export { default as PayableBalanceTable } from './PayableBalanceTable.vue';
 export { default as PayableBalanceCollectionView } from './PayableBalanceCollectionView.vue';
 export { default as PaymentRow } from './components/PaymentRow.vue';
 export { default as PaymentMethodIcon } from './components/PaymentMethodIcon.vue';
+export { default as GroupedBalanceList } from './GroupedBalanceList.vue';

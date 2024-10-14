@@ -38,9 +38,9 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
 
     static async getBillingStatusForObjects(objectIds: string[], organization?: Organization | null) {
         // Load cached balances
-        const cachedOutstandingBalances = await CachedBalance.getForObjects(objectIds, organization?.id);
+        const receivableBalances = await CachedBalance.getForObjects(objectIds, organization?.id);
 
-        const organizationIds = Formatter.uniqueArray(cachedOutstandingBalances.map(b => b.organizationId));
+        const organizationIds = Formatter.uniqueArray(receivableBalances.map(b => b.organizationId));
 
         let addOrganization = false;
         const i = organization ? organizationIds.indexOf(organization.id) : -1;
@@ -60,7 +60,7 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
         const billingStatus = PayableBalanceCollection.create({});
 
         for (const organization of authenticatedOrganizations) {
-            const items = cachedOutstandingBalances.filter(b => b.organizationId === organization.id);
+            const items = receivableBalances.filter(b => b.organizationId === organization.id);
 
             let amount = 0;
             let amountPending = 0;

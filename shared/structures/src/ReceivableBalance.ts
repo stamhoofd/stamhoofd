@@ -1,6 +1,8 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { TranslateMethod } from './I18nInterface';
+import { BalanceItemWithPayments } from './BalanceItem';
+import { PaymentGeneral } from './members/PaymentGeneral';
 
 export enum ReceivableBalanceType {
     organization = 'organization',
@@ -67,4 +69,12 @@ export class ReceivableBalance extends AutoEncoder {
     get amountOpen() {
         return this.amount - this.amountPending;
     }
+}
+
+export class DetailedReceivableBalance extends ReceivableBalance {
+    @field({ decoder: new ArrayDecoder(BalanceItemWithPayments) })
+    balanceItems: BalanceItemWithPayments[] = [];
+
+    @field({ decoder: new ArrayDecoder(PaymentGeneral) })
+    payments: PaymentGeneral[] = [];
 }

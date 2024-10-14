@@ -1,5 +1,5 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQL, SQLAlias, SQLCalculation, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLCalculation, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
@@ -83,6 +83,44 @@ export class CachedBalance extends Model {
                 await this.updateForUsers(organizationId, objectIds);
                 break;
         }
+    }
+
+    static async balanceForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
+        switch (objectType) {
+            case ReceivableBalanceType.organization:
+                return await this.balanceForOrganizations(organizationId, objectIds);
+            case ReceivableBalanceType.member:
+                return await this.balanceForMembers(organizationId, objectIds);
+            case ReceivableBalanceType.user:
+                return await this.balanceForUsers(organizationId, objectIds);
+        }
+    }
+
+    private static async fetchBalanceItems(organizationId: string, objectIds: string[], columnName: string, customWhere?: SQLWhere) {
+        const query = BalanceItem.select()
+            .where('organizationId', organizationId)
+            .where(columnName, objectIds)
+            .whereNot('status', BalanceItemStatus.Hidden)
+            .where(
+                SQL.where(
+                    new SQLCalculation(
+                        new SQLCalculation(
+                            SQL.column('unitPrice'),
+                            new SQLMultiplicationSign(),
+                            SQL.column('amount'),
+                        ),
+                        new SQLMinusSign(),
+                        SQL.column('pricePaid'),
+                    )
+                    , SQLWhereSign.NotEqual, 0)
+                    .or('pricePending', SQLWhereSign.NotEqual, 0),
+            );
+
+        if (customWhere) {
+            query.where(customWhere);
+        }
+
+        return await query.fetch();
     }
 
     private static async fetchForObjects(organizationId: string, objectIds: string[], columnName: string, customWhere?: SQLWhere) {
@@ -221,6 +259,27 @@ export class CachedBalance extends Model {
         }
         const results = await this.fetchForObjects(organizationId, userIds, 'userId', SQL.where('memberId', null));
         await this.setForResults(organizationId, results, ReceivableBalanceType.user);
+    }
+
+    static async balanceForOrganizations(organizationId: string, organizationIds: string[]) {
+        if (organizationIds.length === 0) {
+            return [];
+        }
+        return await this.fetchBalanceItems(organizationId, organizationIds, 'payingOrganizationId');
+    }
+
+    static async balanceForMembers(organizationId: string, memberIds: string[]) {
+        if (memberIds.length === 0) {
+            return [];
+        }
+        return await this.fetchBalanceItems(organizationId, memberIds, 'memberId');
+    }
+
+    static async balanceForUsers(organizationId: string, userIds: string[]) {
+        if (userIds.length === 0) {
+            return [];
+        }
+        return await this.fetchBalanceItems(organizationId, userIds, 'userId', SQL.where('memberId', null));
     }
 
     /**

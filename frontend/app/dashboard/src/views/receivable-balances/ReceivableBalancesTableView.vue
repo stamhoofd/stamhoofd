@@ -40,7 +40,9 @@ const configurationId = computed(() => {
 const filterBuilders = cachedOutstandingBalanceUIFilterBuilders;
 
 function getRequiredFilter(): StamhoofdFilter | null {
-    return null;
+    return {
+        objectType: 'organization',
+    };
 }
 
 const objectFetcher = useReceivableBalancesObjectFetcher({

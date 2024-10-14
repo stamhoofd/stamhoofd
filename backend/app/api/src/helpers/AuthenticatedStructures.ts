@@ -446,7 +446,11 @@ export class AuthenticatedStructures {
         return result;
     }
 
-    static async cachedOutstandingBalances(balances: CachedBalance[]): Promise<ReceivableBalanceStruct[]> {
+    static async receivableBalance(balance: CachedBalance): Promise<ReceivableBalanceStruct> {
+        return (await this.receivableBalances([balance]))[0];
+    }
+
+    static async receivableBalances(balances: CachedBalance[]): Promise<ReceivableBalanceStruct[]> {
         if (balances.length === 0) {
             return [];
         }
@@ -462,6 +466,7 @@ export class AuthenticatedStructures {
         const result: ReceivableBalanceStruct[] = [];
         for (const balance of balances) {
             let object = ReceivableBalanceObject.create({
+                id: balance.objectId,
                 name: 'Onbekend',
             });
 
@@ -470,6 +475,7 @@ export class AuthenticatedStructures {
                 if (organization) {
                     const thisAdmins = admins.filter(a => a.permissions && a.permissions.forOrganization(organization)?.hasAccessRight(AccessRight.OrganizationFinanceDirector));
                     object = ReceivableBalanceObject.create({
+                        id: balance.objectId,
                         name: organization.name,
                         contacts: thisAdmins.map(a => ReceivableBalanceObjectContact.create({
                             firstName: a.firstName ?? '',
@@ -483,6 +489,7 @@ export class AuthenticatedStructures {
                 const member = members.find(m => m.id === balance.objectId) ?? null;
                 if (member) {
                     object = ReceivableBalanceObject.create({
+                        id: balance.objectId,
                         name: member.details.name,
                         contacts: [
                             ReceivableBalanceObjectContact.create({

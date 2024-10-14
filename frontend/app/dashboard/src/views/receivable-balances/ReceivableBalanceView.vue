@@ -1,6 +1,6 @@
 <template>
-    <LoadingView v-if="!billingStatus" />
-    <div class="st-view">
+    <LoadingView v-if="!detailedItem" />
+    <div v-else class="st-view">
         <STNavigationBar :title="title">
             <template #right>
                 <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige groep'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
@@ -49,53 +49,30 @@
 
             <h2>Overzicht</h2>
 
-            <STList>
-                <STListItem v-for="item in billingStatus?.balanceItems" :key="item.id">
-                    <template #left>
-                        <span v-if="item.amount === 0" class="style-amount min-width">
-                            <span class="icon disabled gray" />
-                        </span>
-                        <span v-else class="style-amount min-width">{{ formatFloat(item.amount) }}</span>
-                    </template>
+            <SegmentedControl v-model="selectedTab" :items="['Gegroepeerd', 'Individueel']" />
 
-                    <p v-if="item.itemPrefix" class="style-title-prefix-list">
-                        {{ item.itemPrefix }}
-                    </p>
+            <ReceivableBalanceList v-if="selectedTab === 'Individueel'" :item="detailedItem" />
+            <GroupedBalanceList v-else :item="detailedItem" />
 
-                    <h3 class="style-title-list">
-                        {{ item.itemTitle }}
-                    </h3>
+            <template v-if="pendingPayments.length > 0">
+                <hr>
+                <h2>In verwerking</h2>
+                <p>Bij betalingen via overschrijving of domiciliëring kan het even duren voor een betaling wordt bevestigd.</p>
 
-                    <p v-if="item.itemDescription" class="style-description-small">
-                        {{ item.itemDescription }}
-                    </p>
+                <STList>
+                    <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
+                </STList>
+            </template>
 
-                    <p class="style-description-small">
-                        {{ formatDate(item.createdAt) }}
-                    </p>
+            <hr>
+            <h2>Betalingen</h2>
 
-                    <p v-if="item.amount === 0" class="style-description-small">
-                        Deze schuld werd verwijderd maar werd al (deels) betaald
-                    </p>
+            <p v-if="succeededPayments.length === 0" class="info-box">
+                Je hebt nog geen ontvangen
+            </p>
 
-                    <p v-else class="style-description-small">
-                        {{ formatFloat(item.amount) }} x {{ formatPrice(item.unitPrice) }} te betalen
-                    </p>
-
-                    <p v-if="item.pricePaid !== 0" class="style-description-small">
-                        {{ formatPrice(item.pricePaid) }} betaald
-                    </p>
-
-                    <p v-if="item.pricePending !== 0" class="style-description-small">
-                        {{ formatPrice(item.pricePending) }} in verwerking
-                    </p>
-
-                    <template #right>
-                        <p class="style-price-base">
-                            {{ formatPrice(item.priceOpen) }}
-                        </p>
-                    </template>
-                </STListItem>
+            <STList v-else>
+                <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
             </STList>
 
             <hr>
@@ -119,10 +96,13 @@
 </template>
 
 <script lang="ts" setup>
-import { LoadingView, useBackForward } from '@stamhoofd/components';
+import { Decoder } from '@simonbackx/simple-encoding';
+import { LoadingView, useBackForward, useContext, PaymentRow, SegmentedControl, GroupedBalanceList } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { ReceivableBalance, getReceivableBalanceTypeName, DetailedPayableBalance } from '@stamhoofd/structures';
-import { computed, ref, Ref } from 'vue';
+import { ReceivableBalance, getReceivableBalanceTypeName, DetailedReceivableBalance } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
+import { computed, onMounted, ref, Ref } from 'vue';
+import ReceivableBalanceList from './ReceivableBalanceList.vue';
 
 const props = defineProps<{
     item: ReceivableBalance;
@@ -132,10 +112,31 @@ const props = defineProps<{
 
 const $t = useTranslate();
 const { goBack, goForward, hasNext, hasPrevious } = useBackForward('item', props);
-const billingStatus = ref(null) as Ref<null | DetailedPayableBalance>;
+const detailedItem = ref(null) as Ref<null | DetailedReceivableBalance>;
+const context = useContext();
+const selectedTab = ref('Gegroepeerd') as Ref<'Gegroepeerd' | 'Individueel'>;
 
 const title = computed(() => {
     return $t('Openstaand bedrag');
+});
+
+const pendingPayments = computed(() => {
+    return detailedItem.value?.payments.filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt)) ?? [];
+});
+
+const succeededPayments = computed(() => {
+    return detailedItem.value?.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt)) ?? [];
+});
+
+// Load detailed item
+onMounted(async () => {
+    const response = await context.value.authenticatedServer.request({
+        method: 'GET',
+        path: `/receivable-balances/${props.item.objectType}/${props.item.object.id}`,
+        decoder: DetailedReceivableBalance as Decoder<DetailedReceivableBalance>,
+    });
+
+    detailedItem.value = response.data;
 });
 
 </script>

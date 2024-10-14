@@ -112,7 +112,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
         }
 
         return new PaginatedResponse<ReceivableBalanceStruct[], LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.cachedOutstandingBalances(data),
+            results: await AuthenticatedStructures.receivableBalances(data),
             next,
         });
     }
