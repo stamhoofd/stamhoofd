@@ -427,7 +427,7 @@ export class BalanceItem extends Model {
                 balanceItemId
             ) i ON i.balanceItemId = balance_items.id 
         SET balance_items.pricePending = LEAST(
-            balance_items.unitPrice * balance_items.amount - balance_items.pricePaid, 
+            GREATEST(0, balance_items.unitPrice * balance_items.amount - balance_items.pricePaid), 
             coalesce(i.price, 0)
         )
         ${secondWhere}`;
