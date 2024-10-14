@@ -72,6 +72,25 @@ export class PaymentGeneral extends Payment {
     }
 
     getShortDescription() {
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(Formatter.uniqueArray(this.balanceItemPayments.map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null)), ', ', ' en '));
+        const shortDescriptions = this.balanceItemPayments.map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
+
+        // Count the number of times each description occurs and add prefix if more than 1
+        const counts: { [key: string]: number } = {};
+        for (const shortDescription of shortDescriptions) {
+            counts[shortDescription] = (counts[shortDescription] || 0) + 1;
+        }
+
+        // Add prefix if more than 1
+        const arr: string[] = [];
+        for (const shortDescription of Object.keys(counts)) {
+            if (counts[shortDescription] > 1) {
+                arr.push(counts[shortDescription] + ' x ' + shortDescription);
+            }
+            else {
+                arr.push(shortDescription);
+            }
+        }
+
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' en '));
     }
 }

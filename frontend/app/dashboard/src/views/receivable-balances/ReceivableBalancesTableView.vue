@@ -18,9 +18,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, ModernTableView, TableAction, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, GlobalEventBus, ModernTableView, TableAction, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { ReceivableBalance, getReceivableBalanceTypeName, StamhoofdFilter } from '@stamhoofd/structures';
+import { getReceivableBalanceTypeName, ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import ReceivableBalanceView from './ReceivableBalanceView.vue';
@@ -136,5 +136,16 @@ async function showBalance(item: ReceivableBalance) {
         modalDisplayStyle: 'popup',
     });
 }
+
+// Listen for patches in payments
+GlobalEventBus.addListener(this, 'paymentPatch', () => {
+    tableObjectFetcher.reset(false, false);
+    return Promise.resolve();
+});
+
+GlobalEventBus.addListener(this, 'balanceItemPatch', () => {
+    tableObjectFetcher.reset(false, false);
+    return Promise.resolve();
+});
 
 </script>

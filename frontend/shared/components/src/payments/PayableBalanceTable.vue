@@ -13,6 +13,8 @@
         <template v-else>
             <GroupedBalanceList :item="item" />
 
+            <BalancePriceBreakdown :item="item" />
+
             <p class="style-button-bar right-align">
                 <button class="button primary" type="button" @click="checkout">
                     <span>Betalen</span>
@@ -30,6 +32,7 @@ import { useMemberManager } from '@stamhoofd/networking';
 import { BalanceItemCartItem, BalanceItemWithPayments, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupedBalanceList from './GroupedBalanceList.vue';
+import BalancePriceBreakdown from './BalancePriceBreakdown.vue';
 
 const props = defineProps<{
     item: DetailedPayableBalance;

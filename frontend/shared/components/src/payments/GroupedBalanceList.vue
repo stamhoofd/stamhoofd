@@ -40,12 +40,9 @@
             </template>
         </STListItem>
     </STList>
-
-    <PriceBreakdownBox :price-breakdown="priceBreakdown" />
 </template>
 
 <script setup lang="ts">
-import { PriceBreakdownBox } from '@stamhoofd/components';
 import { BalanceItemWithPayments, DetailedPayableBalance, DetailedReceivableBalance, getBalanceItemTypeIcon } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -139,14 +136,6 @@ const groupedItems = computed(() => {
     }
 
     return Array.from(map.values()).filter(v => v.price !== 0);
-});
-
-const priceBreakdown = computed(() => {
-    const c = BalanceItemWithPayments.getOutstandingBalance(filteredItems.value);
-
-    return [
-        { name: 'Totaal', price: c.totalOpen },
-    ];
 });
 
 </script>

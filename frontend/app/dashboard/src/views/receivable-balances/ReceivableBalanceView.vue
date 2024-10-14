@@ -19,7 +19,7 @@
                         {{ $t('Type') }}
                     </h3>
                     <p v-copyable class="style-definition-text">
-                        {{ capitalizeFirstLetter(getReceivableBalanceTypeName(item.objectType, $t)) }}
+                        {{ capitalizeFirstLetter(getReceivableBalanceTypeName(detailedItem.objectType, $t)) }}
                     </p>
                 </STListItem>
 
@@ -28,7 +28,7 @@
                         {{ $t('Naam') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
-                        {{ item.object.name }}
+                        {{ detailedItem.object.name }}
                     </p>
                 </STListItem>
 
@@ -37,10 +37,10 @@
                         {{ $t('Openstaand bedrag') }}
                     </h3>
                     <p class="style-definition-text">
-                        {{ formatPrice(item.amount) }}
+                        {{ formatPrice(detailedItem.amount) }}
                     </p>
-                    <p v-if="item.amountPending !== 0" class="style-description-small">
-                        waarvan {{ formatPrice(item.amountPending) }} in verwerking
+                    <p v-if="detailedItem.amountPending !== 0" class="style-description-small">
+                        waarvan {{ formatPrice(detailedItem.amountPending) }} in verwerking
                     </p>
                 </STListItem>
             </STList>
@@ -54,6 +54,8 @@
 
                 <ReceivableBalanceList v-if="selectedTab === 'Individueel'" :item="detailedItem" />
                 <GroupedBalanceList v-else :item="detailedItem" />
+
+                <BalancePriceBreakdown :item="detailedItem" />
             </template>
 
             <template v-if="pendingPayments.length > 0">
@@ -84,7 +86,7 @@
             <p>Deze personen ontvangen een e-mail bij elke communicatie rond dit openstaand bedrag.</p>
 
             <STList class="info">
-                <STListItem v-for="(contact, index) of item.object.contacts" :key="index">
+                <STListItem v-for="(contact, index) of detailedItem.object.contacts" :key="index">
                     <h3 class="style-definition-label">
                         {{ contact.firstName || 'Onbekende naam' }} {{ contact.lastName }}
                     </h3>
@@ -99,9 +101,9 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { LoadingView, useBackForward, useContext, PaymentRow, SegmentedControl, GroupedBalanceList } from '@stamhoofd/components';
+import { BalancePriceBreakdown, GlobalEventBus, GroupedBalanceList, LoadingView, PaymentRow, SegmentedControl, useBackForward, useContext } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { ReceivableBalance, getReceivableBalanceTypeName, DetailedReceivableBalance, BalanceItemWithPayments } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, DetailedReceivableBalance, getReceivableBalanceTypeName, ReceivableBalance } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref } from 'vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
@@ -136,6 +138,10 @@ const filteredItems = computed(() => {
 
 // Load detailed item
 onMounted(async () => {
+    await reload();
+});
+
+async function reload() {
     const response = await context.value.authenticatedServer.request({
         method: 'GET',
         path: `/receivable-balances/${props.item.objectType}/${props.item.object.id}`,
@@ -143,6 +149,15 @@ onMounted(async () => {
     });
 
     detailedItem.value = response.data;
+}
+
+// Listen for patches in payments
+GlobalEventBus.addListener(this, 'paymentPatch', async () => {
+    await reload();
+});
+
+GlobalEventBus.addListener(this, 'balanceItemPatch', async () => {
+    await reload();
 });
 
 </script>
