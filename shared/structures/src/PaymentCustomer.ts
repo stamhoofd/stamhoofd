@@ -44,14 +44,6 @@ export class PaymentCustomer extends AutoEncoder {
     }
 
     get dynamicEmail() {
-        if (this.company) {
-            return this.company.name || this.company.companyNumber || 'Onbekend bedrijf';
-        }
-
-        if (this.firstName && this.lastName) {
-            return `${this.firstName} ${this.lastName}`;
-        }
-
-        return this.firstName || this.lastName || this.email || this.phone || 'Onbekende klant';
+        return this.email || this.company?.administrationEmail || null;
     }
 }

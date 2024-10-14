@@ -27,19 +27,29 @@ export class StripeHelper {
 
             if (charge.payment_method_details?.bancontact) {
                 if (charge.payment_method_details.bancontact.iban_last4) {
-                    payment.iban = 'xxxx ' + charge.payment_method_details.bancontact.iban_last4;
+                    payment.iban = '•••• ' + charge.payment_method_details.bancontact.iban_last4;
                 }
                 payment.ibanName = charge.payment_method_details.bancontact.verified_name;
             }
             if (charge.payment_method_details?.ideal) {
                 if (charge.payment_method_details.ideal.iban_last4) {
-                    payment.iban = 'xxxx ' + charge.payment_method_details.ideal.iban_last4;
+                    payment.iban = '•••• ' + charge.payment_method_details.ideal.iban_last4;
                 }
                 payment.ibanName = charge.payment_method_details.ideal.verified_name;
             }
             if (charge.payment_method_details?.card) {
                 if (charge.payment_method_details.card.last4) {
-                    payment.iban = 'xxxx ' + charge.payment_method_details.card.last4;
+                    payment.iban = '•••• ' + charge.payment_method_details.card.last4;
+                }
+            }
+            if (charge.payment_method_details?.sepa_debit) {
+                if (charge.payment_method_details.sepa_debit.last4) {
+                    if (charge.payment_method_details.sepa_debit.country === 'BE') {
+                        payment.iban = charge.payment_method_details.sepa_debit.country + '•• ' + charge.payment_method_details.sepa_debit.bank_code + '• •••• ' + charge.payment_method_details.sepa_debit.last4;
+                    }
+                    else {
+                        payment.iban = '•••• ' + charge.payment_method_details.sepa_debit.last4;
+                    }
                 }
             }
             await payment.save();
@@ -139,7 +149,7 @@ export class StripeHelper {
 
         console.log('session', session);
 
-        if (session.status === 'complete') {
+        if (session.payment_status === 'paid') {
             // This is a direct charge
             const payment_intent = session.payment_intent;
             if (payment_intent !== null && typeof payment_intent !== 'string') {
@@ -158,12 +168,17 @@ export class StripeHelper {
             // Cancel the session
             const session = await stripe.checkout.sessions.expire(model.stripeSessionId);
 
-            if (session.status === 'complete') {
+            if (session.payment_status === 'paid') {
                 return PaymentStatus.Succeeded;
             }
             if (session.status === 'expired') {
                 return PaymentStatus.Failed;
             }
+        }
+
+        if (session.status === 'complete') {
+            // Small difference to detect if the payment is almost done
+            return PaymentStatus.Pending;
         }
 
         return PaymentStatus.Created;
@@ -231,10 +246,18 @@ export class StripeHelper {
         // Bancontact or iDEAL: use payment intends
         if (payment.method === PaymentMethod.Bancontact || payment.method === PaymentMethod.iDEAL) {
             const paymentMethod = await stripe.paymentMethods.create({
-                type: payment.method.toLowerCase() as 'bancontact',
+                type: payment.method.toLowerCase() as 'bancontact' | 'ideal',
                 billing_details: {
-                    name: customer.name && customer.name.length > 2 ? customer.name : 'Onbekend',
-                    email: customer.email,
+                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : 'Onbekend'),
+                    email: payment.customer?.dynamicEmail || customer.email,
+                    address: payment.customer?.company?.address
+                        ? {
+                                city: payment.customer.company.address.city,
+                                country: payment.customer.company.address.country,
+                                line1: payment.customer.company.address.street + ' ' + payment.customer.company.address.number,
+                                postal_code: payment.customer.company.address.postalCode,
+                            }
+                        : undefined,
                 },
             });
 
@@ -315,7 +338,7 @@ export class StripeHelper {
                 mode: 'payment',
                 success_url: redirectUrl,
                 cancel_url: cancelUrl,
-                payment_method_types: ['card'],
+                payment_method_types: payment.method === PaymentMethod.DirectDebit ? ['sepa_debit'] : ['card'],
                 line_items: stripeLineItems,
                 currency: 'eur',
                 locale: i18n.language as 'nl',
@@ -329,8 +352,10 @@ export class StripeHelper {
                         : undefined,
                     metadata: fullMetadata,
                     statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
+
                 },
-                customer_email: customer.email,
+                customer_email: payment.customer?.dynamicEmail || customer.email,
+                customer_creation: 'if_required',
                 metadata: fullMetadata,
                 expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // Expire in 30 minutes
             });

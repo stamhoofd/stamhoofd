@@ -339,6 +339,10 @@ export default class EditPaymentMethodsBox extends VueComponent {
 
         r.push(PaymentMethod.CreditCard);
 
+        if (this.canEnablePaymentMethod(PaymentMethod.DirectDebit) || this.getPaymentMethod(PaymentMethod.DirectDebit)) {
+            r.push(PaymentMethod.DirectDebit);
+        }
+
         r.push(PaymentMethod.Transfer);
         r.push(PaymentMethod.PointOfSale);
 
@@ -390,7 +394,7 @@ export default class EditPaymentMethodsBox extends VueComponent {
                     [PaymentProvider.Stripe]: '',
                 });
             case PaymentMethod.Unknown: return '';
-            case PaymentMethod.DirectDebit: return '';
+            case PaymentMethod.DirectDebit: return this.$t('Betalingen duren tot 5 werkdagen, geen onmiddellijke bevestiging van betaling. Mislukte betalingen kunnen kosten met zich meebrengen.');
             case PaymentMethod.PointOfSale: return this.$t('f511ce18-7a60-4fe8-8695-16216ffb7bdc');
         }
     }
@@ -466,9 +470,10 @@ export default class EditPaymentMethodsBox extends VueComponent {
 
             case PaymentMethod.iDEAL:
             case PaymentMethod.CreditCard:
+            case PaymentMethod.DirectDebit:
             case PaymentMethod.Bancontact: {
                 if (this.stripeAccountObject) {
-                    return PaymentMethodHelper.getName(paymentMethod) + ' is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.';
+                    return PaymentMethodHelper.getNameCapitalized(paymentMethod) + ' is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.';
                 }
                 break;
             }

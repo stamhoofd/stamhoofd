@@ -109,6 +109,10 @@ export class StripeMetaData extends AutoEncoder {
             methods.push(PaymentMethod.iDEAL);
         }
 
+        if (this.capabilities.sepa_debit_payments === 'active') {
+            methods.push(PaymentMethod.DirectDebit);
+        }
+
         return methods;
     }
 }

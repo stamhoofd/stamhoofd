@@ -398,6 +398,15 @@ export class AdminPermissionChecker {
             orders: Order[];
         },
     ): Promise<boolean> {
+        // These balance items are out of scope - but we do have access to them
+        for (const balanceItem of balanceItems) {
+            if (balanceItem.payingOrganizationId && this.checkScope(balanceItem.payingOrganizationId)) {
+                if (await this.canManagePayments(balanceItem.payingOrganizationId)) {
+                    return true;
+                }
+            }
+        }
+
         for (const balanceItem of balanceItems) {
             if (!this.checkScope(balanceItem.organizationId)) {
                 // Invalid scope
