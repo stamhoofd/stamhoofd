@@ -3,7 +3,7 @@ import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegi
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Group, Member, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, SetupStepUpdater } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 
@@ -166,10 +166,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             // #endregion
 
             await organizationPeriod.save();
+            let shouldUpdateSetupSteps = false;
 
             // Check changes to groups
             const deleteGroups = patch.groups.getDeletes();
             if (deleteGroups.length > 0) {
+                shouldUpdateSetupSteps = true;
                 for (const id of deleteGroups) {
                     await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(id);
                     deleteUnreachable = true;
@@ -177,6 +179,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
 
             for (const groupPut of patch.groups.getPuts()) {
+                shouldUpdateSetupSteps = true;
                 await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, { allowedIds });
                 deleteUnreachable = true;
             }
@@ -191,6 +194,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 // Delete unreachable categories first
                 await organizationPeriod.cleanCategories(groups);
                 await Group.deleteUnreachable(organization.id, organizationPeriod, groups);
+            }
+
+            if (shouldUpdateSetupSteps) {
+                console.error('start update setup steps');
+                SetupStepUpdater.updateForOrganization(organization).catch(console.error);
             }
 
             periods.push(organizationPeriod);
