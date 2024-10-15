@@ -1,5 +1,6 @@
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, LimitedFilteredRequest, PrivateOrder, PrivateOrderWithTickets, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PrivateOrder, PrivateOrderWithTickets, SortDefinitions, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { OrderStoreIndexedDbIndex, WebshopManager } from '../WebshopManager';
 
 type ObjectType = PrivateOrderWithTickets;
@@ -8,6 +9,39 @@ function extendSort(list: SortList): SortList {
     // todo: add createdAt?
     return assertSort(list, [{ key: 'id' }]);
 }
+
+const orderSorters: SortDefinitions<PrivateOrderWithTickets> = {
+    createdAt: {
+        getValue(a) {
+            return Formatter.dateTimeIso(a.createdAt);
+        },
+    },
+    id: {
+        getValue(a) {
+            return a.id;
+        },
+    },
+    number: {
+        getValue(a) {
+            return a.number;
+        },
+    },
+    status: {
+        getValue(a) {
+            return a.status;
+        },
+    },
+    paymentMethod: {
+        getValue(a) {
+            return a.data.paymentMethod;
+        },
+    },
+    checkoutMethod: {
+        getValue(a) {
+            return a.data.checkoutMethod?.type;
+        },
+    },
+};
 
 // todo: maybe move
 export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrders, overrides }: {
@@ -19,16 +53,20 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
     return {
         extendSort,
         async fetch(data: LimitedFilteredRequest) {
-            console.error(JSON.stringify(data.sort));
             const arrayBuffer: PrivateOrderWithTickets[] = [];
 
-            const compiledFilters = [data.filter, data.search].map(filter => PrivateOrder.createCompiledFilter(filter));
+            const filters = [data.filter, data.search];
+            if (data.pageFilter) {
+                filters.unshift(data.pageFilter);
+            }
 
             const availableIndexes = Object.values(OrderStoreIndexedDbIndex);
             const sortItems = (data.sort as (SortItem & { key: OrderStoreIndexedDbIndex })[]).filter((item) => {
                 const key = item.key;
                 // skip id
                 if ((key as string) === 'id') {
+                    // https://www.w3.org/TR/IndexedDB-2/#sorted-list-order
+                    // The records in an index are always sorted according to the record's key. However unlike object stores, a given index can contain multiple records with the same key. Such records are additionally sorted according to the index's record's value (meaning the key of the record in the referenced object store).
                     return false;
                 }
                 const doesIndexExist = availableIndexes.includes(key);
@@ -44,13 +82,16 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
 
             const sortItem: (SortItem & { key: OrderStoreIndexedDbIndex }) | undefined = sortItems[0];
 
-            const streamOrdersPromise = manager.streamOrders((order: PrivateOrder) => {
-                if (compiledFilters.every(filter => filter(order))) {
+            const streamOrdersPromise = manager.streamOrders({
+                callback: (order: PrivateOrder) => {
                     arrayBuffer.push(
                         PrivateOrderWithTickets.create(order),
                     );
-                }
-            }, sortItem);
+                },
+                filters,
+                limit: data.limit,
+                sortItem,
+            });
 
             let fetchOrdersPromise: Promise<boolean> | null = null;
 
@@ -83,18 +124,32 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
                 await addTickets(manager, arrayBuffer);
             }
 
-            return { results: arrayBuffer };
+            const lastObject = arrayBuffer[arrayBuffer.length - 1];
+
+            let next: LimitedFilteredRequest | undefined = undefined;
+
+            if (lastObject) {
+                next = new LimitedFilteredRequest({
+                    filter: data.filter,
+                    sort: data.sort,
+                    limit: data.limit,
+                    pageFilter: getSortFilter(lastObject, orderSorters, data.sort),
+                });
+            }
+
+            return { results: arrayBuffer, next };
         },
 
         async fetchCount(data: CountFilteredRequest): Promise<number> {
             let count = 0;
 
-            const compiledFilters = [data.filter, data.search].map(filter => PrivateOrder.createCompiledFilter(filter));
+            const filters = [data.filter, data.search];
 
-            await manager.streamOrders((order: PrivateOrder) => {
-                if (compiledFilters.every(filter => filter(order))) {
+            await manager.streamOrders({
+                callback: (_order: PrivateOrder) => {
                     count++;
-                }
+                },
+                filters,
             });
 
             return count;

@@ -3,14 +3,18 @@ import { isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { EventBus, fetchAll, ObjectFetcher, Toast } from '@stamhoofd/components';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, SortItem, SortItemDirection, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, SortItem, SortItemDirection, StamhoofdFilter, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
 import { toRaw } from 'vue';
 
 class CallbackError extends Error {}
+class CompilerFilterError extends Error {}
 
 export enum OrderStoreIndexedDbIndex {
     Number = 'number',
     CreatedAt = 'createdAt',
+    Status = 'status',
+    PaymentMethod = 'paymentMethod',
+    CheckoutMethod = 'checkoutMethod',
 };
 
 /**
@@ -288,14 +292,17 @@ export class WebshopManager {
 
                 function addOrderStoreIndexes(orderStore: IDBObjectStore) {
                     // typescript will show an error if an index is missing
-                    const indexes: Record<OrderStoreIndexedDbIndex, IDBIndexParameters> = {
+                    const indexes: Record<OrderStoreIndexedDbIndex, IDBIndexParameters & { keyPath?: string | Iterable<string> }> = {
                         // todo: is number unique?
                         [OrderStoreIndexedDbIndex.Number]: { unique: false },
                         [OrderStoreIndexedDbIndex.CreatedAt]: { unique: false },
+                        [OrderStoreIndexedDbIndex.Status]: { unique: false },
+                        [OrderStoreIndexedDbIndex.PaymentMethod]: { unique: false, keyPath: 'data.paymentMethod' },
+                        [OrderStoreIndexedDbIndex.CheckoutMethod]: { unique: false, keyPath: 'data.checkoutMethod.type' },
                     };
 
                     Object.entries(indexes).forEach(([index, options]) => {
-                        orderStore.createIndex(index, index, options);
+                        orderStore.createIndex(index, options.keyPath ?? index, options);
                     });
                 }
 
@@ -562,7 +569,14 @@ export class WebshopManager {
         });
     }
 
-    async streamOrders(callback: (order: PrivateOrder) => void, sortItem?: SortItem & { key: OrderStoreIndexedDbIndex }): Promise<void> {
+    async streamOrders(
+        { callback, filters, limit, sortItem }: {
+            callback: (order: PrivateOrder) => void;
+            filters?: StamhoofdFilter[];
+            limit?: number;
+            sortItem?: SortItem & { key: OrderStoreIndexedDbIndex };
+        },
+    ): Promise<void> {
         const db = await this.getDatabase();
 
         await new Promise<void>((resolve, reject) => {
@@ -584,6 +598,7 @@ export class WebshopManager {
 
             let request: IDBRequest<IDBCursorWithValue | null>;
 
+            // use an index if a SortItem is defined
             if (sortItem) {
                 const indexName = sortItem.key;
                 const order = sortItem.order;
@@ -607,9 +622,27 @@ export class WebshopManager {
                 request = objectStore.openCursor();
             }
 
-            // const request = cursorTarget.openCursor();
+            let matchedItemsCount = 0;
+
+            let compiledFilters: InMemoryFilterRunner[] | undefined;
+
+            try {
+                compiledFilters = filters?.map(filter => PrivateOrder.createCompiledFilter(filter));
+            }
+            catch (e: any) {
+                console.error('Compile filter failed', e);
+                reject(new CompilerFilterError((e.message as string | undefined) ?? 'Compile filter failed'));
+                return;
+            }
+
             request.onsuccess = (event: any) => {
-                const cursor = event.target.result;
+                if (limit && matchedItemsCount >= limit) {
+                    // limit reached
+                    resolve();
+                    return;
+                }
+
+                const cursor: IDBCursor & { value: any } | undefined = event.target.result;
                 if (cursor) {
                     const rawOrder = cursor.value;
 
@@ -626,6 +659,11 @@ export class WebshopManager {
                         return;
                     }
 
+                    if (compiledFilters && !compiledFilters.every(filter => filter(order))) {
+                        cursor.continue();
+                        return;
+                    }
+
                     try {
                         callback(order);
                     }
@@ -637,6 +675,7 @@ export class WebshopManager {
                     }
 
                     cursor.continue();
+                    matchedItemsCount += 1;
                 }
                 else {
                     // no more results
@@ -644,7 +683,7 @@ export class WebshopManager {
                 }
             };
         }).catch((e) => {
-            if (e instanceof CallbackError) {
+            if (e instanceof CallbackError || e instanceof CompilerFilterError) {
                 throw e;
             }
         });
@@ -656,7 +695,7 @@ export class WebshopManager {
      */
     async streamOrdersDeprecated(callback: (order: PrivateOrder) => void, networkFetch = true): Promise<void> {
         try {
-            await this.streamOrders(callback);
+            await this.streamOrders({ callback });
         }
         catch (e) {
             if (!networkFetch || e instanceof CallbackError) {

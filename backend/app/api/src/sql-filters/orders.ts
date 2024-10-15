@@ -1,10 +1,19 @@
-import { baseSQLFilterCompilers, createSQLColumnFilterCompiler, SQLFilterDefinitions } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),
+    id: createSQLColumnFilterCompiler('id'),
     number: createSQLColumnFilterCompiler('number'),
+    status: createSQLColumnFilterCompiler('status'),
+    paymentMethod: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('data'), '$.value.paymentMethod'),
+        { isJSONValue: true, type: SQLValueType.JSONString },
+    ),
+    checkoutMethod: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('data'), '$.value.checkoutMethod.type'),
+        { isJSONValue: true, type: SQLValueType.JSONString },
+    ),
     // 'startDate': createSQLColumnFilterCompiler('startDate'),
     // 'endDate': createSQLColumnFilterCompiler('endDate'),
     // 'groupIds': createSQLExpressionFilterCompiler(

@@ -16,5 +16,9 @@ export const registerItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
 
 export const privateOrderInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
-    '#': createInMemoryFilterCompiler('number'),
+    id: createInMemoryFilterCompiler('id'),
+    number: createInMemoryFilterCompiler('number'),
+    status: createInMemoryFilterCompiler('status'),
+    paymentMethod: createInMemoryFilterCompiler('data.paymentMethod'),
+    checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
 };

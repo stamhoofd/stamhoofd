@@ -10,14 +10,13 @@ export const orderSorters: SQLSortDefinitions<Order> = {
     // Why? Because ORDER BY firstName, lastName produces a different order dan ORDER BY CONCAT(firstName, ' ', lastName) if there are multiple people with spaces in the first name
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
-
-    number: {
+    createdAt: {
         getValue(a) {
-            return a.number;
+            return Formatter.dateTimeIso(a.createdAt);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.column('number'),
+                column: SQL.column('createdAt'),
                 direction,
             });
         },
@@ -33,13 +32,46 @@ export const orderSorters: SQLSortDefinitions<Order> = {
             });
         },
     },
-    createdAt: {
+    number: {
         getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt);
+            return a.number;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.column('createdAt'),
+                column: SQL.column('number'),
+                direction,
+            });
+        },
+    },
+    status: {
+        getValue(a) {
+            return a.status;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('status'),
+                direction,
+            });
+        },
+    },
+    paymentMethod: {
+        getValue(a) {
+            return a.data.paymentMethod;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.jsonValue(SQL.column('data'), '$.value.paymentMethod'),
+                direction,
+            });
+        },
+    },
+    checkoutMethod: {
+        getValue(a) {
+            return a.data.checkoutMethod?.type;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.jsonValue(SQL.column('data'), '$.value.checkoutMethod.type'),
                 direction,
             });
         },

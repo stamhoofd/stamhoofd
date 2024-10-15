@@ -115,6 +115,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         }),
 
         new Column<PrivateOrder, OrderStatus>({
+            id: 'status',
             name: 'Status',
             getValue: order => order.status,
             format: status => OrderStatusHelper.getName(status),
@@ -167,6 +168,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
     if (preview.value.meta.paymentMethods.length > 1) {
         cols.push(new Column<PrivateOrder, string[]>({
+            id: 'paymentMethod',
             name: 'Betaalmethode',
             getValue: (order) => {
                 return Formatter.uniqueArray(order.balanceItems.flatMap(b => b.payments.map(p => p.payment.method))).map(m => PaymentMethodHelper.getNameCapitalized(m, order.data.checkoutMethod?.type ?? null)).sort();
@@ -188,6 +190,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
     if (preview.value.meta.checkoutMethods.length > 1) {
         cols.push(new Column<PrivateOrder, CheckoutMethod | null>({
+            id: 'checkoutMethod',
             name: 'Methode',
             getValue: order => order.data.checkoutMethod,
             format: (method: CheckoutMethod | null) => {
