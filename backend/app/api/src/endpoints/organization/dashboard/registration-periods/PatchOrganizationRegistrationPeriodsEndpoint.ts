@@ -197,7 +197,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
 
             if (shouldUpdateSetupSteps) {
-                console.error('start update setup steps');
                 SetupStepUpdater.updateForOrganization(organization).catch(console.error);
             }
 
