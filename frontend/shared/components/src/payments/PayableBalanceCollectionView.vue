@@ -35,6 +35,8 @@
 import { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import { GlobalEventBus } from '../EventBus';
+import { Toast } from '../overlays/Toast';
 import PayableBalanceTable from './PayableBalanceTable.vue';
 import PaymentRow from './components/PaymentRow.vue';
 
@@ -45,8 +47,10 @@ const props = withDefaults(
          */
         singleOrganization?: boolean;
         collection: DetailedPayableBalanceCollection;
+        reload?: (() => Promise<DetailedPayableBalanceCollection>) | null;
     }>(), {
         singleOrganization: false,
+        reload: null,
     },
 );
 
@@ -56,6 +60,25 @@ const pendingPayments = computed(() => {
 
 const succeededPayments = computed(() => {
     return props.collection.organizations.flatMap(i => i.payments).filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
+});
+
+// Fetch balance
+async function updateBalance() {
+    if (!props.reload) {
+        return;
+    }
+
+    try {
+        const updated = await props.reload!();
+        props.collection.deepSet(updated);
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
+GlobalEventBus.addListener(this, 'paymentPatch', async () => {
+    await updateBalance();
 });
 
 </script>

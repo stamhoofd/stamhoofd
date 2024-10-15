@@ -202,6 +202,14 @@ defineRoutes([
 
             return {
                 collection: DetailedPayableBalanceCollection.create({ organizations: [item] }),
+                reload: async () => {
+                    await updateBalance();
+                    const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+                    if (!item) {
+                        return DetailedPayableBalanceCollection.create({ organizations: [] });
+                    }
+                    return DetailedPayableBalanceCollection.create({ organizations: [item] });
+                },
             };
         },
         propsToParams(props) {
