@@ -49,6 +49,17 @@ function $lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
     };
 }
 
+function $greaterThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
+    return (val) => {
+        const a = normalizeValue(guardFilterCompareValue(val));
+        const b = normalizeValue(guardFilterCompareValue(filter));
+        if (a === null || b === null) {
+            return a === null && b !== null;
+        }
+        return a > b;
+    };
+}
+
 function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         const b = normalizeValue(guardFilterCompareValue(filter));
@@ -242,7 +253,9 @@ export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     $eq: $equalsInMemoryFilterCompiler,
     $neq: invertFilterCompiler($equalsInMemoryFilterCompiler),
     $lt: $lessThanInMemoryFilterCompiler,
-    $gt: invertFilterCompiler($lessThanInMemoryFilterCompiler),
+    $gt: $greaterThanInMemoryFilterCompiler,
+    $lte: invertFilterCompiler($greaterThanInMemoryFilterCompiler),
+    $gte: invertFilterCompiler($lessThanInMemoryFilterCompiler),
     $in: $inInMemoryFilterCompiler,
     $contains: $containsInMemoryFilterCompiler,
     $length: $lengthInMemoryFilterCompiler,
