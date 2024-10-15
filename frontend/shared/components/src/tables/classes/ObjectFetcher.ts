@@ -6,7 +6,6 @@ export interface ObjectFetcher<O> {
     fetch(data: LimitedFilteredRequest): Promise<{ results: O[]; next?: LimitedFilteredRequest }>;
 
     fetchCount(data: CountFilteredRequest): Promise<number>;
-    beforeRefresh?(): void;
 
     destroy?(): void;
 }

@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { Column, GlobalEventBus, InMemoryTableAction, ModernTableView, Toast, UIFilterBuilder, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, GlobalEventBus, InMemoryTableAction, ModernTableView, Toast, UIFilterBuilder, useIsMobile, useTableObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
 import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -37,14 +37,18 @@ const title = 'Bestellingen';
 // todo?
 const configurationId = 'orders';
 
-const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
-    onUpdatedOrders: () => {
-        console.log('on updated orders');
-        tableObjectFetcher.reset();
-    },
-});
-
+fetchOrders();
+useVisibilityChange(() => fetchOrders());
+const objectFetcher = useOrdersObjectFetcher(props.webshopManager);
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
+
+function fetchOrders() {
+    props.webshopManager.fetchOrders2().then((hadUpdatedOrders) => {
+        if (hadUpdatedOrders) {
+            tableObjectFetcher.reset();
+        }
+    }).catch(console.error);
+}
 
 // todo
 const filterBuilders: UIFilterBuilder[] = [];

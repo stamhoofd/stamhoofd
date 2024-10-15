@@ -43,13 +43,7 @@ const orderSorters: SortDefinitions<PrivateOrderWithTickets> = {
     },
 };
 
-// todo: maybe move
-export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrders, overrides }: {
-    onUpdatedOrders?: () => boolean | void;
-    overrides?: Partial<ObjectFetcher<ObjectType>>;
-} = {}): ObjectFetcher<ObjectType> {
-    let startedFetchOrders = false;
-
+export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
     return {
         extendSort,
         async fetch(data: LimitedFilteredRequest) {
@@ -82,7 +76,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
 
             const sortItem: (SortItem & { key: OrderStoreIndexedDbIndex }) | undefined = sortItems[0];
 
-            const streamOrdersPromise = manager.streamOrders({
+            await manager.streamOrders({
                 callback: (order: PrivateOrder) => {
                     arrayBuffer.push(
                         PrivateOrderWithTickets.create(order),
@@ -93,36 +87,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
                 sortItem,
             });
 
-            let fetchOrdersPromise: Promise<boolean> | null = null;
-
-            if (!startedFetchOrders) {
-                // fetch orders from backend on first fetch
-                fetchOrdersPromise = manager.fetchOrders2();
-            }
-
-            let shouldAddTickets = true;
-
-            if (startedFetchOrders === false) {
-                startedFetchOrders = true;
-
-                if (fetchOrdersPromise && onUpdatedOrders) {
-                    fetchOrdersPromise.then((hadUpdatedOrders) => {
-                        if (hadUpdatedOrders) {
-                            const shouldAddTicketsOrVoid = onUpdatedOrders();
-                            // prevent fetching tickets if not necessary (for example because orders is refreshed)
-                            if (shouldAddTicketsOrVoid === false) {
-                                shouldAddTickets = false;
-                            }
-                        }
-                    }).catch(console.error);
-                }
-            }
-
-            await streamOrdersPromise;
-
-            if (shouldAddTickets) {
-                await addTickets(manager, arrayBuffer);
-            }
+            await addTickets(manager, arrayBuffer);
 
             const lastObject = arrayBuffer[arrayBuffer.length - 1];
 
@@ -139,7 +104,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
 
             return { results: arrayBuffer, next };
         },
-
         async fetchCount(data: CountFilteredRequest): Promise<number> {
             let count = 0;
 
@@ -153,9 +117,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, { onUpdatedOrder
             });
 
             return count;
-        },
-        beforeRefresh: () => {
-            startedFetchOrders = false;
         },
         ...overrides,
     };

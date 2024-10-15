@@ -555,7 +555,6 @@ const errorMessage = computed(() => {
 const lastRefresh = ref(new Date());
 function refresh() {
     lastRefresh.value = new Date();
-    props.tableObjectFetcher.objectFetcher.beforeRefresh?.();
     props.tableObjectFetcher.reset(true, true);
 }
 
