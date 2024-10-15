@@ -471,19 +471,17 @@
         </p>
         <InheritedRecordsConfigurationBox :group-level="true" :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
 
-        <template v-if="registrationRecordCategoriesEnabled">
-            <hr>
-            <h2>Eénmalige vragen</h2>
-            <p>Deze vragen zijn enkel van toepassing op deze specifieke inschrijving en gaan daarna verloren. <strong class="style-strong">Bij elke inschrijving moeten ze opnieuw worden ingegeven:</strong> het antwoord hangt dus vast aan de inschrijving, niet het lid zelf. De antwoorden zijn enkel zichtbaar in de context van een inschrijving, niet tussen de gegevens van een lid.</p>
+        <hr>
+        <h2>Eénmalige vragen</h2>
+        <p>Deze vragen zijn enkel van toepassing op deze specifieke inschrijving en gaan daarna verloren. <strong class="style-strong">Bij elke inschrijving moeten ze opnieuw worden ingegeven:</strong> het antwoord hangt dus vast aan de inschrijving, niet het lid zelf. De antwoorden zijn enkel zichtbaar in de context van een inschrijving, niet tussen de gegevens van een lid.</p>
 
-            <p class="warning-box">
-                <span>
-                    Gebruik dit <strong class="style-strong style-underline">NIET</strong> om persoonsgegevens van leden te verzamelen (bv. GEEN allergieën, al dan niet kunnen zwemmen, dieetvoorkeur...) - anders moeten ze dit per inschrijving en elk jaar opnieuw ingeven en is het niet duidelijk welke gegevens nu de juiste zijn. Voeg hier enkel vragen toe die je éénmalig nodig hebt specifiek voor deze activiteit.
-                </span>
-            </p>
+        <p class="warning-box">
+            <span>
+                Gebruik dit <strong class="style-strong style-underline">NIET</strong> om persoonsgegevens van leden te verzamelen (bv. GEEN allergieën, al dan niet kunnen zwemmen, dieetvoorkeur...) - anders moeten ze dit per inschrijving en elk jaar opnieuw ingeven en is het niet duidelijk welke gegevens nu de juiste zijn. Voeg hier enkel vragen toe die je éénmalig nodig hebt specifiek voor deze activiteit.
+            </span>
+        </p>
 
-            <EditRecordCategoriesBox :categories="patched.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch" />
-        </template>
+        <EditRecordCategoriesBox :categories="patched.settings.recordCategories" :settings="recordEditorSettings" @patch:categories="addRecordCategoriesPatch" />
     </SaveView>
 </template>
 
@@ -497,7 +495,7 @@ import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useAuth, useDraggableArray, useFeatureFlag, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
+import { useAuth, useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
@@ -529,7 +527,6 @@ const period = useRegistrationPeriod(computed(() => patched.value.periodId));
 const forceShowRequireGroupIds = ref(false);
 const usedStock = computed(() => patched.value.settings.getUsedStock(patched.value) || 0);
 const auth = useAuth();
-const registrationRecordCategoriesEnabled = useFeatureFlag()('registration-record-categories');
 
 function addRequireGroupIds() {
     forceShowRequireGroupIds.value = true;
