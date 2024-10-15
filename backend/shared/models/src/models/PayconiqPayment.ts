@@ -122,7 +122,7 @@ export class PayconiqPayment extends Model {
         // Read link (currently we use checkout!)
         let link = response._links.checkout.href as string;
 
-        if (organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production') {
+        if (organization.privateMeta.useTestPayments ?? (STAMHOOFD.environment !== 'production')) {
             // For checkout only!
             // We get the wrong link in development mode
             link = link.replace('https://payconiq.com/', 'https://ext.payconiq.com/');
