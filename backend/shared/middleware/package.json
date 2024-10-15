@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-middleware",
-    "version": "2.44.1",
+    "version": "2.45.0",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
