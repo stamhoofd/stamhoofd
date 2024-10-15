@@ -1,4 +1,4 @@
-import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from './InMemoryFilter';
+import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler, createInMemoryFilterCompilerFromCompositePath } from './InMemoryFilter';
 
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
@@ -21,4 +21,8 @@ export const privateOrderInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     status: createInMemoryFilterCompiler('status'),
     paymentMethod: createInMemoryFilterCompiler('data.paymentMethod'),
     checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
+    timeSlotDate: createInMemoryFilterCompiler('data.timeSlot.date'),
+    timeSlotTime: createInMemoryFilterCompiler('data.timeSlot.endTime'),
+    validAt: createInMemoryFilterCompiler('validAt'),
+    name: createInMemoryFilterCompilerFromCompositePath(['data.customer.firstName', 'data.customer.lastName']),
 };

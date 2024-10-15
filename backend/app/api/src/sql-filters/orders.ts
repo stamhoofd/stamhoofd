@@ -14,22 +14,20 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         SQL.jsonValue(SQL.column('data'), '$.value.checkoutMethod.type'),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
-    // 'startDate': createSQLColumnFilterCompiler('startDate'),
-    // 'endDate': createSQLColumnFilterCompiler('endDate'),
-    // 'groupIds': createSQLExpressionFilterCompiler(
-    //     SQL.jsonValue(SQL.column('meta'), '$.value.groups[*].id'),
-    //     { isJSONValue: true, isJSONObject: true },
-    // ),
-    // 'defaultAgeGroupIds': createSQLExpressionFilterCompiler(
-    //     SQL.jsonValue(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
-    //     { isJSONValue: true, isJSONObject: true },
-    // ),
-    // 'organizationTagIds': createSQLExpressionFilterCompiler(
-    //     SQL.jsonValue(SQL.column('meta'), '$.value.organizationTagIds'),
-    //     { isJSONValue: true, isJSONObject: true },
-    // ),
-    // 'meta.visible': createSQLExpressionFilterCompiler(
-    //     SQL.jsonValue(SQL.column('meta'), '$.value.visible'),
-    //     { isJSONValue: true, type: SQLValueType.JSONBoolean },
-    // ),
+    timeSlotDate: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.date'),
+        // todo: type?
+        { isJSONValue: true, type: SQLValueType.JSONString },
+    ),
+    timeSlotTime: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.endTime'),
+        // todo: type?
+        { isJSONValue: true, type: SQLValueType.JSONString },
+    ),
+    validAt: createSQLColumnFilterCompiler('validAt'),
+    totalPrice: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('data'), '$.value.totalPrice'),
+        // todo: type?
+        { isJSONValue: true },
+    ),
 };

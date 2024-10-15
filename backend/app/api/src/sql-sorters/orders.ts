@@ -76,4 +76,55 @@ export const orderSorters: SQLSortDefinitions<Order> = {
             });
         },
     },
+    timeSlotDate: {
+        getValue(a) {
+            return a.data.timeSlot?.date.getTime();
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.date'),
+                direction,
+            });
+        },
+    },
+    timeSlotTime: {
+        getValue(a) {
+            return a.data.timeSlot?.endTime;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.endTime'),
+                direction,
+            });
+        },
+    },
+    validAt: {
+        getValue(a) {
+            return a.validAt?.getTime();
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('validAt'),
+                direction,
+            });
+        },
+    },
+    totalPrice: {
+        getValue(a) {
+            return a.data.totalPrice;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.jsonValue(SQL.column('data'), '$.value.totalPrice'),
+                direction,
+            });
+        },
+    },
+    // amount: {
+    //     getValue: (order) => {
+    //         return order.data.cart.items.reduce((acc, item) => {
+    //             return acc + item.amount;
+    //         }, 0);
+    //     }
+    // }
 };

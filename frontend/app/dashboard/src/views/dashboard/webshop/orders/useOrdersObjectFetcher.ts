@@ -41,6 +41,36 @@ const orderSorters: SortDefinitions<PrivateOrderWithTickets> = {
             return a.data.checkoutMethod?.type;
         },
     },
+    timeSlotDate: {
+        getValue(a) {
+            return a.data.timeSlot?.date.getTime();
+        },
+    },
+    timeSlotTime: {
+        getValue(a) {
+            return a.data.timeSlot?.endTime;
+        },
+    },
+    validAt: {
+        getValue(a) {
+            return a.validAt?.getTime();
+        },
+    },
+    totalPrice: {
+        getValue(a) {
+            return a.data.totalPrice;
+        },
+    },
+    amount: {
+        getValue: (order) => {
+            return order.data.cart.items.reduce((acc, item) => {
+                return acc + item.amount;
+            }, 0);
+        },
+    },
+    name: {
+        getValue: order => order.data.customer.name,
+    },
 };
 
 export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
@@ -94,11 +124,21 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             let next: LimitedFilteredRequest | undefined = undefined;
 
             if (lastObject) {
+                const sortList: SortItem[] = [...sortItems];
+                if (sortList.length > 0 && !sortList.some(item => item.key === 'id')) {
+                    const order = sortList[0].order;
+                    sortList.push({ key: 'id', order });
+                }
+
+                const pageFilter = getSortFilter(lastObject, orderSorters, sortList);
+
+                console.log(JSON.stringify(pageFilter));
+
                 next = new LimitedFilteredRequest({
                     filter: data.filter,
                     sort: data.sort,
                     limit: data.limit,
-                    pageFilter: getSortFilter(lastObject, orderSorters, data.sort),
+                    pageFilter,
                 });
             }
 

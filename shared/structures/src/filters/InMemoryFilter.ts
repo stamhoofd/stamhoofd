@@ -246,6 +246,19 @@ export function createInMemoryFilterCompiler(path: string): InMemoryFilterCompil
     };
 }
 
+export function createInMemoryFilterCompilerFromCompositePath(paths: string[], separator = ' '): InMemoryFilterCompiler {
+    const splittedPaths = paths.map(path => path.split('.'));
+
+    return (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
+        const runner = $andInMemoryFilterCompiler(filter, filters);
+
+        return (object) => {
+            const value = splittedPaths.map(splitted => objectPathValue(object, splitted)).join(separator);
+            return runner(value);
+        };
+    };
+}
+
 export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     $and: $andInMemoryFilterCompiler,
     $or: $orInMemoryFilterCompiler,

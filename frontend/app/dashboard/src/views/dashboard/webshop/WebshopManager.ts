@@ -15,6 +15,10 @@ export enum OrderStoreIndexedDbIndex {
     Status = 'status',
     PaymentMethod = 'paymentMethod',
     CheckoutMethod = 'checkoutMethod',
+    TimeSlotDate = 'timeSlotDate',
+    TimeSlotTime = 'timeSlotTime',
+    ValidAt = 'validAt',
+    Name = 'name',
 };
 
 /**
@@ -232,6 +236,7 @@ export class WebshopManager {
     }
 
     async getDatabase(): Promise<IDBDatabase> {
+        // this.deleteDatabase();
         if (this.database) {
             return this.database;
         }
@@ -299,6 +304,10 @@ export class WebshopManager {
                         [OrderStoreIndexedDbIndex.Status]: { unique: false },
                         [OrderStoreIndexedDbIndex.PaymentMethod]: { unique: false, keyPath: 'data.paymentMethod' },
                         [OrderStoreIndexedDbIndex.CheckoutMethod]: { unique: false, keyPath: 'data.checkoutMethod.type' },
+                        [OrderStoreIndexedDbIndex.TimeSlotDate]: { unique: false, keyPath: 'data.timeSlot.date' },
+                        [OrderStoreIndexedDbIndex.TimeSlotTime]: { unique: false, keyPath: 'data.timeSlot.endTime' },
+                        [OrderStoreIndexedDbIndex.ValidAt]: { unique: false },
+                        [OrderStoreIndexedDbIndex.Name]: { unique: false, keyPath: ['data.customer.firstName', 'data.customer.lastName'] },
                     };
 
                     Object.entries(indexes).forEach(([index, options]) => {

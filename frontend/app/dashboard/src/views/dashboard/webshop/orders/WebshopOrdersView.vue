@@ -245,6 +245,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     if (dateCount > 1) {
         cols.push(
             new Column<PrivateOrder, WebshopTimeSlot | undefined>({
+                id: 'timeSlotDate',
                 name: (hasDelivery && nonDeliveryCount > 0) ? 'Afhaal/leverdatum' : (hasDelivery ? 'Leverdatum' : 'Afhaaldatum'),
                 getValue: order => order.data.timeSlot ? order.data.timeSlot : undefined,
                 compare: (a, b) => !a && !b ? 0 : (a && b ? WebshopTimeSlot.sort(a, b) : (a ? 1 : -1)),
@@ -272,6 +273,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     if (timeCount > 1) {
         cols.push(
             new Column<PrivateOrder, WebshopTimeSlot | undefined>({
+                id: 'timeSlotTime',
                 name: 'Tijdstip',
                 getValue: order => order.data.timeSlot ? order.data.timeSlot : undefined,
                 compare: (a, b) => !a && !b ? 0 : (a && b ? a.startTime - b.startTime : (a ? 1 : -1)),
@@ -297,6 +299,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
     cols.push(
         new Column<PrivateOrder, Date>({
+            id: 'validAt',
             name: 'Besteldatum',
             getValue: order => order.validAt ?? new Date(1990, 0, 1),
             compare: (a, b) => Sorter.byDateValue(a, b),
@@ -320,6 +323,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
     cols.push(
         new Column<PrivateOrder, number>({
+            id: 'totalPrice',
             name: 'Bedrag',
             enabled: false,
             getValue: order => order.data.totalPrice,
@@ -465,6 +469,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     // Show counts
     cols.push(
         new Column<PrivateOrderWithTickets, number>({
+            id: 'amount',
             name: 'Aantal',
             enabled: false,
             getValue: (order) => {
