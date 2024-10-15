@@ -3,9 +3,6 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../BalanceItem';
 import { Recipient, Replacement } from '../endpoints/EmailRequest';
-import { compileToInMemoryFilter, InMemoryFilterDefinitions } from '../filters/InMemoryFilter';
-import { privateOrderInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter';
 import { Payment, PrivatePayment } from '../members/Payment';
 import { Organization } from '../Organization';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod';
@@ -449,11 +446,6 @@ export class PrivateOrder extends Order {
 
     get payments() {
         return this.balanceItems.flatMap(i => i.payments.map(p => p.payment)).filter(p => p.status !== PaymentStatus.Failed).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-    }
-
-    static createCompiledFilter(filter: StamhoofdFilter) {
-        const definitions: InMemoryFilterDefinitions = privateOrderInMemoryFilterCompilers;
-        return compileToInMemoryFilter(filter, definitions);
     }
 }
 

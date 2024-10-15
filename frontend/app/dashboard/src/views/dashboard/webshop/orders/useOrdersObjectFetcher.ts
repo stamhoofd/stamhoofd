@@ -1,7 +1,7 @@
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PrivateOrder, PrivateOrderWithTickets, SortDefinitions, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { OrderStoreIndexedDbIndex, WebshopManager } from '../WebshopManager';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PrivateOrder, PrivateOrderWithTickets, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
+import { WebshopManager } from '../WebshopManager';
+import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderStoreIndexValueDefinitions, PrivateOrderEncodeableIndexes } from '../getPrivateOrderIndexes';
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -10,70 +10,10 @@ function extendSort(list: SortList): SortList {
     return assertSort(list, [{ key: 'id' }]);
 }
 
-const orderSorters: SortDefinitions<PrivateOrderWithTickets> = {
-    createdAt: {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt);
-        },
-    },
-    id: {
-        getValue(a) {
-            return a.id;
-        },
-    },
-    number: {
-        getValue(a) {
-            return a.number;
-        },
-    },
-    status: {
-        getValue(a) {
-            return a.status;
-        },
-    },
-    paymentMethod: {
-        getValue(a) {
-            return a.data.paymentMethod;
-        },
-    },
-    checkoutMethod: {
-        getValue(a) {
-            return a.data.checkoutMethod?.type;
-        },
-    },
-    timeSlotDate: {
-        getValue(a) {
-            return a.data.timeSlot?.date.getTime();
-        },
-    },
-    timeSlotTime: {
-        getValue(a) {
-            return a.data.timeSlot?.endTime;
-        },
-    },
-    validAt: {
-        getValue(a) {
-            return a.validAt?.getTime();
-        },
-    },
-    totalPrice: {
-        getValue(a) {
-            return a.data.totalPrice;
-        },
-    },
-    amount: {
-        getValue: (order) => {
-            return order.data.cart.items.reduce((acc, item) => {
-                return acc + item.amount;
-            }, 0);
-        },
-    },
-    name: {
-        getValue: order => order.data.customer.name,
-    },
-};
-
 export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
+    const availableIndexes: OrderStoreIndex[] = (Object.values(OrderStoreDataIndex) as OrderStoreIndex[])
+        .concat(Object.values(OrderStoreGeneratedIndex));
+
     return {
         extendSort,
         async fetch(data: LimitedFilteredRequest) {
@@ -84,8 +24,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 filters.unshift(data.pageFilter);
             }
 
-            const availableIndexes = Object.values(OrderStoreIndexedDbIndex);
-            const sortItems = (data.sort as (SortItem & { key: OrderStoreIndexedDbIndex })[]).filter((item) => {
+            const sortItems = (data.sort as (SortItem & { key: OrderStoreIndex })[]).filter((item) => {
                 const key = item.key;
                 // skip id
                 if ((key as string) === 'id') {
@@ -104,35 +43,33 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 console.error('Only 1 sort item is supported for the IndexedDb order store');
             }
 
-            const sortItem: (SortItem & { key: OrderStoreIndexedDbIndex }) | undefined = sortItems[0];
+            const sortItem: (SortItem & { key: OrderStoreIndex }) | undefined = sortItems[0];
+            let lastItem: { value: PrivateOrder; indexes: PrivateOrderEncodeableIndexes } | undefined = undefined;
 
             await manager.streamOrders({
-                callback: (order: PrivateOrder) => {
+                callback: (data) => {
                     arrayBuffer.push(
-                        PrivateOrderWithTickets.create(order),
+                        PrivateOrderWithTickets.create(data.value),
                     );
+                    lastItem = data;
                 },
                 filters,
                 limit: data.limit,
                 sortItem,
-            });
+            }).catch(console.error);
 
             await addTickets(manager, arrayBuffer);
 
-            const lastObject = arrayBuffer[arrayBuffer.length - 1];
-
             let next: LimitedFilteredRequest | undefined = undefined;
 
-            if (lastObject) {
+            if (lastItem) {
                 const sortList: SortItem[] = [...sortItems];
                 if (sortList.length > 0 && !sortList.some(item => item.key === 'id')) {
                     const order = sortList[0].order;
                     sortList.push({ key: 'id', order });
                 }
 
-                const pageFilter = getSortFilter(lastObject, orderSorters, sortList);
-
-                console.log(JSON.stringify(pageFilter));
+                const pageFilter = getSortFilter(lastItem, orderStoreIndexValueDefinitions, sortList);
 
                 next = new LimitedFilteredRequest({
                     filter: data.filter,
@@ -150,7 +87,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             const filters = [data.filter, data.search];
 
             await manager.streamOrders({
-                callback: (_order: PrivateOrder) => {
+                callback: () => {
                     count++;
                 },
                 filters,
