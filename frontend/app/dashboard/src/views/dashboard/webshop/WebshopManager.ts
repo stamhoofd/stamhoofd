@@ -225,7 +225,6 @@ export class WebshopManager {
     }
 
     async getDatabase(): Promise<IDBDatabase> {
-        // this.deleteDatabase();
         if (this.database) {
             return this.database;
         }
@@ -236,8 +235,6 @@ export class WebshopManager {
 
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
-            // remark: I think this should not be the version of the structures but the version of the IndexedDb
-            // because onupgradeneeded does only get called if the version changes
             const version = Version;
             let resolved = false;
 
@@ -291,12 +288,12 @@ export class WebshopManager {
                         [OrderStoreDataIndex.Number]: { unique: false, keyPath: 'value.number' },
                         [OrderStoreDataIndex.CreatedAt]: { unique: false, keyPath: 'value.createdAt' },
                         [OrderStoreDataIndex.Status]: { unique: false, keyPath: 'value.status' },
-                        [OrderStoreDataIndex.PaymentMethod]: { unique: false, keyPath: 'value.paymentMethod' },
-                        [OrderStoreDataIndex.CheckoutMethod]: { unique: false, keyPath: 'value.checkoutMethod.type' },
-                        [OrderStoreDataIndex.TimeSlotDate]: { unique: false, keyPath: 'value.timeSlot.date' },
-                        [OrderStoreDataIndex.TimeSlotTime]: { unique: false, keyPath: 'value.timeSlot.endTime' },
+                        [OrderStoreDataIndex.PaymentMethod]: { unique: false, keyPath: 'value.data.paymentMethod' },
+                        [OrderStoreDataIndex.CheckoutMethod]: { unique: false, keyPath: 'value.data.checkoutMethod.type' },
+                        [OrderStoreDataIndex.TimeSlotDate]: { unique: false, keyPath: 'value.data.timeSlot.date' },
+                        [OrderStoreDataIndex.TimeSlotTime]: { unique: false, keyPath: 'value.data.timeSlot.endTime' },
                         [OrderStoreDataIndex.ValidAt]: { unique: false, keyPath: 'value.validAt' },
-                        [OrderStoreDataIndex.Name]: { unique: false, keyPath: ['value.customer.firstName', 'value.customer.lastName'] },
+                        [OrderStoreDataIndex.Name]: { unique: false, keyPath: ['value.data.customer.firstName', 'value.data.customer.lastName'] },
                         // auto generate indexes for generated indexes
                         ...Object.fromEntries(Object.values(OrderStoreGeneratedIndex).map((index) => {
                             return [index, { unique: false, keyPath: `indexes.${index}` }];

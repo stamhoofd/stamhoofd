@@ -99,12 +99,8 @@ export const privateOrderIndexBoxInMemoryFilterCompilers: InMemoryFilterDefiniti
     [OrderStoreDataIndex.TimeSlotTime]: createInMemoryFilterCompiler('data.timeSlot.endTime'),
     [OrderStoreDataIndex.ValidAt]: createInMemoryFilterCompiler('validAt'),
     [OrderStoreDataIndex.Name]: createInMemoryFilterCompiler('data.customer.name'),
-    // [OrderStoreDataIndex.Name]: createInMemoryFilterCompilerFromCompositePath(['data.customer.firstName', 'data.customer.lastName']),
     [OrderStoreGeneratedIndex.TotalPrice]: createInMemoryFilterCompiler('data.totalPrice'),
     [OrderStoreGeneratedIndex.Amount]: createInMemoryFilterCompiler('data.amount'),
-    // ...(Object.fromEntries(Object.values(OrderStoreGeneratedIndex).map((index) => {
-    //     return [index, createInMemoryFilterCompiler(`indexes.${index}`)];
-    // })) as Record<OrderStoreGeneratedIndex, InMemoryFilterCompiler>),
 };
 
 export function createCompiledFilterForPrivateOrderIndexBox(filter: StamhoofdFilter) {
