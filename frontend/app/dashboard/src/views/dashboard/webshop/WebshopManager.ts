@@ -571,9 +571,9 @@ export class WebshopManager {
     }
 
     async streamOrders(
-        { callback, filters, limit, sortItem }: {
+        { callback, filter, limit, sortItem }: {
             callback: (data: PrivateOrder) => void;
-            filters?: StamhoofdFilter[];
+            filter?: StamhoofdFilter;
             limit?: number;
             sortItem?: SortItem & { key: OrderStoreIndex };
         },
@@ -625,15 +625,17 @@ export class WebshopManager {
 
             let matchedItemsCount = 0;
 
-            let compiledFilters: InMemoryFilterRunner[] | undefined;
+            let compiledFilter: InMemoryFilterRunner | undefined;
 
-            try {
-                compiledFilters = filters?.map(filter => createCompiledFilterForPrivateOrderIndexBox(filter));
-            }
-            catch (e: any) {
-                console.error('Compile filter failed', e);
-                reject(new CompilerFilterError((e.message as string | undefined) ?? 'Compile filter failed'));
-                return;
+            if (filter) {
+                try {
+                    compiledFilter = createCompiledFilterForPrivateOrderIndexBox(filter);
+                }
+                catch (e: any) {
+                    console.error('Compile filter failed', e);
+                    reject(new CompilerFilterError((e.message as string | undefined) ?? 'Compile filter failed'));
+                    return;
+                }
             }
 
             const decoder = createPrivateOrderIndexBoxDecoder();
@@ -663,7 +665,7 @@ export class WebshopManager {
                         return;
                     }
 
-                    if (compiledFilters && !compiledFilters.every(filter => filter(decodedResult))) {
+                    if (compiledFilter && !compiledFilter(decodedResult)) {
                         cursor.continue();
                         return;
                     }

@@ -1,5 +1,5 @@
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
 import { WebshopManager } from '../WebshopManager';
 import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderStoreIndexValueDefinitions } from '../getPrivateOrderIndexes';
 
@@ -45,13 +45,22 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             const sortItem: (SortItem & { key: OrderStoreIndex }) | undefined = sortItems[0];
 
+            let filter: StamhoofdFilter = null;
+
+            if (filters.length > 1) {
+                filter = { $and: filters };
+            }
+            else if (filters.length === 1) {
+                filter = filters[0];
+            }
+
             await manager.streamOrders({
                 callback: (order) => {
                     arrayBuffer.push(
                         PrivateOrderWithTickets.create(order),
                     );
                 },
-                filters,
+                filter,
                 limit: data.limit,
                 sortItem,
             }).catch(console.error);
