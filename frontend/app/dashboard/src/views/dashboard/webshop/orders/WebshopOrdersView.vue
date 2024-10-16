@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { Column, GlobalEventBus, InMemoryTableAction, ModernTableView, Toast, UIFilterBuilder, useIsMobile, useTableObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
+import { Column, getWebshopOrderUIFilterBuilders, GlobalEventBus, InMemoryTableAction, ModernTableView, Toast, UIFilterBuilders, useIsMobile, useTableObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
 import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -51,7 +51,7 @@ function fetchOrders() {
 }
 
 // todo
-const filterBuilders: UIFilterBuilder[] = [];
+const filterBuilders: UIFilterBuilders = getWebshopOrderUIFilterBuilders(props.webshopManager.preview);
 
 // const organization = useOrganization();
 const organizationManager = useOrganizationManager();

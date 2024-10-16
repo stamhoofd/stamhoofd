@@ -1,13 +1,13 @@
-import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { ReceivableBalanceType, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
-import { usePlatform } from "../hooks";
-import { GroupUIFilterBuilder } from "./GroupUIFilter";
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
-import { NumberFilterBuilder } from "./NumberUIFilter";
-import { StringFilterBuilder } from "./StringUIFilter";
-import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from "./UIFilter";
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { CheckoutMethodType, CheckoutMethodTypeHelper, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
+import { usePlatform } from '../hooks';
+import { GroupUIFilterBuilder } from './GroupUIFilter';
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
+import { NumberFilterBuilder } from './NumberUIFilter';
+import { StringFilterBuilder } from './StringUIFilter';
+import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from './UIFilter';
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
@@ -210,7 +210,7 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             wrapFilter: (f: StamhoofdFilter) => {
                 const choices = Array.isArray(f) ? f : [f];
 
-                if(choices.length === 3) {
+                if (choices.length === 3) {
                     return null;
                 }
 
@@ -218,49 +218,49 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                     platformMemberships: {
                         $elemMatch: {
                             startDate: {
-                                $lte: {$: '$now'}
+                                $lte: { $: '$now' },
                             },
                             endDate: {
-                                $gt: {$: '$now'}
-                            }
-                        }
-                    }
+                                $gt: { $: '$now' },
+                            },
+                        },
+                    },
                 };
 
-                if(choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
+                if (choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
                     return activeOrExpiringFilter;
                 }
 
                 const getFilter = (choice: StamhoofdFilter<StamhoofdCompareValue>): StamhoofdFilter => {
-                    switch(choice) {
+                    switch (choice) {
                         case 'Active': {
                             return {
                                 platformMemberships: {
                                     $elemMatch: {
                                         endDate: {
-                                            $gt: {$: '$now'}
+                                            $gt: { $: '$now' },
                                         },
                                         startDate: {
-                                            $lte: {$: '$now'}
+                                            $lte: { $: '$now' },
                                         },
                                         $or: [
                                             {
-                                                expireDate: null
+                                                expireDate: null,
                                             },
                                             {
                                                 expireDate: {
-                                                    $gt: {$: '$now'}
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            }
+                                                    $gt: { $: '$now' },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            };
                         }
                         case 'Inactive': {
                             return {
-                                $not: activeOrExpiringFilter
-                            }
+                                $not: activeOrExpiringFilter,
+                            };
                         }
                         case 'Expiring': {
                             return {
@@ -268,30 +268,30 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                                 platformMemberships: {
                                     $elemMatch: {
                                         endDate: {
-                                            $gte: {$: '$now'}
+                                            $gte: { $: '$now' },
                                         },
                                         expireDate: {
-                                            $lt: {$: '$now'}
-                                        }
-                                    }
-                                }
-                            }
+                                            $lt: { $: '$now' },
+                                        },
+                                    },
+                                },
+                            };
                         }
                         default: {
                             return null;
                         }
                     }
-                }
+                };
 
                 const filters = choices.map(getFilter);
 
-                if(filters.length === 1) {
+                if (filters.length === 1) {
                     return filters[0];
                 }
 
                 return {
-                    $or: filters
-                }
+                    $or: filters,
+                };
             },
             unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
                 const activeAndExpiring = unwrapFilter(f, {
@@ -647,3 +647,94 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
 
     return all;
 }
+
+export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
+    const builders = [
+        new NumberFilterBuilder({
+            name: '#',
+            key: 'number',
+        }),
+        new MultipleChoiceFilterBuilder({
+            name: 'Status',
+            options: Object.values(OrderStatus).map((status) => {
+                return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(OrderStatusHelper.getName(status)), status);
+            }),
+            wrapper: {
+                status: {
+                    $in: UIFilterWrapperMarker,
+                },
+            },
+        }),
+        new StringFilterBuilder({
+            name: 'Naam',
+            key: 'name',
+        }),
+        new StringFilterBuilder({
+            name: 'E-mailadres',
+            key: 'email',
+        }),
+    ];
+
+    if (preview.meta.phoneEnabled) {
+        builders.push(new StringFilterBuilder({
+            name: 'Telefoonnummer',
+            key: 'phone',
+        }));
+    }
+
+    builders.push(new MultipleChoiceFilterBuilder({
+        name: 'Betaalmethode',
+        options: Object.values(PaymentMethod).map((paymentMethod) => {
+            return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(paymentMethod), paymentMethod);
+        }),
+        wrapper: {
+            paymentMethod: {
+                $in: UIFilterWrapperMarker,
+            },
+        },
+    }));
+
+    if (preview.meta.checkoutMethods.length > 1) {
+        builders.push(new MultipleChoiceFilterBuilder({
+            name: 'Methode',
+            options: Object.values(CheckoutMethodType).map((checkoutMethod) => {
+                return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(CheckoutMethodTypeHelper.getName(checkoutMethod)), checkoutMethod);
+            }),
+            wrapper: {
+                checkoutMethod: {
+                    $in: UIFilterWrapperMarker,
+                },
+            },
+        }));
+    }
+
+    builders.push(
+        // todo: create CurrencyFilterBuilder
+        new NumberFilterBuilder({
+            name: 'Bedrag',
+            key: 'totalPrice',
+        }),
+        // todo: create CurrencyFilterBuilder
+        new NumberFilterBuilder({
+            name: 'Te betalen',
+            key: 'openBalance',
+        }),
+        new NumberFilterBuilder({
+            name: 'Aantal',
+            key: 'amount',
+        }),
+    );
+
+    const groupFilter = new GroupUIFilterBuilder({ builders });
+
+    return [groupFilter, ...builders];
+}
+/**
+    CreatedAt = 'createdAt',
+    TimeSlotDate = 'timeSlotDate',
+    TimeSlotTime = 'timeSlotTime',
+    ValidAt = 'validAt',
+    OpenBalance = 'openBalance',
+    Location = 'location',
+     *
+     */
