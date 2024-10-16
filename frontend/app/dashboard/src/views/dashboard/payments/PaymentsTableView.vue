@@ -100,7 +100,7 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const filterBuilders = paymentsUIFilterBuilders;
 const title = computed(() => {
     if (props.methods?.length === 1) {
-        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getPluralName(props.methods[0]));
+        return PaymentMethodHelper.getPluralNameCapitalized(props.methods[0]);
     }
 
     return 'Betalingen';

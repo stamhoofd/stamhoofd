@@ -1,12 +1,14 @@
-import { Request } from "@simonbackx/simple-networking";
-import { onBeforeUnmount } from "vue";
+import { Request } from '@simonbackx/simple-networking';
+import { GlobalEventBus } from '@stamhoofd/components';
+import { markRaw, onBeforeUnmount } from 'vue';
 
-export function useRequestOwner() {
-    const owner = {};
+export function useRequestOwner(): object {
+    const owner = markRaw({});
 
     onBeforeUnmount(() => {
         Request.cancelAll(owner);
-    })
+        GlobalEventBus.removeListener(owner);
+    });
 
     return owner;
 }

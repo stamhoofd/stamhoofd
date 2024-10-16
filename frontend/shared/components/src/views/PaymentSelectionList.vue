@@ -1,5 +1,9 @@
 <template>
     <div>
+        <p v-if="selectedPaymentMethod && getWarning(selectedPaymentMethod)" class="warning-box">
+            {{ getWarning(selectedPaymentMethod) }}
+        </p>
+
         <STList class="payment-selection-list">
             <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
                 <template #left>
@@ -36,140 +40,115 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import bancontactLogo from '@stamhoofd/assets/images/partners/bancontact/logo.svg';
-import idealLogo from '@stamhoofd/assets/images/partners/ideal/logo.svg';
-import { LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Country, Organization, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { Radio, STList, STListItem } from '@stamhoofd/components';
+import { Country, Organization, PaymentConfiguration, PaymentCustomer, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
+import { computed, onMounted } from 'vue';
 import PaymentMethodIcon from '../payments/components/PaymentMethodIcon.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        Radio,
-        LoadingButton,
-        STErrorsDefault,
-        PaymentMethodIcon,
-    },
-    model: {
-        // Already vue 3 compliant
-        prop: 'modelValue',
-        event: 'update:modelValue',
-    },
-})
-export default class PaymentSelectionList extends Mixins(NavigationMixin) {
-    @Prop({ default: null })
-    modelValue: PaymentMethod | null;
-
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     organization: Organization;
+    paymentConfiguration: PaymentConfiguration;
+    context?: null | 'takeout' | 'delivery';
+    amount: number;
+    customer?: PaymentCustomer | null;
+}>(), {
+    context: null,
+    customer: null,
+});
 
-    @Prop({ required: true })
-    paymentMethods: PaymentMethod[];
+const selectedPaymentMethod = defineModel<PaymentMethod | null>();
+const paymentMethods = computed(() => props.paymentConfiguration.getAvailablePaymentMethods({
+    amount: props.amount,
+    customer: props.customer,
+}));
 
-    @Prop({ default: null })
-    context: null | 'takeout' | 'delivery';
+const sortedPaymentMethods = computed(() => {
+    const methods = paymentMethods.value;
+    const r: PaymentMethod[] = [];
 
-    mounted() {
-        if (!this.selectedPaymentMethod || this.selectedPaymentMethod === PaymentMethod.Unknown || !this.paymentMethods.includes(this.selectedPaymentMethod)) {
-            this.selectedPaymentMethod = this.sortedPaymentMethods[0] ?? null;
-        }
+    // Force a given ordering
+    if (methods.includes(PaymentMethod.iDEAL) && props.organization.address.country === Country.Netherlands) {
+        r.push(PaymentMethod.iDEAL);
     }
 
-    get selectedPaymentMethod() {
-        return this.modelValue;
+    // Force a given ordering
+    if (methods.includes(PaymentMethod.Payconiq)) {
+        r.push(PaymentMethod.Payconiq);
     }
 
-    set selectedPaymentMethod(method: PaymentMethod | null) {
-        this.$emit('update:modelValue', method);
+    // Force a given ordering
+    if (methods.includes(PaymentMethod.Bancontact)) {
+        r.push(PaymentMethod.Bancontact);
     }
 
-    get sortedPaymentMethods() {
-        const methods = this.paymentMethods;
-        const r: PaymentMethod[] = [];
-
-        // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country === Country.Netherlands) {
-            r.push(PaymentMethod.iDEAL);
-        }
-
-        // Force a given ordering
-        if (methods.includes(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq);
-        }
-
-        // Force a given ordering
-        if (methods.includes(PaymentMethod.Bancontact)) {
-            r.push(PaymentMethod.Bancontact);
-        }
-
-        // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country !== Country.Netherlands) {
-            r.push(PaymentMethod.iDEAL);
-        }
-
-        // Force a given ordering
-        if (methods.includes(PaymentMethod.CreditCard)) {
-            r.push(PaymentMethod.CreditCard);
-        }
-
-        // Force a given ordering
-        if (methods.includes(PaymentMethod.Transfer)) {
-            r.push(PaymentMethod.Transfer);
-        }
-
-        // Others
-        r.push(...methods.filter(p => p !== PaymentMethod.Payconiq && p !== PaymentMethod.Bancontact && p !== PaymentMethod.iDEAL && p !== PaymentMethod.CreditCard && p !== PaymentMethod.Transfer));
-
-        return r;
+    // Force a given ordering
+    if (methods.includes(PaymentMethod.iDEAL) && props.organization.address.country !== Country.Netherlands) {
+        r.push(PaymentMethod.iDEAL);
     }
 
-    get hasNonPayconiq() {
-        const hasTransfer = this.paymentMethods.includes(PaymentMethod.Transfer) ? 1 : 0;
-        const hasPOS = this.paymentMethods.includes(PaymentMethod.PointOfSale) ? 1 : 0;
-        return this.paymentMethods.length > 1 || !!hasTransfer || !!hasPOS;
+    // Force a given ordering
+    if (methods.includes(PaymentMethod.CreditCard)) {
+        r.push(PaymentMethod.CreditCard);
     }
 
-    getName(paymentMethod: PaymentMethod): string {
-        switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return 'Payconiq by Bancontact';
-            case PaymentMethod.Transfer: return 'Via overschrijving';
-            case PaymentMethod.DirectDebit: return 'Domiciliëring';
-        }
-        return PaymentMethodHelper.getNameCapitalized(paymentMethod, this.context);
+    // Force a given ordering
+    if (methods.includes(PaymentMethod.Transfer)) {
+        r.push(PaymentMethod.Transfer);
     }
 
-    getDescription(paymentMethod: PaymentMethod): string {
-        switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return 'Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app';
-            case PaymentMethod.Transfer: return 'Betaalbevestiging kan enkele dagen duren';
-            case PaymentMethod.Bancontact: return this.organization.address.country === Country.Belgium ? '' : '';
-            case PaymentMethod.iDEAL: return this.organization.address.country === Country.Netherlands ? 'Meest gebruikte betaalmethode.' : '';
-            case PaymentMethod.Unknown: return '';
-            case PaymentMethod.DirectDebit: return 'Betaalbevestiging kan 5 werkdagen duren';
-            case PaymentMethod.CreditCard: return '';
-            case PaymentMethod.PointOfSale: return '';
-        }
-    }
+    // Others
+    r.push(...methods.filter(p => p !== PaymentMethod.Payconiq && p !== PaymentMethod.Bancontact && p !== PaymentMethod.iDEAL && p !== PaymentMethod.CreditCard && p !== PaymentMethod.Transfer));
 
-    getLogo(paymentMethod: PaymentMethod): string | null {
-        switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return null;
-            case PaymentMethod.Transfer: return null;
-            case PaymentMethod.Bancontact: return bancontactLogo;
-            case PaymentMethod.iDEAL: return idealLogo;
-            case PaymentMethod.Unknown: return null;
-            case PaymentMethod.DirectDebit: return null;
-            case PaymentMethod.CreditCard: return null;
-            case PaymentMethod.PointOfSale: return null;
-        }
+    return r;
+});
+
+onMounted(() => {
+    if (!selectedPaymentMethod.value || selectedPaymentMethod.value === PaymentMethod.Unknown || !paymentMethods.value.includes(selectedPaymentMethod.value)) {
+        selectedPaymentMethod.value = sortedPaymentMethods.value[0] ?? null;
+    }
+});
+
+const hasNonPayconiq = computed(() => {
+    const hasTransfer = paymentMethods.value.includes(PaymentMethod.Transfer) ? 1 : 0;
+    const hasPOS = paymentMethods.value.includes(PaymentMethod.PointOfSale) ? 1 : 0;
+    return paymentMethods.value.length > 1 || !!hasTransfer || !!hasPOS;
+});
+
+function getName(paymentMethod: PaymentMethod): string {
+    switch (paymentMethod) {
+        case PaymentMethod.Payconiq: return 'Payconiq by Bancontact';
+        case PaymentMethod.Transfer: return 'Via overschrijving';
+        case PaymentMethod.DirectDebit: return 'Domiciliëring';
+    }
+    return PaymentMethodHelper.getNameCapitalized(paymentMethod, props.context);
+}
+
+function getDescription(paymentMethod: PaymentMethod): string {
+    switch (paymentMethod) {
+        case PaymentMethod.Payconiq: return 'Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app';
+        case PaymentMethod.Transfer: return 'Betaalbevestiging kan enkele dagen duren';
+        case PaymentMethod.Bancontact: return props.organization.address.country === Country.Belgium ? '' : '';
+        case PaymentMethod.iDEAL: return props.organization.address.country === Country.Netherlands ? 'Meest gebruikte betaalmethode.' : '';
+        case PaymentMethod.Unknown: return '';
+        case PaymentMethod.DirectDebit: return 'Betaalbevestiging kan 5 werkdagen duren';
+        case PaymentMethod.CreditCard: return '';
+        case PaymentMethod.PointOfSale: return '';
     }
 }
+
+function getWarning(paymentMethod: PaymentMethod): string {
+    const settings = props.paymentConfiguration.paymentMethodSettings.get(paymentMethod);
+    if (settings) {
+        if (settings.warningText) {
+            if (settings.warningAmount === null || settings.warningAmount <= props.amount) {
+                return settings.warningText;
+            }
+        }
+    }
+    return '';
+}
+
 </script>
 
 <style lang="scss">

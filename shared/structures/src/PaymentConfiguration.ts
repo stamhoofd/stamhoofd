@@ -1,8 +1,9 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PaymentMethod } from './PaymentMethod';
 import { TransferSettings } from './webshops/TransferSettings';
+import { PaymentCustomer } from './PaymentCustomer';
 
 export class PayconiqAccount extends AutoEncoder {
     /**
@@ -75,6 +76,27 @@ export class AdministrationFeeSettings extends AutoEncoder {
     }
 }
 
+export class PaymentMethodSettings extends AutoEncoder {
+    // Note: these settings are public - don't store sensitive information here
+    @field({ decoder: IntegerDecoder })
+    minimumAmount = 0;
+
+    /**
+     * Only show warning if amount is higher than this
+     */
+    @field({ decoder: IntegerDecoder, nullable: true })
+    warningAmount: number | null = null;
+
+    @field({ decoder: StringDecoder })
+    warningText = '';
+
+    /**
+     * Disable this payment method for private users
+     */
+    @field({ decoder: BooleanDecoder })
+    companiesOnly = false;
+}
+
 export class PaymentConfiguration extends AutoEncoder {
     @field({ decoder: TransferSettings })
     transferSettings = TransferSettings.create({});
@@ -84,4 +106,27 @@ export class PaymentConfiguration extends AutoEncoder {
 
     @field({ decoder: AdministrationFeeSettings })
     administrationFee = AdministrationFeeSettings.create({});
+
+    @field({ decoder: new MapDecoder(new EnumDecoder(PaymentMethod), PaymentMethodSettings), ...NextVersion })
+    paymentMethodSettings: Map<PaymentMethod, PaymentMethodSettings> = new Map();
+
+    getAvailablePaymentMethods(data: { amount: number; customer: PaymentCustomer | null }) {
+        return this.paymentMethods.filter((method) => {
+            const settings = this.paymentMethodSettings.get(method);
+            if (!settings) {
+                // No special settings, always available
+                return true;
+            }
+
+            if (data.amount < settings.minimumAmount) {
+                return false;
+            }
+
+            if (settings.companiesOnly && (!data.customer || !data.customer.company)) {
+                return false;
+            }
+
+            return true;
+        });
+    }
 }

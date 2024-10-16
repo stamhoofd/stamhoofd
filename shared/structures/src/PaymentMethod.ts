@@ -62,14 +62,24 @@ export class PaymentMethodHelper {
             }
             case PaymentMethod.Transfer: return 'overschrijvingen';
             case PaymentMethod.DirectDebit: return 'domiciliëringen';
-            case PaymentMethod.Bancontact: return 'Bancontact betalingen';
-            case PaymentMethod.iDEAL: return 'iDEAL betalingen';
-            case PaymentMethod.CreditCard: return 'kredietkaart betalingen';
-            case PaymentMethod.Payconiq: return 'Payconiq betalingen';
+            case PaymentMethod.Bancontact: return 'Bancontact';
+            case PaymentMethod.iDEAL: return 'iDEAL';
+            case PaymentMethod.CreditCard: return 'kredietkaart';
+            case PaymentMethod.Payconiq: return 'Payconiq';
         }
     }
 
     static getNameCapitalized(method: PaymentMethod, context: null | 'takeout' | 'delivery' | 'Takeout' | 'Delivery' | 'OnSite' = null): string {
+        if (method === PaymentMethod.iDEAL) {
+            return PaymentMethodHelper.getName(method, context);
+        }
         return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(method, context));
+    }
+
+    static getPluralNameCapitalized(method: PaymentMethod): string {
+        if (method === PaymentMethod.iDEAL) {
+            return PaymentMethodHelper.getPluralName(method);
+        }
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getPluralName(method));
     }
 }

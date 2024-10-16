@@ -30,66 +30,14 @@
                 <h3 class="style-title-list">
                     {{ getName(method) }}
                 </h3>
-                <p v-if="showPrices && getPaymentMethod(method) && getDescription(method)" class="style-description-small pre-wrap" v-text="getDescription(method)" />
+                <p v-if="getPaymentMethod(method) && getDescription(method)" class="style-description-small pre-wrap" v-text="getDescription(method)" />
+                <p v-if="getPaymentMethod(method) && getSettingsDescription(method)" class="style-description-small pre-wrap" v-text="getSettingsDescription(method)" />
+
+                <template #right>
+                    <button v-if="getPaymentMethod(method)" class="icon button settings" type="button" @click="editPaymentMethodSettings(method)" />
+                </template>
             </STListItem>
         </STList>
-
-        <template v-if="hasTransfers">
-            <hr>
-
-            <h2>Overschrijvingen</h2>
-
-            <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
-                <input
-                    v-model="creditor"
-                    class="input"
-                    type="text"
-                    :placeholder="organization.name"
-                    autocomplete=""
-                >
-            </STInputBox>
-
-            <IBANInput v-model="iban" title="Bankrekeningnummer" :validator="validator" :required="true" />
-
-            <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errors.errorBox" class="max">
-                <STList>
-                    <STListItem v-for="_type in transferTypes" :key="_type.value" :selectable="true" element-name="label">
-                        <template #left>
-                            <Radio v-model="transferType" :value="_type.value" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ _type.name }}
-                        </h3>
-                        <p v-if="transferType === _type.value" class="style-description pre-wrap" v-text="_type.description" />
-                    </STListItem>
-                </STList>
-            </STInputBox>
-
-            <p v-if="transferType !== 'Structured'" class="warning-box">
-                <span>De mededeling kan niet gewijzigd worden door <span v-if="type === 'webshop'">bestellers</span><span v-else>leden</span>. Voorzie dus zelf geen eigen vervangingen zoals <em class="style-em">bestelling + naam</em> waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.</span>
-            </p>
-
-            <STInputBox v-if="transferType !== 'Structured'" :title="transferType === 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errors.errorBox">
-                <input
-                    v-model="prefix"
-                    class="input"
-                    type="text"
-                    :placeholder="transferType === 'Fixed' ? 'Mededeling' : (type === 'registration' ? 'Optioneel. Bv. Inschrijving' : 'Optioneel. Bv. Bestelling')"
-                    autocomplete=""
-                >
-            </STInputBox>
-
-            <p v-if="transferExample && transferExample !== prefix" class="style-description-small">
-                Voorbeeld: <span class="style-em">{{ transferExample }}</span>
-            </p>
-
-            <p v-if="transferType === 'Fixed' && type === 'webshop'" class="style-description-small">
-                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />, <code v-copyable class="style-inline-code style-copyable" v-text="`{{email}}`" /> of <code v-copyable class="style-inline-code style-copyable" v-text="`{{nr}}`" />
-            </p>
-            <p v-else-if="transferType === 'Fixed' && type === 'registration'" class="style-description-small">
-                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />
-            </p>
-        </template>
 
         <template v-if="showAdministrationFee">
             <hr>
@@ -120,12 +68,14 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Checkbox, Dropdown, ErrorBox, IBANInput, LoadingView, PermyriadInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useCountry, useErrors, useRequiredOrganization, useValidation, Validator } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AdministrationFeeSettings, Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
+import EditPaymentMethodSettingsView from './EditPaymentMethodSettingsView.vue';
 
 const props = withDefaults(defineProps<{
     type: 'registration' | 'webshop';
@@ -134,12 +84,10 @@ const props = withDefaults(defineProps<{
     privateConfig: PrivatePaymentConfiguration;
     config: PaymentConfiguration;
     choices?: PaymentMethod[] | null;
-    showPrices?: boolean;
 }>(), {
     showAdministrationFee: true,
     validator: null,
     choices: null,
-    showPrices: true,
 });
 
 const loadingStripeAccounts = ref(false);
@@ -152,6 +100,7 @@ const emit = defineEmits(['patch:privateConfig', 'patch:config']);
 const $t = useTranslate();
 const country = useCountry();
 const errors = useErrors({ validator: props.validator });
+const present = usePresent();
 
 loadStripeAccounts().catch(console.error);
 
@@ -189,9 +138,21 @@ function patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
     emit('patch:config', patch);
 }
 
-const hasTransfers = computed(() => {
-    return props.config.paymentMethods.includes(PaymentMethod.Transfer);
-});
+async function editPaymentMethodSettings(paymentMethod: PaymentMethod) {
+    await present({
+        components: [
+            new ComponentWithProperties(EditPaymentMethodSettingsView, {
+                type: props.type,
+                paymentMethod,
+                configuration: props.config,
+                saveHandler: async (configuration: AutoEncoderPatchType<PaymentConfiguration>) => {
+                    patchConfig(configuration);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 async function loadStripeAccounts() {
     try {
@@ -314,7 +275,7 @@ const sortedPaymentMethods = computed(() => {
 });
 
 function getName(paymentMethod: PaymentMethod): string {
-    return PaymentMethodHelper.getNameCapitalized(paymentMethod);
+    return PaymentMethodHelper.getPluralNameCapitalized(paymentMethod);
 }
 
 function providerText(provider: PaymentProvider | null, map: { [key: string]: string }): string {
@@ -359,6 +320,47 @@ function getDescription(paymentMethod: PaymentMethod): string {
         case PaymentMethod.DirectDebit: return $t('Betalingen duren tot 5 werkdagen, geen onmiddellijke bevestiging van betaling. Mislukte betalingen kunnen kosten met zich meebrengen.');
         case PaymentMethod.PointOfSale: return $t('f511ce18-7a60-4fe8-8695-16216ffb7bdc');
     }
+}
+
+function getSettingsDescription(paymentMethod: PaymentMethod): string {
+    let texts: string[] = [];
+    const settings = props.config.paymentMethodSettings.get(paymentMethod);
+
+    if (settings) {
+        if (settings.minimumAmount !== 0) {
+            texts.push('Vanaf minimum ' + Formatter.price(settings.minimumAmount));
+        }
+
+        if (settings.warningText) {
+            if (settings.warningAmount !== null) {
+                texts.push('Met waarschuwing vanaf ' + Formatter.price(settings.warningAmount));
+            }
+            else {
+                texts.push('Met waarschuwing');
+            }
+        }
+
+        if (settings.companiesOnly) {
+            texts.push('Niet beschikbaar voor particulieren');
+        }
+    }
+
+    if (paymentMethod === PaymentMethod.Transfer) {
+        if (!props.config.transferSettings.iban) {
+            texts.push('Nog geen bankrekeningnummer ingesteld');
+        }
+        else {
+            texts.push('Rekeningnummer: ' + props.config.transferSettings.iban);
+        }
+
+        if (props.config.transferSettings.creditor) {
+            texts.push('Begunstigde: ' + props.config.transferSettings.creditor);
+        }
+
+        texts.push('Mededeling: ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
+    }
+
+    return texts.join('\n');
 }
 
 function getPaymentMethod(method: PaymentMethod) {
@@ -505,87 +507,20 @@ const transferTypes = computed(() => {
         {
             value: TransferDescriptionType.Structured,
             name: $t('f22ff741-6a05-4b15-aa6a-16e3a197ac99'),
-            description: 'Willekeurig aangemaakt.',
         },
         {
             value: TransferDescriptionType.Reference,
             name: props.type === 'registration' ? 'Naam van lid/leden' : 'Bestelnummer',
-            description: 'Eventueel voorafgegaan door een zelf gekozen woord (zie onder)',
         },
         {
             value: TransferDescriptionType.Fixed,
             name: 'Vaste mededeling',
-            description: props.type === 'registration'
-                ? 'Altijd dezelfde mededeling voor alle inschrijvingen. Een betaling kan voor meerdere inschrijvingen tegelijk zijn.'
-                : 'Altijd dezelfde mededeling voor alle bestellingen.',
-
         },
     ];
 });
 
-const transferType = computed({
-    get: () => {
-        return props.config.transferSettings.type;
-    },
-    set: (value: TransferDescriptionType) => {
-        patchConfig(PaymentConfiguration.patch({
-            transferSettings: TransferSettings.patch({
-                type: value,
-            }),
-        }));
-    },
-});
-
-const creditor = computed({
-    get: () => {
-        return props.config.transferSettings.creditor;
-    },
-    set: (creditor: string | null) => {
-        patchConfig(PaymentConfiguration.patch({
-            transferSettings: TransferSettings.patch({
-                creditor: !creditor || creditor.length === 0 || creditor === organization.value.name ? null : creditor,
-            }),
-        }));
-    },
-});
-
-const iban = computed({
-    get: () => {
-        return props.config.transferSettings.iban;
-    },
-    set: (iban: string | null) => {
-        patchConfig(PaymentConfiguration.patch({
-            transferSettings: TransferSettings.patch({
-                iban: !iban || iban.length === 0 ? null : iban,
-            }),
-        }));
-    },
-});
-
-const prefix = computed({
-    get: () => {
-        return props.config.transferSettings.prefix;
-    },
-    set: (prefix: string | null) => {
-        patchConfig(PaymentConfiguration.patch({
-            transferSettings: TransferSettings.patch({
-                prefix,
-            }),
-        }));
-    },
-});
-
-const transferExample = computed(() => {
-    const fakeReference = props.type === 'registration' ? $t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : '152';
-    const settings = props.config.transferSettings;
-
-    return settings.generateDescription(fakeReference, organization.value.address.country, {
-        nr: props.type === 'registration' ? '' : fakeReference,
-        email: props.type === 'registration' ? '' : $t('245e4d9b-3b80-42f5-8503-89a480995f0e').toString(),
-        phone: props.type === 'registration' ? '' : $t('0c3689c1-01f8-455a-a9b0-8f766c03b2d3').toString(),
-        name: props.type === 'registration' ? $t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : $t('bb910a6c-ec64-46d8-bebb-c3b4312bbfb4').toString(),
-        naam: props.type === 'registration' ? $t('274d0a26-49b8-4dfa-a8bf-21368b12dca7').toString() : $t('bb910a6c-ec64-46d8-bebb-c3b4312bbfb4').toString(),
-    });
+const prefix = computed(() => {
+    return props.config.transferSettings.prefix;
 });
 
 </script>

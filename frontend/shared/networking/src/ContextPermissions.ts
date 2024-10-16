@@ -68,6 +68,10 @@ export class ContextPermissions {
         return this.permissions?.hasFullAccess() ?? false;
     }
 
+    /**
+     * @deprecated
+     * Use hasPlatformFullAccess instead
+     */
     hasFullPlatformAccess() {
         return this.platformPermissions?.hasFullAccess() ?? false;
     }

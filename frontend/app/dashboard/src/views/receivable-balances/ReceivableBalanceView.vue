@@ -107,6 +107,7 @@ import { BalanceItemWithPayments, DetailedReceivableBalance, getReceivableBalanc
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref } from 'vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
+import { useRequestOwner } from '@stamhoofd/networking';
 
 const props = defineProps<{
     item: ReceivableBalance;
@@ -119,6 +120,7 @@ const { goBack, goForward, hasNext, hasPrevious } = useBackForward('item', props
 const detailedItem = ref(null) as Ref<null | DetailedReceivableBalance>;
 const context = useContext();
 const selectedTab = ref('Gegroepeerd') as Ref<'Gegroepeerd' | 'Individueel'>;
+const owner = useRequestOwner();
 
 const title = computed(() => {
     return $t('Openstaand bedrag');
@@ -146,17 +148,18 @@ async function reload() {
         method: 'GET',
         path: `/receivable-balances/${props.item.objectType}/${props.item.object.id}`,
         decoder: DetailedReceivableBalance as Decoder<DetailedReceivableBalance>,
+        owner,
     });
 
     detailedItem.value = response.data;
 }
 
 // Listen for patches in payments
-GlobalEventBus.addListener(this, 'paymentPatch', async () => {
+GlobalEventBus.addListener(owner, 'paymentPatch', async () => {
     await reload();
 });
 
-GlobalEventBus.addListener(this, 'balanceItemPatch', async () => {
+GlobalEventBus.addListener(owner, 'balanceItemPatch', async () => {
     await reload();
 });
 

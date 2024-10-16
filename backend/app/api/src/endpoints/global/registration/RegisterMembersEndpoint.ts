@@ -284,7 +284,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Validate payment method
         if (totalPrice > 0 && whoWillPayNow !== 'nobody') {
-            const allowedPaymentMethods = organization.meta.registrationPaymentConfiguration.paymentMethods;
+            const allowedPaymentMethods = organization.meta.registrationPaymentConfiguration.getAvailablePaymentMethods({
+                amount: totalPrice,
+                customer: checkout.customer,
+            });
 
             if (!checkout.paymentMethod || !allowedPaymentMethods.includes(checkout.paymentMethod)) {
                 throw new SimpleError({

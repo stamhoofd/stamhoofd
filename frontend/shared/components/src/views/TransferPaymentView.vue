@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Overschrijven" :disablePop="true" :disableDismiss="!isPopup" />
+        <STNavigationBar title="Overschrijven" :disable-pop="true" :disable-dismiss="!isPopup" />
 
         <main>
             <h1 v-if="created && type === 'order'">
@@ -15,19 +15,24 @@
             <h1 v-else>
                 Bedrag overschrijven
             </h1>
-            <p v-if="payment.price > 0 && payment.status !== 'Succeeded' && created">
-                Voer de overschrijving meteen uit. Vermeld zeker “{{ formattedTransferDescription }}” in je overschrijving.
+
+            <p v-if="payment.price > 0 && payment.status !== 'Succeeded'">
+                <template v-if="payment.transferSettings?.infoDescription">
+                    {{ payment.transferSettings.infoDescription }}
+                </template>
+                <template v-else-if="created">
+                    Voer de overschrijving meteen uit. Vermeld zeker “{{ formattedTransferDescription }}” in je overschrijving.
+                </template>
+                <template v-else>
+                    We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
+                </template>
             </p>
-            <p v-if="payment.price > 0 && payment.status !== 'Succeeded' && !created">
-                We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
-            </p>
-            <p v-if="payment.price < 0 && payment.status !== 'Succeeded' && !created">
+            <p v-else-if="payment.price < 0 && payment.status !== 'Succeeded' && !created">
                 Je ontvangt dit bedrag binnenkort terug op jouw rekening.
             </p>
-            <p v-if="payment.price < 0 && payment.status === 'Succeeded'" class="success-box">
+            <p v-else-if="payment.price < 0 && payment.status === 'Succeeded'" class="success-box">
                 We hebben dit bedrag terug op jouw rekening gestort.
             </p>
-
 
             <div class="payment-split">
                 <div class="rectangle">
@@ -90,7 +95,9 @@
 
                 <STList>
                     <STListItem element-name="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
-                        <template #left><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg"></template>
+                        <template #left>
+                            <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg">
+                        </template>
                         <h3 class="style-title-list">
                             KBC Mobile
                         </h3>
@@ -100,7 +107,9 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'bepingib://'">
-                        <template #left><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg"></template>
+                        <template #left>
+                            <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg">
+                        </template>
                         <h3 class="style-title-list">
                             ING Banking
                         </h3>
@@ -110,7 +119,9 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'BEPbelfius://'">
-                        <template #left><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg"></template>
+                        <template #left>
+                            <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg">
+                        </template>
                         <h3 class="style-title-list">
                             Belfius Mobile
                         </h3>
@@ -120,7 +131,9 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'easybanking://'">
-                        <template #left><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png"></template>
+                        <template #left>
+                            <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png">
+                        </template>
                         <h3 class="style-title-list">
                             Easy Banking App (BNP Paribas Fortis)
                         </h3>
@@ -130,7 +143,9 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'BEPargenta://'">
-                        <template #left><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png"></template>
+                        <template #left>
+                            <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png">
+                        </template>
                         <h3 class="style-title-list">
                             Argenta-app
                         </h3>
@@ -140,7 +155,9 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'HBApp://'">
-                        <template #left><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png"></template>
+                        <template #left>
+                            <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png">
+                        </template>
                         <h3 class="style-title-list">
                             Hello Bank! app
                         </h3>
@@ -161,41 +178,43 @@
             <template v-else-if="payment.price > 0 && created">
                 <p v-if="isBelgium" class="hide-smartphone info-box">
                     <span>*De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact. De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). Dit is een overschrijving, niet te verwarren met een online betaling. <a class="inline-link" :href="$domains.getDocs('betalen-qr-code')" target="_blank">Meer info</a></span>
-                </p>     
+                </p>
                 <p v-else class="hide-smartphone info-box">
                     De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
-                </p>          
+                </p>
             </template>
         </main>
 
         <STToolbar v-if="!isPopup">
-            <button v-if="payment.price > 0 && payment.status !==  'Succeeded'" slot="right" class="button secundary hide-smartphone" type="button" @click="helpMe">
-                <span class="icon help" />
-                <span>Het lukt niet</span>
-            </button>
-            <template #right><button class="button primary" type="button" @click="goNext">
-                <span>Doorgaan</span>
-                <span class="icon arrow-right" />
-            </button></template>
+            <template #right>
+                <button v-if="payment.price > 0 && payment.status !== 'Succeeded'" class="button secundary hide-smartphone" type="button" @click="helpMe">
+                    <span class="icon help" />
+                    <span>Het lukt niet</span>
+                </button>
+                <button class="button primary" type="button" @click="goNext">
+                    <span>Doorgaan</span>
+                    <span class="icon arrow-right" />
+                </button>
+            </template>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import LoadingView from "../containers/LoadingView.vue";
-import CopyableDirective from "../directives/Copyable";
-import TooltipDirective from "../directives/Tooltip";
-import Checkbox from "../inputs/Checkbox.vue";
-import STList from "../layout/STList.vue";
-import STListItem from "../layout/STListItem.vue";
-import BackButton from "../navigation/BackButton.vue";
-import STNavigationBar from "../navigation/STNavigationBar.vue";
-import STToolbar from "../navigation/STToolbar.vue";
+import LoadingView from '../containers/LoadingView.vue';
+import CopyableDirective from '../directives/Copyable';
+import TooltipDirective from '../directives/Tooltip';
+import Checkbox from '../inputs/Checkbox.vue';
+import STList from '../layout/STList.vue';
+import STListItem from '../layout/STListItem.vue';
+import BackButton from '../navigation/BackButton.vue';
+import STNavigationBar from '../navigation/STNavigationBar.vue';
+import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
 @Component({
@@ -206,194 +225,194 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
         STListItem,
         LoadingView,
         Checkbox,
-        BackButton
+        BackButton,
     },
     filters: {
-        price: Formatter.price
+        price: Formatter.price,
     },
     directives: {
         tooltip: TooltipDirective,
-        copyable: CopyableDirective
-    }
+        copyable: CopyableDirective,
+    },
 })
-export default class TransferPaymentView extends Mixins(NavigationMixin){
-
+export default class TransferPaymentView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        payment: Payment
+    payment: Payment;
 
     @Prop({ default: false })
-        created: boolean
+    created: boolean;
 
     @Prop({ required: true })
-        type: "registration" | "order"
+    type: 'registration' | 'order';
 
-    @Prop({ required: true }) 
-        organization: Organization
-
-    @Prop({ default: null }) 
-        settings: TransferSettings | null
-
-    @Prop({ default: false })
-        isPopup: boolean
+    @Prop({ required: true })
+    organization: Organization;
 
     @Prop({ default: null })
-        finishedHandler: ((payment: Payment | null, navigate: NavigationActions) => void) | null
+    settings: TransferSettings | null;
 
-    QRCodeUrl: string | null = null
+    @Prop({ default: false })
+    isPopup: boolean;
 
-    isStepsPoppable = false
+    @Prop({ default: null })
+    finishedHandler: ((payment: Payment | null, navigate: NavigationActions) => void) | null;
+
+    QRCodeUrl: string | null = null;
+
+    isStepsPoppable = false;
 
     mounted() {
-        this.generateQRCode().catch(e => console.error(e))
-        this.setLeave()
+        this.generateQRCode().catch(e => console.error(e));
+        this.setLeave();
     }
 
     getOS(): string {
         var userAgent = navigator.userAgent || navigator.vendor;
 
         if (/android/i.test(userAgent)) {
-            return "android";
+            return 'android';
         }
 
         if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
             // Different sms protocol
-            return "macOS-old";
+            return 'macOS-old';
         }
 
         // iOS detection from: http://stackoverflow.com/a/9039885/177710
         if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-            return "iOS";
+            return 'iOS';
         }
 
         // iPad on iOS 13 detection
-        if (navigator.userAgent.includes("Mac") && "ontouchend" in document) {
-            return "iOS";
+        if (navigator.userAgent.includes('Mac') && 'ontouchend' in document) {
+            return 'iOS';
         }
 
-        if (navigator.platform.toUpperCase().indexOf('MAC')>=0 ) {
-            return "macOS";
+        if (navigator.platform.toUpperCase().indexOf('MAC') >= 0) {
+            return 'macOS';
         }
 
-        if (navigator.platform.toUpperCase().indexOf('WIN')>=0 ) {
-            return "windows";
+        if (navigator.platform.toUpperCase().indexOf('WIN') >= 0) {
+            return 'windows';
         }
 
-        if (navigator.platform.toUpperCase().indexOf('IPHONE')>=0 ) {
-            return "iOS";
+        if (navigator.platform.toUpperCase().indexOf('IPHONE') >= 0) {
+            return 'iOS';
         }
 
-        if (navigator.platform.toUpperCase().indexOf('ANDROID')>=0 ) {
-            return "android";
+        if (navigator.platform.toUpperCase().indexOf('ANDROID') >= 0) {
+            return 'android';
         }
 
-        return "unknown"
+        return 'unknown';
     }
 
     beforeUnmount() {
-        window.removeEventListener("beforeunload", this.preventLeave);
+        window.removeEventListener('beforeunload', this.preventLeave);
     }
 
     setLeave() {
         if (!this.created) {
             return;
         }
-        window.addEventListener("beforeunload", this.preventLeave);
+        window.addEventListener('beforeunload', this.preventLeave);
     }
 
     preventLeave(event) {
         // Cancel the event
         event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
-        
-        if (this.type === "registration") {
+
+        if (this.type === 'registration') {
             // Chrome requires returnValue to be set
             event.returnValue = 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
 
             // This message is not visible on most browsers
-            return "Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen."
+            return 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
         }
         // Chrome requires returnValue to be set
         event.returnValue = 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
 
         // This message is not visible on most browsers
-        return "Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!"
+        return 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
     }
 
     shouldNavigateAway() {
         if (!this.created) {
-            return true
+            return true;
         }
         return false;
     }
 
     get isBelgium() {
-        return this.organization.address.country === Country.Belgium
+        return this.organization.address.country === Country.Belgium;
     }
 
     get isStructured() {
-        return this.settings?.type === TransferDescriptionType.Structured
+        return this.settings?.type === TransferDescriptionType.Structured;
     }
 
     get iban() {
-        return this.settings?.iban ?? this.organization.meta.transferSettings.iban ?? "";
+        return this.settings?.iban ?? this.organization.meta.transferSettings.iban ?? '';
     }
 
     get creditor() {
-        return this.settings?.creditor ?? this.organization.name
+        return this.settings?.creditor ?? this.organization.name;
     }
 
     get transferDescription() {
-        return this.payment.transferDescription
+        return this.payment.transferDescription;
     }
 
     get formattedTransferDescription() {
         if (this.isStructured && !this.isBelgium && this.transferDescription) {
-            return this.transferDescription.match(/.{1,4}/g)?.join(" ") ?? this.transferDescription
+            return this.transferDescription.match(/.{1,4}/g)?.join(' ') ?? this.transferDescription;
         }
-        return this.transferDescription
+        return this.transferDescription;
     }
 
     get qrMessage() {
-        const iban = this.iban
-        const creditor = this.creditor
+        const iban = this.iban;
+        const creditor = this.creditor;
 
         // BUG in Fortis app -> need to fill in at least one character for the BIC/SWIFT field, otherwise it won't work
         const bic = '_';
 
         // Note: structured reference still as normal description (the structured reference ISO is not supported)
-        return "BCD\n001\n1\nSCT\n"+bic+"\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100).toFixed(2)+"\n\n\n"+this.transferDescription?.substring(0, 140)+"\nhttps://"+this.$t("ccfc0566-2fc4-4c0a-b1da-c3059cad6586")+"/docs/betalen-qr-code";
+        return 'BCD\n001\n1\nSCT\n' + bic + '\n' + creditor + '\n' + iban + '\nEUR' + (this.payment.price / 100).toFixed(2) + '\n\n\n' + this.transferDescription?.substring(0, 140) + '\nhttps://' + this.$t('ccfc0566-2fc4-4c0a-b1da-c3059cad6586') + '/docs/betalen-qr-code';
     }
 
     async generateQRCode() {
         try {
-            const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
-            this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage)
-        } catch (e) {
-            console.error(e)
+            const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default;
+            this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage);
+        }
+        catch (e) {
+            console.error(e);
             return;
         }
     }
 
     helpMe() {
-        if (this.type === "order") {
-            new CenteredMessage("Het lukt niet", "Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.").addCloseButton().show()
-        } else {
-            new CenteredMessage("Het lukt niet", "Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.").addCloseButton().show()
+        if (this.type === 'order') {
+            new CenteredMessage('Het lukt niet', 'Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.').addCloseButton().show();
+        }
+        else {
+            new CenteredMessage('Het lukt niet', 'Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.').addCloseButton().show();
         }
     }
 
     goNext() {
         if (this.finishedHandler) {
-            this.finishedHandler(this.payment, this)
+            this.finishedHandler(this.payment, this);
             return;
         }
 
         if (this.canDismiss) {
-            this.dismiss({ force: true })
+            this.dismiss({ force: true });
             return;
         }
-        this.pop({force: true})
+        this.pop({ force: true });
     }
-
 }
 </script>
 
@@ -420,7 +439,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        
+
         > table {
             align-self: flex-start;
             margin-left: 10px;
@@ -429,7 +448,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
                 margin-left: 0px;
             }
         }
-        
+
         @media (max-width: 800px) {
             padding: 0;
             border: 0;

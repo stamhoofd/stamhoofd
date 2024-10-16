@@ -138,7 +138,7 @@ const present = usePresent();
 reload().catch(console.error);
 
 // Listen for patches in payments
-GlobalEventBus.addListener(this, 'paymentPatch', async (payment) => {
+GlobalEventBus.addListener(owner, 'paymentPatch', async (payment) => {
     if (payment && payment.id && paymentIds.value.has(payment.id as string)) {
         // Reload members and family
         reloadFamily().catch(console.error);

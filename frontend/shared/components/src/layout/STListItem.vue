@@ -31,40 +31,40 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
-    emits: ["click", "contextmenu"],
+    emits: ['click', 'contextmenu'],
     inheritAttrs: false,
 })
 export default class STListItem extends VueComponent {
-    @Prop({ default: "article", type: String })
-        elementName!: string;
+    @Prop({ default: 'article', type: String })
+    elementName!: string;
 
     @Prop({ default: false, type: Boolean })
-        selectable!: boolean;
+    selectable!: boolean;
 
     @Prop({ default: false, type: Boolean })
-        disabled!: boolean;
+    disabled!: boolean;
 
     get dynamicElementName() {
-        if (this.elementName === "article" && this.selectable && !this.disabled) {
-            return "button";
+        if (this.elementName === 'article' && this.selectable && !this.disabled) {
+            return 'button';
         }
         return this.elementName;
     }
 
     get hoverable() {
-        return this.elementName === "button";
+        return this.elementName === 'button';
     }
 
     onClick(event) {
-        const isDragging = this.$parent?.$parent?.$el?.className?.indexOf("is-dragging") >= 0;
+        const isDragging = this.$parent?.$parent?.$el?.className?.indexOf('is-dragging') >= 0;
         if (isDragging) {
-            console.log("canceled list item click because of drag");
+            console.log('canceled list item click because of drag');
             return;
         }
-        this.$emit("click", event);
+        this.$emit('click', event);
     }
 }
 </script>
@@ -319,8 +319,6 @@ button.st-list-item {
         }
     }
 
-
-
     &.disabled {
         opacity: 0.5;
     }
@@ -362,7 +360,7 @@ button.st-list-item {
             }
         }
 
-        &:active:has(button:active), &:active:has(select:active), &:active:has(label:active), &:active:has(input:not([type=radio]):not([type=checkbox]):active) {
+        &:active:has(button:active), &:active:has(select:active), &:active:has(label:active), &:active:has(textarea:active), &:active:has(input:not([type=radio]):not([type=checkbox]):active) {
             transition: background-color 0.2s 0.1s;
             background: none;
 

@@ -24,10 +24,12 @@ import { getReceivableBalanceTypeName, ReceivableBalance, StamhoofdFilter } from
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import ReceivableBalanceView from './ReceivableBalanceView.vue';
+import { useRequestOwner } from '@stamhoofd/networking';
 
 type ObjectType = ReceivableBalance;
 const $t = useTranslate();
 const present = usePresent();
+const owner = useRequestOwner();
 
 const title = computed(() => {
     return $t('Te ontvangen bedragen');
@@ -138,12 +140,12 @@ async function showBalance(item: ReceivableBalance) {
 }
 
 // Listen for patches in payments
-GlobalEventBus.addListener(this, 'paymentPatch', () => {
+GlobalEventBus.addListener(owner, 'paymentPatch', () => {
     tableObjectFetcher.reset(false, false);
     return Promise.resolve();
 });
 
-GlobalEventBus.addListener(this, 'balanceItemPatch', () => {
+GlobalEventBus.addListener(owner, 'balanceItemPatch', () => {
     tableObjectFetcher.reset(false, false);
     return Promise.resolve();
 });

@@ -167,7 +167,7 @@
                 <hr>
                 <h2>Betaalmethode</h2>
 
-                <PaymentSelectionList v-model="paymentMethod" :payment-methods="paymentMethods" :organization="organization" :context="paymentContext" />
+                <PaymentSelectionList v-model="paymentMethod" :configuration="paymentConfiguration" :organization="organization" :context="paymentContext" :amount="patchedOrder.data.totalPrice" />
             </template>
         </template>
     </SaveView>
@@ -178,7 +178,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from '
 import { AddressInput, CartItemRow, CartItemView, CenteredMessage, PriceBreakdownBox, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager } from '@stamhoofd/networking';
-import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
@@ -334,8 +334,11 @@ export default class EditOrderView extends Mixins(NavigationMixin) {
         return this.patchedOrder.data.deliveryMethod;
     }
 
-    get paymentMethods() {
-        return [PaymentMethod.Transfer, PaymentMethod.PointOfSale];
+    get paymentConfiguration() {
+        return PaymentConfiguration.create({
+            ...this.webshop.meta.paymentConfiguration,
+            paymentMethods: [PaymentMethod.Transfer, PaymentMethod.PointOfSale],
+        });
     }
 
     get server() {

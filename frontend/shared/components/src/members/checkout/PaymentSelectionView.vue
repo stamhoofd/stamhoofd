@@ -6,7 +6,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
+            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :customer="checkout.customer" :organization="organization" />
 
             <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
         </main>
@@ -36,53 +36,60 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, LoadingButton, NavigationActions, PaymentSelectionList, PriceBreakdownBox, STErrorsDefault, STNavigationBar, STToolbar, useErrors, useNavigationActions } from "@stamhoofd/components";
-import { RegisterCheckout } from "@stamhoofd/structures";
-import { computed, onMounted, ref } from "vue";
+import { ErrorBox, LoadingButton, NavigationActions, PaymentSelectionList, PriceBreakdownBox, STErrorsDefault, STNavigationBar, STToolbar, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { RegisterCheckout } from '@stamhoofd/structures';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{
-    checkout: RegisterCheckout,
-    saveHandler: (navigate: NavigationActions) => Promise<void>
-}>()
+    checkout: RegisterCheckout;
+    saveHandler: (navigate: NavigationActions) => Promise<void>;
+}>();
 
 const errors = useErrors();
 
-const organization = computed(() => props.checkout.singleOrganization)
-const loading = ref(false)
-const needsPay = computed(() => props.checkout.totalPrice > 0)
-const navigate = useNavigationActions()
+const organization = computed(() => props.checkout.singleOrganization);
+const loading = ref(false);
+const needsPay = computed(() => props.checkout.totalPrice > 0);
+const navigate = useNavigationActions();
 
 const selectedPaymentMethod = computed({
     get: () => props.checkout.paymentMethod,
-    set: (value) => props.checkout.paymentMethod = value
-})
+    set: value => props.checkout.paymentMethod = value,
+});
 
 onMounted(() => {
     if (!needsPay.value) {
         selectedPaymentMethod.value = null;
-        return
+        return;
     }
     if (!selectedPaymentMethod.value && paymentMethods.value.length) {
-        selectedPaymentMethod.value = paymentMethods.value[0]
+        selectedPaymentMethod.value = paymentMethods.value[0];
     }
-})
+});
 
-const paymentMethods = computed(() => organization.value?.meta.registrationPaymentConfiguration.paymentMethods ?? [])
+const paymentMethods = computed(() => organization.value?.meta.registrationPaymentConfiguration.getAvailablePaymentMethods({
+    amount: props.checkout.totalPrice,
+    customer: props.checkout.customer,
+}) ?? []);
+
+const paymentConfiguration = computed(() => organization.value!.meta.registrationPaymentConfiguration);
 
 async function goNext() {
     if (loading.value) {
-        return
+        return;
     }
 
-    loading.value = true
-    errors.errorBox = null
+    loading.value = true;
+    errors.errorBox = null;
 
     try {
-        await props.saveHandler(navigate)
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
-    } finally {
-        loading.value = false
+        await props.saveHandler(navigate);
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    finally {
+        loading.value = false;
     }
 }
 </script>

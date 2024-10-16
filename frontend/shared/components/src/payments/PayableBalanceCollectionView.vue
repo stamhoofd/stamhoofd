@@ -39,6 +39,8 @@ import { GlobalEventBus } from '../EventBus';
 import { Toast } from '../overlays/Toast';
 import PayableBalanceTable from './PayableBalanceTable.vue';
 import PaymentRow from './components/PaymentRow.vue';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { useVisibilityChange } from '../composables';
 
 const props = withDefaults(
     defineProps<{
@@ -54,6 +56,7 @@ const props = withDefaults(
     },
 );
 
+const owner = useRequestOwner();
 const pendingPayments = computed(() => {
     return props.collection.organizations.flatMap(i => i.payments).filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
 });
@@ -77,7 +80,11 @@ async function updateBalance() {
     }
 }
 
-GlobalEventBus.addListener(this, 'paymentPatch', async () => {
+useVisibilityChange(async () => {
+    await updateBalance();
+});
+
+GlobalEventBus.addListener(owner, 'paymentPatch', async () => {
     await updateBalance();
 });
 

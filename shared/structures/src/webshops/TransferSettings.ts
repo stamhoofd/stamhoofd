@@ -28,6 +28,9 @@ export class TransferSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     creditor: string | null = null;
 
+    @field({ decoder: StringDecoder, ...NextVersion })
+    infoDescription = '';
+
     fillMissing(settings: TransferSettings) {
         const duplicate = this.clone();
         if (!this.iban) {
