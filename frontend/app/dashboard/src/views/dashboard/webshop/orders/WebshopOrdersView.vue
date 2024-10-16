@@ -144,6 +144,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         }),
 
         new Column<PrivateOrder, string>({
+            id: 'email',
             name: 'E-mailadres',
             getValue: order => order.data.customer.email,
             compare: (a, b) => Sorter.byStringValue(a, b),
@@ -158,6 +159,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     if (preview.value.meta.phoneEnabled) {
         cols.push(
             new Column<PrivateOrder, string>({
+                id: 'phone',
                 name: 'Telefoonnummer',
                 getValue: order => order.data.customer.phone,
                 compare: (a, b) => Sorter.byStringValue(a, b),
@@ -218,19 +220,10 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
     if (hasDelivery || nonDeliveryCount > 1) {
         cols.push(new Column<PrivateOrder, string | undefined>({
+            id: 'location',
             name: hasDelivery && nonDeliveryCount === 0 ? 'Adres' : 'Locatie',
             enabled: true,
-            getValue: (order) => {
-                if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                    return order.data.checkoutMethod.name;
-                }
-
-                if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                    return order.data.checkoutMethod.name;
-                }
-
-                return order.data.address?.shortString() ?? 'Onbekend';
-            },
+            getValue: order => order.data.locationName,
             compare: (a, b) => Sorter.byStringValue(a ?? '', b ?? ''),
             getStyle: loc => loc === undefined ? 'gray' : '',
             minimumWidth: 100,
@@ -338,9 +331,10 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
     cols.push(
         new Column<PrivateOrder, number>({
+            id: 'openBalance',
             name: 'Te betalen',
             enabled: preview.value.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.Transfer) || preview.value.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.PointOfSale), // keep it available because should be able to enable it when payment methods are changed
-            getValue: order => order.totalToPay - order.pricePaid,
+            getValue: order => order.openBalance,
             format: price => price !== 0 ? Formatter.price(price) : 'Betaald',
             compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
             getStyle: price => (price === 0 ? 'gray' : ''),
@@ -472,11 +466,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
             id: 'amount',
             name: 'Aantal',
             enabled: false,
-            getValue: (order) => {
-                return order.data.cart.items.reduce((acc, item) => {
-                    return acc + item.amount;
-                }, 0);
-            },
+            getValue: order => order.data.amount,
             format: (stat) => {
                 if (!stat) {
                     return 'Geen';

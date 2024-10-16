@@ -102,6 +102,18 @@ export class OrderData extends Checkout {
         return (!this.timeSlot || (this.timeSlot.date.getTime() + 1000 * 60 * 60 * 24) > new Date().getTime());
     }
 
+    get locationName() {
+        if (this.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+            return this.checkoutMethod.name;
+        }
+
+        if (this.checkoutMethod?.type === CheckoutMethodType.OnSite) {
+            return this.checkoutMethod.name;
+        }
+
+        return this.address?.shortString() ?? 'Onbekend';
+    }
+
     /**
      * Delete the personal data associated with an order when you delete an order.
      * We still need the other data (e.g. to inform other clients about a deleted order)
@@ -196,6 +208,10 @@ export class Order extends AutoEncoder {
             return 0;
         }
         return this.data.totalPrice;
+    }
+
+    get openBalance() {
+        return this.totalToPay - this.pricePaid;
     }
 
     updatePricePaid() {

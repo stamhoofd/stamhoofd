@@ -284,7 +284,6 @@ export class WebshopManager {
                 function addOrderStoreIndexes(orderStore: IDBObjectStore) {
                     // typescript will show an error if an index is missing
                     const indexes: Record<OrderStoreIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }> = {
-                        // todo: is number unique?
                         [OrderStoreDataIndex.Number]: { unique: false, keyPath: 'value.number' },
                         [OrderStoreDataIndex.CreatedAt]: { unique: false, keyPath: 'value.createdAt' },
                         [OrderStoreDataIndex.Status]: { unique: false, keyPath: 'value.status' },
@@ -294,6 +293,8 @@ export class WebshopManager {
                         [OrderStoreDataIndex.TimeSlotTime]: { unique: false, keyPath: 'value.data.timeSlot.endTime' },
                         [OrderStoreDataIndex.ValidAt]: { unique: false, keyPath: 'value.validAt' },
                         [OrderStoreDataIndex.Name]: { unique: false, keyPath: ['value.data.customer.firstName', 'value.data.customer.lastName'] },
+                        [OrderStoreDataIndex.Email]: { unique: false, keyPath: 'value.data.customer.email' },
+                        [OrderStoreDataIndex.Phone]: { unique: false, keyPath: 'value.data.customer.phone' },
                         // auto generate indexes for generated indexes
                         ...Object.fromEntries(Object.values(OrderStoreGeneratedIndex).map((index) => {
                             return [index, { unique: false, keyPath: `indexes.${index}` }];
