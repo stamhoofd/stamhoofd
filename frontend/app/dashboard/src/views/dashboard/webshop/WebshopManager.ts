@@ -574,7 +574,7 @@ export class WebshopManager {
 
     async streamOrders(
         { callback, filters, limit, sortItem }: {
-            callback: (data: { value: PrivateOrder; indexes: PrivateOrderEncodeableIndexes }) => void;
+            callback: (data: PrivateOrder) => void;
             filters?: StamhoofdFilter[];
             limit?: number;
             sortItem?: SortItem & { key: OrderStoreIndex };
@@ -651,7 +651,7 @@ export class WebshopManager {
                 if (cursor) {
                     const rawOrder = cursor.value;
 
-                    let decodedResult: { value: PrivateOrder; indexes: PrivateOrderEncodeableIndexes };
+                    let decodedResult: PrivateOrder;
 
                     try {
                         decodedResult = decoder.decode(new ObjectData(rawOrder, { version: Version }));

@@ -133,6 +133,10 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return Math.max(0, this.cart.price - this.appliedPercentageDiscount - this.fixedDiscount) + this.deliveryPrice + this.administrationFee;
     }
 
+    get amount(): number {
+        return this.cart.items.reduce((acc, item) => acc + item.amount, 0);
+    }
+
     get priceBreakown(): PriceBreakdown {
         const all = [
             {

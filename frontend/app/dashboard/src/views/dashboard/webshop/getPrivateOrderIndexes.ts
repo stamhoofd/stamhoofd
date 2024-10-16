@@ -1,5 +1,5 @@
 import { AutoEncoder, Decoder, field, NumberDecoder } from '@simonbackx/simple-encoding';
-import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, createInMemoryFilterCompilerFromCompositePath, InMemoryFilterCompiler, InMemoryFilterDefinitions, PrivateOrder, SortDefinitions, StamhoofdFilter } from '@stamhoofd/structures';
+import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, InMemoryFilterCompiler, InMemoryFilterDefinitions, PrivateOrder, SortDefinitions, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetIndexes, IndexBox, IndexBoxDecoder, IndexedDbIndexValue } from './IndexBox';
 
@@ -30,66 +30,43 @@ export class PrivateOrderEncodeableIndexes extends AutoEncoder implements Record
     amount: number = 0;
 }
 
-export const orderStoreIndexValueDefinitions: SortDefinitions<{ value: PrivateOrder; indexes: PrivateOrderEncodeableIndexes }> & Record<OrderStoreIndex, { getValue: (data: { value: PrivateOrder; indexes: PrivateOrderEncodeableIndexes }) => IndexedDbIndexValue }> = {
-    createdAt: {
-        getValue({ value }) {
-            return Formatter.dateTimeIso(value.createdAt);
-        },
-    },
+export const orderStoreIndexValueDefinitions: SortDefinitions<PrivateOrder> & Record<OrderStoreIndex, { getValue: (data: PrivateOrder) => IndexedDbIndexValue }> = {
     id: {
-        getValue({ value }) {
-            return value.id;
-        },
+        getValue: value => value.id,
     },
-    number: {
-        getValue({ value }) {
-            return value.number;
-        },
+    [OrderStoreDataIndex.CreatedAt]: {
+        getValue: value => Formatter.dateTimeIso(value.createdAt),
     },
-    status: {
-        getValue({ value }) {
-            return value.status;
-        },
+    [OrderStoreDataIndex.Number]: {
+        getValue: value => value.number,
     },
-    paymentMethod: {
-        getValue({ value }) {
-            return value.data.paymentMethod;
-        },
+    [OrderStoreDataIndex.Status]: {
+        getValue: value => value.status,
     },
-    checkoutMethod: {
-        getValue({ value }) {
-            return value.data.checkoutMethod?.type;
-        },
+    [OrderStoreDataIndex.PaymentMethod]: {
+        getValue: value => value.data.paymentMethod,
     },
-    timeSlotDate: {
-        getValue({ value }) {
-            return value.data.timeSlot?.date.getTime();
-        },
+    [OrderStoreDataIndex.CheckoutMethod]: {
+        getValue: value => value.data.checkoutMethod?.type,
     },
-    timeSlotTime: {
-        getValue({ value }) {
-            return value.data.timeSlot?.endTime;
-        },
+    [OrderStoreDataIndex.TimeSlotDate]: {
+        getValue: value => value.data.timeSlot?.date.getTime(),
     },
-    validAt: {
-        getValue({ value }) {
-            return value.validAt?.getTime();
-        },
+    [OrderStoreDataIndex.TimeSlotTime]: {
+        getValue: value => value.data.timeSlot?.endTime,
     },
-    name: {
-        getValue: ({ value }) => value.data.customer.name,
+    [OrderStoreDataIndex.ValidAt]: {
+        getValue: value => value.validAt?.getTime(),
     },
-    // auto generate definitions for generated indexes
-    ...(Object.fromEntries(Object.values(OrderStoreGeneratedIndex).map((index) => {
-        return [index, {
-            getValue: ({ indexes }: { indexes: PrivateOrderEncodeableIndexes }) => indexes[index],
-        }];
-    })) as unknown as Record<OrderStoreGeneratedIndex, { getValue: (data: { value: PrivateOrder; indexes: PrivateOrderEncodeableIndexes }) => IndexedDbIndexValue }>),
-};
-
-const generatedIndexDefinitions: Record<OrderStoreGeneratedIndex, (order: PrivateOrder) => IndexedDbIndexValue> = {
-    [OrderStoreGeneratedIndex.TotalPrice]: order => order.data.totalPrice,
-    [OrderStoreGeneratedIndex.Amount]: order => order.data.cart.items.reduce((acc, item) => acc + item.amount, 0),
+    [OrderStoreDataIndex.Name]: {
+        getValue: value => value.data.customer.name,
+    },
+    [OrderStoreGeneratedIndex.TotalPrice]: {
+        getValue: value => value.data.totalPrice,
+    },
+    [OrderStoreGeneratedIndex.Amount]: {
+        getValue: value => value.data.amount,
+    },
 };
 
 export const createPrivateOrderIndexBox = (data: PrivateOrder) => {
@@ -99,7 +76,7 @@ export const createPrivateOrderIndexBox = (data: PrivateOrder) => {
 export const getPrivateOrderIndexes: GetIndexes<PrivateOrder, PrivateOrderEncodeableIndexes> = (order) => {
     return PrivateOrderEncodeableIndexes.create(
         Object.fromEntries(Object.values(OrderStoreGeneratedIndex).map((generatedIndex) => {
-            const getIndex = generatedIndexDefinitions[generatedIndex];
+            const getIndex = orderStoreIndexValueDefinitions[generatedIndex].getValue;
             return [generatedIndex, getIndex(order)];
         })),
     );
@@ -107,24 +84,27 @@ export const getPrivateOrderIndexes: GetIndexes<PrivateOrder, PrivateOrderEncode
 
 export const createPrivateOrderIndexBoxDecoder = () => new IndexBoxDecoder(
     PrivateOrder as Decoder<PrivateOrder>,
-    PrivateOrderEncodeableIndexes as Decoder<PrivateOrderEncodeableIndexes>,
 );
 
+// todo: move to shared
 export const privateOrderIndexBoxInMemoryFilterCompilers: InMemoryFilterDefinitions & Record<OrderStoreIndex, InMemoryFilterCompiler> = {
     ...baseInMemoryFilterCompilers,
-    id: createInMemoryFilterCompiler('value.id'),
-    [OrderStoreDataIndex.CreatedAt]: createInMemoryFilterCompiler('value.createdAt'),
-    [OrderStoreDataIndex.Number]: createInMemoryFilterCompiler('value.number'),
-    [OrderStoreDataIndex.Status]: createInMemoryFilterCompiler('value.status'),
-    [OrderStoreDataIndex.PaymentMethod]: createInMemoryFilterCompiler('value.data.paymentMethod'),
-    [OrderStoreDataIndex.CheckoutMethod]: createInMemoryFilterCompiler('value.data.checkoutMethod.type'),
-    [OrderStoreDataIndex.TimeSlotDate]: createInMemoryFilterCompiler('value.data.timeSlot.date'),
-    [OrderStoreDataIndex.TimeSlotTime]: createInMemoryFilterCompiler('value.data.timeSlot.endTime'),
-    [OrderStoreDataIndex.ValidAt]: createInMemoryFilterCompiler('value.validAt'),
-    [OrderStoreDataIndex.Name]: createInMemoryFilterCompilerFromCompositePath(['value.data.customer.firstName', 'value.data.customer.lastName']),
-    ...(Object.fromEntries(Object.values(OrderStoreGeneratedIndex).map((index) => {
-        return [index, createInMemoryFilterCompiler(`indexes.${index}`)];
-    })) as Record<OrderStoreGeneratedIndex, InMemoryFilterCompiler>),
+    id: createInMemoryFilterCompiler('id'),
+    [OrderStoreDataIndex.CreatedAt]: createInMemoryFilterCompiler('createdAt'),
+    [OrderStoreDataIndex.Number]: createInMemoryFilterCompiler('number'),
+    [OrderStoreDataIndex.Status]: createInMemoryFilterCompiler('status'),
+    [OrderStoreDataIndex.PaymentMethod]: createInMemoryFilterCompiler('data.paymentMethod'),
+    [OrderStoreDataIndex.CheckoutMethod]: createInMemoryFilterCompiler('data.checkoutMethod.type'),
+    [OrderStoreDataIndex.TimeSlotDate]: createInMemoryFilterCompiler('data.timeSlot.date'),
+    [OrderStoreDataIndex.TimeSlotTime]: createInMemoryFilterCompiler('data.timeSlot.endTime'),
+    [OrderStoreDataIndex.ValidAt]: createInMemoryFilterCompiler('validAt'),
+    [OrderStoreDataIndex.Name]: createInMemoryFilterCompiler('data.customer.name'),
+    // [OrderStoreDataIndex.Name]: createInMemoryFilterCompilerFromCompositePath(['data.customer.firstName', 'data.customer.lastName']),
+    [OrderStoreGeneratedIndex.TotalPrice]: createInMemoryFilterCompiler('data.totalPrice'),
+    [OrderStoreGeneratedIndex.Amount]: createInMemoryFilterCompiler('data.amount'),
+    // ...(Object.fromEntries(Object.values(OrderStoreGeneratedIndex).map((index) => {
+    //     return [index, createInMemoryFilterCompiler(`indexes.${index}`)];
+    // })) as Record<OrderStoreGeneratedIndex, InMemoryFilterCompiler>),
 };
 
 export function createCompiledFilterForPrivateOrderIndexBox(filter: StamhoofdFilter) {

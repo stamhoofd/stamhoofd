@@ -1,7 +1,7 @@
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PrivateOrder, PrivateOrderWithTickets, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
 import { WebshopManager } from '../WebshopManager';
-import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderStoreIndexValueDefinitions, PrivateOrderEncodeableIndexes } from '../getPrivateOrderIndexes';
+import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderStoreIndexValueDefinitions } from '../getPrivateOrderIndexes';
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -44,14 +44,12 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             const sortItem: (SortItem & { key: OrderStoreIndex }) | undefined = sortItems[0];
-            let lastItem: { value: PrivateOrder; indexes: PrivateOrderEncodeableIndexes } | undefined = undefined;
 
             await manager.streamOrders({
-                callback: (data) => {
+                callback: (order) => {
                     arrayBuffer.push(
-                        PrivateOrderWithTickets.create(data.value),
+                        PrivateOrderWithTickets.create(order),
                     );
-                    lastItem = data;
                 },
                 filters,
                 limit: data.limit,
@@ -60,6 +58,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             await addTickets(manager, arrayBuffer);
 
+            const lastItem = arrayBuffer[arrayBuffer.length - 1];
             let next: LimitedFilteredRequest | undefined = undefined;
 
             if (lastItem) {

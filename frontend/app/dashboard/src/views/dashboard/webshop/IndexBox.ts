@@ -22,17 +22,14 @@ export class IndexBox<T extends EncodableObject> implements Encodeable {
     }
 }
 
-export class IndexBoxDecoder<T extends EncodableObject, I extends EncodableObject> implements Decoder<{ value: T; indexes: I }> {
-    constructor(readonly valueDecoder: Decoder<T>, readonly indexDecoder: Decoder<I>) {
+export class IndexBoxDecoder<T extends EncodableObject> implements Decoder<T> {
+    constructor(readonly decoder: Decoder<T>) {
     }
 
-    decode(data: Data): { value: T; indexes: I } {
+    decode(data: Data): T {
         // Set the version of the decoding context of "value"
         const valueField = data.field('value');
         valueField.context.version = data.field('version').integer;
-        const value = valueField.decode(this.valueDecoder);
-        const indexes = data.field('indexes').decode(this.indexDecoder);
-
-        return { value, indexes };
+        return valueField.decode(this.decoder);
     }
 }
