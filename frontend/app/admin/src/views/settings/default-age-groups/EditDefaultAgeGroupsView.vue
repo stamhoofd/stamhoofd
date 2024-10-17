@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>Elke lokale groep moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.</p>
+        <p>{{ $t('4bff53d6-7455-45fc-aa6d-ae0bafbe0b47') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -16,7 +16,7 @@
         <p>
             <button class="button text" type="button" @click="addGroup">
                 <span class="icon add" />
-                <span>Groep toevoegen</span>
+                <span>{{ $t('a4f0a3f5-60a5-4959-800c-613e8c79d6d9') }}</span>
             </button>
         </p>
     </SaveView>
@@ -107,7 +107,7 @@ async function save() {
                 defaultAgeGroups: patch.value,
             }),
         }));
-        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        new Toast($t('f80e230f-9621-439d-b4ba-bc49fb921698'), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
