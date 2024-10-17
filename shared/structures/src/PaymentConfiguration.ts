@@ -107,7 +107,7 @@ export class PaymentConfiguration extends AutoEncoder {
     @field({ decoder: AdministrationFeeSettings })
     administrationFee = AdministrationFeeSettings.create({});
 
-    @field({ decoder: new MapDecoder(new EnumDecoder(PaymentMethod), PaymentMethodSettings), ...NextVersion })
+    @field({ decoder: new MapDecoder(new EnumDecoder(PaymentMethod), PaymentMethodSettings), version: 340 })
     paymentMethodSettings: Map<PaymentMethod, PaymentMethodSettings> = new Map();
 
     getAvailablePaymentMethods(data: { amount: number; customer: PaymentCustomer | null }) {

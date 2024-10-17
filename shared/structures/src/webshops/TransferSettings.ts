@@ -28,7 +28,7 @@ export class TransferSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     creditor: string | null = null;
 
-    @field({ decoder: StringDecoder, ...NextVersion })
+    @field({ decoder: StringDecoder, version: 340 })
     infoDescription = '';
 
     fillMissing(settings: TransferSettings) {
