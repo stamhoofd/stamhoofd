@@ -16,6 +16,16 @@
             >
         </STInputBox>
 
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                placeholder="Optioneel. Korte beschrijving van het doel van deze tag."
+                autocomplete=""
+                enterkeyhint="next"
+            />
+        </STInputBox>
         <div class="container">
             <hr>
             <h2>{{ $t('b381ed6f-c509-418d-9668-7c161a0fa652') }}</h2>
@@ -170,6 +180,11 @@ function getPatchedTag(tagId: string): OrganizationTag | undefined {
 const name = computed({
     get: () => patched.value.name,
     set: name => addPatch({ name }),
+});
+
+const description = computed({
+    get: () => patched.value.description,
+    set: description => addPatch({ description }),
 });
 
 async function editTag(tag: OrganizationTag) {

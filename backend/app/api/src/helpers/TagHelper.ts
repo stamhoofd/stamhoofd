@@ -1,5 +1,5 @@
 import { Model } from '@simonbackx/simple-database';
-import { Organization } from '@stamhoofd/models';
+import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { OrganizationTag, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
 
@@ -9,13 +9,28 @@ export class TagHelper extends SharedTagHelper {
         QueueHandler.cancel(queueId);
 
         QueueHandler.schedule(queueId, async () => {
+            const tagCounts = new Map<string, number>();
             await this.loopOrganizations(async (organizations) => {
                 for (const organization of organizations) {
                     organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platformTags);
+
+                    for (const tag of organization.meta.tags) {
+                        tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+                    }
                 }
 
                 await Promise.all(organizations.map(organization => organization.save()));
             });
+
+            // Save tag counts
+            const platform = await Platform.getShared();
+            for (const [tag, count] of tagCounts.entries()) {
+                const tagObject = platform.config.tags.find(t => t.id === tag);
+                if (tagObject) {
+                    tagObject.organizationCount = count;
+                }
+            }
+            await platform.save();
         }).catch(console.error);
     }
 

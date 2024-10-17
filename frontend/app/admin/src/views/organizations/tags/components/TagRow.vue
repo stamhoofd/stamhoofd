@@ -6,6 +6,7 @@
         <p v-if="childTagCount > 0" class="style-description-small">
             {{ capitalizeFirstLetter(pluralText(childTagCount, getOrganizationTagTypeName(childType), getOrganizationTagTypePluralName(childType))) }}
         </p>
+        <p v-if="tag.description" class="style-description-small pre-wrap style-limit-lines" v-text="tag.description" />
 
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />

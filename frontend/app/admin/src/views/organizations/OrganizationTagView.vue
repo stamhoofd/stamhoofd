@@ -15,6 +15,7 @@
                         {{ $t('919139ab-1103-4e1b-aaf7-94cfec03a9e3', { name: title }) }}
                     </h2>
                     <template #right>
+                        <span class="style-description-small">{{ tag.organizationCount }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -26,8 +27,11 @@
                     <h3 class="style-title-list">
                         {{ childTag.name }}
                     </h3>
+                    <p v-if="childTag.description" class="style-description-small pre-wrap style-limit-lines" v-text="childTag.description" />
+
                     <template #right>
                         <span v-if="childTag.childTags.length > 0" class="style-description-small">{{ childTag.childTags.length }}</span>
+                        <span v-else class="style-description-small">{{ childTag.organizationCount }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>

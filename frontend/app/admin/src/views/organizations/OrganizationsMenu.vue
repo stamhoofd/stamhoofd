@@ -43,6 +43,7 @@
                         >
                             <span class="icon" />
                             <span>{{ childTag.name }}</span>
+                            <span class="count">{{ formatInteger(childTag.organizationCount) }}</span>
                         </button>
 
                         <hr v-if="index < rootTags.length - 1">
