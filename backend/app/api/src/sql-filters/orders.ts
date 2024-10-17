@@ -2,6 +2,7 @@ import { baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpress
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
+    updatedAt: createSQLColumnFilterCompiler('updatedAt'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),
     id: createSQLColumnFilterCompiler('id'),
     number: createSQLColumnFilterCompiler('number'),
@@ -19,15 +20,15 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         // todo: type?
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
-    timeSlotTime: createSQLExpressionFilterCompiler(
+    timeSlotStartTime: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.startTime'),
+        // todo: type?
+        { isJSONValue: true, type: SQLValueType.JSONString },
+    ),
+    timeSlotEndTime: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.endTime'),
         // todo: type?
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
     validAt: createSQLColumnFilterCompiler('validAt'),
-    totalPrice: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('data'), '$.value.totalPrice'),
-        // todo: type?
-        { isJSONValue: true },
-    ),
 };

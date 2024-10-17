@@ -3,7 +3,7 @@ import { isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { EventBus, fetchAll, ObjectFetcher, Toast } from '@stamhoofd/components';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, SortItem, SortItemDirection, StamhoofdFilter, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
 import { toRaw } from 'vue';
 import { createCompiledFilterForPrivateOrderIndexBox, createPrivateOrderIndexBox, createPrivateOrderIndexBoxDecoder, OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, PrivateOrderEncodeableIndexes } from './getPrivateOrderIndexes';
 
@@ -843,15 +843,21 @@ export class WebshopManager {
     }
 
     async setlastFetchedOrder(order: PrivateOrder) {
-        const updatedAt = order.updatedAt;
+        if (order.number === null) {
+            console.error('Order has no number');
+            return;
+        }
 
-        // todo!!!! is this correct?
-        if (this.lastFetchedOrder && this.lastFetchedOrder.updatedAt >= updatedAt) {
+        // important: this only works if the orders are sorted by updatedAt asc and then by number asc
+        if (this.lastFetchedOrder
+            && (this.lastFetchedOrder.updatedAt > order.updatedAt
+                || (this.lastFetchedOrder.updatedAt === order.updatedAt && this.lastFetchedOrder.number > order.number)
+            )) {
             return;
         }
 
         this.lastFetchedOrder = {
-            updatedAt,
+            updatedAt: order.updatedAt,
             number: order.number!,
         };
         await this.storeSettingKey('lastFetchedOrder', this.lastFetchedOrder);
@@ -1022,13 +1028,36 @@ export class WebshopManager {
 
         const fetcher = this.createBackendOrdersObjectFetcher();
 
-        // todo: only get updated orders?
-        // todo: only get after number x
-        // todo: sort orders on updatedAt? (because lastFetchedOrder is updated)
+        // #region create LimitedFilteredRequest
+        const sort: SortList = [
+            { key: 'updatedAt', order: SortItemDirection.ASC },
+            { key: 'number', order: SortItemDirection.ASC },
+        ];
+
+        let filter: StamhoofdFilter = null;
+
+        if (this.lastFetchedOrder) {
+            filter = {
+                $or: [
+                    {
+                        updatedAt: { $gt: this.lastFetchedOrder.updatedAt },
+                    },
+                    {
+                        $and: [
+                            { updatedAt: { $eq: this.lastFetchedOrder.updatedAt } },
+                            { number: { $gt: this.lastFetchedOrder.number } },
+                        ],
+                    },
+                ],
+            };
+        }
+
         const filteredRequest = new LimitedFilteredRequest({
-            // todo
-            limit: 100,
+            limit: 1,
+            filter,
+            sort,
         });
+        // #endregion
 
         let hadSuccessfulFetch = false;
         let clearOrdersPromise: Promise<void> | undefined = undefined;
@@ -1068,8 +1097,8 @@ export class WebshopManager {
                 if (!hasUpdatedOrders) {
                     hasUpdatedOrders = true;
                 }
-                const deletedOrders: PrivateOrderWithTickets[] = [];
-                const nonDeletedOrders: PrivateOrderWithTickets[] = [];
+                const deletedOrders: PrivateOrder[] = [];
+                const nonDeletedOrders: PrivateOrder[] = [];
 
                 for (const order of orders) {
                     if (order.status === OrderStatus.Deleted) {
