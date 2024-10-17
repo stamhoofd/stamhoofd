@@ -13,7 +13,7 @@ async function fileExists(file) {
     return false;
 }
 
-const namespaces = ['stamhoofd', 'digit', 'keeo'];
+const namespaces = ['stamhoofd', 'digit', 'keeo', 'chiro'];
 
 for (const namespace of namespaces) {
     // await fs.rm("./dist/"+namespace, { recursive: true, force: true })
