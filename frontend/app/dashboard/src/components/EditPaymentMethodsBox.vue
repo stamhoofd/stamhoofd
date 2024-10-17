@@ -72,7 +72,7 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import { Checkbox, Dropdown, ErrorBox, IBANInput, LoadingView, PermyriadInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useCountry, useErrors, useRequiredOrganization, useValidation, Validator } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { AdministrationFeeSettings, Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { AdministrationFeeSettings, Country, Payment, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import EditPaymentMethodSettingsView from './EditPaymentMethodSettingsView.vue';
@@ -393,6 +393,11 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
     patchConfig(PaymentConfiguration.patch({
         paymentMethods: arr,
     }));
+
+    if (enabled && method === PaymentMethod.Transfer) {
+        // Open dialog
+        editPaymentMethodSettings(method).catch(console.error);
+    }
 }
 
 function canEnablePaymentMethod(method: PaymentMethod) {
