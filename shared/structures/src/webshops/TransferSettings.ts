@@ -52,9 +52,9 @@ export class TransferSettings extends AutoEncoder {
     generateDescription(reference: string, country: Country, replacements: { [key: string]: string } = {}) {
         if (this.type === TransferDescriptionType.Structured) {
             if (country === Country.Belgium) {
-                return TransferSettings.generateOGM();
+                return TransferSettings.generateOGM(replacements);
             }
-            return TransferSettings.generateOGMNL();
+            return TransferSettings.generateOGMNL(replacements);
         }
 
         if (this.type === TransferDescriptionType.Reference) {
@@ -64,7 +64,7 @@ export class TransferSettings extends AutoEncoder {
         return replaceReplacements(this.prefix ?? '', replacements);
     }
 
-    static generateOGMNL() {
+    static generateOGMNL(_: { [key: string]: string } = {}) {
         /**
          * Reference: https://www.betaalvereniging.nl/betalingsverkeer/giraal-betalingsverkeer/betalingskenmerken/
          * Check: https://rudhar.com/cgi-bin/chkdigit.cgi
@@ -104,7 +104,7 @@ export class TransferSettings extends AutoEncoder {
         return C + '' + L + (numbers.reverse().map(n => n + '')).join('');
     }
 
-    static generateOGM() {
+    static generateOGM(replacements: { [key: string]: string } = {}) {
         /**
          * De eerste tien cijfers zijn bijvoorbeeld een klantennummer of een factuurnummer.
          * De laatste twee cijfers vormen het controlegetal dat verkregen wordt door van de
@@ -114,7 +114,25 @@ export class TransferSettings extends AutoEncoder {
          * Uitzondering: Indien de rest 0 bedraagt, dan wordt als controlegetal 97 gebruikt.[1]
          */
 
-        const firstChars = Math.round(Math.random() * 9999999999);
+        let firstChars = Math.round(Math.random() * 9999999999);
+        console.log(' first chars to', firstChars);
+
+        if (replacements.prefix && replacements.prefix.length > 0) {
+            // Change first characters
+            const number = parseInt(replacements.prefix);
+            if (!isNaN(number) && number !== 0) {
+                const paddedFirst = (firstChars + '').padStart(10, '0');
+                if (replacements.prefix.length === 4) {
+                    // Add in the middle, not at the start
+                    firstChars = parseInt((paddedFirst.substring(0, 3) + number.toFixed(0).padStart(4, '0') + paddedFirst.substring(3)).padStart(10, '0').substring(0, 10));
+                }
+                else {
+                    firstChars = parseInt((number + paddedFirst).padStart(10, '0').substring(0, 10));
+                }
+                console.log('Changed first chars to', firstChars);
+            }
+        }
+
         let modulo = firstChars % 97;
         if (modulo === 0) {
             modulo = 97;

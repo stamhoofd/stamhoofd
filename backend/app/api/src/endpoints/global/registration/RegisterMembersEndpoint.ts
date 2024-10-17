@@ -713,6 +713,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             email: user.email,
         });
 
+        // Use structured transfer description prefix
+        let prefix = '';
+
         if (checkout.asOrganizationId) {
             if (!checkout.customer) {
                 throw new SimpleError({
@@ -751,6 +754,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             payment.customer.company = foundCompany;
+
+            const orgNumber = parseInt(payingOrganization.uri);
+
+            if (orgNumber !== 0 && !isNaN(orgNumber)) {
+                prefix = orgNumber + '';
+            }
         }
 
         payment.method = checkout.paymentMethod;
@@ -777,6 +786,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     name: Formatter.groupNamesByFamily(m),
                     naam: Formatter.groupNamesByFamily(m),
                     email: user.email,
+                    prefix,
                 },
             );
         }

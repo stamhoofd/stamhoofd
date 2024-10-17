@@ -61,7 +61,7 @@
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td v-if="isStructured && isBelgium">
-                                    Gestructureerde mededeling
+                                    Mededeling
                                 </td>
                                 <td v-else-if="isStructured">
                                     Betalingskenmerk
@@ -84,7 +84,7 @@
                         <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
                         <img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
                     </div>
-                    <img v-if="QRCodeUrl" :src="QRCodeUrl">
+                    <img v-if="QRCodeUrl" :src="QRCodeUrl" width="228" height="228">
                 </div>
             </div>
 
