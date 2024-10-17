@@ -709,15 +709,15 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
     }
 
     builders.push(
-        // todo: create CurrencyFilterBuilder
         new NumberFilterBuilder({
             name: 'Bedrag',
             key: 'totalPrice',
+            currency: true,
         }),
-        // todo: create CurrencyFilterBuilder
         new NumberFilterBuilder({
             name: 'Te betalen',
             key: 'openBalance',
+            currency: true,
         }),
         new NumberFilterBuilder({
             name: 'Aantal',
@@ -734,7 +734,6 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
     TimeSlotDate = 'timeSlotDate',
     TimeSlotTime = 'timeSlotTime',
     ValidAt = 'validAt',
-    OpenBalance = 'openBalance',
     Location = 'location',
      *
      */
