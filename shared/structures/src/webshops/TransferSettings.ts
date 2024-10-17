@@ -142,4 +142,11 @@ export class TransferSettings extends AutoEncoder {
 
         return '+++' + str.substr(0, 3) + '/' + str.substr(3, 4) + '/' + str.substr(3 + 4) + '+++';
     }
+
+    static structureOGM(str: string) {
+        if (str.length !== 12) {
+            return str;
+        }
+        return '+++' + str.substr(0, 3) + '/' + str.substr(3, 4) + '/' + str.substr(3 + 4) + '+++';
+    }
 }

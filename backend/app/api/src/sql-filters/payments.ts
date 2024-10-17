@@ -15,6 +15,7 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
     paidAt: createSQLColumnFilterCompiler('paidAt', { nullable: true }),
     price: createSQLColumnFilterCompiler('price'),
     provider: createSQLColumnFilterCompiler('provider', { nullable: true }),
+    transferDescription: createSQLColumnFilterCompiler('transferDescription', { nullable: true }),
     customer: createSQLFilterNamespace({
         ...baseSQLFilterCompilers,
         email: createSQLExpressionFilterCompiler(
