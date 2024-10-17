@@ -16,7 +16,7 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Type') }}
+                        {{ $t('4a07f8e5-c16e-4706-9387-9d3ded9e2b3c') }}
                     </h3>
                     <p v-copyable class="style-definition-text">
                         {{ capitalizeFirstLetter(getReceivableBalanceTypeName(detailedItem.objectType, $t)) }}
@@ -25,7 +25,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Naam') }}
+                        {{ $t('f7300ff2-638b-47c2-97b5-e8774aa0b6f5') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ detailedItem.object.name }}
@@ -34,7 +34,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Openstaand bedrag') }}
+                        {{ $t('28c2bc66-231f-44f3-9249-c1981b871a1f') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(detailedItem.amount) }}
@@ -123,7 +123,7 @@ const selectedTab = ref('Gegroepeerd') as Ref<'Gegroepeerd' | 'Individueel'>;
 const owner = useRequestOwner();
 
 const title = computed(() => {
-    return $t('Openstaand bedrag');
+    return $t('28c2bc66-231f-44f3-9249-c1981b871a1f');
 });
 
 const pendingPayments = computed(() => {

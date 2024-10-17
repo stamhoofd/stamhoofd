@@ -60,7 +60,7 @@
 
                 <STListItem v-if="!isPlatform">
                     <h3 class="style-definition-label">
-                        Aangesloten sinds
+                        {{ $t('8565df22-3559-44b1-be1f-de9d1c3a7837') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(organization.createdAt) }}
@@ -69,7 +69,7 @@
 
                 <STListItem v-if="!isPlatform && organization.privateMeta">
                     <h3 class="style-definition-label">
-                        Via
+                        {{ $t('bf20a769-772d-46b2-9b48-2ea29c96f113') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ organization.privateMeta?.acquisitionTypes.join(', ') }}
@@ -78,10 +78,10 @@
 
                 <STListItem :selectable="hasWrite" @click="hasWrite ? editTags : undefined">
                     <h3 class="style-definition-label">
-                        Tags
+                        {{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}
                     </h3>
                     <p class="style-definition-text" :class="{placeholder: tagStringList.length === 0}">
-                        {{ tagStringList || 'Geen tags' }}
+                        {{ tagStringList || 'Geen' }}
                     </p>
 
                     <template #right>
@@ -91,7 +91,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Aantal leden
+                        {{ $t('Aantal leden' ) }}
                     </h3>
                     <p v-copyable class="style-definition-text">
                         <MemberCountSpan
@@ -110,9 +110,9 @@
 
             <hr>
 
-            <h2>Navigatie</h2>
+            <h2>{{ $t('f18beb62-a9e8-4881-865c-28ad534b6f24') }}</h2>
 
-            <p>Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.</p>
+            <p>{{ $t('Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.' ) }}</p>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri + '/instellingen'" target="_blank">
@@ -120,7 +120,7 @@
                         <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Instellingen
+                        {{ $t('9a6474d8-0bb5-4760-8dca-e85ba79035ce') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('a5b61d4d-207f-485c-8748-cbb04fcb2d23') }}
@@ -135,7 +135,7 @@
                         <img src="~@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Leden
+                        {{ $t('c3158561-e0dc-4dd5-8581-d2d861238946') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('eb91fb5c-72fc-44d4-9b84-4c9f7791e27a') }}
@@ -150,7 +150,7 @@
                         <img src="~@stamhoofd/assets/images/illustrations/laptop-key.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Beheerdersportaal
+                        {{ $t('bda3721a-3b39-4409-9407-e0b3abde0009') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('2300284a-a015-4c97-8ad1-6c9f2bbde174') }}

@@ -22,8 +22,8 @@ async function selectOrganization() {
     await present({
         components: [
             new ComponentWithProperties(SearchOrganizationView, {
-                title: $t('Kies een organisatie'),
-                description: $t('Dit is de organisatie die het totale bedrag zal aanrekenen aan de geselecteerde organisatie(s).'),
+                title: $t('2a1a65d9-d04a-44f2-a86e-0d500f6186ee'),
+                description: $t('6f707b06-382b-417f-b64a-59c7076a08cd'),
                 selectOrganization: async (organization: Organization, navigation: NavigationActions) => {
                     model.value = organization;
                     await navigation.pop();

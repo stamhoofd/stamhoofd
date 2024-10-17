@@ -11,7 +11,7 @@
         @click="$event => openOrder($event)"
     >
         <template #empty>
-            {{ $t('Er zijn nog geen bestellingen.') }}
+            {{ $t('8827deb6-8c18-4b98-a495-57696801a73e') }}
         </template>
     </ModernTableView>
 </template>

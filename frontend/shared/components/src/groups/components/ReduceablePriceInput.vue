@@ -80,7 +80,7 @@ function getDefaultPrice(isReduced: boolean) {
 }
 
 function formatPriceForPlatform(price: number) {
-    return $t('Je betaalt ? euro aan KSA Nationaal.', {price: Formatter.price(price)});
+    return $t('75815048-939a-4ac1-a81c-f23fc3ec5006', {price: Formatter.price(price)});
 }
 
 useValidation(props.validator, () => {
@@ -89,7 +89,7 @@ useValidation(props.validator, () => {
             code: 'invalid_reduced_price',
             field: 'price',
             message: 'Financial support is not enabled, but you have set a reduced price',
-            human: $t("De functie x staat uit, maar je hebt nog x ingesteld", {
+            human: $t("a83523bb-ba90-4a6c-a73a-4d4f12defe7a", {
                 financialSupportTitle: financialSupportSettings.value.title,
                 financialSupportPriceName: financialSupportSettings.value.priceName
             }),
@@ -103,7 +103,7 @@ useValidation(props.validator, () => {
             code: 'invalid_reduced_price',
             field: 'price',
             message: 'Reduced price should be at least be the normal price minus the minimum difference between the normal and reduced price',
-            human: $t("x moet minstens x lager zijn dan de standaardprijs", {
+            human: $t("77578f4e-049c-4d64-b63c-357fb6d0d7ac", {
                 financialSupportPriceName: financialSupportSettings.value.priceName,
                 minDifference: Formatter.price(minPriceDifference.value),
             }),

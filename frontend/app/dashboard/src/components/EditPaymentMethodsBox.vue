@@ -317,7 +317,7 @@ function getDescription(paymentMethod: PaymentMethod): string {
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.Unknown: return '';
-        case PaymentMethod.DirectDebit: return $t('Betalingen duren tot 5 werkdagen, geen onmiddellijke bevestiging van betaling. Mislukte betalingen kunnen kosten met zich meebrengen.');
+        case PaymentMethod.DirectDebit: return $t('f86a093f-c6ae-42d0-b5c4-4035a4d32f74');
         case PaymentMethod.PointOfSale: return $t('f511ce18-7a60-4fe8-8695-16216ffb7bdc');
     }
 }

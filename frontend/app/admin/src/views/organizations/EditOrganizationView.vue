@@ -51,7 +51,7 @@
         <div v-for="tag in allTagsWithChildren" :key="tag.id" class="container">
             <JumpToContainer :visible="isSelected(tag)">
                 <hr>
-                <h2>{{ tag.name }}</h2>
+                <h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }} → {{ tag.name }}</h2>
                 <STList>
                     <SelectOrganizationTagRow v-for="childTag in tagIdsToTags(tag.childTags)" :key="childTag.id" :organization="patched" :tag="childTag" @patch:organization="addPatch" />
                 </STList>

@@ -18,9 +18,9 @@
 
         <div class="container">
             <hr>
-            <h2>{{ $t('Subtags') }}</h2>
+            <h2>{{ $t('b381ed6f-c509-418d-9668-7c161a0fa652') }}</h2>
             <p class="style-description">
-                {{ $t('Groepen met deze subtags hebben automatisch deze tag.') }}
+                {{ $t('4139ef30-55c8-4775-b97a-69b3a8b7d112') }}
             </p>
             <STList v-model="draggableChildTags" :draggable="true">
                 <template #item="{item}">
@@ -30,7 +30,7 @@
             <p>
                 <button class="button text" type="button" @click="addTag">
                     <span class="icon add" />
-                    <span>{{ $t('Voeg tag toe') }}</span>
+                    <span>{{ $t('20699886-7112-43f5-b38c-f5b686c37257') }}</span>
                 </button>
             </p>
         </div>
@@ -38,15 +38,15 @@
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
-                {{ $t('Verwijder deze tag') }}
+                {{ $t('e5c15476-6092-45c9-ac55-541f45720c71') }}
             </h2>
             <p v-if="!isEmpty" class="style-description">
-                {{ $t('Subtags zullen ook verwijderd worden.') }}
+                {{ $t('ceaaf7f7-900e-497e-91f5-16c3a173b7bf') }}
             </p>
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('Verwijderen') }}</span>
+                <span>{{ $t('5bb7b4d5-def0-431d-ba3c-e34ffc7ee777') }}</span>
             </button>
         </div>
     </SaveView>

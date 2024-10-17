@@ -12,9 +12,9 @@ export enum ReceivableBalanceType {
 
 export function getReceivableBalanceTypeName(type: ReceivableBalanceType, $t: TranslateMethod): string {
     switch (type) {
-        case ReceivableBalanceType.organization: return $t('vereniging');
-        case ReceivableBalanceType.member: return $t('lid');
-        case ReceivableBalanceType.user: return $t('account');
+        case ReceivableBalanceType.organization: return $t('b66501e0-f6de-4259-95ef-13590b24182b');
+        case ReceivableBalanceType.member: return $t('146d0874-2f4d-4374-8808-61a4bd953354');
+        case ReceivableBalanceType.user: return $t('fbb0dee5-c500-4bb4-81d6-945666ae4784');
     }
 }
 

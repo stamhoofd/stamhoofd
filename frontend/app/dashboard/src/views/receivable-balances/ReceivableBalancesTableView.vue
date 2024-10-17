@@ -11,7 +11,7 @@
         @click="showBalance"
     >
         <template #empty>
-            {{ $t('Er zijn geen openstaande bedragen') }}
+            {{ $t('0637e394-fbd7-42ea-9a1b-5acdcc86419a') }}
         </template>
     </ModernTableView>
 </template>
@@ -32,7 +32,7 @@ const present = usePresent();
 const owner = useRequestOwner();
 
 const title = computed(() => {
-    return $t('Te ontvangen bedragen');
+    return $t('e09c97db-85d7-40b0-8043-65fa24a09a01');
 });
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;

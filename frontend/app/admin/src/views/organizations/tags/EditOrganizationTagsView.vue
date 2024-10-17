@@ -14,7 +14,7 @@
         <p>
             <button class="button text" type="button" @click="addTag">
                 <span class="icon add" />
-                <span>{{ $t('Tag toevoegen') }}</span>
+                <span>{{ $t('f87ed463-4821-4877-96db-03c693f46013') }}</span>
             </button>
         </p>
     </SaveView>

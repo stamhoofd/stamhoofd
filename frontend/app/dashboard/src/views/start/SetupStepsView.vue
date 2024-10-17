@@ -2,14 +2,15 @@
     <template v-if="$setupSteps && !$setupSteps.isEmpty()">
         <TransitionFade>
             <p v-if="$areAllComplete && !$overrideShowSteps" key="done" class="success-box selectable with-button" @click="showSteps">
-                Ravot is in orde
+                {{ $t('a654551b-6dcd-48a9-a5c5-4609fdcba5f3') }}
+
                 <button class="button text" type="button">
                     Toon stappen
                 </button>
             </p>
             <div v-else key="steps" class="container">
                 <hr>
-                <h2>Breng Ravot in orde</h2>
+                <h2>{{ $t('8e77d1c1-87dc-4fdb-ad6e-13145bc96f78') }}</h2>
                 <p>Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken. <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">Meer info</a></p>
                 <SetupStepRows :steps="$setupSteps" list-type="todo" @select="onClickStep" />
             </div>
@@ -17,7 +18,7 @@
     </template>
     <template v-else>
         <p v-if="organization$?.period.period.id !== platform.period.id" class="info-box">
-            Jouw groep bevindt zich in een ander werkjaar dan KSA Nationaal.
+            {{ $t('ab0c7981-0d5f-4c36-bd3f-07ddc2a63759') }}
         </p>
     </template>
 </template>
