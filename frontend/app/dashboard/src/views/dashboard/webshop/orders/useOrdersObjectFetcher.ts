@@ -1,5 +1,5 @@
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortList, TicketPrivate } from '@stamhoofd/structures';
 import { WebshopManager } from '../WebshopManager';
 import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderStoreIndexValueDefinitions } from '../getPrivateOrderIndexes';
 
@@ -45,14 +45,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             const sortItem: (SortItem & { key: OrderStoreIndex }) | undefined = sortItems[0];
 
-            let filter: StamhoofdFilter = null;
-
-            if (filters.length > 1) {
-                filter = { $and: filters };
-            }
-            else if (filters.length === 1) {
-                filter = filters[0];
-            }
+            const filter = mergeFilters(filters, '$and');
 
             await manager.streamOrders({
                 callback: (order) => {
@@ -92,13 +85,13 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         async fetchCount(data: CountFilteredRequest): Promise<number> {
             let count = 0;
 
-            const filters = [data.filter, data.search];
+            const filter = mergeFilters([data.filter, data.search], '$and');
 
             await manager.streamOrders({
                 callback: () => {
                     count++;
                 },
-                filters,
+                filter,
             });
 
             return count;
