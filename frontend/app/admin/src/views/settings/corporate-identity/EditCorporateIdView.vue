@@ -70,7 +70,7 @@
         <STInputBox error-fields="footerText" :error-box="errors.errorBox" class="max">
             <WYSIWYGTextInput
                 v-model="footerText"
-                placeholder="Tekst die naast het aanvinkvakje staat"
+                placeholder="Tekst en links die onderaan in de footer zichtbaar zijn"
                 editor-class="gray subtle-links"
             />
         </STInputBox>
