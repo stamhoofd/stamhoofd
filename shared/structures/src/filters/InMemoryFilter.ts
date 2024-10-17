@@ -282,11 +282,6 @@ function compileInMemoryFilter(filter: StamhoofdFilter, definitions: InMemoryFil
     const runners: InMemoryFilterRunner[] = [];
 
     for (const f2 of (Array.isArray(filter) ? filter : [filter])) {
-        // f2 can be 0
-        if (!f2 && f2 !== 0) {
-            continue;
-        }
-
         const f = wrapPlainFilter(f2);
         for (const key of Object.keys(f)) {
             if (!(key in definitions)) {
