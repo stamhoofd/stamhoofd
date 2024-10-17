@@ -100,7 +100,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
         if (user?.permissions?.platform !== null) {
             all.push(
                 new StringFilterBuilder({
-                    name: $t('Groepsnummer'),
+                    name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
                     key: 'uri',
                     wrapper: {
                         registrations: {
@@ -115,7 +115,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('Functies'),
+                    name: $t('b0cb950d-856f-4068-bf2f-9636927020f4'),
                     multipleChoiceConfiguration: {
                         isSubjectPlural: true,
                     },
@@ -137,7 +137,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('Hiërarchie'),
+                    name: $t('ec2de613-f06f-4d9a-888a-40f98b6b3727'),
                     multipleChoiceConfiguration: {
                         isSubjectPlural: true,
                     },
@@ -190,7 +190,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: $t('Standaard leeftijdsgroep'),
+                name: $t('6705ae0e-8239-4bc0-895d-10128cb5c6c4'),
                 options: platform.config.defaultAgeGroups.map((group) => {
                     return new MultipleChoiceUIFilterOption(group.name, group.id);
                 }),
@@ -211,11 +211,11 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: $t('Aansluitingstatus'),
+                name: $t('11007b85-a7ac-48d8-9480-669831cef564'),
                 options: [
-                    new MultipleChoiceUIFilterOption($t('Actief'), 'Active'),
-                    new MultipleChoiceUIFilterOption($t('Verlopen'), 'Expiring'),
-                    new MultipleChoiceUIFilterOption($t('Inactief'), 'Inactive'),
+                    new MultipleChoiceUIFilterOption($t('6d4c31c6-c70b-4cf2-8890-b2d4507913c7'), 'Active'),
+                    new MultipleChoiceUIFilterOption($t('cc528c3f-aed3-4eb6-9db1-70aae5261a28'), 'Expiring'),
+                    new MultipleChoiceUIFilterOption($t('33906077-a1d8-4daa-9914-ce129538f68c'), 'Inactive'),
                 ],
                 wrapFilter: (f: StamhoofdFilter) => {
                     const choices = Array.isArray(f) ? f : [f];
@@ -325,7 +325,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: $t('Actieve aansluiting'),
+                name: $t('b0ed8db1-097d-4739-9407-e8aae5e1413c'),
                 options: platform.config.membershipTypes.map((type) => {
                     return new MultipleChoiceUIFilterOption(type.name, type.id);
                 }),

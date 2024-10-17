@@ -106,7 +106,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<DefaultAgeGroup>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => props.isNew ? $t('Nieuwe standaard leeftijdsgroep') : $t('Standaard leeftijdsgroep bewerken'));
+const title = computed(() => props.isNew ? $t('9cff0038-a8c2-49bd-9353-fab8308a83ad') : $t('b486463a-3a65-4fca-b7cb-e3e93b0cfe4b'));
 const pop = usePop();
 const $t = useTranslate();
 const platform = usePlatform();
