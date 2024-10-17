@@ -695,10 +695,12 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         },
     }));
 
-    if (preview.meta.checkoutMethods.length > 1) {
+    const distinctCheckoutMethods = Formatter.uniqueArray(preview.meta.checkoutMethods.map(m => m.type));
+
+    if (distinctCheckoutMethods.length > 1) {
         builders.push(new MultipleChoiceFilterBuilder({
             name: 'Methode',
-            options: Object.values(CheckoutMethodType).map((checkoutMethod) => {
+            options: distinctCheckoutMethods.map((checkoutMethod) => {
                 return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(CheckoutMethodTypeHelper.getName(checkoutMethod)), checkoutMethod);
             }),
             wrapper: {
@@ -751,6 +753,5 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
 }
 /**
     TimeSlotTime = 'timeSlotTime',
-    Location = 'location',
      *
      */
