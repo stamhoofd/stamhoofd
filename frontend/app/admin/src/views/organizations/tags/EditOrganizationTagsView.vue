@@ -3,6 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
+        <p>Je kan groepen onderverdelen in een hiërachie via tags, verbonden, gewesten en/of gouwen. Elke groep kan meerdere tags krijgen volgens de regels die je instelt bij elke tag.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -43,7 +44,7 @@ const originalTags = computed(() => platform.value.config.tags);
 const { patched: tags, patch, addArrayPatch, hasChanges } = usePatchArray(originalTags);
 const saving = ref(false);
 
-const title = 'Tags';
+const title = 'Hiërachie';
 
 const draggableTags = useDraggableArray(() => TagHelper.getRootTags(tags.value), addArrayPatch);
 

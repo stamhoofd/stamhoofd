@@ -57,10 +57,12 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableA
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SaveView, useDraggableArrayIds, useErrors } from '@stamhoofd/components';
-import { OrganizationTag } from '@stamhoofd/structures';
+import { getOrganizationTagTypeName, OrganizationTag } from '@stamhoofd/structures';
 import { computed, ref, Ref } from 'vue';
 import TagRow from './components/TagRow.vue';
 import EditOrganizationTagView from './EditOrganizationTagView.vue';
+import { Formatter } from '@stamhoofd/utility';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 
 const errors = useErrors();
 const present = usePresent();
@@ -74,7 +76,8 @@ const props = defineProps<{
     saveHandler: (patch: PatchableArrayAutoEncoder<OrganizationTag>) => Promise<void>;
 }>();
 
-const title = computed(() => props.isNew ? 'Nieuwe tag' : 'Tag bewerken');
+const $t = useTranslate();
+const title = computed(() => props.isNew ? 'Nieuwe tag' : Formatter.capitalizeFirstLetter($t('{tagType} bewerken', { tagType: getOrganizationTagTypeName(props.tag.type) })));
 const pop = usePop();
 
 const patch = ref(new PatchableArray()) as Ref<PatchableArrayAutoEncoder<OrganizationTag>>;

@@ -4,7 +4,7 @@
             {{ tag.name }}
         </h2>
         <p v-if="childTagCount > 0" class="style-description-small">
-            {{ childTagCount }} {{ childTagCount === 1 ? getOrganizationTagTypeName(childType) : getOrganizationTagTypePluralName(childType) }}
+            {{ capitalizeFirstLetter(pluralText(childTagCount, getOrganizationTagTypeName(childType), getOrganizationTagTypePluralName(childType))) }}
         </p>
 
         <template #right>
