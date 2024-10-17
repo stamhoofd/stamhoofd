@@ -1,54 +1,57 @@
-import { Database, SQLResultNamespacedRow } from "@simonbackx/simple-database";
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from "./SQLExpression";
-import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from "./SQLExpressions";
+import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
+import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions';
 import { SQLJoin } from './SQLJoin';
-import { Orderable } from "./SQLOrderBy";
-import { Whereable } from "./SQLWhere";
+import { Orderable } from './SQLOrderBy';
+import { Whereable } from './SQLWhere';
 
 class EmptyClass {}
 
-export function parseTable(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string): SQLExpression {
+export function parseTable(tableOrExpressiongOrNamespace: SQLExpression | string, table?: string): SQLExpression {
     if (table !== undefined && typeof tableOrExpressiongOrNamespace === 'string') {
-        return new SQLTableExpression(tableOrExpressiongOrNamespace, table)
-    } else if (typeof tableOrExpressiongOrNamespace === 'string') {
-        return new SQLTableExpression(tableOrExpressiongOrNamespace)
-    } else {
+        return new SQLTableExpression(tableOrExpressiongOrNamespace, table);
+    }
+    else if (typeof tableOrExpressiongOrNamespace === 'string') {
+        return new SQLTableExpression(tableOrExpressiongOrNamespace);
+    }
+    else {
         return tableOrExpressiongOrNamespace;
     }
 }
 
 export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
-    _columns: SQLExpression[]
+    _columns: SQLExpression[];
     _from: SQLExpression;
 
-    _limit: number|null = null;
-    _offset: number|null = null;
+    _limit: number | null = null;
+    _offset: number | null = null;
     _groupBy: SQLExpression[] = [];
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
+    _max_execution_time: number | null = null;
 
-    _transformer: ((row: SQLResultNamespacedRow) => T)|null = null;
+    _transformer: ((row: SQLResultNamespacedRow) => T) | null = null;
 
-    constructor(...columns: (SQLExpression|string)[])
-    constructor(transformer: ((row: SQLResultNamespacedRow) => T),...columns: (SQLExpression|string)[])
-    constructor(...columns: (SQLExpression|string|((row: SQLResultNamespacedRow) => T))[]) {
+    constructor(...columns: (SQLExpression | string)[]);
+    constructor(transformer: ((row: SQLResultNamespacedRow) => T), ...columns: (SQLExpression | string)[]);
+    constructor(...columns: (SQLExpression | string | ((row: SQLResultNamespacedRow) => T))[]) {
         super();
-        
+
         if (typeof columns[0] === 'function') {
             this._transformer = columns.shift() as any;
         }
-        this._columns = columns.map(c => typeof c === 'string' ? new SQLColumnExpression(c) : c ) as any;
+        this._columns = columns.map(c => typeof c === 'string' ? new SQLColumnExpression(c) : c) as any;
     }
 
     clone(): this {
-        const c = new SQLSelect(...this._columns)
+        const c = new SQLSelect(...this._columns);
         Object.assign(c, this);
         return c as any;
     }
 
-    from(namespace: string, table: string): this
-    from(table: string): this
-    from(expression: SQLExpression): this
-    from(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string): this {
+    from(namespace: string, table: string): this;
+    from(table: string): this;
+    from(expression: SQLExpression): this;
+    from(tableOrExpressiongOrNamespace: SQLExpression | string, table?: string): this {
         this._from = parseTable(tableOrExpressiongOrNamespace, table);
 
         return this;
@@ -64,68 +67,77 @@ export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(E
         return this;
     }
 
+    setMaxExecutionTime(ms: number): this {
+        this._max_execution_time = ms;
+        return this;
+    }
+
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         const query: SQLQuery[] = [
-            'SELECT'
-        ]
+            'SELECT',
+        ];
 
-        options = options ?? {}
+        if (this._max_execution_time !== null) {
+            query.push('/*+ MAX_EXECUTION_TIME(' + this._max_execution_time + ') */');
+        }
+
+        options = options ?? {};
         options.defaultNamespace = (this._from as any).namespace ?? (this._from as any).table ?? undefined;
 
-        const columns = this._columns.map(c => c.getSQL(options))
+        const columns = this._columns.map(c => c.getSQL(options));
         query.push(
-            joinSQLQuery(columns, ', ')
-        )
+            joinSQLQuery(columns, ', '),
+        );
 
         query.push(
-            'FROM' 
-        )
+            'FROM',
+        );
 
         query.push(this._from.getSQL(options));
 
-        query.push(...this._joins.map(j => j.getSQL(options)))
+        query.push(...this._joins.map(j => j.getSQL(options)));
 
         if (this._where) {
-            query.push('WHERE')
-            query.push(this._where.getSQL(options))
+            query.push('WHERE');
+            query.push(this._where.getSQL(options));
         }
 
         if (this._groupBy.length > 0) {
-            query.push('GROUP BY')
+            query.push('GROUP BY');
             query.push(
                 joinSQLQuery(
-                    this._groupBy.map(c => c.getSQL(options)), 
-                    ', '
-                )
-            )
+                    this._groupBy.map(c => c.getSQL(options)),
+                    ', ',
+                ),
+            );
         }
 
         if (this._orderBy) {
-            query.push(this._orderBy.getSQL(options))
+            query.push(this._orderBy.getSQL(options));
         }
-        
+
         if (this._limit !== null) {
-            query.push('LIMIT ' + this._limit)
+            query.push('LIMIT ' + this._limit);
             if (this._offset !== null && this._offset !== 0) {
-                query.push('OFFSET ' + this._offset)
+                query.push('OFFSET ' + this._offset);
             }
         }
-        
+
         return joinSQLQuery(query, ' ');
     }
 
-    limit(limit: number|null, offset: number|null = null): this {
+    limit(limit: number | null, offset: number | null = null): this {
         this._limit = limit;
         this._offset = offset;
         return this;
     }
 
     async fetch(): Promise<T[]> {
-        const {query, params} = normalizeSQLQuery(this.getSQL())
+        const { query, params } = normalizeSQLQuery(this.getSQL());
 
         // when debugging: log all queries
         console.log(query, params);
-        const [rows] = await Database.select(query, params, {nestTables: true});
+        const [rows] = await Database.select(query, params, { nestTables: true });
 
         // Now map aggregated queries to the correct namespace
         for (const row of rows) {
@@ -133,7 +145,7 @@ export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(E
                 for (const column in row['']) {
                     const splitted = column.split('__');
                     if (splitted.length <= 1) {
-                        console.warn('Aggregated column without namespace', column)
+                        console.warn('Aggregated column without namespace', column);
                         continue;
                     }
                     const namespace = splitted[0];
@@ -151,35 +163,35 @@ export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(E
         return rows as T[];
     }
 
-    first(required: false): Promise<T|null>
-    first(required: true): Promise<T>
-    async first(required = true): Promise<T|null>  {
+    first(required: false): Promise<T | null>;
+    first(required: true): Promise<T>;
+    async first(required = true): Promise<T | null> {
         const rows = await this.limit(1).fetch();
         if (rows.length === 0) {
             if (required) {
-                throw new Error('Required ' + this._from)
+                throw new Error('Required ' + this._from);
             }
             return null;
         }
 
-        return rows[0]
+        return rows[0];
     }
 
     async count(): Promise<number> {
         this._columns = [
             new SQLSelectAs(
-                new SQLCount(), 
-                new SQLAlias('c')
-            )
-        ]
+                new SQLCount(),
+                new SQLAlias('c'),
+            ),
+        ];
         this._offset = null;
         this._limit = null;
         this._orderBy = null;
 
-        const {query, params} = normalizeSQLQuery(this.getSQL());
+        const { query, params } = normalizeSQLQuery(this.getSQL());
         console.log(query, params);
 
-        const [rows] = await Database.select(query, params, {nestTables: true});
+        const [rows] = await Database.select(query, params, { nestTables: true });
         if (rows.length === 1) {
             const row = rows[0];
             if ('' in row) {
@@ -199,18 +211,18 @@ export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(E
     async sum(expression: SQLExpression): Promise<number> {
         this._columns = [
             new SQLSelectAs(
-                new SQLSum(expression), 
-                new SQLAlias('c')
-            )
-        ]
+                new SQLSum(expression),
+                new SQLAlias('c'),
+            ),
+        ];
         this._offset = null;
         this._limit = null;
         this._orderBy = null;
 
-        const {query, params} = normalizeSQLQuery(this.getSQL());
+        const { query, params } = normalizeSQLQuery(this.getSQL());
         console.log(query, params);
 
-        const [rows] = await Database.select(query, params, {nestTables: true});
+        const [rows] = await Database.select(query, params, { nestTables: true });
         if (rows.length === 1) {
             const row = rows[0];
             if ('' in row) {

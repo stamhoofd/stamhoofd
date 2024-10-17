@@ -11,6 +11,7 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context';
 import { memberFilterCompilers } from '../../../sql-filters/members';
 import { memberSorters } from '../../../sql-sorters/members';
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -120,6 +121,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             .select(
                 SQL.column('members', 'id'),
             )
+            .setMaxExecutionTime(15 * 1000)
             .from(
                 SQL.table('members'),
             );
@@ -236,7 +238,21 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
         const query = await GetMembersEndpoint.buildQuery(requestQuery);
-        const data = await query.fetch();
+        let data: SQLResultNamespacedRow[];
+
+        try {
+            data = await query.fetch();
+        }
+        catch (error) {
+            if (error.message.includes('ER_QUERY_TIMEOUT')) {
+                throw new SimpleError({
+                    code: 'timeout',
+                    message: 'Query took too long',
+                    human: 'Deze opzoeking is te complex en duurt te lang. Probeer een eenvoudigere zoekopdracht of probeer terug op een rustiger tijdstip.',
+                });
+            }
+            throw error;
+        }
 
         const memberIds = data.map((r) => {
             if (typeof r.members.id === 'string') {

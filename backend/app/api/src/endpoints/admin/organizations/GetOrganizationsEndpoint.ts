@@ -9,6 +9,7 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context';
 import { organizationFilterCompilers } from '../../../sql-filters/organizations';
 import { organizationSorters } from '../../../sql-sorters/organizations';
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -55,6 +56,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             .select(
                 SQL.wildcard('organizations'),
             )
+            .setMaxExecutionTime(15 * 1000)
             .from(
                 SQL.table('organizations'),
             );
@@ -114,7 +116,23 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             });
         }
 
-        const data = await GetOrganizationsEndpoint.buildQuery(requestQuery).fetch();
+        const query = GetOrganizationsEndpoint.buildQuery(requestQuery);
+        let data: SQLResultNamespacedRow[];
+
+        try {
+            data = await query.fetch();
+        }
+        catch (error) {
+            if (error.message.includes('ER_QUERY_TIMEOUT')) {
+                throw new SimpleError({
+                    code: 'timeout',
+                    message: 'Query took too long',
+                    human: 'Deze opzoeking is te complex en duurt te lang. Probeer een eenvoudigere zoekopdracht of probeer terug op een rustiger tijdstip.',
+                });
+            }
+            throw error;
+        }
+
         const organizations = Organization.fromRows(data, 'organizations');
 
         let next: LimitedFilteredRequest | undefined;

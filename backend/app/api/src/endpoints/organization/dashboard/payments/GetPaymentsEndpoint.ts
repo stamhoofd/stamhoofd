@@ -9,6 +9,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context';
 import { paymentFilterCompilers } from '../../../../sql-filters/payments';
 import { paymentSorters } from '../../../../sql-sorters/payments';
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -52,6 +53,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const query = SQL
             .select()
+            .setMaxExecutionTime(15 * 1000)
             .from(
                 SQL.table('payments'),
             );
@@ -159,7 +161,21 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
         const query = await this.buildQuery(requestQuery);
-        const data = await query.fetch();
+        let data: SQLResultNamespacedRow[];
+
+        try {
+            data = await query.fetch();
+        }
+        catch (error) {
+            if (error.message.includes('ER_QUERY_TIMEOUT')) {
+                throw new SimpleError({
+                    code: 'timeout',
+                    message: 'Query took too long',
+                    human: 'Deze opzoeking is te complex en duurt te lang. Probeer een eenvoudigere zoekopdracht of probeer terug op een rustiger tijdstip.',
+                });
+            }
+            throw error;
+        }
 
         const payments = Payment.fromRows(data, 'payments');
 

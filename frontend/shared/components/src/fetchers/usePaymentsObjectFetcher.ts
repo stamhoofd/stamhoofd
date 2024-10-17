@@ -1,47 +1,49 @@
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
-import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, SortList } from "@stamhoofd/structures";
-import { useContext } from "../hooks";
-import { ObjectFetcher } from "../tables";
-import { SessionContext } from "@stamhoofd/networking";
-import { Ref } from "vue";
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, SortList } from '@stamhoofd/structures';
+import { useContext } from '../hooks';
+import { ObjectFetcher } from '../tables';
+import { SessionContext } from '@stamhoofd/networking';
+import { Ref } from 'vue';
 
 type ObjectType = PaymentGeneral;
 
-function extendSort(list: SortList): SortList  {
-    return assertSort(list, [{key: 'id'}])
+function extendSort(list: SortList): SortList {
+    return assertSort(list, [{ key: 'id' }]);
 }
 
 export function getPaymentsObjectFetcher(context: Ref<SessionContext>, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
     return {
         extendSort,
-        async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {    
+        async fetch(data: LimitedFilteredRequest): Promise<{ results: ObjectType[]; next?: LimitedFilteredRequest }> {
             const response = await context.value.authenticatedServer.request({
-                method: "GET",
-                path: "/payments",
+                method: 'GET',
+                path: '/payments',
                 decoder: new PaginatedResponseDecoder(new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                 query: data,
                 shouldRetry: false,
-                owner: this
+                owner: this,
+                timeout: 30 * 1000,
             });
 
-            return response.data
+            return response.data;
         },
 
         async fetchCount(data: CountFilteredRequest): Promise<number> {
             const response = await context.value.authenticatedServer.request({
-                method: "GET",
-                path: "/payments/count",
+                method: 'GET',
+                path: '/payments/count',
                 decoder: CountResponse as Decoder<CountResponse>,
                 query: data,
                 shouldRetry: false,
-                owner: this
-            })
+                owner: this,
+                timeout: 30 * 1000,
+            });
 
-            return response.data.count
+            return response.data.count;
         },
-        
-        ...overrides
-    }
+
+        ...overrides,
+    };
 }
 
 export function usePaymentsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
