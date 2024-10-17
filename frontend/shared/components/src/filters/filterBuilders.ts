@@ -3,6 +3,7 @@ import { CheckoutMethodType, CheckoutMethodTypeHelper, OrderStatus, OrderStatusH
 import { Formatter } from '@stamhoofd/utility';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
 import { usePlatform } from '../hooks';
+import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterBuilder } from './NumberUIFilter';
@@ -649,7 +650,7 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
 }
 
 export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
-    const builders = [
+    const builders: UIFilterBuilders = [
         new NumberFilterBuilder({
             name: '#',
             key: 'number',
@@ -709,6 +710,10 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
     }
 
     builders.push(
+        new DateFilterBuilder({
+            name: 'Besteldatum',
+            key: 'validAt',
+        }),
         new NumberFilterBuilder({
             name: 'Bedrag',
             key: 'totalPrice',
@@ -725,15 +730,27 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         }),
     );
 
+    const dateCount = Formatter.uniqueArray(preview.meta.checkoutMethods.flatMap(method => method.timeSlots.timeSlots).map(t => t.dateString())).length;
+
+    const hasDelivery = preview.meta.checkoutMethods.some(method => method.type === CheckoutMethodType.Delivery);
+
+    // Count checkoutmethods that are not delivery
+    const nonDeliveryCount = preview.meta.checkoutMethods.filter(method => method.type !== CheckoutMethodType.Delivery).length;
+
+    if (dateCount > 1) {
+        builders.push(
+            new DateFilterBuilder({
+                name: (hasDelivery && nonDeliveryCount > 0) ? 'Afhaal/leverdatum' : (hasDelivery ? 'Leverdatum' : 'Afhaaldatum'),
+                key: 'timeSlotDate',
+            }));
+    }
+
     const groupFilter = new GroupUIFilterBuilder({ builders });
 
     return [groupFilter, ...builders];
 }
 /**
-    CreatedAt = 'createdAt',
-    TimeSlotDate = 'timeSlotDate',
     TimeSlotTime = 'timeSlotTime',
-    ValidAt = 'validAt',
     Location = 'location',
      *
      */

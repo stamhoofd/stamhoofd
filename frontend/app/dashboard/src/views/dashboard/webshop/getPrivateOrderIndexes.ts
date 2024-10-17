@@ -1,6 +1,5 @@
 import { AutoEncoder, Decoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, InMemoryFilterCompiler, InMemoryFilterDefinitions, PrivateOrder, SortDefinitions, StamhoofdFilter } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { GetIndexes, IndexBox, IndexBoxDecoder, IndexedDbIndexValue } from './IndexBox';
 
 export enum OrderStoreDataIndex {
@@ -45,7 +44,7 @@ export const orderStoreIndexValueDefinitions: SortDefinitions<PrivateOrder> & Re
         getValue: value => value.id,
     },
     [OrderStoreDataIndex.CreatedAt]: {
-        getValue: value => Formatter.dateTimeIso(value.createdAt),
+        getValue: value => value.createdAt.getTime(),
     },
     [OrderStoreDataIndex.Number]: {
         getValue: value => value.number,

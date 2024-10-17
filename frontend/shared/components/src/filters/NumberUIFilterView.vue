@@ -46,27 +46,26 @@
     </STList>
 </template>
 
-
 <script lang="ts" setup>
-import { nextTick, ref, computed, markRaw } from 'vue';
-import { NumberUIFilter, UINumberFilterMode } from './NumberUIFilter';
-import PriceInput from '../inputs/PriceInput.vue';
+import { computed, markRaw, nextTick, ref } from 'vue';
 import NumberInput from '../inputs/NumberInput.vue';
+import PriceInput from '../inputs/PriceInput.vue';
+import { NumberUIFilter, UINumberFilterMode } from './NumberUIFilter';
 
 const props = defineProps<{
-    filter: NumberUIFilter
-}>()
+    filter: NumberUIFilter;
+}>();
 
-const input = ref<HTMLInputElement | null>(null)
-const floatingPoint = computed(() => props.filter.builder.floatingPoint)
-const currency = computed(() => props.filter.builder.currency)
+const input = ref<HTMLInputElement | null>(null);
+const floatingPoint = computed(() => props.filter.builder.floatingPoint);
+const currency = computed(() => props.filter.builder.currency);
 
 async function onChange() {
     await nextTick();
-    input.value?.focus()
+    input.value?.focus();
 }
 
 const inputComponent = computed(() => {
-    return currency.value ? markRaw(PriceInput) : markRaw(NumberInput)
-})
+    return currency.value ? markRaw(PriceInput) : markRaw(NumberInput);
+});
 </script>
