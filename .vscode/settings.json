@@ -93,5 +93,8 @@
     "search.useIgnoreFiles": false,
     "typescript.preferences.importModuleSpecifier": "project-relative",
     "typescript.tsdk": "node_modules/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "i18n-ally.extract.ignored": [
+        "success green"
+    ]
 }
