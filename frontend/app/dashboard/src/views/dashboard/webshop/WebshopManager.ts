@@ -290,7 +290,6 @@ export class WebshopManager {
                         [OrderStoreDataIndex.PaymentMethod]: { unique: false, keyPath: 'value.data.paymentMethod' },
                         [OrderStoreDataIndex.CheckoutMethod]: { unique: false, keyPath: 'value.data.checkoutMethod.type' },
                         [OrderStoreDataIndex.TimeSlotDate]: { unique: false, keyPath: 'value.data.timeSlot.date' },
-                        [OrderStoreDataIndex.TimeSlotTime]: { unique: false, keyPath: 'value.data.timeSlot.endTime' },
                         [OrderStoreDataIndex.ValidAt]: { unique: false, keyPath: 'value.validAt' },
                         [OrderStoreDataIndex.Name]: { unique: false, keyPath: ['value.data.customer.firstName', 'value.data.customer.lastName'] },
                         [OrderStoreDataIndex.Email]: { unique: false, keyPath: 'value.data.customer.email' },
@@ -1024,6 +1023,7 @@ export class WebshopManager {
         const fetcher = this.createBackendOrdersObjectFetcher();
 
         // todo: only get updated orders?
+        // todo: only get after number x
         // todo: sort orders on updatedAt? (because lastFetchedOrder is updated)
         const filteredRequest = new LimitedFilteredRequest({
             // todo

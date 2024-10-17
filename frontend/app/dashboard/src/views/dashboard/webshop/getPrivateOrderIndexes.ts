@@ -9,9 +9,6 @@ export enum OrderStoreDataIndex {
     PaymentMethod = 'paymentMethod',
     CheckoutMethod = 'checkoutMethod',
     TimeSlotDate = 'timeSlotDate',
-    TimeSlotTime = 'timeSlotTime',
-    TimeSlotEndTime = 'timeSlotEndTime',
-    TimeSlotStartTime = 'timeSlotStartTime',
     ValidAt = 'validAt',
     Name = 'name',
     Email = 'email',
@@ -23,6 +20,7 @@ export enum OrderStoreGeneratedIndex {
     Amount = 'amount',
     OpenBalance = 'openBalance',
     Location = 'location',
+    TimeSlotTime = 'timeSlotTime',
 }
 
 export type OrderStoreIndex = OrderStoreDataIndex | OrderStoreGeneratedIndex;
@@ -39,6 +37,9 @@ export class PrivateOrderEncodeableIndexes extends AutoEncoder implements Record
 
     @field({ decoder: StringDecoder })
     location: string = '';
+
+    @field({ decoder: StringDecoder })
+    timeSlotTime: string = '';
 }
 
 export const orderStoreIndexValueDefinitions: SortDefinitions<PrivateOrder> & Record<OrderStoreIndex, { getValue: (data: PrivateOrder) => IndexedDbIndexValue }> = {
@@ -62,16 +63,6 @@ export const orderStoreIndexValueDefinitions: SortDefinitions<PrivateOrder> & Re
     },
     [OrderStoreDataIndex.TimeSlotDate]: {
         getValue: value => value.data.timeSlot?.date.getTime(),
-    },
-    [OrderStoreDataIndex.TimeSlotTime]: {
-        // todo: take into account start time
-        getValue: value => value.data.timeSlot?.endTime,
-    },
-    [OrderStoreDataIndex.TimeSlotEndTime]: {
-        getValue: value => value.data.timeSlot?.endTime,
-    },
-    [OrderStoreDataIndex.TimeSlotStartTime]: {
-        getValue: value => value.data.timeSlot?.startTime,
     },
     [OrderStoreDataIndex.ValidAt]: {
         getValue: value => value.validAt?.getTime(),
@@ -98,6 +89,9 @@ export const orderStoreIndexValueDefinitions: SortDefinitions<PrivateOrder> & Re
     [OrderStoreGeneratedIndex.Location]: {
         getValue: value => value.data.locationName,
     },
+    [OrderStoreGeneratedIndex.TimeSlotTime]: {
+        getValue: value => value.data.timeSlot?.timeIndex,
+    },
 };
 
 export const createPrivateOrderIndexBox = (data: PrivateOrder) => {
@@ -121,24 +115,24 @@ export const createPrivateOrderIndexBoxDecoder = () => new IndexBoxDecoder(
 export const privateOrderIndexBoxInMemoryFilterCompilers: InMemoryFilterDefinitions & Record<OrderStoreIndex, InMemoryFilterCompiler> = {
     ...baseInMemoryFilterCompilers,
     id: createInMemoryFilterCompiler('id'),
+    timeSlotEndTime: createInMemoryFilterCompiler('data.timeSlot.endTime'),
+    timeSlotStartTime: createInMemoryFilterCompiler('data.timeSlot.startTime'),
     [OrderStoreDataIndex.CreatedAt]: createInMemoryFilterCompiler('createdAt'),
     [OrderStoreDataIndex.Number]: createInMemoryFilterCompiler('number'),
     [OrderStoreDataIndex.Status]: createInMemoryFilterCompiler('status'),
     [OrderStoreDataIndex.PaymentMethod]: createInMemoryFilterCompiler('data.paymentMethod'),
     [OrderStoreDataIndex.CheckoutMethod]: createInMemoryFilterCompiler('data.checkoutMethod.type'),
     [OrderStoreDataIndex.TimeSlotDate]: createInMemoryFilterCompiler('data.timeSlot.date'),
-    // todo: take into account start time
-    [OrderStoreDataIndex.TimeSlotTime]: createInMemoryFilterCompiler('data.timeSlot.endTime'),
-    [OrderStoreDataIndex.TimeSlotEndTime]: createInMemoryFilterCompiler('data.timeSlot.endTime'),
-    [OrderStoreDataIndex.TimeSlotStartTime]: createInMemoryFilterCompiler('data.timeSlot.startTime'),
     [OrderStoreDataIndex.ValidAt]: createInMemoryFilterCompiler('validAt'),
     [OrderStoreDataIndex.Name]: createInMemoryFilterCompiler('data.customer.name'),
     [OrderStoreDataIndex.Email]: createInMemoryFilterCompiler('data.customer.email'),
     [OrderStoreDataIndex.Phone]: createInMemoryFilterCompiler('data.customer.phone'),
+    // generated
     [OrderStoreGeneratedIndex.TotalPrice]: createInMemoryFilterCompiler('data.totalPrice'),
     [OrderStoreGeneratedIndex.Amount]: createInMemoryFilterCompiler('data.amount'),
     [OrderStoreGeneratedIndex.OpenBalance]: createInMemoryFilterCompiler('openBalance'),
     [OrderStoreGeneratedIndex.Location]: createInMemoryFilterCompiler('data.locationName'),
+    [OrderStoreGeneratedIndex.TimeSlotTime]: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
 };
 
 export function createCompiledFilterForPrivateOrderIndexBox(filter: StamhoofdFilter) {
