@@ -1,9 +1,5 @@
 {
     "replacements": {
-      "Vereniging": "Groep",
-      "vereniging": "groep",
-      "Verenigingen": "Groepen",
-      "verenigingen": "groepen"
     },
     "81c91169-db1e-4819-8716-5382ffbaa43b": "Het groepsnummer is een unieke code voor deze vereniging. Deze wordt in de URL-balk van de browser gebruikt.",
     "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": "Groepsnummer",
