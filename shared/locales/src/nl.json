@@ -348,11 +348,11 @@
   "bda3721a-3b39-4409-9407-e0b3abde0009": "Beheerdersportaal",
   "2a1a65d9-d04a-44f2-a86e-0d500f6186ee": "Kies een organisatie",
   "6f707b06-382b-417f-b64a-59c7076a08cd": "Dit is de organisatie die het totale bedrag zal aanrekenen aan de geselecteerde organisatie(s).",
-  "b381ed6f-c509-418d-9668-7c161a0fa652": "Subtags",
-  "4139ef30-55c8-4775-b97a-69b3a8b7d112": "Groepen met deze subtags hebben automatisch deze tag.",
+  "b381ed6f-c509-418d-9668-7c161a0fa652": "Onderverdeling",
+  "4139ef30-55c8-4775-b97a-69b3a8b7d112": "Je kan deze tag nog verder onderverdelen.",
   "20699886-7112-43f5-b38c-f5b686c37257": "Voeg tag toe",
   "e5c15476-6092-45c9-ac55-541f45720c71": "Verwijder deze tag",
-  "ceaaf7f7-900e-497e-91f5-16c3a173b7bf": "Subtags zullen ook verwijderd worden.",
+  "ceaaf7f7-900e-497e-91f5-16c3a173b7bf": "Onderliggende tags zullen ook verwijderd worden.",
   "5bb7b4d5-def0-431d-ba3c-e34ffc7ee777": "Verwijderen",
   "f87ed463-4821-4877-96db-03c693f46013": "Tag toevoegen",
   "f86a093f-c6ae-42d0-b5c4-4035a4d32f74": "Betalingen duren tot 5 werkdagen, geen onmiddellijke bevestiging van betaling. Mislukte betalingen kunnen kosten met zich meebrengen.",
@@ -404,5 +404,6 @@
   "2662a425-f996-479b-a1fc-8498f068ea97": "Deze activiteit is enkel zichtbaar voor leden van de organisator.",
   "4bff53d6-7455-45fc-aa6d-ae0bafbe0b47": "Elke lokale groep moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.",
   "a4f0a3f5-60a5-4959-800c-613e8c79d6d9": "Groep toevoegen",
-  "f80e230f-9621-439d-b4ba-bc49fb921698": "De wijzigingen zijn opgeslagen"
+  "f80e230f-9621-439d-b4ba-bc49fb921698": "De wijzigingen zijn opgeslagen",
+  "919139ab-1103-4e1b-aaf7-94cfec03a9e3": "Alle verenigingen in {name}"
 }

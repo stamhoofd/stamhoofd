@@ -8,7 +8,7 @@
 
         <STList v-model="draggableTags" :draggable="true">
             <template #item="{item: tag}">
-                <TagRow :tag="tag" @click="editTag(tag)" />
+                <TagRow :tag="tag" :all-tags="tags" @click="editTag(tag)" />
             </template>
         </STList>
         <p>

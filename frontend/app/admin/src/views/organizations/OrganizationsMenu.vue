@@ -23,7 +23,9 @@
             <div v-for="(tag, index) in tagsToShow" :key="tag.id" class="container">
                 <div class="grouped">
                     <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag}}) }" @click="navigateToTag(tag)">
-                        <span class="icon label" />
+                        <span v-if="tag.type === OrganizationTagType.Tag" class="icon label" />
+                        <span v-else class="icon location" />
+
                         <span>
                             {{ tag.name }}
                         </span>
@@ -55,7 +57,7 @@
 import { Route, defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth, usePlatform } from '@stamhoofd/components';
 import { useCollapsed } from '@stamhoofd/dashboard/src/hooks/useCollapsed';
-import { OrganizationTag, PermissionLevel, TagHelper } from '@stamhoofd/structures';
+import { OrganizationTag, OrganizationTagType, PermissionLevel, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';

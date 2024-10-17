@@ -24,7 +24,7 @@
             </p>
             <STList v-model="draggableChildTags" :draggable="true">
                 <template #item="{item}">
-                    <TagRow :tag="item" @click="editTag(item)" />
+                    <TagRow :all-tags="allTags" :tag="item" @click="editTag(item)" />
                 </template>
             </STList>
             <p>

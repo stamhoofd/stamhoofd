@@ -22,6 +22,39 @@ export class PlatformPrivateConfig extends AutoEncoder {
     emails: OrganizationEmail[] = [];
 }
 
+export enum OrganizationTagType {
+    Tag = 'Tag',
+    Verbond = 'Verbond',
+    Gewest = 'Gewest',
+    Gouw = 'Gouw',
+}
+
+export function getOrganizationTagTypeName(type: OrganizationTagType): string {
+    switch (type) {
+        case OrganizationTagType.Tag:
+            return 'tag';
+        case OrganizationTagType.Verbond:
+            return 'verbond';
+        case OrganizationTagType.Gewest:
+            return 'gewest';
+        case OrganizationTagType.Gouw:
+            return 'gouw';
+    }
+}
+
+export function getOrganizationTagTypePluralName(type: OrganizationTagType): string {
+    switch (type) {
+        case OrganizationTagType.Tag:
+            return 'tags';
+        case OrganizationTagType.Verbond:
+            return 'verbonden';
+        case OrganizationTagType.Gewest:
+            return 'gewesten';
+        case OrganizationTagType.Gouw:
+            return 'gouwen';
+    }
+}
+
 export class OrganizationTag extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -31,6 +64,31 @@ export class OrganizationTag extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
     childTags: string[] = [];
+
+    get type() {
+        if (this.name.startsWith('Verbond ')) {
+            return OrganizationTagType.Verbond;
+        }
+
+        if (this.name.startsWith('Gewest ')) {
+            return OrganizationTagType.Gewest;
+        }
+
+        return OrganizationTagType.Tag;
+    }
+
+    getChildType(allTags: OrganizationTag[]) {
+        if (this.childTags.length === 0) {
+            return OrganizationTagType.Tag;
+        }
+
+        const childTag = allTags.find(t => t.id === this.childTags[0]);
+        if (!childTag) {
+            return OrganizationTagType.Tag;
+        }
+
+        return childTag.type;
+    }
 }
 
 export class PlatformPremiseType extends AutoEncoder {

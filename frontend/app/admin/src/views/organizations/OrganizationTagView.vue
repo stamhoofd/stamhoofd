@@ -9,11 +9,10 @@
             <STList>
                 <STListItem :selectable="true" @click="openThisTag">
                     <template #left>
-                        <span class="icon group gray" />
+                        <span class="icon group" />
                     </template>
-                    <!-- todo: translate -->
                     <h2 class="style-title-list bolder">
-                        Alle verenigingen in {{ tag.name }}
+                        {{ $t('919139ab-1103-4e1b-aaf7-94cfec03a9e3', { name: title }) }}
                     </h2>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -21,7 +20,8 @@
                 </STListItem>
                 <STListItem v-for="childTag of childTags" :key="childTag.id" :selectable="true" @click="openChildTag(childTag)">
                     <template #left>
-                        <span class="icon label gray" />
+                        <span v-if="childTag.type === OrganizationTagType.Tag" class="icon label" />
+                        <span v-else class="icon location" />
                     </template>
                     <h3 class="style-title-list">
                         {{ childTag.name }}
@@ -39,7 +39,7 @@
 <script lang="ts" setup>
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { STList, STListItem, STNavigationBar, usePlatform } from '@stamhoofd/components';
-import { OrganizationTag } from '@stamhoofd/structures';
+import { OrganizationTag, OrganizationTagType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';

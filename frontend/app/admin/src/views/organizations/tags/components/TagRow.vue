@@ -4,8 +4,7 @@
             {{ tag.name }}
         </h2>
         <p v-if="childTagCount > 0" class="style-description-small">
-            <!-- todo: translate -->
-            Deze tag heeft {{ childTagCount }} subtag(s).
+            {{ childTagCount }} {{ childTagCount === 1 ? getOrganizationTagTypeName(childType) : getOrganizationTagTypePluralName(childType) }}
         </p>
 
         <template #right>
@@ -16,13 +15,15 @@
 </template>
 
 <script lang="ts" setup>
-import { OrganizationTag } from '@stamhoofd/structures';
+import { getOrganizationTagTypeName, getOrganizationTagTypePluralName, OrganizationTag } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
     tag: OrganizationTag;
+    allTags: OrganizationTag[];
 }>();
 
 const childTagCount = computed(() => props.tag.childTags.length);
+const childType = computed(() => props.tag.getChildType(props.allTags));
 
 </script>
