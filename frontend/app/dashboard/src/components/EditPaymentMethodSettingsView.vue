@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="false" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -76,7 +76,7 @@
         </template>
 
         <STList>
-            <STListItem v-if="companiesOnly || auth.hasPlatformFullAccess()" :selectable="true" element-name="label">
+            <STListItem v-if="companiesOnly || auth.hasPlatformFullAccess()" key="companiesOnly" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="companiesOnly" />
                 </template>
@@ -86,7 +86,7 @@
                 </h3>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label">
+            <STListItem key="useMinimumAmount" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="useMinimumAmount" />
                 </template>
@@ -102,7 +102,7 @@
                 </div>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label">
+            <STListItem key="useWarning" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="useWarning" />
                 </template>
@@ -124,7 +124,7 @@
                 </div>
             </STListItem>
 
-            <STListItem v-if="useWarning" :selectable="true" element-name="label">
+            <STListItem v-if="useWarning" key="useWarningAmount" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="useWarningAmount" />
                 </template>
@@ -183,7 +183,13 @@ const settings = computed(() => patched.value.paymentMethodSettings.get(props.pa
 
 function addPatchSettings(patch: PartialWithoutMethods<AutoEncoderPatchType<PaymentMethodSettings>>) {
     const p = PaymentConfiguration.patch({});
-    p.paymentMethodSettings.set(props.paymentMethod, PaymentMethodSettings.patch(patch));
+
+    if (!patched.value.paymentMethodSettings.get(props.paymentMethod)) {
+        p.paymentMethodSettings.set(props.paymentMethod, settings.value.patch(patch));
+    }
+    else {
+        p.paymentMethodSettings.set(props.paymentMethod, PaymentMethodSettings.patch(patch));
+    }
     addPatch(p);
 }
 
