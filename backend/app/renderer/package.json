@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-renderer",
-    "version": "2.46.0",
+    "version": "2.47.0",
     "main": "./dist/index.js",
     "exports": {
         ".": {
