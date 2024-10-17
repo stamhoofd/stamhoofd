@@ -7,13 +7,13 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
+            <STInputBox :title="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')" error-fields="name" :error-box="errors.errorBox">
                 <input
                     ref="firstInput"
                     v-model="name"
                     class="input"
                     type="text"
-                    placeholder="Naam"
+                    :placeholder="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')"
                     autocomplete=""
                     enterkeyhint="next"
                 >
@@ -33,10 +33,10 @@
             {{ type.description }}
         </p>
 
-        <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('561e9ebb-ae0c-48f3-a10d-921c2a59d5a4')" error-fields="meta.description" :error-box="errors.errorBox" class="max">
             <WYSIWYGTextInput
                 v-model="description"
-                placeholder="Beschrijving van deze activiteit"
+                :placeholder="$t('2cb56415-5e16-4a75-9012-8971be8dbc6a')"
             />
         </STInputBox>
 
@@ -51,30 +51,30 @@
                 </h3>
 
                 <p class="style-description-small">
-                    Laat leden inschrijven voor deze activiteit via het ledenportaal
+                    {{ $t('9210b13c-2699-4a7f-b173-a07bafd8a13b') }}
                 </p>
             </STListItem>
         </STList>
 
         <hr>
-        <h2>Datum</h2>
+        <h2>{{ $t('112b7686-dffc-4ae9-9706-e3efcd34898f') }}</h2>
 
         <Checkbox v-if="!type || (type.maximumDays !== 1 && (type.minimumDays ?? 1) <= 1)" v-model="multipleDays">
-            Meerdere dagen
+            {{ $t('f001f5c4-f3ea-46c0-bd0c-0b30ad8098f5') }}
         </Checkbox>
 
         <div class="split-inputs">
             <STInputBox :title="multipleDays ? 'Startdatum' : 'Datum'" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" />
             </STInputBox>
-            <TimeInput v-if="multipleDays" v-model="startDate" title="Vanaf" :validator="errors.validator" />
+            <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator" />
         </div>
 
         <div class="split-inputs">
             <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" title="Einddatum" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" />
             </STInputBox>
-            <TimeInput v-else v-model="startDate" title="Vanaf" :validator="errors.validator" />
+            <TimeInput v-else v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator" />
             <TimeInput v-model="endDate" title="Tot" :validator="errors.validator" />
         </div>
 
@@ -88,7 +88,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Nationale of regionale activiteit
+                    {{ $t('d756277c-4655-4e92-afcc-ae3c9f615190') }}
                 </h3>
             </STListItem>
 
@@ -98,15 +98,15 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Zichtbaar in de kalender
+                    {{ $t('987c7ee6-8ee2-41d7-823e-db0ff590ea7d') }}
                 </h3>
             </STListItem>
         </STList>
 
         <template v-if="canSetNationalActivity && externalOrganization">
             <hr>
-            <h2>Organisator</h2>
-            <p>Deze activiteit is enkel zichtbaar voor leden van de organisator.</p>
+            <h2>{{ $t('113f3407-9b00-4e86-bedd-e61614e78a0b') }}</h2>
+            <p>{{ $t('2662a425-f996-479b-a1fc-8498f068ea97') }}</p>
 
             <STList>
                 <STListItem v-if="externalOrganization" :selectable="true" @click="chooseOrganizer('Kies een organisator', canSelectOrganization)">

@@ -390,5 +390,16 @@
   "ffef2405-f472-416b-b8fa-372fdf694797": "Verwijderen",
   "5283efe2-f4a8-4c3b-8cbc-7cf2acf16da0": "Beperking op standaard leeftijdsgroep toevoegen",
   "97bfc084-7f4f-4e4f-a187-48703d42c7be": "Beperking op leeftijdsgroep toevoegen",
-  "5ba7cf31-0cee-4599-9086-ae864b09f441": "Beperking op regio toevoegen"
+  "5ba7cf31-0cee-4599-9086-ae864b09f441": "Beperking op regio toevoegen",
+  "c0a0c0f7-1282-40be-85fc-320d136d34ab": "Naam",
+  "561e9ebb-ae0c-48f3-a10d-921c2a59d5a4": "Beschrijving",
+  "2cb56415-5e16-4a75-9012-8971be8dbc6a": "Beschrijving van deze activiteit",
+  "9210b13c-2699-4a7f-b173-a07bafd8a13b": "Laat leden inschrijven voor deze activiteit via het ledenportaal",
+  "112b7686-dffc-4ae9-9706-e3efcd34898f": "Datum",
+  "f001f5c4-f3ea-46c0-bd0c-0b30ad8098f5": "Meerdere dagen",
+  "5dd84548-b16f-415b-8dbd-d96aeecedc3e": "Vanaf",
+  "d756277c-4655-4e92-afcc-ae3c9f615190": "Nationale of regionale activiteit",
+  "987c7ee6-8ee2-41d7-823e-db0ff590ea7d": "Zichtbaar in de kalender",
+  "113f3407-9b00-4e86-bedd-e61614e78a0b": "Organisator",
+  "2662a425-f996-479b-a1fc-8498f068ea97": "Deze activiteit is enkel zichtbaar voor leden van de organisator."
 }
