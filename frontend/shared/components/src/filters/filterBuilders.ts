@@ -2,13 +2,14 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { CheckoutMethodType, CheckoutMethodTypeHelper, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
-import { usePlatform } from '../hooks';
+import { usePlatform, useUser } from '../hooks';
 import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterBuilder } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from './UIFilter';
+import { computed } from 'vue';
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
@@ -83,63 +84,121 @@ registrationUIFilterBuilders.unshift(
     }),
 );
 
-export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform: Platform, options: { user?: User | null } = {}) {
-    const all = [
-        ...memberWithRegistrationsBlobUIFilterBuilders.slice(1),
-    ];
+export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
+    const $platform = usePlatform();
+    const $user = useUser();
+    const $t = useTranslate();
 
-    if (options.user?.permissions?.platform !== null) {
-        all.push(
-            new StringFilterBuilder({
-                name: 'Groepsnummer',
-                key: 'uri',
-                wrapper: {
-                    registrations: {
-                        $elemMatch: {
-                            organization: UIFilterWrapperMarker,
-                            periodId: platform.period.id,
-                        },
-                    },
-                },
-            }),
-        );
+    return computed(() => {
+        const platform = $platform.value;
+        const user = $user.value;
 
-        all.push(
-            new MultipleChoiceFilterBuilder({
-                name: 'Functies',
-                multipleChoiceConfiguration: {
-                    isSubjectPlural: true,
-                },
-                options: platform.config.responsibilities.map((responsibility) => {
-                    return new MultipleChoiceUIFilterOption(responsibility.name, responsibility.id);
-                }),
-                wrapper: {
-                    responsibilities: {
-                        $elemMatch: {
-                            responsibilityId: {
-                                $in: UIFilterWrapperMarker,
+        const all = [
+            ...memberWithRegistrationsBlobUIFilterBuilders.slice(1),
+        ];
+
+        if (user?.permissions?.platform !== null) {
+            all.push(
+                new StringFilterBuilder({
+                    name: $t('Groepsnummer'),
+                    key: 'uri',
+                    wrapper: {
+                        registrations: {
+                            $elemMatch: {
+                                organization: UIFilterWrapperMarker,
+                                periodId: platform.period.id,
                             },
-                            endDate: null,
                         },
                     },
-                },
-            }),
-        );
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('Functies'),
+                    multipleChoiceConfiguration: {
+                        isSubjectPlural: true,
+                    },
+                    options: platform.config.responsibilities.map((responsibility) => {
+                        return new MultipleChoiceUIFilterOption(responsibility.name, responsibility.id);
+                    }),
+                    wrapper: {
+                        responsibilities: {
+                            $elemMatch: {
+                                responsibilityId: {
+                                    $in: UIFilterWrapperMarker,
+                                },
+                                endDate: null,
+                            },
+                        },
+                    },
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('Hiërarchie'),
+                    multipleChoiceConfiguration: {
+                        isSubjectPlural: true,
+                    },
+                    options: platform.config.tags.map((tag) => {
+                        return new MultipleChoiceUIFilterOption(tag.name, tag.id);
+                    }),
+                    wrapper: {
+                        registrations: {
+                            $elemMatch: {
+                                organization: {
+                                    tags: {
+                                        $in: UIFilterWrapperMarker,
+                                    },
+                                },
+                                periodId: platform.period.id,
+                            },
+                        },
+                    },
+                }),
+            );
+
+            for (const responsibility of platform.config.responsibilities) {
+                if (!responsibility.organizationBased || responsibility.defaultAgeGroupIds === null) {
+                    continue;
+                }
+
+                all.push(
+                    new MultipleChoiceFilterBuilder({
+                        name: responsibility.name,
+                        options: platform.config.defaultAgeGroups.filter(group => responsibility.defaultAgeGroupIds?.includes(group.id)).map((group) => {
+                            return new MultipleChoiceUIFilterOption(group.name, group.id);
+                        }),
+                        wrapper: {
+                            responsibilities: {
+                                $elemMatch: {
+                                    responsibilityId: responsibility.id,
+                                    endDate: null,
+                                    group: {
+                                        defaultAgeGroupId: {
+                                            $in: UIFilterWrapperMarker,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    }),
+                );
+            }
+        }
 
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: 'Tags',
-                multipleChoiceConfiguration: {
-                    isSubjectPlural: true,
-                },
-                options: platform.config.tags.map((tag) => {
-                    return new MultipleChoiceUIFilterOption(tag.name, tag.id);
+                name: $t('Standaard leeftijdsgroep'),
+                options: platform.config.defaultAgeGroups.map((group) => {
+                    return new MultipleChoiceUIFilterOption(group.name, group.id);
                 }),
                 wrapper: {
                     registrations: {
                         $elemMatch: {
-                            organization: {
-                                tags: {
+                            group: {
+                                defaultAgeGroupId: {
                                     $in: UIFilterWrapperMarker,
                                 },
                             },
@@ -150,222 +209,173 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             }),
         );
 
-        for (const responsibility of platform.config.responsibilities) {
-            if (!responsibility.organizationBased || responsibility.defaultAgeGroupIds === null) {
-                continue;
-            }
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: $t('Aansluitingstatus'),
+                options: [
+                    new MultipleChoiceUIFilterOption($t('Actief'), 'Active'),
+                    new MultipleChoiceUIFilterOption($t('Verlopen'), 'Expiring'),
+                    new MultipleChoiceUIFilterOption($t('Inactief'), 'Inactive'),
+                ],
+                wrapFilter: (f: StamhoofdFilter) => {
+                    const choices = Array.isArray(f) ? f : [f];
 
-            all.push(
-                new MultipleChoiceFilterBuilder({
-                    name: responsibility.name,
-                    options: platform.config.defaultAgeGroups.filter(group => responsibility.defaultAgeGroupIds?.includes(group.id)).map((group) => {
-                        return new MultipleChoiceUIFilterOption(group.name, group.id);
-                    }),
-                    wrapper: {
-                        responsibilities: {
-                            $elemMatch: {
-                                responsibilityId: responsibility.id,
-                                endDate: null,
-                                group: {
-                                    defaultAgeGroupId: {
-                                        $in: UIFilterWrapperMarker,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                }),
-            );
-        }
-    }
-
-    all.push(
-        new MultipleChoiceFilterBuilder({
-            name: 'Standaard leeftijdsgroep',
-            options: platform.config.defaultAgeGroups.map((group) => {
-                return new MultipleChoiceUIFilterOption(group.name, group.id);
-            }),
-            wrapper: {
-                registrations: {
-                    $elemMatch: {
-                        group: {
-                            defaultAgeGroupId: {
-                                $in: UIFilterWrapperMarker,
-                            },
-                        },
-                        periodId: platform.period.id,
-                    },
-                },
-            },
-        }),
-    );
-
-    all.push(
-        new MultipleChoiceFilterBuilder({
-            name: 'Aansluitingstatus',
-            options: [
-                new MultipleChoiceUIFilterOption('Actief', 'Active'),
-                new MultipleChoiceUIFilterOption('Verlopen', 'Expiring'),
-                new MultipleChoiceUIFilterOption('Inactief', 'Inactive'),
-            ],
-            wrapFilter: (f: StamhoofdFilter) => {
-                const choices = Array.isArray(f) ? f : [f];
-
-                if (choices.length === 3) {
-                    return null;
-                }
-
-                const activeOrExpiringFilter: StamhoofdFilter = {
-                    platformMemberships: {
-                        $elemMatch: {
-                            startDate: {
-                                $lte: { $: '$now' },
-                            },
-                            endDate: {
-                                $gt: { $: '$now' },
-                            },
-                        },
-                    },
-                };
-
-                if (choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
-                    return activeOrExpiringFilter;
-                }
-
-                const getFilter = (choice: StamhoofdFilter<StamhoofdCompareValue>): StamhoofdFilter => {
-                    switch (choice) {
-                        case 'Active': {
-                            return {
-                                platformMemberships: {
-                                    $elemMatch: {
-                                        endDate: {
-                                            $gt: { $: '$now' },
-                                        },
-                                        startDate: {
-                                            $lte: { $: '$now' },
-                                        },
-                                        $or: [
-                                            {
-                                                expireDate: null,
-                                            },
-                                            {
-                                                expireDate: {
-                                                    $gt: { $: '$now' },
-                                                },
-                                            },
-                                        ],
-                                    },
-                                },
-                            };
-                        }
-                        case 'Inactive': {
-                            return {
-                                $not: activeOrExpiringFilter,
-                            };
-                        }
-                        case 'Expiring': {
-                            return {
-                                $not: getFilter('Active'),
-                                platformMemberships: {
-                                    $elemMatch: {
-                                        endDate: {
-                                            $gte: { $: '$now' },
-                                        },
-                                        expireDate: {
-                                            $lt: { $: '$now' },
-                                        },
-                                    },
-                                },
-                            };
-                        }
-                        default: {
-                            return null;
-                        }
+                    if (choices.length === 3) {
+                        return null;
                     }
-                };
 
-                const filters = choices.map(getFilter);
-
-                if (filters.length === 1) {
-                    return filters[0];
-                }
-
-                return {
-                    $or: filters,
-                };
-            },
-            unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
-                const activeAndExpiring = unwrapFilter(f, {
-                    platformMemberships: {
-                        $elemMatch: {
-                            endDate: {
-                                $gt: { $: '$now' },
+                    const activeOrExpiringFilter: StamhoofdFilter = {
+                        platformMemberships: {
+                            $elemMatch: {
+                                startDate: {
+                                    $lte: { $: '$now' },
+                                },
+                                endDate: {
+                                    $gt: { $: '$now' },
+                                },
                             },
                         },
-                    },
-                });
+                    };
 
-                if (activeAndExpiring.match) {
-                    return ['Active', 'Expiring'];
-                }
+                    if (choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
+                        return activeOrExpiringFilter;
+                    }
 
-                return null;
-            },
-        }),
-    );
+                    const getFilter = (choice: StamhoofdFilter<StamhoofdCompareValue>): StamhoofdFilter => {
+                        switch (choice) {
+                            case 'Active': {
+                                return {
+                                    platformMemberships: {
+                                        $elemMatch: {
+                                            endDate: {
+                                                $gt: { $: '$now' },
+                                            },
+                                            startDate: {
+                                                $lte: { $: '$now' },
+                                            },
+                                            $or: [
+                                                {
+                                                    expireDate: null,
+                                                },
+                                                {
+                                                    expireDate: {
+                                                        $gt: { $: '$now' },
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    },
+                                };
+                            }
+                            case 'Inactive': {
+                                return {
+                                    $not: activeOrExpiringFilter,
+                                };
+                            }
+                            case 'Expiring': {
+                                return {
+                                    $not: getFilter('Active'),
+                                    platformMemberships: {
+                                        $elemMatch: {
+                                            endDate: {
+                                                $gte: { $: '$now' },
+                                            },
+                                            expireDate: {
+                                                $lt: { $: '$now' },
+                                            },
+                                        },
+                                    },
+                                };
+                            }
+                            default: {
+                                return null;
+                            }
+                        }
+                    };
 
-    all.push(
-        new MultipleChoiceFilterBuilder({
-            name: 'Actieve aansluiting',
-            options: platform.config.membershipTypes.map((type) => {
-                return new MultipleChoiceUIFilterOption(type.name, type.id);
+                    const filters = choices.map(getFilter);
+
+                    if (filters.length === 1) {
+                        return filters[0];
+                    }
+
+                    return {
+                        $or: filters,
+                    };
+                },
+                unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
+                    const activeAndExpiring = unwrapFilter(f, {
+                        platformMemberships: {
+                            $elemMatch: {
+                                endDate: {
+                                    $gt: { $: '$now' },
+                                },
+                            },
+                        },
+                    });
+
+                    if (activeAndExpiring.match) {
+                        return ['Active', 'Expiring'];
+                    }
+
+                    return null;
+                },
             }),
-            wrapFilter: (f: StamhoofdFilter) => {
-                const choices = Array.isArray(f) ? f : [f];
-                const d = new Date();
-                d.setHours(12);
-                d.setMinutes(0);
-                d.setSeconds(0);
-                d.setMilliseconds(0);
+        );
 
-                const filters: StamhoofdFilter = [
-                    {
-                        membershipTypeId: {
-                            $in: choices as string[],
-                        },
-                        expireDate: null,
-                        endDate: {
-                            $gt: Formatter.dateIso(d),
-                        },
-                    },
-                    {
-                        membershipTypeId: {
-                            $in: choices as string[],
-                        },
-                        expireDate: {
-                            $gt: Formatter.dateIso(d),
-                        },
-                    },
-                ];
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: $t('Actieve aansluiting'),
+                options: platform.config.membershipTypes.map((type) => {
+                    return new MultipleChoiceUIFilterOption(type.name, type.id);
+                }),
+                wrapFilter: (f: StamhoofdFilter) => {
+                    const choices = Array.isArray(f) ? f : [f];
+                    const d = new Date();
+                    d.setHours(12);
+                    d.setMinutes(0);
+                    d.setSeconds(0);
+                    d.setMilliseconds(0);
 
-                return {
-                    platformMemberships: {
-                        $elemMatch: {
-                            $or: filters,
+                    const filters: StamhoofdFilter = [
+                        {
+                            membershipTypeId: {
+                                $in: choices as string[],
+                            },
+                            expireDate: null,
+                            endDate: {
+                                $gt: Formatter.dateIso(d),
+                            },
                         },
-                    },
-                };
-            },
-        }),
-    );
+                        {
+                            membershipTypeId: {
+                                $in: choices as string[],
+                            },
+                            expireDate: {
+                                $gt: Formatter.dateIso(d),
+                            },
+                        },
+                    ];
 
-    all.unshift(
-        new GroupUIFilterBuilder({
-            builders: all,
-        }),
-    );
+                    return {
+                        platformMemberships: {
+                            $elemMatch: {
+                                $or: filters,
+                            },
+                        },
+                    };
+                },
+            }),
+        );
 
-    return all;
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    });
 }
 
 //

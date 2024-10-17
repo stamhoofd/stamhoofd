@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -49,11 +49,7 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-const filterBuilders = computed(() => {
-    return getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform.value, {
-        user: auth.user,
-    });
-});
+const filterBuilders = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
 
 const title = computed(() => {
     if (props.customTitle) {
