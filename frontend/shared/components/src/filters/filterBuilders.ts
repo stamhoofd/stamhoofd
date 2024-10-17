@@ -6,7 +6,7 @@ import { usePlatform, useUser } from '../hooks';
 import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
-import { NumberFilterBuilder } from './NumberUIFilter';
+import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from './UIFilter';
 import { computed } from 'vue';
@@ -729,12 +729,12 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         new NumberFilterBuilder({
             name: 'Bedrag',
             key: 'totalPrice',
-            currency: true,
+            type: NumberFilterFormat.Currency,
         }),
         new NumberFilterBuilder({
             name: 'Te betalen',
             key: 'openBalance',
-            currency: true,
+            type: NumberFilterFormat.Currency,
         }),
         new NumberFilterBuilder({
             name: 'Aantal',
@@ -742,6 +742,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         }),
     );
 
+    const timeCount = Formatter.uniqueArray(preview.meta.checkoutMethods.flatMap(method => method.timeSlots.timeSlots).map(t => t.timeRangeString())).length;
     const dateCount = Formatter.uniqueArray(preview.meta.checkoutMethods.flatMap(method => method.timeSlots.timeSlots).map(t => t.dateString())).length;
 
     const hasDelivery = preview.meta.checkoutMethods.some(method => method.type === CheckoutMethodType.Delivery);
@@ -757,11 +758,25 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
             }));
     }
 
+    if (timeCount > 1) {
+        // todo: change sort of timeSlotTime => should take start time into account => composite key or generated index maybe?
+        // todo: maybe group
+        builders.push(
+            new NumberFilterBuilder({
+                name: 'Tijdstip einde',
+                key: 'timeSlotEndTime',
+                type: NumberFilterFormat.TimeMinutes,
+            }));
+
+        builders.push(
+            new NumberFilterBuilder({
+                name: 'Tijdstip start',
+                key: 'timeSlotStartTime',
+                type: NumberFilterFormat.TimeMinutes,
+            }));
+    }
+
     const groupFilter = new GroupUIFilterBuilder({ builders });
 
     return [groupFilter, ...builders];
 }
-/**
-    TimeSlotTime = 'timeSlotTime',
-     *
-     */

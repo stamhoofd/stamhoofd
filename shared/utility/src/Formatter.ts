@@ -239,12 +239,12 @@ export class Formatter {
     /**
      * 12:00
      */
-    static time(date: Date): string {
+    static time(date: Date, timeZone = this.timezone): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return '?';
         }
-        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        const datetime = DateTime.fromJSDate(date).setZone(timeZone);
         return datetime.hour + ':' + (datetime.minute + '').padStart(2, '0');
     }
 

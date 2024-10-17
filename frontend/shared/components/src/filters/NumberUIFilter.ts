@@ -77,11 +77,29 @@ export class NumberUIFilter extends UIFilter {
                 text: ' ' + this.combinationWord + ' ',
                 style: 'gray',
             }, {
-                text: this.builder.currency ? Formatter.price(this.value) : this.value.toFixed(this.builder.floatingPoint ? 2 : 0),
+                text: this.valueToText,
                 style: '',
             },
         ];
     }
+
+    private get valueToText() {
+        switch (this.builder.type) {
+            case NumberFilterFormat.Number: return this.value.toFixed(this.builder.floatingPoint ? 2 : 0);
+            case NumberFilterFormat.Currency: return Formatter.price(this.value);
+            case NumberFilterFormat.TimeMinutes: {
+                const dateZero = new Date(0);
+                dateZero.setMinutes(this.value);
+                return Formatter.time(dateZero, 'utc');
+            };
+        }
+    }
+}
+
+export enum NumberFilterFormat {
+    Number,
+    Currency,
+    TimeMinutes,
 }
 
 export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
@@ -92,16 +110,16 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
     wrapper?: WrapperFilter;
 
     floatingPoint = false;
-    currency = false;
+    type = NumberFilterFormat.Number;
 
-    constructor(data: { key: string; name: string; currency?: boolean; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter }) {
+    constructor(data: { key: string; name: string; type?: NumberFilterFormat; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter }) {
         this.key = data.key;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter;
         this.name = data.name;
         this.wrapper = data.wrapper;
-        if (data.currency) {
-            this.currency = true;
+        if (data.type !== undefined) {
+            this.type = data.type;
         }
     }
 

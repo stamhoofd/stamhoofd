@@ -24,6 +24,7 @@ export class DateUIFilter extends UIFilter {
     value: Date = new Date();
     mode: UIDateFilterMode = UIDateFilterMode.Equals;
 
+    // idea: add possibility to choose time also
     constructor(data: Partial<DateUIFilter>, options: { isInverted?: boolean } = {}) {
         super(data, options);
         Object.assign(this, data);

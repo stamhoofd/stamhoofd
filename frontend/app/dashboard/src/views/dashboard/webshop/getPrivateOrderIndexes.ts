@@ -10,6 +10,8 @@ export enum OrderStoreDataIndex {
     CheckoutMethod = 'checkoutMethod',
     TimeSlotDate = 'timeSlotDate',
     TimeSlotTime = 'timeSlotTime',
+    TimeSlotEndTime = 'timeSlotEndTime',
+    TimeSlotStartTime = 'timeSlotStartTime',
     ValidAt = 'validAt',
     Name = 'name',
     Email = 'email',
@@ -62,7 +64,14 @@ export const orderStoreIndexValueDefinitions: SortDefinitions<PrivateOrder> & Re
         getValue: value => value.data.timeSlot?.date.getTime(),
     },
     [OrderStoreDataIndex.TimeSlotTime]: {
+        // todo: take into account start time
         getValue: value => value.data.timeSlot?.endTime,
+    },
+    [OrderStoreDataIndex.TimeSlotEndTime]: {
+        getValue: value => value.data.timeSlot?.endTime,
+    },
+    [OrderStoreDataIndex.TimeSlotStartTime]: {
+        getValue: value => value.data.timeSlot?.startTime,
     },
     [OrderStoreDataIndex.ValidAt]: {
         getValue: value => value.validAt?.getTime(),
@@ -118,7 +127,10 @@ export const privateOrderIndexBoxInMemoryFilterCompilers: InMemoryFilterDefiniti
     [OrderStoreDataIndex.PaymentMethod]: createInMemoryFilterCompiler('data.paymentMethod'),
     [OrderStoreDataIndex.CheckoutMethod]: createInMemoryFilterCompiler('data.checkoutMethod.type'),
     [OrderStoreDataIndex.TimeSlotDate]: createInMemoryFilterCompiler('data.timeSlot.date'),
+    // todo: take into account start time
     [OrderStoreDataIndex.TimeSlotTime]: createInMemoryFilterCompiler('data.timeSlot.endTime'),
+    [OrderStoreDataIndex.TimeSlotEndTime]: createInMemoryFilterCompiler('data.timeSlot.endTime'),
+    [OrderStoreDataIndex.TimeSlotStartTime]: createInMemoryFilterCompiler('data.timeSlot.startTime'),
     [OrderStoreDataIndex.ValidAt]: createInMemoryFilterCompiler('validAt'),
     [OrderStoreDataIndex.Name]: createInMemoryFilterCompiler('data.customer.name'),
     [OrderStoreDataIndex.Email]: createInMemoryFilterCompiler('data.customer.email'),
