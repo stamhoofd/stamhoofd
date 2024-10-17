@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>Elke lokale groep moet per inschrijvingsgroep een standaard leeftijsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.</p>
+        <p>Elke lokale groep moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
