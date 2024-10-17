@@ -68,7 +68,14 @@
     "i18n-ally.localesPaths": [
         "shared/locales/src"
     ],
+    "i18n-ally.annotationInPlace": false,
+    "i18n-ally.extract.keyMaxLength": 1000,
+    "i18n-ally.indent": 4,
+    "i18n-ally.tabStyle": "space",
     "i18n-ally.sourceLanguage": "nl",
+    "i18n-ally.languageTagSystem": "none",
+    "i18n-ally.enabledParsers": ["json"],
+    "i18n-ally.dirStructure": "file",
     "javascript.format.enable": false,
     "search.exclude": {
         "**.tsbuildinfo": true,
