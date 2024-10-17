@@ -45,7 +45,7 @@ const { patched: groups, patch, addArrayPatch, hasChanges } = usePatchArray(orig
 const draggableGroups = useDraggableArray(() => groups.value, addArrayPatch);
 const saving = ref(false);
 
-const title = 'Standaard leeftijdsgroepen';
+const title = $t('9af957c4-5dea-47ee-a30f-1ef5802a9437');
 
 async function addGroup() {
     const arr: PatchableArrayAutoEncoder<DefaultAgeGroup> = new PatchableArray();

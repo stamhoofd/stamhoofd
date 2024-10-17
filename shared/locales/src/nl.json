@@ -378,5 +378,17 @@
   "6d4c31c6-c70b-4cf2-8890-b2d4507913c7": "Actief",
   "cc528c3f-aed3-4eb6-9db1-70aae5261a28": "Verlopen",
   "33906077-a1d8-4daa-9914-ce129538f68c": "Inactief",
-  "b0ed8db1-097d-4739-9407-e8aae5e1413c": "Actieve aansluiting"
+  "b0ed8db1-097d-4739-9407-e8aae5e1413c": "Actieve aansluiting",
+  "9af957c4-5dea-47ee-a30f-1ef5802a9437": "Standaard leeftijdsgroepen",
+  "712c3597-d7c9-459c-9e92-ff32de445642": "De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze standaard leeftijdsgroepen.",
+  "efeed776-7b4a-4f06-b755-04b1c615ff2d": "Leeftijdsgroepen",
+  "248d7837-f7f1-48f9-a151-96e936cda4fc": "De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze leeftijdsgroepen.",
+  "fb25250b-2b50-4fb4-babc-020b9fe80dfc": "Je kan dit voorlopig enkel bewerken via het beheerdersportaal van de organisator.",
+  "8922afd5-4566-4998-9c6f-d7a6143f29a2": "Locatie",
+  "3db5bf3f-3eb5-4cfc-ba9b-429fab43c540": "Naam locatie",
+  "17d579e1-518b-4dd4-98d8-f8184b7287be": "Omslagfoto",
+  "ffef2405-f472-416b-b8fa-372fdf694797": "Verwijderen",
+  "5283efe2-f4a8-4c3b-8cbc-7cf2acf16da0": "Beperking op standaard leeftijdsgroep toevoegen",
+  "97bfc084-7f4f-4e4f-a187-48703d42c7be": "Beperking op leeftijdsgroep toevoegen",
+  "5ba7cf31-0cee-4599-9086-ae864b09f441": "Beperking op regio toevoegen"
 }

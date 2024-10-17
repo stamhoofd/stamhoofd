@@ -143,13 +143,13 @@
             <hr>
 
             <h2 class="style-with-button">
-                <div>Standaard leeftijdsgroepen</div>
+                <div>{{ $t('9af957c4-5dea-47ee-a30f-1ef5802a9437') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteDefaultAgeGroupRestriction" />
                 </div>
             </h2>
 
-            <p>De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze standaard leeftijdsgroepen.</p>
+            <p>{{ $t('712c3597-d7c9-459c-9e92-ff32de445642') }}</p>
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" />
         </JumpToContainer>
@@ -158,16 +158,16 @@
             <hr>
 
             <h2 class="style-with-button">
-                <div>Leeftijdsgroepen</div>
+                <div>{{ $t('efeed776-7b4a-4f06-b755-04b1c615ff2d') }}</div>
                 <div>
                     <button v-if="!hasGroupRestrictions" type="button" class="button icon trash" @click="deleteGroupsRestriction" />
                 </div>
             </h2>
 
-            <p>De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze leeftijdsgroepen.</p>
+            <p>{{ $t('248d7837-f7f1-48f9-a151-96e936cda4fc') }}</p>
 
             <p v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id" class="info-box">
-                Je kan dit voorlopig enkel bewerken via het beheerdersportaal van de organisator.
+                {{ $t('fb25250b-2b50-4fb4-babc-020b9fe80dfc') }}
             </p>
             <GroupsInput v-else v-model="groups" :date="startDate" :is-group-enabled-operator="isGroupEnabledOperator" />
         </JumpToContainer>
@@ -175,13 +175,13 @@
         <JumpToContainer :visible="!!location">
             <hr>
             <h2 class="style-with-button">
-                <div>Locatie</div>
+                <div>{{ $t('8922afd5-4566-4998-9c6f-d7a6143f29a2') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteLocation" />
                 </div>
             </h2>
 
-            <STInputBox title="Naam locatie" error-fields="location.name" :error-box="errors.errorBox">
+            <STInputBox :title="$t('3db5bf3f-3eb5-4cfc-ba9b-429fab43c540')" error-fields="location.name" :error-box="errors.errorBox">
                 <input
                     ref="firstInput"
                     v-model="locationName"
@@ -199,11 +199,11 @@
         <JumpToContainer :visible="!!coverPhoto">
             <hr>
             <h2 class="style-with-button">
-                <div>Omslagfoto</div>
+                <div>{{ $t('17d579e1-518b-4dd4-98d8-f8184b7287be') }}</div>
                 <div>
                     <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
                         <span class="icon trash" />
-                        <span>Verwijderen</span>
+                        <span>{{ $t('ffef2405-f472-416b-b8fa-372fdf694797') }}</span>
                     </button>
                     <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
                 </div>
@@ -221,7 +221,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperking op standaard leeftijdsgroep toevoegen
+                    {{ $t('5283efe2-f4a8-4c3b-8cbc-7cf2acf16da0') }}
                 </h3>
             </STListItem>
 
@@ -231,7 +231,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperking op leeftijdsgroep toevoegen
+                    {{ $t('97bfc084-7f4f-4e4f-a187-48703d42c7be') }}
                 </h3>
             </STListItem>
 
@@ -241,7 +241,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperking op regio toevoegen
+                    {{ $t('5ba7cf31-0cee-4599-9086-ae864b09f441') }}
                 </h3>
             </STListItem>
 
