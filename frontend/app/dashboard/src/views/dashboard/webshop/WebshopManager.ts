@@ -1053,7 +1053,7 @@ export class WebshopManager {
         }
 
         const filteredRequest = new LimitedFilteredRequest({
-            limit: 1,
+            limit: 100,
             filter,
             sort,
         });
