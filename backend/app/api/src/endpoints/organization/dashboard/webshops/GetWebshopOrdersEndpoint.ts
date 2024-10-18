@@ -1,9 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Order } from '@stamhoofd/models';
 import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
@@ -51,16 +52,8 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             query.where(compileToSQLFilter(q.filter, filterCompilers));
         }
 
-        // todo: use same logic as frontend
         if (q.search) {
-            let searchFilter: StamhoofdFilter | null = null;
-
-            // todo: detect special search patterns and adjust search filter if needed
-            searchFilter = {
-                name: {
-                    $contains: q.search,
-                },
-            };
+            const searchFilter: StamhoofdFilter | null = getOrderSearchFilter(q.search, parsePhoneNumber);
 
             if (searchFilter) {
                 query.where(compileToSQLFilter(searchFilter, filterCompilers));

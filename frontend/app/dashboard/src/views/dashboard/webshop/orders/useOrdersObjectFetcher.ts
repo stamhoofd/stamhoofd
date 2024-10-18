@@ -1,6 +1,5 @@
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, Country, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
-import { DataValidator } from '@stamhoofd/utility';
+import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { WebshopManager } from '../WebshopManager';
 import { OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, orderStoreIndexValueDefinitions } from '../getPrivateOrderIndexes';
@@ -12,55 +11,8 @@ function extendSort(list: SortList): SortList {
     return assertSort(list, [{ key: 'id' }]);
 }
 
-// todo: add to backend also?
 function searchToFilter(search: string | null): StamhoofdFilter | null {
-    if (search !== null && search !== undefined) {
-        const parsedInt = Number.parseInt(search);
-
-        if (!Number.isNaN(parsedInt) && !(search.length > 1 && search[0] === '0')) {
-            return {
-                [OrderStoreDataIndex.Number]: {
-                    $eq: parsedInt,
-                },
-            };
-        }
-
-        if (search.includes('@')) {
-            const isCompleteAddress = DataValidator.isEmailValid(search);
-            return {
-                [OrderStoreDataIndex.Email]: {
-                    [(isCompleteAddress ? '$eq' : '$contains')]: search,
-                },
-            };
-        }
-
-        if (search.match(/^\+?[0-9\s-]+$/)) {
-            try {
-                // todo: how to determine country?
-                const phoneNumber = parsePhoneNumber(search, Country.Belgium);
-
-                if (phoneNumber && phoneNumber.isValid()) {
-                    const formatted = phoneNumber.formatInternational();
-                    return {
-                        [OrderStoreDataIndex.Phone]: {
-                            $eq: formatted,
-                        },
-                    };
-                }
-            }
-            catch (e) {
-                console.error('Failed to parse phone number', search, e);
-            }
-        }
-
-        return {
-            [OrderStoreDataIndex.Name]: {
-                $contains: search,
-            },
-        };
-    }
-
-    return null;
+    return getOrderSearchFilter(search, parsePhoneNumber);
 }
 
 export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {

@@ -180,6 +180,7 @@ export * from './src/filters/PropertyFilter';
 export * from './src/filters/Sorters';
 export * from './src/filters/SortList';
 export * from './src/filters/StamhoofdFilter';
+export * from './src/filters/searchFilterFactories';
 
 // Balance
 export * from './src/BalanceItem';
