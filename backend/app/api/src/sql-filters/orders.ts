@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, SQL, SQLConcat, SQLFilterDefinitions, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -36,17 +36,14 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
     validAt: createSQLColumnFilterCompiler('validAt'),
-
-    // todo: TEST!
     name: createSQLExpressionFilterCompiler(
-        new SQLConcat(
-            SQL.jsonValue(SQL.column('data'), '$.value.customer.firstName'),
-            new SQLScalar(' '),
-            SQL.jsonValue(SQL.column('data'), '$.value.customer.lastName'),
-        ),
-        // SQL.jsonValue(SQL.column('data'), '$.value.customer.name'),
-        // todo: type?
-        { isJSONValue: true, type: SQLValueType.JSONString },
+        new SQLCast(
+            new SQLConcat(
+                new SQLJsonUnquote(SQL.jsonValue(SQL.column('data'), '$.value.customer.firstName')),
+                new SQLScalar(' '),
+                new SQLJsonUnquote(SQL.jsonValue(SQL.column('data'), '$.value.customer.lastName')),
+            ),
+            'CHAR'),
     ),
     email: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('data'), '$.value.customer.email'),
@@ -61,8 +58,4 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
     totalPrice: createSQLColumnFilterCompiler('totalPrice'),
     amount: createSQLColumnFilterCompiler('amount'),
     timeSlotTime: createSQLColumnFilterCompiler('timeSlotTime'),
-
-    // only frontend
-    // openBalance
-    // location
 };
