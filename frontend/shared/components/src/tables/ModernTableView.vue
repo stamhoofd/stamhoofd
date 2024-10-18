@@ -560,10 +560,32 @@ function refresh() {
 
 const lastFilteredCount = ref(null) as Ref<number | null>;
 
+// the provisional total items used to calculate / update the visible rows when the total filtered count was not yet available
+let cachedProvisionalTotalItems: number | null = null;
+
 watchEffect(() => {
     if (props.tableObjectFetcher.totalFilteredCount !== null) {
         lastFilteredCount.value = props.tableObjectFetcher.totalFilteredCount;
     }
+});
+
+// if the visible rows had been updated before the total filtered count was available, update them again if necessary
+watch(() => props.tableObjectFetcher.totalFilteredCount, (totalFilteredCount: number | null) => {
+    if (cachedProvisionalTotalItems === null || totalFilteredCount === null) {
+        return;
+    }
+
+    // no need to update visible rows if the cached provisional total items is the same as the eventual total filtered count
+    if (totalFilteredCount === cachedProvisionalTotalItems
+    // if the cached total items is high, an update is not necessary because it will be updated on scroll anyways
+        || cachedProvisionalTotalItems > 200
+    ) {
+        cachedProvisionalTotalItems = null;
+        return;
+    }
+
+    console.log('Total filtered count changed after update visible rows. Updating visible rows again...');
+    updateVisibleRows();
 });
 
 const totalFilteredCount = computed(() => {
@@ -1564,7 +1586,7 @@ function updateVisibleRows() {
     const scrollElement = cachedScrollElement ?? getScrollElement(tableElement.value);
     cachedScrollElement = scrollElement;
 
-    // innerHeight is a fix for animations, causing wrong initial bouding client rect
+    // innerHeight is a fix for animations, causing wrong initial bounding client rect
     if (!cachedTableYPosition || cachedTableYPosition > window.innerHeight) {
         if (!tableBody.value) {
             return;
@@ -1579,7 +1601,21 @@ function updateVisibleRows() {
     // During animations, the scrollTop often jumps temporarily to a negative value
     topOffset = Math.max(0, (scrollElement.scrollTop - cachedTableYPosition));
 
-    const totalItems = totalFilteredCount.value;
+    let totalItems: number;
+
+    if (props.tableObjectFetcher.totalFilteredCount !== null) {
+        totalItems = props.tableObjectFetcher.totalFilteredCount;
+        cachedProvisionalTotalItems = null;
+    }
+    else if (lastFilteredCount.value !== null) {
+        totalItems = lastFilteredCount.value;
+        cachedProvisionalTotalItems = totalItems;
+    }
+    else {
+        totalItems = totalFilteredCount.value;
+        cachedProvisionalTotalItems = null;
+    }
+
     const extraItems = 5;
 
     const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / rowHeight.value) - extraItems, totalItems - 1));

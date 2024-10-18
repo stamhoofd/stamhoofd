@@ -59,6 +59,6 @@ const input = ref<HTMLInputElement | null>(null);
 
 async function onChange() {
     await nextTick();
-    input.value?.focus();
+    input.value?.focus?.();
 }
 </script>
