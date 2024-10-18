@@ -55,38 +55,6 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             await organization.delete();
         }
 
-        // Bulk tag editing
-        for (const patch of request.body.getPatches()) {
-            const organization = await Organization.getByID(patch.id);
-            if (!organization) {
-                throw new SimpleError({ code: 'not_found', message: 'Organization not found', statusCode: 404 });
-            }
-
-            if (patch.meta?.tags) {
-                const cleanedPatch = OrganizationMetaData.patch({
-                    tags: patch.meta.tags as any,
-                });
-                const patchedMeta = organization.meta.patch(cleanedPatch);
-                for (const tag of patchedMeta.tags) {
-                    if (!platform.config.tags.find(t => t.id === tag)) {
-                        throw new SimpleError({ code: 'invalid_tag', message: 'Invalid tag', statusCode: 400 });
-                    }
-                }
-
-                // Sort tags based on platform config order
-                patchedMeta.tags.sort((a, b) => {
-                    const aIndex = platform.config.tags.findIndex(t => t.id === a);
-                    const bIndex = platform.config.tags.findIndex(t => t.id === b);
-                    return aIndex - bIndex;
-                });
-
-                organization.meta.tags = patchedMeta.tags;
-            }
-
-            await organization.save();
-            result.push(organization);
-        }
-
         // Organization creation
         for (const { put } of request.body.getPuts()) {
             if (!Context.auth.hasPlatformFullAccess()) {
