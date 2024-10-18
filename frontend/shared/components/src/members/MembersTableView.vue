@@ -1,5 +1,7 @@
 <template>
+    <LoadingView v-if="loading" />
     <ModernTableView
+        v-else
         ref="modernTableView"
         :table-object-fetcher="tableObjectFetcher"
         :filter-builders="filterBuilders"
@@ -50,7 +52,7 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-const filterBuilders = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
+const { filterBuilders, loading } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
 
 const title = computed(() => {
     if (props.customTitle) {
