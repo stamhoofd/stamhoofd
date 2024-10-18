@@ -46,7 +46,7 @@
                             <span class="count">{{ formatInteger(childTag.organizationCount) }}</span>
                         </button>
 
-                        <hr v-if="index < rootTags.length - 1">
+                        <hr v-if="index < tagsToShow.length - 1 && tag.childTags.length">
                     </div>
                 </div>
             </div>
@@ -94,12 +94,6 @@ defineRoutes([
             slug: String,
         },
         paramsToProps(params: { slug: string }) {
-            if (params.slug === Formatter.slug(otherTags.value.name)) {
-                return {
-                    tag: otherTags.value,
-                };
-            }
-
             const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
             if (!tag) {
                 throw new Error('Tag not found');
@@ -130,12 +124,6 @@ defineRoutes([
             slug: String,
         },
         paramsToProps(params: { slug: string }) {
-            if (params.slug === Formatter.slug(otherTags.value.name)) {
-                return {
-                    tag: otherTags.value,
-                };
-            }
-
             const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
             if (!tag) {
                 throw new Error('Tag not found');
@@ -171,7 +159,6 @@ const checkRoute = useCheckRoute();
 const navigate = useNavigate();
 const platform = usePlatform();
 const collapsed = useCollapsed('tags');
-const otherTagsId = '';
 
 const tags = computed(() => {
     const t = auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
@@ -185,16 +172,7 @@ const rootTags = computed(() => TagHelper.getRootTags(tags.value));
 
 const rootTagsWithChildren = computed(() => rootTags.value.filter(tag => tag.childTags.length > 0));
 const otherRootTags = computed(() => rootTags.value.filter(tag => tag.childTags.length === 0));
-
-const otherTags = computed(() => {
-    return OrganizationTag.create({
-        id: otherTagsId,
-        name: rootTagsWithChildren.value.length === 0 ? 'Tags' : 'Andere tags',
-        childTags: otherRootTags.value.map(t => t.id),
-    });
-});
-
-const tagsToShow = computed(() => rootTagsWithChildren.value.concat(otherTags.value));
+const tagsToShow = computed(() => rootTagsWithChildren.value.concat(...otherRootTags.value));
 
 function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
     return tagIds.map(id => getTagById(id));
