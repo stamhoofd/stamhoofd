@@ -79,6 +79,7 @@ export class PatchPlatformEndpoint extends Endpoint<
         let shouldUpdateSetupSteps = false;
         let shouldMoveToPeriod: RegistrationPeriod | null = null;
         let shouldUpdateMemberships = false;
+        let shouldUpdateTags = false;
 
         if (request.body.config) {
             if (!Context.auth.hasPlatformFullAccess()) {
@@ -119,7 +120,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                         message: 'Invalid tags',
                     });
                 }
-                TagHelper.updateOrganizations((platform.config as PlatformConfig).tags);
+                shouldUpdateTags = true;
             }
 
             if (newConfig.membershipTypes && isPatchableArray(newConfig.membershipTypes) && newConfig.membershipTypes.changes.length > 0) {
@@ -206,6 +207,10 @@ export class PatchPlatformEndpoint extends Endpoint<
                     await MembershipHelper.updateAll();
                 }).catch(console.error);
             }
+        }
+
+        if (shouldUpdateTags) {
+            await TagHelper.updateOrganizations();
         }
 
         if (shouldMoveToPeriod) {

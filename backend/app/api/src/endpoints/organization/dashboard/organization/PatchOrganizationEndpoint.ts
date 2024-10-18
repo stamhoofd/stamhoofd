@@ -64,6 +64,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         const errors = new SimpleErrors();
         let shouldUpdateSetupSteps = false;
+        let updateTags = false;
 
         if (await Context.auth.hasFullAccess(organization.id)) {
             organization.name = request.body.name ?? organization.name;
@@ -284,6 +285,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     const platformConfig: PlatformConfig = platform.config;
                     organization.meta.tags = TagHelper.getAllTagsFromHierarchy(patchedMeta.tags, platformConfig.tags);
+
+                    updateTags = true;
                 }
             }
 
@@ -383,6 +386,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (shouldUpdateSetupSteps) {
             await SetupStepUpdater.updateForOrganization(organization);
+        }
+
+        if (updateTags) {
+            await TagHelper.updateOrganizations();
         }
 
         return new Response(await AuthenticatedStructures.organization(organization));

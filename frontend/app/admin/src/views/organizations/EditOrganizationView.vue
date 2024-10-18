@@ -80,6 +80,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import OrganizationUriInput from './components/OrganizationUriInput.vue';
 import SelectOrganizationTagRow from './tags/components/SelectOrganizationTagRow.vue';
+import { usePlatformManager } from '@stamhoofd/networking';
 
 const platform = usePlatform();
 const errors = useErrors();
@@ -94,6 +95,7 @@ const props = defineProps<{
 
 const { patched, hasChanges, addPatch, patch } = usePatch(props.organization);
 const $t = useTranslate();
+const platformManager = usePlatformManager();
 
 const saving = ref(false);
 
@@ -176,6 +178,10 @@ async function save() {
             });
         }
         await props.saveHandler(patch.value);
+
+        // Reload platform in the background
+        await platformManager.value.forceUpdate();
+
         await pop({ force: true });
     }
     catch (e) {

@@ -4,15 +4,17 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { OrganizationTag, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
 
 export class TagHelper extends SharedTagHelper {
-    static updateOrganizations(platformTags: OrganizationTag[]) {
+    static async updateOrganizations() {
         const queueId = 'update-tags-on-organizations';
         QueueHandler.cancel(queueId);
 
-        QueueHandler.schedule(queueId, async () => {
+        await QueueHandler.schedule(queueId, async () => {
+            let platform = await Platform.getShared();
+
             const tagCounts = new Map<string, number>();
             await this.loopOrganizations(async (organizations) => {
                 for (const organization of organizations) {
-                    organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platformTags);
+                    organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platform.config.tags);
 
                     for (const tag of organization.meta.tags) {
                         tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
@@ -22,8 +24,8 @@ export class TagHelper extends SharedTagHelper {
                 await Promise.all(organizations.map(organization => organization.save()));
             });
 
-            // Save tag counts
-            const platform = await Platform.getShared();
+            // Reload platform to avoid race conditions
+            platform = await Platform.getShared();
             for (const [tag, count] of tagCounts.entries()) {
                 const tagObject = platform.config.tags.find(t => t.id === tag);
                 if (tagObject) {
@@ -31,7 +33,7 @@ export class TagHelper extends SharedTagHelper {
                 }
             }
             await platform.save();
-        }).catch(console.error);
+        });
     }
 
     private static async loopOrganizations(onBatchReceived: (batch: Organization[]) => Promise<void>) {
