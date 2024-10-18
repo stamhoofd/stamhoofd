@@ -34,7 +34,7 @@
             </p>
             <STList v-model="draggableChildTags" :draggable="true">
                 <template #item="{item}">
-                    <TagRow :all-tags="allTags" :tag="item" @click="editTag(item)" />
+                    <TagRow :all-tags="allPatchedTags" :tag="item" @click="editTag(item)" @patch:all-tags="addArrayPatch" />
                 </template>
             </STList>
             <p>
@@ -102,6 +102,10 @@ const hasChanges = computed(() => patch.value.changes.length > 0);
 
 function addPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationTag>>) {
     patch.value.addPatch((props.tag.static as typeof OrganizationTag).patch({ id: props.tag.id, ...newPatch }));
+}
+
+function addArrayPatch(newPatch: PatchableArrayAutoEncoder<OrganizationTag>) {
+    patch.value = patch.value.patch(newPatch);
 }
 
 function addDelete(id: string) {

@@ -113,7 +113,7 @@ export class TagHelper extends SharedTagHelper {
 
                     // infinite loop should not be possible
                     // infinite loop if tag contains other tag in hierarchy
-                    if (this.containsDeep(tagId, otherTagId, tagMap)) {
+                    if (this.containsDeep(tagId, otherTagId, { tagMap })) {
                         console.error(`Tag ${tag.name} contains an infinite loop with ${otherTag.name}.`);
                         return false;
                     }
@@ -124,43 +124,21 @@ export class TagHelper extends SharedTagHelper {
         return true;
     }
 
-    /**
-     * Checks if a tag with the provided id contains the tag with the id to search recursively.
-     * @param tagId id of the tag to search into
-     * @param tagIdToSearch id of the tag to search inside the tag
-     * @param tagMap a map of all the tags
-     * @returns true if the tag contains the tag to search recursively or false otherwise
-     */
-    static containsDeep(tagId: string, tagIdToSearch: string, tagMap: Map<string, OrganizationTag>): boolean {
-        const tag = tagMap.get(tagId);
-        if (!tag) {
-            // should not happen
-            return false;
-        }
-
-        if (tag.childTags.length === 0) {
-            return false;
-        }
-
-        if (tag.childTags.includes(tagIdToSearch)) {
-            return true;
-        }
-
-        for (const childTagId of tag.childTags) {
-            if (this.containsDeep(childTagId, tagIdToSearch, tagMap)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     static getAllTagsFromHierarchy(tagIds: string[], platformTags: OrganizationTag[]) {
         const result = new Set<string>();
         const tagMap = new Map(platformTags.map(tag => [tag.id, tag]));
 
         this.recursivelyGetAllTagsFromHierarchy(tagIds, tagMap, result);
-        return Array.from(result);
+        const sorted = Array.from(result);
+
+        // Sort tags based on platform config order
+        sorted.sort((a, b) => {
+            const aIndex = platformTags.findIndex(t => t.id === a);
+            const bIndex = platformTags.findIndex(t => t.id === b);
+            return aIndex - bIndex;
+        });
+
+        return sorted;
     }
 
     private static recursivelyGetAllTagsFromHierarchy(tagIds: string[], tagMap: Map<string, OrganizationTag>, result: Set<string>): void {

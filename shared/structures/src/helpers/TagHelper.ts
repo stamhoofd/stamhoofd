@@ -31,4 +31,37 @@ export class TagHelper {
 
         return result;
     }
+
+    /**
+     * Checks if a tag with the provided id contains the tag with the id to search recursively.
+     * @param tagId id of the tag to search into
+     * @param tagIdToSearch id of the tag to search inside the tag
+     * @param tagMap a map of all the tags
+     * @returns true if the tag contains the tag to search recursively or false otherwise
+     */
+    static containsDeep(tagId: string, tagIdToSearch: string, tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> }): boolean {
+        const tagMap = 'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map(tag => [tag.id, tag]));
+
+        const tag = tagMap.get(tagId);
+        if (!tag) {
+            // should not happen
+            return false;
+        }
+
+        if (tag.childTags.length === 0) {
+            return false;
+        }
+
+        if (tag.childTags.includes(tagIdToSearch)) {
+            return true;
+        }
+
+        for (const childTagId of tag.childTags) {
+            if (this.containsDeep(childTagId, tagIdToSearch, { tagMap })) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

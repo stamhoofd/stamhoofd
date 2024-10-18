@@ -9,7 +9,7 @@
 
         <STList v-model="draggableTags" :draggable="true">
             <template #item="{item: tag}">
-                <TagRow :tag="tag" :all-tags="tags" @click="editTag(tag)" />
+                <TagRow :tag="tag" :all-tags="tags" @click="editTag(tag)" @patch:all-tags="addArrayPatch" />
             </template>
         </STList>
         <p>

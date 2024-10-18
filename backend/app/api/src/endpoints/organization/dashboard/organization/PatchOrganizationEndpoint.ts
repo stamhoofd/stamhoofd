@@ -276,13 +276,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         }
                     }
 
-                    // Sort tags based on platform config order
-                    patchedMeta.tags.sort((a, b) => {
-                        const aIndex = platform.config.tags.findIndex(t => t.id === a);
-                        const bIndex = platform.config.tags.findIndex(t => t.id === b);
-                        return aIndex - bIndex;
-                    });
-
                     const platformConfig: PlatformConfig = platform.config;
                     organization.meta.tags = TagHelper.getAllTagsFromHierarchy(patchedMeta.tags, platformConfig.tags);
 
