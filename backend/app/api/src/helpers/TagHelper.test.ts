@@ -50,9 +50,9 @@ describe('TagHelper', () => {
             ]);
 
             // act
-            const doesTag3ContainTag4 = TagHelper.containsDeep('id3', 'id4', tags);
-            const doesTag3ContainTag5 = TagHelper.containsDeep('id3', 'id5', tags);
-            const doesTag3ContainTag1 = TagHelper.containsDeep('id3', 'id1', tags);
+            const doesTag3ContainTag4 = TagHelper.containsDeep('id3', 'id4', { tagMap: tags });
+            const doesTag3ContainTag5 = TagHelper.containsDeep('id3', 'id5', { tagMap: tags });
+            const doesTag3ContainTag1 = TagHelper.containsDeep('id3', 'id1', { tagMap: tags });
 
             // assert
             expect(doesTag3ContainTag4).toBe(true);
