@@ -62,13 +62,13 @@ export class OrganizationTag extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = '';
 
-    @field({ decoder: StringDecoder, ...NextVersion })
+    @field({ decoder: StringDecoder, version: 341 })
     description = '';
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 341 })
     organizationCount = 0;
 
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 341 })
     childTags: string[] = [];
 
     get type() {
