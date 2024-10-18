@@ -17,15 +17,14 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { Column, getWebshopOrderUIFilterBuilders, GlobalEventBus, InMemoryTableAction, ModernTableView, Toast, UIFilterBuilders, useIsMobile, useTableObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
-import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
+import { Column, getWebshopOrderUIFilterBuilders, InMemoryTableAction, ModernTableView, UIFilterBuilders, useIsMobile, useTableObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
+import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { computed, onBeforeUnmount, Ref, ref } from 'vue';
+import { computed, onBeforeUnmount } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';
 import OrderView from './OrderView.vue';
@@ -34,7 +33,6 @@ import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
 const title = 'Bestellingen';
-// todo?
 const configurationId = 'orders';
 
 fetchOrders();
@@ -50,33 +48,17 @@ function fetchOrders() {
     }).catch(console.error);
 }
 
-// todo
 const filterBuilders: UIFilterBuilders = getWebshopOrderUIFilterBuilders(props.webshopManager.preview);
 
-// const organization = useOrganization();
 const organizationManager = useOrganizationManager();
-// const context = useContext();
-const owner = useRequestOwner();
 const show = useShow();
 const present = usePresent();
 const isMobile = useIsMobile();
 
-const loading = ref(false);
-const isLoadingOrders = ref(true);
-const isRefreshingOrders = ref(false);
-const orders: Ref<PrivateOrderWithTickets[]> = ref([]);
-
 const preview = computed(() => props.webshopManager.preview);
-// const webshop = computed(() => props.webshopManager.webshop);
 const hasSingleTickets = computed(() => preview.value.hasSingleTickets);
 const hasTickets = computed(() => preview.value.hasTickets);
-// const estimatedRows = computed(() => {
-//     if (isLoadingOrders.value) {
-//         return orders.value.length === 0 ? 30 : orders.value.length;
-//     }
 
-//     return 0;
-// });
 const actions = computed(() => {
     const builder = new OrderActionBuilder({
         organizationManager: organizationManager.value,
@@ -512,76 +494,10 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     return cols;
 })();
 
-// const prefixColumn = computed(() => allColumns[0]);
-
-/**
-* Insert or update an order
-*/
-function putOrder(order: PrivateOrder) {
-    for (const _order of orders.value) {
-        if (order.id === _order.id) {
-            // replace data without affecting reference or tickets
-            _order.deepSet(order);
-            return;
-        }
-    }
-    orders.value.push(PrivateOrderWithTickets.create(order));
-}
-
-async function onNewOrders(orders: PrivateOrder[]) {
-    console.log('Received new orders from network');
-    // Search for the orders and replace / add them
-    for (const order of orders) {
-        putOrder(order);
-    }
-
-    return Promise.resolve();
-}
-
-async function onNewTickets(tickets: TicketPrivate[]) {
-    console.log('Received new tickets from network');
-
-    for (const order of orders.value) {
-        order.addTickets(tickets);
-    }
-
-    return Promise.resolve();
-}
-
-function onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
-    console.log('Received new tickets from network');
-    PrivateOrderWithTickets.addTicketPatches(orders.value, patches);
-    return Promise.resolve();
-}
-
-function created() {
-    props.webshopManager.ordersEventBus.addListener(owner, 'fetched', orders => onNewOrders(orders));
-    props.webshopManager.ordersEventBus.addListener(owner, 'deleted', orders => onDeleteOrders(orders));
-
-    props.webshopManager.ticketsEventBus.addListener(owner, 'fetched', tickets => onNewTickets(tickets));
-    props.webshopManager.ticketPatchesEventBus.addListener(owner, 'patched', tickets => onNewTicketPatches(tickets));
-
-    reload();
-    loadOrders().catch(console.error);
-
-    // Listen for patches in payments
-    GlobalEventBus.addListener(owner, 'paymentPatch', async (payment: PaymentGeneral) => {
-        if (payment && payment.id && payment.webshopIds.find(webshopId => webshopId === props.webshopManager.preview.id)) {
-            await props.webshopManager.fetchNewTickets(false, false);
-        }
-        return Promise.resolve();
-    });
-}
-
-// created();
-
-// const hasWrite = computed(() => {
-//     const p = context.value.organizationPermissions;
-//     if (!p) {
-//         return false;
-//     }
-//     return preview.value.privateMeta.permissions.hasWriteAccess(p);
-// });
+// todo: fetch tickets?
+// todo: what to do on paymentPatch event? fetch new tickets and reload table, or update rows?
+// onNewTickets => order.addTickets(tickets);
+// onNewTicketPatches => patches: AutoEncoderPatchType<TicketPrivate>[] =>  PrivateOrderWithTickets.addTicketPatches(orders.value, patches);
 
 onBeforeUnmount(() => {
     props.webshopManager.ordersEventBus.removeListener(this);
@@ -589,131 +505,6 @@ onBeforeUnmount(() => {
     props.webshopManager.ticketPatchesEventBus.removeListener(this);
     Request.cancelAll(this);
 });
-
-function onDeleteOrders(orders: PrivateOrder[]): Promise<void> {
-    // Delete these orders from the loaded orders instead of doing a full reload
-    for (const order of orders) {
-        const index = orders.findIndex(o => o.id === order.id);
-        if (index !== -1) {
-            orders.splice(index, 1);
-        }
-    }
-
-    return Promise.resolve();
-}
-
-async function loadOrders() {
-    console.log('Loading orders...');
-    orders.value = [];
-    isLoadingOrders.value = true;
-
-    // Disabled for now: first fix needed for payment status + deleted orders
-    try {
-        // We use stream orders because that doesn't block the main thread on iOS
-        // (we don't need to decode all orders at the same time on the main thread)
-
-        // We use a buffer to prevent DOM updates or Vue slowdown during streaming
-        const arrayBuffer: PrivateOrderWithTickets[] = [];
-
-        await props.webshopManager.streamOrdersDeprecated((order) => {
-            // Same orders could be seen twice
-            arrayBuffer.push(
-                PrivateOrderWithTickets.create(order),
-            );
-        }, false);
-
-        const ticketBuffer: TicketPrivate[] = [];
-
-        await props.webshopManager.streamTickets((ticket) => {
-            ticketBuffer.push(ticket);
-        }, false);
-
-        await props.webshopManager.streamTicketPatches((patch) => {
-            const ticket = ticketBuffer.find(o => o.id === patch.id);
-            if (ticket) {
-                ticket.deepSet(ticket.patch(patch));
-            }
-        });
-
-        for (const ticket of ticketBuffer) {
-            const order = arrayBuffer.find(o => o.id === ticket.orderId);
-            if (order) {
-                order.tickets.push(ticket);
-            }
-            else {
-                console.warn('Couldn\'t find order for ticket', ticket);
-            }
-        }
-
-        if (arrayBuffer.length > 0) {
-            orders.value = arrayBuffer;
-            isLoadingOrders.value = false;
-        }
-    }
-    catch (e) {
-        // Database error. We can ignore this and simply move on.
-        console.error(e);
-    }
-    await refresh(false);
-}
-
-async function refresh(reset = false) {
-    try {
-        // Initiate a refresh
-        // don't wait
-        isRefreshingOrders.value = true;
-        isLoadingOrders.value = orders.value.length === 0;
-
-        if (reset) {
-            orders.value = [];
-        }
-        await props.webshopManager.fetchNewOrdersDeprecated(false, reset);
-    }
-    catch (e) {
-        // Fetching failed
-        Toast.fromError(e).show();
-    }
-
-    // And preload the tickets if needed
-    await refreshTickets();
-
-    isLoadingOrders.value = false;
-    isRefreshingOrders.value = false;
-}
-
-async function refreshTickets() {
-    // And preload the tickets if needed
-    if (hasTickets.value) {
-        try {
-            await props.webshopManager.fetchNewTickets(false, false);
-        }
-        catch (e) {
-            // Fetching failed
-            Toast.fromError(e).show();
-        }
-
-        // Do we still have some missing patches that are not yet synced with the server?
-        props.webshopManager.trySavePatches().catch((e: any) => {
-            console.error(e);
-            Toast.fromError(e).show();
-        });
-    }
-}
-
-// const webshopUrl = computed(() => preview.value.getUrl(organization.value!));
-
-// const hasFullPermissions = computed(() => preview.value.privateMeta.permissions.hasFullAccess(context.value.organizationPermissions));
-
-function reload() {
-    loading.value = true;
-
-    props.webshopManager.loadWebshopIfNeeded().catch((e) => {
-        console.error(e);
-        Toast.fromError(e).show();
-    }).finally(() => {
-        loading.value = false;
-    });
-}
 
 // const deliveryCities = computed(() => {
 //     const cities = new Map<string, string>();
@@ -726,10 +517,6 @@ function reload() {
 //     return [...cities.entries()].sort((a, b) => Sorter.byStringValue(a[0], b[0]));
 // });
 
-// const filterDefinitions = [];
-
-// todo: get private order with tickets??
-// function openOrder(order: PrivateOrderWithTickets) {
 function openOrder(order: PrivateOrder) {
     const component = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(OrderView, {
