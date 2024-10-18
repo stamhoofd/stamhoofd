@@ -1,42 +1,42 @@
-import { SimpleError } from "@simonbackx/simple-errors";
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { isEmptyFilter, PropertyFilter, StamhoofdCompareValue, StamhoofdFilter, StamhoofdNotFilter } from "@stamhoofd/structures";
-import { v4 as uuidv4 } from "uuid";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { isEmptyFilter, PropertyFilter, StamhoofdCompareValue, StamhoofdFilter, StamhoofdNotFilter } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from 'uuid';
 
 export type UIFilterWrapper = ((value: StamhoofdFilter) => StamhoofdFilter);
-export type UIFilterUnwrapper = ((value: StamhoofdFilter) => StamhoofdFilter|null);
+export type UIFilterUnwrapper = ((value: StamhoofdFilter) => StamhoofdFilter | null);
 
-export type UIFilterBuilders = UIFilterBuilder[]
+export type UIFilterBuilders = UIFilterBuilder[];
 export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
     /**
      * Create a new default filter
      */
-    create(options?: {isInverted?: boolean}): F
-    name: string
-    wrapper?: WrapperFilter
+    create(options?: { isInverted?: boolean }): F;
+    name: string;
+    wrapper?: WrapperFilter;
 
     // More complicated wrapper support:
-    wrapFilter?: UIFilterWrapper|null|undefined
-    unwrapFilter?: UIFilterUnwrapper|null|undefined
+    wrapFilter?: UIFilterWrapper | null | undefined;
+    unwrapFilter?: UIFilterUnwrapper | null | undefined;
 
-    fromFilter(filter: StamhoofdFilter): UIFilter|null
+    fromFilter(filter: StamhoofdFilter): UIFilter | null;
 }
 
-export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): {match: boolean, markerValue?: StamhoofdFilter|undefined, leftOver?: StamhoofdFilter, isInverted?: boolean} {
+export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter; isInverted?: boolean } {
     if (builder.wrapper) {
         const result = unwrapFilter(filter, builder.wrapper);
 
-        if(!result.match) {
+        if (!result.match) {
             const invertedFilter = UIFilter.invertFilter(filter);
 
-            if(invertedFilter) {
+            if (invertedFilter) {
                 const invertedResult = unwrapFilter(invertedFilter, builder.wrapper);
 
-                if(invertedResult.match) {
+                if (invertedResult.match) {
                     return {
                         ...invertedResult,
-                        isInverted: true
-                    }
+                        isInverted: true,
+                    };
                 }
             }
         }
@@ -47,40 +47,44 @@ export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: Stamhoo
     if (builder.unwrapFilter) {
         const r = builder.unwrapFilter(filter);
 
-        if(r === null) {
+        if (r === null) {
             const invertedFilter = UIFilter.invertFilter(filter);
 
-            if(invertedFilter) {
-                const invertedResult = builder.unwrapFilter(invertedFilter)
-                if(invertedResult !== null) {
+            if (invertedFilter) {
+                const invertedResult = builder.unwrapFilter(invertedFilter);
+                if (invertedResult !== null) {
                     return {
                         match: true,
                         markerValue: invertedResult,
-                        isInverted: true
-                    }
+                        isInverted: true,
+                    };
                 }
             }
         }
 
         return {
             match: true,
-            markerValue: r
-        }
+            markerValue: r,
+        };
     }
 
     return {
         match: true,
-        markerValue: filter
+        markerValue: filter,
     };
 }
 
-export const UIFilterWrapperMarker = Symbol('UIFilterWrapperMarker')
-export type WrapperFilter = StamhoofdFilter<StamhoofdCompareValue | typeof UIFilterWrapperMarker>
+export const UIFilterWrapperMarker = Symbol('UIFilterWrapperMarker');
+export type WrapperFilter = StamhoofdFilter<StamhoofdCompareValue | typeof UIFilterWrapperMarker>;
 
 export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): StamhoofdFilter {
     // Replace the UIFilterWrapperMarker symbol in wrap with filter
     if (wrap === UIFilterWrapperMarker) {
         return filter;
+    }
+
+    if (Array.isArray(wrap)) {
+        return wrap.map(w => wrapFilter(filter, w));
     }
 
     if (typeof wrap === 'object' && wrap !== null) {
@@ -89,10 +93,6 @@ export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): Stamho
             (o as any)[key] = wrapFilter(filter, (wrap as any)[key]);
         }
         return o;
-    }
-
-    if (Array.isArray(wrap)) {
-        return wrap.map(w => wrapFilter(filter, w));
     }
 
     return wrap;
@@ -104,26 +104,26 @@ export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): Stamho
  * Returns the filter at UIFilterWrapperMarker if it is found
  * If no UIFilterWrapperMarker is found, the filter is returned if it is the same as wrap
  */
-export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {match: boolean, markerValue?: StamhoofdFilter|undefined, leftOver?: StamhoofdFilter} {
+export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter } {
     // Replace the UIFilterWrapperMarker symbol in wrap with filter
     if (wrap === UIFilterWrapperMarker) {
         return {
             match: true,
-            markerValue: filter
-        }
+            markerValue: filter,
+        };
     }
 
     if (Array.isArray(wrap)) {
         if (!Array.isArray(filter)) {
             return {
-                match: false
-            }
+                match: false,
+            };
         }
 
         if (filter.length !== wrap.length) {
             return {
-                match: false
-            }
+                match: false,
+            };
         }
 
         const remaining = filter.slice();
@@ -134,10 +134,10 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {mat
             // Check if we find a match
             if (item === UIFilterWrapperMarker) {
                 // Usage like this is dangerous and unpredictable
-                console.warn("UIFilterWrapperMarker in array is not supported as this requires checking in any possible permutation of the array.");
+                console.warn('UIFilterWrapperMarker in array is not supported as this requires checking in any possible permutation of the array.');
                 return {
-                    match: false
-                }
+                    match: false,
+                };
             }
 
             let found = false;
@@ -148,13 +148,13 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {mat
                     if (same.markerValue) {
                         if (pendingMarkerValue !== undefined) {
                             // Check if equal
-                            const {match, leftOver} = unwrapFilter(pendingMarkerValue, same.markerValue);
-                            
+                            const { match, leftOver } = unwrapFilter(pendingMarkerValue, same.markerValue);
+
                             if (!match || leftOver) {
                                 // Pattern did match, but multiple marker values with different values
                                 return {
-                                    match: false
-                                }
+                                    match: false,
+                                };
                             }
                         }
 
@@ -169,40 +169,40 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {mat
 
             if (!found) {
                 return {
-                    match: false
-                }
+                    match: false,
+                };
             }
         }
-        
+
         if (remaining.length > 0) {
             return {
-                match: false
-            }
+                match: false,
+            };
         }
 
         return {
             match: true,
-            markerValue: pendingMarkerValue
-        }
+            markerValue: pendingMarkerValue,
+        };
     }
 
     if (wrap instanceof Date) {
         if (filter instanceof Date) {
             return {
-                match: filter.getTime() === wrap.getTime()
-            }
+                match: filter.getTime() === wrap.getTime(),
+            };
         }
 
         return {
-            match: false
-        }
+            match: false,
+        };
     }
 
     if (typeof wrap === 'object' && wrap !== null) {
         if (typeof filter !== 'object' || filter === null) {
             // Not the same
             return {
-                match: false
+                match: false,
             };
         }
 
@@ -213,8 +213,8 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {mat
             if (filterValue === undefined) {
                 // Required key not found
                 return {
-                    match: false
-                }
+                    match: false,
+                };
             }
 
             const wrapValue = (wrap as any)[key];
@@ -224,21 +224,21 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {mat
             if (!same.match || same.leftOver) {
                 // Not matching
                 return {
-                    match: false
-                }
+                    match: false,
+                };
             }
 
             // We have a match
             if (same.markerValue) {
                 if (pendingMarkerValue !== undefined) {
                     // Check if equal
-                    const {match, leftOver} = unwrapFilter(pendingMarkerValue, same.markerValue);
-                    
+                    const { match, leftOver } = unwrapFilter(pendingMarkerValue, same.markerValue);
+
                     if (!match || leftOver) {
                         // Pattern did match, but multiple marker values with different values
                         return {
-                            match: false
-                        }
+                            match: false,
+                        };
                     }
                 }
 
@@ -256,7 +256,7 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {mat
         return {
             match: true,
             markerValue: pendingMarkerValue,
-            leftOver: leftOverKeys.length ? leftOver : undefined
+            leftOver: leftOverKeys.length ? leftOver : undefined,
         };
     }
 
@@ -264,20 +264,20 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {mat
     // No marker found
     if (filter == wrap) {
         return {
-            match: true
+            match: true,
             // No marker value
         };
     }
     return {
-        match: false
+        match: false,
     };
 }
 
-export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string|number)[]): StamhoofdFilter|null {
+export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | number)[]): StamhoofdFilter | null {
     if (keyPath.length === 0) {
         return filter;
     }
-    const first = keyPath[0]
+    const first = keyPath[0];
 
     if (typeof first === 'number') {
         if (!Array.isArray(filter)) {
@@ -297,7 +297,6 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string|num
         return null;
     }
 
-    
     if (first in filter) {
         return unwrapFilterByPath((filter as any)[first], keyPath.slice(1));
     }
@@ -305,35 +304,35 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string|num
     return null;
 }
 
-export type StyledDescriptionChoice = {id: string; text: string; action: () => void; isSelected: () => boolean};
-export type StyledDescription = {text: string; style: string, choices?: StyledDescriptionChoice[]}[]
-export type UiFilterOptions = {isInverted?: boolean};
+export type StyledDescriptionChoice = { id: string; text: string; action: () => void; isSelected: () => boolean };
+export type StyledDescription = { text: string; style: string; choices?: StyledDescriptionChoice[] }[];
+export type UiFilterOptions = { isInverted?: boolean };
 
 export abstract class UIFilter {
     id = uuidv4();
-    builder!: UIFilterBuilder
+    builder!: UIFilterBuilder;
     isInverted = false;
 
     constructor(data: Partial<UIFilter>, options: UiFilterOptions = {}) {
         Object.assign(this, data);
 
-        if(options.isInverted) {
+        if (options.isInverted) {
             this.isInverted = true;
         }
     }
-    
-    /**
-     * Returns the filter object to pass to the backend or to apply locally
-     */
-    abstract doBuild(): StamhoofdFilter|null
 
     /**
      * Returns the filter object to pass to the backend or to apply locally
      */
-    build(): StamhoofdFilter|null {
+    abstract doBuild(): StamhoofdFilter | null;
+
+    /**
+     * Returns the filter object to pass to the backend or to apply locally
+     */
+    build(): StamhoofdFilter | null {
         const filter = this.buildFilter();
 
-        if(this.isInverted) {
+        if (this.isInverted) {
             return UIFilter.invertFilter(filter);
         }
 
@@ -341,41 +340,41 @@ export abstract class UIFilter {
     }
 
     private buildFilter(): StamhoofdFilter | null {
-        const b = this.doBuild()
+        const b = this.doBuild();
         if (b !== null && this.builder.wrapFilter) {
-            return this.builder.wrapFilter(b)
+            return this.builder.wrapFilter(b);
         }
 
         if (this.builder.wrapper) {
-            return wrapFilter(b, this.builder.wrapper)
+            return wrapFilter(b, this.builder.wrapper);
         }
-        
-        return b
+
+        return b;
     }
 
     static invertFilter(filter: StamhoofdFilter | null) {
-        if(filter === null) {
+        if (filter === null) {
             return null;
         }
 
-        if(typeof filter !== 'object') {
+        if (typeof filter !== 'object') {
             throw new SimpleError({
                 code: 'filter_invert_fail',
                 message: 'Inverteren van de filter is mislukt',
-            })
+            });
         }
 
         const keys = Object.keys(filter);
 
-        if(keys.length === 1 && keys[0] === '$not') {
+        if (keys.length === 1 && keys[0] === '$not') {
             return (filter as StamhoofdNotFilter).$not;
         }
 
         return {
-            $not: filter
-        }
+            $not: filter,
+        };
     }
-    
+
     clone(): UIFilter {
         const f = new (this.constructor as any)();
         Object.assign(f, this);
@@ -383,20 +382,20 @@ export abstract class UIFilter {
         return f;
     }
 
-    flatten(): UIFilter|null {
+    flatten(): UIFilter | null {
         return this;
     }
 
     /**
      * Return the Vue component to edit this filter
      */
-    abstract getComponent(): ComponentWithProperties
-    
+    abstract getComponent(): ComponentWithProperties;
+
     get description(): string {
         return this.styledDescription.map(s => s.text).join('');
     }
-    
-    abstract get styledDescription(): StyledDescription
+
+    abstract get styledDescription(): StyledDescription;
 }
 
 export function filterToString(filter: StamhoofdFilter, builder: UIFilterBuilder) {
@@ -404,7 +403,7 @@ export function filterToString(filter: StamhoofdFilter, builder: UIFilterBuilder
     if (uiFilter) {
         return uiFilter.description;
     }
-    return 'Onleesbare filter'
+    return 'Onleesbare filter';
 }
 
 export function propertyFilterToString(filter: PropertyFilter, builder: UIFilterBuilder) {
@@ -416,18 +415,18 @@ export function propertyFilterToString(filter: PropertyFilter, builder: UIFilter
             return 'Verplicht';
         }
 
-        return "Verplicht in te vullen als: "+ filterToString(filter.requiredWhen, builder) + ' (anders optioneel)'
+        return 'Verplicht in te vullen als: ' + filterToString(filter.requiredWhen, builder) + ' (anders optioneel)';
     }
-    
+
     const enabledDescription = filterToString(filter.enabledWhen, builder);
 
     if (filter.requiredWhen === null) {
-        return 'Wordt enkel gevraagd als: ' + enabledDescription+ ' (optioneel)'
+        return 'Wordt enkel gevraagd als: ' + enabledDescription + ' (optioneel)';
     }
 
     if (isEmptyFilter(filter.requiredWhen)) {
-        return 'Wordt enkel gevraagd als: ' + enabledDescription
+        return 'Wordt enkel gevraagd als: ' + enabledDescription;
     }
 
-    return 'Wordt enkel gevraagd als: ' + enabledDescription+ ' (enkel verplicht invullen als: '+filterToString(filter.requiredWhen, builder)+')'
+    return 'Wordt enkel gevraagd als: ' + enabledDescription + ' (enkel verplicht invullen als: ' + filterToString(filter.requiredWhen, builder) + ')';
 }
