@@ -13,11 +13,15 @@ export class ModelHelper {
                 { [idKey]: { sign: '>', value: lastId } },
                 { limit, sort: [idKey] });
 
-            if (models.length < limit) {
+            if (models.length === 0) {
                 break;
             }
 
             await onBatchReceived(models);
+
+            if (models.length < limit) {
+                break;
+            }
 
             lastId
                     = models[
