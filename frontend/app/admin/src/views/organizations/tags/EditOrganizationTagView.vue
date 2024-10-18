@@ -87,7 +87,7 @@ const props = defineProps<{
 }>();
 
 const $t = useTranslate();
-const title = computed(() => props.isNew ? 'Nieuwe tag' : Formatter.capitalizeFirstLetter($t('{tagType} bewerken', { tagType: getOrganizationTagTypeName(props.tag.type) })));
+const title = computed(() => props.isNew ? 'Nieuwe tag' : Formatter.capitalizeFirstLetter($t('cd52133a-d8bf-4dde-a924-962f3f0e3fe9', { tagType: getOrganizationTagTypeName(props.tag.type) })));
 const pop = usePop();
 
 const patch = ref(new PatchableArray()) as Ref<PatchableArrayAutoEncoder<OrganizationTag>>;

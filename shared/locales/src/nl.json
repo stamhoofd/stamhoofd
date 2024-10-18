@@ -405,5 +405,19 @@
   "4bff53d6-7455-45fc-aa6d-ae0bafbe0b47": "Elke lokale groep moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.",
   "a4f0a3f5-60a5-4959-800c-613e8c79d6d9": "Groep toevoegen",
   "f80e230f-9621-439d-b4ba-bc49fb921698": "De wijzigingen zijn opgeslagen",
-  "919139ab-1103-4e1b-aaf7-94cfec03a9e3": "Alle verenigingen in {name}"
+  "919139ab-1103-4e1b-aaf7-94cfec03a9e3": "Alle verenigingen in {name}",
+  "cd52133a-d8bf-4dde-a924-962f3f0e3fe9": "{tagType} bewerken",
+  "322dd34f-a4ec-4065-be53-040725915e20": "Werkjaar",
+  "446b88a9-50f5-4c2b-a9e8-742f12034863": "Naam afdeling/inschrijvingsgroep",
+  "d8d26405-9d24-4217-af9b-5a0edee0d35f": "E-mailadres lid",
+  "81082354-9a9a-4a23-aa02-3273d4906652": "E-mailadres ouder",
+  "a783e1f8-b052-4278-87c9-e00fa4590e8c": "Telefoonnummer lid",
+  "532568c8-345e-4675-ba5e-60014bbcf9ae": "Telefoonnummer ouder",
+  "f5c908ad-c996-4dc8-acc0-dae902f13495": "Gemeente",
+  "28b0f035-cb44-48b7-b60f-093f6adc26fb": "Postcode",
+  "619d07b4-4512-4ca5-933c-93203421ac54": "Functie",
+  "300d2935-b578-48cc-b58e-1c0446a68d59": "Startdatum",
+  "85dcdb87-b504-43b6-8a52-c22a046eefad": "Einddatum",
+  "5e99e2aa-a240-4894-8de3-f8f0fef20068": "Groepsnummer",
+  "6bf80a05-84b0-47ba-ad41-66e2a106669b": "Filter alle verenigingen die een lid hebben die aan deze voorwaarden voldoet."
 }

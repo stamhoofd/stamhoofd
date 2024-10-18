@@ -108,7 +108,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
         if (user?.permissions?.platform !== null) {
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('Werkjaar'),
+                    name: $t('322dd34f-a4ec-4065-be53-040725915e20'),
                     options: (platform.periods ?? []).map((period) => {
                         return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
                     }),
@@ -168,7 +168,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
         all.push(
             new StringFilterBuilder({
-                name: $t('Naam afdeling/inschrijvingsgroep'),
+                name: $t('446b88a9-50f5-4c2b-a9e8-742f12034863'),
                 key: 'name',
                 wrapper: {
                     group: UIFilterWrapperMarker,
@@ -415,35 +415,35 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
         all.push(
             new StringFilterBuilder({
-                name: $t('E-mailadres lid'),
+                name: $t('d8d26405-9d24-4217-af9b-5a0edee0d35f'),
                 key: 'email',
             }),
         );
 
         all.push(
             new StringFilterBuilder({
-                name: $t('E-mailadres ouder'),
+                name: $t('81082354-9a9a-4a23-aa02-3273d4906652'),
                 key: 'parentEmail',
             }),
         );
 
         all.push(
             new StringFilterBuilder({
-                name: $t('Telefoonnummer lid'),
+                name: $t('a783e1f8-b052-4278-87c9-e00fa4590e8c'),
                 key: 'phone',
             }),
         );
 
         all.push(
             new StringFilterBuilder({
-                name: $t('Telefoonnummer ouder'),
+                name: $t('532568c8-345e-4675-ba5e-60014bbcf9ae'),
                 key: 'parentPhone',
             }),
         );
 
         all.push(
             new StringFilterBuilder({
-                name: $t('Gemeente'),
+                name: $t('f5c908ad-c996-4dc8-acc0-dae902f13495'),
                 key: 'city',
                 wrapper: {
                     $or: [
@@ -460,7 +460,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
         all.push(
             new StringFilterBuilder({
-                name: $t('Postcode'),
+                name: $t('28b0f035-cb44-48b7-b60f-093f6adc26fb'),
                 key: 'postalCode',
                 wrapper: {
                     $or: [
@@ -533,7 +533,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             responsibilitiesFilters.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('Functie'),
+                    name: $t('619d07b4-4512-4ca5-933c-93203421ac54'),
                     multipleChoiceConfiguration: {
                         isSubjectPlural: false,
                     },
@@ -573,14 +573,14 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             responsibilitiesFilters.push(
                 new DateFilterBuilder({
-                    name: $t('Startdatum'),
+                    name: $t('300d2935-b578-48cc-b58e-1c0446a68d59'),
                     key: 'startDate',
                 }),
             );
 
             responsibilitiesFilters.push(
                 new DateFilterBuilder({
-                    name: $t('Einddatum'),
+                    name: $t('85dcdb87-b504-43b6-8a52-c22a046eefad'),
                     key: 'endDate',
                 }),
             );
@@ -710,13 +710,13 @@ export function useGetOrganizationUIFilterBuilders() {
             }),
 
             new StringFilterBuilder({
-                name: $t('Groepsnummer'),
+                name: $t('5e99e2aa-a240-4894-8de3-f8f0fef20068'),
                 key: 'uri',
             }),
 
             new GroupUIFilterBuilder({
                 name: 'Leden',
-                description: $t('Filter alle verenigingen die een lid hebben die aan deze voorwaarden voldoet.'),
+                description: $t('6bf80a05-84b0-47ba-ad41-66e2a106669b'),
                 builders: organizationMemberUIFilterBuilders,
                 wrapper: {
                     members: {
