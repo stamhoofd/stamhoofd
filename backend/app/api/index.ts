@@ -90,6 +90,7 @@ const start = async () => {
 
     // Register Email Recipient loaders
     await import('./src/email-recipient-loaders/members');
+    await import('./src/email-recipient-loaders/orders');
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 

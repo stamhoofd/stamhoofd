@@ -1,12 +1,11 @@
 import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getEmailBuilderForTemplate, sendEmailTemplate } from '../helpers/EmailBuilder';
+import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { WebshopCounter } from '../helpers/WebshopCounter';
 import { BalanceItem, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
 
@@ -66,6 +65,23 @@ export class Order extends Model {
 
     @column({ type: 'string' })
     status = OrderStatus.Created;
+
+    // #region generated columns for filtering
+    @column({ type: 'integer', nullable: true, beforeSave(this: Order) {
+        return this.data.totalPrice;
+    } })
+    totalPrice: number = 0;
+
+    @column({ type: 'integer', nullable: true, beforeSave(this: Order) {
+        return this.data.amount;
+    } })
+    amount: number = 0;
+
+    @column({ type: 'string', nullable: true, beforeSave(this: Order) {
+        return this.data.timeSlot?.timeIndex ?? null;
+    } })
+    timeSlotTime: string | null = null;
+    // #endregion
 
     static webshop = new ManyToOneRelation(Webshop, 'webshop');
     static payment = new ManyToOneRelation(Payment, 'payment');

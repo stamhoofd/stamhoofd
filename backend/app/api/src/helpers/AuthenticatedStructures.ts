@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { CachedBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AccessRight, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -130,6 +130,10 @@ export class AuthenticatedStructures {
         return (await this.organizations([organization]))[0];
     }
 
+    static webshopPreview(webshop: Webshop) {
+        return WebshopPreview.create(webshop);
+    }
+
     static async organizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
         if (organizations.length === 0) {
             return [];
@@ -210,7 +214,7 @@ export class AuthenticatedStructures {
 
             const organizationId = w.organizationId;
             const array = webshopPreviews.get(organizationId);
-            const preview = WebshopPreview.create(w);
+            const preview = this.webshopPreview(w);
 
             if (array) {
                 array.push(preview);

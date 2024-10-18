@@ -2,7 +2,8 @@ import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, DateDecoder, EnumDecod
 import { Formatter } from '@stamhoofd/utility';
 
 import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../BalanceItem';
-import { Recipient, Replacement } from '../endpoints/EmailRequest';
+import { EmailRecipient } from '../email/Email';
+import { Replacement } from '../endpoints/EmailRequest';
 import { Payment, PrivatePayment } from '../members/Payment';
 import { Organization } from '../Organization';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod';
@@ -350,14 +351,14 @@ export class Order extends AutoEncoder {
         return str + '</tbody></table>';
     }
 
-    getRecipient(organization: Organization, webshop: WebshopPreview, payment?: Payment) {
+    getEmailRecipient(organization: Organization, webshop: WebshopPreview): EmailRecipient {
+        const customer = this.data.customer;
         const order = this;
-        const email = order.data.customer.email.toLowerCase();
-        const forcePayment = payment ?? order.payment;
+        const email = customer.email.toLowerCase();
 
-        return Recipient.create({
-            firstName: order.data.customer.firstName,
-            lastName: order.data.customer.lastName,
+        return EmailRecipient.create({
+            firstName: customer.firstName,
+            lastName: customer.lastName,
             email,
             replacements: [
                 Replacement.create({
@@ -374,24 +375,25 @@ export class Order extends AutoEncoder {
                 }),
                 Replacement.create({
                     token: 'priceToPay',
-                    value: forcePayment?.status !== PaymentStatus.Succeeded ? Formatter.price(forcePayment?.price ?? 0) : '',
+                    value: order.openBalance <= 0 ? '' : Formatter.price(order.openBalance),
                 }),
                 Replacement.create({
                     token: 'paymentMethod',
-                    value: forcePayment?.method ? PaymentMethodHelper.getName(forcePayment.method) : PaymentMethodHelper.getName(this.data.paymentMethod),
+                    value: order.data.paymentMethod,
                 }),
-                Replacement.create({
-                    token: 'transferDescription',
-                    value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? (forcePayment?.transferDescription ?? '') : '',
-                }),
-                Replacement.create({
-                    token: 'transferBankAccount',
-                    value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.iban ? webshop?.meta.transferSettings.iban : organization.meta.transferSettings.iban) ?? '') : '',
-                }),
-                Replacement.create({
-                    token: 'transferBankCreditor',
-                    value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.creditor ? webshop?.meta.transferSettings.creditor : organization.meta.transferSettings.creditor) ?? organization.name) : '',
-                }),
+                // todo?
+                // Replacement.create({
+                //     token: 'transferDescription',
+                //     value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? (forcePayment?.transferDescription ?? '') : '',
+                // }),
+                // Replacement.create({
+                //     token: 'transferBankAccount',
+                //     value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.iban ? webshop?.meta.transferSettings.iban : organization.meta.transferSettings.iban) ?? '') : '',
+                // }),
+                // Replacement.create({
+                //     token: 'transferBankCreditor',
+                //     value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.creditor ? webshop?.meta.transferSettings.creditor : organization.meta.transferSettings.creditor) ?? organization.name) : '',
+                // }),
                 Replacement.create({
                     token: 'orderStatus',
                     value: OrderStatusHelper.getName(order.status),
@@ -402,17 +404,7 @@ export class Order extends AutoEncoder {
                 }),
                 Replacement.create({
                     token: 'orderLocation',
-                    value: ((order) => {
-                        if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                            return order.data.checkoutMethod.name;
-                        }
-
-                        if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                            return order.data.checkoutMethod.name;
-                        }
-
-                        return order.data.address?.shortString() ?? '';
-                    })(order),
+                    value: order.data.locationName,
                 }),
                 Replacement.create({
                     token: 'orderDate',
@@ -432,11 +424,12 @@ export class Order extends AutoEncoder {
                     value: '',
                     html: order.getHTMLTable(),
                 }),
-                Replacement.create({
-                    token: 'paymentTable',
-                    value: '',
-                    html: forcePayment?.getHTMLTable(),
-                }),
+                // todo?
+                // Replacement.create({
+                //     token: 'paymentTable',
+                //     value: '',
+                //     html: forcePayment?.getHTMLTable(),
+                // }),
                 Replacement.create({
                     token: 'organizationName',
                     value: organization.name,

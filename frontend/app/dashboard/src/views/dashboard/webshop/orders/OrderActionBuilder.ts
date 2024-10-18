@@ -1,8 +1,9 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, GlobalEventBus, InMemoryTableAction, LoadComponent, MenuTableAction, TableAction, Toast } from '@stamhoofd/components';
-import { OrganizationManager, SessionManager } from '@stamhoofd/networking';
-import { OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from '@stamhoofd/structures';
+import { AsyncTableAction, CenteredMessage, EmailView, GlobalEventBus, InMemoryTableAction, LoadComponent, MenuTableAction, RecipientChooseOneOption, TableAction, TableActionSelection, Toast } from '@stamhoofd/components';
+import { OrganizationManager } from '@stamhoofd/networking';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from '@stamhoofd/structures';
 
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { WebshopManager } from '../WebshopManager';
 
 export class OrderActionBuilder {
@@ -10,11 +11,15 @@ export class OrderActionBuilder {
     webshopManager: WebshopManager;
     organizationManager: OrganizationManager;
 
+    present: ReturnType<typeof usePresent>;
+
     constructor(settings: {
+        present: ReturnType<typeof usePresent>;
         component: any;
         webshopManager: WebshopManager;
         organizationManager: OrganizationManager;
     }) {
+        this.present = settings.present;
         this.component = settings.component;
         this.webshopManager = settings.webshopManager;
         this.organizationManager = settings.organizationManager;
@@ -179,14 +184,14 @@ export class OrderActionBuilder {
                 },
             }),
 
-            new InMemoryTableAction({
+            new AsyncTableAction({
                 name: 'E-mailen',
                 enabled: this.webshopManager.hasRead,
                 icon: 'email',
                 priority: 10,
                 groupIndex: 3,
-                handler: async (orders: PrivateOrder[]) => {
-                    await this.mail(orders);
+                handler: async (selection: TableActionSelection<PrivateOrder>) => {
+                    await this.openMail(selection);
                 },
             }),
 
@@ -254,18 +259,39 @@ export class OrderActionBuilder {
         this.component.present(displayedComponent.setDisplayStyle('popup'));
     }
 
-    async mail(orders: PrivateOrder[]) {
-        // Needs change
-        // const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../../mail/MailView.vue"), {
-        //    defaultSubject: "Bestelling {{nr}}",
-        //    orders: orders,
-        //    webshop: this.webshopManager.preview,
-        //    defaultReplacements: [
-        //        ...this.webshopManager.preview.meta.getEmailReplacements(),
-        //        ...this.organizationManager.organization.meta.getEmailReplacements()
-        //    ]
-        // });
-        // this.component.present(displayedComponent.setDisplayStyle("popup"));
+    async openMail(selection: TableActionSelection<PrivateOrder>) {
+        const filter = selection.filter.filter;
+        const search = selection.filter.search;
+
+        const options: RecipientChooseOneOption[] = [];
+
+        options.push({
+            type: 'ChooseOne',
+            options: [
+                {
+                    id: 'all',
+                    name: 'Alle bestellingen',
+                    value: [
+                        EmailRecipientSubfilter.create({
+                            type: EmailRecipientFilterType.Orders,
+                            filter,
+                            search,
+                        }),
+                    ] },
+            ],
+        });
+
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EmailView, {
+                recipientFilterOptions: options,
+            }),
+        });
+        await this.present({
+            components: [
+                displayedComponent,
+            ],
+            modalDisplayStyle: 'popup',
+        });
     }
 
     async exportToExcel(orders: PrivateOrder[]) {

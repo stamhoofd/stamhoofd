@@ -37,7 +37,14 @@ const configurationId = 'orders';
 
 fetchOrders();
 useVisibilityChange(() => fetchOrders());
-const objectFetcher = useOrdersObjectFetcher(props.webshopManager);
+const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
+    requiredFilter: {
+        webshopId: props.webshopManager.preview.id,
+        status: {
+            $neq: OrderStatus.Deleted,
+        },
+    },
+});
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
 
 function fetchOrders() {
@@ -61,6 +68,7 @@ const hasTickets = computed(() => preview.value.hasTickets);
 
 const actions = computed(() => {
     const builder = new OrderActionBuilder({
+        present,
         organizationManager: organizationManager.value,
         webshopManager: props.webshopManager,
         component: this,

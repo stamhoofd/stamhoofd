@@ -1,7 +1,10 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { CheckoutMethodType, CheckoutMethodTypeHelper, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
+import { useFinancialSupportSettings } from '../groups';
 import { useAuth, usePlatform, useUser } from '../hooks';
 import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
@@ -9,9 +12,6 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoice
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from './UIFilter';
-import { computed } from 'vue';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { useFinancialSupportSettings } from '../groups';
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
@@ -1001,11 +1001,6 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         new NumberFilterBuilder({
             name: 'Bedrag',
             key: 'totalPrice',
-            type: NumberFilterFormat.Currency,
-        }),
-        new NumberFilterBuilder({
-            name: 'Te betalen',
-            key: 'openBalance',
             type: NumberFilterFormat.Currency,
         }),
         new NumberFilterBuilder({

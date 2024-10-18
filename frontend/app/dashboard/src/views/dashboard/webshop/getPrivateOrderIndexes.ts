@@ -46,6 +46,9 @@ export const orderStoreIndexValueDefinitions: SortDefinitions<PrivateOrder> & Re
     id: {
         getValue: value => value.id,
     },
+    webshopId: {
+        getValue: value => value.webshopId,
+    },
     [OrderStoreDataIndex.CreatedAt]: {
         getValue: value => value.createdAt.getTime(),
     },
@@ -117,6 +120,7 @@ export const privateOrderIndexBoxInMemoryFilterCompilers: InMemoryFilterDefiniti
     id: createInMemoryFilterCompiler('id'),
     timeSlotEndTime: createInMemoryFilterCompiler('data.timeSlot.endTime'),
     timeSlotStartTime: createInMemoryFilterCompiler('data.timeSlot.startTime'),
+    webshopId: createInMemoryFilterCompiler('webshopId'),
     [OrderStoreDataIndex.CreatedAt]: createInMemoryFilterCompiler('createdAt'),
     [OrderStoreDataIndex.Number]: createInMemoryFilterCompiler('number'),
     [OrderStoreDataIndex.Status]: createInMemoryFilterCompiler('status'),
@@ -127,12 +131,15 @@ export const privateOrderIndexBoxInMemoryFilterCompilers: InMemoryFilterDefiniti
     [OrderStoreDataIndex.Name]: createInMemoryFilterCompiler('data.customer.name'),
     [OrderStoreDataIndex.Email]: createInMemoryFilterCompiler('data.customer.email'),
     [OrderStoreDataIndex.Phone]: createInMemoryFilterCompiler('data.customer.phone'),
+
     // generated
     [OrderStoreGeneratedIndex.TotalPrice]: createInMemoryFilterCompiler('data.totalPrice'),
     [OrderStoreGeneratedIndex.Amount]: createInMemoryFilterCompiler('data.amount'),
+    [OrderStoreGeneratedIndex.TimeSlotTime]: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
+
+    // only frontend
     [OrderStoreGeneratedIndex.OpenBalance]: createInMemoryFilterCompiler('openBalance'),
     [OrderStoreGeneratedIndex.Location]: createInMemoryFilterCompiler('data.locationName'),
-    [OrderStoreGeneratedIndex.TimeSlotTime]: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
 };
 
 export function createCompiledFilterForPrivateOrderIndexBox(filter: StamhoofdFilter) {

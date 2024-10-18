@@ -801,7 +801,7 @@ export class WebshopManager {
     async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<PrivateOrder[], WebshopOrdersQuery>> {
         const response = await this.context.authenticatedServer.request({
             method: 'GET',
-            path: '/webshop/' + this.preview.id + '/orders',
+            path: '/webshop/orders',
             query,
             shouldRetry: retry,
             decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), WebshopOrdersQuery as Decoder<WebshopOrdersQuery>),
@@ -965,10 +965,9 @@ export class WebshopManager {
     private createBackendOrdersObjectFetcher(): ObjectFetcher<PrivateOrder> {
         return {
             fetch: async (data: LimitedFilteredRequest) => {
-                const webshopId = this.preview.id;
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/${webshopId}/orders`,
+                    path: `/webshop/orders`,
                     decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                     query: data,
                     shouldRetry: false,
@@ -978,10 +977,9 @@ export class WebshopManager {
                 return response.data;
             },
             fetchCount: async (data: CountFilteredRequest): Promise<number> => {
-                const webshopId = this.preview.id;
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/${webshopId}/orders/count`,
+                    path: `/webshop/orders/count`,
                     decoder: CountResponse as Decoder<CountResponse>,
                     query: data,
                     shouldRetry: false,
@@ -1034,22 +1032,22 @@ export class WebshopManager {
             { key: 'number', order: SortItemDirection.ASC },
         ];
 
-        let filter: StamhoofdFilter = null;
+        const filter: StamhoofdFilter = {
+            webshopId: this.preview.id,
+        };
 
         if (this.lastFetchedOrder) {
-            filter = {
-                $or: [
-                    {
-                        updatedAt: { $gt: this.lastFetchedOrder.updatedAt },
-                    },
-                    {
-                        $and: [
-                            { updatedAt: { $eq: this.lastFetchedOrder.updatedAt } },
-                            { number: { $gt: this.lastFetchedOrder.number } },
-                        ],
-                    },
-                ],
-            };
+            filter['$or'] = [
+                {
+                    updatedAt: { $gt: this.lastFetchedOrder.updatedAt },
+                },
+                {
+                    $and: [
+                        { updatedAt: { $eq: this.lastFetchedOrder.updatedAt } },
+                        { number: { $gt: this.lastFetchedOrder.number } },
+                    ],
+                },
+            ];
         }
 
         const filteredRequest = new LimitedFilteredRequest({

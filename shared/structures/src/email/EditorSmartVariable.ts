@@ -5,7 +5,7 @@ import { Country } from '../addresses/CountryDecoder';
 import { BalanceItem, BalanceItemRelation, BalanceItemRelationType } from '../BalanceItem';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage';
-import { Recipient, Replacement } from '../endpoints/EmailRequest';
+import { Recipient } from '../endpoints/EmailRequest';
 import { Payment } from '../members/Payment';
 import { PaymentGeneral } from '../members/PaymentGeneral';
 import { Organization } from '../Organization';
@@ -445,7 +445,7 @@ function fillSmartVariables(variables: EditorSmartVariable[]) {
         }),
     });
 
-    const recipient = exampleOrder.getRecipient(Organization.create({
+    const recipient = exampleOrder.getEmailRecipient(Organization.create({
         name: 'Demovereniging',
         uri: 'demo',
         meta: OrganizationMetaData.create({
@@ -459,6 +459,7 @@ function fillSmartVariables(variables: EditorSmartVariable[]) {
             name: 'Demowinkel',
         }),
     }));
+
     for (const replacement of [...recipient.replacements, ...recipient.getDefaultReplacements()]) {
         const variable = variables.find(v => v.id === replacement.token);
         if (variable) {

@@ -1,7 +1,7 @@
-import { Model } from '@simonbackx/simple-database';
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { OrganizationTag, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
+import { ModelHelper } from './ModelHelper';
 
 export class TagHelper extends SharedTagHelper {
     static async updateOrganizations() {
@@ -37,7 +37,7 @@ export class TagHelper extends SharedTagHelper {
     }
 
     private static async loopOrganizations(onBatchReceived: (batch: Organization[]) => Promise<void>) {
-        await loopModels(Organization, 'id', onBatchReceived, { limit: 10 });
+        await ModelHelper.loop(Organization, 'id', onBatchReceived, { limit: 10 });
     }
 
     /**
@@ -166,32 +166,5 @@ export class TagHelper extends SharedTagHelper {
                 }
             }
         }
-    }
-}
-
-// todo: move for reuse?
-type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
-
-// todo: move for reuse?
-// todo: add option for extending default where
-async function loopModels<M extends typeof Model>(m: M, idKey: KeysMatching<InstanceType<M>, string> & string, onBatchReceived: (batch: InstanceType<M>[]) => Promise<void>, options: { limit?: number } = {}) {
-    let lastId = '';
-    const limit = options.limit ?? 10;
-
-    while (true) {
-        const models = await m.where(
-            { [idKey]: { sign: '>', value: lastId } },
-            { limit, sort: [idKey] });
-
-        if (models.length === 0) {
-            break;
-        }
-
-        await onBatchReceived(models);
-
-        lastId
-                = models[
-                models.length - 1
-            ][idKey] as string;
     }
 }

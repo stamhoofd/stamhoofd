@@ -124,7 +124,7 @@ export class WebshopTimeSlot extends AutoEncoder {
      * Index for sorting on both start and end time
      */
     get timeIndex(): string {
-        return Formatter.minutesPadded(this.startTime) + Formatter.minutesPadded(this.endTime);
+        return Formatter.timeIndex(this.startTime) + Formatter.timeIndex(this.endTime);
     }
 
     toString() {

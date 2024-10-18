@@ -395,7 +395,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationMixin, usePresent } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, LongPressDirective, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
@@ -493,6 +493,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 
     get actionBuilder() {
         return new OrderActionBuilder({
+            present: usePresent(),
             organizationManager: this.$organizationManager,
             webshopManager: this.webshopManager,
             component: this,

@@ -13,6 +13,7 @@ export enum EmailRecipientFilterType {
     Members = 'Members',
     MemberParents = 'MemberParents',
     MemberUnverified = 'MemberUnverified',
+    Orders = 'Orders',
 }
 
 export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {

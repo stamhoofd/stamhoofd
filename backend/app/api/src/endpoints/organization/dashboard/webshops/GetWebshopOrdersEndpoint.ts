@@ -1,8 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 
-import { Order, Webshop } from '@stamhoofd/models';
+import { Order } from '@stamhoofd/models';
 import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -10,7 +10,7 @@ import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFiltere
 import { orderFilterCompilers } from '../../../../sql-filters/orders';
 import { orderSorters } from '../../../../sql-sorters/orders';
 
-type Params = { id: string };
+type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<PrivateOrder[], LimitedFilteredRequest>;
@@ -26,7 +26,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/orders', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/orders', {});
 
         if (params) {
             return [true, params as Params];
@@ -34,37 +34,24 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         return [false];
     }
 
-    static buildQuery(webshopId: string, q: CountFilteredRequest | LimitedFilteredRequest) {
+    static buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         // todo: filter userId???
         const organization = Context.organization!;
-
-        if (!webshopId) {
-            // todo
-            throw new Error();
-        }
 
         const ordersTable: string = Order.table;
 
         const query = SQL
             .select(SQL.wildcard(ordersTable))
             .from(SQL.table(ordersTable))
-            // todo: extra check on webshopId to prevent all orders are returned if webshopId is null?
-            .where('webshopId', webshopId)
             .where(compileToSQLFilter({
-                $or: [
-                    {
-                        organizationId: organization.id,
-                    },
-                    {
-                        organizationId: null,
-                    },
-                ],
+                organizationId: organization.id,
             }, filterCompilers));
 
         if (q.filter) {
             query.where(compileToSQLFilter(q.filter, filterCompilers));
         }
 
+        // todo: use same logic as frontend
         if (q.search) {
             let searchFilter: StamhoofdFilter | null = null;
 
@@ -93,8 +80,8 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         return query;
     }
 
-    static async buildData(webshopId: string, requestQuery: LimitedFilteredRequest) {
-        const query = this.buildQuery(webshopId, requestQuery);
+    static async buildData(requestQuery: LimitedFilteredRequest) {
+        const query = this.buildQuery(requestQuery);
         const data = await query.fetch();
 
         const orders: Order[] = Order.fromRows(data, Order.table);
@@ -139,15 +126,8 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             maxLimit: Context.auth.hasSomePlatformAccess() ? 1000 : 100,
         });
 
-        const webshopId = request.params.id;
-
-        const webshop = await Webshop.getByID(webshopId);
-        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
-            throw Context.auth.notFoundOrNoAccess('Je hebt geen toegang tot de bestellingen van deze webshop');
-        }
-
         return new Response(
-            await GetWebshopOrdersEndpoint.buildData(webshopId, request.query),
+            await GetWebshopOrdersEndpoint.buildData(request.query),
         );
 
         /*

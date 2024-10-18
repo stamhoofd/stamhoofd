@@ -317,7 +317,7 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationMixin, usePresent } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { CartItemRow, EditPaymentView, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, PaymentView, PriceBreakdownBox, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, TableActionSelection, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
@@ -501,6 +501,7 @@ export default class OrderView extends Mixins(NavigationMixin) {
 
     get actionBuilder() {
         return new OrderActionBuilder({
+            present: usePresent(),
             organizationManager: this.$organizationManager,
             webshopManager: this.webshopManager,
             component: this,
