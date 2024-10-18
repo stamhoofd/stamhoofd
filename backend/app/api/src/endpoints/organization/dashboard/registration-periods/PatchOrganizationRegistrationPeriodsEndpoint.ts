@@ -245,6 +245,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         await organizationPeriod.save();
 
         for (const s of struct.groups) {
+            s.settings.registeredMembers = 0;
+            s.settings.reservedMembers = 0;
             await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period);
         }
         const groups = await Group.getAll(organization.id, organizationPeriod.periodId);
