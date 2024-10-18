@@ -8,6 +8,7 @@
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
+        :estimated-rows="estimatedRows"
         @click="showOrganization"
     >
         <template #empty>
@@ -50,6 +51,13 @@ const title = computed(() => {
         }
     }
     return $t('d4a9ca3f-72c9-4418-90fa-5d648b23ee7e');
+});
+
+const estimatedRows = computed(() => {
+    if (props.tag) {
+        return props.tag.organizationCount;
+    }
+    return 30;
 });
 
 const context = useContext();

@@ -592,7 +592,7 @@ const totalFilteredCount = computed(() => {
     if (errorMessage.value) {
         return 0;
     }
-    return props.tableObjectFetcher.totalFilteredCount ?? lastFilteredCount.value ?? props.estimatedRows ?? 0;
+    return props.tableObjectFetcher.totalFilteredCount ?? lastFilteredCount.value ?? Math.max(1, props.estimatedRows ?? 0);
 });
 const totalItemsCount = computed(() => props.tableObjectFetcher.totalCount);
 

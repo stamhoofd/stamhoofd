@@ -8,6 +8,7 @@
         :default-filter="defaultFilter"
         :actions="actions"
         :all-columns="allColumns"
+        :estimated-rows="estimatedRows"
         @click="showMember"
     >
         <template #empty>
@@ -61,6 +62,13 @@ const title = computed(() => {
     }
 
     return 'Leden';
+});
+
+const estimatedRows = computed(() => {
+    if (props.group) {
+        return props.group.settings.registeredMembers;
+    }
+    return 30;
 });
 
 const present = usePresent();
