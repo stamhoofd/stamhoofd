@@ -1,4 +1,4 @@
-import { SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, SQL, createSQLFilterNamespace, createSQLExpressionFilterCompiler } from '@stamhoofd/sql';
+import { SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, SQL, createSQLFilterNamespace, createSQLExpressionFilterCompiler, SQLValueType } from '@stamhoofd/sql';
 
 export const registrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -15,9 +15,11 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
         id: createSQLColumnFilterCompiler('groupId'),
         name: createSQLExpressionFilterCompiler(
             SQL.jsonValue(SQL.column('groups', 'settings'), '$.value.name'),
+            { isJSONValue: true, type: SQLValueType.JSONString },
         ),
         status: createSQLExpressionFilterCompiler(
             SQL.column('groups', 'status'),
+            { isJSONValue: true, type: SQLValueType.JSONString },
         ),
         defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId'), { nullable: true }),
     }),

@@ -2,8 +2,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { SQL } from '../SQL';
 import { SQLExpression } from '../SQLExpression';
-import { SQLArray, SQLCast, SQLColumnExpression, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from '../SQLExpressions';
-import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote } from '../SQLJsonExpressions';
+import { SQLArray, SQLCast, SQLColumnExpression, SQLLower, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression } from '../SQLExpressions';
+import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote, scalarToSQLJSONExpression } from '../SQLJsonExpressions';
 import { SQLSelect } from '../SQLSelect';
 import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from '../SQLWhere';
 
@@ -61,6 +61,9 @@ function doNormalizeValue(val: StamhoofdCompareValue, options?: SQLExpressionFil
     }
 
     if (typeof val === 'string') {
+        if (options?.isJSONObject) {
+            return val;
+        }
         return val.toLocaleLowerCase();
     }
 
@@ -181,18 +184,25 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             if (isJSONObject) {
                 const v = norm(f.$eq);
 
-                // if (typeof v === 'string') {
-                //     return new SQLWhereEqual(
-                //         new SQLJsonSearch(sqlExpression, 'one', convertToExpression(v)),
-                //         SQLWhereSign.NotEqual,
-                //         new SQLNull()
-                //     );
-                // }
+                if (typeof v === 'string') {
+                    // Custom query to support case insensitive comparing
 
+                    return new SQLWhereEqual(
+                        new SQLJsonSearch(
+                            new SQLLower(sqlExpression),
+                            'one',
+                            convertToExpression(
+                                SQLWhereLike.escape(v.toLocaleLowerCase()),
+                            ),
+                        ),
+                        SQLWhereSign.NotEqual,
+                        new SQLNull(),
+                    );
+                }
                 // else
                 return new SQLJsonContains(
                     sqlExpression,
-                    convertToExpression(JSON.stringify(v)),
+                    convertToExpression(v),
                 );
             }
 
@@ -361,7 +371,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             if (isJSONObject) {
                 return new SQLWhereEqual(
                     new SQLJsonSearch(
-                        sqlExpression,
+                        new SQLLower(sqlExpression),
                         'one',
                         convertToExpression(
                             '%' + SQLWhereLike.escape(needle) + '%',

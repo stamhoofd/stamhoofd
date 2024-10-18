@@ -1,46 +1,60 @@
 <template>
     <div class="container">
-        <p v-if="canPop" class="style-description-block">
-            {{$t("Met een filtergroep kan je combinaties van 'en' en 'of' maken.")}}
+        <p v-if="filter.builder.description" class="style-description-block">
+            {{ filter.builder.description }}
         </p>
 
-        <GroupUIFilterList v-if="filters.length" :filter="filter" @replace="copyFromChanged($event)"/>
+        <p v-else-if="canPop" class="style-description-block">
+            {{ $t("Met een filtergroep kan je combinaties van 'en' en 'of' maken.") }}
+        </p>
+
+        <GroupUIFilterList v-if="filters.length" :filter="filter" @replace="copyFromChanged($event)" />
 
         <hr v-if="filters.length">
 
         <STList>
             <STListItem v-for="(builder, index) in builders" :key="index" :selectable="true" class="right-stack" @click="addFilter(builder)">
-                {{ builder.name }}
+                <h3 class="style-title-list">
+                    {{ capitalizeFirstLetter(builder.name) }}
+                </h3>
+                <p v-if="'description' in builder" class="style-description-small">
+                    {{ builder.description }}
+                </p>
 
                 <template #left>
-                    <span class="button icon add gray" />
+                    <span class="button icon filter gray" />
                 </template>
             </STListItem>
         </STList>
     </div>
 </template>
 
-
 <script lang="ts" setup>
-import { ComponentWithProperties, useCanPop, useShow } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
 
-import { computed } from "vue";
-import STList from "../layout/STList.vue";
-import STListItem from "../layout/STListItem.vue";
-import { GroupUIFilter } from "./GroupUIFilter";
-import { UIFilter, UIFilterBuilder } from "./UIFilter";
-import UIFilterEditor from "./UIFilterEditor.vue";
-import GroupUIFilterList from "./components/GroupUIFilterList.vue";
+import { computed } from 'vue';
+import STList from '../layout/STList.vue';
+import STListItem from '../layout/STListItem.vue';
+import { GroupUIFilter, GroupUIFilterBuilder } from './GroupUIFilter';
+import { UIFilter, UIFilterBuilder } from './UIFilter';
+import UIFilterEditor from './UIFilterEditor.vue';
+import GroupUIFilterList from './components/GroupUIFilterList.vue';
 
 const props = defineProps<{
-    filter: GroupUIFilter
+    filter: GroupUIFilter;
 }>();
 
-const show = useShow()
-const canPop = useCanPop()
+const show = useShow();
+const canPop = useCanPop();
 
 const filters = computed(() => props.filter.filters);
-const builders = computed(() => props.filter.builders);
+const builders = computed(() => {
+    if (props.filter.builders.length > 1 && props.filter.builders[0] instanceof GroupUIFilterBuilder && !props.filter.builders[0].wrapper) {
+        // Remove first
+        return props.filter.builders.slice(1);
+    }
+    return props.filter.builders;
+});
 
 async function addFilter(builder: UIFilterBuilder) {
     const filter = builder.create();
@@ -55,13 +69,13 @@ async function addFilter(builder: UIFilterBuilder) {
                     }
                     filters.value.push(ff);
                     copyFromChanged(props.filter.flatten());
-                }
-            })
-        ]
-    })
+                },
+            }),
+        ],
+    });
 }
 
-function copyFromChanged(filter: UIFilter|null) {
+function copyFromChanged(filter: UIFilter | null) {
     if (!filter) {
         props.filter.filters = [];
         return;

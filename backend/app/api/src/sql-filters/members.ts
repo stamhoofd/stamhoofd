@@ -8,26 +8,26 @@ import { registrationFilterCompilers } from './registrations';
  */
 export const memberFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
-    memberNumber: createSQLColumnFilterCompiler('memberNumber'),
-    firstName: createSQLColumnFilterCompiler('firstName'),
-    lastName: createSQLColumnFilterCompiler('lastName'),
-    name: createSQLExpressionFilterCompiler(
+    'id': createSQLColumnFilterCompiler('id'),
+    'memberNumber': createSQLColumnFilterCompiler('memberNumber'),
+    'firstName': createSQLColumnFilterCompiler('firstName'),
+    'lastName': createSQLColumnFilterCompiler('lastName'),
+    'name': createSQLExpressionFilterCompiler(
         new SQLConcat(
             SQL.column('firstName'),
             new SQLScalar(' '),
             SQL.column('lastName'),
         ),
     ),
-    age: createSQLExpressionFilterCompiler(
+    'age': createSQLExpressionFilterCompiler(
         new SQLAge(SQL.column('birthDay')),
         { nullable: true },
     ),
-    gender: createSQLExpressionFilterCompiler(
+    'gender': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.gender'),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
-    birthDay: createSQLColumnFilterCompiler('birthDay', {
+    'birthDay': createSQLColumnFilterCompiler('birthDay', {
         normalizeValue: (d) => {
             if (typeof d === 'number') {
                 const date = new Date(d);
@@ -36,41 +36,76 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             return d;
         },
     }),
-    organizationName: createSQLExpressionFilterCompiler(
+    'organizationName': createSQLExpressionFilterCompiler(
         SQL.column('organizations', 'name'),
     ),
 
-    email: createSQLExpressionFilterCompiler(
+    'details.requiresFinancialSupport': createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.requiresFinancialSupport.value'),
+        { isJSONValue: true, type: SQLValueType.JSONBoolean },
+    ),
+
+    'email': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.email'),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
 
-    parentEmail: createSQLExpressionFilterCompiler(
+    'parentEmail': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.parents[*].email'),
         { isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString },
     ),
 
-    unverifiedEmail: createSQLExpressionFilterCompiler(
+    'unverifiedEmail': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.unverifiedEmails'),
         { isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString },
     ),
 
-    phone: createSQLExpressionFilterCompiler(
+    'phone': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.phone'),
         { isJSONValue: true },
     ),
 
-    parentPhone: createSQLExpressionFilterCompiler(
+    'details.address': createSQLFilterNamespace({
+        city: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('details'), '$.value.address.city'),
+            { isJSONValue: true, type: SQLValueType.JSONString },
+        ),
+        postalCode: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('details'), '$.value.address.postalCode'),
+            { isJSONValue: true, type: SQLValueType.JSONString },
+        ),
+        street: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('details'), '$.value.address.street'),
+            { isJSONValue: true, type: SQLValueType.JSONString },
+        ),
+    }),
+
+    'details.parents[*].address': createSQLFilterNamespace({
+        city: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('details'), '$.value.parents[*].address.city'),
+            { isJSONValue: true, isJSONObject: true },
+        ),
+        postalCode: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('details'), '$.value.parents[*].address.postalCode'),
+            { isJSONValue: true, isJSONObject: true },
+        ),
+        street: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('details'), '$.value.parents[*].address.street'),
+            { isJSONValue: true, isJSONObject: true },
+        ),
+    }),
+
+    'parentPhone': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.parents[*].phone'),
         { isJSONValue: true, isJSONObject: true },
     ),
 
-    unverifiedPhone: createSQLExpressionFilterCompiler(
+    'unverifiedPhone': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.unverifiedPhones'),
         { isJSONValue: true, isJSONObject: true },
     ),
 
-    registrations: createSQLRelationFilterCompiler(
+    'registrations': createSQLRelationFilterCompiler(
         SQL.select()
             .from(
                 SQL.table('registrations'),
@@ -109,7 +144,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         },
     ),
 
-    responsibilities: createSQLRelationFilterCompiler(
+    'responsibilities': createSQLRelationFilterCompiler(
         SQL.select()
             .from(
                 SQL.table('member_responsibility_records'),
@@ -151,7 +186,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         },
     ),
 
-    platformMemberships: createSQLRelationFilterCompiler(
+    'platformMemberships': createSQLRelationFilterCompiler(
         SQL.select()
             .from(
                 SQL.table('member_platform_memberships'),
@@ -178,7 +213,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         },
     ),
 
-    organizations: createSQLRelationFilterCompiler(
+    'organizations': createSQLRelationFilterCompiler(
         SQL.select()
             .from(
                 SQL.table('registrations'),
