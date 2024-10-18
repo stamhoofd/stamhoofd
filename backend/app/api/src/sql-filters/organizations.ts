@@ -33,6 +33,10 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
         SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
+    postalCode: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.postalCode'),
+        { isJSONValue: true, type: SQLValueType.JSONString },
+    ),
     country: createSQLExpressionFilterCompiler(
         SQL.jsonValue(
             SQL.column('organizations', 'address'),

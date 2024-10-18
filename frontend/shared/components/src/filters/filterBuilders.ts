@@ -693,31 +693,49 @@ export function useGetOrganizationUIFilterBuilders() {
     };
 
     const getOrganizationUIFilterBuilders = (user: User | null) => {
-        const all = [new StringFilterBuilder({
-            name: 'Naam',
-            key: 'name',
-        }),
-        new GroupUIFilterBuilder({
-            name: 'Leden',
-            builders: organizationMemberUIFilterBuilders,
-            wrapper: {
-                members: {
-                    $elemMatch: UIFilterWrapperMarker,
+        const all = [
+            new StringFilterBuilder({
+                name: 'Naam',
+                key: 'name',
+            }),
+
+            new StringFilterBuilder({
+                name: 'Gemeente',
+                key: 'city',
+            }),
+
+            new StringFilterBuilder({
+                name: 'Postcode',
+                key: 'postalCode',
+            }),
+
+            new StringFilterBuilder({
+                name: $t('Groepsnummer'),
+                key: 'uri',
+            }),
+
+            new GroupUIFilterBuilder({
+                name: 'Leden',
+                description: $t('Filter alle verenigingen die een lid hebben die aan deze voorwaarden voldoet.'),
+                builders: organizationMemberUIFilterBuilders,
+                wrapper: {
+                    members: {
+                        $elemMatch: UIFilterWrapperMarker,
+                    },
                 },
-            },
-        }),
-        new MultipleChoiceFilterBuilder({
-            name: 'Actief',
-            options: [
-                new MultipleChoiceUIFilterOption('Actief', 1),
-                new MultipleChoiceUIFilterOption('Inactief', 0),
-            ],
-            wrapper: {
-                active: {
-                    $in: UIFilterWrapperMarker,
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: 'Actief',
+                options: [
+                    new MultipleChoiceUIFilterOption('Actief', 1),
+                    new MultipleChoiceUIFilterOption('Inactief', 0),
+                ],
+                wrapper: {
+                    active: {
+                        $in: UIFilterWrapperMarker,
+                    },
                 },
-            },
-        })];
+            })];
 
         if (user?.permissions?.platform !== null) {
             all.push(
