@@ -76,7 +76,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem :selectable="hasWrite" @click="hasWrite ? editTags : undefined">
+                <STListItem :selectable="hasWrite" @click="hasWrite ? editOrganization() : undefined">
                     <h3 class="style-definition-label">
                         {{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}
                     </h3>
@@ -191,7 +191,6 @@ import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
-import SelectOrganizationTagsView from './tags/SelectOrganizationTagsView.vue';
 
 const props = defineProps<{
     organization: Organization;
@@ -268,16 +267,6 @@ async function goNext() {
 
 const deleting = ref(false);
 const hasWrite = computed(() => auth.getPermissionsForOrganization(props.organization)?.hasFullAccess() ?? false);
-
-async function editTags() {
-    await show({
-        components: [
-            new ComponentWithProperties(SelectOrganizationTagsView, {
-                organization: props.organization,
-            }),
-        ],
-    });
-}
 
 async function editOrganization() {
     await present({
