@@ -9,6 +9,9 @@
         </STNavigationBar>
 
         <main>
+            <aside class="style-title-prefix">
+                {{ organization.uri }}
+            </aside>
             <h1 class="style-navigation-title">
                 {{ title }}
             </h1>
