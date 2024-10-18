@@ -2,11 +2,11 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoofd/models';
-import { OrganizationMetaData, Organization as OrganizationStruct } from '@stamhoofd/structures';
+import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../../helpers/Context';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Formatter } from '@stamhoofd/utility';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
