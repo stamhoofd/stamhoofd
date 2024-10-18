@@ -722,6 +722,23 @@ export function useGetOrganizationUIFilterBuilders() {
         if (user?.permissions?.platform !== null) {
             all.push(
                 new MultipleChoiceFilterBuilder({
+                    name: $t('ec2de613-f06f-4d9a-888a-40f98b6b3727'),
+                    multipleChoiceConfiguration: {
+                        isSubjectPlural: true,
+                    },
+                    options: platform.value.config.tags.map((tag) => {
+                        return new MultipleChoiceUIFilterOption(tag.name, tag.id);
+                    }),
+                    wrapper: {
+                        tags: {
+                            $in: UIFilterWrapperMarker,
+                        },
+                    },
+                }),
+            );
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
                     name: 'Voltooide vlagmomenten',
                     multipleChoiceConfiguration: {
                         isSubjectPlural: true,
