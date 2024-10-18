@@ -4,6 +4,7 @@ import { LimitedFilteredRequest } from './FilteredRequest';
 export enum ExcelExportType {
     Payments = 'payments',
     Members = 'members',
+    Organizations = 'organizations',
 }
 
 export class ExcelSheetFilter extends AutoEncoder {

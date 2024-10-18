@@ -86,6 +86,7 @@ const start = async () => {
     // Register Excel loaders
     await import('./src/excel-loaders/members');
     await import('./src/excel-loaders/payments');
+    await import('./src/excel-loaders/organizations');
 
     // Register Email Recipient loaders
     await import('./src/email-recipient-loaders/members');

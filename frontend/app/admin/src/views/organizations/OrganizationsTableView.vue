@@ -22,11 +22,13 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncTableAction, Column, ComponentExposed, EmailView, InMemoryTableAction, ModernTableView, RecipientMultipleChoiceOption, TableAction, TableActionSelection, Toast, useAuth, useContext, useGetOrganizationUIFilterBuilders, useOrganizationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, isEmptyFilter, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
+import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationTag, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import OrganizationView from './OrganizationView.vue';
 import { useChargeOrganizationsSheet } from './composables/useChargeOrganizationsSheet';
+import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 
 type ObjectType = Organization;
 const $t = useTranslate();
@@ -253,6 +255,22 @@ async function openMail(selection: TableActionSelection<Organization>) {
     });
 }
 
+async function exportToExcel(selection: TableActionSelection<ObjectType>) {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(ExcelExportView, {
+                    type: ExcelExportType.Organizations,
+                    filter: selection.filter,
+                    workbook: getSelectableWorkbook(platform.value),
+                    configurationId: 'members',
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 if (auth.hasPlatformFullAccess()) {
     actions.push(
         new InMemoryTableAction({
@@ -318,5 +336,17 @@ if (auth.hasPlatformFullAccess()) {
             await chargeOrganizationsSheet.present(selection.filter.filter);
         },
     }));
+
+    actions.push(
+        new AsyncTableAction({
+            name: 'Exporteren naar Excel',
+            icon: 'download',
+            priority: 11,
+            groupIndex: 3,
+            handler: async (selection) => {
+                await exportToExcel(selection);
+            },
+        }),
+    );
 }
 </script>
