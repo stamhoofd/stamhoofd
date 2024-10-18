@@ -13,7 +13,7 @@ export class ModelHelper {
                 { [idKey]: { sign: '>', value: lastId } },
                 { limit, sort: [idKey] });
 
-            if (models.length === 0) {
+            if (models.length < limit) {
                 break;
             }
 
