@@ -16,8 +16,12 @@ export default new Migration(async () => {
 
     await ModelHelper.loop(Order, 'id', async (batch: Order[]) => {
         console.log('Saving orders...', `(${count})`);
+
         // save all orders to update the new columns
-        await Promise.all(batch.map(order => order.save()));
+        for (const order of batch) {
+            await order.save();
+        }
+
         count += limit;
     },
     { limit });
