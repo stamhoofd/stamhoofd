@@ -65,7 +65,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const { user } = await Context.authenticate();
 
         if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
-            if (!await Context.auth.hasFullAccess(request.body.asOrganizationId)) {
+            if (!await Context.auth.canManageFinances(request.body.asOrganizationId)) {
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register as this organization for a different organization',
