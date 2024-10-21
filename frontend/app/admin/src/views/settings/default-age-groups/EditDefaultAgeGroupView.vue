@@ -42,7 +42,7 @@
         <h2>Automatische aansluiting</h2>
         <p>Leden die in deze leeftijdsgroep inschrijven, kan je automatisch laten aansluiten bij de koepel. Op die manier is de verzekering meteen in orde en hoeft de leiding dit niet per lid individueel te doen.</p>
 
-        <STInputBox title="Aansluiting KSA-Nationaal" error-fields="defaultMembershipTypeId" :error-box="errors.errorBox">
+        <STInputBox :title="$t('61f434a9-49e6-4a92-b613-965dfd807dca')" error-fields="defaultMembershipTypeId" :error-box="errors.errorBox">
             <Dropdown v-model="defaultMembershipTypeId">
                 <option :value="null">
                     Geen automatische aansluiting

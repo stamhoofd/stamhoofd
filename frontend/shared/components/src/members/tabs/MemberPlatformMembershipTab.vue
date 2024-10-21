@@ -2,7 +2,7 @@
     <div class="member-payments-view">
         <main class="container">
             <p v-if="hasFull" class="style-description-block">
-                Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.
+                {{ $t('237be7e0-4534-4008-b7bc-3e6db776a72a') }}
             </p>
 
             <p v-if="memberships.length === 0" class="warning-box">
@@ -82,39 +82,39 @@ import SelectPlatformMembershipView from '../components/platform-membership/Sele
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 const props = defineProps<{
-    member: PlatformMember
+    member: PlatformMember;
 }>();
 const $t = useTranslate();
-const present = usePresent()
-const platformFamilyManager = usePlatformFamilyManager()
+const present = usePresent();
+const platformFamilyManager = usePlatformFamilyManager();
 const deletingMemberships = ref(new Set());
 const platform = usePlatform();
 const now = new Date();
 const auth = useAuth();
-const hasFull = auth.hasFullAccess()
+const hasFull = auth.hasFullAccess();
 
 const memberships = computed(() => {
     return props.member.member.platformMemberships
         .filter(m => m.endDate >= now)
         .sort((a, b) => Sorter.stack(
             Sorter.byDateValue(b.startDate, a.startDate),
-            Sorter.byDateValue(b.createdAt, a.createdAt)
+            Sorter.byDateValue(b.createdAt, a.createdAt),
         ));
 });
 
 function getOrganizationName(membership: MemberPlatformMembership) {
-    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? 'Onbekende groep'
+    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? 'Onbekende groep';
 }
 
 async function addMembership() {
     await present({
         components: [
             new ComponentWithProperties(SelectPlatformMembershipView, {
-                member: props.member
-            })
+                member: props.member,
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function deleteMembership(membership: MemberPlatformMembership) {
@@ -131,18 +131,19 @@ async function deleteMembership(membership: MemberPlatformMembership) {
     try {
         // Execute an isolated patch
         const platformMembershipsPatch = new PatchableArray() as PatchableArrayAutoEncoder<MemberPlatformMembership>;
-        platformMembershipsPatch.addDelete(membership.id)
+        platformMembershipsPatch.addDelete(membership.id);
 
         const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
         patch.addPatch(MemberWithRegistrationsBlob.patch({
             id: props.member.member.id,
-            platformMemberships: platformMembershipsPatch
-        }))
+            platformMemberships: platformMembershipsPatch,
+        }));
 
-        await platformFamilyManager.isolatedPatch([props.member], patch, false)
+        await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
         Toast.success('Aansluiting verwijderd').show();
-    } catch (e) {
+    }
+    catch (e) {
         Toast.fromError(e).show();
     }
     deletingMemberships.value.delete(membership.id);
@@ -151,7 +152,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
 function getMembershipType(membership: MemberPlatformMembership) {
     return platform.value.config.membershipTypes.find(t => t.id === membership.membershipTypeId) ?? PlatformMembershipType.create({
         id: membership.membershipTypeId,
-        name: 'Onbekend'
+        name: 'Onbekend',
     });
 }
 </script>

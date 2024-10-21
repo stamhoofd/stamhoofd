@@ -3,17 +3,17 @@
         <template v-if="isDuplicate">
             <h1>Krijg toegang tot de gegevens van {{ cloned.patchedMember.details.firstName }}</h1>
             <p>{{ cloned.patchedMember.details.firstName }} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.</p>
-            
+
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <STInputBox title="Beveiligingscode" error-fields="code" :error-box="errors.errorBox" class="max">
-                <CodeInput v-model="code" :code-length="16" :space-length="4" :numbersOnly="false" @complete="save" />
+                <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save" />
             </STInputBox>
 
             <hr>
             <h2>Waar vind ik deze code?</h2>
 
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem class="left-center">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/communication.svg">
@@ -22,7 +22,7 @@
                         Vraag de code aan jouw leiding
                     </h2>
                     <p class="style-description">
-                        Jouw leiding kan in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.
+                        {{ $t('f5229cc1-c908-4409-855a-1dba40371815') }}
                     </p>
                 </STListItem>
 
@@ -60,26 +60,26 @@ import { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = withDefaults(
     defineProps<{
-        title: string
-        saveText?: string,
-        component: ComponentOptions,
+        title: string;
+        saveText?: string;
+        component: ComponentOptions;
         // do not change this
-        member: PlatformMember,
+        member: PlatformMember;
         // Whether the member should be saved to the API
-        doSave?: boolean,
-        markReviewed?: string[]
-        saveHandler?: ((navigate: NavigationActions) => Promise<void>|void)|null
+        doSave?: boolean;
+        markReviewed?: string[];
+        saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
         doSave: true,
         saveText: 'Opslaan',
         saveHandler: null,
-        markReviewed: () => []
-    }
+        markReviewed: () => [],
+    },
 );
 
 // We use a clone, so we don't propate the patches to the rest of the app until the save was successful
@@ -89,25 +89,25 @@ const present = usePresent();
 const dismiss = useDismiss();
 const pop = usePop();
 const loading = ref(false);
-const errors = useErrors()
+const errors = useErrors();
 const manager = usePlatformFamilyManager();
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 const willMarkReviewed = !isAdmin;
 const isDuplicate = ref(false);
-const code = ref("");
+const code = ref('');
 
 function patchMemberWithReviewed(member: PlatformMember) {
     if (props.markReviewed.length && willMarkReviewed) {
         const times = member.patchedMember.details.reviewTimes.clone();
 
         for (const r of props.markReviewed) {
-            times.markReviewed(r as any, new Date())
+            times.markReviewed(r as any, new Date());
         }
 
         member.addDetailsPatch({
-            reviewTimes: times
-        })
+            reviewTimes: times,
+        });
     }
 }
 
@@ -128,8 +128,8 @@ async function save() {
             if (code.value.length !== 16) {
                 errors.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: "Vul de beveiligingscode in",
-                    field: 'code'
+                    message: 'Vul de beveiligingscode in',
+                    field: 'code',
                 }));
                 loading.value = false;
                 return;
@@ -137,31 +137,33 @@ async function save() {
 
             // Set security code on member details - this allows the backend to go through with the request
             cloned.value.addDetailsPatch({
-                securityCode: code.value
-            })
+                securityCode: code.value,
+            });
         }
 
         if (props.doSave) {
             // Extra clone for saving, so the view doesn't change during saving
             const saveClone = cloned.value.clone();
-            patchMemberWithReviewed(saveClone)
-            await manager.save(saveClone.family.members)
-            props.member.family.copyFromClone(saveClone.family)
-        } else {
-            // Copy over clone
-            patchMemberWithReviewed(cloned.value)
-            props.member.family.copyFromClone(cloned.value.family)
+            patchMemberWithReviewed(saveClone);
+            await manager.save(saveClone.family.members);
+            props.member.family.copyFromClone(saveClone.family);
         }
-    
-        if (props.saveHandler) {
-            await props.saveHandler({
-                show, present, dismiss, pop
-            });
-        } else {
-            await pop({force: true});
+        else {
+            // Copy over clone
+            patchMemberWithReviewed(cloned.value);
+            props.member.family.copyFromClone(cloned.value.family);
         }
 
-    } catch (e) {
+        if (props.saveHandler) {
+            await props.saveHandler({
+                show, present, dismiss, pop,
+            });
+        }
+        else {
+            await pop({ force: true });
+        }
+    }
+    catch (e) {
         if (isSimpleError(e) || isSimpleErrors(e)) {
             if (e.hasCode('known_member_missing_rights')) {
                 isDuplicate.value = true;
@@ -175,18 +177,18 @@ async function save() {
 }
 
 const hasChanges = computed(() => {
-    return cloned.value.isNew || patchContainsChanges(cloned.value.patch, cloned.value.member, {version: Version})
-})
+    return cloned.value.isNew || patchContainsChanges(cloned.value.patch, cloned.value.member, { version: Version });
+});
 
 async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
 }
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 
 </script>

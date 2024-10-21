@@ -7,16 +7,16 @@
         </p>
         <template v-else>
             <ScrollableSegmentedControl v-if="availableOrganizations.length > 1" v-model="selectedOrganization" :items="availableOrganizations" :labels="availableOrganizations.map(o => o.name)" />
-            
+
             <p v-if="organization" class="style-description-block">
                 {{ $t('7c2fee1a-0838-4346-848d-a3d984e70fdc') }}
-            </p>        
+            </p>
             <p v-else class="style-description-block">
-                Het bedrag zal achteraf door KSA Nationaal aan <strong>{{ selectedOrganization.name }}</strong> worden gefactureerd
-            </p>        
+                {{ $t('525747e4-48df-4f20-979e-3c18142e64a5', {name: selectedOrganization.name }) }}
+            </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
-            
+
             <STList>
                 <STListItem v-for="type of availableMembershipTypes" :key="type.id" :disabled="!getTypeAvailable(type)" :selectable="true" element-name="label">
                     <template #left>
@@ -71,7 +71,7 @@ import { useOrganization, usePlatform } from '../../../hooks';
 import DateSelection from '../../../inputs/DateSelection.vue';
 
 const props = defineProps<{
-    member: PlatformMember
+    member: PlatformMember;
 }>();
 
 const $t = useTranslate();
@@ -81,12 +81,12 @@ const saveText = 'Toevoegen';
 const organization = useOrganization();
 const platform = usePlatform();
 const now = new Date();
-const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 const customStartDate = ref(tomorrow);
 const customEndDate = ref(tomorrow);
 const errors = useErrors();
-const platformFamilyManager = usePlatformFamilyManager()
+const platformFamilyManager = usePlatformFamilyManager();
 const pop = usePop();
 
 const availableOrganizations = computed(() => organization.value ? [organization.value] : props.member.organizations);
@@ -97,7 +97,6 @@ const availableMembershipTypes = computed(() => {
 });
 
 const selectedMembershipType = ref(availableMembershipTypes.value[0] ?? null);
-
 
 async function save() {
     if (!selectedMembershipType.value) {
@@ -117,8 +116,8 @@ async function save() {
         if (!periodConfig) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Dit aansluitingstype is (nog) niet beschikbaar voor dit werkjaar'
-            })
+                message: 'Dit aansluitingstype is (nog) niet beschikbaar voor dit werkjaar',
+            });
         }
 
         const errors = new SimpleErrors();
@@ -128,44 +127,44 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: 'De startdatum kan ten vroegste morgen zijn'
-                }))
+                    message: 'De startdatum kan ten vroegste morgen zijn',
+                }));
             }
 
             if (customStartDate.value.getTime() > customEndDate.value.getTime()) {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: 'De einddatum moet na de startdatum liggen'
-                }))
+                    message: 'De einddatum moet na de startdatum liggen',
+                }));
             }
 
             if (customStartDate.value < periodConfig.startDate) {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: 'De startdatum kan niet voor ' +Formatter.date(periodConfig.startDate)+ ' liggen'
-                }))
+                    message: 'De startdatum kan niet voor ' + Formatter.date(periodConfig.startDate) + ' liggen',
+                }));
             }
 
             if (customStartDate.value > periodConfig.endDate) {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: 'De startdatum kan niet na ' +Formatter.date(periodConfig.endDate)+ ' liggen'
-                }))
+                    message: 'De startdatum kan niet na ' + Formatter.date(periodConfig.endDate) + ' liggen',
+                }));
             }
 
             if (customEndDate.value > periodConfig.endDate) {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: 'De einddatum kan niet na ' +Formatter.date(periodConfig.endDate)+ ' liggen'
-                }))
+                    message: 'De einddatum kan niet na ' + Formatter.date(periodConfig.endDate) + ' liggen',
+                }));
             }
         }
 
-        errors.throwIfNotEmpty()
+        errors.throwIfNotEmpty();
 
         // Execute an isolated patch
         const platformMembershipsPatch = new PatchableArray() as PatchableArrayAutoEncoder<MemberPlatformMembership>;
@@ -178,21 +177,21 @@ async function save() {
                 startDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customStartDate.value : periodConfig.startDate,
                 endDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customEndDate.value : periodConfig.endDate,
                 expireDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? null : periodConfig.expireDate,
-            })
+            }),
         );
 
         const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
         patch.addPatch(MemberWithRegistrationsBlob.patch({
             id: props.member.member.id,
-            platformMemberships: platformMembershipsPatch
-        }))
+            platformMemberships: platformMembershipsPatch,
+        }));
 
-        await platformFamilyManager.isolatedPatch([props.member], patch, false)
+        await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
         Toast.success('Aansluiting toegevoegd').show();
-        await pop({force: true})
-
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -210,11 +209,10 @@ function getTypeDateDescription(type: PlatformMembershipType) {
     }
 
     if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
-        return ''
+        return '';
     }
 
     return Formatter.date(periodConfig.startDate, true) + ' - ' + Formatter.date(periodConfig.expireDate ?? periodConfig.endDate, true);
-
 }
 
 function getTypePriceDescription(type: PlatformMembershipType) {
@@ -234,7 +232,7 @@ function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const priceConfig = periodConfig.getPriceConfigForDate(date);
 
     if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
-        return Formatter.price(priceConfig.pricePerDay) + ' per dag'
+        return Formatter.price(priceConfig.pricePerDay) + ' per dag';
     }
 
     const tagIds = selectedOrganization.value?.meta.tags ?? [];
