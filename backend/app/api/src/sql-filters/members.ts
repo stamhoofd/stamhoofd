@@ -27,6 +27,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         SQL.jsonValue(SQL.column('details'), '$.value.gender'),
         { isJSONValue: true, type: SQLValueType.JSONString },
     ),
+
     'birthDay': createSQLColumnFilterCompiler('birthDay', {
         normalizeValue: (d) => {
             if (typeof d === 'number') {
@@ -36,6 +37,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             return d;
         },
     }),
+
     'organizationName': createSQLExpressionFilterCompiler(
         SQL.column('organizations', 'name'),
     ),
@@ -54,6 +56,28 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         SQL.jsonValue(SQL.column('details'), '$.value.parents[*].email'),
         { isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString },
     ),
+
+    'details.parents[0]': createSQLFilterNamespace({
+        name: createSQLExpressionFilterCompiler(
+            new SQLConcat(
+                SQL.jsonUnquotedValue(SQL.column('details'), '$.value.parents[0].firstName'),
+                new SQLScalar(' '),
+                SQL.jsonUnquotedValue(SQL.column('details'), '$.value.parents[0].lastName'),
+            ),
+            { isJSONValue: true, isJSONObject: false, type: SQLValueType.JSONString },
+        ),
+    }),
+
+    'details.parents[1]': createSQLFilterNamespace({
+        name: createSQLExpressionFilterCompiler(
+            new SQLConcat(
+                SQL.jsonUnquotedValue(SQL.column('details'), '$.value.parents[1].firstName'),
+                new SQLScalar(' '),
+                SQL.jsonUnquotedValue(SQL.column('details'), '$.value.parents[1].lastName'),
+            ),
+            { isJSONValue: true, isJSONObject: false, type: SQLValueType.JSONString },
+        ),
+    }),
 
     'unverifiedEmail': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.unverifiedEmails'),

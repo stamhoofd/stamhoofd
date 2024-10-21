@@ -425,6 +425,23 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
+                    name: $t('Naam ouder'),
+                    key: 'name',
+                    wrapper: {
+                        $or: [
+                            {
+                                'details.parents[0]': UIFilterWrapperMarker,
+                            },
+                            {
+                                'details.parents[1]': UIFilterWrapperMarker,
+                            },
+                        ],
+                    },
+                }),
+            );
+
+            all.push(
+                new StringFilterBuilder({
                     name: $t('d8d26405-9d24-4217-af9b-5a0edee0d35f'),
                     key: 'email',
                 }),
