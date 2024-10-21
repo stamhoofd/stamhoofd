@@ -102,6 +102,10 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             SQL.jsonValue(SQL.column('details'), '$.value.address.street'),
             { isJSONValue: true, type: SQLValueType.JSONString },
         ),
+        number: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('details'), '$.value.address.number'),
+            { isJSONValue: true, type: SQLValueType.JSONString },
+        ),
     }),
 
     'details.parents[*].address': createSQLFilterNamespace({
@@ -115,6 +119,10 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         ),
         street: createSQLExpressionFilterCompiler(
             SQL.jsonValue(SQL.column('details'), '$.value.parents[*].address.street'),
+            { isJSONValue: true, isJSONObject: true },
+        ),
+        number: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('details'), '$.value.parents[*].address.number'),
             { isJSONValue: true, isJSONObject: true },
         ),
     }),

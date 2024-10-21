@@ -470,6 +470,40 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
+                    name: $t('Straatnaam'),
+                    key: 'street',
+                    wrapper: {
+                        $or: [
+                            {
+                                'details.address': UIFilterWrapperMarker,
+                            },
+                            {
+                                'details.parents[*].address': UIFilterWrapperMarker,
+                            },
+                        ],
+                    },
+                }),
+            );
+
+            all.push(
+                new StringFilterBuilder({
+                    name: $t('Huisnummer'),
+                    key: 'number',
+                    wrapper: {
+                        $or: [
+                            {
+                                'details.address': UIFilterWrapperMarker,
+                            },
+                            {
+                                'details.parents[*].address': UIFilterWrapperMarker,
+                            },
+                        ],
+                    },
+                }),
+            );
+
+            all.push(
+                new StringFilterBuilder({
                     name: $t('f5c908ad-c996-4dc8-acc0-dae902f13495'),
                     key: 'city',
                     wrapper: {
