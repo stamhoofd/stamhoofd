@@ -419,5 +419,7 @@
   "300d2935-b578-48cc-b58e-1c0446a68d59": "Startdatum",
   "85dcdb87-b504-43b6-8a52-c22a046eefad": "Einddatum",
   "5e99e2aa-a240-4894-8de3-f8f0fef20068": "Groepsnummer",
-  "6bf80a05-84b0-47ba-ad41-66e2a106669b": "Filter alle verenigingen die een lid hebben die aan deze voorwaarden voldoet."
+  "6bf80a05-84b0-47ba-ad41-66e2a106669b": "Filter alle verenigingen die een lid hebben die aan deze voorwaarden voldoet.",
+  "528545c4-028b-4711-9b16-f6fa990c3130": "Aansluiting/verzekering Stamhoofd*",
+  "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": "* Voor de aansluiting bij Stamhoofd moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van Stamhoofd."
 }

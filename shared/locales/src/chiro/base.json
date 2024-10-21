@@ -20,5 +20,7 @@
   "b091538b-014e-4db2-8241-9ed98e0c51c7": "Breng een kost in rekening per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Wettelijk gezien is het niet toegestaan dat je deze laat afhangen van de gekozen betaalmethode (dat is dus niet mogelijk).",
   "a654551b-6dcd-48a9-a5c5-4609fdcba5f3": "Jouw Chirogroep is in orde",
   "8e77d1c1-87dc-4fdb-ad6e-13145bc96f78": "Breng jouw Chirogroep in orde",
-  "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": "Jouw groep bevindt zich in een ander werkjaar."
+  "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": "Jouw groep bevindt zich in een ander werkjaar.",
+  "528545c4-028b-4711-9b16-f6fa990c3130": "Aansluiting/verzekering Chiro*",
+"e99c7d31-f9fe-4e0f-8947-bdc30784de5b": "* Voor de aansluiting bij Chiro moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van Chiro."
 }

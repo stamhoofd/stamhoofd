@@ -24,7 +24,7 @@
                     >
                 </STInputBox>
 
-                <STInputBox v-if="defaultAgeGroups.length" title="Aansluiting/verzekering KSA-Nationaal*" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
+                <STInputBox v-if="defaultAgeGroups.length" :title="$t('528545c4-028b-4711-9b16-f6fa990c3130')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                     <Dropdown v-model="defaultAgeGroupId">
                         <option :value="null">
                             Geen automatische aansluiting of verzekeringen (!)
@@ -36,7 +36,7 @@
                 </STInputBox>
             </div>
             <p v-if="defaultAgeGroups.length" class="style-description-small">
-                * Voor de aansluiting bij KSA Nationaal moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van KSA Nationaal.
+                {{ $t('e99c7d31-f9fe-4e0f-8947-bdc30784de5b') }}
             </p>
         </template>
 
