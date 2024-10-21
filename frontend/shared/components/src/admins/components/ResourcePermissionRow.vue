@@ -1,5 +1,5 @@
 <template>
-    <STListItem element-name="label" :selectable="true">
+    <STListItem element-name="label" :selectable="true" class="left-center">
         <template #left>
             <Checkbox v-model="selected" :disabled="locked" />
         </template>
@@ -38,234 +38,239 @@ import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed
 import { Ref, computed } from 'vue';
 
 const props = withDefaults(defineProps<{
-    resource: {id: string, name: string, type: PermissionsResourceType};
-    role: PermissionRoleDetailed|Permissions;
-    inheritedRoles?: (PermissionRoleDetailed|Permissions)[];
+    resource: { id: string; name: string; type: PermissionsResourceType };
+    role: PermissionRoleDetailed | Permissions;
+    inheritedRoles?: (PermissionRoleDetailed | Permissions)[];
     type: 'resource' | 'role'; // whether we show the name of the role or the resource
     configurableAccessRights: AccessRight[];
 }>(), {
     inheritedRoles: () => [],
-})
+});
 
-const emit = defineEmits(['patch:role'])
-const {patched: role, addPatch, createPatch} = useEmitPatch<PermissionRoleDetailed|Permissions>(props, emit, 'role');
-const auth = useAuth()
+const emit = defineEmits(['patch:role']);
+const { patched: role, addPatch, createPatch } = useEmitPatch<PermissionRoleDetailed | Permissions>(props, emit, 'role');
+const auth = useAuth();
 const isEditingUserPermissions = (role.value instanceof Permissions);
 
 const isMe = computed(() => {
     if (role.value instanceof Permissions) {
-        return false
+        return false;
     }
-    const realRole = role.value
-    return !!auth.permissions?.roles.find(r => r.id === realRole.id)
-})
+    const realRole = role.value;
+    return !!auth.permissions?.roles.find(r => r.id === realRole.id);
+});
 
-const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id))
+const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id));
 
 const lockedMinimumLevel = computed(() => {
-    const a = props.role.level
-    const b = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None) : PermissionLevel.None
+    const a = props.role.level;
+    const b = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None) : PermissionLevel.None;
 
-    const arr = [a, b]
+    const arr = [a, b];
 
     for (const role of props.inheritedRoles) {
         const c = role.level;
         const d = role.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None;
         const e = props.resource.id !== '' ? (role.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None) : PermissionLevel.None;
-        arr.push(c, d, e)
+        arr.push(c, d, e);
     }
 
-    return maximumPermissionlevel(...arr)
-})
+    return maximumPermissionlevel(...arr);
+});
 
 const lockedAccessRights = computed(() => {
     const accessRights = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.accessRights ?? []) : [];
     return accessRights;
-})
+});
 
 const permissionLevel = computed({
     get: () => {
-        const base = resourcePermissions.value?.level ?? PermissionLevel.None
-        const inherited = lockedMinimumLevel.value
+        const base = resourcePermissions.value?.level ?? PermissionLevel.None;
+        const inherited = lockedMinimumLevel.value;
 
         if (getPermissionLevelNumber(base) < getPermissionLevelNumber(inherited)) {
-            return inherited
+            return inherited;
         }
 
         return base;
     },
     set: (level: PermissionLevel) => {
         if (permissionLevel.value === level) {
-            return
+            return;
         }
 
         if (getPermissionLevelNumber(level) < getPermissionLevelNumber(lockedMinimumLevel.value)) {
-            return
+            return;
         }
 
-        const patch = createPatch()
+        const patch = createPatch();
         if (level === PermissionLevel.None) {
             // Delete the resource if no access rights
             if (resourcePermissions.value?.accessRights.length) {
                 // Keep it but set the level
-            } else {
+            }
+            else {
                 // Delete it
-                const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions>|ResourcePermissions|null>()
-                subPatch.set(props.resource.id, null)
-                patch.resources!.set(props.resource.type, subPatch)
-                addPatch(patch)
+                const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
+                subPatch.set(props.resource.id, null);
+                patch.resources!.set(props.resource.type, subPatch);
+                addPatch(patch);
                 return;
             }
         }
 
-        const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions>|ResourcePermissions|null>()
+        const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
 
         if (resourcePermissions.value) {
             subPatch.set(props.resource.id, ResourcePermissions.patch({
-                level
-            }))
-        } else {
-            subPatch.set(props.resource.id, ResourcePermissions.create({
-                level
-            }))
+                level,
+            }));
         }
-        
-        patch.resources!.set(props.resource.type, subPatch)
-        addPatch(patch)
-    }
-})
+        else {
+            subPatch.set(props.resource.id, ResourcePermissions.create({
+                level,
+            }));
+        }
 
-const accessRightsMap: Map<AccessRight, Ref<boolean>> = new Map()
+        patch.resources!.set(props.resource.type, subPatch);
+        addPatch(patch);
+    },
+});
+
+const accessRightsMap: Map<AccessRight, Ref<boolean>> = new Map();
 
 for (const accessRight of props.configurableAccessRights) {
     const hasAccessRight = computed({
         get: () => resourcePermissions?.value?.accessRights?.includes(accessRight) ?? false,
         set: (enable: boolean) => {
             if (hasAccessRight.value === enable) {
-                return
+                return;
             }
 
-            const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions>|ResourcePermissions|null>()
+            const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
 
             if (resourcePermissions.value) {
-                const p = ResourcePermissions.patch({})
+                const p = ResourcePermissions.patch({});
                 if (enable) {
-                    p.accessRights.addDelete(accessRight) // prevent creating duplicates
-                    p.accessRights.addPut(accessRight)
-                } else {
-                    p.accessRights.addDelete(accessRight)
-                    p.accessRights.addDelete(accessRight) // auto correct duplicates
+                    p.accessRights.addDelete(accessRight); // prevent creating duplicates
+                    p.accessRights.addPut(accessRight);
                 }
-                subPatch.set(props.resource.id, p)
-            } else {
+                else {
+                    p.accessRights.addDelete(accessRight);
+                    p.accessRights.addDelete(accessRight); // auto correct duplicates
+                }
+                subPatch.set(props.resource.id, p);
+            }
+            else {
                 subPatch.set(props.resource.id, ResourcePermissions.create({
                     level: PermissionLevel.None,
-                    accessRights: [accessRight]
-                }))
+                    accessRights: [accessRight],
+                }));
             }
-            
-            const patch = createPatch()
-            patch.resources!.set(props.resource.type, subPatch)
-            addPatch(patch)
-        }
-    })
-    accessRightsMap.set(accessRight, hasAccessRight)
+
+            const patch = createPatch();
+            patch.resources!.set(props.resource.type, subPatch);
+            addPatch(patch);
+        },
+    });
+    accessRightsMap.set(accessRight, hasAccessRight);
 }
 
 const locked = computed(() => {
-    return lockedMinimumLevel.value !== PermissionLevel.None || lockedAccessRights.value.length > 0
-})
+    return lockedMinimumLevel.value !== PermissionLevel.None || lockedAccessRights.value.length > 0;
+});
 
 const selected = computed({
     get: () => lockedMinimumLevel.value !== PermissionLevel.None || lockedAccessRights.value.length > 0 || (!!resourcePermissions.value && (resourcePermissions.value.level !== PermissionLevel.None || !!resourcePermissions.value?.accessRights.length)),
     set: (value: boolean) => {
         if (value === selected.value) {
-            return
+            return;
         }
         if (locked.value) {
-            return
+            return;
         }
-        
+
         if (value) {
-            permissionLevel.value = PermissionLevel.Read
-        } else {
-            // Delete it
-            const patch = createPatch()
-            const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions>|ResourcePermissions|null>()
-            subPatch.set(props.resource.id, null)
-            patch.resources!.set(props.resource.type, subPatch)
-            addPatch(patch)
+            permissionLevel.value = PermissionLevel.Read;
         }
-    }
-})
+        else {
+            // Delete it
+            const patch = createPatch();
+            const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
+            subPatch.set(props.resource.id, null);
+            patch.resources!.set(props.resource.type, subPatch);
+            addPatch(patch);
+        }
+    },
+});
 
 const allAccessRights = computed(() => {
-    const specificAccessRights = resourcePermissions.value?.accessRights ?? []
+    const specificAccessRights = resourcePermissions.value?.accessRights ?? [];
     const inheritedAccessRights = lockedAccessRights.value;
     return [...new Set([...specificAccessRights, ...inheritedAccessRights])];
-})
+});
 
 const levelText = computed(() => {
-    switch(permissionLevel.value) {
+    switch (permissionLevel.value) {
         case PermissionLevel.None: {
             // Loop over all access rights
             const accessRights = allAccessRights.value;
             if (accessRights.length) {
-                return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(" + ")
+                return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(' + ');
             }
-            return "Geen toegang";
+            return 'Geen toegang';
         }
         case PermissionLevel.Read: {
-            const rights = ['Lezen']
+            const rights = ['Lezen'];
             const accessRights = allAccessRights.value;
-            
+
             for (const right of accessRights) {
                 const base = AccessRightHelper.autoGrantRightForLevel(right);
                 if (!base || getPermissionLevelNumber(base) > getPermissionLevelNumber(PermissionLevel.Read)) {
                     // This is not automatically granted for read permissions
-                    rights.push(AccessRightHelper.getNameShort(right))
+                    rights.push(AccessRightHelper.getNameShort(right));
                 }
             }
 
-            return rights.join(' + ')
+            return rights.join(' + ');
         }
         case PermissionLevel.Write: {
-            const rights = ['Bewerken']
+            const rights = ['Bewerken'];
             const accessRights = allAccessRights.value;
-            
+
             for (const right of accessRights) {
                 const base = AccessRightHelper.autoGrantRightForLevel(right);
                 if (!base || getPermissionLevelNumber(base) > getPermissionLevelNumber(PermissionLevel.Write)) {
                     // This is not automatically granted for read permissions
-                    rights.push(AccessRightHelper.getNameShort(right))
+                    rights.push(AccessRightHelper.getNameShort(right));
                 }
             }
 
-            return rights.join(' + ')
+            return rights.join(' + ');
         }
         case PermissionLevel.Full: {
-            const rights = ['Volledige toegang']
+            const rights = ['Volledige toegang'];
             const accessRights = allAccessRights.value;
-            
+
             for (const right of accessRights) {
                 const base = AccessRightHelper.autoGrantRightForLevel(right);
                 if (!base || getPermissionLevelNumber(base) > getPermissionLevelNumber(PermissionLevel.Full)) {
                     // This is not automatically granted for read permissions
-                    rights.push(AccessRightHelper.getNameShort(right))
+                    rights.push(AccessRightHelper.getNameShort(right));
                 }
             }
 
-            return rights.join(' + ')
+            return rights.join(' + ');
         }
         default: {
             const _exhaustiveCheck: never = permissionLevel.value;
             return _exhaustiveCheck;
         }
     }
-})
+});
 
 const choosePermissions = async (event: MouseEvent) => {
-    const showAccessRights = props.configurableAccessRights
+    const showAccessRights = props.configurableAccessRights;
     const contextMenu = new ContextMenu([
         // Base levels
         [
@@ -274,52 +279,53 @@ const choosePermissions = async (event: MouseEvent) => {
                 name: 'Geen basistoegang',
                 disabled: getPermissionLevelNumber(PermissionLevel.None) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
-                    permissionLevel.value = PermissionLevel.None
-                }
+                    permissionLevel.value = PermissionLevel.None;
+                },
             }),
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Read,
                 name: 'Lezen',
                 disabled: getPermissionLevelNumber(PermissionLevel.Read) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
-                    permissionLevel.value = PermissionLevel.Read
-                }
+                    permissionLevel.value = PermissionLevel.Read;
+                },
             }),
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Write,
                 name: 'Bewerken',
                 disabled: getPermissionLevelNumber(PermissionLevel.Write) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
-                    permissionLevel.value = PermissionLevel.Write
-                }
+                    permissionLevel.value = PermissionLevel.Write;
+                },
             }),
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Full,
                 disabled: getPermissionLevelNumber(PermissionLevel.Full) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 name: 'Volledige toegang',
                 action: () => {
-                    permissionLevel.value = PermissionLevel.Full
-                }
-            })
+                    permissionLevel.value = PermissionLevel.Full;
+                },
+            }),
         ],
         // Access rights
         ...(showAccessRights.length > 0 ? [
             showAccessRights.map((accessRight) => {
-                const baseLevel = AccessRightHelper.autoGrantRightForLevel(accessRight)
+                const baseLevel = AccessRightHelper.autoGrantRightForLevel(accessRight);
                 const isLocked = lockedAccessRights.value.includes(accessRight);
-                const included = !!baseLevel && getPermissionLevelNumber(permissionLevel.value) >= getPermissionLevelNumber(baseLevel)
+                const included = !!baseLevel && getPermissionLevelNumber(permissionLevel.value) >= getPermissionLevelNumber(baseLevel);
 
-                //#region description
+                // #region description
                 let description = undefined;
 
-                if(!isLocked) {
-                    if(included) {
+                if (!isLocked) {
+                    if (included) {
                         description = ('Inbegrepen bij ' + getPermissionLevelName(baseLevel));
-                    } else {
-                        description = ('Niet inbegrepen bij ' + getPermissionLevelName(permissionLevel.value))
+                    }
+                    else {
+                        description = ('Niet inbegrepen bij ' + getPermissionLevelName(permissionLevel.value));
                     }
                 }
-                //#endregion
+                // #endregion
 
                 return new ContextMenuItem({
                     selected: isLocked || included || accessRightsMap.get(accessRight)!.value,
@@ -327,17 +333,17 @@ const choosePermissions = async (event: MouseEvent) => {
                     disabled: isLocked || included,
                     description,
                     action: () => {
-                        accessRightsMap.get(accessRight)!.value = !accessRightsMap.get(accessRight)!.value
-                    }
-                })
-            })
-        ] : [])
+                        accessRightsMap.get(accessRight)!.value = !accessRightsMap.get(accessRight)!.value;
+                    },
+                });
+            }),
+        ] : []),
     ]);
 
     await contextMenu.show({
         button: event.currentTarget as HTMLElement,
-        xPlacement: "left",
-        yPlacement: "bottom",
-    })
-}
+        xPlacement: 'left',
+        yPlacement: 'bottom',
+    });
+};
 </script>

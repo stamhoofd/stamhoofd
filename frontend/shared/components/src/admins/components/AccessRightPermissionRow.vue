@@ -1,5 +1,5 @@
 <template>
-    <STListItem element-name="label" :selectable="true">
+    <STListItem element-name="label" :selectable="true" :class="{'left-center': !AccessRightHelper.getLongDescription(props.accessRight)}">
         <template #left>
             <Checkbox v-model="selected" :disabled="locked" />
         </template>
@@ -19,72 +19,70 @@ import { AccessRight, AccessRightHelper, PermissionRoleDetailed, Permissions, ge
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
-    accessRight: AccessRight,
+    accessRight: AccessRight;
     role: PermissionRoleDetailed;
-    inheritedRoles?: (PermissionRoleDetailed|Permissions)[]
+    inheritedRoles?: (PermissionRoleDetailed | Permissions)[];
 }>(), {
     inheritedRoles: () => [],
-})
+});
 
-
-const emit = defineEmits(['patch:role'])
-const {patched: role, addPatch, createPatch} = useEmitPatch<PermissionRoleDetailed>(props, emit, 'role');
+const emit = defineEmits(['patch:role']);
+const { patched: role, addPatch, createPatch } = useEmitPatch<PermissionRoleDetailed>(props, emit, 'role');
 
 const locked = computed(() => {
-    const baseLevel = AccessRightHelper.autoGrantRightForLevel(props.accessRight)
-    const autoInherit = AccessRightHelper.autoInheritFrom(props.accessRight)
+    const baseLevel = AccessRightHelper.autoGrantRightForLevel(props.accessRight);
+    const autoInherit = AccessRightHelper.autoInheritFrom(props.accessRight);
 
     // Note, we only use auto inherit, so we don't check on the actual added access rights (because then not locked)
     for (const r of autoInherit) {
         if (role.value.hasAccessRight(r)) {
-            return true
+            return true;
         }
     }
 
     if (baseLevel && getPermissionLevelNumber(role.value.level) >= getPermissionLevelNumber(baseLevel)) {
-        return true
+        return true;
     }
 
     for (const inheritedRole of props.inheritedRoles!) {
         if (baseLevel && getPermissionLevelNumber(inheritedRole.level) >= getPermissionLevelNumber(baseLevel)) {
-            return true
+            return true;
         }
 
         if (inheritedRole instanceof PermissionRoleDetailed) {
             if (inheritedRole.hasAccessRight(props.accessRight)) {
-                return true
+                return true;
             }
         }
     }
 
     return false;
-
-})
+});
 
 const selected = computed({
     get: () => locked.value || role.value.hasAccessRight(props.accessRight),
     set: (value: boolean) => {
         if (value === selected.value) {
-            return
+            return;
         }
         if (locked.value) {
-            return
+            return;
         }
-        
-        if (value) {
-            const patch = createPatch()
-            patch.accessRights.addDelete(props.accessRight)
-            patch.accessRights.addPut(props.accessRight)
-            addPatch(patch)
-        } else {
-            // Delete it
-            const patch = createPatch()
-            patch.accessRights.addDelete(props.accessRight)
-            patch.accessRights.addDelete(props.accessRight)
-            addPatch(patch)
-        }
-    }
-})
 
+        if (value) {
+            const patch = createPatch();
+            patch.accessRights.addDelete(props.accessRight);
+            patch.accessRights.addPut(props.accessRight);
+            addPatch(patch);
+        }
+        else {
+            // Delete it
+            const patch = createPatch();
+            patch.accessRights.addDelete(props.accessRight);
+            patch.accessRights.addDelete(props.accessRight);
+            addPatch(patch);
+        }
+    },
+});
 
 </script>
