@@ -999,9 +999,11 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         }),
         new MultipleChoiceFilterBuilder({
             name: 'Status',
-            options: Object.values(OrderStatus).map((status) => {
-                return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(OrderStatusHelper.getName(status)), status);
-            }),
+            options: Object.values(OrderStatus)
+                .filter(s => s !== OrderStatus.Deleted)
+                .map((status) => {
+                    return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(OrderStatusHelper.getName(status)), status);
+                }),
             wrapper: {
                 status: {
                     $in: UIFilterWrapperMarker,
