@@ -1,5 +1,5 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ForgotPasswordResetView, PaymentPendingView, RegistrationSuccessView, useContext } from '@stamhoofd/components';
+import { CenteredMessage, ForgotPasswordResetView, GlobalEventBus, PaymentPendingView, RegistrationSuccessView, useContext } from '@stamhoofd/components';
 import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
 
 let didCheckGlobalRoutes = false;
@@ -51,7 +51,9 @@ export function useGlobalRoutes() {
                         CenteredMessage.fromError(error).addCloseButton().show();
                     },
                     finishedHandler: async function (this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
-                        if (payment && payment.status == PaymentStatus.Succeeded) {
+                        GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
+
+                        if (payment && payment.status === PaymentStatus.Succeeded) {
                             // TODO: fetch appropriate data for this payment!
 
                             if (payment.memberNames.length) {

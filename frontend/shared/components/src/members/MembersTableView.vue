@@ -101,6 +101,9 @@ useGlobalEventListener('members-added', async () => {
 useGlobalEventListener('members-registered', async () => {
     tableObjectFetcher.reset(true, true);
 });
+useGlobalEventListener('paymentPatch', async () => {
+    tableObjectFetcher.reset(true, true);
+});
 
 const configurationId = computed(() => {
     return 'members-' + app + '-org-' + (organization.value?.id ?? 'null') + '-' + (props.group ? '-group-' + props.group.id : '') + (props.category ? '-category-' + props.category.id : '') + (props.responsibility ? '-responsibility-' + props.responsibility.id : '');
