@@ -885,9 +885,9 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
     all.push(groupFilter);
 
     const tagsFilter = new MultipleChoiceFilterBuilder({
-        name: 'Tags',
+        name: 'Regio',
         options: [
-            new MultipleChoiceUIFilterOption('Alle tags', null),
+            new MultipleChoiceUIFilterOption('Alles', null),
             ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
         ],
         wrapper: {
