@@ -237,7 +237,7 @@ export class Group extends AutoEncoder {
         if (this.settings.minAge !== null) {
             filter.push({
                 age: {
-                    $gte: this.settings.minAge,
+                    $gt: this.settings.minAge - 1,
                 },
             });
         }
@@ -245,7 +245,7 @@ export class Group extends AutoEncoder {
         if (this.settings.maxAge !== null) {
             filter.push({
                 age: {
-                    $lte: this.settings.maxAge,
+                    $lt: this.settings.maxAge + 1,
                 },
             });
         }
