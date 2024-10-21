@@ -71,7 +71,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
         }
 
-        if (organization) {
+        if (organization && !Context.auth.canAccessAllPlatformMembers()) {
             // Add organization scope filter
             const groups = await Context.auth.getAccessibleGroups(organization.id);
 

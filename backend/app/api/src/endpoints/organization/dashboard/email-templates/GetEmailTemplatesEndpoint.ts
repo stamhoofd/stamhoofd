@@ -73,13 +73,15 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                 );
 
         const defaultTemplateTypes = organization ? types.filter(type => type !== EmailTemplateType.SavedMembersEmail) : types;
-        const defaultTemplates = await EmailTemplate.where({
-            organizationId: null,
-            type: {
-                sign: 'IN',
-                value: defaultTemplateTypes,
-            },
-        });
+        const defaultTemplates = defaultTemplateTypes.length === 0
+            ? []
+            : (await EmailTemplate.where({
+                    organizationId: null,
+                    type: {
+                        sign: 'IN',
+                        value: defaultTemplateTypes,
+                    },
+                }));
 
         return new Response(templates.concat(defaultTemplates).map(template => EmailTemplateStruct.create(template)));
     }
