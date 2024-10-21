@@ -80,7 +80,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
 
     const financesTab = new TabBarItem({
         icon: 'calculator',
-        name: 'Aansluitingen aanrekenen',
+        name: 'Boekhouding en aansluitingen',
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ChargeMembershipsView, {}),
         }),

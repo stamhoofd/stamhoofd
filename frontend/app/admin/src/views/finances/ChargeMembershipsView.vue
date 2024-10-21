@@ -5,12 +5,8 @@
 
         <main class="center">
             <h1>
-                Aansluitingen aanrekenen
+                Boekhouding en aansluitingen
             </h1>
-
-            <p>
-                Alle aansluitingen die (al dan niet automatisch) aan leden worden toegevoegd, worden pas toegevoegd aan het openstaande bedrag van een lokale groep na een manuele actie. Daarna kan een lokale groep het bedrag betalen via een online betaling in hun beheerdersportaal.
-            </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -18,6 +14,80 @@
                 Er is momenteel een aanrekening bezig. Wacht tot deze is afgelopen.
             </p>
             <template v-else>
+                <template v-if="membershipOrganization">
+                    <hr>
+                    <h2>Boekhouding {{ membershipOrganization.name }}</h2>
+
+                    <STList class="illustration-list">
+                        <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/exporteren'">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                Betalingen exporteren
+                            </h2>
+                            <p class="style-description">
+                                {{ $t("64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f") }}
+                            </p>
+                            <template #right>
+                                <span class="icon external gray" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/overschrijvingen'">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/check-transfer.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                Overschrijvingen controleren
+                            </h2>
+                            <p class="style-description">
+                                Markeer overschrijvingen als betaald.
+                            </p>
+                            <template #right>
+                                <span class="icon external gray" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/betalingen'">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                Alle betalingen
+                            </h2>
+                            <p class="style-description">
+                                Controleer alle betalingen die in het systeem aanwezig zijn, inclusief eventueel mislukte betaalpogingen.
+                            </p>
+                            <template #right>
+                                <span class="icon external gray" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/openstaande-bedragen'">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                Te ontvangen bedragen
+                            </h2>
+                            <p class="style-description">
+                                Lijst van alle groepen die nog een openstaand bedrag hebben tegenover {{ membershipOrganization!.name }}
+                            </p>
+                            <template #right>
+                                <span class="icon external gray" />
+                            </template>
+                        </STListItem>
+                    </STList>
+                </template>
+                <hr>
+                <h2>
+                    Aansluitingen aanrekenen
+                </h2>
+                <p>
+                    Alle aansluitingen die (al dan niet automatisch) aan leden worden toegevoegd, worden pas toegevoegd aan het openstaande bedrag van een lokale groep na een manuele actie. Daarna kan een lokale groep het bedrag betalen via een online betaling in hun beheerdersportaal.
+                </p>
+
                 <div class="style-stats-grid">
                     <STInputBox title="Nieuwe aansluitingen">
                         <p class="style-price-big">
@@ -69,10 +139,10 @@
 
                 <hr>
                 <h2>
-                    Verantwoordelijke groep voor aanrekeningen
+                    Verantwoordelijke organisatie voor aanrekeningen
                 </h2>
                 <p>
-                    De aansluitingkosten worden altijd aangerekend via een groep die de koepel vertegenwoordigt. De betaalinstellingen en facturatiegegevens van die groep worden gebruikt voor het verzamelen van alle betalingen. Op die manier kan je de beschikbare betaalmethodes en betaalaccounts configureren.
+                    De aansluitingkosten worden altijd aangerekend via een organisatie/groep die de koepel vertegenwoordigt. De betaalinstellingen en facturatiegegevens van die groep worden gebruikt voor het verzamelen van alle betalingen. Op die manier kan je de beschikbare betaalmethodes en betaalaccounts configureren.
                 </p>
 
                 <p v-if="membershipOrganization" class="info-box">
