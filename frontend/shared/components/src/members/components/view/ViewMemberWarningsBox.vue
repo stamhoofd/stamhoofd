@@ -16,90 +16,93 @@
 
 <script setup lang="ts">
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
 import { useAuth, useOrganization } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = defineProps<{
-    member: PlatformMember
-}>()
+    member: PlatformMember;
+}>();
 const organization = useOrganization();
 const auth = useAuth();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
-const $t = useTranslate()
+const $t = useTranslate();
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
     const recordCategories = props.member.getEnabledRecordCategories({
         checkPermissions: {
-            permissions: auth.userPermissions, 
-            level: PermissionLevel.Read
+            permissions: auth.userPermissions,
+            level: PermissionLevel.Read,
         },
-        scopeOrganization: organization.value
+        scopeOrganization: organization.value,
     });
     const allRecords = recordCategories.flatMap(category => category.getAllFilteredRecords(props.member));
-    const answerClone = new Map(props.member.patchedMember.details.recordAnswers);
+    const answerClone: typeof props.member.patchedMember.details.recordAnswers = new Map();
 
     for (const record of allRecords) {
-        if (!answerClone.has(record.id)) {
-            answerClone.set(record.id, RecordAnswer.createDefaultAnswer(record))
+        const answer = props.member.patchedMember.details.recordAnswers.get(record.id);
+        if (!answer) {
+            answerClone.set(record.id, RecordAnswer.createDefaultAnswer(record));
+        }
+        else {
+            answerClone.set(record.id, answer);
         }
     }
 
-    return answerClone
+    return answerClone;
 });
 
-const {financialSupportSettings} = useFinancialSupportSettings()
-const {dataPermissionSettings} = useDataPermissionSettings()
+const { financialSupportSettings } = useFinancialSupportSettings();
+const { dataPermissionSettings } = useDataPermissionSettings();
 
 const warnings = computed(() => {
-    const warnings: RecordWarning[] = []
+    const warnings: RecordWarning[] = [];
 
     for (const answer of autoCompletedAnswers.value.values()) {
-        warnings.push(...answer.getWarnings())
+        warnings.push(...answer.getWarnings());
     }
 
     if (isPropertyEnabled('financialSupport')) {
         if (props.member.patchedMember.details.requiresFinancialSupport && props.member.patchedMember.details.requiresFinancialSupport.value) {
             warnings.push(RecordWarning.create({
                 text: financialSupportSettings.value.warningText,
-                type: RecordWarningType.Error
-            }))
+                type: RecordWarningType.Error,
+            }));
         }
     }
-    
+
     if (isPropertyEnabled('dataPermission')) {
         if (props.member.patchedMember.details.dataPermissions && !props.member.patchedMember.details.dataPermissions.value) {
             warnings.push(RecordWarning.create({
                 text: dataPermissionSettings.value.warningText,
-                type: RecordWarningType.Error
-            }))
+                type: RecordWarningType.Error,
+            }));
         }
     }
 
     if (props.member.membershipStatus === MembershipStatus.Inactive) {
         warnings.push(RecordWarning.create({
             text: $t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e'),
-            type: RecordWarningType.Error
-        }))
+            type: RecordWarningType.Error,
+        }));
     }
 
     if (props.member.membershipStatus === MembershipStatus.Expiring) {
         warnings.push(RecordWarning.create({
             text: $t('1af084bf-42d6-4a59-a7da-d1e87c6dba8e'),
-            type: RecordWarningType.Warning
-        }))
+            type: RecordWarningType.Warning,
+        }));
     }
 
-    return warnings
+    return warnings;
 });
 const hasWarnings = computed(() => warnings.value.length > 0);
-const sortedWarnings = computed(() => warnings.value.slice().sort(RecordWarning.sort))
+const sortedWarnings = computed(() => warnings.value.slice().sort(RecordWarning.sort));
 </script>
-
