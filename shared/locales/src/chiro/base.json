@@ -13,7 +13,8 @@
     "Leeftijdsgroep": "Afdeling",
     "leeftijdsgroep": "afdeling",
     "Groepsnummer": "Stamnummer",
-    "groepsnummer": "stamnummer"
+    "groepsnummer": "stamnummer",
+    "KSA Nationaal": "Chiro"
   },
   "b4307772-62dd-48a4-bae3-9d46df314727": "Welkom op het ledenportaal van Chiro. Zoek hieronder jouw groep om je in te schrijven of om jouw gegevens te beheren.",
   "5dbc2f08-f2d0-43bc-973d-b789077ca3ad": "Welkom op het beheerdersportaal van Chiro. Hier kan je jouw groep beheren, leden bekijken, en instellingen aanpassen.",
@@ -28,5 +29,6 @@
   "525747e4-48df-4f20-979e-3c18142e64a5": "Het bedrag zal achteraf door Chiro aan {name} worden gefactureerd",
   "237be7e0-4534-4008-b7bc-3e6db776a72a": "Leden die je inschrijft in een afdeling die je koppelt aan een standaard afdeling van Chiro worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
   "60871aaf-1b90-4a7c-a755-a4aeb0585a8e": "Dit lid is niet aangesloten bij Chiro, en is daardoor ook niet verzekerd",
-  "ec0c482e-0528-499f-82fa-b081bf708ded": "Dit lid is bij geen enkele Chirogroep aangesloten voor het huidige werkjaar en kan daardoor niet aangesloten worden"
+  "ec0c482e-0528-499f-82fa-b081bf708ded": "Dit lid is bij geen enkele Chirogroep aangesloten voor het huidige werkjaar en kan daardoor niet aangesloten worden",
+  "75815048-939a-4ac1-a81c-f23fc3ec5006": "Je betaalt {price} aan Chiro."
 }

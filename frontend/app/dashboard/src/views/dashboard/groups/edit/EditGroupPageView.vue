@@ -146,9 +146,7 @@ export default class EditGroupPageView extends Mixins(EditGroupMixin) {
     get hsSquare() {
         return [
             ResolutionRequest.create({
-                height: 250,
-                width: 250,
-                fit: ResolutionFit.Cover,
+                width: 250
             }),
         ];
     }

@@ -8,7 +8,7 @@
                 </div>
             </slot>
         </LoadingButton>
-        <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
+        <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml, image/webp" @change="changedFile">
     </component>
 </template>
 

@@ -36,13 +36,16 @@ export class Image extends Model {
         if (type == 'image/jpeg' || type == 'image/jpg') {
             fileType = 'jpg';
         }
+        if (type == 'image/webp') {
+            fileType = 'webp';
+        }
         if (type === 'image/svg+xml' || type === 'image/svg') {
             fileType = 'svg';
         }
 
         console.log('creating image', fileType, type, resolutions);
 
-        const supportsTransparency = fileType == 'png' || fileType == 'svg';
+        const supportsTransparency = fileType == 'png' || fileType == 'svg' || fileType == 'webp';
         const promises: Promise<{ data: Buffer;info: sharp.OutputInfo }>[] = [];
 
         if (resolutions.length) {
