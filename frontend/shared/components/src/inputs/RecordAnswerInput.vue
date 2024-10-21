@@ -27,7 +27,7 @@
             <STList>
                 <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="selectedChoice" :name="'record-answer-'+answer.id" :value="choice" />
+                        <Radio v-model="selectedChoice" :name="'record-answer-'+answer.id" :value="choice.id" />
                     </template>
                     <h3 class="style-title-list">
                         {{ choice.name }}
@@ -205,9 +205,10 @@ const comments = computed({
 
 const selectedChoice = computed({
     get: () => {
-        return casted.RecordChooseOneAnswer.value?.selectedChoice ?? null;
+        return casted.RecordChooseOneAnswer.value?.selectedChoice?.id ?? null;
     },
-    set: (selectedChoice: RecordChoice | null) => {
+    set: (selectedChoiceId: string | null) => {
+        const selectedChoice = props.record.choices.find(c => c.id === selectedChoiceId);
         patchAnswer(RecordChooseOneAnswer.patch({
             selectedChoice,
         }));
