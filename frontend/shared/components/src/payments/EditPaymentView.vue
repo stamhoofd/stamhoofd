@@ -5,7 +5,7 @@
         </h1>
 
         <p v-if="price >= 0">
-            Kies hieronder wat er precies betaald werd. 
+            Kies hieronder wat er precies betaald werd.
         </p>
         <p v-else>
             {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
@@ -35,7 +35,7 @@
                 </p>
 
                 <template #right>
-                    <PriceInput v-if="isItemSelected(item)" :modelValue="getItemPrice(item)" placeholder="0 euro" :min="null" @update:modelValue="setItemPrice(item, $event)" />
+                    <PriceInput v-if="isItemSelected(item)" :model-value="getItemPrice(item)" placeholder="0 euro" :min="null" @update:model-value="setItemPrice(item, $event)" />
                 </template>
             </STListItem>
         </STList>
@@ -135,8 +135,8 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { BalanceItem, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PlatformFamily, TransferSettings, Version } from '@stamhoofd/structures';
 
@@ -151,7 +151,7 @@ import PriceInput from '../inputs/PriceInput.vue';
 import STInputBox from '../inputs/STInputBox.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import SaveView from "../navigation/SaveView.vue";
+import SaveView from '../navigation/SaveView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
 @Component({
@@ -165,29 +165,29 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
         Checkbox,
         DateSelection,
         Dropdown,
-        IBANInput
+        IBANInput,
     },
 })
 export default class EditPaymentView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     @Prop({ required: true })
-        payment: PaymentGeneral
+    payment: PaymentGeneral;
 
     @Prop({ required: true })
-        balanceItems: BalanceItem[]
+    balanceItems: BalanceItem[];
 
     @Prop({ required: true })
-        isNew!: boolean
+    isNew!: boolean;
 
-    @Prop({default: null})
-        family!: PlatformFamily|null;
-    
-    patchPayment: AutoEncoderPatchType<PaymentGeneral> = PaymentGeneral.patch({})
+    @Prop({ default: null })
+    family!: PlatformFamily | null;
+
+    patchPayment: AutoEncoderPatchType<PaymentGeneral> = PaymentGeneral.patch({});
 
     @Prop({ required: true })
-        saveHandler: ((patch: AutoEncoderPatchType<PaymentGeneral>) => Promise<void>);
+    saveHandler: ((patch: AutoEncoderPatchType<PaymentGeneral>) => Promise<void>);
 
     availableMethods = [
         PaymentMethod.PointOfSale,
@@ -201,11 +201,11 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     ];
 
     get multipleMembers() {
-        return (this.family?.members.length ?? 0) > 1
+        return (this.family?.members.length ?? 0) > 1;
     }
 
     get organization() {
-        return this.$organization
+        return this.$organization;
     }
 
     get title() {
@@ -213,15 +213,15 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     }
 
     get patchedPayment() {
-        return this.payment.patch(this.patchPayment)
+        return this.payment.patch(this.patchPayment);
     }
 
     get filteredBalanceItems() {
-        return this.balanceItems.filter(b => b.price - b.pricePaid !== 0)
+        return this.balanceItems.filter(b => b.price - b.pricePaid !== 0);
     }
 
     addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<PaymentGeneral>>) {
-        this.patchPayment = this.patchPayment.patch(patch as any)
+        this.patchPayment = this.patchPayment.patch(patch as any);
     }
 
     get price() {
@@ -230,8 +230,8 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
 
     set price(price: number) {
         this.addPatch({
-            price
-        })
+            price,
+        });
     }
 
     get method() {
@@ -240,13 +240,13 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
 
     set method(method: PaymentMethod) {
         if (this.method === method) {
-            return
+            return;
         }
 
-        let transferSettings = this.organization.meta.registrationPaymentConfiguration.transferSettings.fillMissing(TransferSettings.create({creditor: this.organization.name}));
-        const webshopId = this.balanceItems.find(b => b.order)?.order?.webshopId
+        let transferSettings = this.organization.meta.registrationPaymentConfiguration.transferSettings.fillMissing(TransferSettings.create({ creditor: this.organization.name }));
+        const webshopId = this.balanceItems.find(b => b.order)?.order?.webshopId;
         if (webshopId) {
-            const webshop = this.organization.webshops.find(w => w.id === webshopId)
+            const webshop = this.organization.webshops.find(w => w.id === webshopId);
             if (webshop) {
                 transferSettings = webshop.meta.paymentConfiguration.transferSettings.fillMissing(transferSettings);
             }
@@ -256,7 +256,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
             method,
             transferDescription: method === PaymentMethod.Transfer ? transferSettings.generateDescription('', I18nController.shared.country) : undefined,
             transferSettings: method === PaymentMethod.Transfer ? transferSettings : undefined,
-        })
+        });
     }
 
     get status() {
@@ -266,8 +266,8 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     set status(status: PaymentStatus) {
         this.addPatch({
             status,
-            paidAt: status === PaymentStatus.Succeeded ? new Date() : null
-        })
+            paidAt: status === PaymentStatus.Succeeded ? new Date() : null,
+        });
     }
 
     get paidAt() {
@@ -276,8 +276,8 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
 
     set paidAt(paidAt: Date | null) {
         this.addPatch({
-            paidAt
-        })
+            paidAt,
+        });
     }
 
     get transferDescription() {
@@ -286,8 +286,8 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
 
     set transferDescription(transferDescription: string) {
         this.addPatch({
-            transferDescription
-        })
+            transferDescription,
+        });
     }
 
     get creditor() {
@@ -297,9 +297,9 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     set creditor(creditor: string) {
         this.addPatch({
             transferSettings: TransferSettings.patch({
-                creditor
-            })
-        })
+                creditor,
+            }),
+        });
     }
 
     get iban() {
@@ -309,88 +309,98 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     set iban(iban: string) {
         this.addPatch({
             transferSettings: TransferSettings.patch({
-                iban
-            })
-        })
+                iban,
+            }),
+        });
     }
 
     get balanceItemPayments() {
-        return this.patchedPayment.balanceItemPayments
+        return this.patchedPayment.balanceItemPayments;
     }
 
     isItemSelected(item: BalanceItem) {
-        return this.balanceItemPayments.find(p => p.balanceItem.id === item.id) !== null
+        const q = this.balanceItemPayments.find(p => p.balanceItem.id === item.id) !== undefined;
+        return q;
     }
 
     setItemSelected(item: BalanceItem, selected: boolean) {
+        if (this.isItemSelected(item) === selected) {
+            return;
+        }
+
         if (selected) {
             const add = BalanceItemPaymentDetailed.create({
                 balanceItem: item,
-                price: item.price - item.pricePaid
+                price: item.price - item.pricePaid,
             });
-            const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray()
-            arr.addPut(add)
+            const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
+            arr.addPut(add);
             this.addPatch({
-                balanceItemPayments: arr
-            })
-        } else {
-            const id = this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.id
+                balanceItemPayments: arr,
+            });
+        }
+        else {
+            const q = this.balanceItemPayments.find(p => p.balanceItem.id === item.id);
+            const id = q?.id;
 
             if (id) {
-                const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray()
-                arr.addDelete(id)
+                const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
+                arr.addDelete(id);
                 this.addPatch({
-                    balanceItemPayments: arr
-                })
+                    balanceItemPayments: arr,
+                });
+            }
+            else {
+                console.error('Could not find item to remove', item, q);
             }
         }
-        this.recalculateTotal()
+        this.recalculateTotal();
     }
 
     recalculateTotal() {
-        this.price = this.balanceItemPayments.reduce((total, p) => total + p.price, 0)
+        this.price = this.balanceItemPayments.reduce((total, p) => total + p.price, 0);
     }
 
     getItemPrice(item: BalanceItem) {
-        return this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.price
+        return this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.price ?? 0;
     }
 
     setItemPrice(item: BalanceItem, price: number) {
-        const id = this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.id
+        this.setItemSelected(item, true);
+        const id = this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.id;
 
         if (id) {
-            const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray()
+            const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
             arr.addPatch(BalanceItemPaymentDetailed.patch({
                 id,
-                price
-            }))
+                price,
+            }));
             this.addPatch({
-                balanceItemPayments: arr
-            })
+                balanceItemPayments: arr,
+            });
         }
-        this.recalculateTotal()
+        this.recalculateTotal();
     }
-
 
     getPaymentMethodName(method: PaymentMethod) {
         return PaymentMethodHelper.getNameCapitalized(method);
-    }   
-    
+    }
+
     getStatusName(status: PaymentStatus) {
         return PaymentStatusHelper.getNameCapitalized(status);
     }
 
     mounted() {
         for (const item of this.filteredBalanceItems) {
-            this.setItemSelected(item, true)
+            this.setItemSelected(item, true);
         }
     }
 
-    loading = false
+    loading = false;
 
     async save() {
         if (this.loading) {
-            return
+            return;
         }
         this.errorBox = null;
 
@@ -399,24 +409,25 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
             if (!valid) {
                 return;
             }
-            this.loading = true
-            await this.saveHandler(this.patchPayment)
-            this.pop({ force: true })
-        } catch (e) {
+            this.loading = true;
+            await this.saveHandler(this.patchPayment);
+            this.pop({ force: true });
+        }
+        catch (e) {
             this.errorBox = new ErrorBox(e);
         }
-        this.loading = false
+        this.loading = false;
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchPayment, this.payment, { version: Version })
+        return patchContainsChanges(this.patchPayment, this.payment, { version: Version });
     }
 
     async shouldNavigateAway() {
         if (!this.hasChanges) {
-            return true
+            return true;
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 }
 </script>
