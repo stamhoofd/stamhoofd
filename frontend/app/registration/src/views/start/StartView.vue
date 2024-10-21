@@ -1,9 +1,9 @@
 <template>
     <section class="st-view">
-        <STNavigationBar title="Mijn account" />
+        <STNavigationBar :title="$t('c4cc8f8b-d490-4182-ba92-7fce435945e7')" />
         <main class="center">
             <h1>
-                Mijn account
+                {{ $t('c4cc8f8b-d490-4182-ba92-7fce435945e7') }}
             </h1>
 
             <p>{{ $t('369440db-a9e0-4530-a06b-3ea05cc6a2b0') }}</p>

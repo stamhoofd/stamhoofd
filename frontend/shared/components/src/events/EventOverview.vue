@@ -111,7 +111,7 @@
 
                 <hr>
                 <h2>Link kopiëren</h2>
-                <p>De link naar deze activiteit in 'Mijn account'. Deel deze link met leden.</p>
+                <p>{{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}</p>
 
                 <div class="input-with-buttons">
                     <div>
