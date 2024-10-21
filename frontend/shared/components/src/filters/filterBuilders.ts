@@ -884,36 +884,34 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
     });
     all.push(groupFilter);
 
-    if (organizations.length !== 1) {
-        const tagsFilter = new MultipleChoiceFilterBuilder({
-            name: 'Tags',
-            options: [
-                new MultipleChoiceUIFilterOption('Alle tags', null),
-                ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
-            ],
-            wrapper: {
-                organizationTagIds: {
-                    $in: UIFilterWrapperMarker,
-                },
+    const tagsFilter = new MultipleChoiceFilterBuilder({
+        name: 'Tags',
+        options: [
+            new MultipleChoiceUIFilterOption('Alle tags', null),
+            ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
+        ],
+        wrapper: {
+            organizationTagIds: {
+                $in: UIFilterWrapperMarker,
             },
-        });
+        },
+    });
 
-        all.push(tagsFilter);
+    all.push(tagsFilter);
 
-        const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
-            name: 'Standaard leeftijdsgroep',
-            options: [
-                new MultipleChoiceUIFilterOption('Iedereen', null),
-                ...platform.config.defaultAgeGroups.map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
-            ],
-            wrapper: {
-                defaultAgeGroupIds: {
-                    $in: UIFilterWrapperMarker,
-                },
+    const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
+        name: 'Standaard leeftijdsgroep',
+        options: [
+            new MultipleChoiceUIFilterOption('Iedereen', null),
+            ...platform.config.defaultAgeGroups.map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
+        ],
+        wrapper: {
+            defaultAgeGroupIds: {
+                $in: UIFilterWrapperMarker,
             },
-        });
-        all.push(defaultAgeGroupFilter);
-    }
+        },
+    });
+    all.push(defaultAgeGroupFilter);
 
     if (organizations.length > 0) {
         const groupFilter = new MultipleChoiceFilterBuilder({
