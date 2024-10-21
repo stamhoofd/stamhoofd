@@ -190,9 +190,9 @@ export class SQLAge implements SQLExpression {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
-            'TIMESTAMPDIFF(YEAR, ',
+            '(TIMESTAMPDIFF(YEAR, ',
             this.expression.getSQL(options),
-            ', CURDATE())',
+            ', CURDATE()) + 1)',
         ]);
     }
 }
