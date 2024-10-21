@@ -94,11 +94,11 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 if (patch.unitPrice !== undefined) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'You cannot change the unit price of a balance item',
-                        human: 'Het is niet mogelijk om de eenheidsprijs van een openstaande schuld te wijzigen. Je kan de openstaande schuld verwijderen en opnieuw aanmaken indien noodzakelijk.',
-                    });
+                    // throw new SimpleError({
+                    //    code: 'invalid_field',
+                    //    message: 'You cannot change the unit price of a balance item',
+                    //    human: 'Het is niet mogelijk om de eenheidsprijs van een openstaande schuld te wijzigen. Je kan de openstaande schuld verwijderen en opnieuw aanmaken indien noodzakelijk.',
+                    // });
                 }
 
                 // Check permissions
