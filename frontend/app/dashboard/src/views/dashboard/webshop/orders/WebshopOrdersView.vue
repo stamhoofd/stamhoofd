@@ -27,6 +27,7 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';
+import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 import OrderView from './OrderView.vue';
 import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 
@@ -38,12 +39,7 @@ const configurationId = 'orders';
 fetchOrders();
 useVisibilityChange(() => fetchOrders());
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
-    requiredFilter: {
-        webshopId: props.webshopManager.preview.id,
-        status: {
-            $neq: OrderStatus.Deleted,
-        },
-    },
+    requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
 });
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
 

@@ -24,7 +24,10 @@
                 <div class="list-input-box">
                     <span>Aan:</span>
 
-                    <button class="list-input dropdown" type="button" @click="showToMenu">
+                    <div v-if="onlyOption" class="list-input">
+                        {{ toDescription }}
+                    </div>
+                    <button v-else class="list-input dropdown" type="button" @click="showToMenu">
                         <span>{{ toDescription }}</span>
                         <span class="icon arrow-down-small gray" />
                     </button>
@@ -225,7 +228,18 @@ const recipientFilter = computed(() => {
     return filter;
 });
 
+const onlyOption = computed(() => {
+    if (props.recipientFilterOptions.length === 1 && props.recipientFilterOptions[0].options.length === 1) {
+        return props.recipientFilterOptions[0].options[0];
+    }
+    return null;
+});
+
 const toDescription = computed(() => {
+    if (onlyOption.value) {
+        return onlyOption.value.name;
+    }
+
     return props.recipientFilterOptions.flatMap((option, i) => {
         const selectedIds = selectedRecipientOptions.value[i];
 

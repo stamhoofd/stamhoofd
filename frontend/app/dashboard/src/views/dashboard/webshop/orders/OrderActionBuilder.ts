@@ -5,6 +5,7 @@ import { EmailRecipientFilterType, EmailRecipientSubfilter, OrderStatus, OrderSt
 
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { WebshopManager } from '../WebshopManager';
+import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
 export class OrderActionBuilder {
     component: any;
@@ -265,12 +266,21 @@ export class OrderActionBuilder {
 
         const options: RecipientChooseOneOption[] = [];
 
+        let name = 'Alle bestellingen';
+
+        if (selection.markedRows.size > 0) {
+            name = 'Geselecteerde bestellingen';
+        }
+        else if (!OrderRequiredFilterHelper.isDefault(this.webshopManager.preview.id, selection.filter.filter)) {
+            name = 'Gefilterde bestellingen';
+        }
+
         options.push({
             type: 'ChooseOne',
             options: [
                 {
                     id: 'all',
-                    name: 'Alle bestellingen',
+                    name,
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Orders,
