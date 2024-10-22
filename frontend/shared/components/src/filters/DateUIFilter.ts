@@ -33,10 +33,18 @@ export class DateUIFilter extends UIFilter {
     doBuild(): StamhoofdFilter {
         switch (this.mode) {
             case UIDateFilterMode.Equals: return {
-                [this.builder.key]: {
-                    $gte: getBeginningOfDay(this.value),
-                    $lte: getEndOfDay(this.value),
-                },
+                $and: [
+                    {
+                        [this.builder.key]: {
+                            $gte: getBeginningOfDay(this.value),
+                        },
+                    },
+                    {
+                        [this.builder.key]: {
+                            $lte: getEndOfDay(this.value),
+                        },
+                    },
+                ],
             };
 
             case UIDateFilterMode.NotEquals: return {
