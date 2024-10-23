@@ -10,8 +10,8 @@ export function useAppContext(): AppType | 'auto' {
 
 export const getAppName = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return 'Beheerdersportaal';
-        case 'registration': return 'Mijn Chiro';
+        case 'dashboard': return 'Mijn groep';
+        case 'registration': return 'Mijn account';
         case 'admin': return 'Administratieportaal';
     }
 };
