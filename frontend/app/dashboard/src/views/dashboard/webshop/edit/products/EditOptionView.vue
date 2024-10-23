@@ -7,8 +7,8 @@
             {{ name }} bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+        <STErrorsDefault :error-box="errors.errorBox" />
+        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
             <input
                 ref="firstInput"
                 v-model="name"
@@ -19,7 +19,7 @@
             >
         </STInputBox>
 
-        <STInputBox title="Meer of minkost" error-fields="price" :error-box="errorBox">
+        <STInputBox title="Meer of minkost" error-fields="price" :error-box="errors.errorBox">
             <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
         </STInputBox>
 
@@ -38,7 +38,7 @@
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="" error-fields="stock" :error-box="errorBox">
+                    <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
                         <NumberInput v-model="stock" />
                     </STInputBox>
                 </div>
@@ -59,135 +59,98 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
-import { Option, OptionMenu, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, usePatch } from '@stamhoofd/components';
+import { Option, OptionMenu } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        PriceInput,
-        NumberInput,
-        STList,
-        STListItem,
-        Checkbox,
-    },
-})
-export default class EditOptionView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
+const errors = useErrors();
+const props = defineProps<{
     optionMenu: OptionMenu;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+    isNew: boolean;
     option: Option;
-
-    patchOptionMenu: AutoEncoderPatchType<OptionMenu> = OptionMenu.patch({});
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: ((patch: AutoEncoderPatchType<OptionMenu>) => void);
+}>();
 
-    get patchedOptionMenu() {
-        return this.optionMenu.patch(this.patchOptionMenu);
-    }
+const pop = usePop();
 
-    get patchedOption() {
-        const c = this.patchedOptionMenu.options.find(c => c.id === this.option.id);
-        if (c) {
-            return c;
-        }
-        return this.option;
-    }
+const { patched, patch, hasChanges, addPatch } = usePatch(props.optionMenu);
 
-    get name() {
-        return this.patchedOption.name;
+const patchedOption = computed(() => {
+    const c = patched.value.options.find(c => c.id === props.option.id);
+    if (c) {
+        return c;
     }
+    return props.option;
+});
 
-    set name(name: string) {
-        this.addOptionPatch(Option.patch({ name }));
-    }
+const name = computed({
+    get: () => patchedOption.value.name,
+    set: (name: string) => {
+        addOptionPatch(Option.patch({ name }));
+    },
+});
 
-    get price() {
-        return this.patchedOption.price;
-    }
+const price = computed({
+    get: () => patchedOption.value.price,
+    set: (price: number) => {
+        addOptionPatch(Option.patch({ price }));
+    },
+});
 
-    set price(price: number) {
-        this.addOptionPatch(Option.patch({ price }));
-    }
+const useStock = computed({
+    get: () => patchedOption.value.stock !== null,
+    set: (useStock: boolean) => {
+        addOptionPatch(Option.patch({ stock: useStock ? (patchedOption.value.stock ?? patchedOption.value.stock ?? (patchedOption.value.usedStock || 10)) : null }));
+    },
+});
 
-    get useStock() {
-        return this.patchedOption.stock !== null;
-    }
+const stock = computed({
+    get: () => patchedOption.value.stock,
+    set: (stock: number | null) => {
+        addOptionPatch(Option.patch({ stock }));
+    },
+});
 
-    set useStock(useStock: boolean) {
-        this.addOptionPatch(Option.patch({ stock: useStock ? (this.patchedOption.stock ?? this.patchedOption.stock ?? (this.patchedOption.usedStock || 10)) : null }));
-    }
+const usedStock = computed(() => patchedOption.value.usedStock);
 
-    get stock() {
-        return this.patchedOption.stock;
-    }
-
-    set stock(stock: number | null) {
-        this.addOptionPatch(Option.patch({ stock }));
-    }
-
-    get usedStock() {
-        return this.patchedOption.usedStock;
-    }
-
-    addOptionPatch(patch: AutoEncoderPatchType<Option>) {
-        const p = OptionMenu.patch({ id: this.optionMenu.id });
-        p.options.addPatch(Option.patch(Object.assign({}, patch, { id: this.option.id })));
-        this.addPatch(p);
-    }
-
-    addPatch(patch: AutoEncoderPatchType<OptionMenu>) {
-        this.patchOptionMenu = this.patchOptionMenu.patch(patch);
-    }
-
-    async save() {
-        if (!await this.validator.validate()) {
-            return;
-        }
-        this.saveHandler(this.patchOptionMenu);
-        this.pop({ force: true });
-    }
-
-    get isSingle() {
-        return this.patchedOptionMenu.options.length <= 1;
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze keuze wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-        const p = OptionMenu.patch({});
-        p.options.addDelete(this.option.id);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchOptionMenu, this.optionMenu, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+function addOptionPatch(patch: AutoEncoderPatchType<Option>) {
+    const p = OptionMenu.patch({ id: props.optionMenu.id });
+    p.options.addPatch(Option.patch(Object.assign({}, patch, { id: props.option.id })));
+    addPatch(p);
 }
+
+async function save() {
+    if (!await errors.validator.validate()) {
+        return;
+    }
+    props.saveHandler(patch.value);
+    pop({ force: true })?.catch(console.error);
+}
+
+const isSingle = computed(() => patched.value.options.length <= 1);
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze keuze wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+    const p = OptionMenu.patch({});
+    p.options.addDelete(props.option.id);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
