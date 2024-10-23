@@ -1,10 +1,10 @@
 <template>
-    <div class="container">
+    <div ref="root" class="container">
         <hr>
         <h2 class="style-with-button">
             <div @contextmenu.prevent="showContextMenu">
                 {{ optionMenu.name || 'Naamloos' }}
-                <span class="style-tag inline-first">{{ optionMenu.multipleChoice ? 'Keuzemenu' : 'Keuzemenu' }}</span>
+                <span class="style-tag inline-first">{{ 'Keuzemenu' }}</span>
             </div>
             <div>
                 <button class="button icon edit" type="button" @click="editOptionMenu" />
@@ -16,39 +16,35 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType, VersionBox } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, STListItem, Toast } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ContextMenu, ContextMenuItem, Toast, useIsMac } from '@stamhoofd/components';
 import { Option, OptionMenu, Product, Version } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { ref, watch } from 'vue';
 import EditOptionMenuView from './EditOptionMenuView.vue';
 import EditOptionView from './EditOptionView.vue';
 import OptionMenuOptions from './OptionMenuOptions.vue';
 
-@Component({
-    components: {
-        STListItem,
-        OptionMenuOptions,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-    },
-})
-export default class OptionMenuSection extends Mixins(NavigationMixin) {
-    @Prop({})
+const props = defineProps<{
     optionMenu: OptionMenu;
-
-    @Prop({})
     product: Product;
+}>();
 
-    mounted() {
-        this.$el.addEventListener('copy', (event) => {
+const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): void }>();
+
+const isMac = useIsMac();
+const present = usePresent();
+
+const root = ref<HTMLElement | null>(null);
+
+watch(root, (value) => {
+    if (value) {
+        value.addEventListener('copy', (event) => {
             try {
-                (event as any).clipboardData.setData('text/plain', this.optionMenu.name || 'Naamloos');
-                (event as any).clipboardData.setData('web stamhoofd/webshop-option-menu', JSON.stringify(new VersionBox(this.optionMenu).encode({ version: Version })));
+                (event as any).clipboardData.setData('text/plain', props.optionMenu.name || 'Naamloos');
+                (event as any).clipboardData.setData('web stamhoofd/webshop-option-menu', JSON.stringify(new VersionBox(props.optionMenu).encode({ version: Version })));
                 event.preventDefault();
             }
             catch (e) {
@@ -56,90 +52,86 @@ export default class OptionMenuSection extends Mixins(NavigationMixin) {
             }
         });
     }
+});
 
-    showContextMenu(event) {
-        const clipboardSupported = !!navigator.clipboard && !!window.ClipboardItem;
-        const menu = new ContextMenu([
-            [
-                ...(clipboardSupported
-                    ? [new ContextMenuItem({
-                            name: 'Kopiëren',
-                            icon: 'copy',
-                            action: () => {
-                                const blob = new Blob([
-                                    JSON.stringify(new VersionBox(this.optionMenu).encode({ version: Version })),
-                                ], { type: 'web stamhoofd/webshop-option-menu' });
-                                navigator.clipboard.write(
-                                    [
-                                        new ClipboardItem({
-                                            ['web stamhoofd/webshop-option-menu']: blob,
-                                        }),
-                                    ],
-                                ).then(() => {
-                                    new Toast((this as any).$isMac ? 'Keuzemenu gekopieërd. Gebruik CMD+V om dit keuzemenu ergens anders te plakken' : 'Keuzemenu gekopieërd. Gebruik CTRL+V om dit keuzemenu ergens anders te plakken', 'copy').show();
-                                }).catch(console.error);
-                                return true;
-                            },
-                        })]
-                    : []),
-                new ContextMenuItem({
-                    name: 'Verwijderen',
-                    icon: 'trash',
-                    action: () => {
-                        this.delete();
-                        return true;
-                    },
-                }),
-            ],
-        ]);
-        menu.show({ clickEvent: event }).catch(console.error);
-    }
+function showContextMenu(event: MouseEvent) {
+    const clipboardSupported = !!navigator.clipboard && !!window.ClipboardItem;
+    const menu = new ContextMenu([
+        [
+            ...(clipboardSupported
+                ? [new ContextMenuItem({
+                        name: 'Kopiëren',
+                        icon: 'copy',
+                        action: () => {
+                            const blob = new Blob([
+                                JSON.stringify(new VersionBox(props.optionMenu).encode({ version: Version })),
+                            ], { type: 'web stamhoofd/webshop-option-menu' });
+                            navigator.clipboard.write(
+                                [
+                                    new ClipboardItem({
+                                        ['web stamhoofd/webshop-option-menu']: blob,
+                                    }),
+                                ],
+                            ).then(() => {
+                                new Toast(isMac ? 'Keuzemenu gekopieërd. Gebruik CMD+V om dit keuzemenu ergens anders te plakken' : 'Keuzemenu gekopieërd. Gebruik CTRL+V om dit keuzemenu ergens anders te plakken', 'copy').show();
+                            }).catch(console.error);
+                            return true;
+                        },
+                    })]
+                : []),
+            new ContextMenuItem({
+                name: 'Verwijderen',
+                icon: 'trash',
+                action: () => {
+                    doDelete();
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
+}
 
-    addOption() {
-        const option = Option.create({});
-        const p = OptionMenu.patch({ id: this.optionMenu.id });
-        p.options.addPut(option);
+function addOption() {
+    const option = Option.create({});
+    const p = OptionMenu.patch({ id: props.optionMenu.id });
+    p.options.addPut(option);
 
-        this.present(new ComponentWithProperties(EditOptionView, { optionMenu: this.optionMenu.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
-            // Merge both patches
-            const product = Product.patch({ id: this.product.id });
-            product.optionMenus.addPatch(p.patch(patch));
-            this.$emit('patch', product);
+    present(new ComponentWithProperties(EditOptionView, { optionMenu: props.optionMenu.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+        // Merge both patches
+        const product = Product.patch({ id: props.product.id });
+        product.optionMenus.addPatch(p.patch(patch));
+        emits('patch', product);
 
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('sheet'));
-    }
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('sheet')).catch(console.error);
+}
 
-    editOptionMenu() {
-        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.product, optionMenu: this.optionMenu, isNew: false, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
-            this.$emit('patch', patch);
+function editOptionMenu() {
+    present(new ComponentWithProperties(EditOptionMenuView,
+        {
+            product: props.product,
+            optionMenu: props.optionMenu,
+            isNew: false,
+            saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+                emits('patch', patch);
+                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            } }).setDisplayStyle('popup')).catch(console.error);
+}
 
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('popup'));
-    }
+function addOptionMenuPatch(patch: AutoEncoderPatchType<OptionMenu>) {
+    const p = Product.patch({ id: props.product.id });
+    p.optionMenus.addPatch(OptionMenu.patch(Object.assign({}, patch, { id: props.optionMenu.id })));
+    addPatch(p);
+}
 
-    addOptionMenuPatch(patch: AutoEncoderPatchType<OptionMenu>) {
-        const p = Product.patch({ id: this.product.id });
-        p.optionMenus.addPatch(OptionMenu.patch(Object.assign({}, patch, { id: this.optionMenu.id })));
-        this.addPatch(p);
-    }
+function doDelete() {
+    const p = Product.patch({ id: props.product.id });
+    p.optionMenus.addDelete(props.optionMenu.id);
+    addPatch(p);
+}
 
-    delete() {
-        const p = Product.patch({ id: this.product.id });
-        p.optionMenus.addDelete(this.optionMenu.id);
-        this.addPatch(p);
-    }
-
-    addPatch(patch: AutoEncoderPatchType<Product>) {
-        this.$emit('patch', patch);
-    }
-
-    moveUp() {
-        this.$emit('move-up');
-    }
-
-    moveDown() {
-        this.$emit('move-down');
-    }
+function addPatch(patch: AutoEncoderPatchType<Product>) {
+    emits('patch', patch);
 }
 </script>

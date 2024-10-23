@@ -1,4 +1,4 @@
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance } from 'vue';
 
 export function useIsIOS(): boolean {
     const app = getCurrentInstance()!;

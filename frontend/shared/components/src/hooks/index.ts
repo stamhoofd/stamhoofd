@@ -11,6 +11,7 @@ export * from './useUser';
 export * from './usePatchMoveUpDown';
 export * from './useOrganization';
 export * from './useIsIOS';
+export * from './useIsMac';
 export * from './useIsAndroid';
 export * from './useIsMobile';
 export * from './useDeviceWidth';
