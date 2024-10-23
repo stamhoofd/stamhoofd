@@ -6,56 +6,44 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem } from '@stamhoofd/components';
+import { STList } from '@stamhoofd/components';
 import { WebshopField } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import WebshopFieldRow from './WebshopFieldRow.vue';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        WebshopFieldRow,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-    },
-})
-export default class WebshopFieldsBox extends Mixins(NavigationMixin) {
-    @Prop({})
+const props = defineProps<{
     fields: WebshopField[];
+}>();
 
-    moveFieldUp(field: WebshopField) {
-        const index = this.fields.findIndex(c => field.id === c.id);
-        if (index === -1 || index === 0) {
-            return;
-        }
+const emits = defineEmits<{ (e: 'patch', patch: PatchableArrayAutoEncoder<WebshopField>): void }>();
 
-        const moveTo = index - 2;
-        const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
-        p.addMove(field.id, this.fields[moveTo]?.id ?? null);
-        this.addPatch(p);
+function moveFieldUp(field: WebshopField) {
+    const index = props.fields.findIndex(c => field.id === c.id);
+    if (index === -1 || index === 0) {
+        return;
     }
 
-    moveFieldDown(field: WebshopField) {
-        const index = this.fields.findIndex(c => field.id === c.id);
-        if (index === -1 || index >= this.fields.length - 1) {
-            return;
-        }
+    const moveTo = index - 2;
+    const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
+    p.addMove(field.id, props.fields[moveTo]?.id ?? null);
+    addPatch(p);
+}
 
-        const moveTo = index + 1;
-        const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
-        p.addMove(field.id, this.fields[moveTo].id);
-        this.addPatch(p);
+function moveFieldDown(field: WebshopField) {
+    const index = props.fields.findIndex(c => field.id === c.id);
+    if (index === -1 || index >= props.fields.length - 1) {
+        return;
     }
 
-    addPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
-        this.$emit('patch', patch);
-    }
+    const moveTo = index + 1;
+    const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
+    p.addMove(field.id, props.fields[moveTo].id);
+    addPatch(p);
+}
+
+function addPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
+    emits('patch', patch);
 }
 </script>
