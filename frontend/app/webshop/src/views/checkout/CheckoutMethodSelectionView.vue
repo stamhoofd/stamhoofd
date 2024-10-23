@@ -88,7 +88,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
         switch (type) {
             case CheckoutMethodType.Takeout: return "Afhalen";
             case CheckoutMethodType.Delivery: return "Levering";
-            case CheckoutMethodType.OnSite: return "Ter plaatse";
+            case CheckoutMethodType.OnSite: return "Ter plaatse consumeren";
         }
     }
     
