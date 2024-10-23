@@ -6,72 +6,52 @@
     </STList>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { STList, STListItem } from '@stamhoofd/components';
+import { STList, useDraggableArray } from '@stamhoofd/components';
 import { Option, OptionMenu } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 
 import OptionRow from './OptionRow.vue';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        OptionRow,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-    },
-})
-export default class OptionMenuOptions extends Mixins(NavigationMixin) {
-    @Prop({})
+const props = defineProps<{
     optionMenu: OptionMenu;
+}>();
 
-    moveOptionUp(option: Option) {
-        const index = this.optionMenu.options.findIndex(c => option.id === c.id);
-        if (index === -1 || index === 0) {
-            return;
-        }
+const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<OptionMenu>): void }>();
 
-        const moveTo = index - 2;
-        const p = OptionMenu.patch({});
-        p.options.addMove(option.id, this.optionMenu.options[moveTo]?.id ?? null);
-        this.addPatch(p);
+function moveOptionUp(option: Option) {
+    const index = props.optionMenu.options.findIndex(c => option.id === c.id);
+    if (index === -1 || index === 0) {
+        return;
     }
 
-    moveOptionDown(option: Option) {
-        const index = this.optionMenu.options.findIndex(c => option.id === c.id);
-        if (index === -1 || index >= this.optionMenu.options.length - 1) {
-            return;
-        }
-
-        const moveTo = index + 1;
-        const p = OptionMenu.patch({});
-        p.options.addMove(option.id, this.optionMenu.options[moveTo].id);
-        this.addPatch(p);
-    }
-
-    addPatch(patch: AutoEncoderPatchType<OptionMenu>) {
-        this.$emit('patch', patch);
-    }
-
-    get draggableOptions() {
-        return this.optionMenu.options;
-    }
-
-    set draggableOptions(options) {
-        if (options.length !== this.optionMenu.options.length) {
-            return;
-        }
-
-        const patch = OptionMenu.patch({});
-        for (const p of options.slice().reverse()) {
-            patch.options.addMove(p.id, null);
-        }
-        this.addPatch(patch);
-    }
+    const moveTo = index - 2;
+    const p = OptionMenu.patch({});
+    p.options.addMove(option.id, props.optionMenu.options[moveTo]?.id ?? null);
+    addPatch(p);
 }
+
+function moveOptionDown(option: Option) {
+    const index = props.optionMenu.options.findIndex(c => option.id === c.id);
+    if (index === -1 || index >= props.optionMenu.options.length - 1) {
+        return;
+    }
+
+    const moveTo = index + 1;
+    const p = OptionMenu.patch({});
+    p.options.addMove(option.id, props.optionMenu.options[moveTo].id);
+    addPatch(p);
+}
+
+function addPatch(patch: AutoEncoderPatchType<OptionMenu>) {
+    emits('patch', patch);
+}
+
+const draggableOptions = useDraggableArray(() => props.optionMenu.options, (patch) => {
+    const optionMenuPatch = OptionMenu.patch({
+        options: patch,
+    });
+
+    addPatch(optionMenuPatch);
+});
 </script>
