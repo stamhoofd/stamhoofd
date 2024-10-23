@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editPrice()" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: MouseEvent) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editPrice()" @contextmenu.prevent="showContextMenu">
         <h3 class="style-title-list">
             {{ productPrice.name || 'Naamloos' }}
         </h3>
@@ -10,7 +10,7 @@
             Uitverkocht
         </p>
         <p v-else-if="productPrice.stock" class="style-description-small">
-            Nog {{ pluralText(productPrice.remainingStock, 'stuk', 'stuks') }} beschikbaar
+            Nog {{ pluralText(productPrice.remainingStock ?? 0, 'stuk', 'stuks') }} beschikbaar
         </p>
 
         <template #right>
@@ -24,91 +24,76 @@
     </STListItem>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ContextMenu, ContextMenuItem, STListItem } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import EditProductPriceView from './EditProductPriceView.vue';
 
-@Component({
-    components: {
-        STListItem,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-    },
-    directives: {
-        LongPress: LongPressDirective,
-    },
-})
-export default class ProductPriceRow extends Mixins(NavigationMixin) {
-    @Prop({})
-    productPrice: ProductPrice;
+const props = defineProps<{ productPrice: ProductPrice; product: Product }>();
 
-    @Prop({})
-    product: Product;
+const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): void; (e: 'move-up'): void; (e: 'move-down'): void }>();
 
-    editPrice() {
-        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.product, productPrice: this.productPrice, isNew: false, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
-            this.$emit('patch', patch);
+const present = usePresent();
 
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('popup'));
+function editPrice() {
+    present(new ComponentWithProperties(EditProductPriceView, { product: props.product, productPrice: props.productPrice, isNew: false, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+        emits('patch', patch);
+
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('popup')).catch(console.error);
+}
+
+function moveUp() {
+    emits('move-up');
+}
+
+function moveDown() {
+    emits('move-down');
+}
+
+async function doDelete() {
+    if (!(await CenteredMessage.confirm('Deze prijs verwijderen?', 'Verwijderen'))) {
+        return;
     }
+    const p = Product.patch({ id: props.product.id });
+    p.prices.addDelete(props.productPrice.id);
+    emits('patch', p);
+}
 
-    moveUp() {
-        this.$emit('move-up');
-    }
-
-    moveDown() {
-        this.$emit('move-down');
-    }
-
-    async delete() {
-        if (!(await CenteredMessage.confirm('Deze prijs verwijderen?', 'Verwijderen'))) {
-            return;
-        }
-        const p = Product.patch({ id: this.product.id });
-        p.prices.addDelete(this.productPrice.id);
-        this.$emit('patch', p);
-    }
-
-    showContextMenu(event) {
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: 'Verplaats omhoog',
-                    icon: 'arrow-up',
-                    action: () => {
-                        this.moveUp();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Verplaats omlaag',
-                    icon: 'arrow-down',
-                    action: () => {
-                        this.moveDown();
-                        return true;
-                    },
-                }),
-            ],
-            [
-                new ContextMenuItem({
-                    name: 'Verwijderen',
-                    icon: 'trash',
-                    action: () => {
-                        this.delete().catch(console.error);
-                        return true;
-                    },
-                }),
-            ],
-        ]);
-        menu.show({ clickEvent: event }).catch(console.error);
-    }
+function showContextMenu(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Verplaats omhoog',
+                icon: 'arrow-up',
+                action: () => {
+                    moveUp();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Verplaats omlaag',
+                icon: 'arrow-down',
+                action: () => {
+                    moveDown();
+                    return true;
+                },
+            }),
+        ],
+        [
+            new ContextMenuItem({
+                name: 'Verwijderen',
+                icon: 'trash',
+                action: () => {
+                    doDelete().catch(console.error);
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
 }
 </script>
