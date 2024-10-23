@@ -75,128 +75,93 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STInputBox,
-        PriceInput,
-        Checkbox,
-        NumberInput,
-        STList,
-        STListItem,
-    },
-})
-export default class ProductPriceBox extends VueComponent {
-    @Prop({ required: true })
-    errorBox: ErrorBox;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    errorBox: ErrorBox | null;
     productPrice: ProductPrice;
-
-    @Prop({ required: true })
     product: Product;
+}>();
 
-    get patchedProduct() {
-        return this.product;
-    }
+const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): void }>();
 
-    get patchedProductPrice() {
-        return this.productPrice;
-    }
+const patchedProductPrice = computed(() => props.productPrice);
 
-    get name() {
-        return this.patchedProductPrice.name;
-    }
+const name = computed({
+    get: () => patchedProductPrice.value.name,
+    set: (name: string) => {
+        addPricePatch(ProductPrice.patch({ name }));
+    },
+});
 
-    set name(name: string) {
-        this.addPricePatch(ProductPrice.patch({ name }));
-    }
+const price = computed({
+    get: () => patchedProductPrice.value.price,
+    set: (price: number) => {
+        addPricePatch(ProductPrice.patch({ price }));
+    },
+});
 
-    get price() {
-        return this.patchedProductPrice.price;
-    }
+const discountAmount = computed({
+    get: () => patchedProductPrice.value.discountAmount,
+    set: (discountAmount: number) => {
+        addPricePatch(ProductPrice.patch({ discountAmount }));
+    },
+});
 
-    set price(price: number) {
-        this.addPricePatch(ProductPrice.patch({ price }));
-    }
+const discountPrice = computed({
+    get: () => patchedProductPrice.value.discountPrice,
+    set: (discountPrice: number | null) => {
+        addPricePatch(ProductPrice.patch({ discountPrice }));
+    },
+});
 
-    get discountAmount() {
-        return this.patchedProductPrice.discountAmount;
-    }
-
-    set discountAmount(discountAmount: number) {
-        this.addPricePatch(ProductPrice.patch({ discountAmount }));
-    }
-
-    get discountPrice() {
-        return this.patchedProductPrice.discountPrice;
-    }
-
-    set discountPrice(discountPrice: number | null) {
-        this.addPricePatch(ProductPrice.patch({ discountPrice }));
-    }
-
-    get useDiscount() {
-        return this.patchedProductPrice.discountPrice !== null;
-    }
-
-    set useDiscount(useDiscount: boolean) {
-        if (useDiscount === this.useDiscount) {
+const useDiscount = computed({
+    get: () => patchedProductPrice.value.discountPrice !== null,
+    set: (value: boolean) => {
+        if (value === useDiscount.value) {
             return;
         }
-        if (useDiscount) {
-            this.discountPrice = this.price;
+        if (value) {
+            discountPrice.value = price.value;
         }
         else {
-            this.discountPrice = null;
+            discountPrice.value = null;
         }
-    }
+    },
+});
 
-    get hidden() {
-        return this.patchedProductPrice.hidden;
-    }
+const hidden = computed({
+    get: () => patchedProductPrice.value.hidden,
+    set: (hidden: boolean) => {
+        addPricePatch(ProductPrice.patch({ hidden }));
+    },
+});
 
-    set hidden(hidden: boolean) {
-        this.addPricePatch(ProductPrice.patch({ hidden }));
-    }
+const useStock = computed({
+    get: () => patchedProductPrice.value.stock !== null,
+    set: (useStock: boolean) => {
+        addPricePatch(ProductPrice.patch({ stock: useStock ? (patchedProductPrice.value.stock ?? patchedProductPrice.value.stock ?? (patchedProductPrice.value.usedStock || 10)) : null }));
+    },
+});
 
-    get useStock() {
-        return this.patchedProductPrice.stock !== null;
-    }
+const stock = computed({
+    get: () => patchedProductPrice.value.stock,
+    set: (stock: number | null) => {
+        addPricePatch(ProductPrice.patch({ stock }));
+    },
+});
 
-    set useStock(useStock: boolean) {
-        this.addPricePatch(ProductPrice.patch({ stock: useStock ? (this.patchedProductPrice.stock ?? this.patchedProductPrice.stock ?? (this.patchedProductPrice.usedStock || 10)) : null }));
-    }
+const usedStock = computed(() => patchedProductPrice.value.usedStock);
 
-    get stock() {
-        return this.patchedProductPrice.stock;
-    }
-
-    set stock(stock: number | null) {
-        this.addPricePatch(ProductPrice.patch({ stock }));
-    }
-
-    get usedStock() {
-        return this.patchedProductPrice.usedStock;
-    }
-
-    addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {
-        const p = Product.patch({});
-        p.prices.addPatch(ProductPrice.patch(Object.assign({}, patch, { id: this.productPrice.id })));
-        this.addPatch(p);
-    }
-
-    addPatch(patch: AutoEncoderPatchType<Product>) {
-        this.$emit('patch', patch);
-    }
-
-    get isSingle() {
-        return this.patchedProduct.prices.length <= 1;
-    }
+function addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {
+    const p = Product.patch({});
+    p.prices.addPatch(ProductPrice.patch(Object.assign({}, patch, { id: props.productPrice.id })));
+    emits('patch', p);
 }
+
+const isSingle = computed(() => props.product.prices.length <= 1);
 </script>
