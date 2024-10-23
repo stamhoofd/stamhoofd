@@ -7,8 +7,8 @@
             Vraag bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+        <STErrorsDefault :error-box="errors.errorBox" />
+        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
             <input
                 ref="firstInput"
                 v-model="name"
@@ -20,7 +20,7 @@
             >
         </STInputBox>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox">
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox">
             <textarea
                 v-model="description"
                 class="input"
@@ -38,7 +38,7 @@
         </Checkbox>
 
         <template v-if="required">
-            <STInputBox title="Placeholder*" error-fields="placeholder" :error-box="errorBox">
+            <STInputBox title="Placeholder*" error-fields="placeholder" :error-box="errors.errorBox">
                 <input
                     v-model="placeholder"
                     class="input"
@@ -66,108 +66,80 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from '@stamhoofd/components';
-import { Version, WebshopField } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, SaveView, STErrorsDefault, STInputBox, useErrors, usePatch } from '@stamhoofd/components';
+import { WebshopField } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-    },
-})
-export default class EditWebshopFieldView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
+const props = defineProps<{
     field: WebshopField;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    patchField: AutoEncoderPatchType<WebshopField> = WebshopField.patch({});
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    isNew: boolean;
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: ((patch: PatchableArrayAutoEncoder<WebshopField>) => void);
+}>();
 
-    get patchedField() {
-        return this.field.patch(this.patchField);
-    }
+const errors = useErrors();
+const { patched, addPatch, hasChanges } = usePatch(props.field);
+const pop = usePop();
 
-    get name() {
-        return this.patchedField.name;
-    }
+const name = computed({
+    get: () => patched.value.name,
+    set: (name: string) => {
+        addPatch(WebshopField.patch({ name }));
+    },
+});
 
-    set name(name: string) {
-        this.addPatch(WebshopField.patch({ name }));
-    }
+const required = computed({
+    get: () => patched.value.required,
+    set: (required: boolean) => {
+        addPatch(WebshopField.patch({ required }));
+    },
+});
 
-    get required() {
-        return this.patchedField.required;
-    }
+const description = computed({
+    get: () => patched.value.description,
+    set: (description: string) => {
+        addPatch(WebshopField.patch({ description }));
+    },
+});
 
-    set required(required: boolean) {
-        this.addPatch(WebshopField.patch({ required }));
-    }
+const placeholder = computed({
+    get: () => patched.value.placeholder,
+    set: (placeholder: string) => {
+        addPatch(WebshopField.patch({ placeholder }));
+    },
+});
 
-    get description() {
-        return this.patchedField.description;
+async function save() {
+    if (!await errors.validator.validate()) {
+        return;
     }
-
-    set description(description: string) {
-        this.addPatch(WebshopField.patch({ description }));
-    }
-
-    get placeholder() {
-        return this.patchedField.placeholder;
-    }
-
-    set placeholder(placeholder: string) {
-        this.addPatch(WebshopField.patch({ placeholder }));
-    }
-
-    addPatch(patch: AutoEncoderPatchType<WebshopField>) {
-        this.patchField = this.patchField.patch(patch);
-    }
-
-    async save() {
-        if (!await this.validator.validate()) {
-            return;
-        }
-        const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
-        p.addPatch(WebshopField.patch(Object.assign({}, this.patchField, { id: this.field.id })));
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze vraag wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-        const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
-        p.addDelete(this.field.id);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchField, this.field, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+    const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
+    p.addPatch(WebshopField.patch(Object.assign({}, patched.value, { id: props.field.id })));
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
 }
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze vraag wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+    const p: PatchableArrayAutoEncoder<WebshopField> = new PatchableArray();
+    p.addDelete(props.field.id);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
