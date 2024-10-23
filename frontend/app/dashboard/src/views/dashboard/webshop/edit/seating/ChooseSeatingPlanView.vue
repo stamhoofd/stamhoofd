@@ -7,7 +7,7 @@
             Je kan een zaalplan aanmaken of een bestaand zaalplan kiezen. Je kan in de loop van een evenement wijzigingen maken aan een zaalplan of zelfs een ander zaalplan kiezen op voorwaarde dat dezelfde rij en zetelnummers gebruikt worden.
         </p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -58,7 +58,7 @@
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" element-name="label">
-                <input type="file" multiple="multiple" style="display: none;" accept=".plan" @change="importSeatingPlan">
+                <input type="file" multiple style="display: none;" accept=".plan" @change="importSeatingPlan">
 
                 <template #left>
                     <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
@@ -81,333 +81,301 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, Decoder, ObjectData, patchContainsChanges, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, ErrorBox, LoadingButton, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from '@stamhoofd/components';
-import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, Version, WebshopMetaData } from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { AutoEncoderPatchType, Decoder, ObjectData, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, LoadingButton, Radio, SaveView, STErrorsDefault, STList, STListItem, Toast, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, WebshopMetaData } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { computed, ref } from 'vue';
 import EditSeatingPlanView from './EditSeatingPlanView.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        Radio,
-        STList,
-        STListItem,
-        LoadingButton,
-    },
-})
-export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-    importingSeatingPlan = false;
-
-    @Prop({ required: true })
-    product!: Product;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    product: Product;
     webshop: PrivateWebshop;
-
-    /// For now only used to update locations and times of other products that are shared
-    patchWebshop: AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({});
-    patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id });
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: (patchProduct: AutoEncoderPatchType<Product>, patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+}>();
 
-    get patchedWebshop() {
-        return this.webshop.patch(this.patchWebshop);
+const errors = useErrors();
+const organization = useOrganization();
+const pop = usePop();
+const present = usePresent();
+const $t = useTranslate();
+
+const importingSeatingPlan = ref(false);
+
+const { patch: patchWebshop, patched: patchedWebshop, addPatch: addWebshopPatch, hasChanges: hasWebshopChanges } = usePatch(props.webshop);
+const { patch: patchProduct, patched: patchedProduct, addPatch, hasChanges: hasProductChanges } = usePatch(props.product);
+const hasChanges = computed(() => hasWebshopChanges.value || hasProductChanges.value);
+
+function isFromOtherWebshop(seatingPlan: SeatingPlan) {
+    return !patchedWebshop.value.meta.seatingPlans.find(p => p.id === seatingPlan.id);
+}
+
+async function save() {
+    const isValid = await errors.validator.validate();
+    if (!isValid) {
+        return;
     }
 
-    get patchedProduct() {
-        return this.product.patch(this.patchProduct);
+    // If seating plan is not yet added to webshop, add it.
+    const added = addSeatingPlanIfNotInWebshop(selectedPlan.value);
+    if (added) {
+        // We assigned a new id to this seating plan
+        const { webshopPatch, id } = added;
+        addPatch(Product.patch({ seatingPlanId: id }));
+        addWebshopPatch(webshopPatch);
     }
 
-    get organization() {
-        return this.$organization;
+    props.saveHandler(patchProduct.value, patchWebshop.value);
+    pop({ force: true })?.catch(console.error);
+}
+
+function addSeatingPlanIfNotInWebshop(id: string | null) {
+    // If seating plan is not yet added to webshop, add it.
+    if (id && !patchedWebshop.value.meta.seatingPlans.find(p => p.id === id)) {
+        let seatingPlan = allSeatingPlans.value.find(p => p.id === id);
+        if (!seatingPlan) {
+            throw new Error('Seating plan not found');
+        }
+
+        // Give the seating plan a new unique id
+        seatingPlan = seatingPlan.patch({ id: SeatingPlan.create({}).id });
+
+        const webshopMetaPatch = WebshopMetaData.patch({});
+        webshopMetaPatch.seatingPlans.addPut(seatingPlan);
+        const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
+        return { webshopPatch, id: seatingPlan.id };
+    }
+}
+
+const selectedPlan = computed({
+    get: () => patchedProduct.value.seatingPlanId,
+    set: (seatingPlanId: string | null) => {
+        addPatch(Product.patch({ seatingPlanId }));
+    },
+});
+
+const seatingPlans = computed(() => patchedWebshop.value.meta.seatingPlans);
+
+const otherWebshopSeatingPlans = computed(() => {
+    const seatingPlans = organization.value!.webshops.filter(w => w.id !== props.webshop.id).flatMap(w => w.meta.seatingPlans);
+
+    // If seating plans have the same name, only show the last changed one
+    const map = new Map<string, SeatingPlan>();
+    for (const seatingPlan of seatingPlans) {
+        map.set(seatingPlan.name, seatingPlan);
     }
 
-    addPatch(patch: AutoEncoderPatchType<Product>) {
-        this.patchProduct = this.patchProduct.patch(patch);
+    return Array.from(map.values());
+});
+
+const allSeatingPlans = computed(() => {
+    // Unique by name
+    const map = new Map<string, SeatingPlan>();
+    const usedIds = new Set<string>();
+    const reservedIds = new Set<string>();
+
+    for (const seatingPlan of seatingPlans.value) {
+        reservedIds.add(seatingPlan.id);
     }
 
-    isFromOtherWebshop(seatingPlan: SeatingPlan) {
-        return !this.patchedWebshop.meta.seatingPlans.find(p => p.id === seatingPlan.id);
+    for (const seatingPlan of otherWebshopSeatingPlans.value) {
+        if (usedIds.has(seatingPlan.id) || reservedIds.has(seatingPlan.id)) {
+            continue;
+        }
+        map.set(seatingPlan.name, seatingPlan);
+        usedIds.add(seatingPlan.id);
     }
 
-    async save() {
-        const isValid = await this.validator.validate();
-        if (!isValid) {
+    for (const seatingPlan of seatingPlans.value) {
+        if (usedIds.has(seatingPlan.id)) {
+            continue;
+        }
+        map.set(seatingPlan.name, seatingPlan);
+        usedIds.add(seatingPlan.id);
+    }
+
+    return Array.from(map.values()).sort((a, b) => Sorter.byStringProperty(a, b, 'name'));
+});
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+function addSeatingPlan() {
+    const seatingPlan = SeatingPlan.create({
+        name: '',
+        categories: [
+            SeatingPlanCategory.create({
+                id: '0',
+                name: 'Standaard',
+                price: 0,
+            }),
+        ],
+        sections: [
+            SeatingPlanSection.create({
+                name: '',
+                rows: [
+                    SeatingPlanRow.create({
+                        label: 'B',
+                        seats: [
+                            SeatingPlanSeat.create({
+                                label: '1',
+                                category: '0',
+                            }),
+                        ],
+                    }),
+                    SeatingPlanRow.create({
+                        label: 'A',
+                        seats: [
+                            SeatingPlanSeat.create({
+                                label: '1',
+                                category: '0',
+                            }),
+                        ],
+                    }),
+                    // Empty row
+                    SeatingPlanRow.create({
+                        seats: [],
+                    }),
+                    // Podium
+                    SeatingPlanRow.create({
+                        seats: [
+                            SeatingPlanSeat.create({
+                                label: 'Podium',
+                                grow: 1,
+                                type: SeatType.Space,
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    });
+
+    const webshopMetaPatch = WebshopMetaData.patch({});
+    webshopMetaPatch.seatingPlans.addPut(seatingPlan);
+    const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
+
+    present({
+        components: [
+            new ComponentWithProperties(EditSeatingPlanView, {
+                webshop: patchedWebshop.value.patch(webshopPatch),
+                seatingPlan,
+                isNew: true,
+                saveHandler: (patchedWebshop: AutoEncoderPatchType<PrivateWebshop>) => {
+                    addWebshopPatch(webshopPatch.patch(patchedWebshop));
+                    selectedPlan.value = seatingPlan.id;
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function editSeatingPlan(seatingPlan: SeatingPlan) {
+    const added = addSeatingPlanIfNotInWebshop(seatingPlan.id);
+    const patched = added ?? {
+        webshopPatch: PrivateWebshop.patch({}),
+        id: seatingPlan.id,
+    };
+
+    const seatingPlanPatched = seatingPlan.patch({ id: patched.id });
+
+    present({
+        components: [
+            new ComponentWithProperties(EditSeatingPlanView, {
+                webshop: patchedWebshop.value.patch(patched.webshopPatch),
+                seatingPlan: seatingPlanPatched,
+                isNew: !!added,
+                saveHandler: (patchedWebshop: AutoEncoderPatchType<PrivateWebshop>) => {
+                    addWebshopPatch(patched.webshopPatch.patch(patchedWebshop));
+                    selectedPlan.value = seatingPlanPatched.id;
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+async function importSeatingPlan(event: InputEvent & any) {
+    if (importingSeatingPlan.value) {
+        return;
+    }
+
+    if (!event.target.files || event.target.files.length === 0) {
+        return;
+    }
+
+    const files = event.target.files as FileList;
+    const file = files[0];
+    importingSeatingPlan.value = true;
+
+    try {
+        const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
+        const data = await JSZip.loadAsync(file);
+        const jsonFile = data.file('plan.json');
+
+        if (!jsonFile) {
+            importingSeatingPlan.value = false;
+            new CenteredMessage($t('de1d5cdf-6aa6-4912-828a-82cb53f8abf6')).addCloseButton().show();
             return;
         }
 
-        // If seating plan is not yet added to webshop, add it.
-        const added = this.addSeatingPlanIfNotInWebshop(this.selectedPlan);
-        if (added) {
-            // We assigned a new id to this seating plan
-            const { webshopPatch, id } = added;
-            this.addPatch(Product.patch({ seatingPlanId: id }));
-            this.patchWebshop = this.patchWebshop.patch(webshopPatch);
-        }
+        const blob = await jsonFile.async('blob');
+        const text = await blob.text();
 
-        this.saveHandler(this.patchProduct, this.patchWebshop);
-        this.pop({ force: true });
-    }
+        const json = JSON.parse(text);
 
-    addSeatingPlanIfNotInWebshop(id: string | null) {
-        // If seating plan is not yet added to webshop, add it.
-        if (id && !this.patchedWebshop.meta.seatingPlans.find(p => p.id === id)) {
-            let seatingPlan = this.allSeatingPlans.find(p => p.id === id);
-            if (!seatingPlan) {
-                throw new Error('Seating plan not found');
-            }
+        // Decode
+        const decoded = new VersionBoxDecoder(SeatingPlan as Decoder<SeatingPlan>).decode(new ObjectData(json, { version: 0 }));
 
-            // Give the seating plan a new unique id
-            seatingPlan = seatingPlan.patch({ id: SeatingPlan.create({}).id });
+        const seatingPlan = decoded.data;
 
-            const webshopMetaPatch = WebshopMetaData.patch({});
-            webshopMetaPatch.seatingPlans.addPut(seatingPlan);
-            const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
-            return { webshopPatch, id: seatingPlan.id };
-        }
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchProduct, this.product, { version: Version }) || patchContainsChanges(this.patchWebshop, this.webshop, { version: Version });
-    }
-
-    get selectedPlan() {
-        return this.patchedProduct.seatingPlanId;
-    }
-
-    set selectedPlan(seatingPlanId: string | null) {
-        this.addPatch(Product.patch({ seatingPlanId }));
-    }
-
-    get seatingPlans() {
-        return this.patchedWebshop.meta.seatingPlans;
-    }
-
-    get otherWebshopSeatingPlans() {
-        const seatingPlans = this.organization.webshops.filter(w => w.id !== this.webshop.id).flatMap(w => w.meta.seatingPlans);
-
-        // If seating plans have the same name, only show the last changed one
-        const map = new Map<string, SeatingPlan>();
-        for (const seatingPlan of seatingPlans) {
-            map.set(seatingPlan.name, seatingPlan);
-        }
-
-        return Array.from(map.values());
-    }
-
-    get allSeatingPlans() {
-        // Unique by name
-        const map = new Map<string, SeatingPlan>();
-        const usedIds = new Set<string>();
-        const reservedIds = new Set<string>();
-
-        for (const seatingPlan of this.seatingPlans) {
-            reservedIds.add(seatingPlan.id);
-        }
-
-        for (const seatingPlan of this.otherWebshopSeatingPlans) {
-            if (usedIds.has(seatingPlan.id) || reservedIds.has(seatingPlan.id)) {
-                continue;
-            }
-            map.set(seatingPlan.name, seatingPlan);
-            usedIds.add(seatingPlan.id);
-        }
-
-        for (const seatingPlan of this.seatingPlans) {
-            if (usedIds.has(seatingPlan.id)) {
-                continue;
-            }
-            map.set(seatingPlan.name, seatingPlan);
-            usedIds.add(seatingPlan.id);
-        }
-
-        return Array.from(map.values()).sort((a, b) => Sorter.byStringProperty(a, b, 'name'));
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
-
-    addSeatingPlan() {
-        const seatingPlan = SeatingPlan.create({
-            name: '',
-            categories: [
-                SeatingPlanCategory.create({
-                    id: '0',
-                    name: 'Standaard',
-                    price: 0,
-                }),
-            ],
-            sections: [
-                SeatingPlanSection.create({
-                    name: '',
-                    rows: [
-                        SeatingPlanRow.create({
-                            label: 'B',
-                            seats: [
-                                SeatingPlanSeat.create({
-                                    label: '1',
-                                    category: '0',
-                                }),
-                            ],
-                        }),
-                        SeatingPlanRow.create({
-                            label: 'A',
-                            seats: [
-                                SeatingPlanSeat.create({
-                                    label: '1',
-                                    category: '0',
-                                }),
-                            ],
-                        }),
-                        // Empty row
-                        SeatingPlanRow.create({
-                            seats: [],
-                        }),
-                        // Podium
-                        SeatingPlanRow.create({
-                            seats: [
-                                SeatingPlanSeat.create({
-                                    label: 'Podium',
-                                    grow: 1,
-                                    type: SeatType.Space,
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        });
+        // Asign a unique id to the seating plan
+        const r = SeatingPlan.create({});
+        seatingPlan.id = r.id;
 
         const webshopMetaPatch = WebshopMetaData.patch({});
         webshopMetaPatch.seatingPlans.addPut(seatingPlan);
         const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
 
-        this.present({
+        present({
             components: [
                 new ComponentWithProperties(EditSeatingPlanView, {
-                    webshop: this.patchedWebshop.patch(webshopPatch),
+                    webshop: patchedWebshop.value.patch(webshopPatch),
                     seatingPlan,
                     isNew: true,
                     saveHandler: (patchedWebshop: AutoEncoderPatchType<PrivateWebshop>) => {
-                        this.patchWebshop = this.patchWebshop.patch(webshopPatch).patch(patchedWebshop);
-                        this.selectedPlan = seatingPlan.id;
+                        addWebshopPatch(webshopPatch.patch(patchedWebshop));
+                        selectedPlan.value = seatingPlan.id;
                     },
                 }),
             ],
             modalDisplayStyle: 'popup',
-        });
+        }).catch(console.error);
+    }
+    catch (e) {
+        console.error(e);
+        const message = $t('977fa720-e451-4dd8-a317-881cf7a409b1');
+        new Toast(message, 'error red');
+    }
+    finally {
+        importingSeatingPlan.value = false;
     }
 
-    editSeatingPlan(seatingPlan: SeatingPlan) {
-        const added = this.addSeatingPlanIfNotInWebshop(seatingPlan.id);
-        const patched = added ?? {
-            webshopPatch: PrivateWebshop.patch({}),
-            id: seatingPlan.id,
-        };
-
-        const seatingPlanPatched = seatingPlan.patch({ id: patched.id });
-
-        this.present({
-            components: [
-                new ComponentWithProperties(EditSeatingPlanView, {
-                    webshop: this.patchedWebshop.patch(patched.webshopPatch),
-                    seatingPlan: seatingPlanPatched,
-                    isNew: !!added,
-                    saveHandler: (patchedWebshop: AutoEncoderPatchType<PrivateWebshop>) => {
-                        this.patchWebshop = this.patchWebshop.patch(patched.webshopPatch).patch(patchedWebshop);
-                        this.selectedPlan = seatingPlanPatched.id;
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    async importSeatingPlan(event) {
-        if (this.importingSeatingPlan) {
-            return;
-        }
-
-        if (!event.target.files || event.target.files.length === 0) {
-            return;
-        }
-
-        const files = event.target.files as FileList;
-        const file = files[0];
-        this.importingSeatingPlan = true;
-
-        try {
-            const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
-            const data = await JSZip.loadAsync(file);
-            const jsonFile = data.file('plan.json');
-
-            if (!jsonFile) {
-                this.importingSeatingPlan = false;
-                new CenteredMessage(this.$t('de1d5cdf-6aa6-4912-828a-82cb53f8abf6')).addCloseButton().show();
-                return;
-            }
-
-            const blob = await jsonFile.async('blob');
-            const text = await blob.text();
-
-            const json = JSON.parse(text);
-
-            // Decode
-            const decoded = new VersionBoxDecoder(SeatingPlan as Decoder<SeatingPlan>).decode(new ObjectData(json, { version: 0 }));
-
-            const seatingPlan = decoded.data;
-
-            // Asign a unique id to the seating plan
-            const r = SeatingPlan.create({});
-            seatingPlan.id = r.id;
-
-            const webshopMetaPatch = WebshopMetaData.patch({});
-            webshopMetaPatch.seatingPlans.addPut(seatingPlan);
-            const webshopPatch = PrivateWebshop.patch({ meta: webshopMetaPatch });
-
-            this.present({
-                components: [
-                    new ComponentWithProperties(EditSeatingPlanView, {
-                        webshop: this.patchedWebshop.patch(webshopPatch),
-                        seatingPlan,
-                        isNew: true,
-                        saveHandler: (patchedWebshop: AutoEncoderPatchType<PrivateWebshop>) => {
-                            this.patchWebshop = this.patchWebshop.patch(webshopPatch).patch(patchedWebshop);
-                            this.selectedPlan = seatingPlan.id;
-                        },
-                    }),
-                ],
-                modalDisplayStyle: 'popup',
-            });
-        }
-        catch (e) {
-            console.error(e);
-            const message = this.$t('977fa720-e451-4dd8-a317-881cf7a409b1');
-            new Toast(message, 'error red');
-        }
-        finally {
-            this.importingSeatingPlan = false;
-        }
-
-        // Clear selection
-        event.target.value = null;
-    }
+    // Clear selection
+    event.target.value = null;
 }
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
