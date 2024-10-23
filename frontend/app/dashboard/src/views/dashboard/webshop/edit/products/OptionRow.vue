@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editOption()" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: MouseEvent) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editOption()" @contextmenu.prevent="showContextMenu">
         <template #left>
             <Radio v-if="!optionMenu.multipleChoice" v-model="isFirst" :value="true" :disabled="true" />
             <Checkbox v-else :disabled="true" />
@@ -12,7 +12,7 @@
             Uitverkocht
         </p>
         <p v-else-if="option.stock" class="style-description-small">
-            Nog {{ pluralText(option.remainingStock, 'stuk', 'stuks') }} beschikbaar
+            Nog {{ pluralText(option.remainingStock ?? 0, 'stuk', 'stuks') }} beschikbaar
         </p>
 
         <template #right>
@@ -23,108 +23,82 @@
     </STListItem>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, LongPressDirective, Radio, STListItem } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Radio, STListItem } from '@stamhoofd/components';
 import { Option, OptionMenu } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed } from 'vue';
 import EditOptionView from './EditOptionView.vue';
 
-@Component({
-    components: {
-        STListItem,
-        Checkbox,
-        Radio,
-    },
-    filters: {
-        priceChange: Formatter.priceChange.bind(Formatter),
-    },
-    directives: {
-        LongPress: LongPressDirective,
-    },
-})
-export default class OptionRow extends Mixins(NavigationMixin) {
-    @Prop({})
+const props = defineProps<{
     optionMenu: OptionMenu;
-
-    @Prop({})
     option: Option;
+}>();
 
-    get isFirst() {
-        return this.optionMenu.options[0].id === this.option.id;
+const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<OptionMenu>): void; (e: 'move-up'): void; (e: 'move-down'): void }>();
+const present = usePresent();
+
+const isFirst = computed(() => props.optionMenu.options[0].id === props.option.id);
+
+function editOption() {
+    present(new ComponentWithProperties(EditOptionView, { option: props.option, optionMenu: props.optionMenu, isNew: false, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+        emits('patch', patch);
+
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('sheet')).catch(console.error);
+}
+
+function moveUp() {
+    emits('move-up');
+}
+
+function moveDown() {
+    emits('move-down');
+}
+
+async function doDelete() {
+    if (!(await CenteredMessage.confirm('Deze keuze verwijderen?', 'Verwijderen'))) {
+        return;
     }
+    const p = OptionMenu.patch({ id: props.optionMenu.id });
+    p.options.addDelete(props.option.id);
+    emits('patch', p);
+}
 
-    set isFirst(set: boolean) {
-        // udno
-    }
-
-    addOptionPatch(patch: AutoEncoderPatchType<Option>) {
-        const p = OptionMenu.patch({ id: this.optionMenu.id });
-        p.options.addPatch(Option.patch(Object.assign({}, patch, { id: this.option.id })));
-        this.$emit('patch', p);
-    }
-
-    editOption() {
-        this.present(new ComponentWithProperties(EditOptionView, { option: this.option, optionMenu: this.optionMenu, isNew: false, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
-            this.$emit('patch', patch);
-
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('sheet'));
-    }
-
-    moveUp() {
-        this.$emit('move-up');
-    }
-
-    moveDown() {
-        this.$emit('move-down');
-    }
-
-    async delete() {
-        if (!(await CenteredMessage.confirm('Deze keuze verwijderen?', 'Verwijderen'))) {
-            return;
-        }
-        const p = OptionMenu.patch({ id: this.optionMenu.id });
-        p.options.addDelete(this.option.id);
-        this.$emit('patch', p);
-    }
-
-    showContextMenu(event) {
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: 'Verplaats omhoog',
-                    icon: 'arrow-up',
-                    action: () => {
-                        this.moveUp();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Verplaats omlaag',
-                    icon: 'arrow-down',
-                    action: () => {
-                        this.moveDown();
-                        return true;
-                    },
-                }),
-            ],
-            [
-                new ContextMenuItem({
-                    name: 'Verwijderen',
-                    icon: 'trash',
-                    disabled: this.optionMenu.options.length <= 1,
-                    action: () => {
-                        this.delete().catch(console.error);
-                        return true;
-                    },
-                }),
-            ],
-        ]);
-        menu.show({ clickEvent: event }).catch(console.error);
-    }
+function showContextMenu(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Verplaats omhoog',
+                icon: 'arrow-up',
+                action: () => {
+                    moveUp();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Verplaats omlaag',
+                icon: 'arrow-down',
+                action: () => {
+                    moveDown();
+                    return true;
+                },
+            }),
+        ],
+        [
+            new ContextMenuItem({
+                name: 'Verwijderen',
+                icon: 'trash',
+                disabled: props.optionMenu.options.length <= 1,
+                action: () => {
+                    doDelete().catch(console.error);
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
 }
 </script>
