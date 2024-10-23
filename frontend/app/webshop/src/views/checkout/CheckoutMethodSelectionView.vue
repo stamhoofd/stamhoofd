@@ -29,9 +29,9 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem } from '@stamhoofd/components';
 import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -44,72 +44,72 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
         STListItem,
         Radio,
         STErrorsDefault,
-        SaveView
+        SaveView,
     },
     filters: {
         date: Formatter.dateWithDay.bind(Formatter),
         minutes: Formatter.minutes.bind(Formatter),
-        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
-    }
+        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
+    },
 })
-export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin){
-    step = -1
+export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin) {
+    step = -1;
 
-    loading = false
-    errorBox: ErrorBox | null = null
+    loading = false;
+    errorBox: ErrorBox | null = null;
 
-    CheckoutManager = CheckoutManager
+    CheckoutManager = CheckoutManager;
 
     get webshop() {
-        return this.$webshopManager.webshop
+        return this.$webshopManager.webshop;
     }
 
     get checkoutMethods() {
-        return this.webshop.meta.checkoutMethods
+        return this.webshop.meta.checkoutMethods;
     }
 
     get selectedMethod(): CheckoutMethod {
         if (this.$checkoutManager.checkout.checkoutMethod) {
-            const search = this.$checkoutManager.checkout.checkoutMethod.id
-            const f = this.webshop.meta.checkoutMethods.find(c => c.id === search)
+            const search = this.$checkoutManager.checkout.checkoutMethod.id;
+            const f = this.webshop.meta.checkoutMethods.find(c => c.id === search);
             if (f) {
-                return f
+                return f;
             }
         }
-        return this.webshop.meta.checkoutMethods[0]
+        return this.webshop.meta.checkoutMethods[0];
     }
 
     set selectedMethod(method: CheckoutMethod) {
-        this.$checkoutManager.checkout.checkoutMethod = method
-        this.$checkoutManager.saveCheckout()
+        this.$checkoutManager.checkout.checkoutMethod = method;
+        this.$checkoutManager.saveCheckout();
     }
 
     getTypeName(type: CheckoutMethodType) {
         switch (type) {
-            case CheckoutMethodType.Takeout: return "Afhalen";
-            case CheckoutMethodType.Delivery: return "Levering";
-            case CheckoutMethodType.OnSite: return "Ter plaatse";
+            case CheckoutMethodType.Takeout: return 'Afhalen';
+            case CheckoutMethodType.Delivery: return 'Levering';
+            case CheckoutMethodType.OnSite: return 'Ter plaatse consumeren';
         }
     }
-    
+
     async goNext() {
         if (this.loading || !this.selectedMethod) {
-            return
+            return;
         }
         // Force checkout save
-        this.selectedMethod = this.selectedMethod as any
+        this.selectedMethod = this.selectedMethod as any;
 
-        this.loading = true
-        this.errorBox = null
+        this.loading = true;
+        this.errorBox = null;
 
         try {
-            await CheckoutStepsManager.for(this.$checkoutManager).goNext(CheckoutStepType.Method, this)
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
+            await CheckoutStepsManager.for(this.$checkoutManager).goNext(CheckoutStepType.Method, this);
         }
-        this.loading = false
+        catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e);
+        }
+        this.loading = false;
     }
 }
 </script>
-
