@@ -1,91 +1,72 @@
 <template>
     <div>
         <div class="split-inputs">
-            <STInputBox title="Startdatum" error-fields="startDate" :error-box="errorBox">
+            <STInputBox title="Startdatum" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" />
             </STInputBox>
-            <TimeInput v-model="startDate" title="Vanaf welk tijdstip" :validator="validator" />
+            <TimeInput v-model="startDate" title="Vanaf welk tijdstip" :validator="errors.validator" />
         </div>
         <div class="split-inputs">
-            <STInputBox title="Einddatum" error-fields="endDate" :error-box="errorBox">
+            <STInputBox title="Einddatum" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" />
             </STInputBox>
-            <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="validator" />
+            <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="errors.validator" />
         </div>
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { DateSelection, ErrorBox, STInputBox, TimeInput, Validator } from '@stamhoofd/components';
+import { DateSelection, ErrorBox, STInputBox, TimeInput, useErrors, useValidation, Validator } from '@stamhoofd/components';
 import { ProductDateRange } from '@stamhoofd/structures';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STInputBox,
-        DateSelection,
-        TimeInput,
+const props = withDefaults(defineProps<{ validator?: Validator | null }>(), {
+    // Assign a validator if you want to offload the validation to components
+    validator: null,
+    value: null,
+});
+
+const errors = useErrors({
+    validator: props.validator });
+
+const model = defineModel<ProductDateRange | null>({ default: null });
+
+if (props.validator) {
+    useValidation(props.validator, async () => {
+        return await isValid();
+    });
+}
+
+const startDate = computed({
+    get: () => model.value?.startDate ?? new Date(),
+    set: (startDate: Date) => {
+        if (model.value) {
+            model.value = model.value.patch({ startDate });
+        }
     },
-})
-export default class ProductDateRangeInput extends VueComponent {
-    /**
-     * Assign a validator if you want to offload the validation to components
-     */
-    @Prop({ default: null })
-    validator: Validator | null;
+});
 
-    errorBox: ErrorBox | null = null;
-
-    @Prop({ default: null })
-    value: ProductDateRange | null;
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.isValid();
-            });
+const endDate = computed({
+    get: () => model.value?.endDate ?? new Date(),
+    set: (endDate: Date) => {
+        if (model.value) {
+            model.value = model.value.patch({ endDate });
         }
+    },
+});
+
+async function isValid(): Promise<boolean> {
+    await Promise.resolve();
+    if (startDate.value > endDate.value) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            field: 'endDate',
+            message: 'De einddatum en tijdstip die je hebt ingevuld ligt voor de startdatum en tijdstip',
+        }));
+        return false;
     }
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
-
-    get startDate() {
-        return this.value?.startDate ?? new Date();
-    }
-
-    set startDate(startDate: Date) {
-        if (this.value) {
-            this.$emit('update:modelValue', this.value.patch({ startDate }));
-        }
-    }
-
-    get endDate() {
-        return this.value?.endDate ?? new Date();
-    }
-
-    set endDate(endDate: Date) {
-        if (this.value) {
-            this.$emit('update:modelValue', this.value.patch({ endDate }));
-        }
-    }
-
-    async isValid(): Promise<boolean> {
-        await Promise.resolve();
-        if (this.startDate > this.endDate) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                field: 'endDate',
-                message: 'De einddatum en tijdstip die je hebt ingevuld ligt voor de startdatum en tijdstip',
-            }));
-            return false;
-        }
-
-        return true;
-    }
+    return true;
 }
 </script>

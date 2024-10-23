@@ -20,193 +20,164 @@
             </STListItem>
         </STList>
         <ProductDateRangeInput v-if="editingDateRange || selectedDateRange === null" v-model="editDateRange" :validator="internalValidator" />
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput, ErrorBox, Radio, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
+import { ErrorBox, Radio, STErrorsDefault, STList, STListItem, useErrors, useValidation, Validator } from '@stamhoofd/components';
 import { ProductDateRange } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed, onMounted, ref, watch } from 'vue';
 import ProductDateRangeInput from './ProductDateRangeInput.vue';
 
-@Component({
-    components: {
-        STInputBox,
-        STListItem,
-        STErrorsDefault,
-        Radio,
-        AddressInput,
-        STList,
-        ProductDateRangeInput,
-    },
-})
-export default class ProductSelectDateRangeInput extends VueComponent {
-    @Prop({ default: '' })
-    title: string;
+const props = withDefaults(defineProps<{ title?: string; dateRanges: ProductDateRange[];
+    // Assign a validator if you want to offload the validation to components
+    validator?: Validator | null; }>(), {
+    title: '',
+    validator: null,
+});
 
-    @Prop({ required: true })
-    dateRanges: ProductDateRange[];
+const emits = defineEmits<{ (e: 'modify', value: { from: ProductDateRange; to: ProductDateRange }): void }>();
 
-    /**
-     * Assign a validator if you want to offload the validation to components
-     */
-    @Prop({ default: null })
-    validator: Validator | null;
+const model = defineModel<ProductDateRange | null>({ default: null });
+const errors = useErrors({ validator: props.validator });
+const internalValidator = new Validator();
 
-    errorBox: ErrorBox | null = null;
+const selectedDateRange = ref<ProductDateRange | null>(null);
+const customDateRange = ref<ProductDateRange | null>(null);
+const editingDateRange = ref(false);
 
-    internalValidator = new Validator();
+watch(model, (val: ProductDateRange | null) => {
+    if (val === (selectedDateRange.value ?? customDateRange.value ?? null)) {
+        // Not changed
+        return;
+    }
 
-    @Prop({ default: null })
-    modelValue: ProductDateRange | null;
+    if (!val) {
+        return;
+    }
 
-    selectedDateRange: ProductDateRange | null = null;
-    customDateRange: ProductDateRange | null = null;
-    editingDateRange = false;
-
-    @Watch('modelValue')
-    onValueChanged(val: ProductDateRange | null) {
-        if (val === (this.selectedDateRange ?? this.customDateRange ?? null)) {
-            // Not changed
-            return;
+    const a = props.dateRanges.find(aa => aa.id === val.id);
+    if (a) {
+        selectedDateRange.value = a;
+        if (editingDateRange.value) {
+            customDateRange.value = a;
         }
-
-        if (!val) {
-            return;
+        else {
+            customDateRange.value = null;
         }
+    }
+    else {
+        selectedDateRange.value = null;
+        editingDateRange.value = false;
+        customDateRange.value = val;
+    }
+});
 
-        const a = this.dateRanges.find(aa => aa.id === val.id);
-        if (a) {
-            this.selectedDateRange = a;
-            if (this.editingDateRange) {
-                this.customDateRange = a;
+onMounted(() => {
+    const a = props.dateRanges.find(aa => aa.id === model.value?.id);
+    if (a) {
+        selectedDateRange.value = a;
+        editingDateRange.value = false;
+        customDateRange.value = null;
+    }
+    else {
+        selectedDateRange.value = null;
+        editingDateRange.value = false;
+        customDateRange.value = model.value;
+
+        if (!model.value) {
+            if (props.dateRanges.length > 0) {
+                model.value = props.dateRanges[0];
             }
             else {
-                this.customDateRange = null;
+                model.value = ProductDateRange.create({
+                    startDate: new Date(),
+                    endDate: new Date(),
+                });
             }
         }
-        else {
-            this.selectedDateRange = null;
-            this.editingDateRange = false;
-            this.customDateRange = val;
-        }
     }
+});
 
-    formatDate(range: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(range.toString());
+useValidation(errors.validator, () => {
+    return isValid();
+});
+
+function formatDate(range: ProductDateRange) {
+    return Formatter.capitalizeFirstLetter(range.toString());
+}
+
+function changeSelected() {
+    console.log('ChangeSelected');
+    if (editingDateRange.value) {
+        customDateRange.value = null;
     }
+    editingDateRange.value = false;
 
-    mounted() {
-        const a = this.dateRanges.find(aa => aa.id === this.modelValue?.id);
-        if (a) {
-            this.selectedDateRange = a;
-            this.editingDateRange = false;
-            this.customDateRange = null;
-        }
-        else {
-            this.selectedDateRange = null;
-            this.editingDateRange = false;
-            this.customDateRange = this.modelValue;
-
-            if (!this.modelValue) {
-                if (this.dateRanges.length > 0) {
-                    this.$emit('update:modelValue', this.dateRanges[0]);
-                }
-                else {
-                    this.$emit('update:modelValue', ProductDateRange.create({
-                        startDate: new Date(),
-                        endDate: new Date(),
-                    }));
-                }
-            }
-        }
-
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.isValid();
-            });
-        }
+    let a = selectedDateRange.value ?? customDateRange.value;
+    if (!a) {
+        // Create a new custom one
+        a = customDateRange.value = ProductDateRange.create({
+            startDate: props.dateRanges[props.dateRanges.length - 1]?.startDate ?? new Date(),
+            endDate: props.dateRanges[props.dateRanges.length - 1]?.endDate ?? new Date(),
+        });
     }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
+    if (a) {
+        model.value = a;
     }
+}
 
-    changeSelected() {
-        console.log('ChangeSelected');
-        if (this.editingDateRange) {
-            this.customDateRange = null;
-        }
-        this.editingDateRange = false;
+function doEditDateRange(dateRange: ProductDateRange) {
+    model.value = dateRange;
+    editingDateRange.value = true;
+    selectedDateRange.value = dateRange;
+    customDateRange.value = dateRange;
+}
 
-        let a = this.selectedDateRange ?? this.customDateRange;
-        if (!a) {
-            // Create a new custom one
-            a = this.customDateRange = ProductDateRange.create({
-                startDate: this.dateRanges[this.dateRanges.length - 1]?.startDate ?? new Date(),
-                endDate: this.dateRanges[this.dateRanges.length - 1]?.endDate ?? new Date(),
-            });
-        }
-        if (a) {
-            this.$emit('update:modelValue', a);
-        }
-    }
-
-    doEditDateRange(dateRange: ProductDateRange) {
-        this.$emit('update:modelValue', dateRange);
-        this.editingDateRange = true;
-        this.selectedDateRange = dateRange;
-        this.customDateRange = dateRange;
-    }
-
-    get editDateRange() {
-        return this.customDateRange;
-    }
-
-    set editDateRange(dateRange: ProductDateRange | null) {
-        if (this.editingDateRange && this.selectedDateRange && dateRange) {
-            this.$emit('modify', { from: this.selectedDateRange, to: dateRange });
-            this.selectedDateRange = dateRange;
-            this.$emit('update:modelValue', dateRange);
-            this.editingDateRange = true;
+const editDateRange = computed({
+    get: () => customDateRange.value,
+    set: (dateRange: ProductDateRange | null) => {
+        if (editingDateRange.value && selectedDateRange.value && dateRange) {
+            emits('modify', { from: selectedDateRange.value, to: dateRange });
+            selectedDateRange.value = dateRange;
+            model.value = dateRange;
+            editingDateRange.value = true;
         }
         else {
-            this.$emit('update:modelValue', dateRange);
+            model.value = dateRange;
         }
-        this.customDateRange = dateRange;
+        customDateRange.value = dateRange;
+    },
+});
+
+async function isValid(): Promise<boolean> {
+    const isValid = await internalValidator.validate();
+    if (!isValid) {
+        errors.errorBox = null;
+        return false;
     }
 
-    async isValid(): Promise<boolean> {
-        const isValid = await this.internalValidator.validate();
-        if (!isValid) {
-            this.errorBox = null;
-            return false;
-        }
-
-        if (this.selectedDateRange) {
-            this.$emit('update:modelValue', this.selectedDateRange);
-            this.errorBox = null;
-            return true;
-        }
-
-        if (!this.customDateRange) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                message: 'Kies een datum',
-                field: 'dateRange',
-            }));
-            return false;
-        }
-
-        this.errorBox = null;
-        this.$emit('update:modelValue', this.customDateRange);
+    if (selectedDateRange.value) {
+        model.value = selectedDateRange.value;
+        errors.errorBox = null;
         return true;
     }
+
+    if (!customDateRange.value) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: 'Kies een datum',
+            field: 'dateRange',
+        }));
+        return false;
+    }
+
+    errors.errorBox = null;
+    model.value = customDateRange.value;
+    return true;
 }
 </script>
