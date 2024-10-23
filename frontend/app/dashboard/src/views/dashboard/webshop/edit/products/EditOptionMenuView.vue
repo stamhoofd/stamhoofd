@@ -7,8 +7,8 @@
             Keuzemenu bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+        <STErrorsDefault :error-box="errors.errorBox" />
+        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
             <input
                 ref="firstInput"
                 v-model="name"
@@ -53,122 +53,95 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from '@stamhoofd/components';
-import { Option, OptionMenu, Product, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, SaveView, STErrorsDefault, STInputBox, useErrors, usePatch } from '@stamhoofd/components';
+import { Option, OptionMenu, Product } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import EditOptionView from './EditOptionView.vue';
 import OptionMenuOptions from './OptionMenuOptions.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        OptionMenuOptions,
-    },
-})
-export default class EditOptionMenuView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    product!: Product;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    product: Product;
+    isNew: boolean;
     optionMenu: OptionMenu;
-
-    patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id });
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: (patch: AutoEncoderPatchType<Product>) => void;
+}>();
 
-    get patchedProduct() {
-        return this.product.patch(this.patchProduct);
+const errors = useErrors();
+const pop = usePop();
+const present = usePresent();
+
+const { patched, patch, addPatch, hasChanges } = usePatch(props.product);
+
+const patchedOptionMenu = computed(() => {
+    const c = patched.value.optionMenus.find(c => c.id === props.optionMenu.id);
+    if (c) {
+        return c;
     }
+    return props.optionMenu;
+});
 
-    get patchedOptionMenu() {
-        const c = this.patchedProduct.optionMenus.find(c => c.id === this.optionMenu.id);
-        if (c) {
-            return c;
-        }
-        return this.optionMenu;
-    }
+const name = computed({
+    get: () => patchedOptionMenu.value.name,
+    set: (name: string) => {
+        addOptionMenuPatch(OptionMenu.patch({ name }));
+    },
+});
 
-    get name() {
-        return this.patchedOptionMenu.name;
-    }
+const multipleChoice = computed({
+    get: () => patchedOptionMenu.value.multipleChoice,
+    set: (multipleChoice: boolean) => {
+        addOptionMenuPatch(OptionMenu.patch({ multipleChoice }));
+    },
+});
 
-    set name(name: string) {
-        this.addOptionMenuPatch(OptionMenu.patch({ name }));
-    }
-
-    get multipleChoice() {
-        return this.patchedOptionMenu.multipleChoice;
-    }
-
-    set multipleChoice(multipleChoice: boolean) {
-        this.addOptionMenuPatch(OptionMenu.patch({ multipleChoice }));
-    }
-
-    addOptionMenuPatch(patch: AutoEncoderPatchType<OptionMenu>) {
-        const p = Product.patch({});
-        p.optionMenus.addPatch(OptionMenu.patch(Object.assign({}, patch, { id: this.optionMenu.id })));
-        this.addPatch(p);
-    }
-
-    addPatch(patch: AutoEncoderPatchType<Product>) {
-        this.patchProduct = this.patchProduct.patch(patch);
-    }
-
-    addOption() {
-        const option = Option.create({});
-        const p = OptionMenu.patch({ id: this.optionMenu.id });
-        p.options.addPut(option);
-
-        this.present(new ComponentWithProperties(EditOptionView, { optionMenu: this.patchedOptionMenu.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
-            // Merge both patches
-            this.addOptionMenuPatch(p.patch(patch));
-
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('sheet'));
-    }
-
-    save() {
-        this.saveHandler(this.patchProduct);
-        this.pop({ force: true });
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je dit keuzemenu wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-
-        const p = Product.patch({});
-        p.optionMenus.addDelete(this.optionMenu.id);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchProduct, this.product, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+function addOptionMenuPatch(patch: AutoEncoderPatchType<OptionMenu>) {
+    const p = Product.patch({});
+    p.optionMenus.addPatch(OptionMenu.patch(Object.assign({}, patch, { id: props.optionMenu.id })));
+    addPatch(p);
 }
+
+function addOption() {
+    const option = Option.create({});
+    const p = OptionMenu.patch({ id: props.optionMenu.id });
+    p.options.addPut(option);
+
+    present(new ComponentWithProperties(EditOptionView, { optionMenu: patchedOptionMenu.value.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+        // Merge both patches
+        addOptionMenuPatch(p.patch(patch));
+
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('sheet')).catch(console.error);
+}
+
+function save() {
+    props.saveHandler(patch.value);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je dit keuzemenu wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+
+    const p = Product.patch({});
+    p.optionMenus.addDelete(props.optionMenu.id);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
