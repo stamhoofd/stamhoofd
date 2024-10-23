@@ -23,185 +23,159 @@
             </STListItem>
         </STList>
         <ProductLocationInput v-if="editingLocation || selectedLocation === null" v-model="editLocation" :validator="internalValidator" />
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput, ErrorBox, Radio, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
+import { ErrorBox, Radio, STErrorsDefault, STList, STListItem, useErrors, useValidation, Validator } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Address, Country, ProductLocation } from '@stamhoofd/structures';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed, onMounted, ref, watch } from 'vue';
 import ProductLocationInput from './ProductLocationInput.vue';
 
-@Component({
-    components: {
-        STInputBox,
-        STListItem,
-        STErrorsDefault,
-        Radio,
-        AddressInput,
-        STList,
-        ProductLocationInput,
-    },
-})
-export default class ProductSelectLocationInput extends VueComponent {
-    @Prop({ required: true })
+const props = defineProps<{
     locations: ProductLocation[];
-
-    /**
-     * Assign a validator if you want to offload the validation to components
-     */
-    @Prop({ default: null })
+    // Assign a validator if you want to offload the validation to components
     validator: Validator | null;
 
-    errorBox: ErrorBox | null = null;
+}>();
 
-    internalValidator = new Validator();
+const emits = defineEmits<{ (e: 'modify', value: { from: ProductLocation; to: ProductLocation }): void }>();
+const errors = useErrors({ validator: props.validator });
+useValidation(errors.validator, () => {
+    return isValid();
+});
 
-    @Prop({ default: null })
-    modelValue: ProductLocation | null;
+const internalValidator = new Validator();
 
-    selectedLocation: ProductLocation | null = null;
-    customLocation: ProductLocation | null = null;
-    editingLocation = false;
+const model = defineModel<ProductLocation | null>({ default: null });
 
-    @Watch('modelValue')
-    onValueChanged(val: ProductLocation | null) {
-        if (val === (this.selectedLocation ?? this.customLocation ?? null)) {
-            // Not changed
-            return;
+const selectedLocation = ref<ProductLocation | null>(null);
+const customLocation = ref<ProductLocation | null>(null);
+const editingLocation = ref(false);
+
+watch(model, (val: ProductLocation | null) => {
+    if (val === (selectedLocation.value ?? customLocation.value ?? null)) {
+        // Not changed
+        return;
+    }
+
+    if (!val) {
+        return;
+    }
+
+    const a = props.locations.find(aa => aa.id === val.id);
+    if (a) {
+        selectedLocation.value = a;
+        if (editingLocation.value) {
+            customLocation.value = a;
         }
-
-        if (!val) {
-            return;
+        else {
+            customLocation.value = null;
         }
+    }
+    else {
+        selectedLocation.value = null;
+        editingLocation.value = false;
+        customLocation.value = val;
+    }
+});
 
-        const a = this.locations.find(aa => aa.id === val.id);
-        if (a) {
-            this.selectedLocation = a;
-            if (this.editingLocation) {
-                this.customLocation = a;
+onMounted(() => {
+    const a = props.locations.find(aa => aa.id === model.value?.id);
+    if (a) {
+        selectedLocation.value = a;
+        editingLocation.value = false;
+        customLocation.value = null;
+    }
+    else {
+        selectedLocation.value = null;
+        editingLocation.value = false;
+        customLocation.value = model.value;
+
+        if (!model.value) {
+            if (props.locations.length > 0) {
+                model.value = props.locations[0];
             }
             else {
-                this.customLocation = null;
+                model.value = ProductLocation.create({
+                    name: '',
+                    address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium),
+                });
             }
         }
-        else {
-            this.selectedLocation = null;
-            this.editingLocation = false;
-            this.customLocation = val;
-        }
     }
+});
 
-    mounted() {
-        const a = this.locations.find(aa => aa.id === this.modelValue?.id);
-        if (a) {
-            this.selectedLocation = a;
-            this.editingLocation = false;
-            this.customLocation = null;
-        }
-        else {
-            this.selectedLocation = null;
-            this.editingLocation = false;
-            this.customLocation = this.modelValue;
-
-            if (!this.modelValue) {
-                if (this.locations.length > 0) {
-                    this.$emit('update:modelValue', this.locations[0]);
-                }
-                else {
-                    this.$emit('update:modelValue', ProductLocation.create({
-                        name: '',
-                        address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium),
-                    }));
-                }
-            }
-        }
-
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.isValid();
-            });
-        }
+function changeSelected() {
+    if (editingLocation.value) {
+        customLocation.value = null;
     }
+    editingLocation.value = false;
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
+    let a = selectedLocation.value ?? customLocation.value;
+    if (!a) {
+        // Create a new custom one
+        a = customLocation.value = ProductLocation.create({
+            name: '',
+            address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium),
+        });
     }
-
-    changeSelected() {
-        if (this.editingLocation) {
-            this.customLocation = null;
-        }
-        this.editingLocation = false;
-
-        let a = this.selectedLocation ?? this.customLocation;
-        if (!a) {
-            // Create a new custom one
-            a = this.customLocation = ProductLocation.create({
-                name: '',
-                address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium),
-            });
-        }
-        if (a) {
-            this.$emit('update:modelValue', a);
-        }
+    if (a) {
+        model.value = a;
     }
+}
 
-    doEditLocation(location: ProductLocation) {
-        this.$emit('update:modelValue', location);
-        this.editingLocation = true;
-        this.selectedLocation = location;
-        this.customLocation = location;
-    }
+function doEditLocation(location: ProductLocation) {
+    model.value = location;
+    editingLocation.value = true;
+    selectedLocation.value = location;
+    customLocation.value = location;
+}
 
-    get editLocation() {
-        return this.customLocation;
-    }
-
-    set editLocation(location: ProductLocation | null) {
-        if (this.editingLocation && this.selectedLocation && location) {
-            this.$emit('modify', { from: this.selectedLocation, to: location });
-            this.selectedLocation = location;
-            this.$emit('update:modelValue', location);
-            this.editingLocation = true;
+const editLocation = computed({
+    get: () => customLocation.value,
+    set: (location: ProductLocation | null) => {
+        if (editingLocation.value && selectedLocation.value && location) {
+            emits('modify', { from: selectedLocation.value, to: location });
+            selectedLocation.value = location;
+            model.value = location;
+            editingLocation.value = true;
         }
         else {
-            this.$emit('update:modelValue', location);
+            model.value = location;
         }
-        this.customLocation = location;
+        customLocation.value = location;
+    },
+});
+
+async function isValid(): Promise<boolean> {
+    const isValid = await internalValidator.validate();
+    if (!isValid) {
+        errors.errorBox = null;
+        return false;
     }
 
-    async isValid(): Promise<boolean> {
-        const isValid = await this.internalValidator.validate();
-        if (!isValid) {
-            this.errorBox = null;
-            return false;
-        }
-
-        if (this.selectedLocation) {
-            this.$emit('update:modelValue', this.selectedLocation);
-            this.errorBox = null;
-            return true;
-        }
-
-        if (!this.customLocation) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                message: 'Vul een locatie in',
-                field: 'location',
-            }));
-            return false;
-        }
-
-        this.errorBox = null;
-        this.$emit('update:modelValue', this.customLocation);
+    if (selectedLocation.value) {
+        model.value = selectedLocation.value;
+        errors.errorBox = null;
         return true;
     }
+
+    if (!customLocation.value) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: 'Vul een locatie in',
+            field: 'location',
+        }));
+        return false;
+    }
+
+    errors.errorBox = null;
+    model.value = customLocation.value;
+    return true;
 }
 </script>
