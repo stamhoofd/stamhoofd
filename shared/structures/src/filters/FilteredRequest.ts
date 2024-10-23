@@ -5,8 +5,8 @@ import { encodeSortList, SortList, SortListDecoder } from './SortList';
 import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter';
 
 export class StamhoofdFilterJSONDecoder {
-    static encode(context: EncodeContext, filter: StamhoofdFilter): string {
-        return JSON.stringify(StamhoofdFilterDecoder.encode(context, filter));
+    static encode(filter: StamhoofdFilter, context: EncodeContext): string {
+        return JSON.stringify(StamhoofdFilterDecoder.encode(filter, context));
     }
 
     static decode(data: Data): StamhoofdFilter {
@@ -26,7 +26,7 @@ export class StamhoofdFilterJSONDecoder {
 }
 
 export class StamhoofdFilterDecoder {
-    static encode(context: EncodeContext, filter: StamhoofdFilter<StamhoofdCompareValue>): PlainObject {
+    static encode(filter: StamhoofdFilter<StamhoofdCompareValue>, context: EncodeContext): PlainObject {
         // We need to convert all Date objects to something recornizable so we can decode them as Dates too
         // We'll use magic objects for this: { $: '$date', value: unixtimeinms }
         if (filter instanceof Date) {
@@ -38,14 +38,14 @@ export class StamhoofdFilterDecoder {
         }
 
         if (Array.isArray(filter)) {
-            return filter.map(f => this.encode(context, f));
+            return filter.map(f => this.encode(f, context));
         }
 
         if (typeof filter === 'object') {
             // Loop and replace all keys
             const c = {} as Record<string, PlainObject>;
             for (const [key, value] of Object.entries(filter)) {
-                c[key] = this.encode(context, value);
+                c[key] = this.encode(value, context);
             }
             return c;
         }
@@ -129,7 +129,7 @@ export class CountFilteredRequest implements Encodeable {
 
     encode(context: EncodeContext): PlainObject {
         return {
-            filter: this.filter ? JSON.stringify(this.filter) : undefined,
+            filter: this.filter ? StamhoofdFilterJSONDecoder.encode(this.filter, context) : undefined,
             search: this.search ?? undefined,
         };
     }
@@ -170,8 +170,8 @@ export class LimitedFilteredRequest implements Encodeable {
 
     encode(context: EncodeContext): PlainObject {
         return {
-            filter: this.filter ? StamhoofdFilterJSONDecoder.encode(context, this.filter) : undefined,
-            pageFilter: this.pageFilter ? StamhoofdFilterJSONDecoder.encode(context, this.pageFilter) : undefined,
+            filter: this.filter ? StamhoofdFilterJSONDecoder.encode(this.filter, context) : undefined,
+            pageFilter: this.pageFilter ? StamhoofdFilterJSONDecoder.encode(this.pageFilter, context) : undefined,
             sort: encodeSortList(this.sort),
             limit: this.limit,
             search: this.search ?? undefined,

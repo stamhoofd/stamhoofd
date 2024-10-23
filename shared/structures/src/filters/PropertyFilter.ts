@@ -47,8 +47,8 @@ export class PropertyFilter implements Encodeable {
 
     encode(context: EncodeContext): PlainObject {
         return {
-            enabledWhen: this.enabledWhen as PlainObject,
-            requiredWhen: this.requiredWhen as PlainObject,
+            enabledWhen: StamhoofdFilterDecoder.encode(this.enabledWhen, context),
+            requiredWhen: StamhoofdFilterDecoder.encode(this.requiredWhen, context),
         };
     }
 
