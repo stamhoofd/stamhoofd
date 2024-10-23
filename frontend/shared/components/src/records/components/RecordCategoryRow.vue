@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editCategory()" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: MouseEvent) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editCategory()" @contextmenu.prevent="showContextMenu">
         <template v-if="settings.toggleDefaultEnabled" #left>
             <Checkbox :model-value="category.defaultEnabled" :disabled="true" />
         </template>

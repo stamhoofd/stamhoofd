@@ -5,7 +5,7 @@
         </h1>
         <p>Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen.</p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr>
         <h2>Ingebouwde gegevens</h2>
@@ -45,116 +45,109 @@
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, STErrorsDefault, STList, STListItem, SaveView, checkoutUIFilterBuilders } from '@stamhoofd/components';
 import { Checkout, PatchAnswers, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
-import EditWebshopMixin from './EditWebshopMixin';
+import { computed } from 'vue';
+import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';
 
-@Component({
-    components: {
-        SaveView,
-        STErrorsDefault,
-        STList,
-        RecordCategoryRow,
-        STListItem,
-        Checkbox,
-    },
-})
-export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) {
-    get categories() {
-        return this.webshop.meta.recordCategories;
-    }
+const props = defineProps<UseEditWebshopProps>();
 
-    set categories(recordCategories: RecordCategory[]) {
-        this.addPatch(PrivateWebshop.patch({
+const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+    getProps: () => props,
+});
+
+const present = usePresent();
+
+const categories = computed({
+    get: () => webshop.value.meta.recordCategories,
+    set: (recordCategories: RecordCategory[]) => {
+        addPatch(PrivateWebshop.patch({
             meta: WebshopMetaData.patch({
                 recordCategories: recordCategories as any,
             }),
         }));
-    }
+    } });
 
-    get phoneEnabled() {
-        return this.webshop.meta.phoneEnabled;
-    }
-
-    set phoneEnabled(phoneEnabled: boolean) {
-        this.addPatch(PrivateWebshop.patch({
+const phoneEnabled = computed({
+    get: () => webshop.value.meta.phoneEnabled,
+    set: (phoneEnabled: boolean) => {
+        addPatch(PrivateWebshop.patch({
             meta: WebshopMetaData.patch({
                 phoneEnabled,
             }),
         }));
-    }
+    },
+});
 
-    get editorSettings() {
-        return new RecordEditorSettings({
-            dataPermission: false,
-            filterBuilder: (_categories: RecordCategory[]) => {
-                return checkoutUIFilterBuilders[0];
-            },
-            exampleValue: Checkout.create({}),
-            patchExampleValue(checkout, patch: PatchAnswers) {
-                return checkout.patch(
-                    Checkout.patch({
-                        recordAnswers: patch,
-                    }),
-                );
-            },
-        });
-    }
-
-    addCategory() {
-        const category = RecordCategory.create({});
-        const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
-        arr.addPut(category);
-
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(EditRecordCategoryView, {
-                        categoryId: category.id,
-                        rootCategories: [...this.categories, category],
-                        settings: this.editorSettings,
-                        isNew: true,
-                        allowChildCategories: true,
-                        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                            this.addCategoriesPatch(arr.patch(patch));
-                        },
-                    }),
+const editorSettings = computed(() => {
+    return new RecordEditorSettings({
+        dataPermission: false,
+        filterBuilder: (_categories: RecordCategory[]) => {
+            return checkoutUIFilterBuilders[0];
+        },
+        exampleValue: Checkout.create({}),
+        patchExampleValue(checkout, patch: PatchAnswers) {
+            return checkout.patch(
+                Checkout.patch({
+                    recordAnswers: patch,
                 }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
+            );
+        },
+    });
+});
 
-    editCategory(category: RecordCategory) {
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(EditRecordCategoryView, {
-                        categoryId: category.id,
-                        rootCategories: this.categories,
-                        settings: this.editorSettings,
-                        isNew: false,
-                        allowChildCategories: true,
-                        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                            this.addCategoriesPatch(patch);
-                        },
-                    }),
+function addCategory() {
+    const category = RecordCategory.create({});
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+    arr.addPut(category);
+
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EditRecordCategoryView, {
+                    categoryId: category.id,
+                    rootCategories: [...categories.value, category],
+                    settings: editorSettings.value,
+                    isNew: true,
+                    allowChildCategories: true,
+                    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                        addCategoriesPatch(arr.patch(patch));
+                    },
                 }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
-        this.addPatch(PrivateWebshop.patch({
-            meta: WebshopMetaData.patch({
-                recordCategories: patch,
             }),
-        }));
-    }
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function editCategory(category: RecordCategory) {
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EditRecordCategoryView, {
+                    categoryId: category.id,
+                    rootCategories: categories.value,
+                    settings: editorSettings.value,
+                    isNew: false,
+                    allowChildCategories: true,
+                    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                        addCategoriesPatch(patch);
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
+    addPatch(PrivateWebshop.patch({
+        meta: WebshopMetaData.patch({
+            recordCategories: patch,
+        }),
+    }));
 }
 </script>
