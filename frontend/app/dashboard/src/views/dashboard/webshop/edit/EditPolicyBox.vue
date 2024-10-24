@@ -4,7 +4,7 @@
         <h2 class="style-with-button">
             <div>Externe link: {{ policy.name || "Naamloos" }}</div>
             <div>
-                <button class="button text only-icon-smartphone" type="button" @click="$emit('delete')">
+                <button class="button text only-icon-smartphone" type="button" @click="emits('delete')">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
@@ -46,101 +46,78 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { BackButton, ErrorBox, FileInput, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
+import { ErrorBox, FileInput, Radio, RadioGroup, STInputBox, useErrors, useValidation, Validator } from '@stamhoofd/components';
 import { File, Policy } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { computed, ref } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        RadioGroup,
-        Radio,
-        BackButton,
-        LoadingButton,
-        FileInput,
-    },
-})
-export default class EditPolicyBox extends Mixins(NavigationMixin) {
-    @Prop({ default: null })
+const props = withDefaults(defineProps<{
     errorBox: ErrorBox | null;
-
-    @Prop({ required: true })
     validator: Validator;
+    policy: Policy;
+}>(), {
+    errorBox: null,
+});
 
-    @Prop({ required: true })
-    policy!: Policy;
+const emits = defineEmits<{
+    (e: 'patch', patch: AutoEncoderPatchType<Policy>): void;
+    (e: 'delete'): void;
+}>();
 
-    selectedType = (this.policy.file ? 'file' : 'website');
+const selectedType = ref(props.policy.file ? 'file' : 'website');
 
-    get name() {
-        return this.policy.name;
+const name = computed({
+    get: () => props.policy.name,
+    set: (name: string) => {
+        emits('patch', Policy.patch({ name }));
+    },
+});
+
+const url = computed({
+    get: () => props.policy.url,
+    set: (url: string | null) => {
+        emits('patch', Policy.patch({ url }));
+    },
+});
+
+const file = computed({
+    get: () => props.policy.file,
+    set: (file: File | null) => {
+        emits('patch', Policy.patch({ file }));
+    },
+});
+
+const errors = useErrors({ validator: props.validator });
+useValidation(errors.validator, () => {
+    return validate();
+});
+
+function validate() {
+    // TODO: add validator
+    if (selectedType.value === 'file') {
+        url.value = null;
+        // We don't clear the file if url is selected, since url has priority over the file. So we don't need to reupload the file
+        if (!file.value) {
+            throw new SimpleError({
+                code: '',
+                message: 'Selecteer een bestand',
+            });
+        }
     }
-
-    set name(name: string) {
-        this.$emit('patch', Policy.patch({ name }));
-    }
-
-    get url() {
-        return this.policy.url;
-    }
-
-    set url(url: string | null) {
-        this.$emit('patch', Policy.patch({ url }));
-    }
-
-    get file() {
-        return this.policy.file;
-    }
-
-    set file(file: File | null) {
-        this.$emit('patch', Policy.patch({ file }));
-    }
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate();
+    else {
+        if (!url.value) {
+            throw new SimpleError({
+                code: '',
+                message: 'Vul een geldige link in',
             });
         }
     }
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
+    if (selectedType.value === 'website' && props.policy.url && props.policy.url.length > 0 && !props.policy.url.startsWith('http://') && !props.policy.url.startsWith('https://') && !props.policy.url.startsWith('mailto:') && !props.policy.url.startsWith('tel:')) {
+        url.value = 'http://' + props.policy.url;
     }
-
-    validate() {
-        // TODO: add validator
-        if (this.selectedType === 'file') {
-            this.url = null;
-            // We don't clear the file if url is selected, since url has priority over the file. So we don't need to reupload the file
-            if (!this.file) {
-                throw new SimpleError({
-                    code: '',
-                    message: 'Selecteer een bestand',
-                });
-            }
-        }
-        else {
-            if (!this.url) {
-                throw new SimpleError({
-                    code: '',
-                    message: 'Vul een geldige link in',
-                });
-            }
-        }
-
-        if (this.selectedType === 'website' && this.policy.url && this.policy.url.length > 0 && !this.policy.url.startsWith('http://') && !this.policy.url.startsWith('https://') && !this.policy.url.startsWith('mailto:') && !this.policy.url.startsWith('tel:')) {
-            this.url = 'http://' + this.policy.url;
-        }
-        return true;
-    }
+    return true;
 }
 </script>
