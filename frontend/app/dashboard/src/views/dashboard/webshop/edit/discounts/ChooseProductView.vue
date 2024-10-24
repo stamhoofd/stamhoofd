@@ -30,68 +30,53 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+<script lang="ts" setup>
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { STList, STListItem, STNavigationBar } from '@stamhoofd/components';
 import { Category, PrivateWebshop, Product, ProductDateRange } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STList,
-        STListItem,
-        STNavigationBar,
-
-    },
-})
-export default class ChooseProductView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     webshop: PrivateWebshop;
-
-    @Prop({ default: null })
     selectedProductId: string | null;
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
     saveHandler: (selected: Product) => void;
+}>(), {
+    selectedProductId: null,
+});
 
-    get title() {
-        return 'Selecteer een artikel';
+const pop = usePop();
+const title = 'Selecteer een artikel';
+
+const categories = computed(() => {
+    const categories = props.webshop.categories.filter(c => getCategoryProducts(c).length > 0) ?? [];
+    if (categories.length <= 0) {
+        return [
+            Category.create({
+                name: '',
+                productIds: props.webshop.products.map(p => p.id),
+            }),
+        ];
     }
+    return categories;
+});
 
-    get categories() {
-        const categories = this.webshop.categories.filter(c => this.getCategoryProducts(c).length > 0) ?? [];
-        if (categories.length <= 0) {
-            return [
-                Category.create({
-                    name: '',
-                    productIds: this.webshop.products.map(p => p.id),
-                }),
-            ];
+function getCategoryProducts(category: Category) {
+    return category.productIds.flatMap((p) => {
+        const product = props.webshop.products.find(pp => pp.id === p);
+        if (product) {
+            return [product];
         }
-        return categories;
-    }
+        return [];
+    });
+}
 
-    getCategoryProducts(category: Category) {
-        return category.productIds.flatMap((p) => {
-            const product = this.webshop.products.find(pp => pp.id === p);
-            if (product) {
-                return [product];
-            }
-            return [];
-        });
-    }
+function formatDateRange(dateRange: ProductDateRange) {
+    return Formatter.capitalizeFirstLetter(dateRange.toString());
+}
 
-    formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString());
-    }
-
-    selectProduct(product: Product) {
-        this.saveHandler(product);
-        this.pop({ force: true });
-    }
+function selectProduct(product: Product) {
+    props.saveHandler(product);
+    pop({ force: true })?.catch(console.error);
 }
 </script>
