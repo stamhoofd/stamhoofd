@@ -7,8 +7,8 @@
             Sponsor bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+        <STErrorsDefault :error-box="errors.errorBox" />
+        <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
             <input
                 ref="firstInput"
                 v-model="name"
@@ -19,7 +19,7 @@
             >
         </STInputBox>
 
-        <UrlInput v-model="url" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :validator="validator" :required="false" />
+        <UrlInput v-model="url" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :validator="errors.validator" :required="false" />
 
         <p class="style-description-small">
             Op plaatsen waar technisch mogelijk, kan men op het logo klikken om de website te bezoeken.
@@ -75,162 +75,123 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, Checkbox, ErrorBox, ImageComponent, NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, UrlInput, Validator } from '@stamhoofd/components';
-import { Image, ResolutionRequest, Sponsor, Version } from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, ErrorBox, ImageComponent, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, UrlInput, useErrors, usePatch } from '@stamhoofd/components';
+import { Image, ResolutionRequest, Sponsor } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        PriceInput,
-        NumberInput,
-        STList,
-        STListItem,
-        Checkbox,
-        UploadButton,
-        UrlInput,
-        ImageComponent,
-    },
-})
-export default class EditSponsorView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
+const props = defineProps<{
     sponsor: Sponsor;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    patchSponsor: AutoEncoderPatchType<Sponsor> = Sponsor.patch({});
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    isNew: boolean;
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: ((patch: AutoEncoderPatchType<Sponsor>) => void);
+    deleteHandler?: (() => void);
+}>();
 
-    @Prop({ required: false })
-    deleteHandler: (() => void);
+const errors = useErrors();
+const pop = usePop();
 
-    get patchedSponsor() {
-        return this.sponsor.patch(this.patchSponsor);
+const { patch: patchSponsor, patched: patchedSponsor, addPatch, hasChanges } = usePatch(props.sponsor);
+
+const name = computed({
+    get: () => patchedSponsor.value.name,
+    set: (name: string) => {
+        addPatch(Sponsor.patch({ name }));
+    },
+});
+
+const url = computed({
+    get: () => patchedSponsor.value.url,
+    set: (url: string | null) => {
+        addPatch(Sponsor.patch({ url: url ? url : null }));
+    },
+});
+
+const onTickets = computed({
+    get: () => patchedSponsor.value.onTickets,
+    set: (onTickets: boolean) => {
+        addPatch(Sponsor.patch({ onTickets }));
+    },
+});
+
+async function save() {
+    if (!await errors.validator.validate()) {
+        return;
     }
 
-    get name() {
-        return this.patchedSponsor.name;
+    try {
+        props.saveHandler(patchSponsor.value);
+        pop({ force: true })?.catch(console.error);
     }
-
-    set name(name: string) {
-        this.addPatch(Sponsor.patch({ name }));
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
+}
 
-    get url() {
-        return this.patchedSponsor.url;
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze keuze wilt verwijderen?', 'Verwijderen')) {
+        return;
     }
-
-    set url(url: string | null) {
-        this.addPatch(Sponsor.patch({ url: url ? url : null }));
+    if (props.deleteHandler) {
+        props.deleteHandler();
     }
+    pop({ force: true })?.catch(console.error);
+}
 
-    get onTickets() {
-        return this.patchedSponsor.onTickets;
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
     }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
 
-    set onTickets(onTickets: boolean) {
-        this.addPatch(Sponsor.patch({ onTickets }));
-    }
-
-    addPatch(patch: AutoEncoderPatchType<Sponsor>) {
-        this.patchSponsor = this.patchSponsor.patch(patch);
-    }
-
-    async save() {
-        if (!await this.validator.validate()) {
-            return;
-        }
-
-        try {
-            this.saveHandler(this.patchSponsor);
-            this.pop({ force: true });
-        }
-        catch (e) {
-            this.errorBox = new ErrorBox(e);
-        }
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze keuze wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-        this.deleteHandler();
-        this.pop({ force: true });
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchSponsor, this.sponsor, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
-
-    get logo() {
-        return this.patchedSponsor.logo;
-    }
-
-    set logo(logo: Image | null) {
+const logo = computed({
+    get: () => patchedSponsor.value.logo,
+    set: (logo: Image | null) => {
         const p = Sponsor.patch({
             logo,
         });
-        this.addPatch(p);
-    }
+        addPatch(p);
+    },
+});
 
-    get banner() {
-        return this.patchedSponsor.banner;
-    }
-
-    set banner(banner: Image | null) {
+const banner = computed({
+    get: () => patchedSponsor.value.banner,
+    set: (banner: Image | null) => {
         const p = Sponsor.patch({
             banner,
         });
-        this.addPatch(p);
-    }
+        addPatch(p);
+    },
+});
 
-    get logoResolutions() {
-        return [
-            ResolutionRequest.create({
-                height: 80,
-            }),
-            ResolutionRequest.create({
-                height: 80 * 2,
-            }),
-            ResolutionRequest.create({
-                height: 80 * 3,
-            }),
-        ];
-    }
+const logoResolutions = [
+    ResolutionRequest.create({
+        height: 80,
+    }),
+    ResolutionRequest.create({
+        height: 80 * 2,
+    }),
+    ResolutionRequest.create({
+        height: 80 * 3,
+    }),
+];
 
-    get resolutions() {
-        return [
-            ResolutionRequest.create({
-                height: 150,
-            }),
-            ResolutionRequest.create({
-                height: 300,
-            }),
-            ResolutionRequest.create({
-                height: 450,
-            }),
-        ];
-    }
-}
+const resolutions = [
+    ResolutionRequest.create({
+        height: 150,
+    }),
+    ResolutionRequest.create({
+        height: 300,
+    }),
+    ResolutionRequest.create({
+        height: 450,
+    }),
+];
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
