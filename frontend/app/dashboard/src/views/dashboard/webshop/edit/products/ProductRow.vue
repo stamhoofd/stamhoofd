@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e: MouseEvent) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
         <template #left>
             <img v-if="imageSrc" :src="imageSrc" :width="imageResolution.width" :height="imageResolution.height" class="product-row-image">
         </template>
@@ -26,194 +26,178 @@
     </STListItem>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from '@stamhoofd/components';
-import { Category } from '@stamhoofd/structures';
-import { PrivateWebshop, Product } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ContextMenu, ContextMenuItem, STListItem } from '@stamhoofd/components';
+import { Category, PrivateWebshop, Product } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed } from 'vue';
 import EditProductView from './EditProductView.vue';
 
-@Component({
-    components: {
-        STListItem,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-    },
-    directives: {
-        LongPress: LongPressDirective,
-    },
-})
-export default class ProductRow extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     product: Product;
-
-    @Prop({ required: false, default: null })
-    category: Category | null;
-
-    @Prop({ required: true })
+    category?: Category | null;
     webshop: PrivateWebshop;
+}>(), {
+    category: null,
+});
 
-    get imageSrc() {
-        return this.imageResolution?.file?.getPublicPath();
+const present = usePresent();
+const imageSrc = computed(() => imageResolution.value?.file?.getPublicPath());
+const imageResolution = computed(() => props.product.images[0]?.getResolutionForSize(80, 80));
+
+const emits = defineEmits<{
+    (e: 'patch', patch: AutoEncoderPatchType<PrivateWebshop>): void;
+    (e: 'move-up'): void;
+    (e: 'move-down'): void;
+}>();
+
+function editProduct() {
+    present(new ComponentWithProperties(EditProductView, { product: props.product, webshop: props.webshop, isNew: false, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+        emits('patch', patch);
+
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('popup')).catch(console.error);
+}
+
+function moveUp() {
+    emits('move-up');
+}
+
+function moveDown() {
+    emits('move-down');
+}
+
+function duplicate() {
+    const duplicatedProduct = props.product.clone();
+    duplicatedProduct.clearStock();
+    duplicatedProduct.id = uuidv4();
+
+    // while name is in use
+    // Remove and get number at end of duplicated product, default to 1
+    let counter = 0;
+    while (props.webshop.products.find(p => p.name === duplicatedProduct.name) && counter < 100) {
+        const endNumber = parseInt(duplicatedProduct.name.match(/\d+$/)?.[0] ?? '1');
+        duplicatedProduct.name = duplicatedProduct.name.replace(/\d+$/, '') + (endNumber + 1);
+        counter++;
     }
 
-    get imageResolution() {
-        return this.product.images[0]?.getResolutionForSize(80, 80);
-    }
+    const webshopPatch = PrivateWebshop.patch({
+        id: props.webshop.id,
+    });
+    webshopPatch.products.addPut(duplicatedProduct, props.product.id);
 
-    editProduct() {
-        this.present(new ComponentWithProperties(EditProductView, { product: this.product, webshop: this.webshop, isNew: false, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
-            this.$emit('patch', patch);
-
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('popup'));
-    }
-
-    moveUp() {
-        this.$emit('move-up');
-    }
-
-    moveDown() {
-        this.$emit('move-down');
-    }
-
-    duplicate() {
-        const duplicatedProduct = this.product.clone();
-        duplicatedProduct.clearStock();
-        duplicatedProduct.id = uuidv4();
-
-        // while name is in use
-        // Remove and get number at end of duplicated product, default to 1
-        let counter = 0;
-        while (this.webshop.products.find(p => p.name === duplicatedProduct.name) && counter < 100) {
-            const endNumber = parseInt(duplicatedProduct.name.match(/\d+$/)?.[0] ?? '1');
-            duplicatedProduct.name = duplicatedProduct.name.replace(/\d+$/, '') + (endNumber + 1);
-            counter++;
-        }
-
-        const webshopPatch = PrivateWebshop.patch({
-            id: this.webshop.id,
+    if (props.category) {
+        const categoryPatch = Category.patch({
+            id: props.category.id,
         });
-        webshopPatch.products.addPut(duplicatedProduct, this.product.id);
-
-        if (this.category) {
-            const categoryPatch = Category.patch({
-                id: this.category.id,
-            });
-            categoryPatch.productIds.addPut(duplicatedProduct.id, this.product.id);
-            webshopPatch.categories.addPatch(categoryPatch);
-        }
-        this.$emit('patch', webshopPatch);
+        categoryPatch.productIds.addPut(duplicatedProduct.id, props.product.id);
+        webshopPatch.categories.addPatch(categoryPatch);
     }
+    emits('patch', webshopPatch);
+}
 
-    async delete() {
-        if (!(await CenteredMessage.confirm('Dit artikel verwijderen?', 'Verwijderen'))) {
-            return;
-        }
-        const webshopPatch = PrivateWebshop.patch({
-            id: this.webshop.id,
+async function doDelete() {
+    if (!(await CenteredMessage.confirm('Dit artikel verwijderen?', 'Verwijderen'))) {
+        return;
+    }
+    const webshopPatch = PrivateWebshop.patch({
+        id: props.webshop.id,
+    });
+    webshopPatch.products.addDelete(props.product.id);
+
+    if (props.category) {
+        const categoryPatch = Category.patch({
+            id: props.category.id,
         });
-        webshopPatch.products.addDelete(this.product.id);
-
-        if (this.category) {
-            const categoryPatch = Category.patch({
-                id: this.category.id,
-            });
-            categoryPatch.productIds.addDelete(this.product.id);
-            webshopPatch.categories.addPatch(categoryPatch);
-        }
-        this.$emit('patch', webshopPatch);
+        categoryPatch.productIds.addDelete(props.product.id);
+        webshopPatch.categories.addPatch(categoryPatch);
     }
+    emits('patch', webshopPatch);
+}
 
-    get price() {
-        return this.product.prices[0].price;
-    }
+const price = computed(() => props.product.prices[0].price);
 
-    showContextMenu(event) {
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: 'Verplaats omhoog',
-                    icon: 'arrow-up',
-                    action: () => {
-                        this.moveUp();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Verplaats omlaag',
-                    icon: 'arrow-down',
-                    action: () => {
-                        this.moveDown();
-                        return true;
-                    },
-                }),
-            ],
-            [
-                new ContextMenuItem({
-                    name: 'Dupliceren',
-                    icon: 'copy',
-                    action: () => {
-                        this.duplicate();
-                        return true;
-                    },
-                }),
-                ...(this.category && this.webshop.categories.length >= 2
-                    ? [
-                            new ContextMenuItem({
-                                name: 'Verplaatsen naar',
-                                childMenu: new ContextMenu([
-                                    this.webshop.categories.flatMap((c) => {
-                                        if (!this.category || c.id === this.category.id) {
-                                            return [];
-                                        }
-                                        return [new ContextMenuItem({
-                                            name: c.name,
-                                            action: () => {
-                                                const categoryPatch = Category.patch({
-                                                    id: c.id,
-                                                });
-                                                categoryPatch.productIds.addPut(this.product.id);
+function showContextMenu(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Verplaats omhoog',
+                icon: 'arrow-up',
+                action: () => {
+                    moveUp();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Verplaats omlaag',
+                icon: 'arrow-down',
+                action: () => {
+                    moveDown();
+                    return true;
+                },
+            }),
+        ],
+        [
+            new ContextMenuItem({
+                name: 'Dupliceren',
+                icon: 'copy',
+                action: () => {
+                    duplicate();
+                    return true;
+                },
+            }),
+            ...(props.category && props.webshop.categories.length >= 2
+                ? [
+                        new ContextMenuItem({
+                            name: 'Verplaatsen naar',
+                            childMenu: new ContextMenu([
+                                props.webshop.categories.flatMap((c) => {
+                                    if (!props.category || c.id === props.category.id) {
+                                        return [];
+                                    }
+                                    return [new ContextMenuItem({
+                                        name: c.name,
+                                        action: () => {
+                                            const categoryPatch = Category.patch({
+                                                id: c.id,
+                                            });
+                                            categoryPatch.productIds.addPut(props.product.id);
 
-                                                const categoryPatch2 = Category.patch({
-                                                    id: this.category!.id,
-                                                });
-                                                categoryPatch2.productIds.addDelete(this.product.id);
+                                            const categoryPatch2 = Category.patch({
+                                                id: props.category!.id,
+                                            });
+                                            categoryPatch2.productIds.addDelete(props.product.id);
 
-                                                const webshopPatch = PrivateWebshop.patch({
-                                                    id: this.webshop.id,
-                                                });
-                                                webshopPatch.categories.addPatch(categoryPatch);
-                                                webshopPatch.categories.addPatch(categoryPatch2);
-                                                this.$emit('patch', webshopPatch);
-                                                return true;
-                                            },
-                                        })];
-                                    }),
-                                ]),
-                            }),
-                        ]
-                    : []),
-            ],
-            [
-                new ContextMenuItem({
-                    name: 'Verwijderen',
-                    icon: 'trash',
-                    action: () => {
-                        this.delete().catch(console.error);
-                        return true;
-                    },
-                }),
-            ],
-        ]);
-        menu.show({ clickEvent: event }).catch(console.error);
-    }
+                                            const webshopPatch = PrivateWebshop.patch({
+                                                id: props.webshop.id,
+                                            });
+                                            webshopPatch.categories.addPatch(categoryPatch);
+                                            webshopPatch.categories.addPatch(categoryPatch2);
+                                            emits('patch', webshopPatch);
+                                            return true;
+                                        },
+                                    })];
+                                }),
+                            ]),
+                        }),
+                    ]
+                : []),
+        ],
+        [
+            new ContextMenuItem({
+                name: 'Verwijderen',
+                icon: 'trash',
+                action: () => {
+                    doDelete().catch(console.error);
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
 }
 </script>
 
