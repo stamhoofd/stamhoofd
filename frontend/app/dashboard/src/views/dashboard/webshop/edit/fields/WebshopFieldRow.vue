@@ -12,44 +12,38 @@
     </STListItem>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Checkbox, Radio, STListItem } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { STListItem } from '@stamhoofd/components';
 import { WebshopField } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import EditWebshopFieldView from './EditWebshopFieldView.vue';
 
-@Component({
-    components: {
-        STListItem,
-        Checkbox,
-        Radio,
-    },
-    filters: {
-        priceChange: Formatter.priceChange.bind(Formatter),
-    },
-})
-export default class WebshopFieldRow extends Mixins(NavigationMixin) {
-    @Prop({})
+const props = defineProps<{
     field: WebshopField;
+}>();
 
-    editField() {
-        this.present(new ComponentWithProperties(EditWebshopFieldView, { field: this.field, isNew: false, saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
-            this.$emit('patch', patch);
+const present = usePresent();
+const emits = defineEmits<{
+    (e: 'patch', patch: PatchableArrayAutoEncoder<WebshopField>): void;
+    (e: 'move-up'): void;
+    (e: 'move-down'): void;
+}>();
 
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('sheet'));
-    }
+function editField() {
+    present(new ComponentWithProperties(EditWebshopFieldView, { field: props.field, isNew: false, saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
+        emits('patch', patch);
 
-    moveUp() {
-        this.$emit('move-up');
-    }
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('sheet')).catch(console.error);
+}
 
-    moveDown() {
-        this.$emit('move-down');
-    }
+function moveUp() {
+    emits('move-up');
+}
+
+function moveDown() {
+    emits('move-down');
 }
 </script>

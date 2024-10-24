@@ -7,9 +7,9 @@
             Leveringsoptie bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Leveringsnaam" error-fields="name" :error-box="errorBox">
+        <STInputBox title="Leveringsnaam" error-fields="name" :error-box="errors.errorBox">
             <input
                 ref="firstInput"
                 v-model="name"
@@ -20,7 +20,7 @@
             >
         </STInputBox>
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
@@ -37,7 +37,7 @@
 
         <hr>
         <h2>Leveringskost</h2>
-        <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" :error-box="errorBox" @patch="patchPrice" />
+        <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" :error-box="errors.errorBox" @patch="patchPrice" />
 
         <div v-if="!isNew" class="container">
             <hr>
@@ -53,119 +53,84 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from '@stamhoofd/components';
-import { CheckoutMethodPrice, PrivateWebshop, Version, WebshopDeliveryMethod, WebshopMetaData, WebshopTimeSlots } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, SaveView, STErrorsDefault, STInputBox, useErrors, usePatch } from '@stamhoofd/components';
+import { CheckoutMethodPrice, PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopTimeSlots } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import CheckoutMethodPriceBox from './CheckoutMethodPriceBox.vue';
 import EditDeliveryRegionsSection from './EditDeliveryRegionsSection.vue';
 import EditTimeSlotsSection from './EditTimeSlotsSection.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        STList,
-        EditTimeSlotsSection,
-        CheckoutMethodPriceBox,
-        EditDeliveryRegionsSection,
-    },
-})
-export default class EditDeliveryMethodView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    deliveryMethod!: WebshopDeliveryMethod;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+const props = defineProps<{
     webshop: PrivateWebshop;
-
-    patchDeliveryMethod: AutoEncoderPatchType<WebshopDeliveryMethod> = WebshopDeliveryMethod.patch({ id: this.deliveryMethod.id });
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    isNew: boolean;
     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+    deliveryMethod: WebshopDeliveryMethod;
+}>();
 
-    get patchedDeliveryMethod() {
-        return this.deliveryMethod.patch(this.patchDeliveryMethod);
-    }
+const errors = useErrors();
+const pop = usePop();
 
-    get name() {
-        return this.patchedDeliveryMethod.name;
-    }
+const { patch: patchDeliveryMethod, patched: patchedDeliveryMethod, addPatch, hasChanges } = usePatch(props.deliveryMethod);
 
-    set name(name: string) {
-        this.patchDeliveryMethod = this.patchDeliveryMethod.patch({ name });
-    }
+const name = computed({
+    get: () => patchedDeliveryMethod.value.name,
+    set: (name: string) => {
+        addPatch({ name });
+    },
+});
 
-    get description() {
-        return this.patchedDeliveryMethod.description;
-    }
+const description = computed({
+    get: () => patchedDeliveryMethod.value.description,
+    set: (description: string) => {
+        addPatch({ description });
+    },
+});
 
-    set description(description: string) {
-        this.patchDeliveryMethod = this.patchDeliveryMethod.patch({ description });
-    }
-
-    addPatch(patch: AutoEncoderPatchType<WebshopDeliveryMethod>) {
-        this.patchDeliveryMethod = this.patchDeliveryMethod.patch(patch);
-    }
-
-    patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
-        this.addPatch(WebshopDeliveryMethod.patch({ timeSlots: patch }));
-    }
-
-    patchPrice(patch: AutoEncoderPatchType<CheckoutMethodPrice>) {
-        this.addPatch(WebshopDeliveryMethod.patch({ price: patch }));
-    }
-
-    async save() {
-        if (!await this.validator.validate()) {
-            return;
-        }
-        const p = PrivateWebshop.patch({});
-        const meta = WebshopMetaData.patch({});
-        meta.checkoutMethods.addPatch(this.patchDeliveryMethod);
-        p.meta = meta;
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze leveringsoptie wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-
-        const p = PrivateWebshop.patch({});
-        const meta = WebshopMetaData.patch({});
-        meta.checkoutMethods.addDelete(this.deliveryMethod.id);
-        p.meta = meta;
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    cancel() {
-        this.pop();
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchDeliveryMethod, this.deliveryMethod, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+function patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
+    addPatch(WebshopDeliveryMethod.patch({ timeSlots: patch }));
 }
+
+function patchPrice(patch: AutoEncoderPatchType<CheckoutMethodPrice>) {
+    addPatch(WebshopDeliveryMethod.patch({ price: patch }));
+}
+
+async function save() {
+    if (!await errors.validator.validate()) {
+        return;
+    }
+    const p = PrivateWebshop.patch({});
+    const meta = WebshopMetaData.patch({});
+    meta.checkoutMethods.addPatch(patchDeliveryMethod.value);
+    p.meta = meta;
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze leveringsoptie wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+
+    const p = PrivateWebshop.patch({});
+    const meta = WebshopMetaData.patch({});
+    meta.checkoutMethods.addDelete(props.deliveryMethod.id);
+    p.meta = meta;
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
