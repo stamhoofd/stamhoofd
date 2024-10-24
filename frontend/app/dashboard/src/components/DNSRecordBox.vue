@@ -30,30 +30,12 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from '@stamhoofd/components';
+<script lang="ts" setup>
 import { DNSRecord } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        BackButton,
-        LoadingButton,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class DNSRecordBox extends Mixins(NavigationMixin) {
-    @Prop({})
+defineProps<{
     record: DNSRecord;
-}
+}>();
 </script>
 
 <style lang="scss">

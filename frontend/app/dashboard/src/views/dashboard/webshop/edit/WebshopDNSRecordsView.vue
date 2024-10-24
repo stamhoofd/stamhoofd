@@ -11,7 +11,7 @@
                 Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
             </p>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="isComplete" class="success-box">
                 Alles is correct ingesteld.
@@ -44,90 +44,69 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, TooltipDirective } from '@stamhoofd/components';
-import { SessionManager } from '@stamhoofd/networking';
+import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar, Toast, useContext, useErrors } from '@stamhoofd/components';
 import { DNSRecordStatus, PrivateWebshop } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed, ref } from 'vue';
 import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
 import { WebshopManager } from '../WebshopManager';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        BackButton,
-        LoadingButton,
-        DNSRecordBox,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class WebshopDNSRecordsView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = defineProps<{
     webshopManager: WebshopManager;
+}>();
 
-    errorBox: ErrorBox | null = null;
-    saving = false;
+const errors = useErrors();
+const saving = ref(false);
 
-    session = this.$context;
+const context = useContext();
+const records = computed(() => props.webshopManager.webshop?.privateMeta.dnsRecords ?? []);
+const dismiss = useDismiss();
 
-    get records() {
-        return this.webshopManager.webshop?.privateMeta.dnsRecords ?? [];
+const isComplete = computed(() => !records.value.find(r => r.status !== DNSRecordStatus.Valid));
+
+function skip() {
+    if (!isComplete.value) {
+        new Toast('Hou er rekening mee dat jouw webshop voorlopig nog niet bereikbaar is op de door jou gekozen link. We gebruiken intussen de standaard domeinnaam van Stamhoofd. Wijzig eventueel de link terug tot iemand dit in orde kan brengen.', 'warning yellow').setHide(15 * 1000).show();
+    }
+    dismiss().catch(console.error);
+}
+
+async function validate() {
+    if (saving.value) {
+        return;
     }
 
-    get isComplete() {
-        return !this.records.find(r => r.status !== DNSRecordStatus.Valid);
+    saving.value = true;
+
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'POST',
+            path: '/webshop/' + props.webshopManager.webshop!.id + '/verify-domain',
+            decoder: PrivateWebshop as Decoder<PrivateWebshop>,
+            shouldRetry: false,
+        });
+
+        saving.value = false;
+
+        props.webshopManager.updateWebshop(response.data);
+
+        if (response.data.meta.domainActive) {
+            new Toast('Je domeinnaam is goed geconfigureerd, jouw webshop is nu bereikbaar op deze nieuwe link.', 'success green').show();
+            dismiss({ force: true }).catch(console.error);
+        }
+        else {
+            new Toast('We konden jouw domeinnaam nog niet activeren (zie foutmeldingen bij de DNS-records). Soms kan het even duren voor de wijzigingen doorkomen, we sturen je een e-mail zodra we ze wel opmerken.', 'error red').show();
+        }
+    }
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+        saving.value = false;
     }
 
-    skip() {
-        if (!this.isComplete) {
-            new Toast('Hou er rekening mee dat jouw webshop voorlopig nog niet bereikbaar is op de door jou gekozen link. We gebruiken intussen de standaard domeinnaam van Stamhoofd. Wijzig eventueel de link terug tot iemand dit in orde kan brengen.', 'warning yellow').setHide(15 * 1000).show();
-        }
-        this.dismiss();
-    }
-
-    async validate() {
-        if (this.saving) {
-            return;
-        }
-
-        this.saving = true;
-
-        try {
-            const response = await this.$context.authenticatedServer.request({
-                method: 'POST',
-                path: '/webshop/' + this.webshopManager.webshop!.id + '/verify-domain',
-                decoder: PrivateWebshop as Decoder<PrivateWebshop>,
-                shouldRetry: false,
-            });
-
-            this.saving = false;
-
-            this.webshopManager.updateWebshop(response.data);
-
-            if (response.data.meta.domainActive) {
-                new Toast('Je domeinnaam is goed geconfigureerd, jouw webshop is nu bereikbaar op deze nieuwe link.', 'success green').show();
-                this.dismiss({ force: true });
-            }
-            else {
-                new Toast('We konden jouw domeinnaam nog niet activeren (zie foutmeldingen bij de DNS-records). Soms kan het even duren voor de wijzigingen doorkomen, we sturen je een e-mail zodra we ze wel opmerken.', 'error red').show();
-            }
-        }
-        catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-            this.saving = false;
-        }
-
-        // this.pop({ force: true })
-    }
+    // this.pop({ force: true })
 }
 </script>

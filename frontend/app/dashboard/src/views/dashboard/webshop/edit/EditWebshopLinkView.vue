@@ -149,7 +149,6 @@ const viewTitle = 'Webshop link wijzigen';
 const present = usePresent();
 const show = useShow();
 const organization = useOrganization();
-// cachedHasCustomDomain: boolean | null = null;
 const cachedCustomUrl = ref<string | null>(null);
 
 const checkingAvailability = ref(false);
@@ -286,7 +285,6 @@ function resetCache() {
 }
 
 onBeforeUnmount(() => {
-    // todo
     Request.cancelAll(this);
 });
 
