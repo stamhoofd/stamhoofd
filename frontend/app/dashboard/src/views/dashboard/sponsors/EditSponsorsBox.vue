@@ -29,97 +29,89 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { STErrorsDefault, STInputBox, STList, STListItem, UploadButton, ViewportHelper } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { STList, STListItem } from '@stamhoofd/components';
 import { Sponsor, SponsorConfig } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import EditSponsorView from './EditSponsorView.vue';
 
-@Component({
-    components: {
-        STInputBox,
-        STErrorsDefault,
-        UploadButton,
-        STList,
-        STListItem,
-    },
-})
-export default class EditSponsorsBox extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = defineProps<{
     config: SponsorConfig | null;
+}>();
 
-    patchConfig(patch: AutoEncoderPatchType<SponsorConfig> | null) {
-        if (patch && !this.config) {
-            this.$emit('patch', SponsorConfig.create({}).patch(patch));
-            return;
-        }
-        this.$emit('patch', patch);
+const emits = defineEmits<{
+    (e: 'patch', patch: AutoEncoderPatchType<SponsorConfig> | null): void;
+}>();
+
+const present = usePresent();
+const sponsors = computed(() => props.config?.sponsors ?? []);
+
+function patchConfig(patch: AutoEncoderPatchType<SponsorConfig> | null) {
+    if (patch && !props.config) {
+        const newPatch = SponsorConfig.create({}).patch(patch) as unknown as AutoEncoderPatchType<SponsorConfig>;
+        emits('patch', newPatch);
+        return;
     }
+    emits('patch', patch);
+}
 
-    get sponsors() {
-        return this.config?.sponsors ?? [];
-    }
+function addSponsor() {
+    const sponsor = Sponsor.create({});
+    const patch = SponsorConfig.patch({});
+    patch.sponsors.addPut(sponsor);
 
-    addSponsor() {
-        const sponsor = Sponsor.create({});
-        const patch = SponsorConfig.patch({});
-        patch.sponsors.addPut(sponsor);
+    present({
+        components: [
+            new ComponentWithProperties(EditSponsorView, {
+                sponsor,
+                isNew: true,
+                saveHandler: (p: AutoEncoderPatchType<Sponsor>) => {
+                    p.id = sponsor.id;
+                    patch.sponsors.addPatch(p);
+                    patchConfig(patch);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
+}
 
-        this.present({
-            components: [
-                new ComponentWithProperties(EditSponsorView, {
-                    sponsor,
-                    isNew: true,
-                    saveHandler: (p: AutoEncoderPatchType<Sponsor>) => {
-                        p.id = sponsor.id;
-                        patch.sponsors.addPatch(p);
-                        this.patchConfig(patch);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
-    }
+function editSponsor(sponsor: Sponsor) {
+    present({
+        components: [
+            new ComponentWithProperties(EditSponsorView, {
+                sponsor,
+                isNew: false,
+                saveHandler: (p: AutoEncoderPatchType<Sponsor>) => {
+                    const patch = SponsorConfig.patch({});
+                    p.id = sponsor.id;
+                    patch.sponsors.addPatch(p);
+                    patchConfig(patch);
+                },
+                deleteHandler: () => {
+                    const patch = SponsorConfig.patch({});
+                    patch.sponsors.addDelete(sponsor.id);
+                    patchConfig(patch);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
+}
 
-    editSponsor(sponsor: Sponsor) {
-        this.present({
-            components: [
-                new ComponentWithProperties(EditSponsorView, {
-                    sponsor,
-                    isNew: false,
-                    saveHandler: (p: AutoEncoderPatchType<Sponsor>) => {
-                        const patch = SponsorConfig.patch({});
-                        p.id = sponsor.id;
-                        patch.sponsors.addPatch(p);
-                        this.patchConfig(patch);
-                    },
-                    deleteHandler: () => {
-                        const patch = SponsorConfig.patch({});
-                        patch.sponsors.addDelete(sponsor.id);
-                        this.patchConfig(patch);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
-    }
-
-    get draggableSponsors() {
-        return this.sponsors;
-    }
-
-    set draggableSponsors(sponsors: Sponsor[]) {
-        if (sponsors.length !== this.sponsors.length) {
+const draggableSponsors = computed({
+    get: () => sponsors.value,
+    set: (value: Sponsor[]) => {
+        if (value.length !== sponsors.value.length) {
             return;
         }
 
         const patch = SponsorConfig.patch({
-            sponsors: sponsors as any,
+            sponsors: value as any,
         });
-        this.patchConfig(patch);
-    }
-}
+        patchConfig(patch);
+    } });
 </script>
