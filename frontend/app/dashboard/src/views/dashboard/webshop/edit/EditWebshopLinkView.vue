@@ -130,7 +130,7 @@ import { DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from 
 import { Formatter, throttle } from '@stamhoofd/utility';
 
 import { useRequestOwner } from '@stamhoofd/networking';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 import WebshopDNSRecordsView from './WebshopDNSRecordsView.vue';
 
@@ -283,10 +283,6 @@ function updateUri() {
 function resetCache() {
     cachedCustomUrl.value = null;
 }
-
-onBeforeUnmount(() => {
-    Request.cancelAll(this);
-});
 
 async function checkUriAvailability() {
     if (quickValidate()) {

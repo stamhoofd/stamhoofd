@@ -3,9 +3,9 @@
         <h1>{{ viewTitle }}</h1>
         <p>Voeg e-mailadressen toe waarop je automatisch een e-mail wilt ontvangen als er nieuwe bestellingen binnen komen. Gebruik deze functie alleen als je geen grote aantallen bestellingen per dag verwacht.</p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :model-value="getEmail(n - 1)" placeholder="E-mailadres" :validator="validator" @update:model-value="setEmail(n - 1, $event)">
+        <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :model-value="getEmail(n - 1)" placeholder="E-mailadres" :validator="errors.validator" @update:model-value="setEmail(n - 1, $event)">
             <template #right>
                 <span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
                 <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
@@ -28,138 +28,113 @@
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { Request } from '@simonbackx/simple-networking';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { EmailInput, SaveView, STErrorsDefault, STInputBox, TooltipDirective } from '@stamhoofd/components';
+import { EmailInput, SaveView, STErrorsDefault, useContext } from '@stamhoofd/components';
 import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
-import EditWebshopMixin from './EditWebshopMixin';
+import { useOrganizationManager } from '@stamhoofd/networking';
+import { computed, onMounted, ref } from 'vue';
+import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 
-@Component({
-    components: {
-        STInputBox,
-        STErrorsDefault,
-        SaveView,
-        EmailInput,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class EditWebshopNotificationsView extends Mixins(EditWebshopMixin) {
-    get organization() {
-        return this.$organization;
-    }
+const props = defineProps<UseEditWebshopProps>();
+const viewTitle = 'Meldingen';
 
-    get user() {
-        return this.$organizationManager.user;
-    }
+const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+    getProps: () => props,
+});
+const context = useContext();
+const organizationManager = useOrganizationManager();
 
-    get viewTitle() {
-        return 'Meldingen';
-    }
+const user = computed(() => organizationManager.value.user);
 
-    beforeUnmount() {
-        Request.cancelAll(this);
-    }
+const emails = computed(() => webshop.value.privateMeta.notificationEmails);
 
-    get emails() {
-        return this.webshop.privateMeta.notificationEmails;
-    }
+function getEmail(n: number) {
+    return emails.value[n];
+}
 
-    getEmail(n: number) {
-        return this.emails[n];
-    }
+onMounted(() => {
+    checkBounces().catch(console.error);
+});
 
-    mounted() {
-        this.checkBounces().catch(console.error);
-    }
+function setEmail(n: number, email: string) {
+    const notificationEmails = emails.value.slice();
+    notificationEmails[n] = email;
+    addPatch(PrivateWebshop.patch({
+        privateMeta: WebshopPrivateMetaData.patch({
+            notificationEmails: notificationEmails as any,
+        }),
+    }));
+}
 
-    setEmail(n: number, email: string) {
-        const notificationEmails = this.emails.slice();
-        notificationEmails[n] = email;
-        this.addPatch(PrivateWebshop.patch({
-            privateMeta: WebshopPrivateMetaData.patch({
-                notificationEmails: notificationEmails as any,
-            }),
-        }));
-    }
+function deleteEmail(n: number) {
+    const notificationEmails = emails.value.slice();
+    notificationEmails.splice(n, 1);
+    addPatch(PrivateWebshop.patch({
+        privateMeta: WebshopPrivateMetaData.patch({
+            notificationEmails: notificationEmails as any,
+        }),
+    }));
+}
 
-    deleteEmail(n: number) {
-        const notificationEmails = this.emails.slice();
-        notificationEmails.splice(n, 1);
-        this.addPatch(PrivateWebshop.patch({
-            privateMeta: WebshopPrivateMetaData.patch({
-                notificationEmails: notificationEmails as any,
-            }),
-        }));
-    }
+function addEmail(str: string) {
+    const notificationEmails = emails.value.slice();
+    notificationEmails.push(str);
+    addPatch(PrivateWebshop.patch({
+        privateMeta: WebshopPrivateMetaData.patch({
+            notificationEmails: notificationEmails as any,
+        }),
+    }));
+}
 
-    addEmail(str: string) {
-        const notificationEmails = this.emails.slice();
-        notificationEmails.push(str);
-        this.addPatch(PrivateWebshop.patch({
-            privateMeta: WebshopPrivateMetaData.patch({
-                notificationEmails: notificationEmails as any,
-            }),
-        }));
-    }
+function isBlocked(n: number) {
+    const email = getEmail(n);
+    return emailInformation.value.find(e => e.email === email && (e.markedAsSpam || e.hardBounce || e.unsubscribedAll));
+}
 
-    isBlocked(n: number) {
-        const email = this.getEmail(n);
-        return this.emailInformation.find(e => e.email === email && (e.markedAsSpam || e.hardBounce || e.unsubscribedAll));
-    }
-
-    getInvalidEmailDescription(n: number) {
-        const email = this.getEmail(n);
-        const find = this.emailInformation.find(e => e.email === email);
-        if (!find) {
-            return null;
-        }
-        if (find.unsubscribedAll) {
-            return 'Heeft zich uitgeschreven voor e-mails';
-        }
-        if (find.markedAsSpam) {
-            return 'Heeft e-mail als spam gemarkeerd';
-        }
-        if (find.hardBounce) {
-            return 'Ongeldig e-mailadres';
-        }
+function getInvalidEmailDescription(n: number) {
+    const email = getEmail(n);
+    const find = emailInformation.value.find(e => e.email === email);
+    if (!find) {
         return null;
     }
-
-    checkingBounces = false;
-    emailInformation: EmailInformation[] = [];
-
-    async checkBounces() {
-        if (this.checkingBounces) {
-            return;
-        }
-        this.checkingBounces = true;
-
-        try {
-            const response = await this.$context.authenticatedServer.request({
-                method: 'POST',
-                path: '/email/check-bounces',
-                body: this.emails,
-                decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>),
-            });
-            this.emailInformation = response.data;
-        }
-        catch (e) {
-            console.error(e);
-        }
-        this.checkingBounces = false;
+    if (find.unsubscribedAll) {
+        return 'Heeft zich uitgeschreven voor e-mails';
     }
-
-    get suggestions() {
-        return [this.user.email].filter(e => !this.emails.includes(e));
+    if (find.markedAsSpam) {
+        return 'Heeft e-mail als spam gemarkeerd';
     }
-
-    get emailCount() {
-        return this.emails.length;
+    if (find.hardBounce) {
+        return 'Ongeldig e-mailadres';
     }
+    return null;
 }
+
+const checkingBounces = ref(false);
+const emailInformation = ref<EmailInformation[]>([]);
+
+async function checkBounces() {
+    if (checkingBounces.value) {
+        return;
+    }
+    checkingBounces.value = true;
+
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'POST',
+            path: '/email/check-bounces',
+            body: emails.value,
+            decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>),
+        });
+        emailInformation.value = response.data;
+    }
+    catch (e) {
+        console.error(e);
+    }
+    checkingBounces.value = false;
+}
+
+const suggestions = computed(() => [user.value.email].filter(e => !emails.value.includes(e)));
+const emailCount = computed(() => emails.value.length);
 </script>
