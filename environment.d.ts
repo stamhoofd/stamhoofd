@@ -207,6 +207,26 @@ declare global {
         readonly translationNamespace: string
         readonly platformName: string
     }
+
+     /** 
+     * The environment that is available everywhere: frontend, backend and shared
+     */ 
+     type BackupEnvironment = {
+        /**
+         * We'll map the value of NODE_ENV to the corresponsing value. But staging value isn't valid for NODE_ENV, hence our own variable
+         */
+        readonly environment: "production" | "development" | "staging" | "test"
+        readonly PORT: number
+
+        // Database to backup
+        readonly DB_DATABASE: string
+        readonly DB_USER: string,
+        readonly DB_PASS: string,
+
+        readonly keyFingerprint: string
+        readonly objectStoragePath: string
+        readonly localBackupFolder: string
+    }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment
 }

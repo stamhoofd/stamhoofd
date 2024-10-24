@@ -1,155 +1,162 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { logger, StyledText } from "@simonbackx/simple-logging";
-import { countries, languages } from "@stamhoofd/locales";
+import { logger, StyledText } from '@simonbackx/simple-logging';
+import { countries, languages } from '@stamhoofd/locales';
 import { Country } from '@stamhoofd/structures';
-import { promises as fs } from "fs";
-import path from "path";
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export class I18n {
-    static loadedLocales: Map<string, Map<string, string>> = new Map()
-    static defaultLanguage = "nl"
-    static defaultCountry = Country.Belgium
+    static loadedLocales: Map<string, Map<string, string>> = new Map();
+    static defaultLanguage = 'nl';
+    static defaultCountry = Country.Belgium;
 
     static async load() {
         await logger.setContext({
             prefixes: [
-                new StyledText('[I18n] ').addClass('i18n', 'tag')
+                new StyledText('[I18n] ').addClass('i18n', 'tag'),
             ],
-            tags: ['i18n']
+            tags: ['i18n'],
         }, async () => {
-            console.log("Loading locales...")
-            const directory = path.dirname(require.resolve("@stamhoofd/locales"))+"/" + STAMHOOFD.translationNamespace
-            const files = (await fs.readdir(directory, { withFileTypes: true }))
-                .filter((dirent) => !dirent.isDirectory())
+            console.log('Loading locales...');
 
-            for (const file of files ) {
-                const locale = file.name.substr(0, file.name.length - 5);
-                console.log("Loaded:" + locale)
-
-                const messages = await import(directory+"/"+file.name)
-                this.loadedLocales.set(locale, this.loadRecursive(messages.default))
+            if (!STAMHOOFD.translationNamespace) {
+                throw new Error('STAMHOOFD.translationNamespace is not set');
             }
-        })
+
+            const directory = path.dirname(require.resolve('@stamhoofd/locales')) + '/' + STAMHOOFD.translationNamespace;
+            const files = (await fs.readdir(directory, { withFileTypes: true }))
+                .filter(dirent => !dirent.isDirectory());
+
+            for (const file of files) {
+                const locale = file.name.substr(0, file.name.length - 5);
+
+                const messages = await import(directory + '/' + file.name);
+                this.loadedLocales.set(locale, this.loadRecursive(messages.default));
+            }
+
+            console.log('Loaded all locales');
+        });
     }
 
-    static loadRecursive(messages: any, prefix: string | null =  null): Map<string, string> {
-        const map = new Map()
+    static loadRecursive(messages: any, prefix: string | null = null): Map<string, string> {
+        const map = new Map();
         for (const key in messages) {
             const element = messages[key];
-            if (typeof (element) !== "string") {
-                const map2 = this.loadRecursive(element, (prefix ? prefix + "." : "")+key)
+            if (typeof (element) !== 'string') {
+                const map2 = this.loadRecursive(element, (prefix ? prefix + '.' : '') + key);
                 map2.forEach((val, key) => map.set(key, val));
-            } else {
-                map.set((prefix ? prefix + "." : "")+key, element)
+            }
+            else {
+                map.set((prefix ? prefix + '.' : '') + key, element);
             }
         }
         return map;
     }
 
     static isValidLocale(locale: string) {
-        if (locale.length == 5 && locale.substr(2, 1) == "-") {
-            const l = locale.substr(0, 2).toLowerCase()
-            const c = locale.substr(3, 2).toUpperCase()
+        if (locale.length == 5 && locale.substr(2, 1) == '-') {
+            const l = locale.substr(0, 2).toLowerCase();
+            const c = locale.substr(3, 2).toUpperCase();
 
-            return languages.includes(l) && countries.includes(c)
+            return languages.includes(l) && countries.includes(c);
         }
-        return false
+        return false;
     }
-    
-    language = ""
-    country = ""
+
+    language = '';
+    country = '';
 
     // Reference to messages in loadedLocales
-    messages: Map<string, string>
+    messages: Map<string, string>;
 
     get locale() {
-        return this.language+"-"+this.country
+        return this.language + '-' + this.country;
     }
 
     constructor(language: string, country: string) {
-        this.language = language
-        this.country = country
-        this.correctLanguageCountryCombination()
+        this.language = language;
+        this.country = country;
+        this.correctLanguageCountryCombination();
 
-        const m = I18n.loadedLocales.get(this.locale)
+        const m = I18n.loadedLocales.get(this.locale);
         if (!m) {
-            throw new Error("Locale not loaded when creating I18n for "+language+"-"+country)
+            throw new Error('Locale not loaded when creating I18n for ' + language + '-' + country);
         }
 
-        this.messages = m
+        this.messages = m;
     }
 
     correctLanguageCountryCombination() {
-         if (I18n.isValidLocale(this.locale)) {
+        if (I18n.isValidLocale(this.locale)) {
             return;
-         }
+        }
 
         // Check language is valid
         if (!languages.includes(this.language)) {
-            this.language = I18n.defaultLanguage
+            this.language = I18n.defaultLanguage;
 
             if (I18n.isValidLocale(this.locale)) {
                 return;
             }
-            this.country = I18n.defaultCountry
+            this.country = I18n.defaultCountry;
             return;
         }
 
         // Loop countries until valid
-        this.country = I18n.defaultCountry
+        this.country = I18n.defaultCountry;
         while (!I18n.isValidLocale(this.locale)) {
-            const index = countries.indexOf(this.country)
+            const index = countries.indexOf(this.country);
             if (index == countries.length - 1) {
                 // Last country
-                this.language = I18n.defaultLanguage
-                this.country = I18n.defaultCountry
+                this.language = I18n.defaultLanguage;
+                this.country = I18n.defaultCountry;
                 return;
             }
-            this.country = countries[index + 1]
+            this.country = countries[index + 1];
         }
     }
 
     switchToLocale(options: {
-            language?: string,
-            country?: string
+        language?: string;
+        country?: string;
     }) {
-        this.country = options.country ?? this.country
-        this.language = options.language ?? this.language
-        this.correctLanguageCountryCombination()
-        
-        const m = I18n.loadedLocales.get(this.locale)
+        this.country = options.country ?? this.country;
+        this.language = options.language ?? this.language;
+        this.correctLanguageCountryCombination();
+
+        const m = I18n.loadedLocales.get(this.locale);
         if (!m) {
-            throw new Error("Locale not loaded, when switching to locale "+this.language+"-"+this.country)
+            throw new Error('Locale not loaded, when switching to locale ' + this.language + '-' + this.country);
         }
 
-        this.messages = m
+        this.messages = m;
     }
 
-    static fromRequest(request: Request|DecodedRequest<any, any, any>): I18n {
+    static fromRequest(request: Request | DecodedRequest<any, any, any>): I18n {
         if ((request as any)._cached_i18n) {
-            return (request as any)._cached_i18n
+            return (request as any)._cached_i18n;
         }
 
         // Try using custom property
-        const localeHeader = request.headers["x-locale"]
-        if (localeHeader && typeof localeHeader === "string" && this.isValidLocale(localeHeader)) {
-            const l = localeHeader.substr(0, 2).toLowerCase()
-            const c = localeHeader.substr(3, 2).toUpperCase()
-            
+        const localeHeader = request.headers['x-locale'];
+        if (localeHeader && typeof localeHeader === 'string' && this.isValidLocale(localeHeader)) {
+            const l = localeHeader.substr(0, 2).toLowerCase();
+            const c = localeHeader.substr(3, 2).toUpperCase();
+
             const i18n = new I18n(l, c);
             (request as any)._cached_i18n = i18n;
             return i18n;
         }
 
         // Try using accept-language defaults
-        const acceptLanguage = request.headers["accept-language"]
+        const acceptLanguage = request.headers['accept-language'];
         if (acceptLanguage) {
-            const splitted = acceptLanguage.split(",");
+            const splitted = acceptLanguage.split(',');
 
             // Loop all countries and languages in the header, until we find a valid one
             for (const item of splitted) {
                 const trimmed = item.trim();
-                const localeSplit = trimmed.split(";");
+                const localeSplit = trimmed.split(';');
                 const locale = localeSplit[0];
 
                 if (locale.length == 2) {
@@ -160,18 +167,18 @@ export class I18n {
                         // using .setCountry(country) method
                         const i18n = new I18n(locale, Country.Belgium);
                         (request as any)._cached_i18n = i18n;
-                        return i18n
+                        return i18n;
                     }
-                } else if (locale.length === 5 && this.isValidLocale(locale)) {
-                    const l = locale.substr(0, 2).toLowerCase()
-                    const c = locale.substr(3, 2).toUpperCase()
+                }
+                else if (locale.length === 5 && this.isValidLocale(locale)) {
+                    const l = locale.substr(0, 2).toLowerCase();
+                    const c = locale.substr(3, 2).toUpperCase();
 
                     // Lang + country
                     const i18n = new I18n(l, c);
                     (request as any)._cached_i18n = i18n;
-                    return i18n
+                    return i18n;
                 }
-                
             }
         }
         const i18n = new I18n(this.defaultLanguage, this.defaultCountry);
@@ -180,11 +187,11 @@ export class I18n {
     }
 
     t(key: string, replace?: Record<string, string>) {
-        return this.$t(key, replace)
+        return this.$t(key, replace);
     }
 
     $t(key: string, replace?: Record<string, string>) {
-        return this.replace(this.messages.get(key) ?? key, replace)
+        return this.replace(this.messages.get(key) ?? key, replace);
     }
 
     escapeRegex(string) {
@@ -193,15 +200,15 @@ export class I18n {
 
     replace(text: string, replace?: Record<string, string>) {
         if (!replace) {
-            return text
+            return text;
         }
         for (const key in replace) {
             if (replace.hasOwnProperty(key)) {
                 const value = replace[key];
-                text = text.replace(new RegExp("{"+this.escapeRegex(key)+"}", "g"), value)
+                text = text.replace(new RegExp('{' + this.escapeRegex(key) + '}', 'g'), value);
             }
         }
-        return text
+        return text;
     }
 
     getDomain(localizedDomain: LocalizedDomain): string {
@@ -210,7 +217,7 @@ export class I18n {
 
     localizedDomains = {
         marketing: (): string => this.getDomain(STAMHOOFD.domains.marketing),
-        defaultTransactionalEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultTransactionalEmail ?? {['']: 'stamhoofd.be'}),
-        defaultBroadcastEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultBroadcastEmail?? {['']: 'stamhoofd.email'}),
-    }
+        defaultTransactionalEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultTransactionalEmail ?? { ['']: 'stamhoofd.be' }),
+        defaultBroadcastEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultBroadcastEmail ?? { ['']: 'stamhoofd.email' }),
+    };
 }

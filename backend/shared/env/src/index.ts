@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 
-function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'admin' | 'renderer' }) {
+function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'admin' | 'renderer' | 'backup' }) {
     // Read environment from file: .env.json
     (global as any).STAMHOOFD = JSON.parse(fs.readFileSync(settings?.path ?? '.env.json', 'utf-8'));
 
@@ -12,6 +12,9 @@ function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'admi
         return;
     }
     if (settings?.service === 'renderer') {
+        return;
+    }
+    if (settings?.service === 'backup') {
         return;
     }
 
