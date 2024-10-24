@@ -152,7 +152,7 @@ function getOptionRequirement(menu: OptionMenu, option: Option): OptionSelection
     return props.productSelector.getOptionRequirement(menu, option);
 }
 
-function setOptionRequirement(menu: OptionMenu, option: Option, requirement: OptionSelectionRequirement) {
+function setOptionRequirement(_menu: OptionMenu, option: Option, requirement: OptionSelectionRequirement) {
     const map = new PatchMap(props.productSelector.optionIds);
 
     map.set(option.id, requirement);

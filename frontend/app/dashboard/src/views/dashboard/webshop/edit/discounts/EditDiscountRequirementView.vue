@@ -7,11 +7,11 @@
             Kortingvoorwaarde bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="validator" @patch="patchProductSelector" />
+        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
-        <STInputBox title="Aantal" error-fields="amount" :error-box="errorBox" class="max">
+        <STInputBox title="Aantal" error-fields="amount" :error-box="errors.errorBox" class="max">
             <NumberInput
                 v-model="amount"
                 :min="1"
@@ -33,116 +33,76 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
-import { DiscountRequirement, PrivateWebshop, ProductSelector, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, NumberInput, SaveView, STErrorsDefault, STInputBox, useErrors, usePatch } from '@stamhoofd/components';
+import { DiscountRequirement, PrivateWebshop, ProductSelector } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import ProductSelectorBox from './ProductSelectorBox.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        NumberInput,
-        STList,
-        STListItem,
-        PermyriadInput,
-        PriceInput,
-        Checkbox,
-        ProductSelectorBox,
-    },
-})
-export default class EditDiscountRequirementView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    discountRequirement!: DiscountRequirement;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    discountRequirement: DiscountRequirement;
+    isNew: boolean;
     webshop: PrivateWebshop;
-
-    /// For now only used to update locations and times of other products that are shared
-    patchDiscountRequirement: AutoEncoderPatchType<DiscountRequirement> = DiscountRequirement.patch({ id: this.discountRequirement.id });
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: (patch: PatchableArrayAutoEncoder<DiscountRequirement>) => void;
+}>();
+const errors = useErrors();
+const pop = usePop();
 
-    get patchedDiscountRequirement() {
-        return this.discountRequirement.patch(this.patchDiscountRequirement);
-    }
+const { patch: patchDiscountRequirement, patched: patchedDiscountRequirement, addPatch, hasChanges } = usePatch(props.discountRequirement);
 
-    get organization() {
-        return this.$organization;
-    }
+const productSelector = computed(() => patchedDiscountRequirement.value.product);
 
-    get productSelector() {
-        return this.patchedDiscountRequirement.product;
-    }
+function patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
+    addPatch(DiscountRequirement.patch({
+        product: patch,
+    }));
+}
 
-    patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
-        this.addPatch(DiscountRequirement.patch({
-            product: patch,
-        }));
-    }
-
-    addPatch(patch: AutoEncoderPatchType<DiscountRequirement>) {
-        this.patchDiscountRequirement = this.patchDiscountRequirement.patch(patch);
-    }
-
-    get amount() {
-        return this.patchedDiscountRequirement.amount;
-    }
-
-    set amount(amount: number) {
-        this.addPatch(DiscountRequirement.patch({
+const amount = computed({
+    get: () => patchedDiscountRequirement.value.amount,
+    set: (amount: number) => {
+        addPatch(DiscountRequirement.patch({
             amount,
         }));
-    }
+    },
+});
 
-    async save() {
-        const isValid = await this.validator.validate();
-        if (!isValid) {
-            return;
-        }
-        const p: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray();
-        p.addPatch(this.patchDiscountRequirement);
-        this.saveHandler(p);
-        this.pop({ force: true });
+async function save() {
+    const isValid = await errors.validator.validate();
+    if (!isValid) {
+        return;
     }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze voorwaarde wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-
-        const p: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray();
-        p.addDelete(this.discountRequirement.id);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchDiscountRequirement, this.discountRequirement, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+    const p: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray();
+    p.addPatch(patchDiscountRequirement.value);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
 }
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze voorwaarde wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+
+    const p: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray();
+    p.addDelete(props.discountRequirement.id);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
 
 <style lang="scss">
