@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr>
         <h2>Algemene kortingen</h2>
@@ -84,213 +84,189 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { Checkbox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast } from '@stamhoofd/components';
-import { Discount, DiscountCode, PrivateWebshop, Version, WebshopMetaData } from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { Checkbox, SaveView, Spinner, STErrorsDefault, STList, STListItem, Toast, useContext, usePatchArray } from '@stamhoofd/components';
+import { Discount, DiscountCode, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 import EditDiscountCodeView from './discounts/EditDiscountCodeView.vue';
 import EditDiscountView from './discounts/EditDiscountView.vue';
 
-import EditWebshopMixin from './EditWebshopMixin';
+import { computed, nextTick, onMounted, ref } from 'vue';
+import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        STInputBox,
-        STErrorsDefault,
-        SaveView,
-        Spinner,
-        Checkbox,
-    },
-})
-export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
-    fetchingDiscountCodes = false;
-    discountCodes: DiscountCode[] = [];
-    patchDiscountCodes: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+const props = defineProps<UseEditWebshopProps>();
 
-    mounted() {
-        this.fetchDiscountCodes().catch(console.error);
-    }
+const present = usePresent();
+const viewTitle = 'Kortingen';
 
-    get patchedDiscountCodes() {
-        return this.patchDiscountCodes.applyTo(this.discountCodes);
-    }
+const { webshop, addPatch, errors, saving, save, hasChanges: hasWebshopChanges } = useEditWebshop({
+    afterSave,
+    validate: () => {},
+    getProps: () => props,
+});
 
-    addDiscountCodesPatch(patchDiscountCodes: PatchableArrayAutoEncoder<DiscountCode>) {
-        this.patchDiscountCodes = this.patchDiscountCodes.patch(patchDiscountCodes);
-    }
+const context = useContext();
+const fetchingDiscountCodes = ref(false);
+const discountCodes = ref<DiscountCode[]>([]);
 
-    async fetchDiscountCodes() {
-        this.fetchingDiscountCodes = true;
-        try {
-            const response = await this.$context.authenticatedServer.request({
-                method: 'GET',
-                path: `/webshop/${this.webshop.id}/discount-codes`,
-                decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
-            });
-            this.discountCodes = response.data;
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-        this.fetchingDiscountCodes = false;
-    }
+const { patch: patchDiscountCodes, patched: patchedDiscountCodes, hasChanges: hasDiscountCodeChanges, addArrayPatch: addDiscountCodesPatch } = usePatchArray<DiscountCode>(discountCodes);
+const hasChanges = computed(() => hasWebshopChanges.value || hasDiscountCodeChanges.value);
 
-    get viewTitle() {
-        return 'Kortingen';
-    }
+onMounted(() => {
+    fetchDiscountCodes().catch(console.error);
+});
 
-    get organization() {
-        return this.$context;
-    }
-
-    get defaultDiscounts() {
-        return this.webshop.meta.defaultDiscounts;
-    }
-
-    getDiscountTitle(discount: Discount) {
-        return discount.getTitle(this.webshop, true);
-    }
-
-    addMetaPatch(meta: AutoEncoderPatchType<WebshopMetaData>) {
-        const p = PrivateWebshop.patch({ meta });
-        this.addPatch(p);
-    }
-
-    addDefaultDiscountsPatch(d: PatchableArrayAutoEncoder<Discount>) {
-        const meta = WebshopMetaData.patch({ defaultDiscounts: d });
-        this.addMetaPatch(meta);
-    }
-
-    get allowDiscountCodeEntry() {
-        return this.webshop.meta.allowDiscountCodeEntry;
-    }
-
-    set allowDiscountCodeEntry(value: boolean) {
-        this.addMetaPatch(WebshopMetaData.patch({ allowDiscountCodeEntry: value }));
-    }
-
-    addDiscount() {
-        const discount = Discount.create({});
-        const arr: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
-        arr.addPut(discount);
-
-        this.present({
-            components: [
-                new ComponentWithProperties(EditDiscountView, {
-                    isNew: true,
-                    discount,
-                    webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => {
-                        arr.merge(patch);
-                        this.addDefaultDiscountsPatch(arr);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    editDiscount(discount: Discount) {
-        this.present({
-            components: [
-                new ComponentWithProperties(EditDiscountView, {
-                    isNew: false,
-                    discount,
-                    webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => {
-                        this.addDefaultDiscountsPatch(patch);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    addDiscountCode() {
-        const discountCode = DiscountCode.create({
-            code: '',
-        });
-        const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
-        arr.addPut(discountCode);
-
-        this.present({
-            components: [
-                new ComponentWithProperties(EditDiscountCodeView, {
-                    isNew: true,
-                    discountCode,
-                    webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
-                        arr.merge(patch);
-                        this.addDiscountCodesPatch(arr);
-
-                        this.$nextTick(() => {
-                            if (this.patchedDiscountCodes.length === 1) {
-                                this.allowDiscountCodeEntry = true;
-                            }
-                        });
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    editDiscountCode(discountCode: DiscountCode) {
-        this.present({
-            components: [
-                new ComponentWithProperties(EditDiscountCodeView, {
-                    isNew: false,
-                    discountCode,
-                    webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
-                        this.addDiscountCodesPatch(patch);
-
-                        this.$nextTick(() => {
-                            if (this.patchedDiscountCodes.length === 0) {
-                                this.allowDiscountCodeEntry = false;
-                            }
-                        });
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    async afterSave() {
-        if (this.patchDiscountCodes.changes.length === 0) {
-            return;
-        }
-
-        const response = await this.$context.authenticatedServer.request({
-            method: 'PATCH',
-            path: `/webshop/${this.webshop.id}/discount-codes`,
-            body: this.patchDiscountCodes,
+async function fetchDiscountCodes() {
+    fetchingDiscountCodes.value = true;
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: `/webshop/${webshop.value.id}/discount-codes`,
             decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
         });
+        discountCodes.value = response.data;
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+    fetchingDiscountCodes.value = false;
+}
 
-        this.patchDiscountCodes = new PatchableArray();
-        for (const d of response.data) {
-            const existing = this.discountCodes.find(dd => dd.id === d.id);
-            if (existing) {
-                existing.deepSet(d);
-            }
-            else {
-                this.discountCodes.push(d);
-            }
+const defaultDiscounts = computed(() => webshop.value.meta.defaultDiscounts);
+
+function getDiscountTitle(discount: Discount) {
+    return discount.getTitle(webshop.value, true);
+}
+
+function addMetaPatch(meta: AutoEncoderPatchType<WebshopMetaData>) {
+    const p = PrivateWebshop.patch({ meta });
+    addPatch(p);
+}
+
+function addDefaultDiscountsPatch(d: PatchableArrayAutoEncoder<Discount>) {
+    const meta = WebshopMetaData.patch({ defaultDiscounts: d });
+    addMetaPatch(meta);
+}
+
+const allowDiscountCodeEntry = computed({
+    get: () => webshop.value.meta.allowDiscountCodeEntry,
+    set: (value: boolean) => {
+        addMetaPatch(WebshopMetaData.patch({ allowDiscountCodeEntry: value }));
+    },
+});
+
+function addDiscount() {
+    const discount = Discount.create({});
+    const arr: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
+    arr.addPut(discount);
+
+    present({
+        components: [
+            new ComponentWithProperties(EditDiscountView, {
+                isNew: true,
+                discount,
+                webshop: webshop.value,
+                saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => {
+                    arr.merge(patch);
+                    addDefaultDiscountsPatch(arr);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function editDiscount(discount: Discount) {
+    present({
+        components: [
+            new ComponentWithProperties(EditDiscountView, {
+                isNew: false,
+                discount,
+                webshop: webshop.value,
+                saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => {
+                    addDefaultDiscountsPatch(patch);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function addDiscountCode() {
+    const discountCode = DiscountCode.create({
+        code: '',
+    });
+    const arr: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray();
+    arr.addPut(discountCode);
+
+    present({
+        components: [
+            new ComponentWithProperties(EditDiscountCodeView, {
+                isNew: true,
+                discountCode,
+                webshop: webshop.value,
+                saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
+                    arr.merge(patch);
+                    // todo: test
+                    addDiscountCodesPatch(arr);
+
+                    nextTick(() => {
+                        if (patchedDiscountCodes.value.length === 1) {
+                            allowDiscountCodeEntry.value = true;
+                        }
+                    }).catch(console.error);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function editDiscountCode(discountCode: DiscountCode) {
+    present({
+        components: [
+            new ComponentWithProperties(EditDiscountCodeView, {
+                isNew: false,
+                discountCode,
+                webshop: webshop.value,
+                saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
+                    // todo: test
+                    addDiscountCodesPatch(patch);
+
+                    nextTick(() => {
+                        if (patchedDiscountCodes.value.length === 0) {
+                            allowDiscountCodeEntry.value = false;
+                        }
+                    }).catch(console.error);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+async function afterSave() {
+    if (patchDiscountCodes.value.changes.length === 0) {
+        return;
+    }
+
+    const response = await context.value.authenticatedServer.request({
+        method: 'PATCH',
+        path: `/webshop/${webshop.value.id}/discount-codes`,
+        body: patchDiscountCodes.value,
+        decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
+    });
+
+    patchDiscountCodes.value = new PatchableArray();
+    for (const d of response.data) {
+        const existing = discountCodes.value.find(dd => dd.id === d.id);
+        if (existing) {
+            existing.deepSet(d);
         }
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.webshopPatch, this.originalWebshop, { version: Version }) || !!this.patchDiscountCodes.changes.length;
-    }
-
-    validate() {
-
+        else {
+            discountCodes.value.push(d);
+        }
     }
 }
 </script>
