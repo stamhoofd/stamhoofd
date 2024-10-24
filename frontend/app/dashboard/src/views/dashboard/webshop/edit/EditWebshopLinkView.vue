@@ -13,7 +13,7 @@
             {{ $t('7a44f6f1-bb2f-4e46-93c2-afcae9db3f80') }}
         </p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <STInputBox title="Domeinnaam">
             <Dropdown v-model="selectedDomain" @update:model-value="onChangeSelectedDomain">
@@ -30,7 +30,7 @@
         </STInputBox>
 
         <template v-if="useNewDomain">
-            <STInputBox title="Jouw webshop link" error-fields="customUrl" :error-box="errorBox" class="max">
+            <STInputBox title="Jouw webshop link" error-fields="customUrl" :error-box="errors.errorBox" class="max">
                 <input
                     v-model="customUrl"
                     class="input"
@@ -73,7 +73,7 @@
         </template>
 
         <template v-else-if="selectedDomain !== null">
-            <STInputBox title="Jouw webshop link" error-fields="domainUri" :error-box="errorBox" class="max">
+            <STInputBox title="Jouw webshop link" error-fields="domainUri" :error-box="errors.errorBox" class="max">
                 <template #right>
                     <button type="button" class="button text" @click="copyLink">
                         <span class="icon copy" />
@@ -88,7 +88,7 @@
         </template>
 
         <template v-else>
-            <STInputBox title="Jouw webshop link" error-fields="uri" :error-box="errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}">
+            <STInputBox title="Jouw webshop link" error-fields="uri" :error-box="errors.errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}">
                 <template #right>
                     <button type="button" class="button text" @click="copyLink">
                         <span class="icon copy" />
@@ -98,7 +98,7 @@
                 <PrefixInput v-model="uri" placeholder="bv. wafelbak" :prefix="defaultDomain+'/'" @blur="updateUri" />
             </STInputBox>
 
-            <template v-if="errorBox === null && ((availabilityCheckerCount > 0 && isAvailable !== null) || checkingAvailability)">
+            <template v-if="errors.errorBox === null && ((availabilityCheckerCount > 0 && isAvailable !== null) || checkingAvailability)">
                 <p v-if="checkingAvailability" class="loading-box">
                     <Spinner />
                     Nakijken of deze link nog beschikbaar is...
@@ -120,433 +120,397 @@
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { Dropdown, PrefixInput, SaveView, Spinner, STErrorsDefault, STInputBox, Toast, Tooltip } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { Dropdown, PrefixInput, SaveView, Spinner, STErrorsDefault, STInputBox, Toast, Tooltip, useContext, useOrganization } from '@stamhoofd/components';
 import { DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, throttle } from '@stamhoofd/utility';
 
-import EditWebshopMixin from './EditWebshopMixin';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 import WebshopDNSRecordsView from './WebshopDNSRecordsView.vue';
 
-const throttle = (func, limit) => {
-    let lastFunc;
-    let lastRan;
-    return function () {
-        const context = this;
+const props = defineProps<UseEditWebshopProps>();
 
-        const args = arguments;
-        if (lastRan) {
-            clearTimeout(lastFunc);
-        }
-        lastRan = Date.now();
+const { webshop, addPatch, errors, saving, save, hasChanges, originalWebshop } = useEditWebshop({
+    validate,
+    shouldDismiss,
+    getProps: () => props,
+});
+const requestOwner = useRequestOwner();
+const context = useContext();
 
-        lastFunc = setTimeout(function () {
-            if (Date.now() - lastRan >= limit) {
-                func.apply(context, args);
-                lastRan = Date.now();
-            }
-        }, limit - (Date.now() - lastRan));
-    };
-};
+const viewTitle = 'Webshop link wijzigen';
 
-@Component({
-    components: {
-        STInputBox,
-        STErrorsDefault,
-        SaveView,
-        PrefixInput,
-        Spinner,
-        Dropdown,
-    },
-})
-export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
-    cachedHasCustomDomain: boolean | null = null;
-    cachedCustomUrl: string | null = null;
+const present = usePresent();
+const show = useShow();
+const organization = useOrganization();
+// cachedHasCustomDomain: boolean | null = null;
+const cachedCustomUrl = ref<string | null>(null);
 
-    checkingAvailability = false;
-    availabilityCheckerCount = 0;
-    isAvailable: boolean | null = null;
-    checkedUri = '';
+const checkingAvailability = ref(false);
+const availabilityCheckerCount = ref(0);
+const isAvailable = ref<boolean | null>(null);
+const checkedUri = ref('');
 
-    selectedDomain: string | null = null;
-    hasOrders = false;
+const selectedDomain = ref<string | null>(null);
+const hasOrders = ref(false);
 
-    created() {
-        this.hasOrders = !!this.webshopManager?.lastFetchedOrder;
+function created() {
+    hasOrders.value = !!props.webshopManager?.lastFetchedOrder;
 
-        if (!this.hasOrders && this.webshopManager) {
-            this.webshopManager.streamOrdersDeprecated(() => {
-                this.hasOrders = true;
-                throw new Error('Stop streaming');
-            }, true).then().catch(console.error);
-        }
+    if (!hasOrders.value && props.webshopManager) {
+        props.webshopManager.streamOrders({ callback: () => {
+            hasOrders.value = true;
+            throw new Error('Stop streaming');
+        } }).catch(console.error);
     }
+}
 
-    mounted() {
-        this.selectedDomain = this.webshop.meta.domainActive ? this.webshop.domain : (this.webshop.domain ? '' : null);
+created();
+
+onMounted(() => {
+    selectedDomain.value = webshop.value.meta.domainActive ? webshop.value.domain : (webshop.value.domain ? '' : null);
+});
+
+const defaultDomains = computed<string[]>(() => Formatter.uniqueArray((organization.value!.webshops).filter(w => w.meta.domainActive && w.domain).map(w => w.domain) as string[]));
+
+function onChangeSelectedDomain() {
+    cachedCustomUrl.value = null;
+    if (selectedDomain.value !== null && selectedDomain.value !== '') {
+        const patch = PrivateWebshop.patch({ domain: selectedDomain.value });
+        addPatch(patch);
     }
-
-    get defaultDomains() {
-        return Formatter.uniqueArray(this.organization.webshops.filter(w => w.meta.domainActive && w.domain).map(w => w.domain));
+    if (selectedDomain.value === null) {
+        const patch = PrivateWebshop.patch({ domain: null });
+        addPatch(patch);
     }
+}
 
-    onChangeSelectedDomain() {
-        this.cachedCustomUrl = null;
-        if (this.selectedDomain !== null && this.selectedDomain !== '') {
-            const patch = PrivateWebshop.patch({ domain: this.selectedDomain });
-            this.addPatch(patch);
-        }
-        if (this.selectedDomain === null) {
-            const patch = PrivateWebshop.patch({ domain: null });
-            this.addPatch(patch);
-        }
-    }
+const doThrottledCheckUriAvailability = throttle(checkUriAvailability, 1000);
 
-    doThrottledCheckUriAvailability = throttle(this.checkUriAvailability, 1000);
+function quickValidate() {
+    if (Formatter.slug(uri.value).length === 0) {
+        isAvailable.value = false;
+        checkedUri.value = '';
 
-    quickValidate() {
-        if (Formatter.slug(this.uri).length === 0) {
-            this.isAvailable = false;
-            this.checkedUri = '';
+        // Invalidate all currently working checks
+        availabilityCheckerCount.value++;
 
-            // Invalidate all currently working checks
-            this.availabilityCheckerCount++;
-
-            // Mark loading as done
-            this.checkingAvailability = false;
-            return true;
-        }
-
-        if (Formatter.slug(this.uri) === this.originalWebshop.uri) {
-            this.isAvailable = true;
-            this.checkedUri = this.originalWebshop.uri;
-
-            // Invalidate all currently working checks
-            if (this.availabilityCheckerCount === 0) {
-                // keep at zero, no need to say again that it is valid
-            }
-            else {
-                this.availabilityCheckerCount++;
-            }
-
-            // Mark loading as done
-            this.checkingAvailability = false;
-            return true;
-        }
-
-        if (Formatter.slug(this.uri) === this.checkedUri || Formatter.slug(this.uri) === this.originalWebshop.uri) {
-            // keep same state
-            // Invalidate all currently working checks
-            this.availabilityCheckerCount++;
-
-            // Mark loading as done
-            this.checkingAvailability = false;
-            return true;
-        }
-        return false;
-    }
-
-    throttledCheckUriAvailability() {
-        this.errorBox = null;
-        Request.cancelAll(this);
-        if (this.quickValidate()) {
-            return;
-        }
-        this.availabilityCheckerCount++;
-        this.checkingAvailability = true;
-        this.isAvailable = null;
-        this.doThrottledCheckUriAvailability();
-    }
-
-    get organization() {
-        return this.$organization;
-    }
-
-    get viewTitle() {
-        return 'Webshop link wijzigen';
-    }
-
-    get legacyUrl() {
-        return this.webshop.getLegacyUrl(this.$organization);
-    }
-
-    get defaultUrl() {
-        return this.webshop.getDefaultUrl(this.$organization);
-    }
-
-    updateUri() {
-        const cleaned = Formatter.slug(this.uri);
-        if (cleaned !== this.uri) {
-            this.uri = cleaned;
-            new Toast('Een link mag geen spaties, speciale tekens of hoofdletters bevatten', 'info').show();
-        }
-        this.throttledCheckUriAvailability();
-    }
-
-    resetCache() {
-        this.cachedCustomUrl = null;
-    }
-
-    beforeUnmount() {
-        Request.cancelAll(this);
-    }
-
-    async checkUriAvailability() {
-        if (this.quickValidate()) {
-            return;
-        }
-
-        this.availabilityCheckerCount++;
-        const c = this.availabilityCheckerCount;
-        const uri = Formatter.slug(this.uri);
-        this.checkingAvailability = true;
-        this.isAvailable = false;
-
-        Request.cancelAll(this);
-
-        try {
-            this.errorBox = null;
-            const response = await this.$context.authenticatedServer.request({
-                path: '/webshop/' + this.webshop.id + '/check-uri',
-                method: 'GET',
-                query: {
-                    uri,
-                },
-                decoder: WebshopUriAvailabilityResponse as Decoder<WebshopUriAvailabilityResponse>,
-                owner: this,
-                shouldRetry: false,
-            });
-
-            if (this.availabilityCheckerCount !== c || uri !== Formatter.slug(this.uri)) {
-                console.info('Ignored response, counter or uri has already changed');
-                // Ignore, because a new request has already started
-                return;
-            }
-
-            this.checkedUri = uri;
-
-            this.checkingAvailability = false;
-            if (response.data.available) {
-                this.isAvailable = true;
-            }
-            else {
-                this.isAvailable = false;
-            }
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-            this.checkingAvailability = false;
-            this.isAvailable = null;
-            throw e;
-        }
-    }
-
-    get useNewDomain() {
-        if (this.selectedDomain === '') {
-            return true;
-        }
-        return false;
-    }
-
-    get defaultDomain() {
-        return this.webshop.getDefaultDomain(this.$organization);
-    }
-
-    get url() {
-        return 'https://' + this.webshop.getUrl(this.$organization);
-    }
-
-    get customUrl() {
-        if (this.cachedCustomUrl) {
-            return this.cachedCustomUrl;
-        }
-
-        if (!this.webshop.domain) {
-            return '';
-        }
-        return this.webshop.getDomainUrl();
-    }
-
-    set customUrl(customUrl: string) {
-        this.cachedCustomUrl = customUrl;
-        const split = customUrl.split('/');
-
-        const patch = PrivateWebshop.patch({ });
-        if (split[0].length === 0) {
-            patch.domain = null;
-            patch.domainUri = '';
-        }
-        else {
-            patch.domain = split[0].toLowerCase().replace(/[^a-zA-Z0-9-.]/g, '');
-
-            if (!split[1] || split[1].length === 0) {
-                patch.domainUri = '';
-            }
-            else {
-                patch.domainUri = Formatter.slug(split[1]);
-            }
-        }
-
-        this.addPatch(patch);
-    }
-
-    get domainUri() {
-        return this.webshop.domainUri;
-    }
-
-    set domainUri(domainUri: string | null) {
-        this.resetCache();
-        const patch = PrivateWebshop.patch({ domainUri: domainUri ? Formatter.slug(domainUri) : '' });
-        this.addPatch(patch);
-    }
-
-    get uri() {
-        return this.webshop.uri;
-    }
-
-    set uri(uri: string) {
-        const patch = PrivateWebshop.patch({ });
-        patch.uri = uri;
-
-        this.addPatch(patch);
-
-        this.throttledCheckUriAvailability();
-    }
-
-    openDnsRecordSettings(replace = false) {
-        const component = new ComponentWithProperties(WebshopDNSRecordsView, {
-            webshopManager: this.webshopManager,
-        });
-
-        if (replace) {
-            this.show({
-                components: [component],
-                animated: true,
-            });
-        }
-        else {
-            this.present({
-                components: [component],
-                modalDisplayStyle: 'popup',
-            });
-        }
-    }
-
-    shouldDismiss(): Promise<boolean> | boolean {
-        if (this.webshop.privateMeta.dnsRecords.find(r => r.status !== DNSRecordStatus.Valid)) {
-            this.openDnsRecordSettings(true);
-            return false;
-        }
+        // Mark loading as done
+        checkingAvailability.value = false;
         return true;
     }
 
-    get didDNSRecordsChange(): boolean {
-        const currently = this.webshop.privateMeta.dnsRecords;
+    if (Formatter.slug(uri.value) === originalWebshop.uri) {
+        isAvailable.value = true;
+        checkedUri.value = originalWebshop.uri;
 
-        if (currently.length !== this.dnsRecords.length) {
-            return true;
+        // Invalidate all currently working checks
+        if (availabilityCheckerCount.value === 0) {
+            // keep at zero, no need to say again that it is valid
+        }
+        else {
+            availabilityCheckerCount.value++;
         }
 
-        for (let i = 0; i < currently.length; i++) {
-            if (currently[i].type !== this.dnsRecords[i].type || currently[i].value !== this.dnsRecords[i].value || currently[i].name !== this.dnsRecords[i].name) {
-                return true;
-            }
+        // Mark loading as done
+        checkingAvailability.value = false;
+        return true;
+    }
+
+    if (Formatter.slug(uri.value) === checkedUri.value || Formatter.slug(uri.value) === originalWebshop.uri) {
+        // keep same state
+        // Invalidate all currently working checks
+        availabilityCheckerCount.value++;
+
+        // Mark loading as done
+        checkingAvailability.value = false;
+        return true;
+    }
+    return false;
+}
+
+function throttledCheckUriAvailability() {
+    errors.errorBox = null;
+    Request.cancelAll(requestOwner);
+    if (quickValidate()) {
+        return;
+    }
+    availabilityCheckerCount.value++;
+    checkingAvailability.value = true;
+    isAvailable.value = null;
+    doThrottledCheckUriAvailability();
+}
+
+const legacyUrl = computed(() => webshop.value.getLegacyUrl(organization.value!));
+
+const defaultUrl = computed(() => webshop.value.getDefaultUrl(organization.value!));
+
+const domainUri = computed({
+    get: () => webshop.value.domainUri,
+    set: (domainUri: string | null) => {
+        resetCache();
+        const patch = PrivateWebshop.patch({ domainUri: domainUri ? Formatter.slug(domainUri) : '' });
+        addPatch(patch);
+    },
+});
+
+const uri = computed({
+    get: () => webshop.value.uri,
+    set: (uri: string) => {
+        const patch = PrivateWebshop.patch({ });
+        patch.uri = uri;
+
+        addPatch(patch);
+
+        throttledCheckUriAvailability();
+    },
+});
+
+function updateUri() {
+    const cleaned = Formatter.slug(uri.value);
+    if (cleaned !== uri.value) {
+        uri.value = cleaned;
+        new Toast('Een link mag geen spaties, speciale tekens of hoofdletters bevatten', 'info').show();
+    }
+    throttledCheckUriAvailability();
+}
+
+function resetCache() {
+    cachedCustomUrl.value = null;
+}
+
+onBeforeUnmount(() => {
+    // todo
+    Request.cancelAll(this);
+});
+
+async function checkUriAvailability() {
+    if (quickValidate()) {
+        return;
+    }
+
+    availabilityCheckerCount.value++;
+    const c = availabilityCheckerCount.value;
+    const formattedUri = Formatter.slug(uri.value);
+    checkingAvailability.value = true;
+    isAvailable.value = false;
+
+    Request.cancelAll(requestOwner);
+
+    try {
+        errors.errorBox = null;
+        const response = await context.value.authenticatedServer.request({
+            path: '/webshop/' + webshop.value.id + '/check-uri',
+            method: 'GET',
+            query: {
+                uri,
+            },
+            decoder: WebshopUriAvailabilityResponse as Decoder<WebshopUriAvailabilityResponse>,
+            owner: requestOwner,
+            shouldRetry: false,
+        });
+
+        if (availabilityCheckerCount.value !== c || formattedUri !== Formatter.slug(uri.value)) {
+            console.info('Ignored response, counter or uri has already changed');
+            // Ignore, because a new request has already started
+            return;
         }
+
+        checkedUri.value = formattedUri;
+
+        checkingAvailability.value = false;
+        if (response.data.available) {
+            isAvailable.value = true;
+        }
+        else {
+            isAvailable.value = false;
+        }
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+        checkingAvailability.value = false;
+        isAvailable.value = null;
+        throw e;
+    }
+}
+
+const useNewDomain = computed(() => {
+    if (selectedDomain.value === '') {
+        return true;
+    }
+    return false;
+});
+
+const defaultDomain = computed(() => webshop.value.getDefaultDomain(organization.value!));
+const url = computed(() => 'https://' + webshop.value.getUrl(organization.value!));
+const customUrl = computed({ get: () => {
+    if (cachedCustomUrl.value) {
+        return cachedCustomUrl.value;
+    }
+
+    if (!webshop.value.domain) {
+        return '';
+    }
+    return webshop.value.getDomainUrl();
+},
+set: (customUrl: string) => {
+    cachedCustomUrl.value = customUrl;
+    const split = customUrl.split('/');
+
+    const patch = PrivateWebshop.patch({ });
+    if (split[0].length === 0) {
+        patch.domain = null;
+        patch.domainUri = '';
+    }
+    else {
+        patch.domain = split[0].toLowerCase().replace(/[^a-zA-Z0-9-.]/g, '');
+
+        if (!split[1] || split[1].length === 0) {
+            patch.domainUri = '';
+        }
+        else {
+            patch.domainUri = Formatter.slug(split[1]);
+        }
+    }
+
+    addPatch(patch);
+},
+});
+
+function openDnsRecordSettings(replace = false) {
+    const component = new ComponentWithProperties(WebshopDNSRecordsView, {
+        webshopManager: props.webshopManager,
+    });
+
+    if (replace) {
+        show({
+            components: [component],
+            animated: true,
+        }).catch(console.error);
+    }
+    else {
+        present({
+            components: [component],
+            modalDisplayStyle: 'popup',
+        }).catch(console.error);
+    }
+}
+
+function shouldDismiss(): Promise<boolean> | boolean {
+    if (webshop.value.privateMeta.dnsRecords.find(r => r.status !== DNSRecordStatus.Valid)) {
+        openDnsRecordSettings(true);
         return false;
     }
+    return true;
+}
 
-    get dnsRecords() {
-        if (!this.webshop.domain) {
-            return [];
-        }
-        return this.webshop.buildDNSRecords();
+const didDNSRecordsChange = computed(() => {
+    const currently = webshop.value.privateMeta.dnsRecords;
+
+    if (currently.length !== dnsRecords.value.length) {
+        return true;
     }
 
-    async copyLink(event) {
-        if (navigator.clipboard) {
-            await navigator.clipboard.writeText(this.url);
+    for (let i = 0; i < currently.length; i++) {
+        if (currently[i].type !== dnsRecords.value[i].type || currently[i].value !== dnsRecords.value[i].value || currently[i].name !== dnsRecords.value[i].name) {
+            return true;
         }
-        else {
-            const input = document.createElement('input');
-            input.value = this.url;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand('copy');
-            document.body.removeChild(input);
-        }
+    }
+    return false;
+});
 
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: 'Link gekopieerd!',
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        this.present(displayedComponent.setDisplayStyle('overlay'));
+const dnsRecords = computed(() => {
+    if (!webshop.value.domain) {
+        return [];
+    }
+    return webshop.value.buildDNSRecords();
+});
 
-        setTimeout(() => {
-            (displayedComponent.componentInstance() as any)?.hide?.();
-        }, 1000);
+async function copyLink(event: MouseEvent) {
+    if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url.value);
+    }
+    else {
+        const input = document.createElement('input');
+        input.value = url.value;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
     }
 
-    async validate() {
-        if (!this.webshop.domain) {
-            await this.checkUriAvailability();
-            if (!this.isAvailable) {
-                throw new SimpleError({
-                    code: '',
-                    field: 'uri',
-                    message: 'Kies een andere link, deze is ongeldig of al in gebruik.',
-                });
-            }
+    const displayedComponent = new ComponentWithProperties(Tooltip, {
+        text: 'Link gekopieerd!',
+        x: event.clientX,
+        y: event.clientY + 10,
+    });
+    present(displayedComponent.setDisplayStyle('overlay')).catch(console.error);
 
-            this.addPatch(PrivateWebshop.patch({ domainUri: null, domain: null }));
+    setTimeout(() => {
+        (displayedComponent.componentInstance() as any)?.hide?.();
+    }, 1000);
+}
+
+async function validate() {
+    if (!webshop.value.domain) {
+        await checkUriAvailability();
+        if (!isAvailable.value) {
+            throw new SimpleError({
+                code: '',
+                field: 'uri',
+                message: 'Kies een andere link, deze is ongeldig of al in gebruik.',
+            });
         }
-        else {
-            // Don't change the uri, because error handling could get weird if it is duplicate (the user won't notice it is changed)
-            this.addPatch(PrivateWebshop.patch({ uri: this.originalWebshop.uri }));
 
-            if (this.webshop.domainUri === null) {
-                this.addPatch(PrivateWebshop.patch({ domainUri: '' }));
-            }
+        addPatch(PrivateWebshop.patch({ domainUri: null, domain: null }));
+    }
+    else {
+        // Don't change the uri, because error handling could get weird if it is duplicate (the user won't notice it is changed)
+        addPatch(PrivateWebshop.patch({ uri: originalWebshop.uri }));
 
-            /// Check if URL format is okay
-            try {
-                const url = new URL('https://' + this.webshop.getDomainUrl());
+        if (webshop.value.domainUri === null) {
+            addPatch(PrivateWebshop.patch({ domainUri: '' }));
+        }
 
-                const hostname = url.hostname;
-                const parts = hostname.split('.');
+        /// Check if URL format is okay
+        try {
+            const url = new URL('https://' + webshop.value.getDomainUrl());
 
-                if (parts.length === 2) {
-                    throw new SimpleError({
-                        code: '',
-                        field: 'customUrl',
-                        message: 'Het is niet mogelijk om een hoofddomein te gebruiken voor een webshop. Lees de documentatie hierover na voor meer informatie.',
-                    });
-                }
-                const subdomain = parts[0];
+            const hostname = url.hostname;
+            const parts = hostname.split('.');
 
-                if (subdomain === 'inschrijven') {
-                    throw new SimpleError({
-                        code: '',
-                        field: 'customUrl',
-                        message: "Het is momenteel niet mogelijk om 'inschrijven' te gebruiken als een subdomeinnaam voor jouw webshop. Deze is gereserveerd voor de ledenadministratie.",
-                    });
-                }
-            }
-            catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    throw e;
-                }
+            if (parts.length === 2) {
                 throw new SimpleError({
                     code: '',
                     field: 'customUrl',
-                    message: 'Deze domeinnaam is ongeldig.',
+                    message: 'Het is niet mogelijk om een hoofddomein te gebruiken voor een webshop. Lees de documentatie hierover na voor meer informatie.',
                 });
             }
+            const subdomain = parts[0];
+
+            if (subdomain === 'inschrijven') {
+                throw new SimpleError({
+                    code: '',
+                    field: 'customUrl',
+                    message: "Het is momenteel niet mogelijk om 'inschrijven' te gebruiken als een subdomeinnaam voor jouw webshop. Deze is gereserveerd voor de ledenadministratie.",
+                });
+            }
+        }
+        catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                throw e;
+            }
+            throw new SimpleError({
+                code: '',
+                field: 'customUrl',
+                message: 'Deze domeinnaam is ongeldig.',
+            });
         }
     }
 }
