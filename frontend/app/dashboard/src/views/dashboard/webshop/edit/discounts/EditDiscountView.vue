@@ -7,14 +7,14 @@
             Korting bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox title="Vast bedrag" error-fields="administrationFee.fixed" :error-box="errorBox">
+            <STInputBox title="Vast bedrag" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
                 <PriceInput v-model="fixedDiscount" :min="0" placeholder="Vaste kost" :required="true" />
             </STInputBox>
 
-            <STInputBox title="Percentage" error-fields="administrationFee.fixed" :error-box="errorBox">
+            <STInputBox title="Percentage" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
                 <PermyriadInput v-model="percentageDiscount" placeholder="Percentage" :required="true" />
             </STInputBox>
         </div>
@@ -111,228 +111,187 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
-import { Discount, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscount, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, usePatch } from '@stamhoofd/components';
+import { Discount, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscountSettings, ProductSelector } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
 import EditProductDiscountView from './EditProductDiscountView.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        NumberInput,
-        STList,
-        STListItem,
-        PermyriadInput,
-        PriceInput,
-        Checkbox,
-    },
-})
-export default class EditDiscountView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    discount!: Discount;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    discount: Discount;
+    isNew: boolean;
     webshop: PrivateWebshop;
-
-    /// For now only used to update locations and times of other products that are shared
-    patchDiscount: AutoEncoderPatchType<Discount> = Discount.patch({ id: this.discount.id });
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: (patch: PatchableArrayAutoEncoder<Discount>) => void;
+}>();
 
-    get patchedDiscount() {
-        return this.discount.patch(this.patchDiscount);
-    }
+const errors = useErrors();
+const present = usePresent();
+const pop = usePop();
 
-    get organization() {
-        return this.$organization;
-    }
+const { patch: patchDiscount, patched: patchedDiscount, addPatch, hasChanges } = usePatch(props.discount);
 
-    getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
-    }
-
-    addPatch(patch: AutoEncoderPatchType<Discount>) {
-        this.patchDiscount = this.patchDiscount.patch(patch);
-    }
-
-    get applyMultipleTimes() {
-        return this.patchedDiscount.applyMultipleTimes;
-    }
-
-    set applyMultipleTimes(applyMultipleTimes: boolean) {
-        this.addPatch(Discount.patch({
+const applyMultipleTimes = computed({
+    get: () => patchedDiscount.value.applyMultipleTimes,
+    set: (applyMultipleTimes: boolean) => {
+        addPatch(Discount.patch({
             applyMultipleTimes,
         }));
-    }
+    },
+});
 
-    get fixedDiscount() {
-        return this.patchedDiscount.orderDiscount.fixedDiscount;
-    }
-
-    set fixedDiscount(fixedDiscount: number) {
-        this.addPatch(Discount.patch({
+const fixedDiscount = computed({
+    get: () => patchedDiscount.value.orderDiscount.fixedDiscount,
+    set: (fixedDiscount: number) => {
+        addPatch(Discount.patch({
             orderDiscount: GeneralDiscount.patch({
                 fixedDiscount,
             }),
         }));
-    }
+    },
+});
 
-    get percentageDiscount() {
-        return this.patchedDiscount.orderDiscount.percentageDiscount;
-    }
-
-    set percentageDiscount(percentageDiscount: number) {
-        this.addPatch(Discount.patch({
+const percentageDiscount = computed({
+    get: () => patchedDiscount.value.orderDiscount.percentageDiscount,
+    set: (percentageDiscount: number) => {
+        addPatch(Discount.patch({
             orderDiscount: GeneralDiscount.patch({
                 percentageDiscount,
             }),
         }));
-    }
+    },
+});
 
-    addRequirementsPatch(d: PatchableArrayAutoEncoder<DiscountRequirement>) {
-        const meta = Discount.patch({
-            requirements: d,
-        });
-        this.addPatch(meta);
-    }
-
-    addProductDiscountPatch(d: PatchableArrayAutoEncoder<ProductDiscountSettings>) {
-        const meta = Discount.patch({
-            productDiscounts: d,
-        });
-        this.addPatch(meta);
-    }
-
-    addRequirement() {
-        const requirement = DiscountRequirement.create({
-            product: ProductSelector.create({
-                productId: this.webshop.products[0].id,
-            }),
-        });
-        const arr: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray();
-        arr.addPut(requirement);
-
-        this.present({
-            components: [
-                new ComponentWithProperties(EditDiscountRequirementView, {
-                    isNew: true,
-                    discountRequirement: requirement,
-                    webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountRequirement>) => {
-                        arr.merge(patch);
-                        this.addRequirementsPatch(arr);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    editRequirement(discountRequirement: DiscountRequirement) {
-        this.present({
-            components: [
-                new ComponentWithProperties(EditDiscountRequirementView, {
-                    isNew: false,
-                    discountRequirement: discountRequirement,
-                    webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<DiscountRequirement>) => {
-                        this.addRequirementsPatch(patch);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    addProductDiscount() {
-        const productDiscount = ProductDiscountSettings.create({
-            product: ProductSelector.create({
-                productId: this.webshop.products[0].id,
-            }),
-        });
-        const arr: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
-        arr.addPut(productDiscount);
-
-        this.present({
-            components: [
-                new ComponentWithProperties(EditProductDiscountView, {
-                    isNew: true,
-                    productDiscount,
-                    webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => {
-                        arr.merge(patch);
-                        this.addProductDiscountPatch(arr);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    editProductDiscount(productDiscount: ProductDiscountSettings) {
-        this.present({
-            components: [
-                new ComponentWithProperties(EditProductDiscountView, {
-                    isNew: false,
-                    productDiscount,
-                    webshop: this.webshop,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => {
-                        this.addProductDiscountPatch(patch);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    async save() {
-        const isValid = await this.validator.validate();
-        if (!isValid) {
-            return;
-        }
-        const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
-        p.addPatch(this.patchDiscount);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze korting wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-
-        const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
-        p.addDelete(this.discount.id);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchDiscount, this.discount, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+function addRequirementsPatch(d: PatchableArrayAutoEncoder<DiscountRequirement>) {
+    const meta = Discount.patch({
+        requirements: d,
+    });
+    addPatch(meta);
 }
+
+function addProductDiscountPatch(d: PatchableArrayAutoEncoder<ProductDiscountSettings>) {
+    const meta = Discount.patch({
+        productDiscounts: d,
+    });
+    addPatch(meta);
+}
+
+function addRequirement() {
+    const requirement = DiscountRequirement.create({
+        product: ProductSelector.create({
+            productId: props.webshop.products[0].id,
+        }),
+    });
+    const arr: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray();
+    arr.addPut(requirement);
+
+    present({
+        components: [
+            new ComponentWithProperties(EditDiscountRequirementView, {
+                isNew: true,
+                discountRequirement: requirement,
+                webshop: props.webshop,
+                saveHandler: (patch: PatchableArrayAutoEncoder<DiscountRequirement>) => {
+                    arr.merge(patch);
+                    addRequirementsPatch(arr);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function editRequirement(discountRequirement: DiscountRequirement) {
+    present({
+        components: [
+            new ComponentWithProperties(EditDiscountRequirementView, {
+                isNew: false,
+                discountRequirement: discountRequirement,
+                webshop: props.webshop,
+                saveHandler: (patch: PatchableArrayAutoEncoder<DiscountRequirement>) => {
+                    addRequirementsPatch(patch);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function addProductDiscount() {
+    const productDiscount = ProductDiscountSettings.create({
+        product: ProductSelector.create({
+            productId: props.webshop.products[0].id,
+        }),
+    });
+    const arr: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
+    arr.addPut(productDiscount);
+
+    present({
+        components: [
+            new ComponentWithProperties(EditProductDiscountView, {
+                isNew: true,
+                productDiscount,
+                webshop: props.webshop,
+                saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => {
+                    arr.merge(patch);
+                    addProductDiscountPatch(arr);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function editProductDiscount(productDiscount: ProductDiscountSettings) {
+    present({
+        components: [
+            new ComponentWithProperties(EditProductDiscountView, {
+                isNew: false,
+                productDiscount,
+                webshop: props.webshop,
+                saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => {
+                    addProductDiscountPatch(patch);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+async function save() {
+    const isValid = await errors.validator.validate();
+    if (!isValid) {
+        return;
+    }
+    const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
+    p.addPatch(patchDiscount.value);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze korting wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+
+    const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
+    p.addDelete(props.discount.id);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
