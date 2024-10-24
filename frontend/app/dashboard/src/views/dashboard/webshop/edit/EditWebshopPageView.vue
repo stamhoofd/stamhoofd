@@ -1,8 +1,8 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" class="webshop-view-page" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Titel" error-fields="meta.title" :error-box="errorBox">
+        <STErrorsDefault :error-box="errors.errorBox" />
+        <STInputBox title="Titel" error-fields="meta.title" :error-box="errors.errorBox">
             <input
                 v-model="title"
                 class="input"
@@ -12,7 +12,7 @@
             >
         </STInputBox>
 
-        <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errorBox" class="max">
+        <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errors.errorBox" class="max">
             <WYSIWYGTextInput
                 v-model="description"
                 placeholder="Beschrijving die op jouw webshop staat"
@@ -66,7 +66,7 @@
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
         </figure>
 
-        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
+        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="errors.validator" :error-box="errors.errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
 
         <hr>
         <h2 class="style-with-button">
@@ -80,7 +80,7 @@
         <p v-if="policies.length === 0" class="info-box">
             Je hebt momenteel geen externe links toegevoegd.
         </p>
-        <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
+        <p v-if="policies.length > 0 && (organization?.meta.privacyPolicyFile || organization?.meta.privacyPolicyUrl)" class="warning-box">
             De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
         </p>
 
@@ -90,12 +90,12 @@
             Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen → Personaliseren. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.
         </p>
 
-        <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Standaardkleur" :required="false" :disallowed="['#FFFFFF']" />
+        <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="errors.validator" placeholder="Standaardkleur" :required="false" :disallowed="['#FFFFFF']" />
         <p class="style-description-small">
             Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je vereniging te behouden (bij algemene instellingen > personalisatie).
         </p>
 
-        <STInputBox title="Donkere mode" error-fields="meta.darkMode" :error-box="errorBox" class="max">
+        <STInputBox title="Donkere mode" error-fields="meta.darkMode" :error-box="errors.errorBox" class="max">
             <RadioGroup>
                 <Radio v-model="darkMode" :value="'Off'">
                     Uit
@@ -122,7 +122,7 @@
             Logo van vereniging gebruiken
         </Checkbox>
 
-        <LogoEditor v-if="useLogo" :meta-data="webshop.meta" :validator="validator" :dark-mode="darkMode" @patch="addMetaPatch" />
+        <LogoEditor v-if="useLogo" :meta-data="webshop.meta" :validator="errors.validator" :dark-mode="darkMode" @patch="addMetaPatch" />
 
         <template v-if="hasTickets">
             <hr>
@@ -147,246 +147,198 @@
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, useOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import EditSponsorsBox from '../../sponsors/EditSponsorsBox.vue';
 import EditPolicyBox from './EditPolicyBox.vue';
-import EditWebshopMixin from './EditWebshopMixin';
+import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 
-@Component({
-    components: {
-        STInputBox,
-        STErrorsDefault,
-        UploadButton,
-        EditPolicyBox,
-        SaveView,
-        STList,
-        STListItem,
-        Radio,
-        RadioGroup,
-        WYSIWYGTextInput,
-        LogoEditor,
-        ColorInput,
-        EditSponsorsBox,
-        Checkbox,
-    },
-})
-export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
-    get organization() {
-        return this.$organization;
-    }
+const props = defineProps<UseEditWebshopProps>();
 
-    get viewTitle() {
-        return 'Webshop pagina wijzigen';
-    }
+const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+    getProps: () => props,
+});
+const present = usePresent();
+const organization = useOrganization();
+const viewTitle = 'Webshop pagina wijzigen';
 
-    get hasTickets() {
-        return this.webshop.hasTickets;
-    }
+const hasTickets = computed(() => webshop.value.hasTickets);
 
-    addMetaPatch(patch: AutoEncoderPatchType<WebshopMetaData>) {
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
-    }
+function addMetaPatch(patch: AutoEncoderPatchType<WebshopMetaData>) {
+    addPatch(PrivateWebshop.patch({ meta: patch }));
+}
 
-    patchPolicy(policy: Policy, patch: AutoEncoderPatchType<Policy>) {
-        const p = WebshopMetaData.patch({});
-        patch.id = policy.id;
-        p.policies.addPatch(patch);
-        this.addPatch(PrivateWebshop.patch({ meta: p }));
-    }
+function patchPolicy(policy: Policy, patch: AutoEncoderPatchType<Policy>) {
+    const p = WebshopMetaData.patch({});
+    patch.id = policy.id;
+    p.policies.addPatch(patch);
+    addPatch(PrivateWebshop.patch({ meta: p }));
+}
 
-    deletePolicy(policy: Policy) {
-        const p = WebshopMetaData.patch({});
-        p.policies.addDelete(policy.id);
-        this.addPatch(PrivateWebshop.patch({ meta: p }));
-    }
+function deletePolicy(policy: Policy) {
+    const p = WebshopMetaData.patch({});
+    p.policies.addDelete(policy.id);
+    addPatch(PrivateWebshop.patch({ meta: p }));
+}
 
-    addPolicy() {
-        const p = WebshopMetaData.patch({});
-        p.policies.addPut(Policy.create({}));
-        this.addPatch(PrivateWebshop.patch({ meta: p }));
-    }
+function addPolicy() {
+    const p = WebshopMetaData.patch({});
+    p.policies.addPut(Policy.create({}));
+    addPatch(PrivateWebshop.patch({ meta: p }));
+}
 
-    get policies() {
-        return this.webshop.meta.policies;
-    }
-
-    get title() {
-        return this.webshop.meta.title;
-    }
-
-    set title(title: string) {
+const policies = computed(() => webshop.value.meta.policies);
+const title = computed({
+    get: () => webshop.value.meta.title,
+    set: (title: string) => {
         const patch = WebshopMetaData.patch({ title });
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
-    }
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
 
-    get description() {
-        return this.webshop.meta.description;
-    }
-
-    set description(description: RichText) {
+const description = computed({
+    get: () => webshop.value.meta.description,
+    set: (description: RichText) => {
         const patch = WebshopMetaData.patch({ description });
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
-    }
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
 
-    get reduceBranding() {
-        return this.webshop.meta.reduceBranding;
-    }
-
-    set reduceBranding(reduceBranding: boolean) {
+const reduceBranding = computed({
+    get: () => webshop.value.meta.reduceBranding,
+    set: (reduceBranding: boolean) => {
         const patch = WebshopMetaData.patch({ reduceBranding });
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
-    }
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
 
-    get WebshopLayout() {
-        return WebshopLayout;
-    }
-
-    get layout() {
-        return this.webshop.meta.layout;
-    }
-
-    set layout(layout: WebshopLayout) {
+const layout = computed({
+    get: () => webshop.value.meta.layout,
+    set: (layout: WebshopLayout) => {
         const patch = WebshopMetaData.patch({ layout });
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
-    }
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
 
-    get defaultColor() {
-        return this.organization.meta.color ?? null;
-    }
-
-    get color() {
-        return this.webshop.meta.color;
-    }
-
-    set color(color: string | null) {
+const color = computed({
+    get: () => webshop.value.meta.color,
+    set: (color: string | null) => {
         const patch = WebshopMetaData.patch({ color });
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
-    }
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
 
-    get darkMode() {
-        return this.webshop.meta.darkMode;
-    }
-
-    set darkMode(darkMode: DarkMode) {
+const darkMode = computed({
+    get: () => webshop.value.meta.darkMode,
+    set: (darkMode: DarkMode) => {
         const patch = WebshopMetaData.patch({ darkMode });
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
-    }
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
 
-    get useLogo() {
-        return this.webshop.meta.useLogo;
-    }
+const useLogo = computed({
+    get: () => webshop.value.meta.useLogo,
+    set: (useLogo: boolean) => {
+        addMetaPatch(WebshopMetaData.patch({ useLogo }));
+    },
+});
 
-    set useLogo(useLogo: boolean) {
-        this.addMetaPatch(WebshopMetaData.patch({ useLogo }));
-    }
+const defaultColor = computed(() => organization.value?.meta.color ?? null);
 
-    get coverPhoto() {
-        return this.webshop.meta.coverPhoto;
-    }
-
-    set coverPhoto(coverPhoto: Image | null) {
+const coverPhoto = computed({
+    get: () => webshop.value.meta.coverPhoto,
+    set: (coverPhoto: Image | null) => {
         const patch = WebshopMetaData.patch({ coverPhoto });
-        this.addPatch(PrivateWebshop.patch({ meta: patch }));
+        addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
+
+const hs = [
+    ResolutionRequest.create({
+        width: 1800,
+    }),
+    ResolutionRequest.create({
+        width: 900,
+    }),
+];
+
+const coverPhotoResolution = computed(() => {
+    const image = coverPhoto.value;
+    if (!image) {
+        return null;
+    }
+    return image.getResolutionForSize(800, 200);
+});
+
+const coverPhotoSrc = computed(() => {
+    const image = coverPhoto.value;
+    if (!image) {
+        return null;
+    }
+    return coverPhotoResolution.value?.file.getPublicPath();
+});
+
+const coverImageWidth = computed(() => coverPhotoResolution.value?.width);
+const coverImageHeight = computed(() => coverPhotoResolution.value?.height);
+const sponsorConfig = computed(() => webshop.value.meta.sponsors);
+
+function patchSponsorConfig(config: AutoEncoderPatchType<SponsorConfig> | null) {
+    addMetaPatch(WebshopMetaData.patch({ sponsors: config }));
+}
+
+function previewTicket() {
+    // Example product:
+    const product = webshop.value.products.find(p => p.type === ProductType.Ticket) ?? webshop.value.products[0];
+
+    if (!product) {
+        new Toast('Voeg ten minste één ticket toe aan je webshop om een voorbeeld van een ticket te bekijken', 'error red').show();
+        return;
+    }
+    const cart = Cart.create({});
+    const item = CartItem.createDefault(product, cart, webshop.value, { admin: true });
+
+    const seatingPlan = product.seatingPlanId ? webshop.value.meta.seatingPlans.find(s => s.id === product.seatingPlanId) : null;
+    const section = seatingPlan ? seatingPlan.sections[0] : null;
+    const row = section ? section.rows.filter(r => r.label && r.seatCount > 0)[Math.floor(section.rows.filter(r => r.label && r.seatCount > 0).length / 2)] : null;
+    const seat = row ? row.seats.filter(s => s.isValidSeat)[Math.floor(row.seats.filter(s => s.isValidSeat).length / 2)] : null;
+
+    const reservedSeat = seat
+        ? CartReservedSeat.create({
+            section: section!.id,
+            row: row!.label,
+            seat: seat.label,
+        })
+        : null;
+
+    if (reservedSeat && seatingPlan) {
+        reservedSeat.calculatePrice(seatingPlan);
     }
 
-    get hs() {
-        return [
-            ResolutionRequest.create({
-                width: 1800,
-            }),
-            ResolutionRequest.create({
-                width: 900,
-            }),
-        ];
-    }
+    const ticket = TicketPublic.create({
+        items: [item],
+        secret: 'VRBLDTICKET',
+        index: 1,
+        total: 1,
+        seat: reservedSeat,
+    });
 
-    get coverPhotoResolution() {
-        const image = this.coverPhoto;
-        if (!image) {
-            return null;
-        }
-        return image.getResolutionForSize(800, 200);
-    }
-
-    get coverPhotoSrc() {
-        const image = this.coverPhoto;
-        if (!image) {
-            return null;
-        }
-        return this.coverPhotoResolution?.file.getPublicPath();
-    }
-
-    get coverImageWidth() {
-        return this.coverPhotoResolution?.width;
-    }
-
-    get coverImageHeight() {
-        return this.coverPhotoResolution?.height;
-    }
-
-    get sponsorConfig() {
-        return this.webshop.meta.sponsors;
-    }
-
-    patchSponsorConfig(config: AutoEncoderPatchType<SponsorConfig> | null) {
-        this.addMetaPatch(WebshopMetaData.patch({ sponsors: config }));
-    }
-
-    previewTicket() {
-        // Example product:
-        const product = this.webshop.products.find(p => p.type === ProductType.Ticket) ?? this.webshop.products[0];
-
-        if (!product) {
-            new Toast('Voeg ten minste één ticket toe aan je webshop om een voorbeeld van een ticket te bekijken', 'error red').show();
-            return;
-        }
-        const cart = Cart.create({});
-        const item = CartItem.createDefault(product, cart, this.webshop, { admin: true });
-
-        const seatingPlan = product.seatingPlanId ? this.webshop.meta.seatingPlans.find(s => s.id === product.seatingPlanId) : null;
-        const section = seatingPlan ? seatingPlan.sections[0] : null;
-        const row = section ? section.rows.filter(r => r.label && r.seatCount > 0)[Math.floor(section.rows.filter(r => r.label && r.seatCount > 0).length / 2)] : null;
-        const seat = row ? row.seats.filter(s => s.isValidSeat)[Math.floor(row.seats.filter(s => s.isValidSeat).length / 2)] : null;
-
-        const reservedSeat = seat
-            ? CartReservedSeat.create({
-                section: section!.id,
-                row: row!.label,
-                seat: seat.label,
-            })
-            : null;
-
-        if (reservedSeat && seatingPlan) {
-            reservedSeat.calculatePrice(seatingPlan);
-        }
-
-        const ticket = TicketPublic.create({
-            items: [item],
-            secret: 'VRBLDTICKET',
-            index: 1,
-            total: 1,
-            seat: reservedSeat,
-        });
-
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(DetailedTicketView, {
-                        organization: this.organization,
-                        webshop: this.webshop,
-                        ticket,
-                    }),
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(DetailedTicketView, {
+                    organization: organization.value,
+                    webshop: webshop.value,
+                    ticket,
                 }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
-    }
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
 }
 </script>
 
