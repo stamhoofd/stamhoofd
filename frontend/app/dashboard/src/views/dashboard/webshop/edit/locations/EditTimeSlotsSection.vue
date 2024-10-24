@@ -41,67 +41,53 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { STList, STListItem } from '@stamhoofd/components';
 import { PrivateWebshop, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed } from 'vue';
 import EditTimeSlotView from './EditTimeSlotView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STListItem,
-        STList,
-    },
-    filters: {
-        date: Formatter.date.bind(Formatter),
-        minutes: Formatter.minutes.bind(Formatter),
-    },
-})
-export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    title!: string;
-
-    @Prop({ required: true })
-    timeSlots!: WebshopTimeSlots;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    title: string;
+    timeSlots: WebshopTimeSlots;
     webshop: PrivateWebshop;
+}>();
 
-    addPatch(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
-        this.$emit('patch', patch);
-    }
+const present = usePresent();
 
-    get sortedSlots() {
-        return this.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort);
-    }
+const emits = defineEmits<{
+    (e: 'patch', patch: AutoEncoderPatchType<WebshopTimeSlots>): void;
+}>();
 
-    addTimeSlot() {
-        const timeSlot = WebshopTimeSlot.create({
-            date: new Date(),
-        });
-        const p = WebshopTimeSlots.patch({});
-        p.timeSlots.addPut(timeSlot);
+function addPatch(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
+    emits('patch', patch);
+}
 
-        this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots.patch(p), isNew: true, webshop: this.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
-            // Merge both patches
-            this.addPatch(p.patch(patch));
+const sortedSlots = computed(() => props.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort));
 
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('sheet'));
-    }
+function addTimeSlot() {
+    const timeSlot = WebshopTimeSlot.create({
+        date: new Date(),
+    });
+    const p = WebshopTimeSlots.patch({});
+    p.timeSlots.addPut(timeSlot);
 
-    editTimeSlot(timeSlot: WebshopTimeSlot) {
-        this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots, isNew: false, webshop: this.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
-            this.addPatch(patch);
+    present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: props.timeSlots.patch(p), isNew: true, webshop: props.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
+        // Merge both patches
+        addPatch(p.patch(patch));
 
-            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        } }).setDisplayStyle('sheet'));
-    }
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('sheet')).catch(console.error);
+}
+
+function editTimeSlot(timeSlot: WebshopTimeSlot) {
+    present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: props.timeSlots, isNew: false, webshop: props.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
+        addPatch(patch);
+
+        // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+    } }).setDisplayStyle('sheet')).catch(console.error);
 }
 </script>
