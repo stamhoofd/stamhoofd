@@ -1,6 +1,6 @@
 <template>
     <div class="product-selector-box">
-        <STInputBox title="Artikel" error-fields="productId" :error-box="errorBox" class="max">
+        <STInputBox title="Artikel" error-fields="productId" :error-box="errors.errorBox" class="max">
             <div class="style-input-box" @click="changeProduct">
                 <STList v-if="product">
                     <STListItem :selectable="true">
@@ -25,7 +25,7 @@
             </div>
         </STInputBox>
 
-        <STInputBox v-if="product && product.prices.length > 1" title="Prijskeuzes" error-fields="productPriceIds" :error-box="errorBox" class="max">
+        <STInputBox v-if="product && product.prices.length > 1" title="Prijskeuzes" error-fields="productPriceIds" :error-box="errors.errorBox" class="max">
             <STList>
                 <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
                     <template #left>
@@ -39,7 +39,7 @@
             </STList>
         </STInputBox>
 
-        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errorBox" class="max">
+        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
                     <template #left>
@@ -62,184 +62,161 @@
     </div>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
+import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Checkbox, ContextMenu, ContextMenuItem, ErrorBox, ImageComponent, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
-import { Option, OptionMenu, OptionSelectionRequirementHelper } from '@stamhoofd/structures';
-import { OptionSelectionRequirement } from '@stamhoofd/structures';
-import { PrivateWebshop, Product, ProductPrice, ProductSelector } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { Checkbox, ContextMenu, ContextMenuItem, ErrorBox, ImageComponent, STInputBox, STList, STListItem, useErrors, useValidation, Validator } from '@stamhoofd/components';
+import { Option, OptionMenu, OptionSelectionRequirement, OptionSelectionRequirementHelper, PrivateWebshop, Product, ProductPrice, ProductSelector } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import ChooseProductView from './ChooseProductView.vue';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-        ImageComponent,
-        Checkbox,
-        STInputBox,
-    },
-})
-export default class ProductSelectorBox extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     webshop: PrivateWebshop;
-
-    @Prop({ required: true })
     productSelector: ProductSelector;
-
-    @Prop({ default: null })
     validator: Validator | null;
+}>(), {
+    validator: null,
+});
 
-    errorBox: ErrorBox | null = null;
+const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<ProductSelector>): void }>();
 
-    addPatch(patch: AutoEncoderPatchType<ProductSelector>) {
-        this.$emit('patch', patch);
-    }
+const present = usePresent();
+const errors = useErrors({ validator: props.validator });
 
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate();
-            });
-        }
-    }
+useValidation(errors.validator, () => {
+    return validate();
+});
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
-        }
-    }
+function addPatch(patch: AutoEncoderPatchType<ProductSelector>) {
+    emits('patch', patch);
+}
 
-    changeProduct() {
-        this.present({
-            components: [
-                new ComponentWithProperties(ChooseProductView, {
-                    webshop: this.webshop,
-                    selectedProductId: this.productSelector.productId,
-                    saveHandler: (product: Product) => {
-                        this.addPatch(ProductSelector.patch({
-                            productId: product.id,
-                            optionIds: new Map(),
-                        }));
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
-        });
-    }
-
-    async validate() {
-        if (!this.product) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                message: 'Kies een artikel',
-                field: 'productId',
-            }));
-            return false;
-        }
-
-        return true;
-    }
-
-    get product() {
-        return this.webshop.products.find(p => p.id === this.productSelector.productId);
-    }
-
-    isPriceSelected(price: ProductPrice) {
-        return this.productSelector.productPriceIds.includes(price.id) || this.productSelector.productPriceIds.length === 0;
-    }
-
-    setPriceSelected(price: ProductPrice, selected: boolean) {
-        let productPriceIds = this.productSelector.productPriceIds.filter(i => i !== price.id);
-        if (productPriceIds.length === 0 && this.product) {
-            productPriceIds = this.product!.prices.map(p => p.id).filter(i => i !== price.id);
-        }
-
-        if (selected) {
-            productPriceIds.push(price.id);
-        }
-
-        if (productPriceIds.length === this.product?.prices.length) {
-            productPriceIds = [];
-        }
-
-        this.addPatch(ProductSelector.patch({
-            productPriceIds: productPriceIds as any,
-        }));
-    }
-
-    getOptionRequirement(menu: OptionMenu, option: Option): OptionSelectionRequirement {
-        return this.productSelector.getOptionRequirement(menu, option);
-    }
-
-    setOptionRequirement(menu: OptionMenu, option: Option, requirement: OptionSelectionRequirement) {
-        const map = new Map(this.productSelector.optionIds);
-
-        map.set(option.id, requirement);
-
-        this.addPatch(ProductSelector.patch({
-            optionIds: map,
-        }));
-    }
-
-    isOptionSelected(menu: OptionMenu, option: Option): boolean {
-        return this.productSelector.getOptionRequirement(menu, option) !== OptionSelectionRequirement.Excluded;
-    }
-
-    setOptionSelected(menu: OptionMenu, option: Option, selected: boolean) {
-        const currentSelected = this.isOptionSelected(menu, option);
-
-        if (currentSelected === selected) {
-            return;
-        }
-
-        const map = new Map(this.productSelector.optionIds);
-
-        if (selected) {
-            map.set(option.id, OptionSelectionRequirement.Optional);
-        }
-        else {
-            map.set(option.id, OptionSelectionRequirement.Excluded);
-        }
-
-        this.addPatch(ProductSelector.patch({
-            optionIds: map,
-        }));
-    }
-
-    getRequirementName(requirement: OptionSelectionRequirement) {
-        return OptionSelectionRequirementHelper.getName(requirement);
-    }
-
-    showRequirementMenu(menu: OptionMenu, option: Option, event) {
-        const value = this.getOptionRequirement(menu, option);
-        let values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Required, OptionSelectionRequirement.Excluded];
-
-        if (!menu.multipleChoice) {
-            values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Excluded];
-        }
-
-        const c = new ContextMenu([
-            values.map((v) => {
-                return new ContextMenuItem({
-                    name: OptionSelectionRequirementHelper.getName(v),
-                    selected: v === value,
-                    action: () => {
-                        this.setOptionRequirement(menu, option, v);
-                        return true;
-                    },
-                });
+function changeProduct() {
+    present({
+        components: [
+            new ComponentWithProperties(ChooseProductView, {
+                webshop: props.webshop,
+                selectedProductId: props.productSelector.productId,
+                saveHandler: (product: Product) => {
+                    addPatch(ProductSelector.patch({
+                        productId: product.id,
+                        optionIds: new PatchMap(),
+                    }));
+                },
             }),
-        ]);
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
+}
 
-        c.show({
-            button: event.currentTarget,
-            xPlacement: 'left',
-            yPlacement: 'bottom',
-        }).catch(console.error);
+async function validate() {
+    if (!product.value) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: 'Kies een artikel',
+            field: 'productId',
+        }));
+        return false;
     }
+
+    return true;
+}
+
+const product = computed(() => props.webshop.products.find(p => p.id === props.productSelector.productId)!);
+
+function isPriceSelected(price: ProductPrice) {
+    return props.productSelector.productPriceIds.includes(price.id) || props.productSelector.productPriceIds.length === 0;
+}
+
+function setPriceSelected(price: ProductPrice, selected: boolean) {
+    let productPriceIds = props.productSelector.productPriceIds.filter(i => i !== price.id);
+    if (productPriceIds.length === 0 && product.value) {
+        productPriceIds = product.value!.prices.map(p => p.id).filter(i => i !== price.id);
+    }
+
+    if (selected) {
+        productPriceIds.push(price.id);
+    }
+
+    if (productPriceIds.length === product.value?.prices.length) {
+        productPriceIds = [];
+    }
+
+    addPatch(ProductSelector.patch({
+        productPriceIds: productPriceIds as any,
+    }));
+}
+
+function getOptionRequirement(menu: OptionMenu, option: Option): OptionSelectionRequirement {
+    return props.productSelector.getOptionRequirement(menu, option);
+}
+
+function setOptionRequirement(menu: OptionMenu, option: Option, requirement: OptionSelectionRequirement) {
+    const map = new PatchMap(props.productSelector.optionIds);
+
+    map.set(option.id, requirement);
+
+    addPatch(ProductSelector.patch({
+        optionIds: map,
+    }));
+}
+
+function isOptionSelected(menu: OptionMenu, option: Option): boolean {
+    return props.productSelector.getOptionRequirement(menu, option) !== OptionSelectionRequirement.Excluded;
+}
+
+function setOptionSelected(menu: OptionMenu, option: Option, selected: boolean) {
+    const currentSelected = isOptionSelected(menu, option);
+
+    if (currentSelected === selected) {
+        return;
+    }
+
+    const map = new PatchMap(props.productSelector.optionIds);
+
+    if (selected) {
+        map.set(option.id, OptionSelectionRequirement.Optional);
+    }
+    else {
+        map.set(option.id, OptionSelectionRequirement.Excluded);
+    }
+
+    addPatch(ProductSelector.patch({
+        optionIds: map,
+    }));
+}
+
+function getRequirementName(requirement: OptionSelectionRequirement) {
+    return OptionSelectionRequirementHelper.getName(requirement);
+}
+
+function showRequirementMenu(menu: OptionMenu, option: Option, event: MouseEvent | TouchEvent) {
+    const value = getOptionRequirement(menu, option);
+    let values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Required, OptionSelectionRequirement.Excluded];
+
+    if (!menu.multipleChoice) {
+        values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Excluded];
+    }
+
+    const c = new ContextMenu([
+        values.map((v) => {
+            return new ContextMenuItem({
+                name: OptionSelectionRequirementHelper.getName(v),
+                selected: v === value,
+                action: () => {
+                    setOptionRequirement(menu, option, v);
+                    return true;
+                },
+            });
+        }),
+    ]);
+
+    c.show({
+        button: event.currentTarget as HTMLElement,
+        xPlacement: 'left',
+        yPlacement: 'bottom',
+    }).catch(console.error);
 }
 </script>
 
