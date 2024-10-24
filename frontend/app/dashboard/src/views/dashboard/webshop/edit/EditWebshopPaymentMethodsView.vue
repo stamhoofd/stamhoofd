@@ -3,76 +3,57 @@
         <h1>{{ viewTitle }}</h1>
         <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">deze pagina</a>.</p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <EditPaymentMethodsBox
             type="webshop"
             :organization="organization"
             :config="config"
             :private-config="privateConfig"
-            :validator="validator"
+            :validator="errors.validator"
             @patch:config="patchConfig($event)"
             @patch:private-config="patchPrivateConfig($event)"
         />
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { SaveView, STErrorsDefault, STInputBox } from '@stamhoofd/components';
-import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { SaveView, STErrorsDefault, useOrganization } from '@stamhoofd/components';
+import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
-import EditWebshopMixin from './EditWebshopMixin';
+import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 
-@Component({
-    components: {
-        STInputBox,
-        STErrorsDefault,
-        EditPaymentMethodsBox,
-        SaveView,
-    },
-})
-export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMixin) {
-    get viewTitle() {
-        return 'Betaalmethodes';
-    }
+const props = defineProps<UseEditWebshopProps>();
 
-    get isAnyTicketType() {
-        return (this.webshop.meta.ticketType !== WebshopTicketType.None);
-    }
+const organization = useOrganization();
+const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+    getProps: () => props,
+});
 
-    get config() {
-        return this.webshop.meta.paymentConfiguration;
-    }
+const viewTitle = 'Betaalmethodes';
+const config = computed(() => webshop.value.meta.paymentConfiguration);
+const privateConfig = computed(() => webshop.value.privateMeta.paymentConfiguration);
 
-    patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
-        this.addPatch(
-            PrivateWebshop.patch({
-                meta: WebshopMetaData.patch({
-                    paymentConfiguration: patch,
-                }),
+function patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
+    addPatch(
+        PrivateWebshop.patch({
+            meta: WebshopMetaData.patch({
+                paymentConfiguration: patch,
             }),
-        );
-    }
+        }),
+    );
+}
 
-    get privateConfig() {
-        return this.webshop.privateMeta.paymentConfiguration;
-    }
-
-    patchPrivateConfig(patch: PrivatePaymentConfiguration) {
-        this.addPatch(
-            PrivateWebshop.patch({
-                privateMeta: WebshopPrivateMetaData.patch({
-                    paymentConfiguration: patch,
-                }),
+function patchPrivateConfig(patch: PrivatePaymentConfiguration) {
+    addPatch(
+        PrivateWebshop.patch({
+            privateMeta: WebshopPrivateMetaData.patch({
+                paymentConfiguration: patch,
             }),
-        );
-    }
-
-    get organization() {
-        return this.$context.organization!;
-    }
+        }),
+    );
 }
 </script>
