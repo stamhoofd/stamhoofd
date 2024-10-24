@@ -7,42 +7,35 @@
             Deze functie is verouderd. Als je alle vrije invoervelden wist, en daarna opslaat, kan je gebruik maken van uitgebreidere vragenlijsten.
         </p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
         <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
     </SaveView>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SaveView, STErrorsDefault } from '@stamhoofd/components';
 import { PrivateWebshop, WebshopField, WebshopMetaData } from '@stamhoofd/structures';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 
-import EditWebshopMixin from './EditWebshopMixin';
+import { computed } from 'vue';
 import WebshopFieldsBox from './fields/WebshopFieldsBox.vue';
+import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 
-@Component({
-    components: {
-        STErrorsDefault,
-        WebshopFieldsBox,
-        SaveView,
-    },
-})
-export default class EditWebshopInputFieldsView extends Mixins(EditWebshopMixin) {
-    get viewTitle() {
-        return 'Vrije invoervelden';
-    }
+const viewTitle = 'Vrije invoervelden';
 
-    get fields() {
-        return this.webshop.meta.customFields;
-    }
+const props = defineProps<UseEditWebshopProps>();
 
-    addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
-        this.addPatch(PrivateWebshop.patch({
-            meta: WebshopMetaData.patch({
-                customFields: patch,
-            }),
-        }));
-    }
+const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+    getProps: () => props,
+});
+
+const fields = computed(() => webshop.value.meta.customFields);
+
+function addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
+    addPatch(PrivateWebshop.patch({
+        meta: WebshopMetaData.patch({
+            customFields: patch,
+        }),
+    }));
 }
 </script>
