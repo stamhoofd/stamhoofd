@@ -7,9 +7,9 @@
             Productkorting bewerken
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="validator" @patch="patchProductSelector" />
+        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
         <hr>
         <h2>Korting</h2>
@@ -18,7 +18,7 @@
         </p>
 
         <div v-for="(d, index) in discounts" :key="d.id">
-            <STInputBox :title="discounts.length === 1 ? 'Korting' : 'Korting op '+(index+1)+'e stuk' + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' en verder' : '')" :error-box="errorBox" class="max">
+            <STInputBox :title="discounts.length === 1 ? 'Korting' : 'Korting op '+(index+1)+'e stuk' + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' en verder' : '')" :error-box="errors.errorBox" class="max">
                 <template v-if="discounts.length > 1" #right>
                     <button class="button icon trash gray" type="button" @click="removeDiscount(d)" />
                 </template>
@@ -50,7 +50,7 @@
             </button>
         </p>
 
-        <!--<STInputBox title="Kortingpercentage" error-fields="percentageDiscount" :error-box="errorBox" class="max">
+        <!--<STInputBox title="Kortingpercentage" error-fields="percentageDiscount" :error-box="errors.errorBox" class="max">
             <PermyriadInput
                 v-model="percentageDiscount"
                 :required="true"
@@ -104,7 +104,7 @@
         <h2>Zichtbaarheid (optioneel)</h2>
         <p>Als deze korting wordt toegepast op een item in een winkelmandje kan je bij dat item een label tonen (bv. 'BLACK FRIDAY'). Hou dit label kort, bij voorkeur 1 woord.</p>
 
-        <STInputBox title="Label" error-fields="cartLabel" :error-box="errorBox">
+        <STInputBox title="Label" error-fields="cartLabel" :error-box="errors.errorBox">
             <input
                 v-model="cartLabel"
                 class="input"
@@ -128,203 +128,157 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, NumberInput, PermyriadInput, PriceInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
-import { PrivateWebshop, ProductDiscount, ProductDiscountRepeatBehaviour, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Dropdown, PermyriadInput, PriceInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, usePatch } from '@stamhoofd/components';
+import { PrivateWebshop, ProductDiscount, ProductDiscountRepeatBehaviour, ProductDiscountSettings, ProductSelector } from '@stamhoofd/structures';
 
+import { computed, ref } from 'vue';
 import ProductSelectorBox from './ProductSelectorBox.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        NumberInput,
-        STList,
-        STListItem,
-        PermyriadInput,
-        PriceInput,
-        Checkbox,
-        ProductSelectorBox,
-        Dropdown,
-        Radio,
-    },
-})
-export default class EditProductDiscountView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-
-    @Prop({ required: true })
-    productDiscount!: ProductDiscountSettings;
-
-    @Prop({ required: true })
-    isNew!: boolean;
-
-    @Prop({ required: true })
+const props = defineProps<{
+    productDiscount: ProductDiscountSettings;
+    isNew: boolean;
     webshop: PrivateWebshop;
-
-    /// For now only used to update locations and times of other products that are shared
-    patchProductDiscount: AutoEncoderPatchType<ProductDiscountSettings> = ProductDiscountSettings.patch({ id: this.productDiscount.id });
-    cachedDiscountType: Map<string, 'percentageDiscount' | 'discountPerPiece'> = new Map();
-
-    /**
-     * If we can immediately save this product, then you can create a save handler and pass along the changes.
-     */
-    @Prop({ required: true })
+    // If we can immediately save this product, then you can create a save handler and pass along the changes.
     saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => void;
+}>();
+const errors = useErrors();
+const pop = usePop();
 
-    get patchedProductDiscount() {
-        return this.productDiscount.patch(this.patchProductDiscount);
-    }
+const { patch: patchProductDiscount, patched: patchedProductDiscount, addPatch, hasChanges } = usePatch(props.productDiscount);
 
-    get organization() {
-        return this.$organization;
-    }
+const cachedDiscountType = ref<Map<string, 'percentageDiscount' | 'discountPerPiece'>>(new Map());
+const productSelector = computed(() => patchedProductDiscount.value.product);
 
-    get productSelector() {
-        return this.patchedProductDiscount.product;
-    }
+function patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
+    addPatch(ProductDiscountSettings.patch({
+        product: patch,
+    }));
+}
 
-    patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
-        this.addPatch(ProductDiscountSettings.patch({
-            product: patch,
-        }));
-    }
+const discounts = computed(() => patchedProductDiscount.value.discounts as unknown as ProductDiscount[]);
 
-    addPatch(patch: AutoEncoderPatchType<ProductDiscountSettings>) {
-        this.patchProductDiscount = this.patchProductDiscount.patch(patch);
-    }
-
-    get discounts() {
-        return this.patchedProductDiscount.discounts;
-    }
-
-    get repeatBehaviour() {
-        return this.patchedProductDiscount.repeatBehaviour;
-    }
-
-    set repeatBehaviour(repeatBehaviour: ProductDiscountRepeatBehaviour) {
-        this.addPatch(ProductDiscountSettings.patch({
+const repeatBehaviour = computed({
+    get: () => patchedProductDiscount.value.repeatBehaviour,
+    set: (repeatBehaviour: ProductDiscountRepeatBehaviour | undefined) => {
+        addPatch(ProductDiscountSettings.patch({
             repeatBehaviour,
         }));
-    }
+    } });
 
-    get cartLabel() {
-        return this.patchedProductDiscount.cartLabel ?? '';
-    }
-
-    set cartLabel(cartLabel: string) {
-        this.addPatch(ProductDiscountSettings.patch({
+const cartLabel = computed({
+    get: () => patchedProductDiscount.value.cartLabel ?? '',
+    set: (cartLabel: string) => {
+        addPatch(ProductDiscountSettings.patch({
             cartLabel: cartLabel || null,
         }));
+    },
+});
+
+function getDiscountType(d: ProductDiscount) {
+    if (cachedDiscountType.value.has(d.id)) {
+        return cachedDiscountType.value.get(d.id);
     }
 
-    getDiscountType(d: ProductDiscount) {
-        if (this.cachedDiscountType.has(d.id)) {
-            return this.cachedDiscountType.get(d.id);
-        }
-
-        if (d.discountPerPiece > 0) {
-            return 'discountPerPiece';
-        }
-        return 'percentageDiscount';
+    if (d.discountPerPiece > 0) {
+        return 'discountPerPiece';
     }
+    return 'percentageDiscount';
+}
 
-    setDiscountType(d: ProductDiscount, type: 'percentageDiscount' | 'discountPerPiece') {
-        this.cachedDiscountType.set(d.id, type);
+function setDiscountType(d: ProductDiscount, type: 'percentageDiscount' | 'discountPerPiece') {
+    cachedDiscountType.value.set(d.id, type);
 
-        const p = ProductDiscountSettings.patch({});
-        if (type === 'percentageDiscount') {
-            p.discounts.addPatch(ProductDiscount.patch({
-                id: d.id,
-                percentageDiscount: Math.min(100, this.getDiscountDiscountPerPiece(d)),
-                discountPerPiece: 0,
-            }));
-        }
-        else {
-            p.discounts.addPatch(ProductDiscount.patch({
-                id: d.id,
-                percentageDiscount: 0,
-                discountPerPiece: Math.max(1, this.getDiscountPercentageDiscount(d)),
-            }));
-        }
-        this.addPatch(p);
+    const p = ProductDiscountSettings.patch({});
+    if (type === 'percentageDiscount') {
+        p.discounts.addPatch(ProductDiscount.patch({
+            id: d.id,
+            percentageDiscount: Math.min(100, getDiscountDiscountPerPiece(d)),
+            discountPerPiece: 0,
+        }));
     }
-
-    getDiscountDiscountPerPiece(d: ProductDiscount) {
-        return d.discountPerPiece;
-    }
-
-    setDiscountDiscountPerPiece(d: ProductDiscount, discountPerPiece: number) {
-        const p = ProductDiscountSettings.patch({});
+    else {
         p.discounts.addPatch(ProductDiscount.patch({
             id: d.id,
             percentageDiscount: 0,
-            discountPerPiece: discountPerPiece,
+            discountPerPiece: Math.max(1, getDiscountPercentageDiscount(d)),
         }));
-        this.addPatch(p);
     }
-
-    getDiscountPercentageDiscount(d: ProductDiscount) {
-        return d.percentageDiscount;
-    }
-
-    setDiscountPercentageDiscount(d: ProductDiscount, percentageDiscount: number) {
-        const p = ProductDiscountSettings.patch({});
-        p.discounts.addPatch(ProductDiscount.patch({
-            id: d.id,
-            percentageDiscount,
-            discountPerPiece: 0,
-        }));
-        this.addPatch(p);
-    }
-
-    addDiscount() {
-        const p = ProductDiscountSettings.patch({});
-        p.discounts.addPut(ProductDiscount.create({}));
-        this.addPatch(p);
-    }
-
-    removeDiscount(discount: ProductDiscount) {
-        const p = ProductDiscountSettings.patch({});
-        p.discounts.addDelete(discount.id);
-        this.addPatch(p);
-    }
-
-    async save() {
-        const isValid = await this.validator.validate();
-        if (!isValid) {
-            return;
-        }
-        const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
-        p.addPatch(this.patchProductDiscount);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je deze korting wilt verwijderen?', 'Verwijderen')) {
-            return;
-        }
-
-        const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
-        p.addDelete(this.productDiscount.id);
-        this.saveHandler(p);
-        this.pop({ force: true });
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchProductDiscount, this.productDiscount, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
-    }
+    addPatch(p);
 }
+
+function getDiscountDiscountPerPiece(d: ProductDiscount) {
+    return d.discountPerPiece;
+}
+
+function setDiscountDiscountPerPiece(d: ProductDiscount, discountPerPiece: number) {
+    const p = ProductDiscountSettings.patch({});
+    p.discounts.addPatch(ProductDiscount.patch({
+        id: d.id,
+        percentageDiscount: 0,
+        discountPerPiece: discountPerPiece,
+    }));
+    addPatch(p);
+}
+
+function getDiscountPercentageDiscount(d: ProductDiscount) {
+    return d.percentageDiscount;
+}
+
+function setDiscountPercentageDiscount(d: ProductDiscount, percentageDiscount: number) {
+    const p = ProductDiscountSettings.patch({});
+    p.discounts.addPatch(ProductDiscount.patch({
+        id: d.id,
+        percentageDiscount,
+        discountPerPiece: 0,
+    }));
+    addPatch(p);
+}
+
+function addDiscount() {
+    const p = ProductDiscountSettings.patch({});
+    p.discounts.addPut(ProductDiscount.create({}));
+    addPatch(p);
+}
+
+function removeDiscount(discount: ProductDiscount) {
+    const p = ProductDiscountSettings.patch({});
+    p.discounts.addDelete(discount.id);
+    addPatch(p);
+}
+
+async function save() {
+    const isValid = await errors.validator.validate();
+    if (!isValid) {
+        return;
+    }
+    const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
+    p.addPatch(patchProductDiscount.value);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze korting wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+
+    const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
+    p.addDelete(props.productDiscount.id);
+    props.saveHandler(p);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function shouldNavigateAway() {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
