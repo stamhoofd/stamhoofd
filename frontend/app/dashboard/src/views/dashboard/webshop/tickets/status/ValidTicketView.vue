@@ -496,7 +496,6 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
             present: usePresent(),
             organizationManager: this.$organizationManager,
             webshopManager: this.webshopManager,
-            component: this,
         });
     }
 

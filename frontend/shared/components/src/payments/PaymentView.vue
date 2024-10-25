@@ -121,7 +121,7 @@
 
             <hr>
             <h2>Facturatiegegevens</h2>
-            
+
             <p v-if="!payment.customer" class="info-box">
                 Deze betaling heeft geen facturatiegegevens.
             </p>
@@ -316,7 +316,7 @@
                         <p v-if="item.price < 0" class="style-tag">
                             Terugbetaling
                         </p>
-                        
+
                         <template #right>
                             <span class="style-price-base">{{ item.price === 0 ? 'Gratis' : formatPrice(item.price) }}</span>
                         </template>
@@ -330,46 +330,46 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors } from "@stamhoofd/components";
-import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors } from '@stamhoofd/components';
+import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel } from '@stamhoofd/structures';
 
-import { useRequestOwner } from "@stamhoofd/networking";
-import { Sorter } from "@stamhoofd/utility";
-import { computed, ref } from "vue";
-import PriceBreakdownBox from "../views/PriceBreakdownBox.vue";
+import { useRequestOwner } from '@stamhoofd/networking';
+import { Sorter } from '@stamhoofd/utility';
+import { computed, ref } from 'vue';
+import PriceBreakdownBox from '../views/PriceBreakdownBox.vue';
 
 const props = withDefaults(
     defineProps<{
-        payment: PaymentGeneral
-        getNext?: ((payment: PaymentGeneral) => PaymentGeneral | null) | null
-        getPrevious?: ((payment: PaymentGeneral) => PaymentGeneral | null) |  null
+        payment: PaymentGeneral;
+        getNext?: ((payment: PaymentGeneral) => PaymentGeneral | null) | null;
+        getPrevious?: ((payment: PaymentGeneral) => PaymentGeneral | null) | null;
     }>(), {
         getNext: null,
-        getPrevious: null
-    }
-)
+        getPrevious: null,
+    },
+);
 
-const {hasNext, hasPrevious, goBack, goForward} = useBackForward('payment', props)
-const errors = useErrors()
-const title =  PaymentMethodHelper.getNameCapitalized(props.payment.method ?? PaymentMethod.Unknown)
-const isManualMethod = props.payment.method === PaymentMethod.Transfer || props.payment.method === PaymentMethod.PointOfSale || props.payment.method === PaymentMethod.Unknown
+const { hasNext, hasPrevious, goBack, goForward } = useBackForward('payment', props);
+const errors = useErrors();
+const title = PaymentMethodHelper.getNameCapitalized(props.payment.method ?? PaymentMethod.Unknown);
+const isManualMethod = props.payment.method === PaymentMethod.Transfer || props.payment.method === PaymentMethod.PointOfSale || props.payment.method === PaymentMethod.Unknown;
 const auth = useAuth();
-const app = useAppContext()
-const canWrite = computed(() => app === 'dashboard' && auth.canAccessPayment(props.payment, PermissionLevel.Write))
+const app = useAppContext();
+const canWrite = computed(() => app === 'dashboard' && auth.canAccessPayment(props.payment, PermissionLevel.Write));
 const VATPercentage = 21; // todo
-const context = useContext()
-const owner = useRequestOwner()
-const markingPaid = ref(false)
+const context = useContext();
+const owner = useRequestOwner();
+const markingPaid = ref(false);
 
 const sortedItems = computed(() => {
     return props.payment.balanceItemPayments.slice().sort((a, b) => {
         return Sorter.stack(
             Sorter.byNumberValue(a.price, b.price),
-            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.description, b.itemDescription ?? b.balanceItem.description)
-        )
-    })
-})
+            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.description, b.itemDescription ?? b.balanceItem.description),
+        );
+    });
+});
 
 async function reload() {
     try {
@@ -378,53 +378,55 @@ async function reload() {
             path: `/payments/${props.payment.id}`,
             decoder: PaymentGeneral as Decoder<PaymentGeneral>,
             owner,
-            shouldRetry: true
+            shouldRetry: true,
         });
         props.payment.deepSet(response.data);
-    } catch (e) {
+    }
+    catch (e) {
         Toast.fromError(e).show();
     }
 }
 
 async function markPaid() {
-    await mark(PaymentStatus.Succeeded)
+    await mark(PaymentStatus.Succeeded);
 }
 
 async function markPending() {
-    await mark(PaymentStatus.Pending)
+    await mark(PaymentStatus.Pending);
 }
 
 async function markFailed() {
-    await mark(PaymentStatus.Failed)
+    await mark(PaymentStatus.Failed);
 }
 
 async function mark(status: PaymentStatus) {
     if (markingPaid.value) {
         return;
     }
- 
+
     markingPaid.value = true;
- 
+
     try {
-        const data: PatchableArrayAutoEncoder<Payment> = new PatchableArray()
+        const data: PatchableArrayAutoEncoder<Payment> = new PatchableArray();
         data.addPatch(Payment.patch({
             id: props.payment.id,
-            status
+            status,
         }));
- 
+
         // Create a patch for this payment
         const response = await context.value.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/payments",
+            method: 'PATCH',
+            path: '/organization/payments',
             body: data,
             decoder: new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>),
-            shouldRetry: false
-        })
+            shouldRetry: false,
+        });
         props.payment.deepSet(response.data[0]);
         GlobalEventBus.sendEvent('paymentPatch', props.payment).catch(console.error);
-        new Toast("Betaalstatus gewijzigd", "success").setHide(1000).show()
-    } catch (e) {
-        Toast.fromError(e).show()
+        new Toast('Betaalstatus gewijzigd', 'success').setHide(1000).show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
     }
     markingPaid.value = false;
 }

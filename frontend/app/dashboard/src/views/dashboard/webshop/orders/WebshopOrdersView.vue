@@ -67,8 +67,8 @@ const actions = computed(() => {
         present,
         organizationManager: organizationManager.value,
         webshopManager: props.webshopManager,
-        component: this,
     });
+
     return [
         new InMemoryTableAction({
             name: 'Openen',
@@ -522,6 +522,7 @@ onBeforeUnmount(() => {
 // });
 
 function openOrder(order: PrivateOrder) {
+    // todo: getNextOrder and getPreviousOrder?
     const component = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(OrderView, {
             initialOrder: order,

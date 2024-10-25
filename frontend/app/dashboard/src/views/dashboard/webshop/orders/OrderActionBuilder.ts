@@ -8,7 +8,6 @@ import { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
 export class OrderActionBuilder {
-    component: any;
     webshopManager: WebshopManager;
     organizationManager: OrganizationManager;
 
@@ -16,12 +15,10 @@ export class OrderActionBuilder {
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>;
-        component: any;
         webshopManager: WebshopManager;
         organizationManager: OrganizationManager;
     }) {
         this.present = settings.present;
-        this.component = settings.component;
         this.webshopManager = settings.webshopManager;
         this.organizationManager = settings.organizationManager;
     }
@@ -241,7 +238,7 @@ export class OrderActionBuilder {
             webshopManager: this.webshopManager,
             isNew: true,
         });
-        this.component.present(displayedComponent.setDisplayStyle('popup'));
+        this.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
     }
 
     async editOrder(order: PrivateOrder, mode?: 'comments') {
@@ -250,14 +247,14 @@ export class OrderActionBuilder {
             webshopManager: this.webshopManager,
             mode,
         });
-        this.component.present(displayedComponent.setDisplayStyle('popup'));
+        this.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
     }
 
     async sms(orders: PrivateOrder[]) {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '../../sms/SMSView.vue'), {
             customers: orders.map(o => o.data.customer),
         });
-        this.component.present(displayedComponent.setDisplayStyle('popup'));
+        this.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
     }
 
     async openMail(selection: TableActionSelection<PrivateOrder>) {

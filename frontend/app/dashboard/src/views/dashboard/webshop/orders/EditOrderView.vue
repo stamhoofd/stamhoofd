@@ -180,7 +180,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager } from '@stamhoofd/networking';
 import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import AddItemView from './AddItemView.vue';
 
@@ -199,13 +199,8 @@ const { patch: patchOrder, addPatch } = usePatch(order);
 const present = usePresent();
 const dismiss = useDismiss();
 
-const patchedOrder = computed(() => {
-    const p = order.patch(finalPatch.value);
-    // if (props.webshopManager.webshop) {
-    //     p.data.update(props.webshopManager.webshop);
-    // }
-    return p;
-});
+const answersClone = ref(order.data.fieldAnswers.map(a => a.clone()));
+const recordAnswersClone = ref(new Map([...order.data.recordAnswers].map(([id, recordAnswer]) => [id, recordAnswer.clone()])));
 
 const finalPatch = computed(() => {
     return patchOrder.value.patch(PrivateOrder.patch({
@@ -216,13 +211,21 @@ const finalPatch = computed(() => {
     }));
 });
 
+const patchedOrder = computed(() => {
+    return order.patch(finalPatch.value);
+});
+
+watch(patchedOrder, (p) => {
+    if (props.webshopManager.webshop) {
+        p.data.update(props.webshopManager.webshop);
+    }
+});
+
 const isChanged = computed(() => patchContainsChanges(finalPatch.value, order, { version: Version }));
 
 const errors = useErrors();
 const saving = ref(false);
 const isNew = props.initialOrder === null;
-const answersClone = ref(order.data.fieldAnswers.map(a => a.clone()));
-const recordAnswersClone = ref(new Map([...order.data.recordAnswers].map(([id, recordAnswer]) => [id, recordAnswer.clone()])));
 
 onMounted(() => {
     if (isNew && checkoutMethods.value.length > 0) {

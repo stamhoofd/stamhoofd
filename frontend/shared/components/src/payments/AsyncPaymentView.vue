@@ -14,14 +14,14 @@ import { useContext } from '../hooks';
 import PaymentView from './PaymentView.vue';
 
 const props = defineProps<{
-    payment: Payment
+    payment: Payment;
 }>();
 
 const context = useContext();
 const errors = useErrors();
-const owner = useRequestOwner()
+const owner = useRequestOwner();
 const loadedPayment = ref(null) as Ref<PaymentGeneral | null>;
-load().catch(console.error)
+load().catch(console.error);
 
 async function load() {
     try {
@@ -29,18 +29,19 @@ async function load() {
             loadedPayment.value = props.payment;
             return;
         }
-        
+
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
             path: `/payments/${props.payment.id}`,
             decoder: PaymentGeneral as Decoder<PaymentGeneral>,
             owner,
-            shouldRetry: true
+            shouldRetry: true,
         });
         props.payment.deepSet(response.data);
         loadedPayment.value = response.data;
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 }
 
