@@ -117,7 +117,7 @@ declare global {
         readonly AWS_SECRET_ACCESS_KEY: string,
         readonly AWS_REGION: "eu-west-1" | string, // TODO: add others
  
-         // DO spaces
+        // DO spaces
         readonly SPACES_ENDPOINT: string,
         readonly SPACES_BUCKET: string,
         readonly SPACES_KEY: string,
@@ -149,7 +149,7 @@ declare global {
         // Communication with other internal services
         readonly INTERNAL_SECRET_KEY: string
 
-        readonly CRONS_DISABLED: boolean
+        readonly CRONS_DISABLED?: boolean
 
         readonly WHITELISTED_EMAIL_DESTINATIONS?: string[] // E-mails we are allowed to send e-mails to in case of staging or development environment
         readonly CACHE_PATH: string
@@ -219,13 +219,21 @@ declare global {
         readonly PORT: number
 
         // Database to backup
+        readonly DB_HOST: string,
         readonly DB_DATABASE: string
         readonly DB_USER: string,
         readonly DB_PASS: string,
+        readonly CRONS_DISABLED?: boolean
 
         readonly keyFingerprint: string
         readonly objectStoragePath: string
         readonly localBackupFolder: string
+
+        readonly SPACES_ENDPOINT: string,
+        readonly SPACES_BUCKET: string,
+        readonly SPACES_KEY: string,
+        readonly SPACES_SECRET: string
+        readonly AWS_REGION: "eu-west-1" | string, // TODO: add others
     }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment

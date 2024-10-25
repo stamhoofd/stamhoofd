@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Database } from '@simonbackx/simple-database';
-import { logger, StyledText } from '@simonbackx/simple-logging';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { Group, Organization, Payment, Registration, STPackage, Webshop } from '@stamhoofd/models';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
-import { Formatter, sleep } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
 
+import { registerCron } from '@stamhoofd/crons';
 import { clearExcelCache } from './crons/clearExcelCache';
 import { endFunctionsOfUsersWithoutRegistration } from './crons/endFunctionsOfUsersWithoutRegistration';
 import { ExchangePaymentEndpoint } from './endpoints/organization/shared/ExchangePaymentEndpoint';
@@ -654,163 +654,17 @@ async function checkDrips() {
     lastDripId = organizations[organizations.length - 1].id;
 }
 
-type CronJobDefinition = {
-    name: string;
-    method: () => Promise<void>;
-    running: boolean;
-};
-
-const registeredCronJobs: CronJobDefinition[] = [];
-
-registeredCronJobs.push({
-    name: 'checkSettlements',
-    method: checkSettlements,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkFailedBuckarooPayments',
-    method: checkFailedBuckarooPayments,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkExpirationEmails',
-    method: checkExpirationEmails,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkPostmarkBounces',
-    method: checkPostmarkBounces,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkReservedUntil',
-    method: checkReservedUntil,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkComplaints',
-    method: checkComplaints,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkReplies',
-    method: checkReplies,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkBounces',
-    method: checkBounces,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkDNS',
-    method: checkDNS,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkWebshopDNS',
-    method: checkWebshopDNS,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkPayments',
-    method: checkPayments,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'checkDrips',
-    method: checkDrips,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'clearExcelCache',
-    method: clearExcelCache,
-    running: false,
-});
-
-registeredCronJobs.push({
-    name: 'endFunctionsOfUsersWithoutRegistration',
-    method: endFunctionsOfUsersWithoutRegistration,
-    running: false,
-});
-
-async function run(name: string, handler: () => Promise<void>) {
-    try {
-        await logger.setContext({
-            prefixes: [
-                new StyledText(`[${name}] `).addClass('crons', 'tag'),
-            ],
-            tags: ['crons'],
-        }, async () => {
-            try {
-                await handler();
-            }
-            catch (e) {
-                console.error(new StyledText(e).addClass('error'));
-            }
-        });
-    }
-    catch (e) {
-        console.error(new StyledText(e).addClass('error'));
-    }
-}
-
-let stopCrons = false;
-export function stopCronScheduling() {
-    stopCrons = true;
-}
-
-let schedulingJobs = false;
-export function areCronsRunning(): boolean {
-    if (schedulingJobs && !stopCrons) {
-        return true;
-    }
-
-    for (const job of registeredCronJobs) {
-        if (job.running) {
-            return true;
-        }
-    }
-    return false;
-}
-
-export const crons = async () => {
-    if (STAMHOOFD.CRONS_DISABLED) {
-        console.log('Crons are disabled. Make sure to enable them in the environment variables.');
-        return;
-    }
-
-    schedulingJobs = true;
-    for (const job of registeredCronJobs) {
-        if (stopCrons) {
-            break;
-        }
-        if (job.running) {
-            continue;
-        }
-        job.running = true;
-        run(job.name, job.method).finally(() => {
-            job.running = false;
-        }).catch((e) => {
-            console.error(e);
-        });
-
-        // Prevent starting too many jobs at once
-        if (STAMHOOFD.environment !== 'development') {
-            await sleep(10 * 1000);
-        }
-    }
-    schedulingJobs = false;
-};
+registerCron('checkSettlements', checkSettlements);
+registerCron('checkFailedBuckarooPayments', checkFailedBuckarooPayments);
+registerCron('checkExpirationEmails', checkExpirationEmails);
+registerCron('checkPostmarkBounces', checkPostmarkBounces);
+registerCron('checkReservedUntil', checkReservedUntil);
+registerCron('checkComplaints', checkComplaints);
+registerCron('checkReplies', checkReplies);
+registerCron('checkBounces', checkBounces);
+registerCron('checkDNS', checkDNS);
+registerCron('checkWebshopDNS', checkWebshopDNS);
+registerCron('checkPayments', checkPayments);
+registerCron('checkDrips', checkDrips);
+registerCron('clearExcelCache', clearExcelCache);
+registerCron('endFunctionsOfUsersWithoutRegistration', endFunctionsOfUsersWithoutRegistration);

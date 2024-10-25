@@ -10,7 +10,7 @@ import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
-import { areCronsRunning, crons, stopCronScheduling } from './src/crons';
+import { stopCrons, startCrons, waitForCrons } from '@stamhoofd/crons';
 import { resumeEmails } from './src/helpers/EmailResumer';
 import { ContextMiddleware } from './src/middleware/ContextMiddleware';
 
@@ -115,8 +115,7 @@ const start = async () => {
             routerServer.server.keepAliveTimeout = 1;
         }
 
-        stopCronScheduling();
-        clearInterval(cronInterval);
+        stopCrons();
 
         if (STAMHOOFD.environment === 'development') {
             setTimeout(() => {
@@ -134,16 +133,7 @@ const start = async () => {
             console.error(err);
         }
 
-        try {
-            while (areCronsRunning()) {
-                console.log('Crons are still running. Waiting 2 seconds...');
-                await sleep(2000);
-            }
-        }
-        catch (err) {
-            console.error('Failed to wait for crons to finish:');
-            console.error(err);
-        }
+        await waitForCrons();
 
         try {
             while (Email.currentQueue.length > 0) {
@@ -185,10 +175,9 @@ const start = async () => {
         });
     });
 
-    const cronInterval = setInterval(() => {
-        crons().catch(console.error);
-    }, 5 * 60 * 1000);
-    crons().catch(console.error);
+    // Register crons
+    await import('./src/crons');
+    startCrons();
     seeds().catch(console.error);
 };
 

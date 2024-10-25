@@ -14,20 +14,19 @@ function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'admi
     if (settings?.service === 'renderer') {
         return;
     }
-    if (settings?.service === 'backup') {
-        return;
-    }
 
-    if (!STAMHOOFD.domains) {
-        throw new Error('Expected environment variable domains');
-    }
+    if (settings?.service === 'api') {
+        if (!STAMHOOFD.domains) {
+            throw new Error('Expected environment variable domains');
+        }
 
-    if (!STAMHOOFD.userMode || !['platform', 'organization'].includes(STAMHOOFD.userMode)) {
-        throw new Error('Expected environment variable userMode');
-    }
+        if (!STAMHOOFD.userMode || !['platform', 'organization'].includes(STAMHOOFD.userMode)) {
+            throw new Error('Expected environment variable userMode');
+        }
 
-    if (!STAMHOOFD.translationNamespace) {
-        throw new Error('Expected environment variable translationNamespace');
+        if (!STAMHOOFD.translationNamespace) {
+            throw new Error('Expected environment variable translationNamespace');
+        }
     }
 
     // Database

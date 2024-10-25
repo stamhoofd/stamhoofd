@@ -29,7 +29,7 @@
         "clear:global:shared": "rm -rf shared/*/dist shared/*/esm/dist",
         "build:global:shared": "echo 'Building globally shared dependencies...' && cd shared/locales && yarn -s build && cd ../utility && yarn -s build && cd ../excel-writer && yarn -s build && cd ../structures && yarn -s build && cd ../.. && echo 'Done building globally shared dependencies.'",
         "clear:backend:shared": "rm -rf backend/shared/*/dist",
-        "build:backend:shared": "echo 'Building shared backend dependencies...' && cd backend/shared/queues && yarn -s build && cd ../env && yarn -s build && cd ../i18n && yarn -s build && cd ../email && yarn -s build && cd ../sql && yarn -s build && cd ../models && yarn -s build && cd ../logging && yarn -s build && cd ../middleware && yarn -s build && cd ../.. && echo 'Done building backend shared dependencies.'",
+        "build:backend:shared": "echo 'Building shared backend dependencies...' && cd backend/shared/queues && yarn -s build && cd ../env && yarn -s build && cd ../i18n && yarn -s build && cd ../email && yarn -s build && cd ../sql && yarn -s build && cd ../models && yarn -s build && cd ../logging && yarn -s build && cd ../crons && yarn -s build && cd ../middleware && yarn -s build  && cd ../.. && echo 'Done building backend shared dependencies.'",
         "stripe-webhooks": "stripe listen --forward-to http://api.stamhoofd/stripe/webhooks",
         "caddy": "caddy run -w --config .development/caddy.json",
         "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",

@@ -4,6 +4,7 @@ backendEnv.load({ service: 'backup' });
 import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { loadLogger } from '@stamhoofd/logging';
+import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -52,6 +53,15 @@ const start = async () => {
             routerServer.server.keepAliveTimeout = 1;
         }
 
+        stopCrons();
+
+        if (STAMHOOFD.environment === 'development') {
+            setTimeout(() => {
+                console.error('Forcing exit after 5 seconds');
+                process.exit(1);
+            }, 5000);
+        }
+
         try {
             await routerServer.close();
             console.log('HTTP server stopped');
@@ -60,6 +70,8 @@ const start = async () => {
             console.error('Failed to stop HTTP server:');
             console.error(err);
         }
+
+        await waitForCrons();
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
         process.exit(0);
@@ -80,6 +92,10 @@ const start = async () => {
             process.exit(1);
         });
     });
+
+    // Register crons
+    await import('./src/crons');
+    startCrons();
 };
 
 start().catch((error) => {
