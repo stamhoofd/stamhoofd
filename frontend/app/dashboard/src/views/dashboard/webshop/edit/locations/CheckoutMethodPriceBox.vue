@@ -20,59 +20,48 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Checkbox, ErrorBox, PriceInput, STInputBox } from '@stamhoofd/components';
 import { CheckoutMethodPrice } from '@stamhoofd/structures';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STInputBox,
-        PriceInput,
-        Checkbox,
-    },
-})
-export default class CheckoutMethodPriceBox extends VueComponent {
-    @Prop({})
+const props = withDefaults(defineProps<{
     checkoutMethodPrice: CheckoutMethodPrice;
-
-    @Prop({ default: null })
     errorBox: ErrorBox | null;
+}>(), {
+    errorBox: null,
+});
 
-    get price() {
-        return this.checkoutMethodPrice.price;
-    }
+const emits = defineEmits<{
+    (e: 'patch', patch: AutoEncoderPatchType<CheckoutMethodPrice>): void;
+}>();
 
-    set price(price: number) {
-        this.$emit('patch', CheckoutMethodPrice.patch({ price }));
-    }
+const price = computed({
+    get: () => props.checkoutMethodPrice.price,
+    set: (price: number) => {
+        emits('patch', CheckoutMethodPrice.patch({ price }));
+    },
+});
 
-    get useMinimumPrice() {
-        return this.checkoutMethodPrice.minimumPrice !== null;
-    }
+const useMinimumPrice = computed({
+    get: () => props.checkoutMethodPrice.minimumPrice !== null,
+    set: (useMinimumPrice: boolean) => {
+        emits('patch', CheckoutMethodPrice.patch({ minimumPrice: useMinimumPrice ? minimumPrice.value : null }));
+    },
+});
 
-    set useMinimumPrice(useMinimumPrice: boolean) {
-        if (useMinimumPrice === this.useMinimumPrice) {
-            return;
-        }
+const minimumPrice = computed({
+    get: () => props.checkoutMethodPrice.minimumPrice ?? 0,
+    set: (minimumPrice: number | null) => {
+        emits('patch', CheckoutMethodPrice.patch({ minimumPrice }));
+    },
+});
 
-        this.$emit('patch', CheckoutMethodPrice.patch({ minimumPrice: useMinimumPrice ? this.minimumPrice : null }));
-    }
-
-    get minimumPrice() {
-        return this.checkoutMethodPrice.minimumPrice ?? 0;
-    }
-
-    set minimumPrice(minimumPrice: number | null) {
-        this.$emit('patch', CheckoutMethodPrice.patch({ minimumPrice }));
-    }
-
-    get discountPrice() {
-        return this.checkoutMethodPrice.discountPrice;
-    }
-
-    set discountPrice(discountPrice: number) {
-        this.$emit('patch', CheckoutMethodPrice.patch({ discountPrice }));
-    }
-}
+const discountPrice = computed({
+    get: () => props.checkoutMethodPrice.discountPrice,
+    set: (discountPrice: number) => {
+        emits('patch', CheckoutMethodPrice.patch({ discountPrice }));
+    },
+});
 </script>
