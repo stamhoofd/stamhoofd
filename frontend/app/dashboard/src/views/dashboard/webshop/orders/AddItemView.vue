@@ -12,29 +12,13 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CategoryBox, ProductGrid, STErrorsDefault, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Cart, CartItem, Checkout, Webshop } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { CategoryBox, ProductGrid, STNavigationBar } from '@stamhoofd/components';
+import { CartItem, Checkout, Webshop } from '@stamhoofd/structures';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STErrorsDefault,
-        CategoryBox,
-        ProductGrid,
-    },
-})
-export default class AddItemView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+defineProps<{
     webshop: Webshop;
-
-    @Prop({ required: true })
     checkout: Checkout;
-
-    @Prop({ required: true })
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void;
-}
+    saveHandler: (newItem: CartItem, oldItem: CartItem | null, component: any) => void;
+}>();
 </script>
