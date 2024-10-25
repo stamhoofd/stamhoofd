@@ -41,175 +41,143 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
-import { LoadingButton, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { SessionManager } from '@stamhoofd/networking';
+import { LoadingButton, STList, STListItem, useContext } from '@stamhoofd/components';
 import { City, Country, CountryHelper, Province, SearchRegions, WebshopDeliveryMethod } from '@stamhoofd/structures';
+import { throttle } from '@stamhoofd/utility';
+import { computed, ref, watch } from 'vue';
 
-const throttle = (func, limit) => {
-    let lastFunc;
-    let lastRan;
-    return function () {
-        const context = this;
+const props = defineProps<{
+    deliveryMethod: WebshopDeliveryMethod;
+}>();
 
-        const args = arguments;
-        if (lastRan) {
-            clearTimeout(lastFunc);
-        }
-        lastRan = Date.now();
+const emits = defineEmits<{
+    (e: 'patch', patch: AutoEncoderPatchType<WebshopDeliveryMethod>): void;
+}>();
+const context = useContext();
 
-        lastFunc = setTimeout(function () {
-            if (Date.now() - lastRan >= limit) {
-                func.apply(context, args);
-                lastRan = Date.now();
-            }
-        }, limit - (Date.now() - lastRan));
-    };
-};
+const searchQuery = ref('');
+const throttledSearch = throttle(() => doSearch(), 300);
+const loadingSearch = ref(false);
+const searchResults = ref<SearchRegions | null>(null);
+const searchCount = ref(0);
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STListItem,
-        STList,
-        LoadingButton,
-    },
-})
-export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    deliveryMethod!: WebshopDeliveryMethod;
+watch(searchQuery, (value) => {
+    // start query
+    loadingSearch.value = true;
+    searchCount.value += 1;
 
-    searchQuery = '';
-    throttledSearch = throttle(this.doSearch.bind(this), 300);
-    loadingSearch = false;
-    searchResults: SearchRegions | null = null;
-    searchCount = 0;
+    if (value.length === 0) {
+        searchResults.value = null;
+        loadingSearch.value = false;
+        return;
+    }
+    throttledSearch();
+});
 
-    @Watch('searchQuery')
-    onSearch() {
-        // start query
-        this.loadingSearch = true;
-        this.searchCount++;
+function countryName(country: Country) {
+    return CountryHelper.getName(country);
+}
 
-        if (this.searchQuery.length === 0) {
-            this.searchResults = null;
-            this.loadingSearch = false;
-            return;
-        }
-        this.throttledSearch();
+async function doSearch() {
+    if (searchQuery.value.length === 0) {
+        searchResults.value = null;
+        loadingSearch.value = false;
+        return;
     }
 
-    countryName(country: Country) {
-        return CountryHelper.getName(country);
+    const c = searchCount.value;
+
+    // search
+    const response = await context.value.server.request({
+        method: 'GET',
+        path: '/address/search',
+        query: {
+            query: searchQuery.value,
+        },
+        decoder: SearchRegions as Decoder<SearchRegions>,
+    });
+
+    if (c === searchCount.value) {
+        searchResults.value = response.data;
+        loadingSearch.value = false;
+    }
+}
+
+const cities = computed(() => {
+    if (searchResults.value) {
+        return searchResults.value.cities;
+    }
+    return props.deliveryMethod.cities;
+});
+
+const provinces = computed(() => {
+    if (searchResults.value) {
+        return searchResults.value.provinces;
+    }
+    return props.deliveryMethod.provinces;
+});
+
+const countries = computed(() => {
+    if (searchResults.value) {
+        return searchResults.value.countries;
+    }
+    return props.deliveryMethod.countries;
+});
+
+function hasCity(city: City) {
+    return !!props.deliveryMethod.cities.find(c => c.id === city.id);
+}
+
+function toggleCity(city: City) {
+    const p = WebshopDeliveryMethod.patch({});
+
+    if (hasCity(city)) {
+        p.cities.addDelete(city.id);
+    }
+    else {
+        p.cities.addPut(city);
+        searchQuery.value = '';
     }
 
-    async doSearch() {
-        if (this.searchQuery.length === 0) {
-            this.searchResults = null;
-            this.loadingSearch = false;
-            return;
-        }
+    emits('patch', p);
+}
 
-        const c = this.searchCount;
+function hasProvince(province: Province) {
+    return !!props.deliveryMethod.provinces.find(c => c.id === province.id);
+}
 
-        // search
-        const response = await this.$context.server.request({
-            method: 'GET',
-            path: '/address/search',
-            query: {
-                query: this.searchQuery,
-            },
-            decoder: SearchRegions as Decoder<SearchRegions>,
-        });
+function toggleProvince(province: Province) {
+    const p = WebshopDeliveryMethod.patch({});
 
-        if (c === this.searchCount) {
-            this.searchResults = response.data;
-            this.loadingSearch = false;
-        }
+    if (hasProvince(province)) {
+        p.provinces.addDelete(province.id);
+    }
+    else {
+        p.provinces.addPut(province);
+        searchQuery.value = '';
     }
 
-    addPatch(patch: AutoEncoderPatchType<WebshopDeliveryMethod>) {
-        this.$emit('patch', patch);
+    emits('patch', p);
+}
+
+function hasCountry(country: Country) {
+    return !!props.deliveryMethod.countries.find(c => c === country);
+}
+
+function toggleCountry(country: Country) {
+    const p = WebshopDeliveryMethod.patch({});
+
+    if (hasCountry(country)) {
+        p.countries.addDelete(country);
+    }
+    else {
+        p.countries.addPut(country);
+        searchQuery.value = '';
     }
 
-    get cities() {
-        if (this.searchResults) {
-            return this.searchResults.cities;
-        }
-        return this.deliveryMethod.cities;
-    }
-
-    get provinces() {
-        if (this.searchResults) {
-            return this.searchResults.provinces;
-        }
-        return this.deliveryMethod.provinces;
-    }
-
-    get countries() {
-        if (this.searchResults) {
-            return this.searchResults.countries;
-        }
-        return this.deliveryMethod.countries;
-    }
-
-    hasCity(city: City) {
-        return !!this.deliveryMethod.cities.find(c => c.id === city.id);
-    }
-
-    toggleCity(city: City) {
-        const p = WebshopDeliveryMethod.patch({});
-
-        if (this.hasCity(city)) {
-            p.cities.addDelete(city.id);
-        }
-        else {
-            p.cities.addPut(city);
-            this.searchQuery = '';
-        }
-
-        this.$emit('patch', p);
-    }
-
-    hasProvince(province: Province) {
-        return !!this.deliveryMethod.provinces.find(c => c.id === province.id);
-    }
-
-    toggleProvince(province: Province) {
-        const p = WebshopDeliveryMethod.patch({});
-
-        if (this.hasProvince(province)) {
-            p.provinces.addDelete(province.id);
-        }
-        else {
-            p.provinces.addPut(province);
-            this.searchQuery = '';
-        }
-
-        this.$emit('patch', p);
-    }
-
-    hasCountry(country: Country) {
-        return !!this.deliveryMethod.countries.find(c => c === country);
-    }
-
-    toggleCountry(country: Country) {
-        const p = WebshopDeliveryMethod.patch({});
-
-        if (this.hasCountry(country)) {
-            p.countries.addDelete(country);
-        }
-        else {
-            p.countries.addPut(country);
-            this.searchQuery = '';
-        }
-
-        this.$emit('patch', p);
-    }
+    emits('patch', p);
 }
 </script>
 
