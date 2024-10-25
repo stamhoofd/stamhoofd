@@ -25,58 +25,32 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { SessionManager } from '@stamhoofd/networking';
+<script lang="ts" setup>
+import { STList, STNavigationBar, STToolbar, useOrganization } from '@stamhoofd/components';
 import { PrivateOrderWithTickets, TicketPublic } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import TicketRow from './TicketRow.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        TicketRow,
-    },
-})
-export default class OrderTicketsView extends Mixins(NavigationMixin) {
-    loading = false;
-    errorBox: ErrorBox | null = null;
+const props = defineProps<{
+    initialOrder: PrivateOrderWithTickets;
+    webshopManager: WebshopManager;
+}>();
 
-    @Prop({ required: true })
-    initialOrder!: PrivateOrderWithTickets;
+const organization = useOrganization();
+const webshop = computed(() => props.webshopManager.preview);
+const order = computed(() => props.initialOrder);
+const tickets = computed(() => order.value.tickets.map(t => t.getPublic(order.value)).sort(TicketPublic.sort));
 
-    @Prop({ required: true })
-    webshopManager!: WebshopManager;
+async function downloadAllTickets() {
+    const TicketBuilder = (await import(
+        /* webpackChunkName: "TicketBuilder" */
+        /* webpackPrefetch: true */
+        '@stamhoofd/ticket-builder'
+    )).TicketBuilder;
 
-    get webshop() {
-        return this.webshopManager.preview;
-    }
-
-    order: PrivateOrderWithTickets = this.initialOrder;
-
-    get tickets() {
-        return this.order.tickets.map(t => t.getPublic(this.order)).sort(TicketPublic.sort);
-    }
-
-    get hasWrite() {
-        return this.webshop.privateMeta.permissions.hasWriteAccess(this.$context.organizationPermissions);
-    }
-
-    async downloadAllTickets() {
-        const TicketBuilder = (await import(
-            /* webpackChunkName: "TicketBuilder" */
-            /* webpackPrefetch: true */
-            '@stamhoofd/ticket-builder'
-        )).TicketBuilder;
-
-        const builder = new TicketBuilder(this.tickets, this.webshop, this.$organization, this.order);
-        await builder.download();
-    }
+    const builder = new TicketBuilder(tickets.value, webshop.value, organization.value!, order.value);
+    await builder.download();
 }
 </script>
