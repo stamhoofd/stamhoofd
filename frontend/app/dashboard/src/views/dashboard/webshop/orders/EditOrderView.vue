@@ -4,10 +4,10 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="mode === 'comments'">
-            <STInputBox error-fields="data.comments" :error-box="errorBox" class="max">
+            <STInputBox error-fields="data.comments" :error-box="errors.errorBox" class="max">
                 <textarea
                     v-model="comments"
                     class="input large"
@@ -21,7 +21,7 @@
             <hr>
             <h2>Klantgegevens</h2>
 
-            <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+            <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
                 <div class="input-group">
                     <div>
                         <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
@@ -32,18 +32,18 @@
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" :placeholder="emailPlaceholder" autocomplete="email" />
+            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
 
-            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="validator" placeholder="Optioneel voor beheerders" autocomplete="tel" :required="false" />
+            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" placeholder="Optioneel voor beheerders" autocomplete="tel" :required="false" />
 
-            <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errorBox" />
+            <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
 
             <div v-for="category of recordCategories" :key="category.id" class="container">
                 <hr>
                 <h2>{{ category.name }}</h2>
 
-                <RecordAnswerInput v-for="record of category.records" :key="record.id" :record-settings="record" :record-answers="recordAnswers" :validator="validator" :all-optional="true" />
+                <RecordAnswerInput v-for="record of category.records" :key="record.id" :record="record" :answers="recordAnswers" :validator="errors.validator" :all-optional="true" />
             </div>
 
             <template v-if="checkoutMethods.length > 1">
@@ -59,7 +59,7 @@
                             {{ getTypeName(checkoutMethod.type) }}: {{ checkoutMethod.name }}
                         </h2>
                         <p class="style-description-small">
-                            {{ checkoutMethod.description || checkoutMethod.address || "" }}
+                            {{ checkoutMethod.description || (checkoutMethod as any).address || "" }}
                         </p>
                         <p v-if="checkoutMethod.timeSlots.timeSlots.length === 1" class="style-description-small">
                             {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
@@ -86,14 +86,14 @@
                 </h2>
 
                 <p v-if="selectedMethod.type === 'Takeout'">
-                    Afhaallocatie: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ selectedMethod.address }}
+                    Afhaallocatie: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopTakeoutMethod).address }}
                 </p>
 
                 <p v-if="selectedMethod.type === 'OnSite'">
-                    Locatie: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ selectedMethod.address }}
+                    Locatie: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopOnSiteMethod).address }}
                 </p>
 
-                <STErrorsDefault :error-box="errorBox" />
+                <STErrorsDefault :error-box="errors.errorBox" />
 
                 <STList>
                     <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
@@ -136,7 +136,7 @@
                     </template>
                 </p>
 
-                <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
+                <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="errors.validator" :validate-server="server" />
             </template>
 
             <hr>
@@ -145,7 +145,7 @@
             <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
                 <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
 
-                <button class="button icon trash" @click="deleteCode(code)" />
+                <button class="button icon trash" type="button" @click="deleteCode(code)" />
             </p>
 
             <STList v-if="webshopFull">
@@ -167,273 +167,205 @@
                 <hr>
                 <h2>Betaalmethode</h2>
 
-                <PaymentSelectionList v-model="paymentMethod" :configuration="paymentConfiguration" :organization="organization" :context="paymentContext" :amount="patchedOrder.data.totalPrice" />
+                <PaymentSelectionList v-model="paymentMethod" :payment-configuration="paymentConfiguration" :organization="organization!" :context="paymentContext" :amount="patchedOrder.data.totalPrice" />
             </template>
         </template>
     </SaveView>
 </template>
-<script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CartItemRow, CartItemView, CenteredMessage, PriceBreakdownBox, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { AddressInput, CartItemRow, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, PaymentSelectionList, PhoneInput, PriceBreakdownBox, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager } from '@stamhoofd/networking';
-import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
+import { computed, nextTick, onMounted, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import AddItemView from './AddItemView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        Radio,
-        SaveView,
-        STErrorsDefault,
-        EmailInput,
-        STInputBox,
-        PhoneInput,
-        AddressInput,
-        FieldBox,
-        PaymentSelectionList,
-        RecordAnswerInput,
-        PriceBreakdownBox,
-        CartItemRow,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter),
-        date: Formatter.dateWithDay.bind(Formatter),
-        dateTime: Formatter.dateTimeWithDay.bind(Formatter),
-        minutes: Formatter.minutes.bind(Formatter),
-        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
-        dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
-    },
-    directives: {
-        tooltip: TooltipDirective,
-        LongPress: LongPressDirective,
-    },
-})
-export default class EditOrderView extends Mixins(NavigationMixin) {
-    @Prop({ default: null })
-    initialOrder!: PrivateOrder | null;
+const props = withDefaults(defineProps<{
+    initialOrder?: PrivateOrder | null;
+    webshopManager: WebshopManager;
+    mode?: string;
+}>(), {
+    initialOrder: null,
+    mode: '',
+});
 
-    @Prop({ required: true })
-    webshopManager!: WebshopManager;
+const organization = useOrganization();
+const order = props.initialOrder ?? PrivateOrder.create({ webshopId: props.webshopManager.preview.id, id: '', payment: null });
+const { patch: patchOrder, addPatch } = usePatch(order);
+const present = usePresent();
+const dismiss = useDismiss();
 
-    @Prop({ default: '' })
-    mode!: string;
+const patchedOrder = computed(() => {
+    const p = order.patch(finalPatch.value);
+    // if (props.webshopManager.webshop) {
+    //     p.data.update(props.webshopManager.webshop);
+    // }
+    return p;
+});
 
-    order: PrivateOrder = this.initialOrder ?? PrivateOrder.create({ webshopId: this.webshopManager.preview.id, id: '', payment: null });
-    patchOrder: AutoEncoderPatchType<PrivateOrder> = PrivateOrder.patch({});
-    errorBox: ErrorBox | null = null;
-    saving = false;
+const finalPatch = computed(() => {
+    return patchOrder.value.patch(PrivateOrder.patch({
+        data: OrderData.patch({
+            fieldAnswers: answersClone.value,
+            recordAnswers: recordAnswersClone.value as any,
+        }),
+    }));
+});
 
-    isNew = (this.initialOrder === null);
+const isChanged = computed(() => patchContainsChanges(finalPatch.value, order, { version: Version }));
 
-    validator = new Validator();
-    answersClone = this.order.data.fieldAnswers.map(a => a.clone());
-    recordAnswersClone = this.order.data.recordAnswers.map(a => a.clone());
+const errors = useErrors();
+const saving = ref(false);
+const isNew = props.initialOrder === null;
+const answersClone = ref(order.data.fieldAnswers.map(a => a.clone()));
+const recordAnswersClone = ref(new Map([...order.data.recordAnswers].map(([id, recordAnswer]) => [id, recordAnswer.clone()])));
 
-    mounted() {
-        if (this.isNew && this.checkoutMethods.length > 0) {
-            // Force selection of method
-            this.selectedMethod = this.checkoutMethods[0];
-        }
+onMounted(() => {
+    if (isNew && checkoutMethods.value.length > 0) {
+        // Force selection of method
+        selectedMethod.value = checkoutMethods.value[0];
     }
+});
 
-    formatFreePrice(price: number) {
-        if (price === 0) {
-            return '';
-        }
-        return Formatter.price(price);
+function deleteCode(code: DiscountCode) {
+    const patchedData = OrderData.patch({});
+    patchedData.discountCodes.addDelete(code.id);
+
+    addPatch({ data: patchedData });
+}
+
+const recordCategories = computed(() => {
+    return RecordCategory.flattenCategories(
+        webshop.meta.recordCategories,
+        patchedOrder.value.data,
+    );
+});
+
+const phoneEnabed = computed(() => {
+    return webshop.meta.phoneEnabled;
+});
+
+const emailPlaceholder = computed(() => {
+    if (webshop.meta.ticketType !== WebshopTicketType.None) {
+        return 'Voor tickets';
     }
+    return 'Voor bevestigingsemail';
+});
 
-    deleteCode(code: DiscountCode) {
-        const patchedData = OrderData.patch({});
-        patchedData.discountCodes.addDelete(code.id);
-
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
-            data: patchedData,
-        }));
+const emailDescription = computed(() => {
+    if (webshop.meta.ticketType !== WebshopTicketType.None) {
+        return 'De tickets worden verzonden naar dit e-mailadres (na betaling, of meteen als betaalmethode \'Ter plaatse\' gekozen wordt). Kijk het goed na.';
     }
+    return null;
+});
 
-    get recordCategories(): RecordCategory[] {
-        return RecordCategory.flattenCategories(
-            this.webshop.meta.recordCategories,
-            this.patchedOrder.data,
-        );
+const title = computed(() => {
+    if (props.mode === 'comments') {
+        return 'Notities bewerken';
     }
-
-    get phoneEnabed() {
-        return this.webshop.meta.phoneEnabled;
+    if (isNew) {
+        return 'Nieuwe bestelling';
     }
+    return 'Bestelling bewerken';
+});
 
-    get emailPlaceholder() {
-        if (this.webshop.meta.ticketType !== WebshopTicketType.None) {
-            return 'Voor tickets';
-        }
-        return 'Voor bevestigingsemail';
-    }
+const webshop = props.webshopManager.preview;
+const webshopFull = props.webshopManager.webshop;
+const fields = webshop.meta.customFields;
+const deliveryMethod = computed(() => patchedOrder.value.data.deliveryMethod);
+const paymentConfiguration = PaymentConfiguration.create({
+    ...webshop.meta.paymentConfiguration,
+    paymentMethods: [PaymentMethod.Transfer, PaymentMethod.PointOfSale],
+});
 
-    get emailDescription() {
-        if (this.webshop.meta.ticketType !== WebshopTicketType.None) {
-            return 'De tickets worden verzonden naar dit e-mailadres (na betaling, of meteen als betaalmethode \'Ter plaatse\' gekozen wordt). Kijk het goed na.';
-        }
-        return null;
-    }
+const server = NetworkManager.server;
 
-    get title() {
-        if (this.mode === 'comments') {
-            return 'Notities bewerken';
-        }
-        if (this.isNew) {
-            return 'Nieuwe bestelling';
-        }
-        return 'Bestelling bewerken';
-    }
-
-    get organization() {
-        return this.$organization;
-    }
-
-    get webshop() {
-        return this.webshopManager.preview;
-    }
-
-    get webshopFull() {
-        return this.webshopManager.webshop;
-    }
-
-    get fields() {
-        return this.webshop.meta.customFields;
-    }
-
-    get finalPatch() {
-        return this.patchOrder.patch(PrivateOrder.patch({
-            data: OrderData.patch({
-                fieldAnswers: this.answersClone,
-                recordAnswers: this.recordAnswersClone as any,
-            }),
-        }));
-    }
-
-    get patchedOrder() {
-        const patched = this.order.patch(this.finalPatch);
-        if (this.webshopManager.webshop) {
-            patched.data.update(this.webshopManager.webshop);
-        }
-        return patched;
-    }
-
-    get deliveryMethod() {
-        return this.patchedOrder.data.deliveryMethod;
-    }
-
-    get paymentConfiguration() {
-        return PaymentConfiguration.create({
-            ...this.webshop.meta.paymentConfiguration,
-            paymentMethods: [PaymentMethod.Transfer, PaymentMethod.PointOfSale],
-        });
-    }
-
-    get server() {
-        return NetworkManager.server;
-    }
-
-    // fields
-    get firstName() {
-        return this.patchedOrder.data.customer.firstName;
-    }
-
-    set firstName(firstName: string) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+const firstName = computed({
+    get: () => patchedOrder.value.data.customer.firstName,
+    set: (firstName: string) => {
+        addPatch({
             data: OrderData.patch({
                 customer: Customer.patch({
                     firstName,
                 }),
             }),
-        }));
-    }
+        });
+    },
 
-    get lastName() {
-        return this.patchedOrder.data.customer.lastName;
-    }
+});
 
-    set lastName(lastName: string) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+const lastName = computed({
+    get: () => patchedOrder.value.data.customer.lastName,
+    set: (lastName: string) => {
+        addPatch({
             data: OrderData.patch({
                 customer: Customer.patch({
                     lastName,
                 }),
             }),
-        }));
-    }
+        });
+    },
+});
 
-    get email() {
-        return this.patchedOrder.data.customer.email;
-    }
-
-    set email(email: string) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+const email = computed({
+    get: () => patchedOrder.value.data.customer.email,
+    set: (email: string) => {
+        addPatch({
             data: OrderData.patch({
                 customer: Customer.patch({
                     email,
                 }),
             }),
-        }));
-    }
+        });
+    },
+});
 
-    get phone() {
-        return this.patchedOrder.data.customer.phone;
-    }
-
-    set phone(phone: string | null) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+const phone = computed({
+    get: () => patchedOrder.value.data.customer.phone,
+    set: (phone: string | null) => {
+        addPatch({
             data: OrderData.patch({
                 customer: Customer.patch({
                     phone: phone ?? '',
                 }),
             }),
-        }));
-    }
+        });
+    },
+});
 
-    get address() {
-        return this.patchedOrder.data.address;
-    }
-
-    set address(address: ValidatedAddress | null) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+const address = computed({
+    get: () => patchedOrder.value.data.address,
+    set: (address: ValidatedAddress | null) => {
+        addPatch({
             data: OrderData.patch({
                 address,
             }),
-        }));
-    }
+        });
+    },
+});
 
-    get comments() {
-        return this.patchedOrder.data.comments;
-    }
-
-    set comments(comments: string) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+const comments = computed({
+    get: () => patchedOrder.value.data.comments,
+    set: (comments: string) => {
+        addPatch({
             data: OrderData.patch({
                 comments,
             }),
-        }));
-    }
+        });
+    },
+});
 
-    get checkoutMethods() {
-        return this.webshop.meta.checkoutMethods;
-    }
+const checkoutMethods = computed(() => webshop.meta.checkoutMethods);
 
-    get selectedMethod(): CheckoutMethod | null {
-        if (this.patchedOrder.data.checkoutMethod) {
-            const search = this.patchedOrder.data.checkoutMethod.id;
-            const f = this.webshop.meta.checkoutMethods.find(c => c.id === search);
+const selectedMethod = computed({
+    get: () => {
+        if (patchedOrder.value.data.checkoutMethod) {
+            const search = patchedOrder.value.data.checkoutMethod.id;
+            const f = webshop.meta.checkoutMethods.find(c => c.id === search);
             if (f) {
                 return f;
             }
@@ -441,260 +373,252 @@ export default class EditOrderView extends Mixins(NavigationMixin) {
 
         // Don't return a default here: otherwise you are not able to save
         return null;
-    }
-
-    set selectedMethod(checkoutMethod: CheckoutMethod | null) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+    },
+    set: (checkoutMethod: CheckoutMethod | null) => {
+        addPatch({
             data: OrderData.patch({
                 checkoutMethod,
             }),
-        }));
+        });
 
         // Force update timeslot
-        const temporaryVariable = this.selectedSlot;
-        this.selectedSlot = temporaryVariable ?? this.timeSlots[0] ?? null;
+        const temporaryVariable = selectedSlot.value;
+        selectedSlot.value = temporaryVariable ?? timeSlots.value[0] ?? null;
 
         if (!checkoutMethod || checkoutMethod.type !== CheckoutMethodType.Delivery) {
-            this.address = null;
+            address.value = null;
         }
-    }
+    },
+});
 
-    get paymentMethod() {
-        return this.patchedOrder.data.paymentMethod;
-    }
-
-    set paymentMethod(paymentMethod: PaymentMethod) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+const paymentMethod = computed({
+    get: () => patchedOrder.value.data.paymentMethod,
+    set: (paymentMethod: PaymentMethod) => {
+        addPatch({
             data: OrderData.patch({
                 paymentMethod,
             }),
-        }));
-    }
+        });
+    },
+});
 
-    get paymentContext() {
-        return this.patchedOrder.data.paymentContext;
-    }
+const paymentContext = computed(() => patchedOrder.value.data.paymentContext);
 
-    getTypeName(type: CheckoutMethodType) {
-        switch (type) {
-            case CheckoutMethodType.Takeout: return 'Afhalen';
-            case CheckoutMethodType.Delivery: return 'Levering';
-            case CheckoutMethodType.OnSite: return 'Ter plaatse';
-        }
+function getTypeName(type: CheckoutMethodType) {
+    switch (type) {
+        case CheckoutMethodType.Takeout: return 'Afhalen';
+        case CheckoutMethodType.Delivery: return 'Levering';
+        case CheckoutMethodType.OnSite: return 'Ter plaatse';
     }
+}
 
-    // Timeslots
-    get timeSlots(): WebshopTimeSlot[] {
-        return this.selectedMethod?.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort) ?? [];
-    }
+const timeSlots = computed(() => selectedMethod.value?.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort) ?? []);
 
-    get selectedSlot(): WebshopTimeSlot | null {
-        if (this.patchedOrder.data.timeSlot) {
-            const search = this.patchedOrder.data.timeSlot;
-            const f = this.timeSlots.find(c => c.id === search.id);
+const selectedSlot = computed({
+    get: () => {
+        if (patchedOrder.value.data.timeSlot) {
+            const search = patchedOrder.value.data.timeSlot;
+            const f = timeSlots.value.find(c => c.id === search.id);
             if (f) {
                 return f;
             }
 
-            const f2 = this.timeSlots.find(c => c.toString() === search.toString());
+            const f2 = timeSlots.value.find(c => c.toString() === search.toString());
             if (f2) {
                 return f2;
             }
         }
         return null;
-    }
-
-    set selectedSlot(timeSlot: WebshopTimeSlot | null) {
-        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+    },
+    set: (timeSlot: WebshopTimeSlot | null) => {
+        addPatch({
             data: OrderData.patch({
                 timeSlot,
             }),
-        }));
-    }
-
-    get recordAnswers() {
-        return this.recordAnswersClone;
-    }
-
-    set recordAnswers(recordAnswers: RecordAnswer[]) {
-        this.recordAnswersClone = recordAnswers;
-    }
-
-    // Other
-
-    imageSrc(cartItem: CartItem) {
-        return cartItem.product.images[0]?.getPathForSize(100, 100);
-    }
-
-    async save() {
-        if (this.saving) {
-            return;
-        }
-
-        try {
-            const isValid = await this.validator.validate();
-            if (!isValid) {
-                return;
-            }
-
-            await this.$nextTick();
-
-            const orderData = this.patchedOrder.data;
-            orderData.validate(this.webshopManager.webshop!, this.$organization.meta, I18nController.i18n, true);
-
-            // Save validated record answers (to delete old answers)
-            this.recordAnswersClone = orderData.recordAnswers;
-
-            this.saving = true;
-
-            const patch = this.finalPatch;
-            patch.id = this.order.id;
-
-            const patches: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
-
-            if (this.isNew) {
-                patches.addPut(this.patchedOrder);
-            }
-            else {
-                patches.addPatch(patch);
-            }
-            const orders = await this.webshopManager.patchOrders(patches);
-
-            // Force webshop refetch to update stocks
-            await this.webshopManager.loadWebshop(false);
-
-            this.saving = false;
-            new Toast('Wijzigingen opgeslagen', 'success').setHide(1000).show();
-
-            // Move all data to original order
-            for (const order of orders) {
-                if (order.id === this.order.id) {
-                    this.order.deepSet(order);
-                }
-            }
-            this.patchOrder = PrivateOrder.patch({});
-            this.answersClone = this.order.data.fieldAnswers.map(f => f.clone());
-            this.dismiss({ force: true });
-        }
-        catch (e) {
-            this.saving = false;
-            this.errorBox = new ErrorBox(e);
-        }
-    }
-
-    async addProduct() {
-        let clone = this.patchedOrder.data.clone();
-        const webshop = await this.webshopManager.loadWebshopIfNeeded();
-
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(AddItemView, {
-                checkout: clone,
-                webshop: webshop,
-                saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                    component.dismiss({ force: true });
-
-                    if (oldItem) {
-                        clone.cart.replaceItem(oldItem, cartItem);
-                    }
-                    else {
-                        clone.cart.addItem(cartItem);
-                    }
-
-                    if (!this.isNew && clone.totalPrice !== this.patchedOrder.data.totalPrice) {
-                        new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
-                    }
-
-                    this.patchOrder = this.patchOrder.patch({ data: clone });
-                },
-            }),
-        }).setDisplayStyle('sheet'));
-    }
-
-    async editCartItem(cartItem: CartItem) {
-        let clone = this.patchedOrder.data.clone();
-        const webshop = await this.webshopManager.loadWebshopIfNeeded();
-
-        const newCartItem = cartItem.clone();
-
-        // First refresh the item
-        try {
-            newCartItem.refresh(webshop);
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(CartItemView, {
-                        admin: true,
-                        cartItem: newCartItem,
-                        oldItem: cartItem,
-                        checkout: clone,
-                        webshop: webshop,
-                        saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                            component.dismiss({ force: true });
-
-                            if (oldItem) {
-                                clone.cart.replaceItem(oldItem, cartItem);
-                            }
-                            else {
-                                clone.cart.addItem(cartItem);
-                            }
-
-                            if (clone.totalPrice !== this.patchedOrder.data.totalPrice) {
-                                new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
-                            }
-
-                            this.patchOrder = this.patchOrder.patch({
-                                data: clone,
-                            });
-                        },
-                    }),
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
         });
+    },
+});
+
+const recordAnswers = computed({
+    get: () => recordAnswersClone.value,
+    set: (recordAnswers: Map<string, RecordAnswer>) => {
+        recordAnswersClone.value = recordAnswers;
+    },
+});
+
+// Other
+async function save() {
+    if (saving.value) {
+        return;
     }
 
-    async deleteItem(cartItem: CartItem) {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je dit wilt verwijderen?', 'Ja, verwijderen', 'Je kan de bestelling nog nakijken voor je het definitief verwijdert.')) {
+    try {
+        const isValid = await errors.validator.validate();
+        if (!isValid) {
             return;
         }
-        let clone = this.patchedOrder.data.cart.clone();
-        clone.removeItem(cartItem);
 
-        if (clone.price !== this.patchedOrder.data.cart.price) {
-            new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
+        await nextTick();
+
+        const orderData = patchedOrder.value.data;
+        orderData.validate(props.webshopManager.webshop!, organization.value!.meta, I18nController.i18n, true);
+
+        // Save validated record answers (to delete old answers)
+        recordAnswersClone.value = orderData.recordAnswers;
+
+        saving.value = true;
+
+        const patch = finalPatch.value;
+        patch.id = order.id;
+
+        const patches: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
+
+        if (isNew) {
+            patches.addPut(patchedOrder.value);
         }
-
-        this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
-            cart: clone,
-        }) });
-    }
-
-    setCartItemAmount(cartItem: CartItem, amount: number) {
-        let clone = this.patchedOrder.data.cart.clone();
-        const found = clone.items.find(i => i.id === cartItem.id);
-        if (found) {
-            found.amount = amount;
-
-            this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
-                cart: clone,
-            }) });
+        else {
+            patches.addPatch(patch);
         }
-    }
+        const orders = await props.webshopManager.patchOrders(patches);
 
-    get isChanged() {
-        return patchContainsChanges(this.finalPatch, this.order, { version: Version });
-    }
+        // Force webshop refetch to update stocks
+        await props.webshopManager.loadWebshop(false);
 
-    async shouldNavigateAway() {
-        if (!this.isChanged) {
-            return true;
+        saving.value = false;
+        new Toast('Wijzigingen opgeslagen', 'success').setHide(1000).show();
+
+        // Move all data to original order
+        for (const order of orders) {
+            if (order.id === order.id) {
+                order.deepSet(order);
+            }
         }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+        patchOrder.value = PrivateOrder.patch({});
+        answersClone.value = order.data.fieldAnswers.map(f => f.clone());
+        dismiss({ force: true }).catch(console.error);
+    }
+    catch (e) {
+        saving.value = false;
+        errors.errorBox = new ErrorBox(e);
     }
 }
+
+async function addProduct() {
+    let clone = patchedOrder.value.data.clone();
+    const w = await props.webshopManager.loadWebshopIfNeeded();
+
+    present(new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(AddItemView, {
+            checkout: clone,
+            webshop: w,
+            saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component: any) => {
+                component.dismiss({ force: true });
+
+                if (oldItem) {
+                    clone.cart.replaceItem(oldItem, cartItem);
+                }
+                else {
+                    clone.cart.addItem(cartItem);
+                }
+
+                if (!isNew && clone.totalPrice !== patchedOrder.value.data.totalPrice) {
+                    new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
+                }
+
+                patchOrder.value = patchOrder.value.patch({ data: clone });
+            },
+        }),
+    }).setDisplayStyle('sheet')).catch(console.error);
+}
+
+async function editCartItem(cartItem: CartItem) {
+    let clone = patchedOrder.value.data.clone();
+    const w = await props.webshopManager.loadWebshopIfNeeded();
+
+    const newCartItem = cartItem.clone();
+
+    // First refresh the item
+    try {
+        newCartItem.refresh(w);
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(CartItemView, {
+                    admin: true,
+                    cartItem: newCartItem,
+                    oldItem: cartItem,
+                    checkout: clone,
+                    webshop: webshop,
+                    saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component: any) => {
+                        component.dismiss({ force: true });
+
+                        if (oldItem) {
+                            clone.cart.replaceItem(oldItem, cartItem);
+                        }
+                        else {
+                            clone.cart.addItem(cartItem);
+                        }
+
+                        if (clone.totalPrice !== patchedOrder.value.data.totalPrice) {
+                            new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
+                        }
+
+                        patchOrder.value = patchOrder.value.patch({
+                            data: clone,
+                        });
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
+}
+
+async function deleteItem(cartItem: CartItem) {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je dit wilt verwijderen?', 'Ja, verwijderen', 'Je kan de bestelling nog nakijken voor je het definitief verwijdert.')) {
+        return;
+    }
+    let clone = patchedOrder.value.data.cart.clone();
+    clone.removeItem(cartItem);
+
+    if (clone.price !== patchedOrder.value.data.cart.price) {
+        new Toast('De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.', 'warning yellow').setHide(10 * 1000).show();
+    }
+
+    addPatch({
+        data: OrderData.patch({
+            cart: clone,
+        }),
+    });
+}
+
+function setCartItemAmount(cartItem: CartItem, amount: number) {
+    let clone = patchedOrder.value.data.cart.clone();
+    const found = clone.items.find(i => i.id === cartItem.id);
+    if (found) {
+        found.amount = amount;
+
+        addPatch({
+            data: OrderData.patch({
+                cart: clone,
+            }),
+        });
+    }
+}
+
+async function shouldNavigateAway() {
+    if (!isChanged.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
