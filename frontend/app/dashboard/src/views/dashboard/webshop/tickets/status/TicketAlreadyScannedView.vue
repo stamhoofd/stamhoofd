@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view ticket-already-scanned-view">
+    <div class="st-view ticket-already-scanned-view" ref="root">
         <STNavigationBar title="Ticket al gescand" />
 
         <main>
@@ -15,7 +15,7 @@
             </p>
 
             <STList class="info">
-                <STListItem>
+                <STListItem v-if="ticket.scannedAt">
                     <h3 class="style-definition-label">
                         Tijdstip
                     </h3>
@@ -40,7 +40,7 @@
                 <button class="button secundary" @click="viewTicket">
                     Ticket toch bekijken
                 </button>
-                <button class="button primary" @click="pop">
+                <button class="button primary" @click="() => pop()">
                     Terug
                 </button>
             </template>
@@ -48,58 +48,49 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { BackButton, Checkbox, ColorHelper, Spinner, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { ColorHelper, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { PrivateOrder, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { ref, watch } from 'vue';
 import { WebshopManager } from '../../WebshopManager';
 import ValidTicketView from './ValidTicketView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        BackButton,
-        STList,
-        STListItem,
-        STToolbar,
-        Spinner,
-        Checkbox,
-    },
+const props = defineProps<{
+    webshopManager: WebshopManager;
+    ticket: TicketPrivate | TicketPublicPrivate;
+    order: PrivateOrder
+}>();
+
+const root = ref<HTMLElement | null>(null);
+
+watch(root, (root) => {
+if(root !== null) {
+    ColorHelper.setColor('#ffc900', root);
+}
 })
-export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    webshopManager!: WebshopManager;
 
-    @Prop({ required: true })
-    ticket!: TicketPrivate | TicketPublicPrivate;
+const show = useShow();
+const pop = usePop();
 
-    @Prop({ required: true })
-    order!: PrivateOrder;
+function formatDateTime(date: Date) {
+    return Formatter.capitalizeFirstLetter(Formatter.dateTimeWithDay(date));
+}
 
-    formatDateTime(date: Date) {
-        return Formatter.capitalizeFirstLetter(Formatter.dateTimeWithDay(date));
-    }
-
-    viewTicket() {
-        this.show({
-            components: [
-                new ComponentWithProperties(ValidTicketView, {
-                    webshopManager: this.webshopManager,
-                    ticket: this.ticket,
-                    order: this.order,
-                }),
-            ],
-            replace: 1,
-            force: true,
-        });
-    }
-
-    mounted() {
-        ColorHelper.setColor('#ffc900', this.$el as HTMLElement);
-    }
+function viewTicket() {
+    show({
+        components: [
+            new ComponentWithProperties(ValidTicketView, {
+                webshopManager: props.webshopManager,
+                ticket: props.ticket,
+                order: props.order,
+            }),
+        ],
+        replace: 1,
+        force: true,
+    });
 }
 </script>
 
