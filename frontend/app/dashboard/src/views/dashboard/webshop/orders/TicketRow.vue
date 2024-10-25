@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => openMenu(e)" class="right-stack" :selectable="true" @contextmenu.prevent="openMenu" @click="openTicket">
+    <STListItem v-long-press="(e: MouseEvent) => openMenu(e)" class="right-stack" :selectable="true" @contextmenu.prevent="openMenu" @click="openTicket">
         <h3 class="style-title-list">
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
@@ -25,190 +25,144 @@
     </STListItem>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, LongPressDirective, STList, STListItem } from '@stamhoofd/components';
-import { SessionManager } from '@stamhoofd/networking';
-import { Order, ProductDateRange, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ContextMenu, ContextMenuItem, STListItem, useContext, useOrganization } from '@stamhoofd/components';
+import { Order, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed } from 'vue';
 import TicketAlreadyScannedView from '../tickets/status/TicketAlreadyScannedView.vue';
 import ValidTicketView from '../tickets/status/ValidTicketView.vue';
 import { WebshopManager } from '../WebshopManager';
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-    },
-    directives: {
-        LongPress: LongPressDirective,
-    },
-})
-export default class TicketRow extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    ticket!: TicketPublicPrivate;
+const props = defineProps<{
+    ticket: TicketPublicPrivate;
+    order: Order;
+    webshopManager: WebshopManager;
+}>();
 
-    @Prop({ required: true })
-    order!: Order;
+const present = usePresent();
+const context = useContext();
+const organization = useOrganization();
+const webshop = computed(() => props.webshopManager.preview);
+// todo: multiple item support needed!
+const cartItem = computed(() => props.ticket.items[0]);
+const name = computed(() => props.ticket.getTitle());
 
-    @Prop({ required: true })
-    webshopManager!: WebshopManager;
-
-    get webshop() {
-        return this.webshopManager.preview;
+const scannedAtDescription = computed(() => {
+    if (!props.ticket.scannedAt) {
+        return 'Niet gescand';
     }
-
-    QRCodeUrl: string | null = null;
-
-    get cartItem() {
-        // todo: multiple item support needed!
-        return this.ticket.items[0];
+    if (!props.ticket.scannedBy) {
+        return 'Gescand op ' + Formatter.dateTime(props.ticket.scannedAt);
     }
+    return 'Gescand op ' + Formatter.dateTime(props.ticket.scannedAt) + ' door ' + props.ticket.scannedBy;
+});
 
-    get name() {
-        return this.ticket.getTitle();
+const isSingle = computed(() => webshop.value.meta.ticketType === WebshopTicketType.SingleTicket);
+const hasWrite = computed(() => {
+    const p = context.value.organizationPermissions;
+    if (!p) {
+        return false;
     }
+    return webshop.value.privateMeta.permissions.hasWriteAccess(p);
+});
 
-    get scannedAtDescription() {
-        if (!this.ticket.scannedAt) {
-            return 'Niet gescand';
-        }
-        if (!this.ticket.scannedBy) {
-            return 'Gescand op ' + Formatter.dateTime(this.ticket.scannedAt);
-        }
-        return 'Gescand op ' + Formatter.dateTime(this.ticket.scannedAt) + ' door ' + this.ticket.scannedBy;
-    }
-
-    get canShare() {
-        return !!navigator.share;
-    }
-
-    get isSingle() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket;
-    }
-
-    get hasWrite() {
-        const p = this.$context.organizationPermissions;
-        if (!p) {
-            return false;
-        }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p);
-    }
-
-    openTicket() {
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(!this.ticket.scannedAt ? ValidTicketView : TicketAlreadyScannedView, {
-                        order: this.order,
-                        ticket: this.ticket,
-                        webshopManager: this.webshopManager,
-                    }),
+function openTicket() {
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(!props.ticket.scannedAt ? ValidTicketView : TicketAlreadyScannedView, {
+                    order: props.order,
+                    ticket: props.ticket,
+                    webshopManager: props.webshopManager,
                 }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
 
-    openMenu(clickEvent) {
-        const contextMenu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: 'Open scanscherm',
-                    action: () => {
-                        this.openTicket();
-                        return true;
-                    },
-                    icon: 'qr-code',
-                }),
-                new ContextMenuItem({
-                    name: 'Markeer als',
-                    childMenu: this.getMarkAsMenu(),
-                }),
-                new ContextMenuItem({
-                    name: 'Download',
-                    action: () => {
-                        this.download().catch(console.error);
-                        return true;
-                    },
-                    icon: 'download',
-                }),
-            ],
-        ]);
-        contextMenu.show({ clickEvent }).catch(console.error);
-    }
+function openMenu(clickEvent: MouseEvent) {
+    const contextMenu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Open scanscherm',
+                action: () => {
+                    openTicket();
+                    return true;
+                },
+                icon: 'qr-code',
+            }),
+            new ContextMenuItem({
+                name: 'Markeer als',
+                childMenu: getMarkAsMenu(),
+            }),
+            new ContextMenuItem({
+                name: 'Download',
+                action: () => {
+                    download().catch(console.error);
+                    return true;
+                },
+                icon: 'download',
+            }),
+        ],
+    ]);
+    contextMenu.show({ clickEvent }).catch(console.error);
+}
 
-    markAs(event) {
-        const el = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget;
-        const contextMenu = this.getMarkAsMenu();
-        contextMenu.show({ button: el, xPlacement: 'left' }).catch(console.error);
-    }
+function markAs(event: MouseEvent) {
+    const el: HTMLElement = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget as HTMLElement;
+    const contextMenu = getMarkAsMenu();
+    contextMenu.show({ button: el, xPlacement: 'left' }).catch(console.error);
+}
 
-    getMarkAsMenu() {
-        return new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: 'Gescand',
-                    selected: !!this.ticket.scannedAt,
-                    action: () => {
-                        this.webshopManager.addTicketPatch(TicketPrivate.patch({
-                            id: this.ticket.id,
-                            secret: this.ticket.secret, // needed for lookups
-                            scannedAt: new Date(),
-                            scannedBy: this.$context.user?.firstName ?? null,
-                        })).catch(console.error);
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Niet gescand',
-                    selected: !this.ticket.scannedAt,
-                    action: () => {
-                        this.webshopManager.addTicketPatch(TicketPrivate.patch({
-                            id: this.ticket.id,
-                            secret: this.ticket.secret, // needed for lookups
-                            scannedAt: null,
-                            scannedBy: null,
-                        })).catch(console.error);
-                        return true;
-                    },
-                }),
-            ],
-        ]);
-    }
+function getMarkAsMenu() {
+    return new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Gescand',
+                selected: !!props.ticket.scannedAt,
+                action: () => {
+                    props.webshopManager.addTicketPatch(TicketPrivate.patch({
+                        id: props.ticket.id,
+                        secret: props.ticket.secret, // needed for lookups
+                        scannedAt: new Date(),
+                        scannedBy: context.value.user?.firstName ?? null,
+                    })).catch(console.error);
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Niet gescand',
+                selected: !props.ticket.scannedAt,
+                action: () => {
+                    props.webshopManager.addTicketPatch(TicketPrivate.patch({
+                        id: props.ticket.id,
+                        secret: props.ticket.secret, // needed for lookups
+                        scannedAt: null,
+                        scannedBy: null,
+                    })).catch(console.error);
+                    return true;
+                },
+            }),
+        ],
+    ]);
+}
 
-    get statusName() {
-        return this.ticket.scannedAt ? 'Gescand' : 'Niet gescand';
-    }
+const statusName = computed(() => props.ticket.scannedAt ? 'Gescand' : 'Niet gescand');
+const statusColor = computed(() => props.ticket.scannedAt ? '' : 'gray');
 
-    get statusColor() {
-        return this.ticket.scannedAt ? '' : 'gray';
-    }
+async function download() {
+    const TicketBuilder = (await import(
+        /* webpackChunkName: "TicketBuilder" */
+        /* webpackPrefetch: true */
+        '@stamhoofd/ticket-builder'
+    )).TicketBuilder;
 
-    formatPrice(price: number) {
-        return Formatter.price(price);
-    }
-
-    formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString());
-    }
-
-    get qrMessage() {
-        return 'https://' + this.webshop.getUrl(this.$organization) + '/tickets/' + this.ticket.secret;
-    }
-
-    async download() {
-        const TicketBuilder = (await import(
-            /* webpackChunkName: "TicketBuilder" */
-            /* webpackPrefetch: true */
-            '@stamhoofd/ticket-builder'
-        )).TicketBuilder;
-
-        const builder = new TicketBuilder([this.ticket], this.webshop, this.$organization, this.order ?? undefined);
-        await builder.download();
-    }
+    const builder = new TicketBuilder([props.ticket], webshop.value, organization.value!, props.order ?? undefined);
+    await builder.download();
 }
 </script>
 
