@@ -17,8 +17,8 @@
                 <span class="icon arrow-down-small" />
             </button>
 
-            <p v-if="duplicateSeats.length" class="error-box">
-                Dubbele boekingen gedetecteerd voor plaatsen: {{ duplicateSeats.map(s => s.getNameString(webshop, selectedProduct)).join(', ') }}
+            <p v-if="webshop !== null && selectedProduct && duplicateSeats.length" class="error-box">
+                Dubbele boekingen gedetecteerd voor plaatsen: {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
             </p>
 
             <div v-for="section of sections" :key="section.id" class="container">
@@ -43,387 +43,365 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox, STNavigationBar, Toast } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox, STNavigationBar, Toast, useContext, useIsMobile } from '@stamhoofd/components';
 import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
 
+import { useRequestOwner } from '@stamhoofd/networking';
+import { computed, onBeforeUnmount, Ref, ref } from 'vue';
 import EditSeatingPlanView from '../edit/seating/EditSeatingPlanView.vue';
 import { WebshopManager } from '../WebshopManager';
 import OrderView from './OrderView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        LoadingView,
-        SeatSelectionBox,
-    },
-})
-export default class WebshopSeatingView extends Mixins(NavigationMixin) {
-    @Prop()
+const props = defineProps<{
     webshopManager: WebshopManager;
+}>();
 
-    get preview() {
-        return this.webshopManager.preview;
+const present = usePresent();
+const show = useShow();
+const context = useContext();
+const isMobile = useIsMobile();
+const preview = computed(() => props.webshopManager.preview);
+const webshop = computed(() => props.webshopManager.webshop);
+const loading = ref(false);
+const orders = ref([]) as Ref<PrivateOrderWithTickets[]>;
+const selectedProductId = ref<string | null>(null);
+const requestOwner = useRequestOwner();
+
+const selectedProduct = computed({
+    get: (): Product | null => webshop.value?.products?.find(p => p.id === selectedProductId.value) ?? null,
+    set: (product: Product | null) => {
+        selectedProductId.value = product?.id ?? null;
+    },
+});
+
+const onNewOrders = async (orders: PrivateOrder[]) => {
+    // Search for the orders and replace / add them
+    for (const order of orders) {
+        putOrder(order);
     }
 
-    get webshop() {
-        return this.webshopManager.webshop;
+    // If we received new orders, the webshop will also have changed reserved seats for the products
+    await props.webshopManager.loadWebshopIfNeeded(false, true);
+
+    // Remove highlight (order might have changed)
+    highlightedSeats.value = [];
+
+    return Promise.resolve();
+};
+
+const onDeleteOrders = async (orders: PrivateOrder[]): Promise<void> => {
+    // Delete these orders from the loaded orders instead of doing a full reload
+    for (const order of orders) {
+        const index = orders.findIndex(o => o.id === order.id);
+        if (index !== -1) {
+            orders.splice(index, 1);
+        }
     }
 
-    get organization() {
-        return this.$organization;
+    // If we received new orders, the webshop will also have changed reserved seats for the products
+    await props.webshopManager.loadWebshopIfNeeded(false, true);
+
+    // Remove highlight (order might have changed)
+    highlightedSeats.value = [];
+
+    return Promise.resolve();
+};
+
+function created() {
+    props.webshopManager.ordersEventBus.addListener(requestOwner, 'fetched', onNewOrders);
+    props.webshopManager.ordersEventBus.addListener(requestOwner, 'deleted', onDeleteOrders);
+
+    reload();
+    loadOrders().catch(console.error);
+}
+
+created();
+
+onBeforeUnmount(() => {
+    props.webshopManager.ordersEventBus.removeListener(requestOwner);
+    props.webshopManager.ticketsEventBus.removeListener(requestOwner);
+    props.webshopManager.ticketPatchesEventBus.removeListener(requestOwner);
+});
+
+const availableProducts = computed(() => {
+    return webshop.value?.products.filter(p => p.seatingPlanId) ?? [];
+});
+
+const seatingPlan = computed(() => {
+    return webshop.value?.meta.seatingPlans.find(p => p.id === selectedProduct.value?.seatingPlanId) ?? null;
+});
+
+const sections = computed(() => {
+    const plan = seatingPlan.value;
+    if (!plan) {
+        return [];
+    }
+    return plan.sections;
+});
+
+const reservedSeats = computed(() => {
+    return selectedProduct.value?.reservedSeats ?? [];
+});
+
+const duplicateSeats = computed(() => {
+    // Try to find all seats that are reserved twice
+    const duplicateSeats = new Map<string, ReservedSeat>();
+    const foundSeats = new Set<string>();
+
+    // We need to look at the reserved seats of orders, not of the product
+    const correctedReservedSeats = orders.value.flatMap(o => o.data.cart.items.flatMap(item => item.product.id === selectedProduct.value?.id ? item.reservedSeats : []));
+
+    for (const seat of correctedReservedSeats ?? []) {
+        const id = seat.section + ':::' + seat.row + ':::' + seat.seat;
+        if (foundSeats.has(id)) {
+            duplicateSeats.set(id, seat);
+        }
+        foundSeats.add(id);
     }
 
-    loading = false;
-    orders: PrivateOrderWithTickets[] = [];
-    selectedProductId: string | null = null;
+    return [...duplicateSeats.values()];
+});
 
-    get selectedProduct() {
-        return this.webshop?.products?.find(p => p.id === this.selectedProductId) ?? null;
-    }
-
-    set selectedProduct(product: Product | null) {
-        this.selectedProductId = product?.id ?? null;
-    }
-
-    created() {
-        this.webshopManager.ordersEventBus.addListener(this, 'fetched', this.onNewOrders.bind(this));
-        this.webshopManager.ordersEventBus.addListener(this, 'deleted', this.onDeleteOrders.bind(this));
-
-        this.reload();
-        this.loadOrders().catch(console.error);
-    }
-
-    beforeUnmount() {
-        this.webshopManager.ordersEventBus.removeListener(this);
-        this.webshopManager.ticketsEventBus.removeListener(this);
-        this.webshopManager.ticketPatchesEventBus.removeListener(this);
-        Request.cancelAll(this);
-    }
-
-    get availableProducts() {
-        return this.webshop?.products.filter(p => p.seatingPlanId) ?? [];
-    }
-
-    get seatingPlan() {
-        return this.webshop?.meta.seatingPlans.find(p => p.id === this.selectedProduct?.seatingPlanId) ?? null;
-    }
-
-    get sections() {
-        const plan = this.seatingPlan;
-        if (!plan) {
+const scannedSeats = computed(() => {
+    return orders.value.flatMap(o => o.tickets.flatMap((t) => {
+        const ticket = t.getPublic(o);
+        if (!ticket.isSingle || !ticket.items[0]) {
             return [];
         }
-        return plan.sections;
-    }
-
-    get reservedSeats() {
-        return this.selectedProduct?.reservedSeats ?? [];
-    }
-
-    get duplicateSeats() {
-        // Try to find all seats that are reserved twice
-        const duplicateSeats = new Map<string, ReservedSeat>();
-        const foundSeats = new Set<string>();
-
-        // We need to look at the reserved seats of orders, not of the product
-        const correctedReservedSeats = this.orders.flatMap(o => o.data.cart.items.flatMap(item => item.product.id === this.selectedProduct?.id ? item.reservedSeats : []));
-
-        for (const seat of correctedReservedSeats ?? []) {
-            const id = seat.section + ':::' + seat.row + ':::' + seat.seat;
-            if (foundSeats.has(id)) {
-                duplicateSeats.set(id, seat);
-            }
-            foundSeats.add(id);
+        const item = ticket.items[0];
+        if (item.product.id !== selectedProduct.value?.id) {
+            return [];
         }
+        return t.scannedAt ? [t.seat] : [];
+    }));
+});
 
-        return [...duplicateSeats.values()];
-    }
+const highlightedSeats = ref<ReservedSeat[]>([]);
 
-    get scannedSeats() {
-        return this.orders.flatMap(o => o.tickets.flatMap((t) => {
-            const ticket = t.getPublic(o);
-            if (!ticket.isSingle || !ticket.items[0]) {
-                return [];
-            }
-            const item = ticket.items[0];
-            if (item.product.id !== this.selectedProduct?.id) {
-                return [];
-            }
-            return t.scannedAt ? [t.seat] : [];
-        }));
-    }
-
-    highlightedSeats: ReservedSeat[] = [];
-
-    editSeatingPlan() {
-        this.present({
-            components: [
-                new ComponentWithProperties(EditSeatingPlanView, {
-                    webshop: this.webshop,
-                    seatingPlan: this.seatingPlan,
-                    isNew: false,
-                    saveHandler: async (patch: AutoEncoderPatchType<PrivateWebshop>) => {
-                        // this.patchWebshop = this.patchWebshop.patch(patchedWebshop)
-                        await this.webshopManager.patchWebshop(patch);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    chooseProduct(event) {
-        const contextMenu = new ContextMenu([
-            this.availableProducts.map((product) => {
-                return new ContextMenuItem({
-                    name: product.name,
-                    action: () => {
-                        this.selectedProduct = product;
-                        this.highlightedSeats = [];
-                        return true;
-                    },
-                });
+function editSeatingPlan() {
+    present({
+        components: [
+            new ComponentWithProperties(EditSeatingPlanView, {
+                webshop: webshop.value,
+                seatingPlan: seatingPlan.value,
+                isNew: false,
+                saveHandler: async (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+                    // this.patchWebshop = this.patchWebshop.patch(patchedWebshop)
+                    await props.webshopManager.patchWebshop(patch);
+                },
             }),
-        ]);
-        contextMenu.show({ button: event.currentTarget, xPlacement: 'right' }).catch(console.error);
-    }
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
 
-    onClickSeat(seat: ReservedSeat) {
-        for (const order of this.orders) {
-            for (const item of order.data.cart.items) {
-                if (item.product.id !== this.selectedProduct?.id) {
-                    continue;
-                }
-                for (const s of item.reservedSeats) {
-                    if (s.equals(seat)) {
-                        this.openOrder(order);
+function chooseProduct(event: MouseEvent) {
+    const contextMenu = new ContextMenu([
+        availableProducts.value.map((product) => {
+            return new ContextMenuItem({
+                name: product.name,
+                action: () => {
+                    selectedProduct.value = product;
+                    highlightedSeats.value = [];
+                    return true;
+                },
+            });
+        }),
+    ]);
+    contextMenu.show({
+        button: event.currentTarget as HTMLElement,
+        xPlacement: 'right',
+    }).catch(console.error);
+}
 
-                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats);
-                        return;
-                    }
+function onClickSeat(seat: ReservedSeat) {
+    for (const order of orders.value) {
+        for (const item of order.data.cart.items) {
+            if (item.product.id !== selectedProduct.value?.id) {
+                continue;
+            }
+            for (const s of item.reservedSeats) {
+                if (s.equals(seat)) {
+                    openOrder(order);
+
+                    highlightedSeats.value = order.data.cart.items.flatMap(i => i.product.id !== selectedProduct.value?.id ? [] : i.reservedSeats);
+                    return;
                 }
             }
         }
-        this.highlightedSeats = [];
-
-        // Check if this seat is reserved in the product
-        if (this.selectedProduct?.reservedSeats.find(r => r.equals(seat))) {
-            new Toast('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller nog aan het afrekenen is.', 'info').show();
-        }
-        else {
-            new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
-        }
     }
+    highlightedSeats.value = [];
 
-    onHoverSeat(seat: ReservedSeat) {
-        for (const order of this.orders) {
-            for (const item of order.data.cart.items) {
-                if (item.product.id !== this.selectedProduct?.id) {
-                    continue;
-                }
-                for (const s of item.reservedSeats) {
-                    if (s.equals(seat)) {
-                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats);
-                        return;
-                    }
+    // Check if this seat is reserved in the product
+    if (selectedProduct.value?.reservedSeats.find(r => r.equals(seat))) {
+        new Toast('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller nog aan het afrekenen is.', 'info').show();
+    }
+    else {
+        new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
+    }
+}
+
+function onHoverSeat(seat: ReservedSeat) {
+    for (const order of orders.value) {
+        for (const item of order.data.cart.items) {
+            if (item.product.id !== selectedProduct.value?.id) {
+                continue;
+            }
+            for (const s of item.reservedSeats) {
+                if (s.equals(seat)) {
+                    highlightedSeats.value = order.data.cart.items.flatMap(i => i.product.id !== selectedProduct.value?.id ? [] : i.reservedSeats);
+                    return;
                 }
             }
         }
-        this.highlightedSeats = [];
     }
+    highlightedSeats.value = [];
+}
 
-    async onDeleteOrders(orders: PrivateOrder[]): Promise<void> {
-        // Delete these orders from the loaded orders instead of doing a full reload
-        for (const order of orders) {
-            const index = this.orders.findIndex(o => o.id === order.id);
-            if (index !== -1) {
-                this.orders.splice(index, 1);
-            }
-        }
-
-        // If we received new orders, the webshop will also have changed reserved seats for the products
-        await this.webshopManager.loadWebshopIfNeeded(false, true);
-
-        // Remove highlight (order might have changed)
-        this.highlightedSeats = [];
-
-        return Promise.resolve();
-    }
-
-    /**
+/**
      * Insert or update an order
      */
-    putOrder(order: PrivateOrder) {
-        for (const _order of this.orders) {
-            if (order.id === _order.id) {
-                // replace data without affecting reference or tickets
-                _order.set(order);
-                return;
+function putOrder(order: PrivateOrder) {
+    for (const _order of orders.value) {
+        if (order.id === _order.id) {
+            // replace data without affecting reference or tickets
+            _order.set(order);
+            return;
+        }
+    }
+    orders.value.push(PrivateOrderWithTickets.create(order));
+}
+
+const isLoadingOrders = ref(true);
+const isRefreshingOrders = ref(false);
+
+async function loadOrders() {
+    console.log('Loading orders...');
+    orders.value = [];
+    isLoadingOrders.value = true;
+
+    // Disabled for now: first fix needed for payment status + deleted orders
+    try {
+        // We use stream orders because that doesn't block the main thread on iOS
+        // (we don't need to decode all orders at the same time on the main thread)
+
+        // We use a buffer to prevent DOM updates or Vue slowdown during streaming
+        const arrayBuffer: PrivateOrderWithTickets[] = [];
+
+        await props.webshopManager.streamOrdersDeprecated((order) => {
+            // Same orders could be seen twice
+            arrayBuffer.push(
+                PrivateOrderWithTickets.create(order),
+            );
+        }, false);
+
+        const ticketBuffer: TicketPrivate[] = [];
+
+        await props.webshopManager.streamTickets((ticket) => {
+            ticketBuffer.push(ticket);
+        }, false);
+
+        await props.webshopManager.streamTicketPatches((patch) => {
+            const ticket = ticketBuffer.find(o => o.id === patch.id);
+            if (ticket) {
+                ticket.deepSet(ticket.patch(patch));
+            }
+        });
+
+        for (const ticket of ticketBuffer) {
+            const order = arrayBuffer.find(o => o.id === ticket.orderId);
+            if (order) {
+                order.tickets.push(ticket);
+            }
+            else {
+                console.warn('Couldn\'t find order for ticket', ticket);
             }
         }
-        this.orders.push(PrivateOrderWithTickets.create(order));
-    }
 
-    async onNewOrders(orders: PrivateOrder[]) {
-        // Search for the orders and replace / add them
-        for (const order of orders) {
-            this.putOrder(order);
+        if (arrayBuffer.length > 0) {
+            orders.value = arrayBuffer;
+            isLoadingOrders.value = false;
         }
-
-        // If we received new orders, the webshop will also have changed reserved seats for the products
-        await this.webshopManager.loadWebshopIfNeeded(false, true);
-
-        // Remove highlight (order might have changed)
-        this.highlightedSeats = [];
-
-        return Promise.resolve();
     }
+    catch (e) {
+        // Database error. We can ignore this and simply move on.
+        console.error(e);
+    }
+    await refresh(false);
+}
 
-    get hasWrite() {
-        const p = this.$context.organizationPermissions;
-        if (!p) {
-            return false;
+const hasTickets = computed(() => preview.value.hasTickets);
+
+async function refresh(reset = false) {
+    try {
+        // Initiate a refresh
+        // don't wait
+        isRefreshingOrders.value = true;
+        isLoadingOrders.value = orders.value.length === 0;
+
+        if (reset) {
+            orders.value = [];
         }
-        return this.preview.privateMeta.permissions.hasWriteAccess(p);
+        await props.webshopManager.fetchNewOrdersDeprecated(false, reset);
+    }
+    catch (e) {
+        // Fetching failed
+        Toast.fromError(e).show();
     }
 
-    isLoadingOrders = true;
-    isRefreshingOrders = false;
-
-    async loadOrders() {
-        console.log('Loading orders...');
-        this.orders = [];
-        this.isLoadingOrders = true;
-
-        // Disabled for now: first fix needed for payment status + deleted orders
+    // And preload the tickets if needed
+    if (hasTickets.value) {
         try {
-            // We use stream orders because that doesn't block the main thread on iOS
-            // (we don't need to decode all orders at the same time on the main thread)
-
-            // We use a buffer to prevent DOM updates or Vue slowdown during streaming
-            const arrayBuffer: PrivateOrderWithTickets[] = [];
-
-            await this.webshopManager.streamOrdersDeprecated((order) => {
-                // Same orders could be seen twice
-                arrayBuffer.push(
-                    PrivateOrderWithTickets.create(order),
-                );
-            }, false);
-
-            const ticketBuffer: TicketPrivate[] = [];
-
-            await this.webshopManager.streamTickets((ticket) => {
-                ticketBuffer.push(ticket);
-            }, false);
-
-            await this.webshopManager.streamTicketPatches((patch) => {
-                const ticket = ticketBuffer.find(o => o.id === patch.id);
-                if (ticket) {
-                    ticket.deepSet(ticket.patch(patch));
-                }
-            });
-
-            for (const ticket of ticketBuffer) {
-                const order = arrayBuffer.find(o => o.id === ticket.orderId);
-                if (order) {
-                    order.tickets.push(ticket);
-                }
-                else {
-                    console.warn('Couldn\'t find order for ticket', ticket);
-                }
-            }
-
-            if (arrayBuffer.length > 0) {
-                this.orders = arrayBuffer;
-                this.isLoadingOrders = false;
-            }
-        }
-        catch (e) {
-            // Database error. We can ignore this and simply move on.
-            console.error(e);
-        }
-        await this.refresh(false);
-    }
-
-    get hasTickets() {
-        return this.preview.hasTickets;
-    }
-
-    async refresh(reset = false) {
-        try {
-            // Initiate a refresh
-            // don't wait
-            this.isRefreshingOrders = true;
-            this.isLoadingOrders = this.orders.length === 0;
-
-            if (reset) {
-                this.orders = [];
-            }
-            await this.webshopManager.fetchNewOrdersDeprecated(false, reset);
+            await props.webshopManager.fetchNewTickets(false, false);
         }
         catch (e) {
             // Fetching failed
             Toast.fromError(e).show();
         }
 
-        // And preload the tickets if needed
-        if (this.hasTickets) {
-            try {
-                await this.webshopManager.fetchNewTickets(false, false);
-            }
-            catch (e) {
-                // Fetching failed
-                Toast.fromError(e).show();
-            }
-
-            // Do we still have some missing patches that are not yet synced with the server?
-            this.webshopManager.trySavePatches().catch((e) => {
-                console.error(e);
-                Toast.fromError(e).show();
-            });
-        }
-
-        this.isLoadingOrders = false;
-        this.isRefreshingOrders = false;
-    }
-
-    get hasFullPermissions() {
-        return this.preview.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions);
-    }
-
-    reload() {
-        this.loading = true;
-
-        this.webshopManager.loadWebshopIfNeeded().catch((e) => {
+        // Do we still have some missing patches that are not yet synced with the server?
+        props.webshopManager.trySavePatches().catch((e: Error) => {
             console.error(e);
             Toast.fromError(e).show();
-        }).finally(() => {
-            this.loading = false;
-            this.selectedProduct = this.selectedProduct ?? this.availableProducts[0] ?? null;
-            console.log(this.selectedProduct?.reservedSeats);
         });
     }
 
-    openOrder(order: PrivateOrderWithTickets) {
-        const component = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(OrderView, {
-                initialOrder: order,
-                webshopManager: this.webshopManager,
-            }),
-        });
+    isLoadingOrders.value = false;
+    isRefreshingOrders.value = false;
+}
 
-        if ((this as any).$isMobile) {
-            this.show(component);
-        }
-        else {
-            component.modalDisplayStyle = 'popup';
-            this.present(component);
-        }
+const hasFullPermissions = computed(() => preview.value.privateMeta.permissions.hasFullAccess(context.value.organizationPermissions));
+
+function reload() {
+    loading.value = true;
+
+    props.webshopManager.loadWebshopIfNeeded().catch((e) => {
+        console.error(e);
+        Toast.fromError(e).show();
+    }).finally(() => {
+        loading.value = false;
+        selectedProduct.value = selectedProduct.value ?? availableProducts.value[0] ?? null;
+        console.log(selectedProduct.value?.reservedSeats);
+    });
+}
+
+function openOrder(order: PrivateOrderWithTickets) {
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(OrderView, {
+            initialOrder: order,
+            webshopManager: props.webshopManager,
+        }),
+    });
+
+    if (isMobile) {
+        show(component).catch(console.error);
+    }
+    else {
+        component.modalDisplayStyle = 'popup';
+        present(component).catch(console.error);
     }
 }
 </script>
