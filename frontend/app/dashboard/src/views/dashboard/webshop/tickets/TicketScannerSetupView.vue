@@ -57,124 +57,110 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import { computed, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import TicketScannerView from './TicketScannerView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        BackButton,
-        STList,
-        STListItem,
-        STToolbar,
-        Spinner,
-        Checkbox,
-    },
-})
-export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    webshopManager!: WebshopManager;
+const props = defineProps<{
+    webshopManager: WebshopManager;
 
-    disabledProducts: Product[] = [];
-    isChecking = true;
-    noDatabaseSupport = false;
+}>();
 
-    created() {
-        this.webshopManager.loadWebshopIfNeeded().then(() => {
-            // Load disabled products in database
-            this.webshopManager.readSettingKey('disabledProducts').then((value) => {
-                if (value && Array.isArray(value)) {
-                    if (this.ticketProducts) {
-                        this.disabledProducts = this.ticketProducts?.filter(p => value.includes(p.id));
-                    }
+const present = usePresent();
+const disabledProducts = ref<Product[]>([]);
+const isChecking = ref(false);
+const noDatabaseSupport = ref(false);
+
+function created() {
+    props.webshopManager.loadWebshopIfNeeded().then(() => {
+        // Load disabled products in database
+        props.webshopManager.readSettingKey('disabledProducts').then((value) => {
+            if (value && Array.isArray(value)) {
+                if (ticketProducts.value) {
+                    disabledProducts.value = ticketProducts.value?.filter(p => value.includes(p.id));
                 }
-            }).catch(console.error);
-        }).catch(console.error);
-
-        // Initialize offlien storage: check if everything works okay
-        this.isChecking = true;
-        this.webshopManager.getDatabase().catch((e) => {
-            this.noDatabaseSupport = true;
-        }).finally(() => {
-            this.isChecking = false;
-        });
-    }
-
-    formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString());
-    }
-
-    get isLoading() {
-        return this.webshopManager.webshop === null;
-    }
-
-    /**
-     * Only filter if we sell tickets as products, not for tickets per order
-     */
-    get shouldFilter() {
-        return this.webshopManager.preview.meta.ticketType === WebshopTicketType.Tickets;
-    }
-
-    get ticketProducts() {
-        return this.webshopManager.webshop?.products.filter(p => p.type === ProductType.Ticket || p.type === ProductType.Voucher) ?? [];
-    }
-
-    get categories() {
-        const categories = this.webshopManager.webshop?.categories.filter(c => this.getCategoryProducts(c).length > 0) ?? [];
-        if (categories.length <= 0) {
-            return [
-                Category.create({
-                    name: '',
-                    productIds: this.ticketProducts.map(p => p.id),
-                }),
-            ];
-        }
-        return categories;
-    }
-
-    getCategoryProducts(category: Category) {
-        return category.productIds.flatMap((p) => {
-            const product = this.ticketProducts.find(pp => pp.id === p);
-            if (product) {
-                return [product];
             }
-            return [];
-        });
-    }
+        }).catch(console.error);
+    }).catch(console.error);
 
-    isProductSelected(product: Product) {
-        return !this.disabledProducts.find(p => p.id === product.id);
-    }
+    // Initialize offlien storage: check if everything works okay
+    isChecking.value = true;
+    props.webshopManager.getDatabase().catch(() => {
+        noDatabaseSupport.value = true;
+    }).finally(() => {
+        isChecking.value = false;
+    });
+}
 
-    setProductSelected(product: Product, selected: boolean) {
-        if (selected === this.isProductSelected(product)) {
-            return;
-        }
-        if (selected) {
-            this.disabledProducts = this.disabledProducts.filter(p => p.id !== product.id);
-        }
-        else {
-            this.disabledProducts.push(product);
-        }
-    }
+created();
 
-    start() {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(TicketScannerView, {
-                webshopManager: this.webshopManager,
-                disabledProducts: this.disabledProducts,
+function formatDateRange(dateRange: ProductDateRange) {
+    return Formatter.capitalizeFirstLetter(dateRange.toString());
+}
+
+const isLoading = computed(() => props.webshopManager.webshop === null);
+
+// Only filter if we sell tickets as products, not for tickets per order
+const shouldFilter = computed(() => props.webshopManager.preview.meta.ticketType === WebshopTicketType.Tickets);
+
+const ticketProducts = computed(() => {
+    return props.webshopManager.webshop?.products.filter(p => p.type === ProductType.Ticket || p.type === ProductType.Voucher) ?? [];
+});
+
+const categories = computed(() => {
+    const categories = props.webshopManager.webshop?.categories.filter(c => getCategoryProducts(c).length > 0) ?? [];
+    if (categories.length <= 0) {
+        return [
+            Category.create({
+                name: '',
+                productIds: ticketProducts.value.map(p => p.id),
             }),
-        }));
-
-        // Save disabled products in database
-        this.webshopManager.storeSettingKey('disabledProducts', this.disabledProducts.map(p => p.id)).catch(console.error);
+        ];
     }
+    return categories;
+});
+
+function getCategoryProducts(category: Category) {
+    return category.productIds.flatMap((p) => {
+        const product = ticketProducts.value.find(pp => pp.id === p);
+        if (product) {
+            return [product];
+        }
+        return [];
+    });
+}
+
+function isProductSelected(product: Product) {
+    return !disabledProducts.value.find(p => p.id === product.id);
+}
+
+function setProductSelected(product: Product, selected: boolean) {
+    if (selected === isProductSelected(product)) {
+        return;
+    }
+    if (selected) {
+        disabledProducts.value = disabledProducts.value.filter(p => p.id !== product.id);
+    }
+    else {
+        disabledProducts.value.push(product);
+    }
+}
+
+function start() {
+    present(new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(TicketScannerView, {
+            webshopManager: props.webshopManager,
+            disabledProducts: disabledProducts.value,
+        }),
+    })).catch(console.error);
+
+    // Save disabled products in database
+    props.webshopManager.storeSettingKey('disabledProducts', disabledProducts.value.map(p => p.id)).catch(console.error);
 }
 </script>
