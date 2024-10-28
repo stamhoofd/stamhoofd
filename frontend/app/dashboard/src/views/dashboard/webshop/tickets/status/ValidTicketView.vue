@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view valid-ticket-view">
+    <div ref="root" class="st-view valid-ticket-view">
         <STNavigationBar title="Geldig ticket" />
 
         <main v-if="!publicTicket.isSingle">
@@ -50,7 +50,7 @@
             <h2>Informatie</h2>
 
             <STList>
-                <STListItem v-if="order.totalToPay || !webshop.isAllFree">
+                <STListItem v-if="order.totalToPay || !webshop?.isAllFree">
                     <h3 class="style-definition-label">
                         Totaal te betalen
                     </h3>
@@ -59,7 +59,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="(order.totalToPay || !webshop.isAllFree) && (order.pricePaid > 0 && order.pricePaid !== order.totalToPay)">
+                <STListItem v-if="(order.totalToPay || !webshop?.isAllFree) && (order.pricePaid > 0 && order.pricePaid !== order.totalToPay)">
                     <h3 class="style-definition-label">
                         Betaald bedrag
                     </h3>
@@ -68,7 +68,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem>
+                <STListItem v-if="order.validAt !== null">
                     <h3 class="style-definition-label">
                         Geplaatst op
                     </h3>
@@ -77,7 +77,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-long-press="(e) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
+                <STListItem v-long-press="(e: Event) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     <h3 :class="'style-definition-label '+statusColor">
                         Status
                     </h3>
@@ -93,7 +93,7 @@
                 <STListItem
                     v-for="(payment, index) in order.payments"
                     :key="payment.id"
-                    v-long-press="(e) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite"
+                    v-long-press="(e: MouseEvent) => (hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite"
                     class="right-description" @click="openPayment(payment)"
                     @contextmenu.prevent="hasPaymentsWrite && (payment.method === 'Transfer' || payment.method === 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
                 >
@@ -146,13 +146,13 @@
                             {{ order.data.checkoutMethod.name }}
                         </p>
                     </STListItem>
-                    <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
+                    <STListItem v-if="(order.data.checkoutMethod as any).address" class="right-description">
                         <h3 class="style-definition-label">
                             Adres
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ order.data.checkoutMethod.address }}
+                            {{ (order.data.checkoutMethod as any).address }}
                         </p>
                     </STListItem>
                     <STListItem v-if="order.data.address" class="right-description">
@@ -393,290 +393,259 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, usePresent } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, LongPressDirective, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, useContext, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import { useOrganizationManager } from '@stamhoofd/networking';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { OrderActionBuilder } from '../../orders/OrderActionBuilder';
 import OrderView from '../../orders/OrderView.vue';
 import { WebshopManager } from '../../WebshopManager';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STList,
-        STListItem,
-        STToolbar,
-        Spinner,
-        ViewRecordCategoryAnswersBox,
-        CartItemRow,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter),
-        date: Formatter.dateWithDay.bind(Formatter),
-        dateTime: Formatter.dateTimeWithDay.bind(Formatter),
-        minutes: Formatter.minutes.bind(Formatter),
-        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
-    },
-    directives: {
-        LongPress: LongPressDirective,
-    },
-})
-export default class ValidTicketView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    webshopManager!: WebshopManager;
+const props = defineProps<{
+    webshopManager: WebshopManager;
+    ticket: TicketPrivate | TicketPublicPrivate;
+    order: PrivateOrder;
+}>();
 
-    @Prop({ required: true })
-    ticket!: TicketPrivate | TicketPublicPrivate;
+const root = ref<HTMLElement | null>(null);
 
-    @Prop({ required: true })
-    order!: PrivateOrder;
+watch(root, (el) => {
+    if (el) {
+        ColorHelper.setColor('#0CBB69', el);
+    }
+});
 
-    get recordAnswers() {
-        return this.order.data.recordAnswers;
+const present = usePresent();
+const pop = usePop();
+const context = useContext();
+const organizationManager = useOrganizationManager();
+
+const webshop = computed(() => props.webshopManager.webshop);
+await props.webshopManager.loadWebshopIfNeeded(false, true);
+
+const recordAnswers = computed(() => props.order.data.recordAnswers);
+const isMissingPayments = computed(() => props.order.payments.reduce((a, b) => a + b.price, 0) !== props.order.totalToPay);
+const hasWarnings = computed(() => warnings.value.length > 0);
+const publicTicket = computed(() => props.ticket.getPublic(props.order));
+const indexDescription = computed(() => publicTicket.value.getIndexDescription(props.webshopManager.preview));
+const changedSeatString = computed(() => webshop.value ? publicTicket.value.getChangedSeatString(webshop.value, false) : '');
+const warnings = computed(() => {
+    const warnings: RecordWarning[] = [];
+
+    for (const answer of recordAnswers.value.values()) {
+        warnings.push(...answer.getWarnings());
     }
 
-    get isMissingPayments() {
-        return this.order.payments.reduce((a, b) => a + b.price, 0) !== this.order.totalToPay;
+    return warnings;
+});
+
+const sortedWarnings = computed(() => warnings.value.slice().sort(RecordWarning.sort));
+const isCanceled = computed(() => props.order.status === OrderStatus.Canceled);
+const item = computed(() => publicTicket.value.isSingle ? publicTicket.value.items[0] : null);
+
+function formatDateRange(dateRange: ProductDateRange) {
+    return Formatter.capitalizeFirstLetter(dateRange.toString());
+}
+
+function getName(paymentMethod: PaymentMethod): string {
+    return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod));
+}
+
+const actionBuilder = computed(() => new OrderActionBuilder({
+    present: usePresent(),
+    organizationManager: organizationManager.value,
+    webshopManager: props.webshopManager,
+}));
+
+const statusName = computed(() => OrderStatusHelper.getName(props.order.status));
+
+const statusColor = computed(() => OrderStatusHelper.getColor(props.order.status));
+
+const hasWrite = computed(() => {
+    const p = context.value.organizationPermissions;
+    if (!p) {
+        return false;
     }
 
-    get hasWarnings() {
-        return this.warnings.length > 0;
+    if (webshop.value === null) {
+        return false;
     }
 
-    get publicTicket() {
-        return this.ticket.getPublic(this.order);
+    return webshop.value.privateMeta.permissions.hasWriteAccess(p);
+});
+
+const hasPaymentsWrite = computed(() => {
+    const p = context.value.organizationPermissions;
+    if (!p) {
+        return false;
+    }
+    if (p.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+        return true;
     }
 
-    get indexDescription() {
-        return this.publicTicket.getIndexDescription(this.webshop);
+    if (p.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
+        return true;
     }
 
-    get changedSeatString() {
-        return this.publicTicket.getChangedSeatString(this.webshop, false);
+    if (webshop.value === null) {
+        return false;
     }
 
-    get warnings(): RecordWarning[] {
-        const warnings: RecordWarning[] = [];
+    return webshop.value.privateMeta.permissions.hasWriteAccess(p);
+});
 
-        for (const answer of this.recordAnswers) {
-            warnings.push(...answer.getWarnings());
+function openPayment(payment: Payment) {
+    if (!hasPaymentsWrite.value) {
+        return;
+    }
+
+    present({
+        components: [
+            new ComponentWithProperties(AsyncPaymentView, {
+                payment,
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function markAs(event: Event) {
+    const el: HTMLElement = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget as HTMLElement;
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+        x: el.getBoundingClientRect().left + el.offsetWidth,
+        y: el.getBoundingClientRect().top + el.offsetHeight,
+        xPlacement: 'left',
+        yPlacement: 'bottom',
+        actions: actionBuilder.value.getStatusActions(),
+        // todo: selection
+    });
+    present(displayedComponent.setDisplayStyle('overlay')).catch(console.error);
+}
+
+function changePaymentStatus(event: Event) {
+    const el: HTMLElement = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget as HTMLElement;
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+        x: el.getBoundingClientRect().left + el.offsetWidth,
+        y: el.getBoundingClientRect().top + el.offsetHeight,
+        xPlacement: 'left',
+        yPlacement: 'bottom',
+        actions: actionBuilder.value.getPaymentActions(),
+        // todo: selection
+    });
+    present(displayedComponent.setDisplayStyle('overlay')).catch(console.error);
+}
+
+async function cancelScan() {
+    if (props.ticket.scannedAt) {
+        await props.webshopManager.addTicketPatch(TicketPrivate.patch({
+            id: props.ticket.id,
+            secret: props.ticket.secret, // needed for lookups
+            scannedAt: null,
+            scannedBy: null,
+        }));
+    }
+    pop({ force: true })?.catch(console.error);
+}
+
+async function markScanned() {
+    if (!props.ticket.scannedAt) {
+        await props.webshopManager.addTicketPatch(TicketPrivate.patch({
+            id: props.ticket.id,
+            secret: props.ticket.secret, // needed for lookups
+            scannedAt: new Date(),
+            scannedBy: context.value.user?.firstName ?? null,
+        }));
+    }
+
+    pop({ force: true })?.catch(console.error);
+}
+
+const recordCategories = computed(() => {
+    if (webshop.value === null) {
+        return [];
+    }
+
+    return RecordCategory.flattenCategoriesForAnswers(
+        webshop.value.meta.recordCategories,
+        [...props.order.data.recordAnswers.values()],
+    );
+});
+
+function openOrder() {
+    present({
+        components: [
+            new ComponentWithProperties(OrderView, {
+                initialOrder: PrivateOrderWithTickets.create(props.order),
+                webshopManager: props.webshopManager,
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+const owner = {};
+
+function created() {
+    // Listen for patches in payments
+    GlobalEventBus.addListener(owner, 'paymentPatch', async (payment) => {
+        if (payment && payment.id && props.order.payments.find(p => p.id === payment.id as string)) {
+            await props.webshopManager.fetchNewOrdersDeprecated(false, false);
         }
+        return Promise.resolve();
+    });
 
-        return warnings;
-    }
-
-    get sortedWarnings() {
-        return this.warnings.slice().sort(RecordWarning.sort);
-    }
-
-    get isCanceled() {
-        return this.order.status === OrderStatus.Canceled;
-    }
-
-    get item() {
-        return this.publicTicket.isSingle ? this.publicTicket.items[0] : null;
-    }
-
-    formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString());
-    }
-
-    getName(paymentMethod: PaymentMethod): string {
-        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod));
-    }
-
-    get actionBuilder() {
-        return new OrderActionBuilder({
-            present: usePresent(),
-            organizationManager: this.$organizationManager,
-            webshopManager: this.webshopManager,
-        });
-    }
-
-    get statusName() {
-        return OrderStatusHelper.getName(this.order.status);
-    }
-
-    get statusColor() {
-        return OrderStatusHelper.getColor(this.order.status);
-    }
-
-    get webshop() {
-        return this.webshopManager.preview;
-    }
-
-    get hasWrite() {
-        const p = this.$context.organizationPermissions;
-        if (!p) {
-            return false;
-        }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p);
-    }
-
-    get hasPaymentsWrite() {
-        const p = this.$context.organizationPermissions;
-        if (!p) {
-            return false;
-        }
-        if (p.hasAccessRight(AccessRight.OrganizationManagePayments)) {
-            return true;
-        }
-
-        if (p.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
-            return true;
-        }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p);
-    }
-
-    openPayment(payment: Payment) {
-        if (!this.hasPaymentsWrite) {
-            return;
-        }
-
-        this.present({
-            components: [
-                new ComponentWithProperties(AsyncPaymentView, {
-                    payment,
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    markAs(event) {
-        const el = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget;
-        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: el.getBoundingClientRect().left + el.offsetWidth,
-            y: el.getBoundingClientRect().top + el.offsetHeight,
-            xPlacement: 'left',
-            yPlacement: 'bottom',
-            actions: this.actionBuilder.getStatusActions(),
-            // todo: selection
-        });
-        this.present(displayedComponent.setDisplayStyle('overlay'));
-    }
-
-    changePaymentStatus(event) {
-        const el = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget;
-        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: el.getBoundingClientRect().left + el.offsetWidth,
-            y: el.getBoundingClientRect().top + el.offsetHeight,
-            xPlacement: 'left',
-            yPlacement: 'bottom',
-            actions: this.actionBuilder.getPaymentActions(),
-            // todo: selection
-        });
-        this.present(displayedComponent.setDisplayStyle('overlay'));
-    }
-
-    async cancelScan() {
-        if (this.ticket.scannedAt) {
-            await this.webshopManager.addTicketPatch(TicketPrivate.patch({
-                id: this.ticket.id,
-                secret: this.ticket.secret, // needed for lookups
-                scannedAt: null,
-                scannedBy: null,
-            }));
-        }
-        this.pop({ force: true });
-    }
-
-    async markScanned() {
-        if (!this.ticket.scannedAt) {
-            await this.webshopManager.addTicketPatch(TicketPrivate.patch({
-                id: this.ticket.id,
-                secret: this.ticket.secret, // needed for lookups
-                scannedAt: new Date(),
-                scannedBy: this.$context.user?.firstName ?? null,
-            }));
-        }
-
-        this.pop({ force: true });
-    }
-
-    get recordCategories(): RecordCategory[] {
-        return RecordCategory.flattenCategoriesForAnswers(
-            this.webshop.meta.recordCategories,
-            [...this.order.data.recordAnswers.values()],
-        );
-    }
-
-    openOrder() {
-        this.present({
-            components: [
-                new ComponentWithProperties(OrderView, {
-                    initialOrder: PrivateOrderWithTickets.create(this.order),
-                    webshopManager: this.webshopManager,
-                }),
-            ],
-            modalDisplayStyle: 'popup',
-        });
-    }
-
-    mounted() {
-        ColorHelper.setColor('#0CBB69', this.$el as HTMLElement);
-    }
-
-    created() {
-        // Listen for patches in payments
-        GlobalEventBus.addListener(this, 'paymentPatch', async (payment) => {
-            if (payment && payment.id && this.order.payments.find(p => p.id === payment.id as string)) {
-                await this.webshopManager.fetchNewOrdersDeprecated(false, false);
+    props.webshopManager.ordersEventBus.addListener(owner, 'fetched', (orders: PrivateOrder[]) => {
+        for (const order of orders) {
+            if (order.id === props.order.id) {
+                props.order.deepSet(order);
             }
-            return Promise.resolve();
-        });
+        }
+        return Promise.resolve();
+    });
+}
 
-        this.webshopManager.ordersEventBus.addListener(this, 'fetched', (orders: PrivateOrder[]) => {
-            for (const order of orders) {
-                if (order.id === this.order.id) {
-                    this.order.deepSet(order);
-                }
-            }
-            return Promise.resolve();
-        });
-    }
+created();
 
-    beforeUnmount() {
-        this.webshopManager.ordersEventBus.removeListener(this);
-    }
+onBeforeUnmount(() => {
+    props.webshopManager.ordersEventBus.removeListener(this);
+});
 
-    createPayment() {
-        const payment = PaymentGeneral.create({
-            method: PaymentMethod.PointOfSale,
-            status: PaymentStatus.Succeeded,
-            paidAt: new Date(),
-        });
+function createPayment() {
+    const payment = PaymentGeneral.create({
+        method: PaymentMethod.PointOfSale,
+        status: PaymentStatus.Succeeded,
+        paidAt: new Date(),
+    });
 
-        const component = new ComponentWithProperties(EditPaymentView, {
-            payment,
-            balanceItems: this.order.balanceItems,
-            isNew: true,
-            saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
-                const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-                arr.addPut(payment.patch(patch));
-                await this.$context.authenticatedServer.request({
-                    method: 'PATCH',
-                    path: '/organization/payments',
-                    body: arr,
-                    decoder: new ArrayDecoder(PaymentGeneral),
-                    shouldRetry: false,
-                });
+    const component = new ComponentWithProperties(EditPaymentView, {
+        payment,
+        balanceItems: props.order.balanceItems,
+        isNew: true,
+        saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
+            const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
+            arr.addPut(payment.patch(patch));
+            await context.value.authenticatedServer.request({
+                method: 'PATCH',
+                path: '/organization/payments',
+                body: arr,
+                decoder: new ArrayDecoder(PaymentGeneral),
+                shouldRetry: false,
+            });
 
-                // Update order
-                await this.webshopManager.fetchNewOrdersDeprecated(false, false);
-            },
-        });
-        this.present({
-            components: [component],
-            modalDisplayStyle: 'popup',
-        });
-    }
+            // Update order
+            await props.webshopManager.fetchNewOrdersDeprecated(false, false);
+        },
+    });
+
+    present({
+        components: [component],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
 }
 </script>
 
