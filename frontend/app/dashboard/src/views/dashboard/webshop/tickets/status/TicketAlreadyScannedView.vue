@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view ticket-already-scanned-view" ref="root">
+    <div ref="root" class="st-view ticket-already-scanned-view">
         <STNavigationBar title="Ticket al gescand" />
 
         <main>
@@ -37,10 +37,10 @@
 
         <STToolbar>
             <template #right>
-                <button class="button secundary" @click="viewTicket">
+                <button class="button secundary" type="button" @click="viewTicket">
                     Ticket toch bekijken
                 </button>
-                <button class="button primary" @click="() => pop()">
+                <button class="button primary" type="button" @click="() => pop()">
                     Terug
                 </button>
             </template>
@@ -61,16 +61,16 @@ import ValidTicketView from './ValidTicketView.vue';
 const props = defineProps<{
     webshopManager: WebshopManager;
     ticket: TicketPrivate | TicketPublicPrivate;
-    order: PrivateOrder
+    order: PrivateOrder;
 }>();
 
 const root = ref<HTMLElement | null>(null);
 
 watch(root, (root) => {
-if(root !== null) {
-    ColorHelper.setColor('#ffc900', root);
-}
-})
+    if (root !== null) {
+        ColorHelper.setColor('#ffc900', root);
+    }
+});
 
 const show = useShow();
 const pop = usePop();
@@ -90,7 +90,7 @@ function viewTicket() {
         ],
         replace: 1,
         force: true,
-    });
+    }).catch(console.error);
 }
 </script>
 

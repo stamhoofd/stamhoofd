@@ -21,43 +21,27 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, LoadComponent, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { LoadComponent, STList, STListItem, STNavigationBar, useOrganization } from '@stamhoofd/components';
 import { WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        STList,
-        STListItem,
-        BackButton,
-    },
-})
-export default class WebshopArchiveView extends Mixins(NavigationMixin) {
-    get organization() {
-        return this.$organization;
-    }
+const organization = useOrganization();
+const show = useShow();
 
-    get webshops() {
-        return this.organization.webshops
-            .filter(webshop => webshop.meta.status === WebshopStatus.Archived)
-            .sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name));
-    }
+const webshops = computed(() => organization.value?.webshops
+    .filter(webshop => webshop.meta.status === WebshopStatus.Archived)
+    .sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name)) ?? []);
 
-    async openWebshop(webshop: WebshopPreview) {
-        this.show({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: await LoadComponent(() => import(/* webpackChunkName: "WebshopOverview" */ './WebshopOverview.vue'), { preview: webshop }, { instant: false }),
-                }),
-            ] },
-        );
-    }
+async function openWebshop(webshop: WebshopPreview) {
+    show({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: await LoadComponent(() => import(/* webpackChunkName: "WebshopOverview" */ './WebshopOverview.vue'), { preview: webshop }, { instant: false }),
+            }),
+        ] },
+    ).catch(console.error);
 }
 </script>
