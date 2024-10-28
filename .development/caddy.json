@@ -2,29 +2,10 @@
     "apps": {
         "http": {
             "servers": {
-                "redirect": {
-                    "listen": [
-                        ":80"
-                    ],
-                    "routes": [
-                        {
-                            "handle": [
-                                {
-                                    "handler": "static_response",
-                                    "status_code": "301",
-                                    "headers": {
-                                        "Location": [
-                                            "https://{http.request.hostport}{http.request.uri}"
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                },
                 "stamhoofd": {
                     "listen": [
-                        ":443"
+                        ":443",
+                        ":80"
                     ],
                     "routes": [
                         {
@@ -122,72 +103,10 @@
                             ],
                             "handle": [
                                 {
-                                    "handler": "subroute",
-                                    "routes": [
-                                        {
-                                            "match": [
-                                                {
-                                                    "not": [
-                                                        {
-                                                            "path": [
-                                                                "*.js",
-                                                                "*.css",
-                                                                "*.png",
-                                                                "*.svg",
-                                                                "*.ttf",
-                                                                "*.woff",
-                                                                "*.woff2"
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "handler": "headers",
-                                                    "response": {
-                                                        "set": {
-                                                            "Cache-Control": [
-                                                                "no-cache"
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "terminal": false
-                                        },
-                                        {
-                                            "match": [
-                                                {
-                                                    "path": [
-                                                        "*.js",
-                                                        "*.css",
-                                                        "*.png",
-                                                        "*.svg",
-                                                        "*.ttf",
-                                                        "*.woff",
-                                                        "*.woff2"
-                                                    ]
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "handler": "headers",
-                                                    "response": {
-                                                        "set": {
-                                                            "Cache-Control": [
-                                                                "max-age=2592000"
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "terminal": false
-                                        }
-                                    ]
-                                },
-                                {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8080"
@@ -206,72 +125,10 @@
                             ],
                             "handle": [
                                 {
-                                    "handler": "subroute",
-                                    "routes": [
-                                        {
-                                            "match": [
-                                                {
-                                                    "not": [
-                                                        {
-                                                            "path": [
-                                                                "*.js",
-                                                                "*.css",
-                                                                "*.png",
-                                                                "*.svg",
-                                                                "*.ttf",
-                                                                "*.woff",
-                                                                "*.woff2"
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "handler": "headers",
-                                                    "response": {
-                                                        "set": {
-                                                            "Cache-Control": [
-                                                                "no-cache"
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "terminal": false
-                                        },
-                                        {
-                                            "match": [
-                                                {
-                                                    "path": [
-                                                        "*.js",
-                                                        "*.css",
-                                                        "*.png",
-                                                        "*.svg",
-                                                        "*.ttf",
-                                                        "*.woff",
-                                                        "*.woff2"
-                                                    ]
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "handler": "headers",
-                                                    "response": {
-                                                        "set": {
-                                                            "Cache-Control": [
-                                                                "max-age=2592000"
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "terminal": false
-                                        }
-                                    ]
-                                },
-                                {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8083"
@@ -294,72 +151,10 @@
                             ],
                             "handle": [
                                 {
-                                    "handler": "subroute",
-                                    "routes": [
-                                        {
-                                            "match": [
-                                                {
-                                                    "not": [
-                                                        {
-                                                            "path": [
-                                                                "*.js",
-                                                                "*.css",
-                                                                "*.png",
-                                                                "*.svg",
-                                                                "*.ttf",
-                                                                "*.woff",
-                                                                "*.woff2"
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "handler": "headers",
-                                                    "response": {
-                                                        "set": {
-                                                            "Cache-Control": [
-                                                                "no-cache"
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "terminal": false
-                                        },
-                                        {
-                                            "match": [
-                                                {
-                                                    "path": [
-                                                        "*.js",
-                                                        "*.css",
-                                                        "*.png",
-                                                        "*.svg",
-                                                        "*.ttf",
-                                                        "*.woff",
-                                                        "*.woff2"
-                                                    ]
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "handler": "headers",
-                                                    "response": {
-                                                        "set": {
-                                                            "Cache-Control": [
-                                                                "max-age=2592000"
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "terminal": false
-                                        }
-                                    ]
-                                },
-                                {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8882"
@@ -380,72 +175,10 @@
                             ],
                             "handle": [
                                 {
-                                    "handler": "subroute",
-                                    "routes": [
-                                        {
-                                            "match": [
-                                                {
-                                                    "not": [
-                                                        {
-                                                            "path": [
-                                                                "*.js",
-                                                                "*.css",
-                                                                "*.png",
-                                                                "*.svg",
-                                                                "*.ttf",
-                                                                "*.woff",
-                                                                "*.woff2"
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "handler": "headers",
-                                                    "response": {
-                                                        "set": {
-                                                            "Cache-Control": [
-                                                                "no-cache"
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "terminal": false
-                                        },
-                                        {
-                                            "match": [
-                                                {
-                                                    "path": [
-                                                        "*.js",
-                                                        "*.css",
-                                                        "*.png",
-                                                        "*.svg",
-                                                        "*.ttf",
-                                                        "*.woff",
-                                                        "*.woff2"
-                                                    ]
-                                                }
-                                            ],
-                                            "handle": [
-                                                {
-                                                    "handler": "headers",
-                                                    "response": {
-                                                        "set": {
-                                                            "Cache-Control": [
-                                                                "max-age=2592000"
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "terminal": false
-                                        }
-                                    ]
-                                },
-                                {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8082"
@@ -466,6 +199,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8081"
@@ -487,6 +223,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8081"
@@ -499,6 +238,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8082"
@@ -525,7 +267,7 @@
                             "dashboard.stamhoofd",
                             "*.be.stamhoofd",
                             "*.nl.stamhoofd",
-                            "api.stamhoofd",   
+                            "api.stamhoofd",
                             "*.api.stamhoofd",
                             "api.admin.stamhoofd",
                             "admin.stamhoofd",
@@ -540,9 +282,11 @@
                     },
                     {
                         "on_demand": true,
-                        "issuers": [{
-                            "module": "internal"
-                        }]
+                        "issuers": [
+                            {
+                                "module": "internal"
+                            }
+                        ]
                     }
                 ],
                 "on_demand": {
