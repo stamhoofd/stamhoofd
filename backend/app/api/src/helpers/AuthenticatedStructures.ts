@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CachedBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
 import { AccessRight, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
@@ -428,11 +428,6 @@ export class AuthenticatedStructures {
     }
 
     static async orders(orders: Order[]): Promise<PrivateOrder[]> {
-        // Load groups
-        // const groupIds = orders.map(e => e.groupId).filter(id => id !== null);
-        // const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : [];
-        // const groupStructs = await this.groups(groups);
-
         const result: PrivateOrder[] = [];
         const webshopIds = new Set(orders.map(o => o.webshopId));
 
@@ -454,12 +449,11 @@ export class AuthenticatedStructures {
         }
 
         for (const order of orders) {
-            // const group = groupStructs.find(g => g.id == event.groupId) ?? null;
+            const balanceItems = await BalanceItem.where({ orderId: order.id });
 
             const struct = PrivateOrder.create({
                 ...order,
-                // todo!!!!!
-                balanceItems: [],
+                balanceItems: await BalanceItem.getStructureWithPrivatePayments(balanceItems),
             });
 
             result.push(struct);

@@ -1,11 +1,11 @@
 import { column, Database, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, BalanceItemPaymentWithPayment, OrderStatus, Payment as PaymentStruct, RegistrationWithMember } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, OrderStatus, Payment as PaymentStruct, PrivatePayment } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
-import { Organization, Payment, Webshop } from './';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
+import { Organization, Payment, Webshop } from './';
 import { CachedBalance } from './CachedBalance';
 
 /**
@@ -466,6 +466,29 @@ export class BalanceItem extends Model {
                     return BalanceItemPaymentWithPayment.create({
                         ...p,
                         payment: PaymentStruct.create(payment),
+                    });
+                }),
+            });
+        });
+    }
+
+    static async getStructureWithPrivatePayments(items: BalanceItem[]): Promise<BalanceItemWithPrivatePayments[]> {
+        if (items.length === 0) {
+            return [];
+        }
+
+        const { payments, balanceItemPayments } = await BalanceItem.loadPayments(items);
+
+        return items.map((item) => {
+            const thisBalanceItemPayments = balanceItemPayments.filter(p => p.balanceItemId === item.id);
+
+            return BalanceItemWithPrivatePayments.create({
+                ...item,
+                payments: thisBalanceItemPayments.map((p) => {
+                    const payment = payments.find(pp => pp.id === p.paymentId)!;
+                    return BalanceItemPaymentWithPrivatePayment.create({
+                        ...p,
+                        payment: PrivatePayment.create(payment),
                     });
                 }),
             });
