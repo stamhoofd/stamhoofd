@@ -21,346 +21,331 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ContextMenu, ContextMenuItem, Spinner, STNavigationBar, Toast } from "@stamhoofd/components";
-import { Graph } from "@stamhoofd/structures";
+<script lang="ts" setup>
+import { ContextMenu, ContextMenuItem, Spinner, Toast } from '@stamhoofd/components';
+import { Graph } from '@stamhoofd/structures';
 import {
     CategoryScale,
-    Chart, Filler, LinearScale,
+    Chart, ChartArea, ChartDataset, ChartOptions, Filler, LinearScale,
     LineController,
-    LineElement, PointElement, Tooltip
+    LineElement, PointElement, Tooltip,
 } from 'chart.js';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
 
-import { DateOption } from "./DateRange";
-import GraphDateRangeSelector from "./GraphDateRangeSelector.vue";
-import { GraphViewConfiguration } from "./GraphViewConfiguration";
+import { computed, ref, watch } from 'vue';
+import { DateOption } from './DateRange';
+import GraphDateRangeSelector from './GraphDateRangeSelector.vue';
+import { GraphViewConfiguration } from './GraphViewConfiguration';
 
-@Component({
-    components: {
-        STNavigationBar,
-        GraphDateRangeSelector,
-        Spinner
-    }
-})
-export default class GraphView extends VueComponent {
-    @Prop({ required: true }) 
-    configurations!: GraphViewConfiguration[][]
+const props = defineProps<{
+    configurations: GraphViewConfiguration[][];
+}>();
 
-    selectedConfiguration = this.configurations[0][0]
+const canvas = ref<HTMLCanvasElement | null>(null);
+const selectedConfiguration = ref(props.configurations[0][0]);
 
-    get sum() {
-        return this.selectedConfiguration.sum
-    }
+const sum = computed(() => selectedConfiguration.value.sum);
+const formatter = computed(() => selectedConfiguration.value.formatter);
+const title = computed(() => selectedConfiguration.value.title);
+const options = computed(() => selectedConfiguration.value.options);
+const range = computed({
+    get: () => selectedConfiguration.value.selectedRange,
+    set: (range: DateOption | null) => {
+        selectedConfiguration.value.selectedRange = range;
+    },
+});
+const hasMultipleConfigurations = computed(() => props.configurations.length || props.configurations.find(c => c.length));
+const loading = ref(false);
+let chart: Chart;
+let graphData: Graph | null = null;
 
-    get formatter() {
-        return this.selectedConfiguration.formatter
-    }
+async function load(range: DateOption): Promise<Graph> {
+    return await selectedConfiguration.value.load(range);
+}
 
-    get title() {
-        return this.selectedConfiguration.title
-    }
-
-    async load(range: DateOption): Promise<Graph> {
-        return await this.selectedConfiguration.load(range)
-    }
-
-    get options() {
-        return this.selectedConfiguration.options
-    }
-    
-    get range() {
-        return this.selectedConfiguration.selectedRange
-    }
-
-    set range(range: DateOption | null) {
-        this.selectedConfiguration.selectedRange = range
-    }
-
-    chart: Chart
-    loading = true
-
-    graphData: Graph | null = null
-
-    mounted() {
-        if (this.selectedConfiguration && this.options) {
-            this.range = this.options[0];
+watch(canvas, (canvas) => {
+    if (canvas && !chart) {
+        if (selectedConfiguration.value && options.value) {
+            range.value = options.value[0];
         }
-        this.loadData().catch(console.error) 
+        loadData().catch(console.error);
+    }
+});
+
+function chooseConfiguration(event: MouseEvent) {
+    const contextMenu = new ContextMenu(
+        props.configurations.map((arr) => {
+            return arr.map((config) => {
+                return new ContextMenuItem({
+                    name: config.title,
+                    action: () => {
+                        selectedConfiguration.value = config;
+                        return true;
+                    },
+                });
+            });
+        }),
+    );
+    contextMenu.show({ button: event.currentTarget as HTMLElement, xPlacement: 'right' }).catch(console.error);
+}
+
+watch(() => options.value, (n) => {
+    if (n) {
+        range.value = n[0];
+    }
+});
+
+watch(() => range.value, () => {
+    loadData().catch(console.error);
+});
+
+async function loadData() {
+    if (!options.value) {
+        return;
+    }
+    if (!range.value) {
+        // should happen in watcher
+        return;
     }
 
-    get hasMultipleConfigurations() {
-        return this.configurations.length || this.configurations.find(c => c.length)
+    loading.value = true;
+    try {
+        graphData = await load(range.value);
+        loadGraph(graphData);
+    }
+    catch (e) {
+        console.error(e);
+        Toast.fromError(e).show();
     }
 
-    chooseConfiguration(event) {
-        const contextMenu = new ContextMenu(
-            this.configurations.map(arr => {
-                return arr.map(config => {
-                    return new ContextMenuItem({
-                        name: config.title,
-                        action: () => {
-                            this.selectedConfiguration = config
-                            return true;
-                        }
-                    })
-                })
-            })
+    loading.value = false;
+}
+
+function format(v: number) {
+    if (formatter.value) {
+        return formatter.value(v);
+    }
+    return v + '';
+}
+
+const lastValue = computed(() => {
+    if (!graphData) {
+        return 0;
+    }
+    if (sum.value) {
+        let v = 0;
+        for (const d of graphData.data[0].values) {
+            v += d;
+        }
+
+        return v;
+    }
+    const d = graphData.data[0];
+    return d.values[d.values.length - 1];
+});
+
+function loadGraph(graph: Graph) {
+    let update = false;
+    if (!chart) {
+        Chart.register(
+            LineElement,
+            PointElement,
+            LineController,
+            CategoryScale,
+            LinearScale,
+            Filler,
+            Tooltip,
         );
-        contextMenu.show({ button: event.currentTarget, xPlacement: "right" }).catch(console.error);
+    }
+    else {
+        // chart.destroy()
+        update = true;
     }
 
-    @Watch('options')
-    onChangeOptions(n) {
-        this.range = n[0]
+    let width: number, height: number, gradient: CanvasGradient;
+    function getBorderGradient(ctx: CanvasRenderingContext2D, chartArea: ChartArea) {
+        const chartWidth = chartArea.right - chartArea.left;
+        const chartHeight = chartArea.bottom - chartArea.top;
+        if (!gradient || width !== chartWidth || height !== chartHeight) {
+            // Create the gradient because this is either the first render
+            // or the size of the chart has changed
+            width = chartWidth;
+            height = chartHeight;
+            gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+            gradient.addColorStop(0, '#0053ff');
+            gradient.addColorStop(1, '#8B17FF');
+        }
+
+        return gradient;
     }
 
-    @Watch('range')
-    onChangeRange() {
-        this.loadData().catch(console.error) 
+    let width2: number, height2: number, gradient2: CanvasGradient;
+    function getBackgroundGradient(ctx: CanvasRenderingContext2D, chartArea: ChartArea) {
+        const chartWidth = chartArea.right - chartArea.left;
+        const chartHeight = chartArea.bottom - chartArea.top;
+        if (!gradient || width2 !== chartWidth || height2 !== chartHeight) {
+            // Create the gradient because this is either the first render
+            // or the size of the chart has changed
+            width2 = chartWidth;
+            height2 = chartHeight;
+            gradient2 = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+            gradient2.addColorStop(0, '#0053ff20');
+            gradient2.addColorStop(1, '#8B17FF10');
+        }
+
+        return gradient2;
     }
 
-    async loadData() {
-        if (!this.options) {
-            return
-        }
-        if (!this.range) {
-            // should happen in watcher
-            return;
-        }
+    const fontFamily = `Metropolis, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
 
-        this.loading = true
-        try {
-            this.graphData = await this.load(this.range)
-            this.loadGraph(this.graphData)
-        } catch (e) {
-            console.error(e)
-            Toast.fromError(e).show()
-        }
-
-        this.loading = false
-    }
-
-    format(v: number) {
-        if (this.formatter) {
-            return this.formatter(v)
-        }
-        return v + ""
-    }
-
-    get lastValue(): number {
-        if (!this.graphData) {
-            return 0
-        }
-        if (this.sum) {
-            let v = 0;
-            for (const d of this.graphData.data[0].values) {
-                v += d
-            }
-
-            return v
-        }
-        const d = this.graphData.data[0]
-        return d.values[d.values.length - 1]
-    }
-
-    loadGraph(graph: Graph) {
-        let update = false
-        if (!this.chart) {
-            Chart.register(
-                LineElement,
-                PointElement,
-                LineController,
-                CategoryScale,
-                LinearScale,
-                Filler,
-                Tooltip
-            );
-        } else {
-            //this.chart.destroy()
-            update = true;
-        }
-
-        let width, height, gradient;
-        function getBorderGradient(ctx, chartArea) {
-            const chartWidth = chartArea.right - chartArea.left;
-            const chartHeight = chartArea.bottom - chartArea.top;
-            if (!gradient || width !== chartWidth || height !== chartHeight) {
-                // Create the gradient because this is either the first render
-                // or the size of the chart has changed
-                width = chartWidth;
-                height = chartHeight;
-                gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-                gradient.addColorStop(0, '#0053ff');
-                gradient.addColorStop(1, "#8B17FF");
-            }
-
-            return gradient;
-        }
-
-        let width2, height2, gradient2;
-        function getBackgroundGradient(ctx, chartArea) {
-            const chartWidth = chartArea.right - chartArea.left;
-            const chartHeight = chartArea.bottom - chartArea.top;
-            if (!gradient || width2 !== chartWidth || height2 !== chartHeight) {
-                // Create the gradient because this is either the first render
-                // or the size of the chart has changed
-                width2 = chartWidth;
-                height2 = chartHeight;
-                gradient2 = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-                gradient2.addColorStop(0, '#0053ff20');
-                gradient2.addColorStop(1, "#8B17FF10");
-            }
-
-            return gradient2;
-        }
-
-        const fontFamily = `Metropolis, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
-        
-        const options = {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    bottom: 10,
-                    top: 5,
-                    left: 10,
-                    right: 10
-                },
+    const options: ChartOptions = {
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                bottom: 10,
+                top: 5,
+                left: 10,
+                right: 10,
             },
-            scales: {
-                y: {
+        },
+        scales: {
+            y: {
+                display: false,
+                beginAtZero: true,
+                suggestedMax: 1,
+                position: {
+                    x: -50,
+                },
+                ticks: {
                     display: false,
-                    beginAtZero: true,
-                    suggestedMax: 1,
-                    position: {
-                        x: -50,
-                    },
-                    ticks: {
-                        display: false
-                    },  
-                    grid: {
-                        display: false
-                    }
                 },
-                x: {
-                    //display: false,
-                    grid: {
-                        display: false,
-                    },
-                    ticks: {
-                        display: true,
-                        align: 'inner',
-                        font: {
-                            size: 13,
-                            family: fontFamily
-                        },
-                        // Include a dollar sign in the ticks
-                        callback: function(value, index, ticks) {
-                            if (index === 0 || index === ticks.length - 1) {
-                                return this.getLabelForValue(value as any as number)
-                            }
-                            return undefined;
-                        }
-                    }
-                }
-            },
-            elements: {
-                point:{
-                    radius: 0,
-                    hoverRadius: 5,
-                    hitRadius: 50,
-                    borderWidth: 0,
-                    hoverBorderWidth: 0
-                }
-            },
-            plugins: {
-                tooltip: {
-                    padding: 15,
-                    cornerRadius: 7,
-                    caretSize: 0,
-                    bodyFont: {
-                        family: fontFamily,
-                        weight: '400',
-                        size: 13
-                    },
-                    titleFont: {
-                        family: fontFamily,
-                        weight: '600',
-                        size: 14
-                    },
-                    displayColors: false,
-                    callbacks: {
-                        label: (context) => {
-                            return this.format(context.parsed.y as number)
-                        }
-                    }
+                grid: {
+                    display: false,
                 },
-            }
+            },
+            x: {
+                // display: false,
+                grid: {
+                    display: false,
+                },
+                ticks: {
+                    display: true,
+                    align: 'inner',
+                    font: {
+                        size: 13,
+                        family: fontFamily,
+                    },
+                    // Include a dollar sign in the ticks
+                    callback: function (value, index, ticks) {
+                        if (index === 0 || index === ticks.length - 1) {
+                            return this.getLabelForValue(value as any as number);
+                        }
+                        return undefined;
+                    },
+                },
+            },
+        },
+        elements: {
+            point: {
+                radius: 0,
+                hoverRadius: 5,
+                hitRadius: 50,
+                borderWidth: 0,
+                hoverBorderWidth: 0,
+            },
+        },
+        plugins: {
+            tooltip: {
+                padding: 15,
+                cornerRadius: 7,
+                caretSize: 0,
+                bodyFont: {
+                    family: fontFamily,
+                    weight: '400',
+                    size: 13,
+                },
+                titleFont: {
+                    family: fontFamily,
+                    weight: '600',
+                    size: 14,
+                },
+                displayColors: false,
+                callbacks: {
+                    label: (context) => {
+                        return format(context.parsed.y as number);
+                    },
+                },
+            },
+        },
+    };
+
+    const datasets = graph.data.map((d) => {
+        const dataSet: ChartDataset = {
+            label: d.label,
+            data: d.values,
+            cubicInterpolationMode: 'monotone',
+            backgroundColor: function (context: { chart: Chart }) {
+                const chart = context.chart;
+                const { ctx, chartArea } = chart;
+
+                if (!chartArea) {
+                    // This case happens on initial chart load
+                    return;
+                }
+                return getBackgroundGradient(ctx, chartArea);
+            },
+            borderColor: function (context: { chart: Chart }) {
+                const chart = context.chart;
+                const { ctx, chartArea } = chart;
+
+                if (!chartArea) {
+                    // This case happens on initial chart load
+                    return;
+                }
+                return getBorderGradient(ctx, chartArea);
+            },
+            fill: true,
+            borderWidth: 3,
+            tension: 1,
+            clip: false,
+            borderJoinStyle: 'round',
+            borderCapStyle: 'round',
+            showLine: true,
+            pointBackgroundColor: function (context: { chart: Chart }) {
+                const chart = context.chart;
+                const { ctx, chartArea } = chart;
+
+                if (!chartArea) {
+                    // This case happens on initial chart load
+                    return;
+                }
+                return getBorderGradient(ctx, chartArea);
+            },
         };
 
-        const datasets = graph.data.map(d => {
-            return {
-                label: d.label,
-                data: d.values,
-                cubicInterpolationMode: 'monotone',
-                backgroundColor: function(context) {
-                    const chart = context.chart;
-                    const {ctx, chartArea} = chart;
+        return dataSet;
+    });
 
-                    if (!chartArea) {
-                    // This case happens on initial chart load
-                        return;
-                    }
-                    return getBackgroundGradient(ctx, chartArea);
-                },
-                borderColor: function(context) {
-                    const chart = context.chart;
-                    const {ctx, chartArea} = chart;
-
-                    if (!chartArea) {
-                    // This case happens on initial chart load
-                        return;
-                    }
-                    return getBorderGradient(ctx, chartArea);
-                },
-                fill: true,
-                borderWidth: 3,
-                tension: 1,
-                clip: false,
-                borderJoinStyle: 'round',
-                borderCapStyle: 'round',
-                showLine: true,
-                pointBackgroundColor: function(context) {
-                    const chart = context.chart;
-                    const {ctx, chartArea} = chart;
-
-                    if (!chartArea) {
-                    // This case happens on initial chart load
-                        return;
-                    }
-                    return getBorderGradient(ctx, chartArea);
-                }
-            }
-        });
-
-        if (update) {
-            // Only update these values because they can animate
-            this.chart.data.datasets[0].data! = datasets[0].data
-            this.chart.data.datasets[0].label! = datasets[0].label
-            this.chart.data.labels = graph.labels
-            this.chart.update()
-        } else {
-            this.chart = new Chart(this.$refs.canvas as HTMLCanvasElement, {
+    if (update) {
+        // Only update these values because they can animate
+        chart.data.datasets[0].data! = datasets[0].data;
+        chart.data.datasets[0].label! = datasets[0].label ?? '';
+        chart.data.labels = graph.labels;
+        chart.update();
+    }
+    else {
+        if (canvas.value === null) {
+            console.error('Canvas is null');
+        }
+        else {
+            chart = new Chart(canvas.value, {
                 type: 'line',
                 data: {
                     labels: graph.labels,
-                    datasets: datasets as any
+                    datasets: datasets as any,
                 },
-                options: options as any
+                options: options as any,
             });
         }
-            
-        
     }
 }
 </script>
