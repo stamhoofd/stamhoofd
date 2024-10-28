@@ -305,7 +305,7 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async canAccessWebshop(webshop: Webshop, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessWebshop(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         const organizationPermissions = await this.getOrganizationPermissions(webshop.organizationId);
 
         if (!organizationPermissions) {
@@ -323,7 +323,7 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async canAccessWebshopTickets(webshop: Webshop, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessWebshopTickets(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!this.checkScope(webshop.organizationId)) {
             return false;
         }
@@ -345,7 +345,7 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async canAccessOrder(webshop: Webshop, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessOrder(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         return await this.canAccessWebshop(webshop, permissionLevel);
     }
 

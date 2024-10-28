@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CachedBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { CachedBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
+import { AccessRight, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -434,6 +434,24 @@ export class AuthenticatedStructures {
         // const groupStructs = await this.groups(groups);
 
         const result: PrivateOrder[] = [];
+        const webshopIds = new Set(orders.map(o => o.webshopId));
+
+        for (const webshopId of webshopIds) {
+            const organizationId = orders.find(o => o.webshopId === webshopId)!.organizationId;
+
+            const canAccess = await Context.auth.canAccessOrder({
+                id: webshopId,
+                organizationId,
+            }, PermissionLevel.Read);
+
+            if (!canAccess) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Permission denied',
+                    human: 'Je hebt geen toegang tot de orders van deze webshop',
+                });
+            }
+        }
 
         for (const order of orders) {
             // const group = groupStructs.find(g => g.id == event.groupId) ?? null;
@@ -443,6 +461,37 @@ export class AuthenticatedStructures {
                 // todo!!!!!
                 balanceItems: [],
             });
+
+            result.push(struct);
+        }
+
+        return result;
+    }
+
+    // todo?
+    static async tickets(tickets: Ticket[]): Promise<TicketPrivate[]> {
+        const result: TicketPrivate[] = [];
+        const webshopIds = new Set(tickets.map(t => t.webshopId));
+
+        for (const webshopId of webshopIds) {
+            const organizationId = tickets.find(t => t.webshopId === webshopId)!.organizationId;
+
+            const canAccess = await Context.auth.canAccessWebshopTickets({
+                id: webshopId,
+                organizationId,
+            }, PermissionLevel.Read);
+
+            if (!canAccess) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Permission denied',
+                    human: 'Je hebt geen toegang tot de tickets van deze webshop',
+                });
+            }
+        }
+
+        for (const ticket of tickets) {
+            const struct = TicketPrivate.create({ ...ticket });
 
             result.push(struct);
         }

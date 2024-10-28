@@ -1,24 +1,32 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Ticket, Webshop } from '@stamhoofd/models';
-import { PaginatedResponse, PermissionLevel, TicketPrivate, WebshopTicketsQuery } from '@stamhoofd/structures';
+import { Ticket } from '@stamhoofd/models';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, TicketPrivate } from '@stamhoofd/structures';
 
+import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
+import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
+import { ticketFilterCompilers } from '../../../../sql-filters/tickets';
+import { ticketSorters } from '../../../../sql-sorters/tickets';
 
-type Params = { id: string };
-type Query = WebshopTicketsQuery;
+type Params = Record<string, never>;
+type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<TicketPrivate[], Query>;
+type ResponseBody = PaginatedResponse<TicketPrivate[], LimitedFilteredRequest>;
+
+const filterCompilers: SQLFilterDefinitions = ticketFilterCompilers;
+const sorters: SQLSortDefinitions<Ticket> = ticketSorters;
 
 export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = WebshopTicketsQuery as Decoder<WebshopTicketsQuery>;
+    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/tickets/private', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/tickets/private', {});
 
         if (params) {
             return [true, params as Params];
@@ -26,45 +34,87 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         return [false];
     }
 
-    async handle(_: DecodedRequest<Params, Query, Body>): Promise<Response<ResponseBody>> {
-        await Promise.resolve();
-        throw new Error('Not implemented');
-        /* const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+    static buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+        const organization = Context.organization!;
+
+        const ticketsTable: string = Ticket.table;
+
+        const query = SQL
+            .select(SQL.wildcard(ticketsTable))
+            .from(SQL.table(ticketsTable))
+            .where(compileToSQLFilter({
+                organizationId: organization.id,
+            }, filterCompilers));
+
+        if (q.filter) {
+            query.where(compileToSQLFilter(q.filter, filterCompilers));
+        }
+
+        // currently no search supported, probably not needed?
+        // if (q.search) {
+        // }
+
+        if (q instanceof LimitedFilteredRequest) {
+            if (q.pageFilter) {
+                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+            }
+
+            q.sort = assertSort(q.sort, [{ key: 'id' }]);
+            query.orderBy(compileToSQLSorter(q.sort, sorters));
+            query.limit(q.limit);
+        }
+
+        return query;
+    }
+
+    static async buildData(requestQuery: LimitedFilteredRequest) {
+        const query = this.buildQuery(requestQuery);
+        const data = await query.fetch();
+
+        const tickets: Ticket[] = Ticket.fromRows(data, Ticket.table);
+
+        let next: LimitedFilteredRequest | undefined;
+
+        if (tickets.length >= requestQuery.limit) {
+            const lastObject = tickets[tickets.length - 1];
+            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+
+            next = new LimitedFilteredRequest({
+                filter: requestQuery.filter,
+                pageFilter: nextFilter,
+                sort: requestQuery.sort,
+                limit: requestQuery.limit,
+                search: requestQuery.search,
+            });
+
+            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
+                console.error('Found infinite loading loop for', requestQuery);
+                next = undefined;
+            }
+        }
+
+        return new PaginatedResponse<TicketPrivate[], LimitedFilteredRequest>({
+            results: await AuthenticatedStructures.tickets(tickets),
+            next,
+        });
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>): Promise<Response<ResponseBody>> {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
-        const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop || !await Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Read)) {
-            throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot de tickets van deze webshop")
-        }
-
-        let tickets: Ticket[] | undefined = undefined
-        const limit = 150
-
-        if (request.query.updatedSince !== undefined) {
-            if (request.query.lastId !== undefined) {
-                tickets = await Ticket.select("WHERE webshopId = ? AND (updatedAt > ? OR (updatedAt = ? AND id > ?)) ORDER BY updatedAt, id LIMIT ?", [webshop.id, request.query.updatedSince, request.query.updatedSince, request.query.lastId, limit])
-            } else {
-                tickets = await Ticket.select("WHERE webshopId = ? AND updatedAt >= ? ORDER BY updatedAt, id LIMIT ?", [webshop.id, request.query.updatedSince, limit])
-            }
-        } else {
-            tickets = await Ticket.select("WHERE webshopId = ? ORDER BY updatedAt, id LIMIT ?", [webshop.id, limit])
-        }
-
-        const supportsDeletedTickets = request.request.getVersion() >= 229
+        LimitedFilteredRequestHelper.throwIfInvalidLimit({
+            request: request.query,
+            maxLimit: Context.auth.hasSomePlatformAccess() ? 1000 : 100,
+        });
 
         return new Response(
-            new PaginatedResponse({
-                results: tickets.map(ticket => TicketPrivate.create(ticket)).filter(ticket => supportsDeletedTickets || !ticket.deletedAt),
-                next: tickets.length >= limit ? WebshopTicketsQuery.create({
-                    updatedSince: tickets[tickets.length - 1].updatedAt ?? undefined,
-                    lastId: tickets[tickets.length - 1].id ?? undefined
-                }) : undefined
-            })
-        ); */
+            await GetWebshopTicketsEndpoint.buildData(request.query),
+        );
     }
 }

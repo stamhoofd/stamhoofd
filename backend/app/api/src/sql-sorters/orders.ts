@@ -21,6 +21,17 @@ export const orderSorters: SQLSortDefinitions<Order> = {
             });
         },
     },
+    updatedAt: {
+        getValue(a) {
+            return Formatter.dateTimeIso(a.updatedAt);
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('updatedAt'),
+                direction,
+            });
+        },
+    },
     id: {
         getValue(a) {
             return a.id;
