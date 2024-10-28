@@ -48,7 +48,7 @@ export class StripeMetaAccountSettings extends AutoEncoder {
 
 export class StripeMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
-    type: 'express' | 'standard' = 'express'
+    type: 'express' | 'standard' | 'none' = 'express'
 
     @field({ decoder: AnyDecoder, optional: true, nullable: true })
     blob: any | null = null

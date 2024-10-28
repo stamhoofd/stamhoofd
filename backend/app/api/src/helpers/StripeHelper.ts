@@ -193,6 +193,11 @@ export class StripeHelper {
             directCharge = true;
         }
 
+        if (stripeAccount.meta.type === 'none') {
+            // Direct charges, but fees are paid by platform
+            directCharge = true;
+        }
+
         payment.transferFee = fee;
 
         const fullMetadata = {

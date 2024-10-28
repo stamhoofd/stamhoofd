@@ -60,7 +60,16 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         let expressData: Stripe.AccountCreateParams = {
             country: organization.address.country,
             controller: {
-                requirement_collection: 'application',
+                losses: {
+                    payments: 'application'
+                },
+                fees: {
+                    payer: 'application'
+                },
+                requirement_collection: 'stripe',
+                stripe_dashboard: {
+                    type: 'express'
+                }
             },
             settings: {
                 payouts: {
@@ -73,14 +82,18 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         };
 
-        if (type !== 'express') {
+        if (type !== 'none') {
             expressData = {};
+        }
+
+        if (type === 'express') {
+            expressData.controller = undefined
         }
 
         // Create a new Stripe account
         const stripe = StripeHelper.getInstance()
         const account = await stripe.accounts.create({
-            type,
+            type: type === 'none' ? undefined : type,
             ...sharedData,
             ...expressData
         });

@@ -112,7 +112,7 @@ declare global {
         // Stripe
         readonly STRIPE_SECRET_KEY: string
         readonly STRIPE_ENDPOINT_SECRET: string
-        readonly STRIPE_CONNECT_METHOD: 'express' | 'standard'
+        readonly STRIPE_CONNECT_METHOD: 'express' | 'standard' | 'none'
 
         // Communication with other internal services
         readonly INTERNAL_SECRET_KEY: string

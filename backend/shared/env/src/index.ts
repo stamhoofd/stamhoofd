@@ -30,9 +30,11 @@ export function load(settings?: { path?: string, service?: "redirecter" | "api" 
     process.env.AWS_SECRET_ACCESS_KEY = STAMHOOFD.AWS_SECRET_ACCESS_KEY+""
     process.env.AWS_REGION = STAMHOOFD.AWS_REGION+""
     // Database
-    process.env.DB_MULTIPLE_STATEMENTS="true"
+    process.env.DB_MULTIPLE_STATEMENTS = "true";
 
-    process.env.STRIPE_CONNECT_METHOD = STAMHOOFD.STRIPE_CONNECT_METHOD ?? "express"
+    (STAMHOOFD as any).STRIPE_CONNECT_METHOD  = STAMHOOFD.STRIPE_CONNECT_METHOD ?? "express"
+
+    console.log('Launching using Stripe Connect Method', STAMHOOFD.STRIPE_CONNECT_METHOD)
 }
 
 export function signInternal(...content: string[]) {
