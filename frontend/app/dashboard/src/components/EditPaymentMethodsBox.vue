@@ -69,10 +69,10 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, Dropdown, ErrorBox, IBANInput, LoadingView, PermyriadInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useCountry, useErrors, useRequiredOrganization, useValidation, Validator } from '@stamhoofd/components';
+import { Checkbox, Dropdown, ErrorBox, LoadingView, PermyriadInput, PriceInput, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useCountry, useErrors, useRequiredOrganization, useValidation, Validator } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { AdministrationFeeSettings, Country, Payment, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { AdministrationFeeSettings, Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import EditPaymentMethodSettingsView from './EditPaymentMethodSettingsView.vue';
@@ -187,19 +187,11 @@ function setDefaultSelection() {
             PaymentMethod.PointOfSale,
         ];
 
-        let found = false;
-
         // Check if online payments are enabled
         for (const p of sortedPaymentMethods.value) {
             if (!ignore.includes(p) && canEnablePaymentMethod(p)) {
                 setPaymentMethod(p, true);
-                found = true;
             }
-        }
-
-        if (!found) {
-            // Enable transfer
-            setPaymentMethod(PaymentMethod.Transfer, true);
         }
     }
     else {
