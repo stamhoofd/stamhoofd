@@ -73,7 +73,7 @@ function openTicket() {
     present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(!props.ticket.scannedAt ? ValidTicketView : TicketAlreadyScannedView, {
+                root: new ComponentWithProperties(props.ticket.scannedAt !== null ? TicketAlreadyScannedView : ValidTicketView, {
                     order: props.order,
                     ticket: props.ticket,
                     webshopManager: props.webshopManager,

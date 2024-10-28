@@ -426,7 +426,7 @@ const context = useContext();
 const organizationManager = useOrganizationManager();
 
 const webshop = computed(() => props.webshopManager.webshop);
-await props.webshopManager.loadWebshopIfNeeded(false, true);
+props.webshopManager.loadWebshopIfNeeded(false, true).catch(console.error);
 
 const recordAnswers = computed(() => props.order.data.recordAnswers);
 const isMissingPayments = computed(() => props.order.payments.reduce((a, b) => a + b.price, 0) !== props.order.totalToPay);
