@@ -44,8 +44,8 @@ const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
 
 function fetchOrders() {
-    props.webshopManager.fetchOrders2().then((hadUpdatedOrders) => {
-        if (hadUpdatedOrders) {
+    props.webshopManager.fetchOrders().then((hasUpdatedOrders) => {
+        if (hasUpdatedOrders) {
             tableObjectFetcher.reset();
         }
     }).catch(console.error);

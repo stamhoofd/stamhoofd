@@ -228,25 +228,26 @@ async function loadOrderGraph(range: DateOption, type: 'revenue' | 'count'): Pro
     const orderIds = new Set<string>();
 
     return await createGroupedChart(range, async (callback) => {
-        await props.webshopManager.streamOrdersDeprecated((order: Order) => {
-            if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
+        await props.webshopManager.streamOrders({
+            callback: (order: Order) => {
+                if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                 // Check in range
-                if (order.createdAt < range.range.start || order.createdAt > range.range.end) {
-                    return;
-                }
+                    if (order.createdAt < range.range.start || order.createdAt > range.range.end) {
+                        return;
+                    }
 
-                orderIds.add(order.id);
+                    orderIds.add(order.id);
 
-                switch (type) {
-                    case 'revenue':
-                        callback(order.data.totalPrice, order.createdAt);
-                        break;
-                    case 'count':
-                        callback(1, order.createdAt);
-                        break;
+                    switch (type) {
+                        case 'revenue':
+                            callback(order.data.totalPrice, order.createdAt);
+                            break;
+                        case 'count':
+                            callback(1, order.createdAt);
+                            break;
+                    }
                 }
-            }
-        }, false);
+            } });
     });
 }
 
@@ -257,18 +258,19 @@ async function loadScanGraph(range: DateOption, filterVouchers: boolean): Promis
         // Keep track of all the order item ids that are a voucher, so we can count them separately
         const voucherItemMap = new Set<string>();
 
-        await props.webshopManager.streamOrdersDeprecated((order: Order) => {
-            if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
-                orderIds.add(order.id);
+        await props.webshopManager.streamOrders({
+            callback: (order: Order) => {
+                if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
+                    orderIds.add(order.id);
 
-                // Vouchermap
-                for (const item of order.data.cart.items) {
-                    if (item.product.type === ProductType.Voucher) {
-                        voucherItemMap.add(item.id);
+                    // Vouchermap
+                    for (const item of order.data.cart.items) {
+                        if (item.product.type === ProductType.Voucher) {
+                            voucherItemMap.add(item.id);
+                        }
                     }
                 }
-            }
-        }, false);
+            } });
 
         await props.webshopManager.streamTickets((ticket: TicketPrivate) => {
             if (ticket.scannedAt && orderIds.has(ticket.orderId)) {
@@ -449,45 +451,47 @@ async function reload() {
         // Keep track of all the order item ids that are a voucher, so we can count them separately
         const voucherItemMap = new Set<string>();
 
-        await props.webshopManager.streamOrdersDeprecated((order: Order) => {
-            if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
-                orderIds.add(order.id);
-                totalRevenue.value += order.data.totalPrice;
-                totalOrders.value += 1;
+        await props.webshopManager.streamOrders({
+            networkFetch: true,
+            callback: (order: Order) => {
+                if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
+                    orderIds.add(order.id);
+                    totalRevenue.value += order.data.totalPrice;
+                    totalOrders.value += 1;
 
-                if (firstOrderDate.value === null || order.createdAt < firstOrderDate.value) {
-                    firstOrderDate.value = order.createdAt;
-                }
-
-                if (lastOrderDate.value === null || order.createdAt > lastOrderDate.value) {
-                    lastOrderDate.value = order.createdAt;
-                }
-
-                for (const item of order.data.cart.items) {
-                    const code = item.codeWithoutFields;
-                    const current = productMap.get(code);
-                    if (current) {
-                        current.amount += item.amount;
-                        current.price += item.getPriceWithDiscounts();
-                    }
-                    else {
-                        const productCategory = webshop.value?.categories.find(c => c.productIds.includes(item.product.id));
-
-                        productMap.set(code, {
-                            amount: item.amount,
-                            name: item.product.name,
-                            description: item.descriptionWithoutFields,
-                            price: item.getPriceWithDiscounts(),
-                            category: productCategory ?? null,
-                        });
+                    if (firstOrderDate.value === null || order.createdAt < firstOrderDate.value) {
+                        firstOrderDate.value = order.createdAt;
                     }
 
-                    if (item.product.type === ProductType.Voucher) {
-                        voucherItemMap.add(item.id);
+                    if (lastOrderDate.value === null || order.createdAt > lastOrderDate.value) {
+                        lastOrderDate.value = order.createdAt;
+                    }
+
+                    for (const item of order.data.cart.items) {
+                        const code = item.codeWithoutFields;
+                        const current = productMap.get(code);
+                        if (current) {
+                            current.amount += item.amount;
+                            current.price += item.getPriceWithDiscounts();
+                        }
+                        else {
+                            const productCategory = webshop.value?.categories.find(c => c.productIds.includes(item.product.id));
+
+                            productMap.set(code, {
+                                amount: item.amount,
+                                name: item.product.name,
+                                description: item.descriptionWithoutFields,
+                                price: item.getPriceWithDiscounts(),
+                                category: productCategory ?? null,
+                            });
+                        }
+
+                        if (item.product.type === ProductType.Voucher) {
+                            voucherItemMap.add(item.id);
+                        }
                     }
                 }
-            }
-        });
+            } });
 
         if (props.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
             await props.webshopManager.streamTickets((ticket: TicketPrivate) => {

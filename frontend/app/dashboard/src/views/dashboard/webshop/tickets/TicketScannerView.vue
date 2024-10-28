@@ -202,8 +202,8 @@ function toggleFlash() {
 async function updateTickets() {
     try {
         await Promise.all([
-            props.webshopManager.fetchNewTickets(false, false),
-            props.webshopManager.fetchNewOrdersDeprecated(false, false),
+            props.webshopManager.fetchTickets(),
+            props.webshopManager.fetchOrders(),
         ]);
 
         hadNetworkError.value = false;

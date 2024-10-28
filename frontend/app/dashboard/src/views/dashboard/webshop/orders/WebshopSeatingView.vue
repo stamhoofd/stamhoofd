@@ -291,12 +291,14 @@ async function loadOrders() {
         // We use a buffer to prevent DOM updates or Vue slowdown during streaming
         const arrayBuffer: PrivateOrderWithTickets[] = [];
 
-        await props.webshopManager.streamOrdersDeprecated((order) => {
+        await props.webshopManager.streamOrders({
+            callback: (order) => {
             // Same orders could be seen twice
-            arrayBuffer.push(
-                PrivateOrderWithTickets.create(order),
-            );
-        }, false);
+                arrayBuffer.push(
+                    PrivateOrderWithTickets.create(order),
+                );
+            },
+        });
 
         const ticketBuffer: TicketPrivate[] = [];
 
@@ -345,7 +347,7 @@ async function refresh(reset = false) {
         if (reset) {
             orders.value = [];
         }
-        await props.webshopManager.fetchNewOrdersDeprecated(false, reset);
+        await props.webshopManager.fetchOrders({ isFetchAll: reset });
     }
     catch (e) {
         // Fetching failed
@@ -355,7 +357,7 @@ async function refresh(reset = false) {
     // And preload the tickets if needed
     if (hasTickets.value) {
         try {
-            await props.webshopManager.fetchNewTickets(false, false);
+            await props.webshopManager.fetchTickets();
         }
         catch (e) {
             // Fetching failed

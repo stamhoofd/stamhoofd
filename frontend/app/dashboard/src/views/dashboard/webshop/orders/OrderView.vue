@@ -659,14 +659,14 @@ onBeforeUnmount(() => {
 });
 
 async function downloadNewOrders() {
-    await props.webshopManager.fetchNewOrdersDeprecated(false, false);
+    await props.webshopManager.fetchOrders();
 }
 
 function downloadNewTickets() {
     if (!hasTickets.value) {
         return;
     }
-    props.webshopManager.fetchNewTickets(false, false).catch((e: Error) => {
+    props.webshopManager.fetchTickets().catch((e: Error) => {
         if (tickets.value.length === 0) {
             if (Request.isNetworkError(e)) {
                 new Toast('Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.', 'error red').show();

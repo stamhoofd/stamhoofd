@@ -594,7 +594,7 @@ function created() {
     // Listen for patches in payments
     GlobalEventBus.addListener(owner, 'paymentPatch', async (payment) => {
         if (payment && payment.id && props.order.payments.find(p => p.id === payment.id as string)) {
-            await props.webshopManager.fetchNewOrdersDeprecated(false, false);
+            await props.webshopManager.fetchOrders();
         }
         return Promise.resolve();
     });
@@ -638,7 +638,7 @@ function createPayment() {
             });
 
             // Update order
-            await props.webshopManager.fetchNewOrdersDeprecated(false, false);
+            await props.webshopManager.fetchOrders();
         },
     });
 

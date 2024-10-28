@@ -3,9 +3,9 @@ import { isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { EventBus, fetchAll, ObjectFetcher, Toast } from '@stamhoofd/components';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version, WebshopPreview } from '@stamhoofd/structures';
 import { toRaw } from 'vue';
-import { createCompiledFilterForPrivateOrderIndexBox, createPrivateOrderIndexBox, createPrivateOrderIndexBoxDecoder, OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex, PrivateOrderEncodeableIndexes } from './getPrivateOrderIndexes';
+import { createCompiledFilterForPrivateOrderIndexBox, createPrivateOrderIndexBox, createPrivateOrderIndexBoxDecoder, OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex } from './getPrivateOrderIndexes';
 
 class CallbackError extends Error {}
 class CompilerFilterError extends Error {}
@@ -354,10 +354,10 @@ export class WebshopManager {
         });
     }
 
-    async readSettingKey(key: IDBValidKey): Promise<any | undefined> {
+    async readSettingKey<T = any>(key: IDBValidKey): Promise<T | undefined> {
         const db = await this.getDatabase();
 
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<T | undefined>((resolve, reject) => {
             const transaction = db.transaction(['settings'], 'readonly');
 
             transaction.onerror = (event) => {
@@ -370,7 +370,7 @@ export class WebshopManager {
             const request = objectStore.get(key);
 
             request.onsuccess = () => {
-                resolve(request.result);
+                resolve(request.result as T | undefined);
             };
         });
     }
@@ -530,11 +530,11 @@ export class WebshopManager {
         }
 
         if (networkFetch) {
-            await this.fetchNewTickets(false, false, (tickets: TicketPrivate[]) => {
+            await this.fetchTickets({ callback: (tickets: TicketPrivate[]) => {
                 for (const ticket of tickets) {
                     callback(ticket);
                 }
-            });
+            } });
         }
     }
 
@@ -570,11 +570,12 @@ export class WebshopManager {
     }
 
     async streamOrders(
-        { callback, filter, limit, sortItem }: {
+        { callback, filter, limit, sortItem, networkFetch }: {
             callback: (data: PrivateOrder) => void;
             filter?: StamhoofdFilter;
             limit?: number;
             sortItem?: SortItem & { key: OrderStoreIndex };
+            networkFetch?: boolean;
         },
     ): Promise<void> {
         const db = await this.getDatabase();
@@ -692,23 +693,6 @@ export class WebshopManager {
                 throw e;
             }
         });
-    }
-
-    /**
-     * Warning: might stream same orders multiple times if they have been changed
-     * @deprecated
-     */
-    async streamOrdersDeprecated(callback: (order: PrivateOrder) => void, networkFetch = true): Promise<void> {
-        try {
-            await this.streamOrders({ callback: (order) => {
-                return { value: order, indexes: PrivateOrderEncodeableIndexes.create({}) };
-            } });
-        }
-        catch (e) {
-            if (!networkFetch || e instanceof CallbackError) {
-                throw e;
-            }
-        }
 
         if (networkFetch) {
             const owner = {};
@@ -718,9 +702,11 @@ export class WebshopManager {
                 }
                 return Promise.resolve();
             });
+
             try {
-                await this.fetchNewOrdersDeprecated(false, false);
+                await this.fetchOrders();
             }
+
             finally {
                 this.ordersEventBus.removeListener(owner);
             }
@@ -798,19 +784,6 @@ export class WebshopManager {
         });
     }
 
-    async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<PrivateOrder[], WebshopOrdersQuery>> {
-        const response = await this.context.authenticatedServer.request({
-            method: 'GET',
-            path: '/webshop/orders',
-            query,
-            shouldRetry: retry,
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), WebshopOrdersQuery as Decoder<WebshopOrdersQuery>),
-            owner: this,
-        });
-
-        return response.data;
-    }
-
     async patchOrders(patches: PatchableArrayAutoEncoder<PrivateOrder>) {
         const response = await this.context.authenticatedServer.request({
             method: 'PATCH',
@@ -832,7 +805,7 @@ export class WebshopManager {
 
         // Patching orders can result in changed tickets. We'll need to pull those in.
         try {
-            await this.fetchNewTickets(false, false);
+            await this.fetchTickets();
         }
         catch (e) {
             console.error(e);
@@ -886,7 +859,7 @@ export class WebshopManager {
         await this.addTicketPatches([patch]);
     }
 
-    async trySavePatches() {
+    async trySavePatches(): Promise<void> {
         if (this.savingTicketPatches) {
             // Already working on it
             return;
@@ -900,8 +873,8 @@ export class WebshopManager {
                 this.savingTicketPatches = false;
                 return this.trySavePatches();
             }
-            catch (e) {
-                if (Request.isNetworkError(e)) {
+            catch (e: any) {
+                if (Request.isNetworkError(e as Error)) {
                     // failed.
                 }
                 else {
@@ -1015,14 +988,19 @@ export class WebshopManager {
      * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
      * @returns true if the backend returned updated orders
      */
-    async fetchOrders2({ isFetchAll }: { isFetchAll?: boolean } = {}): Promise<boolean> {
+    async fetchOrders({ isFetchAll }: { isFetchAll?: boolean } = {}): Promise<boolean> {
         if (this.isLoadingOrders) {
             return false;
         }
 
         this.isLoadingOrders = true;
 
-        await this.initLastFetchedOrder();
+        if (isFetchAll) {
+            this.lastFetchedOrder = null;
+        }
+        else {
+            await this.initLastFetchedOrder();
+        }
 
         const fetcher = this.createBackendOrdersObjectFetcher();
 
@@ -1144,76 +1122,8 @@ export class WebshopManager {
 
         // wait for all orders to be stored
         await Promise.all(storeOrdersPromises);
+        this.lastUpdatedOrders = new Date();
         return hasUpdatedOrders;
-    }
-
-    /**
-     * Fetch new orders from the server.
-     * Try to avoid this if needed and use the cache first + fetch changes
-     * @deprecated
-     */
-    async fetchNewOrdersDeprecated(retry = false, reset = false) {
-        // TODO: clear local database if resetting
-        if (this.isLoadingOrders) {
-            return;
-        }
-        this.isLoadingOrders = true;
-
-        try {
-            if (!reset) {
-                await this.initLastFetchedOrder();
-            }
-
-            let didClear = false;
-
-            let query: WebshopOrdersQuery | undefined = reset
-                ? WebshopOrdersQuery.create({})
-                : WebshopOrdersQuery.create({
-                    updatedSince: this.lastFetchedOrder ? this.lastFetchedOrder.updatedAt : undefined,
-                    afterNumber: this.lastFetchedOrder ? this.lastFetchedOrder.number : undefined,
-                });
-
-            while (query) {
-                const response: PaginatedResponse<PrivateOrder[], WebshopOrdersQuery> = await this.fetchOrders(query, retry);
-
-                if (reset && !didClear) {
-                    // Clear only if we have internet access
-                    didClear = true;
-                    try {
-                        await this.clearOrdersFromDatabase();
-                    }
-                    catch (e) {
-                        // ignore since some browsers don't support databases
-                        console.error(e);
-                    }
-                }
-
-                if (response.results.length > 0) {
-                    // Save these orders to the local database
-                    // Non-critical:
-                    this.storeOrders(response.results).catch(console.error);
-
-                    // Non-critical:
-                    this.setlastFetchedOrder(response.results[response.results.length - 1]).catch(console.error);
-
-                    // Already send these new orders to our listeners, who want to know new incoming orders
-                    const fetched = response.results.filter(o => o.status !== OrderStatus.Deleted);
-                    this.ordersEventBus.sendEvent('fetched', fetched).catch(console.error);
-
-                    // Let listeners know that some orders are deleted
-                    const deleted = response.results.filter(o => o.status === OrderStatus.Deleted);
-                    if (deleted.length > 0) {
-                        this.ordersEventBus.sendEvent('deleted', deleted).catch(console.error);
-                    }
-                }
-
-                query = response.next;
-            }
-            this.lastUpdatedOrders = new Date();
-        }
-        finally {
-            this.isLoadingOrders = false;
-        }
     }
 
     /// TICKETS
@@ -1396,20 +1306,7 @@ export class WebshopManager {
         });
     }
 
-    async fetchTickets(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<TicketPrivate[], WebshopTicketsQuery>> {
-        const response = await this.context.authenticatedServer.request({
-            method: 'GET',
-            path: '/webshop/' + this.preview.id + '/tickets/private',
-            query,
-            shouldRetry: retry,
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), WebshopTicketsQuery as Decoder<WebshopTicketsQuery>),
-            owner: this,
-        });
-
-        return response.data;
-    }
-
-    async setLastFetchedTicket(ticket: TicketPrivate) {
+    private async setLastFetchedTicket(ticket: TicketPrivate) {
         this.lastFetchedTicket = {
             updatedAt: ticket.updatedAt,
             id: ticket.id!,
@@ -1417,66 +1314,193 @@ export class WebshopManager {
         await this.storeSettingKey('lastFetchedTicket', this.lastFetchedTicket);
     }
 
-    /**
-     * Fetch new orders from the server.
-     * Try to avoid this if needed and use the cache first + fetch changes
-     */
-    async fetchNewTickets(retry = false, reset = false, callback?: (tickets: TicketPrivate[]) => void) {
+    private async initLastFetchedTicket() {
+        if (this.lastFetchedTicket === undefined) {
+            // Only once (if undefined)
+            try {
+                this.lastFetchedTicket = await this.readSettingKey('lastFetchedTicket') ?? null;
+                if (this.lastFetchedTicket?.updatedAt && !this.lastUpdatedTickets) {
+                    // Set initial timestamp in case of network error later on
+                    this.lastUpdatedTickets = this.lastFetchedTicket.updatedAt;
+                }
+            }
+            catch (e) {
+                console.error(e);
+                // Probably no database support. Ignore it and load everything.
+                this.lastFetchedTicket = null;
+            }
+        }
+    }
+
+    private createBackendTicketsObjectFetcher(): ObjectFetcher<TicketPrivate> {
+        return {
+            fetch: async (data: LimitedFilteredRequest) => {
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/tickets/private`,
+                    decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+
+                return response.data;
+            },
+            fetchCount: async (data: CountFilteredRequest): Promise<number> => {
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/tickets/private/count`,
+                    decoder: CountResponse as Decoder<CountResponse>,
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+                return response.data.count;
+            },
+        };
+    }
+
+    async fetchTickets({ isFetchAll, callback }: { isFetchAll?: boolean; callback?: (tickets: TicketPrivate[]) => void } = {}): Promise<boolean> {
         // TODO: clear local database if resetting
         if (this.isLoadingTickets) {
-            return;
+            return false;
         }
         this.isLoadingTickets = true;
 
+        if (isFetchAll) {
+            this.lastFetchedTicket = null;
+        }
+        else {
+            await this.initLastFetchedTicket();
+        }
+
+        const fetcher = this.createBackendTicketsObjectFetcher();
+
+        // #region create LimitedFilteredRequest
+        const sort: SortList = [
+            { key: 'updatedAt', order: SortItemDirection.ASC },
+            // todo?
+            { key: 'id', order: SortItemDirection.ASC },
+        ];
+
+        const filter: StamhoofdFilter = {
+            webshopId: this.preview.id,
+        };
+
+        if (this.lastFetchedTicket) {
+            filter['$or'] = [
+                {
+                    updatedAt: { $gt: this.lastFetchedTicket.updatedAt },
+                },
+                {
+                    $and: [
+                        { updatedAt: { $eq: this.lastFetchedTicket.updatedAt } },
+                        { id: { $gt: this.lastFetchedTicket.id } },
+                    ],
+                },
+            ];
+        }
+
+        const filteredRequest = new LimitedFilteredRequest({
+            limit: 100,
+            filter,
+            sort,
+        });
+        // #endregion
+
+        let hadSuccessfulFetch = false;
+        let clearTicketsPromise: Promise<void> | undefined = undefined;
+
+        const triedClearTicketsPromise = new Promise<void>((resolve) => {
+            if (clearTicketsPromise) {
+                clearTicketsPromise
+                    .then(() => {
+                        console.log('Cleared orders from indexed db.');
+                    })
+                    .catch((e) => {
+                        // Clear only if we have internet access
+                        // ignore since some browsers don't support databases
+                        console.error('Failed clear orders from indexed db.');
+                        console.error(e);
+                    })
+                    .finally(resolve);
+                return;
+            }
+
+            resolve();
+        });
+
+        const storeTicketsPromises: Promise<void>[] = [];
+        let hasUpdatedTickets = false;
+
+        const onResultsReceivedHelper = async (tickets: TicketPrivate[]): Promise<void> => {
+            if (isFetchAll && !hadSuccessfulFetch) {
+                hadSuccessfulFetch = true;
+                // todo
+                clearTicketsPromise = Promise.resolve();
+            }
+
+            // prevent that tickets get added to indexed db before the db was cleared
+            await triedClearTicketsPromise;
+
+            if (tickets.length > 0) {
+                if (!hasUpdatedTickets) {
+                    hasUpdatedTickets = true;
+                }
+                const deletedTickets: TicketPrivate[] = [];
+                const nonDeletedTickets: TicketPrivate[] = [];
+
+                for (const ticket of tickets) {
+                    if (ticket.deletedAt) {
+                        deletedTickets.push(ticket);
+                        continue;
+                    }
+
+                    nonDeletedTickets.push(ticket);
+                }
+
+                const storeTicketsPromise = this.storeTickets(tickets);
+                storeTicketsPromises.push(storeTicketsPromise);
+
+                const promises: Promise<unknown>[] = [
+                    storeTicketsPromise,
+                    // todo: this should be run sync?
+                    this.setLastFetchedTicket(tickets[tickets.length - 1]),
+                ];
+
+                if (callback) {
+                    callback(nonDeletedTickets);
+                }
+
+                if (nonDeletedTickets.length > 0) {
+                    // todo: is this necessary and should this always be broadcasted (thus without if statement)?
+                    promises.push(this.ticketsEventBus.sendEvent('fetched', nonDeletedTickets));
+                }
+
+                if (deletedTickets.length > 0) {
+                    // todo: is this necessary
+                    promises.push(this.ticketsEventBus.sendEvent('deleted', deletedTickets));
+                }
+
+                await Promise.all(promises.map(promise => promise.catch(console.error)));
+            }
+        };
+
+        // run async
+        const onResultsReceived: (tickets: TicketPrivate[]) => void = (tickets) => {
+            onResultsReceivedHelper(tickets).catch(console.error);
+        };
+
         try {
-            if (this.lastFetchedTicket === undefined) {
-                // Only once (if undefined)
-                try {
-                    this.lastFetchedTicket = await this.readSettingKey('lastFetchedTicket') ?? null;
-
-                    if (this.lastFetchedTicket?.updatedAt && !this.lastUpdatedTickets) {
-                        // Set initial timestamp in case of network error later on
-                        this.lastUpdatedTickets = this.lastFetchedTicket.updatedAt;
-                    }
-                }
-                catch (e) {
-                    console.error(e);
-                    // Probably no database support. Ignore it and load everything.
-                    this.lastFetchedTicket = null;
-                }
-            }
-            let query: WebshopTicketsQuery | undefined = reset
-                ? WebshopTicketsQuery.create({})
-                : WebshopTicketsQuery.create({
-                    updatedSince: this.lastFetchedTicket ? this.lastFetchedTicket.updatedAt : undefined,
-                    lastId: this.lastFetchedTicket ? this.lastFetchedTicket.id : undefined,
-                });
-
-            while (query) {
-                const response: PaginatedResponse<TicketPrivate[], WebshopTicketsQuery> = await this.fetchTickets(query, retry);
-
-                if (response.results.length > 0) {
-                    // Save these orders to the local database
-                    // Non-critical:
-                    this.storeTickets(response.results).catch(console.error);
-
-                    // Non-critical:
-                    this.setLastFetchedTicket(response.results[response.results.length - 1]).catch(console.error);
-
-                    if (callback) {
-                        callback(response.results);
-                    }
-                    else {
-                        this.ticketsEventBus.sendEvent('fetched', response.results).catch(console.error);
-                    }
-                }
-
-                query = response.next;
-            }
-            this.lastUpdatedTickets = new Date();
+            await fetchAll(filteredRequest, fetcher, { onResultsReceived });
         }
         finally {
             this.isLoadingTickets = false;
         }
+
+        // wait for all orders to be stored
+        await Promise.all(storeTicketsPromises);
+        this.lastUpdatedTickets = new Date();
+        return hasUpdatedTickets;
     }
 }
