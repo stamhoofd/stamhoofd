@@ -99,8 +99,8 @@ export async function backup() {
 
     // Assert disk space
     const availableDiskSpace = (await diskSpace()) / 1000 / 1000 / 1000;
-    if (availableDiskSpace < 10) {
-        throw new Error('Less than 10GB disk space available. Avoid creating backups now until this has been resolved.');
+    if (availableDiskSpace < 20) {
+        throw new Error('Less than 20GB disk space available. Avoid creating backups now until this has been resolved.');
     }
 
     // Recreate folder
