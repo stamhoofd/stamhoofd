@@ -264,6 +264,11 @@ export class StripeHelper {
                 customer_email: customer.email,
                 metadata: fullMetadata,
                 expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // Expire in 30 minutes
+                payment_method_options: {
+                    card: {
+                        request_three_d_secure: 'challenge', // Force usage of string customer authentication for card payments
+                    },
+                },
             });
             console.log("Stripe session", session)
 
