@@ -317,9 +317,9 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncPaymentView, CartItemRow, EditPaymentView, GlobalEventBus, PriceBreakdownBox, STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, Toast, useContext, useKeyUpDown, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { AccessRight, BalanceItemWithPrivatePayments, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemWithPrivatePayments, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useOrganizationManager } from '@stamhoofd/networking';
@@ -340,6 +340,7 @@ const props = withDefaults(defineProps<{
 });
 
 const present = usePresent();
+const pop = usePop();
 const context = useContext();
 const organizationManager = useOrganizationManager();
 const show = useShow();
@@ -562,11 +563,18 @@ function editComments() {
     actionBuilder.editOrder(order.value, 'comments').catch(console.error);
 }
 
+async function onOrdersDeleted(orders: PrivateOrder[]): Promise<void> {
+    if(orders.some(o => o.id === props.initialOrder.id)) {
+        await pop();
+    }
+}
+
 const owner = {};
 
 function created() {
     props.webshopManager.ticketsEventBus.addListener(owner, 'fetched', tickets => onNewTickets(tickets));
     props.webshopManager.ticketPatchesEventBus.addListener(owner, 'patched', tickets => onNewTicketPatches(tickets));
+    props.webshopManager.ordersEventBus.addListener(owner, 'deleted', orders => onOrdersDeleted(orders));
 
     if (hasTickets.value) {
         recheckTickets();
@@ -582,6 +590,12 @@ function created() {
         return Promise.resolve();
     });
 }
+
+onBeforeUnmount(() => {
+    props.webshopManager.ticketsEventBus.removeListener(owner);
+    props.webshopManager.ticketPatchesEventBus.removeListener(owner);
+    props.webshopManager.ordersEventBus.removeListener(owner);
+});
 
 created();
 
@@ -651,12 +665,6 @@ function onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
     order.value.addTicketPatches(patches);
     return Promise.resolve();
 }
-
-onBeforeUnmount(() => {
-    props.webshopManager.ticketsEventBus.removeListener(this);
-    props.webshopManager.ticketPatchesEventBus.removeListener(this);
-    props.webshopManager.ordersEventBus.removeListener(this);
-});
 
 async function downloadNewOrders() {
     await props.webshopManager.fetchOrders();

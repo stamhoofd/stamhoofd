@@ -500,11 +500,6 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     return cols;
 })();
 
-// todo: fetch tickets?
-// todo: what to do on paymentPatch event? fetch new tickets and reload table, or update rows?
-// onNewTickets => order.addTickets(tickets);
-// onNewTicketPatches => patches: AutoEncoderPatchType<TicketPrivate>[] =>  PrivateOrderWithTickets.addTicketPatches(orders.value, patches);
-
 // const deliveryCities = computed(() => {
 //     const cities = new Map<string, string>();
 //     for (const order of orders.value) {
