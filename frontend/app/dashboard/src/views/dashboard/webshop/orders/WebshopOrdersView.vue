@@ -18,11 +18,12 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { Column, getWebshopOrderUIFilterBuilders, InMemoryTableAction, ModernTableView, UIFilterBuilders, useIsMobile, useTableObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
-import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, WebshopTimeSlot } from '@stamhoofd/structures';
+import { Column, getWebshopOrderUIFilterBuilders, GlobalEventBus, InMemoryTableAction, ModernTableView, UIFilterBuilders, useIsMobile, useTableObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
+import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
 
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount } from 'vue';
 import { WebshopManager } from '../WebshopManager';
@@ -57,6 +58,7 @@ const organizationManager = useOrganizationManager();
 const show = useShow();
 const present = usePresent();
 const isMobile = useIsMobile();
+const requestOwner = useRequestOwner();
 
 const preview = computed(() => props.webshopManager.preview);
 const hasSingleTickets = computed(() => preview.value.hasSingleTickets);
@@ -503,13 +505,6 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 // onNewTickets => order.addTickets(tickets);
 // onNewTicketPatches => patches: AutoEncoderPatchType<TicketPrivate>[] =>  PrivateOrderWithTickets.addTicketPatches(orders.value, patches);
 
-onBeforeUnmount(() => {
-    props.webshopManager.ordersEventBus.removeListener(this);
-    props.webshopManager.ticketsEventBus.removeListener(this);
-    props.webshopManager.ticketPatchesEventBus.removeListener(this);
-    Request.cancelAll(this);
-});
-
 // const deliveryCities = computed(() => {
 //     const cities = new Map<string, string>();
 //     for (const order of orders.value) {
@@ -538,4 +533,75 @@ function openOrder(order: PrivateOrder) {
         present(component).catch(console.error);
     }
 }
+
+/**
+* Insert or update an order
+*/
+function putOrder(order: PrivateOrder) {
+    for (const _order of tableObjectFetcher.objects) {
+        if (order.id === _order.id) {
+            // replace data without affecting reference or tickets
+            _order.deepSet(order);
+            return;
+        }
+    }
+
+    tableObjectFetcher.reset();
+}
+
+async function onNewOrders(orders: PrivateOrder[]) {
+    console.log('Received new orders from network');
+    // Search for the orders and replace / add them
+    for (const order of orders) {
+        putOrder(order);
+    }
+
+    return Promise.resolve();
+}
+
+function onDeleteOrders(_orders: PrivateOrder[]): Promise<void> {
+    tableObjectFetcher.reset();
+    return Promise.resolve();
+}
+
+async function onNewTickets(tickets: TicketPrivate[]) {
+    console.log('Received new tickets from network');
+
+    for (const order of tableObjectFetcher.objects) {
+        order.addTickets(tickets);
+    }
+
+    return Promise.resolve();
+}
+
+function onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+    console.log('Received new tickets from network');
+    PrivateOrderWithTickets.addTicketPatches(tableObjectFetcher.objects, patches);
+    return Promise.resolve();
+}
+
+function created() {
+    props.webshopManager.ordersEventBus.addListener(requestOwner, 'fetched', onNewOrders.bind(requestOwner));
+    props.webshopManager.ordersEventBus.addListener(requestOwner, 'deleted', onDeleteOrders.bind(requestOwner));
+
+    props.webshopManager.ticketsEventBus.addListener(requestOwner, 'fetched', onNewTickets.bind(requestOwner));
+    props.webshopManager.ticketPatchesEventBus.addListener(requestOwner, 'patched', onNewTicketPatches.bind(requestOwner));
+
+    // Listen for patches in payments
+    GlobalEventBus.addListener(requestOwner, 'paymentPatch', async (payment: PaymentGeneral) => {
+        if (payment && payment.id && payment.webshopIds.find(webshopId => webshopId === props.webshopManager.preview.id)) {
+            await props.webshopManager.fetchTickets();
+        }
+        return Promise.resolve();
+    });
+}
+
+created();
+
+onBeforeUnmount(() => {
+    props.webshopManager.ordersEventBus.removeListener(requestOwner);
+    props.webshopManager.ticketsEventBus.removeListener(requestOwner);
+    props.webshopManager.ticketPatchesEventBus.removeListener(requestOwner);
+    Request.cancelAll(requestOwner);
+});
 </script>
