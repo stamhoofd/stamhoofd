@@ -2,96 +2,81 @@
     <LoadingView v-if="loading" />
     <div v-else class="st-view ticket-view">
         <STNavigationBar v-if="!$isMobile" :large="!true" :sticky="false">
-            <OrganizationLogo #left :organization="organization" />
+            <template #left>
+                <OrganizationLogo :organization="organization" />
+            </template>
         </STNavigationBar>
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, DetailedTicketView, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { DetailedTicketView, LoadingView, OrganizationLogo, STNavigationBar, Toast, useIsMobile } from '@stamhoofd/components';
 import { TicketPublic } from '@stamhoofd/structures';
+import { computed, Ref, ref } from 'vue';
+import { useWebshopManager } from '../../composables/useWebshopManager';
 
+const props = defineProps<{
+    secret: string;
+}>();
 
+const webshopManager = useWebshopManager();
+const present = usePresent();
+const isMobile = useIsMobile();
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        Radio,
-        LoadingButton,
-        STErrorsDefault,
-        LoadingView,
-        BackButton,
-        OrganizationLogo,
-        Spinner
+const loading = ref(true);
+const tickets = ref<TicketPublic[]>([]) as Ref<TicketPublic[]>;
+
+const organization = computed(() => webshopManager.organization);
+const webshop = computed(() => webshopManager.webshop);
+
+async function downloadTickets() {
+    loading.value = true;
+
+    try {
+        const response = await webshopManager.server.request({
+            method: 'GET',
+            path: '/webshop/' + webshopManager.webshop.id + '/tickets',
+            query: {
+                // Required because we don't need to repeat item information (network + database impact)
+                secret: props.secret,
+            },
+            decoder: new ArrayDecoder(TicketPublic as Decoder<TicketPublic>),
+        });
+        tickets.value = response.data;
+        openTicket();
     }
-})
-export default class TicketView extends Mixins(NavigationMixin){
-    loading = true
-    
-    @Prop({ required: true })
-        secret: string 
-
-    tickets: TicketPublic[] = []
-
-    get organization() {
-        return this.$webshopManager.organization
-    }
-
-    get webshop() {
-        return this.$webshopManager.webshop
-    }
-
-    async downloadTickets() {
-        this.loading = true
-
-        try {
-            const response = await this.$webshopManager.server.request({
-                method: "GET",
-                path: "/webshop/" +this.$webshopManager.webshop.id + "/tickets",
-                query: {
-                    // Required because we don't need to repeat item information (network + database impact)
-                    secret: this.secret
-                },
-                decoder: new ArrayDecoder(TicketPublic as Decoder<TicketPublic>)
-            })
-            this.tickets = response.data
-            this.openTicket();
-        } catch (e) {
-            Toast.fromError(e).show()
-        }        
-
-        this.loading = false
+    catch (e) {
+        Toast.fromError(e).show();
     }
 
-    openTicket() {
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(DetailedTicketView, {
-                        ticket: this.tickets[0],
-                        webshop: this.webshop,
-                        organization: this.organization,
-                        allowDismiss: false,
-                        logo: !!(this as any).$isMobile
-                    })
-                })
-            ],
-            modalDisplayStyle: "sheet",
-            animated: false
-        })
-    }
-
-
-    created() {
-        this.downloadTickets().catch(console.error)
-    }
+    loading.value = false;
 }
+
+function openTicket() {
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(DetailedTicketView, {
+                    ticket: tickets.value[0],
+                    webshop: webshop.value,
+                    organization: organization.value,
+                    allowDismiss: false,
+                    logo: !!isMobile,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+        animated: false,
+    }).catch(console.error);
+}
+
+function created() {
+    downloadTickets().catch(console.error);
+}
+
+created();
 </script>
 
 <style lang="scss">
