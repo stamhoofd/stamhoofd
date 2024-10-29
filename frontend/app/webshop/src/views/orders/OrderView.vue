@@ -2,9 +2,11 @@
     <LoadingView v-if="!order" />
     <div v-else class="st-view order-view box-shade">
         <STNavigationBar :large="true" :sticky="false">
-            <OrganizationLogo #left :organization="organization" :webshop="webshop" />
+            <template #left>
+                <OrganizationLogo :organization="organization" :webshop="webshop" />
+            </template>
             <template #right>
-                <button class="text button" type="button" @click="pop">
+                <button class="text button" type="button" @click="() => pop()">
                     Sluiten
                 </button>
             </template>
@@ -27,14 +29,14 @@
                         Bedankt voor jouw bestelling, je ontvangt via e-mail ook een bevestiging.
                     </p>
 
-                    <p v-if="isFailed && !closed" class="error-box selectable with-button" @click="pop">
+                    <p v-if="isFailed && !closed" class="error-box selectable with-button" @click="() => pop()">
                         Deze bestelling is mislukt. Probeer je bestelling opnieuw te plaatsen als je dat nog niet had gedaan.
 
                         <button class="button text" type="button">
                             Opnieuw
                         </button>
                     </p>
-                    <p v-else-if="isFailed" class="error-box selectable with-button" @click="pop">
+                    <p v-else-if="isFailed" class="error-box selectable with-button" @click="() => pop()">
                         Deze bestelling is mislukt
 
                         <button class="button text" type="button">
@@ -128,7 +130,7 @@
                         Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.
                     </p>
                     <p v-else-if="!isCanceled && !isPaid && !isTransfer" class="warning-box">
-                        Opgelet: je zal deze bestelling nog moeten betalen {{ getLowerCaseName(order.payment.method) }}
+                        Opgelet: je zal deze bestelling nog moeten betalen {{ getLowerCaseName(order.data.paymentMethod) }}
                     </p>
 
                     <STList class="info">
@@ -204,7 +206,7 @@
                                 <span v-if="isCanceled" class="icon canceled" />
                             </p>
                         </STListItem>
-                                                
+
                         <template v-if="order.data.checkoutMethod">
                             <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                                 <h3 class="style-definition-label">
@@ -223,13 +225,13 @@
                                     {{ order.data.checkoutMethod.name }}
                                 </p>
                             </STListItem>
-                            <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
+                            <STListItem v-if="(order.data.checkoutMethod as any).address" class="right-description">
                                 <h3 class="style-definition-label">
                                     Adres
                                 </h3>
 
                                 <p class="style-definition-text">
-                                    {{ order.data.checkoutMethod.address }}
+                                    {{ (order.data.checkoutMethod as any).address }}
                                 </p>
                             </STListItem>
                             <STListItem v-if="order.data.address" class="right-description">
@@ -344,292 +346,213 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CartItemRow, CenteredMessage, DetailedTicketView, ErrorBox, LoadingButton, LoadingView, Logo, OrganizationLogo, PriceBreakdownBox, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
-import { CartItem, Order, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CartItemRow, CenteredMessage, DetailedTicketView, LoadingView, Logo, OrganizationLogo, PriceBreakdownBox, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { Order, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
+import { Ref, computed, onMounted, ref } from 'vue';
 
-import { CheckoutManager } from '../../classes/CheckoutManager';
+import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useWebshopManager } from '../../composables/useWebshopManager';
 import TicketListItem from '../products/TicketListItem.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        Radio,
-        LoadingButton,
-        STErrorsDefault,
-        LoadingView,
-        OrganizationLogo,
-        Spinner,
-        TicketListItem,
-        ViewRecordCategoryAnswersBox,
-        Logo,
-        CartItemRow,
-        PriceBreakdownBox
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter),
-        date: Formatter.dateWithDay.bind(Formatter),
-        dateTime: Formatter.dateTimeWithDay.bind(Formatter),
-        minutes: Formatter.minutes.bind(Formatter),
-        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
+const props = withDefaults(defineProps<{
+    orderId?: string | null;
+    paymentId?: string | null;
+    initialOrder?: Order | null;
+    success?: boolean;
+}>(), {
+    orderId: null,
+    paymentId: null,
+    initialOrder: null,
+    success: false,
+});
+
+const webshopManager = useWebshopManager();
+const checkoutManager = useCheckoutManager();
+const present = usePresent();
+const pop = usePop();
+
+const order = ref<Order | null>(props.initialOrder) as Ref<Order | null>;
+const tickets = ref<TicketPublic[]>([]) as Ref<TicketPublic[]>;
+const loadingTickets = ref(false);
+const organization = computed(() => webshopManager.organization);
+const webshop = computed(() => webshopManager.webshop);
+const singleTicket = computed(() => tickets.value.length === 1 || webshop.value.meta.ticketType === WebshopTicketType.SingleTicket);
+const canShare = computed(() => !!navigator.share);
+const isPaid = computed(() => order.value && (order.value.payment === null || order.value.payment.status === PaymentStatus.Succeeded));
+const isTransfer = computed(() => getDefaultTransferPayment() !== null);
+
+function isPaymentTransfer(payment: Payment) {
+    return payment.method === PaymentMethod.Transfer;
+}
+
+const closed = computed(() => webshop.value.isClosed(2 * 60 * 1000) || !organization.value.meta.packages.useWebshops);
+const isFailed = computed(() => !order.value || order.value.number === null);
+const isCanceled = computed(() => !order.value || order.value.status === OrderStatus.Canceled || order.value.status === OrderStatus.Deleted);
+const isDeleted = computed(() => !order.value || order.value.status === OrderStatus.Deleted);
+const hasTickets = computed(() => {
+    return (order.value && order.value.status !== OrderStatus.Canceled && order.value.status !== OrderStatus.Deleted) && (webshop.value.meta.ticketType === WebshopTicketType.SingleTicket || !!order.value?.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket));
+});
+
+const hasSingleTicket = computed(() => webshop.value.meta.ticketType === WebshopTicketType.SingleTicket);
+const statusName = computed(() => {
+    if (isFailed.value) {
+        return 'Mislukt';
     }
-})
-export default class OrderView extends Mixins(NavigationMixin){
-    loading = false
-    errorBox: ErrorBox | null = null
-    CheckoutManager = CheckoutManager
+    return order.value ? OrderStatusHelper.getName(order.value.status) : '';
+});
 
-    @Prop({ default: null })
-        orderId: string | null
+const publicTickets = computed(() => tickets.value);
+const recordCategories = computed(() => {
+    if (!order.value) {
+        return [];
+    }
+    return RecordCategory.flattenCategoriesForAnswers(
+        webshop.value.meta.recordCategories,
+        [...order.value.data.recordAnswers.values()],
+    );
+});
 
-    @Prop({ default: null })
-        paymentId: string | null
+function share() {
+    navigator.share({
+        title: 'Bestelling ' + webshopManager.webshop.meta.name,
+        text: 'Bekijk mijn bestelling bij ' + webshopManager.webshop.meta.name + ' via deze link.',
+        url: webshopManager.webshop.getUrl(organization.value) + '/order/' + order.value!.id,
+    }).catch(e => console.error(e));
+}
 
-    @Prop({ default: null })
-        initialOrder!: Order | null
+function getName(paymentMethod: PaymentMethod): string {
+    return PaymentMethodHelper.getNameCapitalized(paymentMethod, order.value?.data.paymentContext);
+}
 
-    @Prop({ default: false })
-        success: boolean
+function getLowerCaseName(paymentMethod: PaymentMethod): string {
+    return PaymentMethodHelper.getName(paymentMethod, order.value?.data.paymentContext);
+}
 
-    order: Order | null = this.initialOrder
+function openTransferView(payment: Payment) {
+    if (payment.method === PaymentMethod.Transfer) {
+        present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(TransferPaymentView, {
+                type: 'order',
+                payment,
+                organization: webshopManager.organization,
+                settings: webshopManager.webshop.meta.transferSettings,
+                isPopup: true,
+            }),
+        }).setDisplayStyle('popup')).catch(console.error);
+    }
+}
 
-    tickets: TicketPublic[] = []
-    loadingTickets = false
+function getDefaultTransferPayment() {
+    const payments = order.value?.payments.filter(p => p.method === PaymentMethod.Transfer && p.price >= 0) ?? [];
+    return payments[0] ?? null;
+}
 
-    get organization() {
-        return this.$webshopManager.organization
+async function checkTickets() {
+    if (!hasTickets.value || !order.value || (!isPaid.value && isTransfer.value)) {
+        return;
+    }
+    loadingTickets.value = true;
+
+    try {
+        const response = await webshopManager.server.request({
+            method: 'GET',
+            path: '/webshop/' + webshopManager.webshop.id + '/tickets',
+            query: {
+                // Required because we don't need to repeat item information (network + database impact)
+                orderId: order.value.id,
+            },
+            decoder: new ArrayDecoder(TicketOrder as Decoder<TicketOrder>),
+        });
+        tickets.value = response.data.map(ticket => ticket.getPublic(order.value!)).sort(TicketPublic.sort);
+    }
+    catch (e) {
+        Toast.fromError(e).show();
     }
 
-    get webshop() {
-        return this.$webshopManager.webshop
-    }
+    loadingTickets.value = false;
+}
 
-    get singleTicket() {
-        return this.tickets.length === 1 || this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
-    }
+onMounted(() => {
+    if (props.success) {
+        checkoutManager.clear();
 
-    get canShare() {
-        return !!navigator.share
+        // Update stock in background
+        webshopManager.reload().catch((e) => {
+            console.error(e);
+        });
     }
-
-    get isPaid() {
-        return this.order && (this.order.payment === null || this.order.payment.status === PaymentStatus.Succeeded)
+    if (order.value) {
+        checkTickets().catch(console.error);
+        return;
     }
-
-    get isTransfer() {
-        return this.getDefaultTransferPayment() !== null
+    // Load order
+    if (props.orderId) {
+        webshopManager.server
+            .request({
+                method: 'GET',
+                path: '/webshop/' + webshopManager.webshop.id + '/order/' + props.orderId,
+                decoder: Order as Decoder<Order>,
+            }).then((response) => {
+                const orderValue = response.data;
+                order.value = orderValue;
+                checkTickets().catch(console.error);
+            }).catch((e) => {
+                // too: handle this
+                console.error(e);
+                new CenteredMessage('Ongeldige bestelling', 'De bestelling die je opvraagt bestaat niet (meer)', 'error').addCloseButton().show();
+                pop({ force: true })?.catch(console.error);
+            });
     }
-
-    isPaymentTransfer(payment: Payment) {
-        return payment.method === PaymentMethod.Transfer
-    }
-
-    get closed() {
-        // 2 minutes in advance already
-        return this.webshop.isClosed(2*60*1000) || !this.organization.meta.packages.useWebshops
-    }
-
-    get isFailed() {
-        return !this.order || this.order.number === null
-    }
-
-    get isCanceled() {
-        return !this.order || this.order.status === OrderStatus.Canceled || this.order.status === OrderStatus.Deleted
-    }
-
-    get isDeleted() {
-        return !this.order || this.order.status === OrderStatus.Deleted
-    }
-
-    get hasTickets() {
-        return (this.order && this.order.status !== OrderStatus.Canceled && this.order.status !== OrderStatus.Deleted) && (this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket))
-    }
-
-    get hasSingleTicket() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
-    }
-
-    get statusName() {
-        if (this.isFailed) {
-            return 'Mislukt'
+    else {
+        if (!props.paymentId) {
+            throw new Error('Missing payment id or order id');
         }
-        return this.order ? OrderStatusHelper.getName(this.order.status) : ""
+        webshopManager.server
+            .request({
+                method: 'GET',
+                path: '/webshop/' + webshopManager.webshop.id + '/payment/' + props.paymentId + '/order',
+                decoder: Order as Decoder<Order>,
+            }).then((response) => {
+                const orderValue = response.data;
+                order.value = orderValue;
+                checkTickets().catch(console.error);
+            }).catch((e) => {
+                // too: handle this
+                console.error(e);
+                new CenteredMessage('Ongeldige bestelling', 'De bestelling die je opvraagt bestaat niet (meer)', 'error').addCloseButton().show();
+                pop({ force: true })?.catch(console.error);
+            });
     }
+});
 
-    get statusColor() {
-        return this.order ? OrderStatusHelper.getColor(this.order.status) : ""
-    }
+async function downloadAllTickets() {
+    const TicketBuilder = (await import(
+        /* webpackChunkName: "TicketBuilder" */
+        /* webpackPrefetch: true */
+        '@stamhoofd/ticket-builder'
+    )).TicketBuilder;
 
-    get publicTickets() {
-        return this.tickets
-    }
+    const builder = new TicketBuilder(publicTickets.value, webshop.value, webshopManager.organization, order.value ?? undefined);
+    await builder.download();
+}
 
-    get recordCategories(): RecordCategory[] {
-        if (!this.order) {
-            return []
-        }
-        return RecordCategory.flattenCategoriesForAnswers(
-            this.webshop.meta.recordCategories,
-            [...this.order.data.recordAnswers.values()]
-        )
-    }
-
-    formatFreePrice(price: number) {
-        if (price === 0) {
-            return ''
-        }
-        return Formatter.price(price)
-    }
-
-    share() {
-        navigator.share({
-            title: "Bestelling "+this.$webshopManager.webshop.meta.name,
-            text: "Bekijk mijn bestelling bij "+this.$webshopManager.webshop.meta.name+" via deze link.",
-            url: this.$webshopManager.webshop.getUrl(this.organization)+"/order/"+this.order!.id,
-        }).catch(e => console.error(e))
-    }
-
-    getName(paymentMethod: PaymentMethod): string {
-        return PaymentMethodHelper.getNameCapitalized(paymentMethod, this.order?.data.paymentContext)
-    }
-
-    getLowerCaseName(paymentMethod: PaymentMethod): string {
-        return PaymentMethodHelper.getName(paymentMethod, this.order?.data.paymentContext)
-    }
-
-    openTransferView(payment: Payment) {
-        if (payment.method === PaymentMethod.Transfer) {
-            this.present(new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(TransferPaymentView, {
-                    type: "order",
-                    payment,
-                    organization: this.$webshopManager.organization,
-                    settings: this.$webshopManager.webshop.meta.transferSettings,
-                    isPopup: true
-                })
-            }).setDisplayStyle("popup"))
-        }
-    }
-
-    getDefaultTransferPayment() {
-        const payments = this.order?.payments.filter(p => p.method === PaymentMethod.Transfer && p.price >= 0) ?? []
-        return payments[0] ?? null
-    }
-
-    async checkTickets() {
-        if (!this.hasTickets || !this.order || (!this.isPaid && this.isTransfer)) {
-            return
-        }
-        this.loadingTickets = true
-
-        try {
-            const response = await this.$webshopManager.server.request({
-                method: "GET",
-                path: "/webshop/" +this.$webshopManager.webshop.id + "/tickets",
-                query: {
-                    // Required because we don't need to repeat item information (network + database impact)
-                    orderId: this.order.id
-                },
-                decoder: new ArrayDecoder(TicketOrder as Decoder<TicketOrder>)
-            })
-            this.tickets = response.data.map(ticket => ticket.getPublic(this.order!)).sort(TicketPublic.sort)
-        } catch (e) {
-            Toast.fromError(e).show()
-        }        
-
-        this.loadingTickets = false
-    }
-
-    mounted() {
-        if (this.success) {
-            this.$checkoutManager.clear()
-
-            // Update stock in background
-            this.$webshopManager.reload().catch(e => {
-                console.error(e)
-            })
-        }
-        if (this.order) {
-            this.checkTickets().catch(console.error)
-            return;
-        }
-        // Load order
-        if (this.orderId) {
-            this.$webshopManager.server
-                .request({
-                    method: "GET",
-                    path: "/webshop/" +this.$webshopManager.webshop.id + "/order/"+this.orderId,
-                    decoder: Order as Decoder<Order>,
-                }).then(response => {
-                    const order = response.data
-                    this.order = order
-                    this.checkTickets().catch(console.error)
-                }).catch(e => {
-                    // too: handle this
-                    console.error(e)
-                    new CenteredMessage("Ongeldige bestelling", "De bestelling die je opvraagt bestaat niet (meer)", "error").addCloseButton().show()
-                    this.pop({ force: true })
-                })
-        } else {
-            if (!this.paymentId) {
-                throw new Error("Missing payment id or order id")
-            }
-            this.$webshopManager.server
-                .request({
-                    method: "GET",
-                    path: "/webshop/" +this.$webshopManager.webshop.id + "/payment/"+this.paymentId+"/order",
-                    decoder: Order as Decoder<Order>,
-                }).then(response => {
-                    const order = response.data
-                    this.order = order
-                    this.checkTickets().catch(console.error)
-                }).catch(e => {
-                    // too: handle this
-                    console.error(e)
-                    new CenteredMessage("Ongeldige bestelling", "De bestelling die je opvraagt bestaat niet (meer)", "error").addCloseButton().show()
-                    this.pop({ force: true })
-                })
-        }
-    }
-
-    async downloadAllTickets() {
-        const TicketBuilder = (await import(
-            /* webpackChunkName: "TicketBuilder" */
-            /* webpackPrefetch: true */
-            '@stamhoofd/ticket-builder'
-        )).TicketBuilder
-
-        const builder = new TicketBuilder(this.publicTickets, this.webshop, this.$webshopManager.organization, this.order ?? undefined)
-        await builder.download()
-    }
-
-    openTicket(ticket: TicketPublic) {
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(DetailedTicketView, {
-                        ticket: ticket,
-                        order: this.order,
-                        webshop: this.webshop,
-                        organization: this.organization
-                    })
-                })
-            ],
-            modalDisplayStyle: "sheet"
-        })
-    }
-
-    imageSrc(cartItem: CartItem) {
-        return cartItem.product.images[0]?.getPathForSize(100, 100)
-    }
+function openTicket(ticket: TicketPublic) {
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(DetailedTicketView, {
+                    ticket: ticket,
+                    order: order.value,
+                    webshop: webshop.value,
+                    organization: organization.value,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
 }
 </script>
 
@@ -682,8 +605,8 @@ export default class OrderView extends Mixins(NavigationMixin){
                 }
         }
 
-        .stamhoofd-logo-container {    
-            display: block;      
+        .stamhoofd-logo-container {
+            display: block;
 
             svg {
                 width: 140px;

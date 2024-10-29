@@ -216,12 +216,12 @@ import { useNavigationActions } from '../types/NavigationActions';
 
 const props = withDefaults(defineProps<{
     payment: Payment;
-    created: boolean;
+    created?: boolean;
     type: 'registration' | 'order';
     organization: Organization;
-    settings: TransferSettings | null;
-    isPopup: boolean;
-    finishedHandler: ((payment: Payment | null, navigate: NavigationActions) => void) | null;
+    settings?: TransferSettings | null;
+    isPopup?: boolean;
+    finishedHandler?: ((payment: Payment | null, navigate: NavigationActions) => void) | null;
 }>(), {
     created: false,
     settings: null,
