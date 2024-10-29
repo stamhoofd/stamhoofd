@@ -5,6 +5,7 @@ import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { loadLogger } from '@stamhoofd/logging';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
+import { cleanBackups } from './src/helpers/backup';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -96,6 +97,9 @@ const start = async () => {
     // Register crons
     await import('./src/crons');
     startCrons();
+
+    // Clean backups on boot (bit faster to retrieve the timestamp of the last backup for the health endpoint)
+    await cleanBackups();
 };
 
 start().catch((error) => {

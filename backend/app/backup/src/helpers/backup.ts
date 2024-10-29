@@ -1,12 +1,167 @@
-import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
+import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import { Database } from '@simonbackx/simple-database';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import chalk from 'chalk';
 import { exec } from 'child_process';
 import fs from 'fs';
+import { DateTime } from 'luxon';
 import path from 'path';
 import util from 'util';
 const execPromise = util.promisify(exec);
+
+// Normally we'll have ±5 binary logs per day (if max size is set to 50MB)
+// Since well create a backup every day, keeping 500 binary logs would give
+// a full history of 100 days - and leaves us enough margin in case more
+// logs are created in a day
+const MAX_BINARY_LOGS = 500;
+const MAX_BACKUPS = 30; // in days
+const BACKUP_PREFIX = 'backup-';
+const BINARY_LOG_PREFIX = 'binlog.';
+
+/**
+ * For the health endpoint
+ */
+
+let LAST_BINARY_BACKUP: Date | null = null;
+
+let LAST_BACKUP: Date | null = null;
+
+export class BackupHealth extends AutoEncoder {
+    @field({ decoder: StringDecoder, nullable: true })
+    lastBackup: string | null;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    lastBinaryBackup: string | null;
+
+    @field({ decoder: StringDecoder })
+    status: 'ok' | 'error';
+}
+
+export function getHealth(): BackupHealth {
+    const now = new Date();
+
+    return BackupHealth.create({
+        lastBinaryBackup: LAST_BINARY_BACKUP ? Formatter.dateTimeIso(LAST_BINARY_BACKUP) : null,
+        lastBackup: LAST_BACKUP ? Formatter.dateTimeIso(LAST_BACKUP) : null,
+        status: LAST_BINARY_BACKUP && LAST_BACKUP && (LAST_BINARY_BACKUP.getTime() - now.getTime() < 60 * 10 * 1000) && (LAST_BACKUP.getTime() - now.getTime() < 60 * 60 * 1000 * 25) ? 'ok' : 'error',
+    });
+}
+
+export async function cleanBackups() {
+    console.log('Cleaning backups...');
+
+    const client = getS3Client();
+
+    // List all backup files on the server
+    const allBackups = await listAllFiles(STAMHOOFD.objectStoragePath);
+
+    // Delete backups older than MAX_BACKUPS days (not using count because we want to keep the last 30 days)
+    const now = new Date();
+    const boundaryDateTime = new Date(now.getTime() - 1000 * 60 * 60 * 24 * MAX_BACKUPS);
+    const boundaryFileName = getBackupBaseFileName(boundaryDateTime) + '.gz.enc';
+    let lastBackup: string | null = null;
+
+    for (const file of allBackups) {
+        const filename = path.basename(file.key);
+        if (filename.startsWith(BACKUP_PREFIX) && filename.endsWith('.gz.enc')) {
+            if (filename < boundaryFileName) {
+                console.log('Deleting old backup ' + filename);
+
+                await client.send(new DeleteObjectCommand({
+                    Bucket: STAMHOOFD.SPACES_BUCKET,
+                    Key: file.key,
+                }));
+            }
+            else {
+                if (!lastBackup || lastBackup < filename) {
+                    lastBackup = filename;
+                }
+            }
+        }
+    }
+
+    if (!LAST_BACKUP && lastBackup) {
+        // Read timestamp from last backup file
+        console.log('Setting last backup timestamp from last backup ' + lastBackup);
+        LAST_BACKUP = getBackupFileDate(lastBackup);
+    }
+}
+
+export async function cleanBinaryLogBackups() {
+    console.log('Cleaning binary log backups...');
+
+    const client = getS3Client();
+
+    // List all backup files on the server
+    const allBackups = (await listAllFiles(STAMHOOFD.objectStoragePath + '/binlogs')).filter(f => f.key.endsWith('.enc') && path.basename(f.key).startsWith(BINARY_LOG_PREFIX));
+    const numberToDelete = allBackups.length - MAX_BINARY_LOGS;
+
+    if (numberToDelete <= 0) {
+        console.log('No binary logs to delete');
+        return;
+    }
+
+    console.log('Found ' + allBackups.length + ' binary logs, deleting ' + numberToDelete);
+
+    for (let i = 0; i < numberToDelete; i++) {
+        const file = allBackups[i];
+        console.log('Deleting old binary log ' + file.key);
+
+        await client.send(new DeleteObjectCommand({
+            Bucket: STAMHOOFD.SPACES_BUCKET,
+            Key: file.key,
+        }));
+    }
+}
+
+type ObjectStorageFile = { key: string; lastModified: Date; size: number };
+
+export async function listAllFiles(prefix: string): Promise<ObjectStorageFile[]> {
+    const client = getS3Client();
+    const files: ObjectStorageFile[] = [];
+    let marker: string | undefined;
+
+    // List all backup files on the server
+    while (true) {
+        const response = await client.send(new ListObjectsCommand({
+            Bucket: STAMHOOFD.SPACES_BUCKET,
+            Prefix: prefix + '/', // / suffix is required to make Delimiter work
+            MaxKeys: 1000,
+            Marker: marker,
+            Delimiter: '/', // this makes sure we don't go into folders
+        }));
+
+        if (response.Contents === undefined) {
+            break;
+        }
+
+        for (const object of response.Contents) {
+            if (files.find(f => f.key === object.Key)) {
+                throw new Error('Duplicate key found: ' + object.Key);
+            }
+
+            files.push({
+                key: object.Key!,
+                lastModified: object.LastModified!,
+                size: object.Size!,
+            });
+        }
+
+        if (!response.NextMarker) {
+            break;
+        }
+
+        marker = response.NextMarker;
+    }
+
+    // Sort files: use the name
+    files.sort((a, b) => {
+        return a.key.localeCompare(b.key);
+    });
+
+    return files;
+}
 
 export function escapeShellArg(arg) {
     return `'${arg.replace(/'/g, `'\\''`)}'`;
@@ -36,6 +191,52 @@ export function getS3Client() {
             secretAccessKey: STAMHOOFD.SPACES_SECRET,
         },
     });
+}
+
+export function getBackupBaseFileName(date: Date) {
+    const timestamp = Formatter.dateIso(date) + '-' + Formatter.timeIso(date).replace(':', 'h');
+    const tmpFile = `${BACKUP_PREFIX}${timestamp}.sql`;
+    return tmpFile;
+}
+
+export function getBackupFileDate(filename: string) {
+    if (!filename.startsWith(BACKUP_PREFIX) || !filename.endsWith('.sql.gz.enc')) {
+        throw new Error('Invalid backup filename: ' + filename);
+    }
+
+    const dateString = filename.substring(BACKUP_PREFIX.length, filename.length - '.sql.gz.enc'.length);
+
+    const year = parseInt(dateString.substring(0, 4));
+    const month = parseInt(dateString.substring(5, 7));
+    const day = parseInt(dateString.substring(8, 10));
+
+    const hour = parseInt(dateString.substring(11, 13));
+    const minute = parseInt(dateString.substring(14, 16));
+
+    console.log('Found date ', {
+        year,
+        month,
+        day,
+        hour,
+        minute,
+    }, 'from', dateString);
+
+    // Convert Brussels timeezone string to date object
+    const date = DateTime.fromObject({
+        year,
+        month,
+        day,
+        hour,
+        minute,
+    }, { zone: 'Europe/Brussels' }).toJSDate();
+
+    // Check match
+    const expected = getBackupBaseFileName(date) + '.gz.enc';
+    if (expected !== filename) {
+        throw new Error('Invalid backup filename: ' + filename + ' - expected ' + expected);
+    }
+
+    return date;
 }
 
 export async function backup() {
@@ -106,8 +307,7 @@ export async function backup() {
     // Recreate folder
     await execPromise('mkdir -p ' + escapeShellArg(localBackupFolder));
 
-    const timestamp = Formatter.dateIso(new Date()) + '-' + Formatter.timeIso(new Date()).replace(':', 'h');
-    const tmpFile = `${localBackupFolder}backup-${timestamp}.sql`;
+    const tmpFile = `${localBackupFolder}${getBackupBaseFileName(new Date())}`;
     const compressedFile = tmpFile + '.gz';
 
     const cmd = 'mysqldump -u ' + escapeShellArg(STAMHOOFD.DB_USER) + ' -p' + escapeShellArg(STAMHOOFD.DB_PASS) + ' --flush-logs --single-transaction --triggers --routines --events --lock-tables=false ' + escapeShellArg(STAMHOOFD.DB_DATABASE) + ' > ' + escapeShellArg(tmpFile);
@@ -167,6 +367,7 @@ export async function backup() {
     }
 
     console.log(chalk.green('✓ Backup uploaded to object storage at ' + key));
+    LAST_BACKUP = new Date();
 }
 
 export async function backupBinlogs() {
@@ -183,16 +384,24 @@ export async function backupBinlogs() {
     const binLogPath = path.dirname(logBinBaseName);
 
     const [rows] = await Database.select('SHOW BINARY LOGS');
+
+    if (rows.length > MAX_BINARY_LOGS) {
+        console.error(chalk.bold(chalk.red('Warning: MAX_BINARY_LOGS is larger than the binary logs stored on the system. Please check the MySQL configuration.')));
+
+        // Only copy last MAX_BINARY_LOGS rows
+        rows.splice(0, rows.length - MAX_BINARY_LOGS);
+    }
+
     const lastRow = rows.pop();
+
+    const allBinaryLogs = await listAllFiles(STAMHOOFD.objectStoragePath + '/binlogs');
 
     for (const row of rows) {
         const data = row[''];
         const logName = data['Log_name'];
 
         const fullPath = binLogPath + '/' + logName;
-        console.log('Found ' + fullPath);
-
-        await uploadBinaryLog(fullPath, false, true);
+        await uploadBinaryLog(fullPath, false, true, allBinaryLogs);
     }
 
     // Upload partial lastRow
@@ -201,32 +410,47 @@ export async function backupBinlogs() {
         const logName = data['Log_name'];
 
         const fullPath = binLogPath + '/' + logName;
-        console.log('Found ' + fullPath);
-
-        await uploadBinaryLog(fullPath, true, true);
+        await uploadBinaryLog(fullPath, true, true, allBinaryLogs);
     }
+
+    LAST_BINARY_BACKUP = new Date();
 }
 
-export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, gzip = true) {
+export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, gzip = true, allBinaryLogs: ObjectStorageFile[]) {
     const client = getS3Client();
+
+    const number = parseInt(path.basename(binaryLogPath).split('.')[1]);
+    if (isNaN(number) || !isFinite(number)) {
+        throw new Error('Invalid binary log name: ' + binaryLogPath);
+    }
+
+    // Increase the padding to 10 digits so we never need to worry about number sorting issues in the long future
+    const uploadedName = BINARY_LOG_PREFIX + number.toString().padStart(10, '0');
 
     if (!partial) {
         // Check if the file exists in S3
-        const key = STAMHOOFD.objectStoragePath + '/binlogs/' + path.basename(binaryLogPath) + (gzip ? '.gz' : '') + '.enc';
+        const key = STAMHOOFD.objectStoragePath + '/binlogs/' + uploadedName + (gzip ? '.gz' : '') + '.enc';
+
+        if (allBinaryLogs.find(f => f.key === key)) {
+            console.log('Binary log already exists: ' + uploadedName);
+            return;
+        }
+
+        // Double check using HEAD
         try {
             await client.send(new HeadObjectCommand({
                 Bucket: STAMHOOFD.SPACES_BUCKET,
                 Key: key,
                 ResponseCacheControl: 'no-cache',
             }));
-            console.log('Binary log already exists at ' + key);
+            console.log('Binary log already exists: ' + uploadedName);
             return;
         }
         catch (e) {
             if (e.name !== 'NotFound') {
                 throw e;
             }
-            console.log('Binary log does not exist yet at ' + key);
+            console.log('Binary log does not exist: ' + uploadedName);
         }
     }
 
@@ -237,7 +461,7 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
         throw new Error('Backup folder should end with a /');
     }
 
-    let binaryLogPathMoved = localBackupFolder + 'binlogs/' + path.basename(binaryLogPath) + (partial ? '.partial' : '');
+    let binaryLogPathMoved = localBackupFolder + 'binlogs/' + uploadedName + (partial ? '.partial' : '');
 
     // Mkdir
     await execPromise('mkdir -p ' + escapeShellArg(path.dirname(binaryLogPathMoved)));
@@ -252,9 +476,9 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
         // Compress the binary log
         const compressedFile = binaryLogPathMoved + '.gz';
         const cmd = `gzip -c ${escapeShellArg(binaryLogPathMoved)} > ${escapeShellArg(compressedFile)}`;
-        console.log('Compressing binary log...');
+        console.log('Compressing ' + uploadedName + '...');
         await execPromise(cmd);
-        console.log('Binary log compressed at ' + compressedFile);
+        console.log('Compressed at ' + compressedFile);
 
         // Delete the uncompressed file
         await execPromise('rm ' + escapeShellArg(binaryLogPathMoved));

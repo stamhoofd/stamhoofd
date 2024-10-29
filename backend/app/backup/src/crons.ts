@@ -1,5 +1,5 @@
 import { registerCron } from '@stamhoofd/crons';
-import { backup, backupBinlogs } from './helpers/backup';
+import { backup, backupBinlogs, cleanBackups, cleanBinaryLogBackups } from './helpers/backup';
 import { Formatter } from '@stamhoofd/utility';
 
 let lastFullBackup: Date | null = null;
@@ -30,5 +30,21 @@ async function backupBinLogs() {
     await backupBinlogs();
 }
 
+let lastClean = new Date(0); // on boot
+const cleanInterval = 1000 * 60 * 60 * 4; // every 4 hours
+
+async function clean() {
+    const now = new Date();
+
+    if (now.getTime() - lastClean.getTime() > cleanInterval) {
+        console.log('Cleaning backups...');
+        await cleanBackups();
+        await cleanBinaryLogBackups();
+        lastClean = now;
+    }
+}
+
 registerCron('createBackups', createBackups);
 registerCron('backupBinLogs', backupBinLogs);
+
+registerCron('clean', clean);
