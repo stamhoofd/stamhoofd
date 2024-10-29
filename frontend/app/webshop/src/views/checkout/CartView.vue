@@ -13,22 +13,22 @@
             <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon label">
                 <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
 
-                <button class="button icon trash" @click="deleteCode(code)" />
+                <button class="button icon trash" type="button" @click="deleteCode(code)" />
             </p>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <STList>
                 <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
             </STList>
 
             <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
-            <PriceBreakdownBox :price-breakdown="checkout.priceBreakdown" />
+            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
         </main>
 
         <STToolbar>
             <template #right>
-                <button type="button" class="button secundary" @click="pop">
+                <button type="button" class="button secundary" @click="() => pop()">
                     <span class="icon add" />
                     <span v-if="cart.items.length > 0">Meer toevoegen</span>
                     <span v-else>Iets toevoegen</span>
@@ -44,181 +44,138 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { AddDiscountCodeBox, CartItemRow, CartItemView, ErrorBox, LoadingButton, PriceBreakdownBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, useDismiss, useNavigationController, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AddDiscountCodeBox, CartItemRow, CartItemView, ErrorBox, LoadingButton, PriceBreakdownBox, STErrorsDefault, STList, STNavigationBar, STToolbar, useErrors } from '@stamhoofd/components';
 import { CartItem, DiscountCode } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { computed, onMounted, ref } from 'vue';
+import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useWebshopManager } from '../../composables/useWebshopManager';
 
-import { CheckoutManager } from '../../classes/CheckoutManager';
 import { CheckoutStepsManager } from './CheckoutStepsManager';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        STErrorsDefault,
-        LoadingButton,
-        CartItemRow,
-        PriceBreakdownBox,
-        AddDiscountCodeBox,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-    },
-})
-export default class CartView extends Mixins(NavigationMixin) {
-    CheckoutManager = CheckoutManager;
+const title = 'Winkelmandje';
+const loading = ref(false);
 
-    title = 'Winkelmandje';
-    loading = false;
-    errorBox: ErrorBox | null = null;
+const errors = useErrors();
+const present = usePresent();
+const pop = usePop();
 
-    get cart() {
-        return this.$checkoutManager.cart;
+const navigationController = useNavigationController();
+const dismiss = useDismiss();
+const show = useShow();
+
+const checkoutManager = useCheckoutManager();
+const webshopManager = useWebshopManager();
+
+const cart = computed(() => checkoutManager.cart);
+const checkout = computed(() => checkoutManager.checkout);
+const webshop = computed(() => webshopManager.webshop);
+
+async function goToCheckout() {
+    if (loading.value) {
+        return;
     }
 
-    get checkout() {
-        return this.$checkoutManager.checkout;
-    }
+    loading.value = true;
+    errors.errorBox = null;
 
-    get webshop() {
-        return this.$webshopManager.webshop;
-    }
-
-    async goToCheckout() {
-        if (this.loading) {
-            return;
-        }
-
-        this.loading = true;
-        this.errorBox = null;
-
-        try {
-            await CheckoutStepsManager.for(this.$checkoutManager).goNext(undefined, this);
-        }
-        catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-        }
-        this.loading = false;
-    }
-
-    deleteCode(code: DiscountCode) {
-        this.$checkoutManager.removeCode(code);
-    }
-
-    deleteItem(cartItem: CartItem) {
-        this.$checkoutManager.cart.removeItem(cartItem);
-        this.$checkoutManager.checkout.update(this.webshop);
-        this.$checkoutManager.saveCart();
-    }
-
-    setCartItemAmount(cartItem: CartItem, amount: number) {
-        cartItem.amount = amount;
-        this.$checkoutManager.checkout.update(this.webshop);
-        this.$checkoutManager.saveCart();
-    }
-
-    async applyCode(code: string) {
-        return await this.$checkoutManager.applyCode(code);
-    }
-
-    editCartItem(cartItem: CartItem) {
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(CartItemView, {
-                        cartItem: cartItem.clone(),
-                        oldItem: cartItem,
-                        cart: this.$checkoutManager.cart,
-                        webshop: this.$webshopManager.webshop,
-                        checkout: this.$checkoutManager.checkout,
-                        saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                            component?.dismiss({ force: true });
-                            if (oldItem) {
-                                this.$checkoutManager.cart.replaceItem(oldItem, cartItem);
-                            }
-                            else {
-                                this.$checkoutManager.cart.addItem(cartItem);
-                            }
-                            this.$checkoutManager.saveCart();
-                        },
-                    }),
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
+    try {
+        await CheckoutStepsManager.for(checkoutManager).goNext(undefined, {
+            navigationController: navigationController.value,
+            dismiss,
+            show,
         });
     }
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+    }
+    loading.value = false;
+}
 
-    mounted() {
-        this.check().catch(console.error);
+function deleteCode(code: DiscountCode) {
+    checkoutManager.removeCode(code);
+}
+
+function deleteItem(cartItem: CartItem) {
+    checkoutManager.cart.removeItem(cartItem);
+    checkoutManager.checkout.update(webshop.value);
+    checkoutManager.saveCart();
+}
+
+function setCartItemAmount(cartItem: CartItem, amount: number) {
+    cartItem.amount = amount;
+    checkoutManager.checkout.update(webshop.value);
+    checkoutManager.saveCart();
+}
+
+async function applyCode(code: string) {
+    return await checkoutManager.applyCode(code);
+}
+
+function editCartItem(cartItem: CartItem) {
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(CartItemView, {
+                    cartItem: cartItem.clone(),
+                    oldItem: cartItem,
+                    cart: checkoutManager.cart,
+                    webshop: webshopManager.webshop,
+                    checkout: checkoutManager.checkout,
+                    saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component: any) => {
+                        component?.dismiss({ force: true });
+                        if (oldItem) {
+                            checkoutManager.cart.replaceItem(oldItem, cartItem);
+                        }
+                        else {
+                            checkoutManager.cart.addItem(cartItem);
+                        }
+                        checkoutManager.saveCart();
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
+}
+
+onMounted(() => {
+    check().catch(console.error);
+});
+
+async function check() {
+    try {
+        await webshopManager.reload();
+    }
+    catch (e) {
+        // Possible: but don't skip validation
+        console.error(e);
     }
 
-    async check() {
-        try {
-            await this.$webshopManager.reload();
-        }
-        catch (e) {
-            // Possible: but don't skip validation
-            console.error(e);
-        }
-
-        try {
-            this.cart.validate(this.$webshopManager.webshop);
-            this.errorBox = null;
-        }
-        catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-        }
-        this.$checkoutManager.saveCart();
-
-        try {
-            await this.$checkoutManager.validateCodes();
-        }
-        catch (e) {
-            console.error(e);
-        }
+    try {
+        cart.value.validate(webshopManager.webshop);
+        errors.errorBox = null;
     }
-
-    activated() {
-        this.errorBox = null;
-        this.check().catch(console.error);
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
     }
+    checkoutManager.saveCart();
 
-    countFor(cartItem: CartItem) {
-        return this.$checkoutManager.cart.items.reduce((prev, item) => {
-            if (item.product.id !== cartItem.product.id) {
-                return prev;
-            }
-            return prev + item.amount;
-        }, 0) - (cartItem.amount ?? 0);
+    try {
+        await checkoutManager.validateCodes();
     }
-
-    maximumRemainingStockFor(cartItem: CartItem) {
-        if (cartItem.product.remainingStock === null) {
-            return null;
-        }
-
-        return cartItem.product.remainingStock - this.countFor(cartItem);
-    }
-
-    maximumRemainingOrderFor(cartItem: CartItem) {
-        if (cartItem.product.maxPerOrder === null) {
-            return null;
-        }
-
-        return cartItem.product.maxPerOrder - this.countFor(cartItem);
-    }
-
-    maximumRemainingFor(cartItem: CartItem) {
-        const admin = false;
-        const remaining = cartItem.getMaximumRemaining(cartItem, this.cart, this.webshop, admin);
-        return remaining;
+    catch (e) {
+        console.error(e);
     }
 }
+
+function activated() {
+    errors.errorBox = null;
+    check().catch(console.error);
+}
+
+activated();
 </script>

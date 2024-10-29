@@ -2,10 +2,10 @@
     <SaveView title="Jouw gegevens" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field @save="goNext">
         <h1>Jouw gegevens</h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!isLoggedIn">
-            <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+            <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
                 <div class="input-group">
                     <div>
                         <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
@@ -16,142 +16,112 @@
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" :placeholder="emailPlaceholder" autocomplete="email" />
+            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
         </template>
 
-        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
+        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" placeholder="Voor dringende info" autocomplete="tel" />
 
-        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="$checkoutManager.checkout.fieldAnswers" :error-box="errorBox" />
+        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
     </SaveView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { WebshopTicketType } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
+<script lang="ts" setup>
+import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, useContext, useErrors } from '@stamhoofd/components';
+import { WebshopTicketType } from '@stamhoofd/structures';
 
-import { CheckoutManager } from '../../classes/CheckoutManager';
+import { useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { computed, ref } from 'vue';
+import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useWebshopManager } from '../../composables/useWebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
+const loading = ref(false);
+const errors = useErrors();
 
-@Component({
-    components: {
-        STList,
-        STListItem,
-        STErrorsDefault,
-        STInputBox,
-        EmailInput,
-        PhoneInput,
-        SaveView,
-        FieldBox
+const webshopManager = useWebshopManager();
+const checkoutManager = useCheckoutManager();
+const navigationController = useNavigationController();
+const dismiss = useDismiss();
+const show = useShow();
+const context = useContext();
+const webshop = computed(() => webshopManager.webshop);
+
+const phoneEnabled = computed(() => webshop.value.meta.phoneEnabled);
+const isLoggedIn = computed(() => context.value.isComplete() ?? false);
+
+const emailPlaceholder = computed(() => {
+    if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
+        return 'Voor tickets';
+    }
+    return 'Voor bevestigingsemail';
+});
+
+const emailDescription = computed(() => {
+    if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
+        return 'Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.';
+    }
+    return null;
+});
+
+const fields = computed(() => webshop.value.meta.customFields);
+
+const firstName = computed({
+    get: () => checkoutManager.checkout.customer.firstName,
+    set: (firstName: string) => {
+        checkoutManager.checkout.customer.firstName = firstName;
+        checkoutManager.saveCheckout();
     },
-    filters: {
-        dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
-        minutes: Formatter.minutes.bind(Formatter)
-    }
-})
-export default class CustomerView extends Mixins(NavigationMixin){
-    step = -1
+});
 
-    loading = false
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    CheckoutManager = CheckoutManager
+const lastName = computed({
+    get: () => checkoutManager.checkout.customer.lastName,
+    set: (lastName: string) => {
+        checkoutManager.checkout.customer.lastName = lastName;
+        checkoutManager.saveCheckout();
+    },
+});
 
-    get phoneEnabled() {
-        return this.webshop.meta.phoneEnabled
-    }
+const email = computed({
+    get: () => checkoutManager.checkout.customer.email,
+    set: (email: string) => {
+        checkoutManager.checkout.customer.email = email;
+        checkoutManager.saveCheckout();
+    },
+});
 
-    get isLoggedIn() {
-        return this.$context.isComplete() ?? false
-    }
-    
-    get checkoutMethod() {
-        return this.$checkoutManager.checkout.checkoutMethod!
-    }
+const phone = computed({
+    get: () => checkoutManager.checkout.customer.phone,
+    set: (phone: string) => {
+        checkoutManager.checkout.customer.phone = phone;
+        checkoutManager.saveCheckout();
+    },
+});
 
-    get emailPlaceholder() {
-        if (this.webshop.meta.ticketType !== WebshopTicketType.None) {
-            return 'Voor tickets'
-        }
-        return 'Voor bevestigingsemail'
-    }
-
-    get emailDescription() {
-        if (this.webshop.meta.ticketType !== WebshopTicketType.None) {
-            return 'Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.'
-        }
-        return null
+async function goNext() {
+    if (loading.value) {
+        return;
     }
 
-    get fields() {
-        return this.webshop.meta.customFields
+    if (!await errors.validator.validate()) {
+        return;
     }
+    loading.value = true;
+    errors.errorBox = null;
 
-    get webshop() {
-        return this.$webshopManager.webshop
+    // Clear old open fields
+
+    try {
+        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Customer, {
+            navigationController: navigationController.value,
+            dismiss,
+            show,
+        });
     }
-
-    get firstName() {
-        return this.$checkoutManager.checkout.customer.firstName
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
     }
-
-    set firstName(firstName: string) {
-        this.$checkoutManager.checkout.customer.firstName = firstName
-        this.$checkoutManager.saveCheckout()
-    } 
-
-    get lastName() {
-        return this.$checkoutManager.checkout.customer.lastName
-    }
-
-    set lastName(lastName: string) {
-        this.$checkoutManager.checkout.customer.lastName = lastName
-        this.$checkoutManager.saveCheckout()
-    } 
-
-    get email() {
-        return this.$checkoutManager.checkout.customer.email
-    }
-
-    set email(email: string) {
-        this.$checkoutManager.checkout.customer.email = email
-        this.$checkoutManager.saveCheckout()
-    } 
-
-    get phone() {
-        return this.$checkoutManager.checkout.customer.phone
-    }
-
-    set phone(phone: string) {
-        this.$checkoutManager.checkout.customer.phone = phone
-        this.$checkoutManager.saveCheckout()
-    } 
-
-    async goNext() {
-        if (this.loading) {
-            return
-        }
-
-        if (!await this.validator.validate()) {
-            return
-        }
-        this.loading = true
-        this.errorBox = null
-
-        // Clear old open fields
-
-        try {
-            await CheckoutStepsManager.for(this.$checkoutManager).goNext(CheckoutStepType.Customer, this)
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-        }
-        this.loading = false
-    }
+    loading.value = false;
 }
 </script>
-
