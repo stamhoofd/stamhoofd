@@ -239,6 +239,11 @@ export class RecordCategory extends AutoEncoder {
                         const answer = answers.find(a => a.settings?.id === record.id) 
 
                         if (!answer || !(answer instanceof RecordMultipleChoiceAnswer)) {
+
+                            if (answer && (answer instanceof RecordChooseOneAnswer) && answer.selectedChoice) {
+                                return [answer.selectedChoice.id]
+                            }
+
                             return []
                         }
 
@@ -261,6 +266,10 @@ export class RecordCategory extends AutoEncoder {
                         const answer = answers.find(a => a.settings?.id === record.id) 
 
                         if (!answer || !(answer instanceof RecordChooseOneAnswer) || !answer.selectedChoice) {
+                            if (answer && (answer instanceof RecordMultipleChoiceAnswer)) {
+                                return answer.selectedChoices.map(c => c.id)
+                            }
+
                             return []
                         }
 
@@ -283,7 +292,7 @@ export class RecordCategory extends AutoEncoder {
                         if (answer instanceof RecordTextAnswer) {
                             return answer?.value ?? ""
                         }
-                        return ""
+                        return answer?.stringValue ?? "";
                     }
                 })
             ]
@@ -302,6 +311,10 @@ export class RecordCategory extends AutoEncoder {
                         const answer = answers.find(a => a.settings?.id === record.id)
                         if (answer instanceof RecordPriceAnswer) {
                             return answer.value ?? 0
+                        }
+
+                        if (typeof answer?.objectValue === "number" && !isNaN(answer.objectValue)) {
+                            return answer.objectValue
                         }
                         return 0
                     }
