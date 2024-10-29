@@ -5,14 +5,14 @@
         </h1>
 
         <p v-if="checkoutMethod.type === 'Takeout'">
-            Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
+            Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
         </p>
 
         <p v-if="checkoutMethod.type === 'OnSite'">
-            Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
+            Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
         </p>
-                
-        <STErrorsDefault :error-box="errorBox" />
+
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>
             <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
@@ -21,7 +21,7 @@
                 </template>
                 <h2 class="style-title-list">
                     {{ formatDateWithDay(slot.date) }}
-                </h2> 
+                </h2>
                 <p class="style-description">
                     Tussen {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                 </p>
@@ -35,95 +35,75 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+<script lang="ts" setup>
+import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem, useErrors } from '@stamhoofd/components';
 import { CheckoutMethodType, WebshopTimeSlot } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { computed, onMounted, ref } from 'vue';
 
-import { CheckoutManager } from '../../classes/CheckoutManager';
+import { useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
-@Component({
-    components: {
-        STList,
-        STListItem,
-        Radio,
-        STErrorsDefault,
-        SaveView
+const loading = ref(false);
+const errors = useErrors();
+const checkoutManager = useCheckoutManager();
+const dismiss = useDismiss();
+const show = useShow();
+const navigationController = useNavigationController();
+
+const title = computed(() => {
+    if (checkoutMethod.value.type === CheckoutMethodType.Takeout) {
+        return 'Kies je afhaaltijdstip';
+    }
+    if (checkoutMethod.value.type === CheckoutMethodType.Delivery) {
+        return 'Kies je leveringstijdstip';
+    }
+    if (checkoutMethod.value.type === CheckoutMethodType.OnSite) {
+        return 'Kies wanneer je komt';
+    }
+    return 'Kies je tijdstip';
+});
+
+const checkoutMethod = computed(() => checkoutManager.checkout.checkoutMethod!);
+const timeSlots = computed(() => checkoutManager.checkout.checkoutMethod!.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort));
+const selectedSlot = computed({
+    get: () => {
+        if (checkoutManager.checkout.timeSlot) {
+            return timeSlots.value.find(t => t.id === checkoutManager.checkout.timeSlot!.id) ?? timeSlots.value[0];
+        }
+        return timeSlots.value[0];
     },
-    filters: {
-        dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
-        minutes: Formatter.minutes.bind(Formatter)
+    set: (timeSlot: WebshopTimeSlot) => {
+        checkoutManager.checkout.timeSlot = timeSlot;
+        checkoutManager.saveCheckout();
+    },
+});
+
+async function goNext() {
+    if (loading.value || !selectedSlot.value) {
+        return;
     }
-})
-export default class TimeSelectionView extends Mixins(NavigationMixin){
-    step = -1
+    // Force checkout save
+    selectedSlot.value = selectedSlot.value as any;
+    loading.value = true;
+    errors.errorBox = null;
 
-    loading = false
-    errorBox: ErrorBox | null = null
-    CheckoutManager = CheckoutManager
-
-    get title() {
-        if (this.checkoutMethod.type === CheckoutMethodType.Takeout) {
-            return "Kies je afhaaltijdstip"
-        }
-        if (this.checkoutMethod.type === CheckoutMethodType.Delivery) {
-            return "Kies je leveringstijdstip"
-        }
-        if (this.checkoutMethod.type === CheckoutMethodType.OnSite) {
-            return "Kies wanneer je komt"
-        }
-        return "Kies je tijdstip"
+    try {
+        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Time, {
+            dismiss,
+            show,
+            navigationController: navigationController.value,
+        });
     }
-
-    get checkoutMethod() {
-        return this.$checkoutManager.checkout.checkoutMethod!
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
     }
-
-    get timeSlots(): WebshopTimeSlot[] {
-        return this.$checkoutManager.checkout.checkoutMethod!.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort)
-    }
-
-    get selectedSlot(): WebshopTimeSlot {
-        if (this.$checkoutManager.checkout.timeSlot) {
-            return this.timeSlots.find(t => t.id === this.$checkoutManager.checkout.timeSlot!.id) ?? this.timeSlots[0]
-        }
-        return this.timeSlots[0]
-    }
-
-    set selectedSlot(timeSlot: WebshopTimeSlot) {
-        this.$checkoutManager.checkout.timeSlot = timeSlot
-        this.$checkoutManager.saveCheckout()
-    }
-
-    get webshop() {
-        return this.$webshopManager.webshop
-    }
-
-    async goNext() {
-        if (this.loading || !this.selectedSlot) {
-            return
-        }
-        // Force checkout save
-        this.selectedSlot = this.selectedSlot as any
-        this.loading = true
-        this.errorBox = null
-
-        try {
-            await CheckoutStepsManager.for(this.$checkoutManager).goNext(CheckoutStepType.Time, this)
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-        }
-        this.loading = false
-    }
-
-    mounted() {
-        // Force minimum selection
-        this.selectedSlot = this.selectedSlot as any
-    }
+    loading.value = false;
 }
-</script>
 
+onMounted(() => {
+    // Force minimum selection
+    selectedSlot.value = selectedSlot.value as any;
+});
+</script>
