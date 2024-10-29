@@ -12,91 +12,55 @@
         <p v-if="cartItem.product.location && cartItem.product.location.address" class="description" v-text="cartItem.product.location.address" />
         <p v-if="ticket.getIndexDescriptionString(webshop)" class="description" v-text="ticket.getIndexDescriptionString(webshop)" />
 
-        <template #right><span class="icon qr-code" />
-        <span class="icon arrow-right-small gray" /></template>
+        <template #right>
+            <span class="icon qr-code" />
+            <span class="icon arrow-right-small gray" />
+        </template>
     </STListItem>
 </template>
 
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { DetailedTicketView, STListItem } from '@stamhoofd/components';
+import { Order, Organization, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, DetailedTicketView,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { Order, Organization, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+const props = withDefaults(defineProps<{
+    webshop: Webshop;
+    organization: Organization;
+    ticket: TicketPublic;
+    order?: Order | null;
+}>(), {
+    order: null,
+});
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        LoadingView,
-        Checkbox
-    }
-})
-export default class TicketListItem extends Mixins(NavigationMixin){
-    @Prop({ required: true })
-        webshop: Webshop
+const present = usePresent();
 
-    @Prop({ required: true })
-        organization: Organization
+// TODO: multiple item support needed!
+const cartItem = computed(() => props.ticket.items[0]);
+const name = computed(() => props.ticket.getTitle());
+const isSingle = computed(() => props.webshop.meta.ticketType === WebshopTicketType.SingleTicket);
 
-    @Prop({ required: true })
-        ticket: TicketPublic
-
-    @Prop({ required: false, default: null })
-        order: Order | null
-
-    QRCodeUrl: string | null = null
-
-    get cartItem() {
-        // TODO: multiple item support needed!
-        return this.ticket.items[0]
-    }
-
-    get name() {
-        return this.ticket.getTitle()
-    }
-
-    get canShare() {
-        return !!navigator.share
-    }
-
-    get isSingle() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
-    }
-
-    openTicket() {
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(DetailedTicketView, {
-                        ticket: this.ticket,
-                        order: this.order,
-                        webshop: this.webshop,
-                        organization: this.organization
-                    })
-                })
-            ],
-            modalDisplayStyle: "sheet"
-        })
-    }
-
-    formatPrice(price: number) {
-        return Formatter.price(price)
-    }
-
-    formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString())
-    }
+function openTicket() {
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(DetailedTicketView, {
+                    ticket: props.ticket,
+                    order: props.order,
+                    webshop: props.webshop,
+                    organization: props.organization,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    }).catch(console.error);
 }
 </script>
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
-
 
 .ticket-list-item {
 
