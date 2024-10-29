@@ -29,19 +29,12 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { ErrorBox, Logo, STErrorsDefault } from "@stamhoofd/components";
+<script lang="ts" setup>
+import { ErrorBox, Logo, STErrorsDefault } from '@stamhoofd/components';
 
-@Component({
-    components: {
-        Logo,
-        STErrorsDefault
-    }
-})
-export default class InvalidWebshopView extends Mixins(NavigationMixin){
-    @Prop({ default: null })
-        errorBox: ErrorBox | null
-}
+withDefaults(defineProps<{
+    errorBox: ErrorBox | null;
+}>(), {
+    errorBox: null,
+});
 </script>
