@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
+import { StringCompare } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../../filters/ChoicesFilter";
@@ -9,7 +10,7 @@ import { NumberFilterDefinition } from "../../filters/NumberFilter";
 import { PropertyFilter } from "../../filters/PropertyFilter";
 import { StringFilterDefinition } from "../../filters/StringFilter";
 import { RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer } from "./RecordAnswer";
-import { RecordSettings, RecordType } from "./RecordSettings";
+import { RecordChoice, RecordSettings, RecordType } from "./RecordSettings";
 
 export class RecordEditorSettings<T> {
     dataPermission = false
@@ -237,17 +238,25 @@ export class RecordCategory extends AutoEncoder {
                     getValue: (v) => {
                         const answers = getAnswers(v)
                         const answer = answers.find(a => a.settings?.id === record.id) 
+                        let choices: RecordChoice[] = []
 
                         if (!answer || !(answer instanceof RecordMultipleChoiceAnswer)) {
 
                             if (answer && (answer instanceof RecordChooseOneAnswer) && answer.selectedChoice) {
-                                return [answer.selectedChoice.id]
+                                choices = [answer.selectedChoice]
                             }
-
-                            return []
+                        } else {
+                            choices = answer.selectedChoices
                         }
 
-                        return answer.selectedChoices.map(c => c.id)
+                        // Map choices to valid choices on id or name
+                        return choices.map(c => {
+                            const choice = record.choices.find(ch => ch.id === c.id) ?? record.choices.find(ch => StringCompare.typoCount(ch.name, c.name) === 0) ?? record.choices.find(ch => StringCompare.typoCount(ch.name, c.name) < 2)
+                            if (choice) {
+                                return choice.id
+                            }
+                            return c.id
+                        })
                     },
                     defaultMode: ChoicesFilterMode.And
                 })
@@ -264,16 +273,24 @@ export class RecordCategory extends AutoEncoder {
                     getValue: (v) => {
                         const answers = getAnswers(v)
                         const answer = answers.find(a => a.settings?.id === record.id) 
+                        let choices: RecordChoice[] = []
 
                         if (!answer || !(answer instanceof RecordChooseOneAnswer) || !answer.selectedChoice) {
                             if (answer && (answer instanceof RecordMultipleChoiceAnswer)) {
-                                return answer.selectedChoices.map(c => c.id)
+                                choices = answer.selectedChoices
                             }
-
-                            return []
+                        } else {
+                            choices = [answer.selectedChoice]
                         }
 
-                        return [answer.selectedChoice.id]
+                        // Map choices to valid choices on id or name
+                        return choices.map(c => {
+                            const choice = record.choices.find(ch => ch.id === c.id) ?? record.choices.find(ch => StringCompare.typoCount(ch.name, c.name) === 0) ?? record.choices.find(ch => StringCompare.typoCount(ch.name, c.name) < 2)
+                            if (choice) {
+                                return choice.id
+                            }
+                            return c.id
+                        })
                     },
                     defaultMode: ChoicesFilterMode.Or
                 })
