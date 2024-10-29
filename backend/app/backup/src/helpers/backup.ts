@@ -1,12 +1,12 @@
+import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
+import { Database } from '@simonbackx/simple-database';
 import { Formatter } from '@stamhoofd/utility';
+import chalk from 'chalk';
 import { exec } from 'child_process';
-import util from 'util';
-const execPromise = util.promisify(exec);
-import { S3Client, ListObjectsCommand, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'; // ES Modules import
 import fs from 'fs';
 import path from 'path';
-import { Database } from '@simonbackx/simple-database';
-import chalk from 'chalk';
+import util from 'util';
+const execPromise = util.promisify(exec);
 
 export function escapeShellArg(arg) {
     return `'${arg.replace(/'/g, `'\\''`)}'`;
@@ -245,7 +245,7 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
     await execPromise(`${STAMHOOFD.environment === 'development' ? '' : 'sudo '}cp ${escapeShellArg(binaryLogPath)} ${escapeShellArg(binaryLogPathMoved)}`);
 
     if (STAMHOOFD.environment !== 'development') {
-        await execPromise(`chown stamhoofd:stamhoofd ${escapeShellArg(binaryLogPathMoved)}`);
+        await execPromise(`sudo chown stamhoofd:stamhoofd ${escapeShellArg(binaryLogPathMoved)}`);
     }
 
     if (gzip) {
