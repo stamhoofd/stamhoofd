@@ -80,16 +80,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.id = request.body.organization.id;
         organization.name = request.body.organization.name;
 
-        // Delay save until after organization is saved, but do validations before the organization is saved
-        // let registerCodeModels: Model[] = []
-        // let delayEmails: EmailInterfaceBase[] = []
-
-        // if (request.body.registerCode) {
-        //    const applied = await RegisterCode.applyRegisterCode(organization, request.body.registerCode)
-        //    registerCodeModels = applied.models
-        //    delayEmails = applied.emails
-        // }
-
         organization.uri = uri;
         organization.meta = request.body.organization.meta;
         organization.address = request.body.organization.address;

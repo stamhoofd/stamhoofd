@@ -40,7 +40,6 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         const result: Organization[] = [];
-        const platform = await Platform.getShared();
 
         for (const id of request.body.getDeletes()) {
             if (!Context.auth.hasPlatformFullAccess()) {
@@ -119,6 +118,9 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             organization.meta = put.meta;
             organization.address = put.address;
 
+            const periodId = (await Platform.getShared()).periodId;
+            organization.periodId = periodId;
+
             if (put.privateMeta) {
                 organization.privateMeta = put.privateMeta;
             }
@@ -137,7 +139,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
             const organizationPeriod = new OrganizationRegistrationPeriod();
             organizationPeriod.organizationId = organization.id;
-            organizationPeriod.periodId = (await Platform.getShared()).periodId;
+            organizationPeriod.periodId = periodId;
             await organizationPeriod.save();
 
             result.push(organization);
