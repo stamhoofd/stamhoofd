@@ -234,6 +234,8 @@ declare global {
         readonly SPACES_KEY: string,
         readonly SPACES_SECRET: string
         readonly AWS_REGION: "eu-west-1" | string, // TODO: add others
+
+        readonly HEALTH_ACCESS_KEY?: string // Optional for a little bit of extra security (the health endpoint does not expose any sensitive information)
     }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment

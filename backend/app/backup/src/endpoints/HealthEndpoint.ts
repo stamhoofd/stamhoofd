@@ -1,9 +1,16 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { BackupHealth, getHealth } from '../helpers/backup';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;
 type Body = undefined;
-type Query = undefined;
+
+class Query extends AutoEncoder {
+    @field({ decoder: StringDecoder, optional: true })
+    key?: string;
+}
+
 type ResponseBody = BackupHealth;
 
 /**
@@ -25,6 +32,14 @@ export class HealthEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        if (STAMHOOFD.HEALTH_ACCESS_KEY && request.query.key !== STAMHOOFD.HEALTH_ACCESS_KEY) {
+            throw new SimpleError({
+                code: 'unauthorized',
+                message: 'Unauthorized',
+                statusCode: 401,
+            });
+        }
+
         const health = getHealth();
         const response = new Response(
             health,
