@@ -4,85 +4,70 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartItemView } from "@stamhoofd/components";
-import { Cart, CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { CartItemView } from '@stamhoofd/components';
+import { CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
+import { computed, Ref, ref } from 'vue';
 
-@Component({
-    components: {
-        CartItemView
-    }
-})
-export default class FullPageProduct extends Mixins(NavigationMixin){
-    @Prop({ default: false })
-        admin: boolean
+const props = withDefaults(defineProps<{
+    admin?: boolean;
+    product: Product;
+    webshop: Webshop;
+    checkout: Checkout;
+    saveHandler: (newItem: CartItem, oldItem: CartItem | null, component: any) => void;
+}>(), {
+    admin: false,
 
-    @Prop({ required: true })
-        product: Product
-    
-    @Prop({ required: true })
-        webshop: Webshop
+});
 
-    @Prop({ required: true })
-        checkout: Checkout
+const cartItem = ref<CartItem | null>(null) as Ref<CartItem | null>;
 
-    @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void
+const cart = computed(() => props.checkout.cart);
+const updateItem = computed(() => !props.webshop.shouldEnableCart || props.product.isUnique);
+const oldItem = computed(() => {
+    if (updateItem.value) {
+        const item = cart.value.items.find(i => i.product.id === props.product.id);
+        if (item) {
+            try {
+                item.validate(props.webshop, cart.value, {
+                    refresh: true,
+                    admin: props.admin,
+                });
 
-    cartItem: CartItem | null = null
-
-    get cart() {
-        return this.checkout.cart
-    }
-
-    created() {
-        // Validate the cart item once
-        if (!this.oldItem && !this.webshop.shouldEnableCart) {
-            // Otherwie we are not able to remove the invalid items
-            this.cart.clear()
-        }
-        this.cartItem = this.getCartItem()
-    }
-
-    get updateItem() {
-        return !this.webshop.shouldEnableCart || this.product.isUnique
-    }
-
-    getCartItem() {
-        if (this.oldItem) {
-            return this.oldItem.clone()
-        }
-        
-        return CartItem.createDefault(this.product, this.cart, this.webshop, {admin: this.admin})
-    }
-
-    get oldItem() {
-        if (this.updateItem) {
-            const item = this.cart.items.find(i => i.product.id === this.product.id)
-            if (item) {
-                try {
-                    item.validate(this.webshop, this.cart, {
-                        refresh: true,
-                        admin: this.admin
-                    })
-
-                    return item
-                } catch (e) {
-                    console.error(e)
-                }
+                return item;
+            }
+            catch (e) {
+                console.error(e);
             }
         }
-
-        return null;
     }
 
-    mappedSaveHandler(newItem: CartItem, oldItem: CartItem | null, component) {
-        this.saveHandler(newItem, oldItem, component.canDismiss ? component : null) // no component dismiss
+    return null;
+});
 
-        // Clear the cart item if needed
-        this.cartItem = this.getCartItem()
+function created() {
+    // Validate the cart item once
+    if (!oldItem.value && !props.webshop.shouldEnableCart) {
+        // Otherwie we are not able to remove the invalid items
+        cart.value.clear();
     }
+    cartItem.value = getCartItem();
+}
+
+created();
+
+function getCartItem() {
+    if (oldItem.value) {
+        return oldItem.value.clone();
+    }
+
+    return CartItem.createDefault(props.product, cart.value, props.webshop, { admin: props.admin });
+}
+
+function mappedSaveHandler(newItem: CartItem, oldItem: CartItem | null, component: any) {
+    props.saveHandler(newItem, oldItem, component.canDismiss ? component : null); // no component dismiss
+
+    // Clear the cart item if needed
+    cartItem.value = getCartItem();
 }
 </script>
