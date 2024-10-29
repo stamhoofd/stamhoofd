@@ -106,6 +106,7 @@ async function goNext() {
             checkoutManager.checkout.paymentMethod = PaymentMethod.Unknown;
         }
         // Place order
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const data = OrderData.create(checkoutManager.checkout as any);
         data.consumerLanguage = I18nController.shared?.language ?? 'nl';
         const response = await webshopManager.optionalAuthenticatedServer.request({

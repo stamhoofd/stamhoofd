@@ -1,6 +1,6 @@
 <template>
     <div class="full-product-box">
-        <CartItemView :cart-item="cartItem" :checkout="checkout" :save-handler="mappedSaveHandler" :webshop="webshop" :old-item="oldItem" :admin="admin" />
+        <CartItemView v-if="cartItem" :cart-item="cartItem" :checkout="checkout" :save-handler="mappedSaveHandler" :webshop="webshop" :old-item="oldItem" :admin="admin" />
     </div>
 </template>
 
