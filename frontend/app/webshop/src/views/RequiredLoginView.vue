@@ -33,83 +33,69 @@
     </section>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { LoadingView, Logo, OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { UrlHelper } from "@stamhoofd/networking";
-import { LoginProviderType } from "@stamhoofd/structures";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { LoadingView, OrganizationLogo, STNavigationBar, useContext } from '@stamhoofd/components';
+import { UrlHelper } from '@stamhoofd/networking';
+import { LoginProviderType } from '@stamhoofd/structures';
 
-import { WebshopManager } from "../classes/WebshopManager";
+import { computed, onMounted, ref } from 'vue';
+import { useWebshopManager } from '../composables/useWebshopManager';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        OrganizationLogo,
-        Logo,
-        LoadingView
-    },
-    metaInfo() {
-        return {
-            title: this.organization.name + " - Inloggen",
-            meta: [
-                {
-                    vmid: 'description',
-                    name: 'description',
-                    content: "Log in om door te gaan",
-                },
-                {
-                    hid: 'og:site_name',
-                    name: 'og:site_name',
-                    content: this.organization.name
-                }, 
-                {
-                    // Prevent indexing login page
-                    name: 'robots',
-                    content: 'noindex'
-                }
-            ]
+// todo: metaInfo
+
+// metaInfo() {
+//         return {
+//             title: this.organization.name + " - Inloggen",
+//             meta: [
+//                 {
+//                     vmid: 'description',
+//                     name: 'description',
+//                     content: "Log in om door te gaan",
+//                 },
+//                 {
+//                     hid: 'og:site_name',
+//                     name: 'og:site_name',
+//                     content: this.organization.name
+//                 },
+//                 {
+//                     // Prevent indexing login page
+//                     name: 'robots',
+//                     content: 'noindex'
+//                 }
+//             ]
+//         }
+//     }
+
+const webshopManager = useWebshopManager();
+const loading = ref(false);
+
+const organization = computed(() => webshopManager.organization);
+const webshop = computed(() => webshopManager.webshop);
+const context = useContext();
+
+onMounted(() => {
+    // Try to log in on first load
+    try {
+        const search = UrlHelper.initial.getSearchParams();
+        if (!sessionStorage.getItem('triedLogin') && !search.get('error') && !search.get('oid_rt')) {
+            sessionStorage.setItem('triedLogin', 'true');
+            login().catch(console.error);
         }
     }
-})
-export default class RequiredLoginView extends Mixins(NavigationMixin){
-    WebshopManager = WebshopManager
-    loading = false
-
-    get organization() {
-        return this.$webshopManager.organization
+    catch (e) {
+        console.error(e);
     }
-    
-    get webshop() {
-        return this.$webshopManager.webshop
+});
+
+async function login() {
+    if (loading.value) {
+        return;
     }
 
-    mounted() {
-        // Try to log in on first load
-        try {
-            const search = UrlHelper.initial.getSearchParams();
-            if (!sessionStorage.getItem('triedLogin') && !search.get('error') && !search.get('oid_rt')) {
-                sessionStorage.setItem('triedLogin', "true")
-                this.login().catch(console.error)
-            }
-        } catch (e) {
-            console.error(e)
-        }
-    }
-
-    async login() {
-        if (this.loading) {
-            return
-        }
-
-        await this.$context.startSSO({
-            webshopId: this.webshop.id,
-            providerType: LoginProviderType.SSO
-        })
-        this.loading = true
-    }
+    await context.value.startSSO({
+        webshopId: webshop.value.id,
+        providerType: LoginProviderType.SSO,
+    });
+    loading.value = true;
 }
 </script>
