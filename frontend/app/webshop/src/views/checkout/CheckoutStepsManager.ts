@@ -196,10 +196,7 @@ export class CheckoutStepsManager {
                 },
                 skipHandler: () => {
                     for (const record of category.getAllRecords()) {
-                        const index = this.$checkoutManager.checkout.recordAnswers.findIndex(a => a.settings.id == record.id);
-                        if (index != -1) {
-                            this.$checkoutManager.checkout.recordAnswers.splice(index, 1);
-                        }
+                        this.$checkoutManager.checkout.recordAnswers.delete(record.id);
                     }
                     this.$checkoutManager.saveCheckout();
                 },
