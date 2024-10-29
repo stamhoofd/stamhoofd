@@ -200,220 +200,183 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { NavigationActions } from '@stamhoofd/components';
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 
-import LoadingView from '../containers/LoadingView.vue';
-import CopyableDirective from '../directives/Copyable';
-import TooltipDirective from '../directives/Tooltip';
-import Checkbox from '../inputs/Checkbox.vue';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import BackButton from '../navigation/BackButton.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { useNavigationActions } from '../types/NavigationActions';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        LoadingView,
-        Checkbox,
-        BackButton,
-    },
-    filters: {
-        price: Formatter.price,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-        copyable: CopyableDirective,
-    },
-})
-export default class TransferPaymentView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     payment: Payment;
-
-    @Prop({ default: false })
     created: boolean;
-
-    @Prop({ required: true })
     type: 'registration' | 'order';
-
-    @Prop({ required: true })
     organization: Organization;
-
-    @Prop({ default: null })
     settings: TransferSettings | null;
-
-    @Prop({ default: false })
     isPopup: boolean;
-
-    @Prop({ default: null })
     finishedHandler: ((payment: Payment | null, navigate: NavigationActions) => void) | null;
+}>(), {
+    created: false,
+    settings: null,
+    isPopup: false,
+    finishedHandler: null,
+});
 
-    QRCodeUrl: string | null = null;
+const QRCodeUrl = ref<string | null>(null);
+const canDismiss = useCanDismiss();
+const dismiss = useDismiss();
+const pop = usePop();
+const $t = useTranslate();
+const navigate = useNavigationActions();
 
-    isStepsPoppable = false;
+onMounted(() => {
+    generateQRCode().catch(e => console.error(e));
+    setLeave();
+});
 
-    mounted() {
-        this.generateQRCode().catch(e => console.error(e));
-        this.setLeave();
+function getOS(): string {
+    var userAgent = navigator.userAgent || navigator.vendor;
+
+    if (/android/i.test(userAgent)) {
+        return 'android';
     }
 
-    getOS(): string {
-        var userAgent = navigator.userAgent || navigator.vendor;
-
-        if (/android/i.test(userAgent)) {
-            return 'android';
-        }
-
-        if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
-            // Different sms protocol
-            return 'macOS-old';
-        }
-
-        // iOS detection from: http://stackoverflow.com/a/9039885/177710
-        if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
-            return 'iOS';
-        }
-
-        // iPad on iOS 13 detection
-        if (navigator.userAgent.includes('Mac') && 'ontouchend' in document) {
-            return 'iOS';
-        }
-
-        if (navigator.platform.toUpperCase().indexOf('MAC') >= 0) {
-            return 'macOS';
-        }
-
-        if (navigator.platform.toUpperCase().indexOf('WIN') >= 0) {
-            return 'windows';
-        }
-
-        if (navigator.platform.toUpperCase().indexOf('IPHONE') >= 0) {
-            return 'iOS';
-        }
-
-        if (navigator.platform.toUpperCase().indexOf('ANDROID') >= 0) {
-            return 'android';
-        }
-
-        return 'unknown';
+    if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
+        // Different sms protocol
+        return 'macOS-old';
     }
 
-    beforeUnmount() {
-        window.removeEventListener('beforeunload', this.preventLeave);
+    // iOS detection from: http://stackoverflow.com/a/9039885/177710
+    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+        return 'iOS';
     }
 
-    setLeave() {
-        if (!this.created) {
-            return;
-        }
-        window.addEventListener('beforeunload', this.preventLeave);
+    // iPad on iOS 13 detection
+    if (navigator.userAgent.includes('Mac') && 'ontouchend' in document) {
+        return 'iOS';
     }
 
-    preventLeave(event) {
-        // Cancel the event
-        event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+    if (navigator.platform.toUpperCase().indexOf('MAC') >= 0) {
+        return 'macOS';
+    }
 
-        if (this.type === 'registration') {
-            // Chrome requires returnValue to be set
-            event.returnValue = 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
+    if (navigator.platform.toUpperCase().indexOf('WIN') >= 0) {
+        return 'windows';
+    }
 
-            // This message is not visible on most browsers
-            return 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
-        }
+    if (navigator.platform.toUpperCase().indexOf('IPHONE') >= 0) {
+        return 'iOS';
+    }
+
+    if (navigator.platform.toUpperCase().indexOf('ANDROID') >= 0) {
+        return 'android';
+    }
+
+    return 'unknown';
+}
+
+const preventLeave = (event: BeforeUnloadEvent) => {
+    // Cancel the event
+    event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+
+    if (props.type === 'registration') {
         // Chrome requires returnValue to be set
-        event.returnValue = 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
+        event.returnValue = 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
 
         // This message is not visible on most browsers
-        return 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
+        return 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
     }
+    // Chrome requires returnValue to be set
+    event.returnValue = 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
 
-    shouldNavigateAway() {
-        if (!this.created) {
-            return true;
-        }
-        return false;
+    // This message is not visible on most browsers
+    return 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
+};
+
+onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', preventLeave);
+});
+
+function setLeave() {
+    if (!props.created) {
+        return;
     }
+    window.addEventListener('beforeunload', preventLeave);
+}
 
-    get isBelgium() {
-        return this.organization.address.country === Country.Belgium;
+function shouldNavigateAway() {
+    if (!props.created) {
+        return true;
     }
+    return false;
+}
 
-    get isStructured() {
-        return this.settings?.type === TransferDescriptionType.Structured;
+const isBelgium = computed(() => props.organization.address.country === Country.Belgium);
+const isStructured = computed(() => props.settings?.type === TransferDescriptionType.Structured);
+const iban = computed(() => props.settings?.iban ?? props.organization.meta.transferSettings.iban ?? '');
+const creditor = computed(() => props.settings?.creditor ?? props.organization.name);
+const transferDescription = computed(() => props.payment.transferDescription);
+const formattedTransferDescription = computed(() => {
+    if (isStructured.value && !isBelgium.value && transferDescription.value) {
+        return transferDescription.value.match(/.{1,4}/g)?.join(' ') ?? transferDescription.value;
     }
+    return transferDescription.value;
+});
 
-    get iban() {
-        return this.settings?.iban ?? this.organization.meta.transferSettings.iban ?? '';
+const qrMessage = computed(() => {
+    const ibanValue = iban.value;
+    const creditorValue = creditor.value;
+
+    // BUG in Fortis app -> need to fill in at least one character for the BIC/SWIFT field, otherwise it won't work
+    const bic = '_';
+
+    // Note: structured reference still as normal description (the structured reference ISO is not supported)
+    return 'BCD\n001\n1\nSCT\n' + bic + '\n' + creditorValue + '\n' + ibanValue + '\nEUR' + (props.payment.price / 100).toFixed(2) + '\n\n\n' + transferDescription.value?.substring(0, 140) + '\nhttps://' + $t('ccfc0566-2fc4-4c0a-b1da-c3059cad6586') + '/docs/betalen-qr-code';
+});
+
+async function generateQRCode() {
+    try {
+        const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default;
+        QRCodeUrl.value = await QRCode.toDataURL(qrMessage.value);
     }
-
-    get creditor() {
-        return this.settings?.creditor ?? this.organization.name;
-    }
-
-    get transferDescription() {
-        return this.payment.transferDescription;
-    }
-
-    get formattedTransferDescription() {
-        if (this.isStructured && !this.isBelgium && this.transferDescription) {
-            return this.transferDescription.match(/.{1,4}/g)?.join(' ') ?? this.transferDescription;
-        }
-        return this.transferDescription;
-    }
-
-    get qrMessage() {
-        const iban = this.iban;
-        const creditor = this.creditor;
-
-        // BUG in Fortis app -> need to fill in at least one character for the BIC/SWIFT field, otherwise it won't work
-        const bic = '_';
-
-        // Note: structured reference still as normal description (the structured reference ISO is not supported)
-        return 'BCD\n001\n1\nSCT\n' + bic + '\n' + creditor + '\n' + iban + '\nEUR' + (this.payment.price / 100).toFixed(2) + '\n\n\n' + this.transferDescription?.substring(0, 140) + '\nhttps://' + this.$t('ccfc0566-2fc4-4c0a-b1da-c3059cad6586') + '/docs/betalen-qr-code';
-    }
-
-    async generateQRCode() {
-        try {
-            const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default;
-            this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage);
-        }
-        catch (e) {
-            console.error(e);
-            return;
-        }
-    }
-
-    helpMe() {
-        if (this.type === 'order') {
-            new CenteredMessage('Het lukt niet', 'Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.').addCloseButton().show();
-        }
-        else {
-            new CenteredMessage('Het lukt niet', 'Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.').addCloseButton().show();
-        }
-    }
-
-    goNext() {
-        if (this.finishedHandler) {
-            this.finishedHandler(this.payment, this);
-            return;
-        }
-
-        if (this.canDismiss) {
-            this.dismiss({ force: true });
-            return;
-        }
-        this.pop({ force: true });
+    catch (e) {
+        console.error(e);
+        return;
     }
 }
+
+function helpMe() {
+    if (props.type === 'order') {
+        new CenteredMessage('Het lukt niet', 'Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.').addCloseButton().show();
+    }
+    else {
+        new CenteredMessage('Het lukt niet', 'Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.').addCloseButton().show();
+    }
+}
+
+function goNext() {
+    if (props.finishedHandler) {
+        props.finishedHandler(props.payment, navigate);
+        return;
+    }
+
+    if (canDismiss.value) {
+        dismiss({ force: true })?.catch(console.error);
+        return;
+    }
+    pop({ force: true })?.catch(console.error);
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
 
 <style lang="scss">
