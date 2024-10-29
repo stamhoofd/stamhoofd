@@ -20,8 +20,10 @@
 
                     <STList>
                         <STListItem v-for="webshop of webshops" :key="webshop.id" element-name="a" :selectable="true" :href="'https://'+webshop.getUrl(organization)" class="left-center">
-                            <img v-if="webshop.meta.hasTickets" slot="left" src="@stamhoofd/assets/images/illustrations/tickets.svg" class="style-illustration-img">
-                            <img v-else slot="left" src="@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
+                            <template #left>
+                                <img v-if="webshop.meta.hasTickets" src="@stamhoofd/assets/images/illustrations/tickets.svg" class="style-illustration-img">
+                                <img v-else src="@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
+                            </template>
                             <h3 class="style-title-list">
                                 {{ webshop.meta.name }}
                             </h3>
@@ -29,7 +31,9 @@
                                 {{ webshop.meta.description }}
                             </p>
 
-                            <template #right><span class="icon arrow-right-small gray" /></template>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
                         </STListItem>
                     </STList>
                 </main>
@@ -48,51 +52,32 @@
     </section>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { LegalFooter,OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+<script lang="ts" setup>
+import { LegalFooter, OrganizationLogo, STList, STListItem, STNavigationBar } from '@stamhoofd/components';
 import { Organization, WebshopPreview } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        OrganizationLogo,
-        LegalFooter
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        time: Formatter.time.bind(Formatter)
-    },
-    metaInfo() {
-        return {
-            title: this.organization.name + " - Webshops",
-            meta: [
-                {
-                    vmid: 'description',
-                    name: 'description',
-                    content: "Kies een webshop om door te gaan",
-                },
-                {
-                    hid: 'og:site_name',
-                    name: 'og:site_name',
-                    content: this.organization.name
-                }
-            ]
-        }
-    }
-})
-export default class ChooseWebshopView extends Mixins(NavigationMixin){
-    @Prop({ required: true })
-        organization!: Organization;
+// todo: meta info
 
-    @Prop({ required: true })
-        webshops!: WebshopPreview[];
-      
+// metaInfo() {
+//         return {
+//             title: this.organization.name + " - Webshops",
+//             meta: [
+//                 {
+//                     vmid: 'description',
+//                     name: 'description',
+//                     content: "Kies een webshop om door te gaan",
+//                 },
+//                 {
+//                     hid: 'og:site_name',
+//                     name: 'og:site_name',
+//                     content: this.organization.name
+//                 }
+//             ]
+//         }
+//     }
 
-}
+defineProps<{
+    organization: Organization;
+    webshops: WebshopPreview[];
+}>();
 </script>
