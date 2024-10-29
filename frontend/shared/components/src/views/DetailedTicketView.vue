@@ -1,10 +1,12 @@
 <template>
     <div class="st-view detailed-ticket-view">
-        <STNavigationBar :title="name" :disableDismiss="!allowDismiss" :sticky="false" :large="logo">
+        <STNavigationBar :title="name" :disable-dismiss="!allowDismiss" :sticky="false" :large="logo">
             <template #left>
                 <OrganizationLogo v-if="logo" :organization="organization" />
             </template>
-            <template v-if="canShare" #right><button class="button icon share navigation" type="button" @click="share" /></template>
+            <template v-if="canShare" #right>
+                <button class="button icon share navigation" type="button" @click="share" />
+            </template>
         </STNavigationBar>
         <main>
             <figure class="qr-box">
@@ -71,7 +73,7 @@
                         {{ formatDateRange(cartItem.product.dateRange) }}
                     </p>
                 </STListItem>
-                
+
                 <STListItem v-if="price">
                     <h3 class="style-definition-label">
                         Prijs
@@ -84,174 +86,134 @@
         </main>
 
         <STToolbar>
-            <template #right><button class="button primary" type="button" @click="download">
-                <span class="icon download" />
-                <span>Opslaan</span>
-            </button></template>
+            <template #right>
+                <button class="button primary" type="button" @click="download">
+                    <span class="icon download" />
+                    <span>Opslaan</span>
+                </button>
+            </template>
         </STToolbar>
     </div>
 </template>
 
-
-<script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ImageComponent, OrganizationLogo, ShowSeatsView, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { ImageComponent, OrganizationLogo, ShowSeatsView, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Order, Organization, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
+const props = withDefaults(defineProps<{
+    logo?: boolean;
+    webshop: Webshop;
+    organization: Organization;
+    ticket: TicketPublic;
+    order?: Order | null;
+    allowDismiss?: boolean;
+}>(), {
+    logo: false,
+    order: null,
+    allowDismiss: true,
+});
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STErrorsDefault,
-        OrganizationLogo,
-        STList,
-        STListItem,
-        ImageComponent
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter)
-    }
-})
-export default class DetailedTicketView extends Mixins(NavigationMixin){
-    @Prop({ default: false })
-        logo: boolean
+const show = useShow();
+const QRCodeUrl = ref<string | null>(null);
+const visibleSponsor = ref(0);
 
-    @Prop({ required: true })
-        webshop: Webshop
+// TODO: multiple item support needed!
+const cartItem = computed(() => props.ticket.items[0]);
+const indexDescription = computed(() => props.ticket.getIndexDescription(props.webshop));
+const changedSeatString = computed(() => props.ticket.getChangedSeatString(props.webshop, true));
+const sponsors = computed(() => (props.webshop.meta.sponsors?.sponsors ?? []).filter(s => s.onTickets && (s.banner || s.logo)));
+const name = computed(() => props.ticket.getTitle());
+const canShare = computed(() => !!navigator.share);
+const price = computed(() => props.ticket.getPrice(props.order));
+const isSingle = computed(() => props.webshop.meta.ticketType === WebshopTicketType.SingleTicket);
 
-    @Prop({ required: true })
-        organization: Organization
-
-    @Prop({ required: true })
-        ticket: TicketPublic
-
-    @Prop({ required: false, default: null })
-        order: Order | null
-
-    @Prop({ default: true })
-        allowDismiss: boolean
-
-    QRCodeUrl: string | null = null
-    visibleSponsor = 0;
-
-    get cartItem() {
-        // TODO: multiple item support needed!
-        return this.ticket.items[0]
-    }
-
-    get indexDescription() {
-        return this.ticket.getIndexDescription(this.webshop)
-    }
-
-    get changedSeatString() {
-        return this.ticket.getChangedSeatString(this.webshop, true)
-    }
-
-    get sponsors() {
-        return (this.webshop.meta.sponsors?.sponsors ?? []).filter(s => s.onTickets && (s.banner||s.logo))
-    }
-
-    get name() {
-        return this.ticket.getTitle()
-    }
-
-    get canShare() {
-        return !!navigator.share
-    }
-
-    get price() {
-        return this.ticket.getPrice(this.order)
-    }
-
-    get isSingle() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
-    }
-
-    share() {
-        navigator.share({
-            title: this.webshop.meta.name+" - "+this.name,
-            text: "Bekijk en sla jouw ticket op via deze link.",
-            url: this.qrMessage,
-        }).catch(e => console.error(e))
-    }
-
-    showSeats() {
-        this.show({
-            components: [
-                new ComponentWithProperties(ShowSeatsView, {
-                    webshop: this.webshop,
-                    ticket: this.ticket,
-                    order: this.order,
-                    allowDismiss: this.allowDismiss
-                })
-            ]
-        })
-    }
-
-    formatPrice(price: number) {
-        return Formatter.price(price)
-    }
-
-    formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString())
-    }
-
-    get qrMessage() {
-        return "https://"+this.webshop.getUrl(this.organization) + "/tickets/"+this.ticket.secret
-    }
-
-    timer: NodeJS.Timeout;
-
-    mounted() {
-        this.generateQRCode().catch(console.error)
-        this.visibleSponsor = Math.floor(Math.random() * Math.max(0, this.sponsors.length - 1))
-
-        this.timer = setInterval(() => {
-            console.log('tick')
-            if (this.visibleSponsor + 1 >= this.sponsors.length) {
-                this.visibleSponsor = 0;
-            } else {
-                this.visibleSponsor = this.visibleSponsor+1
-            }
-        }, 3000)
-    }
-
-    beforeUnmount() {
-        clearInterval(this.timer);
-    }
-
-    async download() {
-        const TicketBuilder = (await import(
-            /* webpackChunkName: "TicketBuilder" */
-            /* webpackPrefetch: true */
-            '@stamhoofd/ticket-builder'
-        )).TicketBuilder
-
-        const builder = new TicketBuilder([this.ticket], this.webshop, this.organization, this.order ?? undefined)
-        await builder.download()
-    }
-
-    async generateQRCode() {
-        const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
-
-        // Increase scanning speed on mobile screens by adding more correction levels
-        this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage, { 
-            margin: 0, 
-            width: 370, 
-            height: 370,
-            dark: "#000000",
-            color: "#ffffff",
-        })
-    }
-
-    shouldNavigateAway() {
-        return this.allowDismiss
-    }
+function share() {
+    navigator.share({
+        title: props.webshop.meta.name + ' - ' + name.value,
+        text: 'Bekijk en sla jouw ticket op via deze link.',
+        url: qrMessage.value,
+    }).catch(e => console.error(e));
 }
+
+function showSeats() {
+    show({
+        components: [
+            new ComponentWithProperties(ShowSeatsView, {
+                webshop: props.webshop,
+                ticket: props.ticket,
+                order: props.order,
+                allowDismiss: props.allowDismiss,
+            }),
+        ],
+    }).catch(console.error);
+}
+
+function formatPrice(price: number) {
+    return Formatter.price(price);
+}
+
+function formatDateRange(dateRange: ProductDateRange) {
+    return Formatter.capitalizeFirstLetter(dateRange.toString());
+}
+
+const qrMessage = computed(() => 'https://' + props.webshop.getUrl(props.organization) + '/tickets/' + props.ticket.secret);
+
+let timer: NodeJS.Timeout;
+
+onMounted(() => {
+    generateQRCode().catch(console.error);
+    visibleSponsor.value = Math.floor(Math.random() * Math.max(0, sponsors.value.length - 1));
+
+    timer = setInterval(() => {
+        console.log('tick');
+        if (visibleSponsor.value + 1 >= sponsors.value.length) {
+            visibleSponsor.value = 0;
+        }
+        else {
+            visibleSponsor.value = visibleSponsor.value + 1;
+        }
+    }, 3000);
+});
+
+onBeforeUnmount(() => {
+    clearInterval(timer);
+});
+
+async function download() {
+    const TicketBuilder = (await import(
+        /* webpackChunkName: "TicketBuilder" */
+        /* webpackPrefetch: true */
+        '@stamhoofd/ticket-builder'
+    )).TicketBuilder;
+
+    const builder = new TicketBuilder([props.ticket], props.webshop, props.organization, props.order ?? undefined);
+    await builder.download();
+}
+
+async function generateQRCode() {
+    const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default;
+
+    // Increase scanning speed on mobile screens by adding more correction levels
+    QRCodeUrl.value = await QRCode.toDataURL(qrMessage.value, {
+        margin: 0,
+        width: 370,
+        color: {
+            light: '#ffffff',
+            dark: '#000000',
+        },
+    });
+}
+
+function shouldNavigateAway() {
+    return props.allowDismiss;
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
 
 <style lang="scss">
@@ -357,7 +319,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
             width: auto;
             height: auto;
             max-width: 100%;
-            
+
         }
 
         img {
