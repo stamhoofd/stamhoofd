@@ -17,7 +17,7 @@
                 <p class="price">
                     {{ priceString }}
 
-                    <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ formatDateTime(product.enableAfter) }}</span>
+                    <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ product.enableAfter ? formatDateTime(product.enableAfter) : '?' }}</span>
                     <span v-else-if="!product.isEnabled && !admin" class="style-tag error">Onbeschikbaar</span>
                     <span v-else-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
                     <span v-else-if="stockText !== null" class="style-tag" :class="stockText.style">{{ stockText.text }}</span>
@@ -35,218 +35,171 @@
     </article>
 </template>
 
-
-<script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartItemView, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, useCanDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { CartItemView } from '@stamhoofd/components';
 import { Cart, CartItem, CartStockHelper, Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        LoadingView,
-        Checkbox
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        dateTime: (d: Date) => Formatter.dateTime(d, true)
-    }
-})
-export default class ProductBox extends Mixins(NavigationMixin){
-    @Prop({ default: false })
-        admin: boolean
+const props = withDefaults(defineProps<{
+    admin?: boolean;
+    product: Product;
+    webshop: Webshop;
+    checkout: Checkout;
+    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void;
+}>(), {
+    admin: false,
+});
 
-    @Prop({ required: true })
-        product: Product
-    
-    @Prop({ required: true })
-        webshop: Webshop
+const present = usePresent();
+const show = useShow();
+const canDismiss = useCanDismiss();
+const cart = computed(() => props.checkout.cart);
 
-    @Prop({ required: true })
-        checkout: Checkout
-
-    @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
-
-    get price() {
-        return this.product.prices[0].price
-    }
-
-    get cart() {
-        return this.checkout.cart
-    }
-
-    get priceString() {
-        const priceRanges = Formatter.uniqueArray(this.product.filteredPrices({admin: this.admin}).map(p => p.price))
-        if (priceRanges.length === 1) {
-            if (priceRanges[0] === 0) {
-                if (this.webshop.isAllFree) {
-                    return "";
-                }
-                return "Gratis"
+const priceString = computed(() => {
+    const priceRanges = Formatter.uniqueArray(props.product.filteredPrices({ admin: props.admin }).map(p => p.price));
+    if (priceRanges.length === 1) {
+        if (priceRanges[0] === 0) {
+            if (props.webshop.isAllFree) {
+                return '';
             }
-            return Formatter.price(priceRanges[0])
+            return 'Gratis';
         }
-        const minimum = Math.min(...priceRanges)
-        const maximum = Math.max(...priceRanges)
-        return Formatter.price(minimum, true) + " - " + Formatter.price(maximum, true)
+        return Formatter.price(priceRanges[0]);
+    }
+    const minimum = Math.min(...priceRanges);
+    const maximum = Math.max(...priceRanges);
+    return Formatter.price(minimum, true) + ' - ' + Formatter.price(maximum, true);
+});
+
+const count = computed(() => {
+    return cart.value.items.reduce((prev, item) => {
+        if (item.product.id !== props.product.id) {
+            return prev;
+        }
+        return prev + item.amount;
+    }, 0);
+});
+
+const imageResolution = computed(() => props.product.images[0]?.getResolutionForSize(100, 100));
+const imageSrc = computed(() => imageResolution.value?.file.getPublicPath());
+const imgWidth = computed(() => imageResolution.value?.width);
+const imgHeight = computed(() => imageResolution.value?.height);
+
+const stockText = computed(() => {
+    const remainingWithoutCart = CartStockHelper.getRemainingAcrossOptions({ cart: new Cart(), product: props.product, webshop: props.webshop, admin: props.admin }, { inMultipleCartItems: true, excludeOrder: true });
+
+    if (remainingWithoutCart === 0) {
+        return {
+            text: 'Uitverkocht',
+            style: 'error',
+        };
     }
 
-    get count() {
-        return this.cart.items.reduce((prev, item) => {
-            if (item.product.id !== this.product.id) {
-                return prev
-            }
-            return prev + item.amount
-        }, 0)
-    }
-
-    get pendingReservationCount() {
-        return this.cart.items.reduce((prev, item) => {
-            if (item.product.id !== this.product.id) {
-                return prev
-            }
-            return prev + item.amount - item.reservedAmount
-        }, 0)
-    }
-
-    get imageResolution() {
-        return this.product.images[0]?.getResolutionForSize(100, 100)
-    }
-    
-    get imageSrc() {
-        return this.imageResolution?.file.getPublicPath()
-    }
-
-    get imgWidth() {
-        return this.imageResolution?.width
-    }
-
-    get imgHeight() {
-        return this.imageResolution?.height
-    }
-
-    get stockText() {
-        const remainingWithoutCart = CartStockHelper.getRemainingAcrossOptions({ cart: new Cart(), product: this.product, webshop: this.webshop, admin: this.admin}, {inMultipleCartItems: true, excludeOrder: true});
-
-        if (remainingWithoutCart === 0) {
-            return {
-                text: "Uitverkocht",
-                style: "error"
-            }
+    if (editExisting.value) {
+        if (remainingWithoutCart === null || remainingWithoutCart > 25) {
+            return null;
         }
 
-        if (this.editExisting) {
-            if (remainingWithoutCart === null || remainingWithoutCart > 25) {
-                return null
-            }
-
-            const maxOrder = CartStockHelper.getOrderMaximum({ cart: new Cart(), product: this.product, webshop: this.webshop, admin: this.admin});
-            if (maxOrder && maxOrder.remaining !== null && maxOrder.remaining < remainingWithoutCart) {
-                // No point in showing stock: you can only order x items in one order
-                return null;
-            }
-
-            return {
-                text:  'Nog ' + this.product.getRemainingStockText(remainingWithoutCart),
-                style: "warn"
-            }
-        }
-
-
-        // How much we can still order from this product
-        const maxOrder = CartStockHelper.getOrderMaximum({ cart: this.cart, product: this.product, webshop: this.webshop, admin: this.admin});
-        const remaining = CartStockHelper.getRemainingAcrossOptions({ cart: this.cart, product: this.product, webshop: this.webshop, admin: this.admin}, {inMultipleCartItems: true, excludeOrder: true});
-
-        if (maxOrder && maxOrder.remaining === 0) {
-            return {
-                text: "Maximum bereikt",
-                style: "error"
-            }
-        }
-        
-        if (remaining === null) {
-            return null
-        }
-
-        if (remaining > 25 || (maxOrder && maxOrder.remaining !== null && remaining > maxOrder.remaining)) {
+        const maxOrder = CartStockHelper.getOrderMaximum({ cart: new Cart(), product: props.product, webshop: props.webshop, admin: props.admin });
+        if (maxOrder && maxOrder.remaining !== null && maxOrder.remaining < remainingWithoutCart) {
             // No point in showing stock: you can only order x items in one order
-            return null
-        }
-    
-        if (remaining === 0 ) {
-            return {
-                text: "Maximum bereikt",
-                style: "error"
-            }
+            return null;
         }
 
         return {
-            text:  'Nog ' + this.product.getRemainingStockText(remaining),
-            style: "warn"
+            text: 'Nog ' + props.product.getRemainingStockText(remainingWithoutCart),
+            style: 'warn',
+        };
+    }
+
+    // How much we can still order from this product
+    const maxOrder = CartStockHelper.getOrderMaximum({ cart: cart.value, product: props.product, webshop: props.webshop, admin: props.admin });
+    const remaining = CartStockHelper.getRemainingAcrossOptions({ cart: cart.value, product: props.product, webshop: props.webshop, admin: props.admin }, { inMultipleCartItems: true, excludeOrder: true });
+
+    if (maxOrder && maxOrder.remaining === 0) {
+        return {
+            text: 'Maximum bereikt',
+            style: 'error',
+        };
+    }
+
+    if (remaining === null) {
+        return null;
+    }
+
+    if (remaining > 25 || (maxOrder && maxOrder.remaining !== null && remaining > maxOrder.remaining)) {
+        // No point in showing stock: you can only order x items in one order
+        return null;
+    }
+
+    if (remaining === 0) {
+        return {
+            text: 'Maximum bereikt',
+            style: 'error',
+        };
+    }
+
+    return {
+        text: 'Nog ' + props.product.getRemainingStockText(remaining),
+        style: 'warn',
+    };
+});
+
+const editExisting = computed(() => props.product.isUnique || !props.webshop.shouldEnableCart);
+
+function onClicked() {
+    const editExistingValue = editExisting.value;
+    const oldItem = editExistingValue ? cart.value.items.find(i => i.product.id === props.product.id) : undefined;
+
+    let cartItem = oldItem?.clone() ?? CartItem.createDefault(props.product, cart.value, props.webshop, { admin: props.admin });
+
+    // refresh: to make sure we display the latest data
+    if (oldItem) {
+        try {
+            cartItem.refresh(props.webshop);
+        }
+        catch (e) {
+            console.error(e);
+
+            // Not recoverable
+            cartItem = CartItem.createDefault(props.product, cart.value, props.webshop, { admin: props.admin });
         }
     }
 
-    get editExisting() {
-        return this.product.isUnique || !this.webshop.shouldEnableCart
+    if (canDismiss.value) {
+        show(new ComponentWithProperties(CartItemView, {
+            admin: props.admin,
+            cartItem,
+            oldItem,
+            cart: cart.value,
+            webshop: props.webshop,
+            checkout: props.checkout,
+            saveHandler: props.saveHandler,
+        })).catch(console.error);
     }
-
-    onClicked() {
-        const editExisting = this.editExisting
-        const oldItem = editExisting ? this.cart.items.find(i => i.product.id === this.product.id) : undefined
-
-        let cartItem = oldItem?.clone() ?? CartItem.createDefault(this.product, this.cart, this.webshop, {admin: this.admin})
-
-        // refresh: to make sure we display the latest data
-        if (oldItem) {
-            try {
-                cartItem.refresh(this.webshop)
-            } catch (e) {
-                console.error(e)
-
-                // Not recoverable
-                cartItem = CartItem.createDefault(this.product, this.cart, this.webshop, {admin: this.admin})
-            }
-        }
-
-        if (this.canDismiss) {
-            this.show(new ComponentWithProperties(CartItemView, { 
-                admin: this.admin,
-                cartItem,
-                oldItem,
-                cart: this.cart,
-                webshop: this.webshop,
-                checkout: this.checkout,
-                saveHandler: this.saveHandler,
-            }))
-        } else {
-            this.present({
-                components: [
-                    new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(CartItemView, { 
-                            admin: this.admin,
-                            cartItem,
-                            oldItem,
-                            webshop: this.webshop,
-                            checkout: this.checkout,
-                            saveHandler: this.saveHandler,
-                        })
-                    })
-                ],
-                modalDisplayStyle: "sheet"
-            });
-        }
+    else {
+        present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(CartItemView, {
+                        admin: props.admin,
+                        cartItem,
+                        oldItem,
+                        webshop: props.webshop,
+                        checkout: props.checkout,
+                        saveHandler: props.saveHandler,
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'sheet',
+        }).catch(console.error);
     }
+}
 
-    formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString())
-    }
-
+function formatDateRange(dateRange: ProductDateRange) {
+    return Formatter.capitalizeFirstLetter(dateRange.toString());
 }
 </script>
 
@@ -384,13 +337,12 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 }
             }
         }
-        
+
     }
 
     &.ticket {
         position: relative;
     }
-
 
     &.selected {
         > .content > div {
@@ -429,7 +381,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
         background: $color-background;
         border-radius: $border-radius;
         margin: 0;
-        
+
         box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.05), 0px 20px 50px $color-shadow, inset 0px 0px 0px 1px $color-shadow;
         overflow: hidden;
 
@@ -473,7 +425,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 height: 100%;
                 width: 100%;
             }
-            
+
             background: none;
 
             // Force hardware acceleration (for filter)

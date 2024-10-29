@@ -162,7 +162,7 @@ const props = withDefaults(defineProps<{
     webshop: Webshop;
     checkout: Checkout;
     saveHandler: (newItem: CartItem, oldItem: CartItem | null,
-        component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: ReturnType<typeof useCanDismiss> }) => void;
+        component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: boolean }) => void;
     oldItem?: CartItem | null;
 
 }>(), {
@@ -252,7 +252,7 @@ function addToCart() {
     try {
         props.saveHandler(props.cartItem, props.oldItem, {
             dismiss,
-            canDismiss,
+            canDismiss: canDismiss.value,
         });
     }
     catch (e) {
@@ -272,7 +272,7 @@ function chooseSeats() {
         saveHandler: props.saveHandler,
     });
 
-    if (!canDismiss) {
+    if (!canDismiss.value) {
         present({
             components: [
                 component,
