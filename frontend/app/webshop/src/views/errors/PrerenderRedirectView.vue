@@ -24,40 +24,33 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { Logo } from "@stamhoofd/components";
+<script lang="ts" setup>
+import { Logo } from '@stamhoofd/components';
 
-@Component({
-    components: {
-        Logo
-    },
-    metaInfo() {
-        return {
-            meta: [
-                {
-                    hid: `prerender-status-code`,
-                    name: 'prerender-status-code',
-                    content: "301"
-                },
-                {
-                    hid: `prerender-header-location`,
-                    name: 'prerender-header',
-                    content: "Location: "+this.location
-                },
-                {
-                    hid: `prerender-header-cache`,
-                    name: 'prerender-header',
-                    content: "Cache-Control: no-cache"
-                }
-            ]
-        }
-    }
+// todo: meta info
+// metaInfo() {
+//         return {
+//             meta: [
+//                 {
+//                     hid: `prerender-status-code`,
+//                     name: 'prerender-status-code',
+//                     content: "301"
+//                 },
+//                 {
+//                     hid: `prerender-header-location`,
+//                     name: 'prerender-header',
+//                     content: "Location: "+this.location
+//                 },
+//                 {
+//                     hid: `prerender-header-cache`,
+//                     name: 'prerender-header',
+//                     content: "Cache-Control: no-cache"
+//                 }
+//             ]
+//         }
+//     }
 
-})
-export default class PrerenderRedirectView extends Mixins(NavigationMixin){
-    @Prop({ required: true })
-        location: string
-}
+defineProps<{
+    location: string;
+}>();
 </script>
