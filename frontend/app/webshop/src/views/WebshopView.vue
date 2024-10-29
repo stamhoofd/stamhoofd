@@ -28,17 +28,18 @@
                         <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
                     </figure>
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
+                    <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
                     <div v-if="webshop.meta.description.html" class="description style-wysiwyg" v-html="webshop.meta.description.html" />
                     <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
 
                     <p v-if="showOpenAt" class="info-box">
-                        Bestellen kan vanaf {{ formatDateTime(webshop.meta.openAt) }}
+                        Bestellen kan vanaf {{ webshop.meta.openAt ? formatDateTime(webshop.meta.openAt) : '?' }}
                     </p>
                     <p v-else-if="closed" class="info-box">
                         Bestellingen zijn gesloten
                     </p>
                     <p v-else-if="almostClosed" class="info-box">
-                        Bestellen kan tot {{ formatTime(webshop.meta.availableUntil) }}
+                        Bestellen kan tot {{ webshop.meta.availableUntil ? formatTime(webshop.meta.availableUntil) : '?' }}
                     </p>
                     <p v-if="categories.length === 0 && products.length === 0" class="info-box">
                         Momenteel is er niets beschikbaar.
@@ -59,449 +60,370 @@
     </section>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LegalFooter, LoadingView, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, NavigationMixin, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { CategoryBox, CenteredMessage, GlobalEventBus, LegalFooter, OrganizationLogo, PaymentPendingView, ProductGrid, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
-import { CartItem, LoginProviderType, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { CartItem, LoginProviderType, Payment, PaymentStatus } from '@stamhoofd/structures';
 
-import { CheckoutManager } from '../classes/CheckoutManager';
-import { WebshopManager } from '../classes/WebshopManager';
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';
+import { useCheckoutManager } from '../composables/useCheckoutManager';
+import { useWebshopManager } from '../composables/useWebshopManager';
 import CartView from './checkout/CartView.vue';
 import { CheckoutStep, CheckoutStepsManager } from './checkout/CheckoutStepsManager';
-import FullPageProduct from './FullPageProduct.vue';
 import OrderView from './orders/OrderView.vue';
 import TicketView from './orders/TicketView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        LoadingView,
-        Checkbox,
-        CategoryBox,
-        ProductGrid,
-        OrganizationLogo,
-        FullPageProduct,
-        LegalFooter,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        time: Formatter.time.bind(Formatter),
-        dateTime: Formatter.dateTime.bind(Formatter),
-    },
-    metaInfo() {
-        return {
-            title: this.$webshopManager.webshop.meta.name,
-            titleTemplate: '%s | ' + this.$webshopManager.organization.name,
-            meta: [
-                {
-                    vmid: 'description',
-                    name: 'description',
-                    content: this.$webshopManager.webshop.meta.description.text,
-                },
-                {
-                    hid: 'og:site_name',
-                    name: 'og:site_name',
-                    content: this.$webshopManager.organization.name,
-                },
-                {
-                    hid: 'og:title',
-                    name: 'og:title',
-                    content: this.$webshopManager.webshop.meta.title ?? this.$webshopManager.webshop.meta.name,
-                },
-                ...(this.bannerImageSrc
-                    ? [
-                            {
-                                hid: 'og:image',
-                                name: 'og:image',
-                                content: this.bannerImageSrc,
-                            },
-                            {
-                                hid: 'og:image:width',
-                                name: 'og:image:width',
-                                content: this.bannerImageWidth,
-                            },
-                            {
-                                hid: 'og:image:height',
-                                name: 'og:image:height',
-                                content: this.bannerImageHeight,
-                            },
-                            {
-                                hid: 'og:image:type',
-                                name: 'og:image:type',
-                                content: this.bannerImageSrc.endsWith('.png') ? 'image/png' : 'image/jpeg',
-                            },
-                        ]
-                    : []),
-            ],
-        };
-    },
-})
-export default class WebshopView extends Mixins(NavigationMixin) {
-    CheckoutManager = CheckoutManager;
-    CheckoutStepsManager = CheckoutStepsManager;
-    WebshopManager = WebshopManager;
-    visible = true;
+import FullPageProduct from './FullPageProduct.vue';
 
-    get isLoggedIn() {
-        return this.$context.isComplete() ?? false;
-    }
+// todo: meta info
 
-    get userName() {
-        return this.$context.user?.firstName ?? '';
-    }
+// metaInfo() {
+//         return {
+//             title: webshopManager.webshop.meta.name,
+//             titleTemplate: '%s | ' + webshopManager.organization.name,
+//             meta: [
+//                 {
+//                     vmid: 'description',
+//                     name: 'description',
+//                     content: webshopManager.webshop.meta.description.text,
+//                 },
+//                 {
+//                     hid: 'og:site_name',
+//                     name: 'og:site_name',
+//                     content: webshopManager.organization.name,
+//                 },
+//                 {
+//                     hid: 'og:title',
+//                     name: 'og:title',
+//                     content: webshopManager.webshop.meta.title ?? webshopManager.webshop.meta.name,
+//                 },
+//                 ...(bannerImage.valueSrc
+//                     ? [
+//                             {
+//                                 hid: 'og:image',
+//                                 name: 'og:image',
+//                                 content: bannerImage.valueSrc,
+//                             },
+//                             {
+//                                 hid: 'og:image:width',
+//                                 name: 'og:image:width',
+//                                 content: bannerImage.valueWidth,
+//                             },
+//                             {
+//                                 hid: 'og:image:height',
+//                                 name: 'og:image:height',
+//                                 content: bannerImage.valueHeight,
+//                             },
+//                             {
+//                                 hid: 'og:image:type',
+//                                 name: 'og:image:type',
+//                                 content: bannerImage.valueSrc.endsWith('.png') ? 'image/png' : 'image/jpeg',
+//                             },
+//                         ]
+//                     : []),
+//             ],
+//         };
+//     },
 
-    logout() {
-        this.$context.logout();
-    }
+const visible = ref(true);
 
-    switchAccount() {
-        // Do a silent logout
-        this.$context.removeFromStorage();
+const context = useContext();
 
-        // Redirect to login
-        this.$context.startSSO({
-            webshopId: this.webshop.id,
-            prompt: 'select_account',
-            providerType: LoginProviderType.SSO,
-        }).catch(console.error);
-    }
+const present = usePresent();
+const dismiss = useDismiss();
+const webshopManager = useWebshopManager();
+const checkoutManager = useCheckoutManager();
+const isLoggedIn = computed(() => context.value.isComplete() ?? false);
+const userName = computed(() => context.value.user?.firstName ?? '');
 
-    get organization() {
-        return this.$webshopManager.organization;
-    }
+function switchAccount() {
+    // Do a silent logout
+    context.value.removeFromStorage();
 
-    get webshop() {
-        return this.$webshopManager.webshop;
-    }
+    // Redirect to login
+    context.value.startSSO({
+        webshopId: webshop.value.id,
+        prompt: 'select_account',
+        providerType: LoginProviderType.SSO,
+    }).catch(console.error);
+}
 
-    get cartEnabled() {
-        return this.webshop.shouldEnableCart;
-    }
+const organization = computed(() => webshopManager.organization);
+const webshop = computed(() => webshopManager.webshop);
+const cartEnabled = computed(() => webshop.value.shouldEnableCart);
+const webshopLayout = computed(() => webshop.value.meta.layout);
+const checkout = computed(() => checkoutManager.checkout);
+const cart = computed(() => checkoutManager.cart);
+const cartCount = computed(() => checkoutManager.cart.count);
 
-    get hasTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.Tickets;
-    }
-
-    get webshopLayout() {
-        return this.webshop.meta.layout;
-    }
-
-    get checkout() {
-        return this.$checkoutManager.checkout;
-    }
-
-    get cart() {
-        return this.$checkoutManager.cart;
-    }
-
-    get cartCount() {
-        return this.$checkoutManager.cart.count;
-    }
-
-    async openCheckout(animated = true) {
-        try {
-            // Force a save if nothing changed (to fix timeSlot + updated data)
-            const nextStep = await CheckoutStepsManager.for(this.$checkoutManager).getNextStep(undefined, false);
-            if (!nextStep) {
-                throw new SimpleError({
-                    code: 'missing_config',
-                    message: 'Er ging iets mis bij het ophalen van de volgende stap',
-                });
-            }
-
-            this.present({
-                animated,
-                adjustHistory: animated,
-                components: [
-                    new ComponentWithProperties(NavigationController, {
-                        initialComponents: [await nextStep.getComponent()],
-                    }),
-                ],
-                modalDisplayStyle: 'popup',
-                url: UrlHelper.transformUrl(nextStep.url),
+async function openCheckout(animated = true) {
+    try {
+        // Force a save if nothing changed (to fix timeSlot + updated data)
+        const nextStep = await CheckoutStepsManager.for(checkoutManager).getNextStep(undefined, false);
+        if (!nextStep) {
+            throw new SimpleError({
+                code: 'missing_config',
+                message: 'Er ging iets mis bij het ophalen van de volgende stap',
             });
         }
-        catch (e) {
-            console.error(e);
-            Toast.fromError(e).show();
-        }
-    }
 
-    openCart(animated = true, components: ComponentWithProperties[] = [], url?: string) {
-        if (!this.cartEnabled && components.length === 0) {
-            this.openCheckout(animated).catch(console.error);
-            return;
-        }
-        this.present({
+        present({
             animated,
             adjustHistory: animated,
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    initialComponents: [
-                        ...(this.cartEnabled ? [new ComponentWithProperties(CartView)] : []),
-                        ...components,
-                    ],
+                    initialComponents: [await nextStep.getComponent()],
                 }),
             ],
             modalDisplayStyle: 'popup',
-            url: UrlHelper.transformUrl(url ?? '/cart'),
-        });
+            url: UrlHelper.transformUrl(nextStep.url),
+        }).catch(console.error);
     }
-
-    get bannerImage() {
-        return this.webshop.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined);
-    }
-
-    get bannerImageWidth() {
-        return this.bannerImage?.width;
-    }
-
-    get bannerImageHeight() {
-        return this.bannerImage?.height;
-    }
-
-    get bannerImageSrc() {
-        return this.bannerImage?.file.getPublicPath();
-    }
-
-    get isTrial() {
-        return this.organization.meta.packages.isWebshopsTrial;
-    }
-
-    get closed() {
-        // 2 minutes in advance already
-        return this.webshop.isClosed(2 * 60 * 1000) || !this.organization.meta.packages.useWebshops;
-    }
-
-    get almostClosed() {
-        return this.webshop.isClosed(6 * 60 * 60 * 1000) && !this.closed;
-    }
-
-    get showOpenAt() {
-        return this.closed && this.webshop.opensInTheFuture();
-    }
-
-    get products() {
-        return this.webshop.products.filter(p => !p.hidden);
-    }
-
-    get categories() {
-        return this.webshop.categories.filter((c) => {
-            const products = c.productIds.flatMap((id) => {
-                const product = this.webshop.products.find(p => p.id === id);
-                if (product && !product.hidden) {
-                    return [product];
-                }
-                return [];
-            });
-            return products.length > 0;
-        });
-    }
-
-    onAddItem(cartItem: CartItem, oldItem: CartItem | null, component) {
-        if (this.cartEnabled) {
-            if (component) {
-                component.dismiss({ force: true });
-            }
-
-            if (oldItem) {
-                this.$checkoutManager.cart.replaceItem(oldItem, cartItem);
-            }
-            else {
-                this.$checkoutManager.cart.addItem(cartItem);
-            }
-            this.$checkoutManager.saveCart();
-
-            this.openCart(true);
-            // if (this.products.length === 1) {
-            // this.openCart(true)
-            // } else {
-            // new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
-            // }
-        }
-        else {
-            this.$checkoutManager.cart.clear();
-            if (component) {
-                component.dismiss({ force: true });
-            }
-            this.$checkoutManager.cart.addItem(cartItem);
-            this.$checkoutManager.saveCart();
-            this.openCheckout(true).catch(console.error);
-        }
-    }
-
-    /**
-     * Update cart
-     */
-    async check() {
-        try {
-            this.cart.validate(this.$webshopManager.webshop);
-        }
-        catch (e) {
-            console.error(e);
-        }
-        this.$checkoutManager.saveCart();
-
-        try {
-            await this.$checkoutManager.validateCodes();
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-
-    mounted() {
-        const currentPath = UrlHelper.shared.getPath({ removeLocale: true });
-        const path = UrlHelper.shared.getParts();
-        const params = UrlHelper.shared.getSearchParams();
-        UrlHelper.shared.clear();
-
-        UrlHelper.setUrl('/');
-        this.check().catch(console.error);
-
-        if (path.length === 2 && path[0] === 'code') {
-            if (this.cartEnabled) {
-                this.openCart(false);
-            }
-
-            const code = path[1];
-            this.$checkoutManager.applyCode(code).catch(console.error);
-        }
-        else if (path.length === 2 && path[0] === 'order') {
-            const orderId = path[1];
-            this.present({
-                animated: false,
-                adjustHistory: false,
-                components: [
-                    new ComponentWithProperties(OrderView, { orderId }),
-                ],
-            });
-        }
-        else if (path.length === 2 && path[0] === 'tickets') {
-            const secret = path[1];
-            this.present({
-                animated: false,
-                adjustHistory: false,
-                components: [
-                    new ComponentWithProperties(TicketView, { secret }),
-                ],
-            });
-        }
-        else if (path.length === 1 && path[0] === 'payment' && params.get('id')) {
-            const paymentId = params.get('id');
-            const cancel = params.get('cancel') === 'true';
-            const me = this;
-
-            this.present({
-                adjustHistory: false,
-                animated: false,
-                force: true,
-                components: [
-                    new ComponentWithProperties(PaymentPendingView, {
-                        server: this.$webshopManager.server,
-                        paymentId,
-                        cancel,
-                        finishedHandler: function (this: InstanceType<typeof NavigationMixin>, payment: Payment | null) {
-                            if (payment && payment.status === PaymentStatus.Succeeded) {
-                                if (!this.popup) {
-                                    console.log('Presenting order by replacing current view');
-
-                                    // We are not in a popup/sheet on mobile
-                                    // So replace with a force instead of dimissing
-                                    this.present({
-                                        components: [
-                                            new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }),
-                                        ],
-                                        replace: 1,
-                                        force: true,
-                                    });
-                                }
-                                else {
-                                    // In popup/sheet on desktop
-                                    // Desktop: push
-                                    this.dismiss({ force: true, animated: true });
-                                    this.present({
-                                        components: [
-                                            new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }),
-                                        ],
-                                    });
-                                }
-                            }
-                            else {
-                                this.dismiss({ force: true });
-
-                                // Force reload webshop (stock will have changed: prevent invalidating the cart)
-                                // Update stock in background
-                                this.$webshopManager.reload().catch((e) => {
-                                    console.error(e);
-                                });
-
-                                new CenteredMessage('Betaling mislukt', 'De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.').addCloseButton(undefined, async () => {
-                                    await me.resumeStep('/checkout/payment');
-                                }).show();
-                            }
-                        },
-                    }),
-                ],
-                modalDisplayStyle: 'sheet', // warning: if changing to popup: this.present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
-            });
-        }
-        else if (path.length === 2 && path[0] === 'checkout') {
-            this.resumeStep('/' + path.join('/'), false).catch((e) => {
-                console.error(e);
-            });
-        }
-        else if (path.length === 1 && path[0] === 'cart' && this.cartEnabled) {
-            this.openCart(false);
-        }
-    }
-
-    async resumeStep(destination: string, animated = true) {
-        // Quickly recreate all steps
-        let step: CheckoutStep | undefined = undefined;
-        const waitingComponents: Promise<ComponentWithProperties>[] = [];
-
-        while (!step || step.url !== destination) {
-            try {
-                const nextStep = await CheckoutStepsManager.for(this.$checkoutManager).getNextStep(step?.id);
-                if (!nextStep) {
-                    break;
-                }
-                waitingComponents.push(nextStep.getComponent());
-                step = nextStep;
-            }
-            catch (e) {
-                // Possible invalid checkout -> stop here
-                break;
-            }
-        }
-
-        const components = await Promise.all(waitingComponents);
-        this.openCart(animated, components, step?.url);
-    }
-
-    deactivated() {
-        // For an unknown reason, activated is also called when the view is displayed for the first time
-        // so we need to only start setting the url when we were deactivated first
-        this.visible = false;
-    }
-
-    beforeUnmount() {
-        GlobalEventBus.removeListener(this);
-    }
-
-    activated() {
-        this.visible = true;
+    catch (e) {
+        console.error(e);
+        Toast.fromError(e).show();
     }
 }
+
+function openCart(animated = true, components: ComponentWithProperties[] = [], url?: string) {
+    if (!cartEnabled.value && components.length === 0) {
+        openCheckout(animated).catch(console.error);
+        return;
+    }
+    present({
+        animated,
+        adjustHistory: animated,
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                initialComponents: [
+                    ...(cartEnabled.value ? [new ComponentWithProperties(CartView)] : []),
+                    ...components,
+                ],
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+        url: UrlHelper.transformUrl(url ?? '/cart'),
+    }).catch(console.error);
+}
+
+const bannerImage = computed(() => webshop.value.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined));
+const bannerImageWidth = computed(() => bannerImage.value?.width);
+const bannerImageHeight = computed(() => bannerImage.value?.height);
+const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
+// 2 minutes in advance already
+const closed = computed(() => webshop.value.isClosed(2 * 60 * 1000) || !organization.value.meta.packages.useWebshops);
+const almostClosed = computed(() => webshop.value.isClosed(6 * 60 * 60 * 1000) && !closed.value);
+const showOpenAt = computed(() => closed.value && webshop.value.opensInTheFuture());
+const products = computed(() => webshop.value.products.filter(p => !p.hidden));
+const categories = computed(() => {
+    return webshop.value.categories.filter((c) => {
+        const products = c.productIds.flatMap((id) => {
+            const product = webshop.value.products.find(p => p.id === id);
+            if (product && !product.hidden) {
+                return [product];
+            }
+            return [];
+        });
+        return products.length > 0;
+    });
+});
+
+function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss: ReturnType<typeof useDismiss> }) {
+    if (cartEnabled.value) {
+        if (args) {
+            args.dismiss({ force: true }).catch(console.error);
+        }
+
+        if (oldItem) {
+            checkoutManager.cart.replaceItem(oldItem, cartItem);
+        }
+        else {
+            checkoutManager.cart.addItem(cartItem);
+        }
+        checkoutManager.saveCart();
+
+        openCart(true);
+        // if (this.products.length === 1) {
+        // openCart(true)
+        // } else {
+        // new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
+        // }
+    }
+    else {
+        checkoutManager.cart.clear();
+        if (args) {
+            args.dismiss({ force: true }).catch(console.error);
+        }
+        checkoutManager.cart.addItem(cartItem);
+        checkoutManager.saveCart();
+        openCheckout(true).catch(console.error);
+    }
+}
+
+/**
+* Update cart
+*/
+async function check() {
+    try {
+        cart.value.validate(webshopManager.webshop);
+    }
+    catch (e) {
+        console.error(e);
+    }
+    checkoutManager.saveCart();
+
+    try {
+        await checkoutManager.validateCodes();
+    }
+    catch (e) {
+        console.error(e);
+    }
+}
+
+onMounted(() => {
+    const path = UrlHelper.shared.getParts();
+    const params = UrlHelper.shared.getSearchParams();
+    UrlHelper.shared.clear();
+
+    UrlHelper.setUrl('/');
+    check().catch(console.error);
+
+    if (path.length === 2 && path[0] === 'code') {
+        if (cartEnabled.value) {
+            openCart(false);
+        }
+
+        const code = path[1];
+        checkoutManager.applyCode(code).catch(console.error);
+    }
+    else if (path.length === 2 && path[0] === 'order') {
+        const orderId = path[1];
+        present({
+            animated: false,
+            adjustHistory: false,
+            components: [
+                new ComponentWithProperties(OrderView, { orderId }),
+            ],
+        }).catch(console.error);
+    }
+    else if (path.length === 2 && path[0] === 'tickets') {
+        const secret = path[1];
+        present({
+            animated: false,
+            adjustHistory: false,
+            components: [
+                new ComponentWithProperties(TicketView, { secret }),
+            ],
+        }).catch(console.error);
+    }
+    else if (path.length === 1 && path[0] === 'payment' && params.get('id')) {
+        const paymentId = params.get('id');
+        const cancel = params.get('cancel') === 'true';
+
+        present({
+            adjustHistory: false,
+            animated: false,
+            force: true,
+            components: [
+                new ComponentWithProperties(PaymentPendingView, {
+                    server: webshopManager.server,
+                    paymentId,
+                    cancel,
+                    finishedHandler: function (this: InstanceType<typeof NavigationMixin>, payment: Payment | null) {
+                        if (payment && payment.status === PaymentStatus.Succeeded) {
+                            if (!this.popup) {
+                                console.log('Presenting order by replacing current view');
+
+                                // We are not in a popup/sheet on mobile
+                                // So replace with a force instead of dimissing
+                                present({
+                                    components: [
+                                        new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }),
+                                    ],
+                                    replace: 1,
+                                    force: true,
+                                }).catch(console.error);
+                            }
+                            else {
+                                // In popup/sheet on desktop
+                                // Desktop: push
+                                dismiss({ force: true, animated: true }).catch(console.error);
+                                present({
+                                    components: [
+                                        new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }),
+                                    ],
+                                }).catch(console.error);
+                            }
+                        }
+                        else {
+                            dismiss({ force: true }).catch(console.error);
+
+                            // Force reload webshop (stock will have changed: prevent invalidating the cart)
+                            // Update stock in background
+                            webshopManager.reload().catch((e) => {
+                                console.error(e);
+                            });
+
+                            new CenteredMessage('Betaling mislukt', 'De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.').addCloseButton(undefined, async () => {
+                                await resumeStep('/checkout/payment');
+                            }).show();
+                        }
+                    },
+                }),
+            ],
+            modalDisplayStyle: 'sheet', // warning: if changing to popup: present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
+        }).catch(console.error);
+    }
+    else if (path.length === 2 && path[0] === 'checkout') {
+        resumeStep('/' + path.join('/'), false).catch((e) => {
+            console.error(e);
+        });
+    }
+    else if (path.length === 1 && path[0] === 'cart' && cartEnabled.value) {
+        openCart(false);
+    }
+});
+
+async function resumeStep(destination: string, animated = true) {
+    // Quickly recreate all steps
+    let step: CheckoutStep | undefined = undefined;
+    const waitingComponents: Promise<ComponentWithProperties>[] = [];
+
+    while (!step || step.url !== destination) {
+        try {
+            const nextStep = await CheckoutStepsManager.for(checkoutManager).getNextStep(step?.id);
+            if (!nextStep) {
+                break;
+            }
+            waitingComponents.push(nextStep.getComponent());
+            step = nextStep;
+        }
+        catch (e) {
+            // Possible invalid checkout -> stop here
+            break;
+        }
+    }
+
+    const components = await Promise.all(waitingComponents);
+    openCart(animated, components, step?.url);
+}
+
+onDeactivated(() => {
+    // For an unknown reason, activated is also called when the view is displayed for the first time
+    // so we need to only start setting the url when we were deactivated first
+    visible.value = false;
+});
+
+onBeforeUnmount(() => {
+    GlobalEventBus.removeListener(this);
+});
+
+onActivated(() => {
+    visible.value = true;
+});
 </script>
 
 <style lang="scss">
@@ -611,10 +533,10 @@ export default class WebshopView extends Mixins(NavigationMixin) {
                     }
                 }
 
-                > .full-product-box {
+                //> .full-product-box {
                     // position: sticky;
                     // top: 0px;
-                }
+                //}
             }
 
             @media (min-width: 1200px) {
