@@ -22,7 +22,6 @@
                 {{ oldItem.cartError.getHuman() }}
             </p>
 
-
             <p v-if="!cartItem.product.isEnabled" class="info-box">
                 {{ cartItem.product.isEnabledTextLong }}
             </p>
@@ -47,7 +46,7 @@
                 Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ formatPrice(discountPrice) }} per stuk!
             </p>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
@@ -62,7 +61,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem>
+                <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
                         Wanneer?
                     </h3>
@@ -100,7 +99,7 @@
 
             <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" :cart="cart" :old-item="oldItem" :admin="admin" :webshop="webshop" />
 
-            <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errorBox" />
+            <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
 
             <template v-if="canOrder && canSelectAmount">
                 <hr>
@@ -137,332 +136,260 @@
     </form>
 </template>
 
-
-<script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+<script lang="ts" setup>
+import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
 
+import { computed, onMounted, ref, Ref, watch } from 'vue';
+import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
+import { useErrors } from '../errors/useErrors';
 import NumberInput from '../inputs/NumberInput.vue';
-import Radio from "../inputs/Radio.vue";
-import StepperInput from '../inputs/StepperInput.vue';
-import STList from "../layout/STList.vue";
-import STListItem from "../layout/STListItem.vue";
+import Radio from '../inputs/Radio.vue';
+import STList from '../layout/STList.vue';
+import STListItem from '../layout/STListItem.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
-import PriceBreakdownBox from './PriceBreakdownBox.vue';
 import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
-import type {ErrorBox} from '../errors/ErrorBox'
+import PriceBreakdownBox from './PriceBreakdownBox.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        Radio,
-        NumberInput,
-        OptionMenuBox,
-        StepperInput,
-        FieldBox,
-        STErrorsDefault,
-        PriceBreakdownBox
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter),
-        priceFree: (p: number) => {
-            if (p === 0) {
-                return "Gratis"
-            }
-            return Formatter.price(p);
+const props = withDefaults(defineProps<{
+    admin?: boolean;
+    cartItem: CartItem;
+    webshop: Webshop;
+    checkout: Checkout;
+    saveHandler: (newItem: CartItem, oldItem: CartItem | null,
+        component: { dismiss: ReturnType<typeof useDismiss>; canDismiss: ReturnType<typeof useCanDismiss> }) => void;
+    oldItem?: CartItem | null;
+
+}>(), {
+    admin: false,
+    oldItem: null,
+});
+
+const present = usePresent();
+const show = useShow();
+const dismiss = useDismiss();
+const canDismiss = useCanDismiss();
+const pricedItem = ref(props.cartItem) as Ref<CartItem>;
+const pricedCheckout = ref(props.checkout) as Ref<Checkout>;
+const errors = useErrors();
+
+const willNeedSeats = computed(() => withSeats.value);
+const cart = computed(() => props.checkout.cart);
+
+onMounted(() => {
+    onChangeItem();
+    console.log('Cartview', this, props.cartItem);
+});
+
+// External changes should trigger a price update
+watch(() => props.checkout, () => {
+    onChangeItem();
+});
+
+watch(() => props.cartItem, () => {
+    onChangeItem();
+}, { deep: true });
+
+function onChangeItem() {
+    // Update the cart price on changes
+    const clonedCheckout = props.checkout.clone();
+    if (props.oldItem) {
+        clonedCheckout.cart.removeItem(props.oldItem);
+    }
+    const pricedItemClone = props.cartItem.clone();
+    clonedCheckout.cart.addItem(pricedItemClone, false); // No merging (otherwise prices are not updated)
+
+    // Calculate prices
+    clonedCheckout.update(props.webshop);
+    pricedCheckout.value = clonedCheckout;
+    pricedItem.value = pricedItemClone;
+}
+
+const formattedPriceWithDiscount = computed(() => pricedItem.value.getFormattedPriceWithDiscount());
+const formattedPriceWithoutDiscount = computed(() => pricedItem.value.getFormattedPriceWithoutDiscount());
+
+function validate() {
+    try {
+        const clonedCart = cart.value.clone();
+
+        if (!cartEnabled.value) {
+            clonedCart.clear();
         }
-    }
-})
-export default class CartItemView extends Mixins(NavigationMixin){
-    @Prop({ default: false })
-        admin: boolean
-        
-    @Prop({ required: true })
-        cartItem!: CartItem
-
-    @Prop({ required: true })
-        webshop: Webshop
-
-    @Prop({ required: true })
-        checkout!: Checkout
-
-    @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void
-
-    @Prop({ default: null })
-        oldItem: CartItem | null
-
-    pricedItem = this.cartItem
-    pricedCheckout = this.checkout
-
-    errorBox: ErrorBox | null = null
-
-    get willNeedSeats() {
-        return this.withSeats
-    }
-
-    get cart() {
-        return this.checkout.cart
-    }
-
-    pluralText(num: number, singular: string, plural: string) {
-        return Formatter.pluralText(num, singular, plural)
-    }
-
-    mounted() {
-        this.onChangeItem()
-
-        console.log('Cartview', this, this.cartItem)
-    }
-
-    /**
-     * External changes should trigger a price update
-     */
-    @Watch('checkout', {deep: true})
-    onChangeCheckout() {
-        this.onChangeItem()
-    }
-
-    @Watch('cartItem', {deep: true})
-    onChangeItem() {
-        // Update the cart price on changes
-        const clonedCheckout = this.checkout.clone();
-        if (this.oldItem) {
-            clonedCheckout.cart.removeItem(this.oldItem)
-        }
-        const pricedItem = this.cartItem.clone()
-        clonedCheckout.cart.addItem(pricedItem, false) // No merging (otherwise prices are not updated)
-
-        // Calculate prices
-        clonedCheckout.update(this.webshop)
-        this.pricedCheckout = clonedCheckout
-        this.pricedItem = pricedItem
-    }
-
-    get formattedPriceWithDiscount() {
-        return this.pricedItem.getFormattedPriceWithDiscount()
-    }
-
-    get formattedPriceWithoutDiscount() {
-        return this.pricedItem.getFormattedPriceWithoutDiscount()
-    }
-
-    validate() {
-        try {
-            const clonedCart = this.cart.clone()
-
-            if (!this.cartEnabled) {
-                clonedCart.clear()
-            } else if (this.oldItem) {
-                clonedCart.removeItem(this.oldItem)
-            }
-
-            this.cartItem.validate(this.webshop, clonedCart, {
-                refresh: true,
-                admin: this.admin,
-                validateSeats: false
-            })
-        } catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e)
-            return false
-        }
-        this.errorBox = null
-        return true;
-    }
-
-    addToCart() {
-        if (!this.validate()) {
-            return;
+        else if (props.oldItem) {
+            clonedCart.removeItem(props.oldItem);
         }
 
-        if (this.willNeedSeats) {
-            this.chooseSeats();
-            return;
-        }
-
-        try {
-            this.saveHandler(this.cartItem, this.oldItem, this)
-        } catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e)
-            return
-        }
-    }
-
-    chooseSeats() {
-        const component = new ComponentWithProperties(ChooseSeatsView, {
-            cartItem: this.cartItem,
-            oldItem: this.oldItem,
-            webshop: this.webshop,
-            admin: this.admin,
-            cart: this.cart,
-            saveHandler: this.saveHandler
+        props.cartItem.validate(props.webshop, clonedCart, {
+            refresh: true,
+            admin: props.admin,
+            validateSeats: false,
         });
+    }
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+        return false;
+    }
+    errors.errorBox = null;
+    return true;
+}
 
-        if (!this.canDismiss) {
-            this.present({
-                components: [
-                    component
-                ],
-                modalDisplayStyle: "sheet"
-            })
-        } else {
-            // Sheet
-            this.show({
-                components: [
-                    component
-                ]
-            })
-        }
+function addToCart() {
+    if (!validate()) {
+        return;
     }
 
-    get cartEnabled() {
-        return this.webshop.shouldEnableCart
+    if (willNeedSeats.value) {
+        chooseSeats();
+        return;
     }
 
-    get withSeats() {
-        return this.cartItem.product.seatingPlanId !== null
+    try {
+        props.saveHandler(props.cartItem, props.oldItem, {
+            dismiss,
+            canDismiss,
+        });
     }
-
-    get suffixSingular() {
-        if (this.cartItem.product.type === ProductType.Ticket) {
-            return "ticket"
-        }
-        return this.cartItem.product.type === ProductType.Person ? 'persoon' : 'stuk'
-    }
-
-    get suffix() {
-        if (this.cartItem.product.type === ProductType.Ticket) {
-            return "tickets"
-        }
-        return this.cartItem.product.type === ProductType.Person ? 'personen' : 'stuks'
-    }
-
-    get image() {
-        return this.cartItem.product.images[0]?.getResolutionForSize(600, undefined)
-    }
-
-    get imageSrc() {
-        return this.image?.file?.getPublicPath()
-    }
-
-    get product() {
-        return this.cartItem.product
-    }
-
-    get remainingReduced() {
-        if (this.cartItem.productPrice.discountPrice === null) {
-            return 0
-        }
-        return this.cartItem.productPrice.discountAmount - this.count
-    }
-
-    get discountPrice() {
-        return this.cartItem.productPrice.discountPrice ?? 0
-    }
-
-    /**
-     * Return the total amount of this same product in the cart, that is not this item (if it is editing)
-     */
-    get count() {
-        return this.cart.items.reduce((prev, item) => {
-            if (item.product.id !== this.product.id) {
-                return prev
-            }
-            return prev + item.amount
-        }, 0)  - (this.oldItem?.amount ?? 0)
-    }
-
-    get availableStock() {
-        return this.cartItem.getAvailableStock(this.oldItem, this.cart, this.webshop, this.admin)
-    }
-
-    get maximumRemaining() {
-        return this.cartItem.getMaximumRemaining(this.oldItem, this.cart, this.webshop, this.admin)
-    }
-
-    get maximumRemainingAcrossOptions() {
-        return CartStockHelper.getRemainingAcrossOptions({
-            product: this.product,
-            oldItem: this.oldItem,
-            cart: this.cart,
-            webshop: this.webshop,
-            admin: this.admin,
-            amount: this.cartItem.amount
-        }, {inMultipleCartItems: false})
-    }
-
-    get stockText() {
-        const maximumRemaining = this.maximumRemaining
-        return this.availableStock.filter(v => v.text !== null && (!v.remaining || !maximumRemaining || v.remaining <= maximumRemaining)).map(s => s.text)[0]
-    }
-
-    getPriceStock(price: ProductPrice) {
-        const priceStock = CartStockHelper.getPriceStock({product: this.product, oldItem: this.oldItem, cart: this.cart, productPrice: price, webshop: this.webshop, admin: this.admin, amount: this.cartItem.amount})
-        if (!priceStock) {
-            return null
-        }
-
-        if (priceStock.remaining !== null && this.maximumRemainingAcrossOptions !== null && priceStock.remaining > this.maximumRemainingAcrossOptions) {
-            // Doesn't matter to show this
-            return null;
-        }
-        return priceStock
-    }
-
-    getPriceStockText(price: ProductPrice) {
-        // Don't show text if all options are sold out
-        if (this.maximumRemainingAcrossOptions === 0) {
-            return null
-        }
-
-        return this.getPriceStock(price)?.shortText
-    }
-
-    canSelectPrice(price: ProductPrice) {
-        if (this.maximumRemainingAcrossOptions === 0) {
-            return false
-        }
-
-        return this.getPriceStock(price)?.remaining !== 0
-    }
-
-    formatDateRange(dateRange: ProductDateRange) {
-        return Formatter.capitalizeFirstLetter(dateRange.toString())
-    }
-
-    get areSeatsSoldOut() {
-        return CartStockHelper.getSeatsStock({product: this.product, oldItem: this.oldItem, cart: this.cart, webshop: this.webshop, admin: this.admin, amount: this.cartItem.amount})?.stock === 0
-    }
-
-    get canOrder() {
-        return (this.maximumRemaining === null || this.maximumRemaining > 0) && (this.product.isEnabled || this.admin)
-        //return (this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0 || !!this.oldItem) && this.product.isEnabled)) && !this.areSeatsSoldOut
-    }
-
-    get canSelectAmount() {
-        return this.product.maxPerOrder !== 1 && this.product.allowMultiple
-    }
-
-    get totalPrice() {
-        return this.pricedItem.getPriceWithDiscounts()
-    }
-
-    get administrationFee() {
-        return this.webshop.meta.paymentConfiguration.administrationFee.calculate(this.pricedItem.getPriceWithDiscounts())
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+        return;
     }
 }
+
+function chooseSeats() {
+    const component = new ComponentWithProperties(ChooseSeatsView, {
+        cartItem: props.cartItem,
+        oldItem: props.oldItem,
+        webshop: props.webshop,
+        admin: props.admin,
+        cart: cart.value,
+        saveHandler: props.saveHandler,
+    });
+
+    if (!canDismiss) {
+        present({
+            components: [
+                component,
+            ],
+            modalDisplayStyle: 'sheet',
+        }).catch(console.error);
+    }
+    else {
+        // Sheet
+        show({
+            components: [
+                component,
+            ],
+        }).catch(console.error);
+    }
+}
+
+const cartEnabled = computed(() => props.webshop.shouldEnableCart);
+const withSeats = computed(() => props.cartItem.product.seatingPlanId !== null);
+const suffixSingular = computed(() => {
+    if (props.cartItem.product.type === ProductType.Ticket) {
+        return 'ticket';
+    }
+    return props.cartItem.product.type === ProductType.Person ? 'persoon' : 'stuk';
+});
+
+const suffix = computed(() => {
+    if (props.cartItem.product.type === ProductType.Ticket) {
+        return 'tickets';
+    }
+    return props.cartItem.product.type === ProductType.Person ? 'personen' : 'stuks';
+});
+
+const image = computed(() => props.cartItem.product.images[0]?.getResolutionForSize(600, undefined));
+const imageSrc = computed(() => image.value?.file?.getPublicPath());
+const product = computed(() => props.cartItem.product);
+const remainingReduced = computed(() => {
+    if (props.cartItem.productPrice.discountPrice === null) {
+        return 0;
+    }
+    return props.cartItem.productPrice.discountAmount - count.value;
+});
+const discountPrice = computed(() => props.cartItem.productPrice.discountPrice ?? 0);
+const count = computed(() => {
+    return cart.value.items.reduce((prev, item) => {
+        if (item.product.id !== product.value.id) {
+            return prev;
+        }
+        return prev + item.amount;
+    }, 0) - (props.oldItem?.amount ?? 0);
+});
+
+const availableStock = computed(() => {
+    return props.cartItem.getAvailableStock(props.oldItem, cart.value, props.webshop, props.admin);
+});
+
+const maximumRemaining = computed(() => props.cartItem.getMaximumRemaining(props.oldItem, cart.value, props.webshop, props.admin));
+const maximumRemainingAcrossOptions = computed(() => {
+    return CartStockHelper.getRemainingAcrossOptions({
+        product: product.value,
+        oldItem: props.oldItem,
+        cart: cart.value,
+        webshop: props.webshop,
+        admin: props.admin,
+        amount: props.cartItem.amount,
+    }, { inMultipleCartItems: false });
+});
+
+const stockText = computed(() => {
+    const maximumRemainingValue = maximumRemaining.value;
+    return availableStock.value.filter(v => v.text !== null && (!v.remaining || !maximumRemainingValue || v.remaining <= maximumRemainingValue)).map(s => s.text)[0];
+});
+
+function getPriceStock(price: ProductPrice) {
+    const priceStock = CartStockHelper.getPriceStock({ product: product.value, oldItem: props.oldItem, cart: cart.value, productPrice: price, webshop: props.webshop, admin: props.admin, amount: props.cartItem.amount });
+    if (!priceStock) {
+        return null;
+    }
+
+    if (priceStock.remaining !== null && maximumRemainingAcrossOptions.value !== null && priceStock.remaining > maximumRemainingAcrossOptions.value) {
+        // Doesn't matter to show this
+        return null;
+    }
+    return priceStock;
+}
+
+function getPriceStockText(price: ProductPrice) {
+    // Don't show text if all options are sold out
+    if (maximumRemainingAcrossOptions.value === 0) {
+        return null;
+    }
+
+    return getPriceStock(price)?.shortText;
+}
+
+function canSelectPrice(price: ProductPrice) {
+    if (maximumRemainingAcrossOptions.value === 0) {
+        return false;
+    }
+
+    return getPriceStock(price)?.remaining !== 0;
+}
+
+function formatDateRange(dateRange: ProductDateRange) {
+    return Formatter.capitalizeFirstLetter(dateRange.toString());
+}
+
+const areSeatsSoldOut = computed(() => {
+    return CartStockHelper.getSeatsStock({ product: product.value, oldItem: props.oldItem, cart: cart.value, webshop: props.webshop, admin: props.admin, amount: props.cartItem.amount })?.stock === 0;
+});
+
+const canOrder = computed(() => {
+    return (maximumRemaining.value === null || maximumRemaining.value > 0) && (product.value.isEnabled || props.admin);
+    // return (props.admin || ((maximumRemaining.value === null || maximumRemaining.value > 0 || !!props.oldItem) && product.value.isEnabled)) && !this.areSeatsSoldOut
+});
+
+const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple);
 </script>
 
 <style lang="scss">
