@@ -2,7 +2,7 @@
     <SaveView title="Kies je afhaalmethode" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" :prefer-large-button="true" @save="goNext">
         <h1>Kies je afhaalmethode</h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>
             <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
@@ -19,97 +19,83 @@
                     {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
                 </p>
 
-                <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1">
-                    <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
-                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1" #right>
+                    <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">Volzet</span>
+                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
         </STList>
     </SaveView>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { ErrorBox, useErrors } from '@stamhoofd/components';
 import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 
-import { CheckoutManager } from '../../classes/CheckoutManager';
+import { useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { computed, ref } from 'vue';
+import { useCheckoutManager } from '../../composables/useCheckoutManager';
+import { useWebshopManager } from '../../composables/useWebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
-@Component({
-    components: {
-        STList,
-        STListItem,
-        Radio,
-        STErrorsDefault,
-        SaveView,
-    },
-    filters: {
-        date: Formatter.dateWithDay.bind(Formatter),
-        minutes: Formatter.minutes.bind(Formatter),
-        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
-    },
-})
-export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin) {
-    step = -1;
+const loading = ref(false);
+const errors = useErrors();
 
-    loading = false;
-    errorBox: ErrorBox | null = null;
+const navigationController = useNavigationController();
+const dismiss = useDismiss();
+const show = useShow();
 
-    CheckoutManager = CheckoutManager;
-
-    get webshop() {
-        return this.$webshopManager.webshop;
-    }
-
-    get checkoutMethods() {
-        return this.webshop.meta.checkoutMethods;
-    }
-
-    get selectedMethod(): CheckoutMethod {
-        if (this.$checkoutManager.checkout.checkoutMethod) {
-            const search = this.$checkoutManager.checkout.checkoutMethod.id;
-            const f = this.webshop.meta.checkoutMethods.find(c => c.id === search);
+const webshopManager = useWebshopManager();
+const checkoutManager = useCheckoutManager();
+const webshop = computed(() => webshopManager.webshop);
+const checkoutMethods = computed(() => webshop.value.meta.checkoutMethods);
+const selectedMethod = computed({
+    get: () => {
+        if (checkoutManager.checkout.checkoutMethod) {
+            const search = checkoutManager.checkout.checkoutMethod.id;
+            const f = webshop.value.meta.checkoutMethods.find(c => c.id === search);
             if (f) {
                 return f;
             }
         }
-        return this.webshop.meta.checkoutMethods[0];
+        return webshop.value.meta.checkoutMethods[0];
+    },
+    set: (method: CheckoutMethod) => {
+        checkoutManager.checkout.checkoutMethod = method;
+        checkoutManager.saveCheckout();
+    },
+},
+);
+
+function getTypeName(type: CheckoutMethodType) {
+    switch (type) {
+        case CheckoutMethodType.Takeout: return 'Afhalen';
+        case CheckoutMethodType.Delivery: return 'Levering';
+        case CheckoutMethodType.OnSite: return 'Ter plaatse consumeren';
     }
+}
 
-    set selectedMethod(method: CheckoutMethod) {
-        this.$checkoutManager.checkout.checkoutMethod = method;
-        this.$checkoutManager.saveCheckout();
+async function goNext() {
+    if (loading.value || !selectedMethod.value) {
+        return;
     }
+    // Force checkout save
+    selectedMethod.value = selectedMethod.value as any;
 
-    getTypeName(type: CheckoutMethodType) {
-        switch (type) {
-            case CheckoutMethodType.Takeout: return 'Afhalen';
-            case CheckoutMethodType.Delivery: return 'Levering';
-            case CheckoutMethodType.OnSite: return 'Ter plaatse consumeren';
-        }
+    loading.value = true;
+    errors.errorBox = null;
+
+    try {
+        await CheckoutStepsManager.for(checkoutManager).goNext(CheckoutStepType.Method, {
+            navigationController: navigationController.value,
+            dismiss,
+            show,
+        });
     }
-
-    async goNext() {
-        if (this.loading || !this.selectedMethod) {
-            return;
-        }
-        // Force checkout save
-        this.selectedMethod = this.selectedMethod as any;
-
-        this.loading = true;
-        this.errorBox = null;
-
-        try {
-            await CheckoutStepsManager.for(this.$checkoutManager).goNext(CheckoutStepType.Method, this);
-        }
-        catch (e) {
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-        }
-        this.loading = false;
+    catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
     }
+    loading.value = false;
 }
 </script>
