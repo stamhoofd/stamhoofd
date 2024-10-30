@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PaymentMethod } from './PaymentMethod';
-import { TransferSettings } from './webshops/TransferSettings';
-import { PaymentCustomer } from './PaymentCustomer';
+import { PaymentMethod } from './PaymentMethod.js';
+import { TransferSettings } from './webshops/TransferSettings.js';
+import { PaymentCustomer } from './PaymentCustomer.js';
 
 export class PayconiqAccount extends AutoEncoder {
     /**

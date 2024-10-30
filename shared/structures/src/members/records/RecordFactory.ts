@@ -1,7 +1,7 @@
-import { PropertyFilter } from '../../filters/PropertyFilter';
-import { LegacyRecordType } from './LegacyRecordType';
-import { RecordCategory } from './RecordCategory';
-import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings';
+import { PropertyFilter } from '../../filters/PropertyFilter.js';
+import { LegacyRecordType } from './LegacyRecordType.js';
+import { RecordCategory } from './RecordCategory.js';
+import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
 
 export class RecordFactory {
     static getRecordCategory(type: LegacyRecordType): RecordCategory | undefined {

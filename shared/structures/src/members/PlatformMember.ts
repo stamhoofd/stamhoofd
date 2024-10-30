@@ -1,29 +1,29 @@
 import { AutoEncoderPatchType, deepSetArray, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 
-import { AccessRight } from '../AccessRight';
-import { type Group } from '../Group';
-import { GroupType } from '../GroupType';
+import { AccessRight } from '../AccessRight.js';
+import { type Group } from '../Group.js';
+import { GroupType } from '../GroupType.js';
 
-import { Organization } from '../Organization';
-import { PermissionLevel } from '../PermissionLevel';
-import { PermissionsResourceType } from '../PermissionsResourceType';
+import { Organization } from '../Organization.js';
+import { PermissionLevel } from '../PermissionLevel.js';
+import { PermissionsResourceType } from '../PermissionsResourceType.js';
 
-import { Platform } from '../Platform';
-import { UserPermissions } from '../UserPermissions';
-import { UserWithMembers } from '../UserWithMembers';
-import { Address } from '../addresses/Address';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter';
-import { EmergencyContact } from './EmergencyContact';
-import { MemberDetails } from './MemberDetails';
-import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob';
-import { ObjectWithRecords } from './ObjectWithRecords';
-import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration';
-import { Parent } from './Parent';
-import { RegisterCheckout } from './checkout/RegisterCheckout';
-import { RegisterItem } from './checkout/RegisterItem';
-import { RecordAnswer } from './records/RecordAnswer';
-import { RecordCategory } from './records/RecordCategory';
-import { RecordSettings } from './records/RecordSettings';
+import { Platform } from '../Platform.js';
+import { UserPermissions } from '../UserPermissions.js';
+import { UserWithMembers } from '../UserWithMembers.js';
+import { Address } from '../addresses/Address.js';
+import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import { EmergencyContact } from './EmergencyContact.js';
+import { MemberDetails } from './MemberDetails.js';
+import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
+import { ObjectWithRecords } from './ObjectWithRecords.js';
+import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
+import { Parent } from './Parent.js';
+import { RegisterCheckout } from './checkout/RegisterCheckout.js';
+import { RegisterItem } from './checkout/RegisterItem.js';
+import { RecordAnswer } from './records/RecordAnswer.js';
+import { RecordCategory } from './records/RecordCategory.js';
+import { RecordSettings } from './records/RecordSettings.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];

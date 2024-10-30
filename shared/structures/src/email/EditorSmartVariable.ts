@@ -1,26 +1,26 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import { Address, ValidatedAddress } from '../addresses/Address';
-import { Country } from '../addresses/CountryDecoder';
-import { BalanceItem, BalanceItemRelation, BalanceItemRelationType } from '../BalanceItem';
-import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed';
-import { STPackageType, STPackageTypeHelper } from '../billing/STPackage';
-import { Recipient } from '../endpoints/EmailRequest';
-import { Payment } from '../members/Payment';
-import { PaymentGeneral } from '../members/PaymentGeneral';
-import { Organization } from '../Organization';
-import { OrganizationMetaData } from '../OrganizationMetaData';
-import { OrganizationType } from '../OrganizationType';
-import { PaymentMethod } from '../PaymentMethod';
-import { Cart } from '../webshops/Cart';
-import { CartItem, CartItemPrice } from '../webshops/CartItem';
-import { Customer } from '../webshops/Customer';
-import { Order, OrderData } from '../webshops/Order';
-import { Product, ProductPrice } from '../webshops/Product';
-import { TransferDescriptionType, TransferSettings } from '../webshops/TransferSettings';
-import { WebshopPreview } from '../webshops/Webshop';
-import { WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '../webshops/WebshopMetaData';
-import { EmailRecipient } from './Email';
+import { Address, ValidatedAddress } from '../addresses/Address.js';
+import { Country } from '../addresses/CountryDecoder.js';
+import { BalanceItem, BalanceItemRelation, BalanceItemRelationType } from '../BalanceItem.js';
+import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
+import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
+import { Recipient } from '../endpoints/EmailRequest.js';
+import { Payment } from '../members/Payment.js';
+import { PaymentGeneral } from '../members/PaymentGeneral.js';
+import { Organization } from '../Organization.js';
+import { OrganizationMetaData } from '../OrganizationMetaData.js';
+import { OrganizationType } from '../OrganizationType.js';
+import { PaymentMethod } from '../PaymentMethod.js';
+import { Cart } from '../webshops/Cart.js';
+import { CartItem, CartItemPrice } from '../webshops/CartItem.js';
+import { Customer } from '../webshops/Customer.js';
+import { Order, OrderData } from '../webshops/Order.js';
+import { Product, ProductPrice } from '../webshops/Product.js';
+import { TransferDescriptionType, TransferSettings } from '../webshops/TransferSettings.js';
+import { WebshopPreview } from '../webshops/Webshop.js';
+import { WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '../webshops/WebshopMetaData.js';
+import { EmailRecipient } from './Email.js';
 
 export class EditorSmartVariable extends AutoEncoder {
     @field({ decoder: StringDecoder })

@@ -1,11 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { StamhoofdFilter } from './filters/StamhoofdFilter';
-import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords';
-import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer';
-import { RecordCategory } from './members/records/RecordCategory';
-import { RecordSettings } from './members/records/RecordSettings';
+import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
+import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
+import { RecordCategory } from './members/records/RecordCategory.js';
+import { RecordSettings } from './members/records/RecordSettings.js';
 
 export enum DocumentStatus {
     Draft = 'Draft',

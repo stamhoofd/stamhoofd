@@ -14,10 +14,13 @@
     "sideEffects": false,
     "files": [
         "dist",
-        "esm/dist"
+        "esm/dist",
+        "esm/dist/package.json"
     ],
     "scripts": {
-        "build": "tsc -b . esm",
+        "build": "yarn -s build-cjs && yarn -s build-esm",
+        "build-cjs": "tsc -p . --declaration",
+        "build-esm": "cd esm && tsc -p . --declaration",
         "test": "jest",
         "lint": "eslint"
     },

@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { MembersBlob } from '../members/MemberWithRegistrationsBlob';
-import { Payment } from '../members/Payment';
-import { RegistrationWithMember } from '../members/RegistrationWithMember';
+import { MembersBlob } from '../members/MemberWithRegistrationsBlob.js';
+import { Payment } from '../members/Payment.js';
+import { RegistrationWithMember } from '../members/RegistrationWithMember.js';
 
 export class RegisterResponse extends AutoEncoder {
     @field({ decoder: Payment, nullable: true })

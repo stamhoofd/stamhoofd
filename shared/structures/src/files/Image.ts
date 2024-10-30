@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, Data, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { File } from './File';
-import { Resolution } from './Resolution';
+import { File } from './File.js';
+import { Resolution } from './Resolution.js';
 
 export class Image extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

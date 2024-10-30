@@ -1,4 +1,4 @@
-import { PermissionLevel } from './PermissionLevel';
+import { PermissionLevel } from './PermissionLevel.js';
 
 /**
  * More granular access rights to specific things in the system

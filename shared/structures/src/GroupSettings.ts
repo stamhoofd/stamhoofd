@@ -2,16 +2,16 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDe
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Group } from './Group';
-import { GroupGenderType } from './GroupGenderType';
-import { OldGroupPrices } from './OldGroupPrices';
-import { RegistrationPeriodBase } from './RegistrationPeriodBase';
-import { StockReservation } from './StockReservation';
-import { Image } from './files/Image';
-import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
-import { PlatformMember } from './members/PlatformMember';
-import { RegisterItem } from './members/checkout/RegisterItem';
-import { RecordCategory } from './members/records/RecordCategory';
+import { Group } from './Group.js';
+import { GroupGenderType } from './GroupGenderType.js';
+import { OldGroupPrices } from './OldGroupPrices.js';
+import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
+import { StockReservation } from './StockReservation.js';
+import { Image } from './files/Image.js';
+import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
+import { PlatformMember } from './members/PlatformMember.js';
+import { RegisterItem } from './members/checkout/RegisterItem.js';
+import { RecordCategory } from './members/records/RecordCategory.js';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })

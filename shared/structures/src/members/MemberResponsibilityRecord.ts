@@ -1,7 +1,7 @@
 import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Group } from '../Group';
-import { type PlatformMember } from './PlatformMember';
+import { Group } from '../Group.js';
+import { type PlatformMember } from './PlatformMember.js';
 
 export class MemberResponsibilityRecordBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

@@ -1,6 +1,6 @@
 import { DataValidator } from '@stamhoofd/utility';
-import { Country } from '../addresses/CountryDecoder';
-import { StamhoofdFilter } from './StamhoofdFilter';
+import { Country } from '../addresses/CountryDecoder.js';
+import { StamhoofdFilter } from './StamhoofdFilter.js';
 
 export type ParsePhoneNumber = (search: string, country: Country) => { isValid: () => boolean; formatInternational: () => string };
 

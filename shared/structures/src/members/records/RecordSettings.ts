@@ -2,8 +2,8 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDe
 import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ResolutionRequest } from '../../files/ResolutionRequest';
-import { type RecordAnswer } from './RecordAnswer';
+import { ResolutionRequest } from '../../files/ResolutionRequest.js';
+import { type RecordAnswer } from './RecordAnswer.js';
 
 export enum RecordType {
     /**

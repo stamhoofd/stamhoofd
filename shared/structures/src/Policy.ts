@@ -1,7 +1,7 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { File } from './files/File';
+import { File } from './files/File.js';
 
 export class Policy extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

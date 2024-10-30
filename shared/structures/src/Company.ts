@@ -1,6 +1,6 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Address } from './addresses/Address';
+import { Address } from './addresses/Address.js';
 
 export class Company extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })

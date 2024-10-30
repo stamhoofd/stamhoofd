@@ -1,7 +1,7 @@
 import 'jest-extended';
 
-import { MemberDetails } from './MemberDetails';
-import { Parent } from './Parent';
+import { MemberDetails } from './MemberDetails.js';
+import { Parent } from './Parent.js';
 
 describe('Correctly merge multiple details together', () => {
     test('Merge parents', () => {

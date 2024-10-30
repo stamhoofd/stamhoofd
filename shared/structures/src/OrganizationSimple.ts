@@ -1,6 +1,6 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Address } from './addresses/Address';
+import { Address } from './addresses/Address.js';
 
 export class OrganizationSimple extends AutoEncoder {
     @field({ decoder: StringDecoder })

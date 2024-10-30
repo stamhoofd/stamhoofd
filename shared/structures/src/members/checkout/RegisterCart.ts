@@ -1,11 +1,11 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { BalanceItemWithPayments } from '../../BalanceItem';
-import { RegistrationWithMember } from '../RegistrationWithMember';
-import { BalanceItemCartItem } from './BalanceItemCartItem';
-import { RegisterCheckout, RegisterContext } from './RegisterCheckout';
-import { IDRegisterItem, RegisterItem } from './RegisterItem';
-import { Platform } from '../../Platform';
+import { BalanceItemWithPayments } from '../../BalanceItem.js';
+import { RegistrationWithMember } from '../RegistrationWithMember.js';
+import { BalanceItemCartItem } from './BalanceItemCartItem.js';
+import { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
+import { IDRegisterItem, RegisterItem } from './RegisterItem.js';
+import { Platform } from '../../Platform.js';
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })

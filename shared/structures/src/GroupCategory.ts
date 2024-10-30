@@ -1,12 +1,12 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { AccessRight } from './AccessRight';
-import { Group } from './Group';
-import { PermissionRole } from './PermissionRole';
-import { PermissionsByRole } from './PermissionsByRole';
-import { PermissionsResourceType } from './PermissionsResourceType';
-import { OrganizationRegistrationPeriod } from './RegistrationPeriod';
+import { AccessRight } from './AccessRight.js';
+import { Group } from './Group.js';
+import { PermissionRole } from './PermissionRole.js';
+import { PermissionsByRole } from './PermissionsByRole.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { OrganizationRegistrationPeriod } from './RegistrationPeriod.js';
 
 /**
  * Give access to a given resouce based by the roles of a user
@@ -112,14 +112,14 @@ export class GroupCategory extends AutoEncoder {
         return true;
     }
 
-    canEdit(permissions: import('./LoadedPermissions').LoadedPermissions | null): boolean {
+    canEdit(permissions: import('./LoadedPermissions.js').LoadedPermissions | null): boolean {
         if (permissions?.hasFullAccess()) {
             return true;
         }
         return false;
     }
 
-    canCreate(permissions: import('./LoadedPermissions').LoadedPermissions | null, categories: GroupCategory[] = []): boolean {
+    canCreate(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, categories: GroupCategory[] = []): boolean {
         if (!permissions) {
             return false;
         }
@@ -180,7 +180,7 @@ export class GroupCategoryTree extends GroupCategory {
         return count;
     }
 
-    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod, options: { permissions?: import('./LoadedPermissions').LoadedPermissions | null; maxDepth?: number | null; smartCombine?: boolean; groups?: Group[] } = {}): GroupCategoryTree {
+    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod, options: { permissions?: import('./LoadedPermissions.js').LoadedPermissions | null; maxDepth?: number | null; smartCombine?: boolean; groups?: Group[] } = {}): GroupCategoryTree {
         const categories = organizationPeriod.settings.categories;
         const groups = options?.groups ?? organizationPeriod.groups;
 

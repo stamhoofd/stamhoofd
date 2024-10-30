@@ -1,7 +1,7 @@
 import { AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { MemberDetails } from './MemberDetails';
+import { MemberDetails } from './MemberDetails.js';
 
 export class TinyMember extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

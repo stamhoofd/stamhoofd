@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, IntegerDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
+import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 
 export class DefaultAgeGroup extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

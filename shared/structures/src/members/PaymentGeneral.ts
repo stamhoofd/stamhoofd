@@ -1,9 +1,9 @@
 import { ArrayDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
-import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed';
-import { Payment, Settlement } from './Payment';
-import { BalanceItemRelationType } from '../BalanceItem';
+import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
+import { Payment, Settlement } from './Payment.js';
+import { BalanceItemRelationType } from '../BalanceItem.js';
 
 export class PaymentGeneral extends Payment {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })

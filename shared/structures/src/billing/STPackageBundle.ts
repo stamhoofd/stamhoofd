@@ -1,4 +1,4 @@
-import { STPackage, STPackageMeta, STPackageType, STPricingType } from './STPackage';
+import { STPackage, STPackageMeta, STPackageType, STPricingType } from './STPackage.js';
 
 /**
  * Package bundle are packages that you can buy

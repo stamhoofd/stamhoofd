@@ -2,8 +2,8 @@ import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDe
 import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../addresses/Address';
-import { Country } from '../addresses/CountryDecoder';
+import { Address } from '../addresses/Address.js';
+import { Country } from '../addresses/CountryDecoder.js';
 
 export enum STPackageType {
     // Members without activities (not available in frontend anymore)

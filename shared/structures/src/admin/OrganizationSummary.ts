@@ -1,15 +1,15 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
-import { Address } from '../addresses/Address';
-import { STBillingStatus } from '../billing/STBillingStatus';
-import { Organization } from '../Organization';
-import { OrganizationEmail } from '../OrganizationEmail';
-import { OrganizationPackages } from '../OrganizationMetaData';
-import { AcquisitionType } from '../OrganizationPrivateMetaData';
-import { OrganizationType } from '../OrganizationType';
-import { UmbrellaOrganization } from '../UmbrellaOrganization';
-import { User } from '../User';
+import { Address } from '../addresses/Address.js';
+import { STBillingStatus } from '../billing/STBillingStatus.js';
+import { Organization } from '../Organization.js';
+import { OrganizationEmail } from '../OrganizationEmail.js';
+import { OrganizationPackages } from '../OrganizationMetaData.js';
+import { AcquisitionType } from '../OrganizationPrivateMetaData.js';
+import { OrganizationType } from '../OrganizationType.js';
+import { UmbrellaOrganization } from '../UmbrellaOrganization.js';
+import { User } from '../User.js';
 
 export class OrganizationStats extends AutoEncoder {
     @field({ decoder: IntegerDecoder })

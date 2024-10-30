@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
-import { Address } from '../addresses/Address';
-import { Recipient, Replacement } from '../endpoints/EmailRequest';
-import { Gender } from '../members/Gender';
-import { Parent } from '../members/Parent';
+import { Address } from '../addresses/Address.js';
+import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
+import { Gender } from '../members/Gender.js';
+import { Parent } from '../members/Parent.js';
 
 export class MemberSummary extends AutoEncoder {
     @field({ decoder: StringDecoder })

@@ -1,6 +1,6 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { PermissionsByRole } from './PermissionsByRole';
+import { PermissionsByRole } from './PermissionsByRole.js';
 
 export class GroupPrivateSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 10 })

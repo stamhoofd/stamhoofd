@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { AccessRight, AccessRightHelper } from './AccessRight';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel';
-import { PermissionsResourceType, getPermissionResourceTypeName } from './PermissionsResourceType';
-import { ResourcePermissions } from './ResourcePermissions';
+import { AccessRight, AccessRightHelper } from './AccessRight.js';
+import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
+import { PermissionsResourceType, getPermissionResourceTypeName } from './PermissionsResourceType.js';
+import { ResourcePermissions } from './ResourcePermissions.js';
 
 export class PermissionRole extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

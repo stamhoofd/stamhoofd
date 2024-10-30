@@ -1,16 +1,16 @@
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 
-import { Address } from '../addresses/Address';
-import { Replacement } from '../endpoints/EmailRequest';
+import { Address } from '../addresses/Address.js';
+import { Replacement } from '../endpoints/EmailRequest.js';
 
-import { Group } from '../Group';
-import { GroupGenderType } from '../GroupGenderType';
-import { EmergencyContact } from './EmergencyContact';
-import { Gender } from './Gender';
-import { Parent } from './Parent';
-import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer';
-import { ReviewTimes } from './ReviewTime';
+import { Group } from '../Group.js';
+import { GroupGenderType } from '../GroupGenderType.js';
+import { EmergencyContact } from './EmergencyContact.js';
+import { Gender } from './Gender.js';
+import { Parent } from './Parent.js';
+import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
+import { ReviewTimes } from './ReviewTime.js';
 
 /**
  * Keep track of date nad time of an edited boolean value

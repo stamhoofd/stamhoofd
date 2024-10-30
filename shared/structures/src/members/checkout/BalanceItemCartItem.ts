@@ -1,6 +1,6 @@
 import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItemWithPayments } from '../../BalanceItem';
+import { BalanceItemWithPayments } from '../../BalanceItem.js';
 
 /**
  * Contains an intention to pay for an outstanding balance item

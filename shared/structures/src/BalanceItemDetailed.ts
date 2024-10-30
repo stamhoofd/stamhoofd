@@ -1,9 +1,9 @@
 import { field } from '@simonbackx/simple-encoding';
 
 import { Formatter } from '@stamhoofd/utility';
-import { BalanceItem, BalanceItemPayment } from './BalanceItem';
-import { RegistrationWithMember } from './members/RegistrationWithMember';
-import { Order } from './webshops/Order';
+import { BalanceItem, BalanceItemPayment } from './BalanceItem.js';
+import { RegistrationWithMember } from './members/RegistrationWithMember.js';
+import { Order } from './webshops/Order.js';
 
 // Do we still need this?
 export class BalanceItemDetailed extends BalanceItem {

@@ -1,6 +1,6 @@
 import { AutoEncoder, EnumDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 
-import { Country } from '../addresses/CountryDecoder';
+import { Country } from '../addresses/CountryDecoder.js';
 
 export enum TransferDescriptionType {
     Structured = 'Structured', // Random structured transfer

@@ -1,4 +1,4 @@
-import { OrganizationTag } from '../Platform';
+import { OrganizationTag } from '../Platform.js';
 
 export class TagHelper {
     /**

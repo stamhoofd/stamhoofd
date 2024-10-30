@@ -1,10 +1,10 @@
-import { Country } from '../../addresses/CountryDecoder';
-import { PropertyFilter } from '../../filters/PropertyFilter';
-import { OrganizationType } from '../../OrganizationType';
-import { OrganizationRecordsConfiguration } from '../OrganizationRecordsConfiguration';
-import { LegacyRecordType } from './LegacyRecordType';
-import { RecordCategory } from './RecordCategory';
-import { RecordFactory } from './RecordFactory';
+import { Country } from '../../addresses/CountryDecoder.js';
+import { PropertyFilter } from '../../filters/PropertyFilter.js';
+import { OrganizationType } from '../../OrganizationType.js';
+import { OrganizationRecordsConfiguration } from '../OrganizationRecordsConfiguration.js';
+import { LegacyRecordType } from './LegacyRecordType.js';
+import { RecordCategory } from './RecordCategory.js';
+import { RecordFactory } from './RecordFactory.js';
 
 export class RecordConfigurationFactory {
     static create(type: OrganizationType, country: Country): OrganizationRecordsConfiguration {

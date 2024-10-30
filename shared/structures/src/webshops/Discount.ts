@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
-import { CartItem, CartItemPrice } from './CartItem';
+import { CartItem, CartItemPrice } from './CartItem.js';
 import { v4 as uuidv4 } from 'uuid';
-import { Checkout } from './Checkout';
-import { Webshop } from './Webshop';
+import { Checkout } from './Checkout.js';
+import { Webshop } from './Webshop.js';
 import { Formatter } from '@stamhoofd/utility';
-import { OptionMenu, Option } from './Product';
+import { OptionMenu, Option } from './Product.js';
 
 export enum OptionSelectionRequirement {
     Required = 'Required',

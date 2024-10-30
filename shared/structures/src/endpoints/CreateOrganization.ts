@@ -1,7 +1,7 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Organization } from '../Organization';
-import { NewUser } from '../User';
+import { Organization } from '../Organization.js';
+import { NewUser } from '../User.js';
 
 export class CreateOrganization extends AutoEncoder {
     @field({ decoder: Organization })

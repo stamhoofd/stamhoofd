@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Payment, PrivatePayment } from './members/Payment';
-import { PriceBreakdown } from './PriceBreakdown';
+import { Payment, PrivatePayment } from './members/Payment.js';
+import { PriceBreakdown } from './PriceBreakdown.js';
 
 export enum BalanceItemStatus {
     /**

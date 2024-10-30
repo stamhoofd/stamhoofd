@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Image } from './files/Image';
-import { Group } from './Group';
-import { RichText } from './RichText';
-import { Address } from './addresses/Address';
+import { Image } from './files/Image.js';
+import { Group } from './Group.js';
+import { RichText } from './RichText.js';
+import { Address } from './addresses/Address.js';
 import { Formatter } from '@stamhoofd/utility';
 
 export class EventLocation extends AutoEncoder {

@@ -1,6 +1,6 @@
 import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailRecipientFilterType } from './Email';
+import { EmailRecipientFilterType } from './Email.js';
 
 export enum EmailTemplateType {
     /**

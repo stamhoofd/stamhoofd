@@ -1,3 +1,2 @@
-export * from './EventPermissionChecker';
-export * from './TagHelper';
-
+export * from './EventPermissionChecker.js';
+export * from './TagHelper.js';

@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
-import { STCredit } from './STCredit';
+import { STCredit } from './STCredit.js';
 
-import { STInvoice, STPendingInvoice } from './STInvoice';
-import { STPackage } from './STPackage';
+import { STInvoice, STPendingInvoice } from './STInvoice.js';
+import { STPackage } from './STPackage.js';
 
 export class STBillingStatus extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(STInvoice) })

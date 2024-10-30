@@ -3,10 +3,10 @@ import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../../addresses/Address';
-import { Image } from '../../files/Image';
-import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings';
-import { CountryHelper } from '../../addresses/CountryDecoder';
+import { Address } from '../../addresses/Address.js';
+import { Image } from '../../files/Image.js';
+import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
+import { CountryHelper } from '../../addresses/CountryDecoder.js';
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

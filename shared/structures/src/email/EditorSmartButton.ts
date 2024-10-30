@@ -1,6 +1,6 @@
 import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Recipient, Replacement } from '../endpoints/EmailRequest';
-import { EmailRecipient } from './Email';
+import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
+import { EmailRecipient } from './Email.js';
 
 export class EditorSmartButton extends AutoEncoder {
     @field({ decoder: StringDecoder })

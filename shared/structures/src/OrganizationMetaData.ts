@@ -1,21 +1,21 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Colors } from '@stamhoofd/utility';
 
-import { Address } from './addresses/Address';
-import { STPackageStatus, STPackageType } from './billing/STPackage';
-import { Company } from './Company';
-import { Replacement } from './endpoints/EmailRequest';
-import { File } from './files/File';
-import { Image } from './files/Image';
-import { GroupCategory } from './GroupCategory';
-import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
-import { OldGroupPrices } from './OldGroupPrices';
-import { OrganizationGenderType } from './OrganizationGenderType';
-import { OrganizationType } from './OrganizationType';
-import { PaymentConfiguration } from './PaymentConfiguration';
-import { PaymentMethod } from './PaymentMethod';
-import { UmbrellaOrganization } from './UmbrellaOrganization';
-import { TransferSettings } from './webshops/TransferSettings';
+import { Address } from './addresses/Address.js';
+import { STPackageStatus, STPackageType } from './billing/STPackage.js';
+import { Company } from './Company.js';
+import { Replacement } from './endpoints/EmailRequest.js';
+import { File } from './files/File.js';
+import { Image } from './files/Image.js';
+import { GroupCategory } from './GroupCategory.js';
+import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
+import { OldGroupPrices } from './OldGroupPrices.js';
+import { OrganizationGenderType } from './OrganizationGenderType.js';
+import { OrganizationType } from './OrganizationType.js';
+import { PaymentConfiguration } from './PaymentConfiguration.js';
+import { PaymentMethod } from './PaymentMethod.js';
+import { UmbrellaOrganization } from './UmbrellaOrganization.js';
+import { TransferSettings } from './webshops/TransferSettings.js';
 
 export class OrganizationPackages extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })

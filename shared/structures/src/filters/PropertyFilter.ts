@@ -1,8 +1,8 @@
 import { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 
-import { Filterable } from '../members/records/RecordCategory';
-import { StamhoofdFilterDecoder } from './FilteredRequest';
-import { isEmptyFilter, StamhoofdFilter } from './StamhoofdFilter';
+import { Filterable } from '../members/records/RecordCategory.js';
+import { StamhoofdFilterDecoder } from './FilteredRequest.js';
+import { isEmptyFilter, StamhoofdFilter } from './StamhoofdFilter.js';
 
 export class PropertyFilter implements Encodeable {
     constructor(enabledWhen: StamhoofdFilter | null, requiredWhen: StamhoofdFilter | null) {

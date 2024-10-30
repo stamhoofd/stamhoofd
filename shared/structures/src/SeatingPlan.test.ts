@@ -1,4 +1,4 @@
-import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType } from './SeatingPlan';
+import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType } from './SeatingPlan.js';
 
 describe('SeatingPlan', () => {
     describe('adjustSeatsForBetterFit', () => {

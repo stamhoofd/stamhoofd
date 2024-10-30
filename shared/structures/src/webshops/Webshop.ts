@@ -1,12 +1,12 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { DNSRecord, DNSRecordType } from '../DNSRecord';
+import { DNSRecord, DNSRecordType } from '../DNSRecord.js';
 
-import { Organization } from '../Organization';
-import { Category } from './Category';
-import { Product } from './Product';
-import { WebshopMetaData, WebshopPrivateMetaData, WebshopStatus } from './WebshopMetaData';
+import { Organization } from '../Organization.js';
+import { Category } from './Category.js';
+import { Product } from './Product.js';
+import { WebshopMetaData, WebshopPrivateMetaData, WebshopStatus } from './WebshopMetaData.js';
 
 export class WebshopPreview extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

@@ -1,7 +1,7 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
 
-import { GroupGenderType } from './GroupGenderType';
-import { GroupSettings, WaitingListType } from './GroupSettings';
+import { GroupGenderType } from './GroupGenderType.js';
+import { GroupSettings, WaitingListType } from './GroupSettings.js';
 
 describe('GroupSettings v73 → v75 upgrade', () => {
     it('should remove max members if not used', () => {

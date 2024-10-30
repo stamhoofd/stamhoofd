@@ -1,6 +1,6 @@
 import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { OrganizationSimple } from '../OrganizationSimple';
+import { OrganizationSimple } from '../OrganizationSimple.js';
 
 export class EmailAddressSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })

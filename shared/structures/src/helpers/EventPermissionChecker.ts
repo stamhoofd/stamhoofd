@@ -1,9 +1,9 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { AccessRight } from '../AccessRight';
-import { NamedObject } from '../Event';
-import { PermissionsResourceType } from '../PermissionsResourceType';
-import { Platform } from '../Platform';
-import { OrganizationForPermissionCalculation, UserPermissions } from '../UserPermissions';
+import { AccessRight } from '../AccessRight.js';
+import { NamedObject } from '../Event.js';
+import { PermissionsResourceType } from '../PermissionsResourceType.js';
+import { Platform } from '../Platform.js';
+import { OrganizationForPermissionCalculation, UserPermissions } from '../UserPermissions.js';
 
 interface EventDataForPermission {
     organizationId: string | null;

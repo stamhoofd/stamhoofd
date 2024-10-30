@@ -1,11 +1,11 @@
 import { Data } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { ChallengeGrantStruct } from './ChallengeGrantStruct';
-import { PasswordGrantStruct } from './PasswordGrantStruct';
-import { PasswordTokenGrantStruct } from './PasswordTokenGrantStruct';
-import { RefreshTokenGrantStruct } from './RefreshTokenGrantStruct';
-import { RequestChallengeGrantStruct } from './RequestChallengeGrantStruct';
+import { ChallengeGrantStruct } from './ChallengeGrantStruct.js';
+import { PasswordGrantStruct } from './PasswordGrantStruct.js';
+import { PasswordTokenGrantStruct } from './PasswordTokenGrantStruct.js';
+import { RefreshTokenGrantStruct } from './RefreshTokenGrantStruct.js';
+import { RequestChallengeGrantStruct } from './RequestChallengeGrantStruct.js';
 
 /// Only used as input
 export class CreateTokenStruct {

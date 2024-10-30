@@ -1,8 +1,8 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { PaymentMethod } from '../PaymentMethod';
-import { PaymentStatus } from '../PaymentStatus';
-import { TransferSettings } from '../webshops/TransferSettings';
+import { PaymentMethod } from '../PaymentMethod.js';
+import { PaymentStatus } from '../PaymentStatus.js';
+import { TransferSettings } from '../webshops/TransferSettings.js';
 
 export class PaymentPatch extends AutoEncoder {
     @field({ decoder: StringDecoder })

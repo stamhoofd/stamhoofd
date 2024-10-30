@@ -1,6 +1,6 @@
 import { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
 
-import { File } from './File';
+import { File } from './File.js';
 
 export class Resolution implements Encodeable {
     /// Path to the server

@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 
-import { ProductType } from './Product';
-import { Webshop } from './Webshop';
-import { CartItem } from './CartItem';
+import { ProductType } from './Product.js';
+import { Webshop } from './Webshop.js';
+import { CartItem } from './CartItem.js';
 
 export class Cart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(CartItem) })

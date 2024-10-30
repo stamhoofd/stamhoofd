@@ -2,11 +2,11 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../addresses/Address';
-import { Image } from '../files/Image';
-import { ReservedSeat } from '../SeatingPlan';
-import { Webshop } from './Webshop';
-import { WebshopField } from './WebshopField';
+import { Address } from '../addresses/Address.js';
+import { Image } from '../files/Image.js';
+import { ReservedSeat } from '../SeatingPlan.js';
+import { Webshop } from './Webshop.js';
+import { WebshopField } from './WebshopField.js';
 
 export class ProductPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

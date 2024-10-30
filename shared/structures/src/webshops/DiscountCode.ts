@@ -1,5 +1,5 @@
 import { AutoEncoder, field, StringDecoder, ArrayDecoder, IntegerDecoder, BooleanDecoder, DateDecoder } from '@simonbackx/simple-encoding';
-import { Discount } from './Discount';
+import { Discount } from './Discount.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class DiscountCode extends AutoEncoder {

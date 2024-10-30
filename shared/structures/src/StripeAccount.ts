@@ -1,7 +1,7 @@
 import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
-import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod';
+import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
 
 export class Requirements extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })

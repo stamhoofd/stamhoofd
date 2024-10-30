@@ -1,11 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { PropertyFilter } from '../filters/PropertyFilter';
-import { type Group } from '../Group';
-import { GroupType } from '../GroupType';
-import { Organization } from '../Organization';
-import { Platform } from '../Platform';
-import { RecordCategory } from './records/RecordCategory';
+import { PropertyFilter } from '../filters/PropertyFilter.js';
+import { type Group } from '../Group.js';
+import { GroupType } from '../GroupType.js';
+import { Organization } from '../Organization.js';
+import { Platform } from '../Platform.js';
+import { RecordCategory } from './records/RecordCategory.js';
 
 export enum AskRequirement {
     NotAsked = 'NotAsked',

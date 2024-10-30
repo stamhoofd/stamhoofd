@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 
-import { Group } from '../Group';
-import { Organization } from '../Organization';
+import { Group } from '../Group.js';
+import { Organization } from '../Organization.js';
 
 export class GroupsWithOrganizations extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Group) })

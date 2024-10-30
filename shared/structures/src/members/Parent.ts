@@ -2,8 +2,8 @@ import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@s
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../addresses/Address';
-import { ParentType } from './ParentType';
+import { Address } from '../addresses/Address.js';
+import { ParentType } from './ParentType.js';
 
 export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

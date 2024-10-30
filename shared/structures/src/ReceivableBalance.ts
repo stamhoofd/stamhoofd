@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { TranslateMethod } from './I18nInterface';
-import { BalanceItemWithPayments } from './BalanceItem';
-import { PaymentGeneral } from './members/PaymentGeneral';
+import { TranslateMethod } from './I18nInterface.js';
+import { BalanceItemWithPayments } from './BalanceItem.js';
+import { PaymentGeneral } from './members/PaymentGeneral.js';
 
 export enum ReceivableBalanceType {
     organization = 'organization',

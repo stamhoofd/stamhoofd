@@ -2,11 +2,11 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from 
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
-import { StamhoofdFilter } from '../../filters/StamhoofdFilter';
-import { PropertyFilter } from '../../filters/PropertyFilter';
-import { ObjectWithRecords } from '../ObjectWithRecords';
-import { RecordAnswer } from './RecordAnswer';
-import { RecordSettings } from './RecordSettings';
+import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
+import { PropertyFilter } from '../../filters/PropertyFilter.js';
+import { ObjectWithRecords } from '../ObjectWithRecords.js';
+import { RecordAnswer } from './RecordAnswer.js';
+import { RecordSettings } from './RecordSettings.js';
 
 export interface Filterable {
     doesMatchFilter(filter: StamhoofdFilter): boolean;

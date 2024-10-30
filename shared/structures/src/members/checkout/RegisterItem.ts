@@ -2,21 +2,21 @@ import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDec
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { Group } from '../../Group';
-import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings';
-import { GroupType } from '../../GroupType';
-import { Organization } from '../../Organization';
-import { PriceBreakdown } from '../../PriceBreakdown';
-import { StockReservation } from '../../StockReservation';
-import { PlatformMember } from '../PlatformMember';
-import { Registration } from '../Registration';
-import { RegisterContext } from './RegisterCheckout';
-import { StamhoofdFilter } from '../../filters/StamhoofdFilter';
-import { compileToInMemoryFilter } from '../../filters/InMemoryFilter';
-import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions';
-import { RecordSettings } from '../records/RecordSettings';
-import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer';
-import { RecordCategory } from '../records/RecordCategory';
+import { Group } from '../../Group.js';
+import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
+import { GroupType } from '../../GroupType.js';
+import { Organization } from '../../Organization.js';
+import { PriceBreakdown } from '../../PriceBreakdown.js';
+import { StockReservation } from '../../StockReservation.js';
+import { PlatformMember } from '../PlatformMember.js';
+import { Registration } from '../Registration.js';
+import { RegisterContext } from './RegisterCheckout.js';
+import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
+import { compileToInMemoryFilter } from '../../filters/InMemoryFilter.js';
+import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions.js';
+import { RecordSettings } from '../records/RecordSettings.js';
+import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer.js';
+import { RecordCategory } from '../records/RecordCategory.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })

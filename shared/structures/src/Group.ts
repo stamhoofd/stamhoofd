@@ -1,16 +1,16 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { StamhoofdFilter } from './filters/StamhoofdFilter';
-import { GroupCategory } from './GroupCategory';
-import { GroupGenderType } from './GroupGenderType';
-import { GroupPrivateSettings } from './GroupPrivateSettings';
-import { GroupSettings, WaitingListType } from './GroupSettings';
-import { GroupType } from './GroupType';
-import { Gender } from './members/Gender';
-import { PermissionLevel } from './PermissionLevel';
-import { PermissionsResourceType } from './PermissionsResourceType';
-import { StockReservation } from './StockReservation';
+import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import { GroupCategory } from './GroupCategory.js';
+import { GroupGenderType } from './GroupGenderType.js';
+import { GroupPrivateSettings } from './GroupPrivateSettings.js';
+import { GroupSettings, WaitingListType } from './GroupSettings.js';
+import { GroupType } from './GroupType.js';
+import { Gender } from './members/Gender.js';
+import { PermissionLevel } from './PermissionLevel.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { StockReservation } from './StockReservation.js';
 
 export enum GroupStatus {
     Open = 'Open',
@@ -186,7 +186,7 @@ export class Group extends AutoEncoder {
         return [...map.values()];
     }
 
-    hasAccess(permissions: import('./LoadedPermissions').LoadedPermissions | null, allCategories: GroupCategory[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    hasAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!permissions) {
             return false;
         }
@@ -215,15 +215,15 @@ export class Group extends AutoEncoder {
         return true;
     }
 
-    hasReadAccess(permissions: import('./LoadedPermissions').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasReadAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Read);
     }
 
-    hasWriteAccess(permissions: import('./LoadedPermissions').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasWriteAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Write);
     }
 
-    hasFullAccess(permissions: import('./LoadedPermissions').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasFullAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Full);
     }
 

@@ -1,7 +1,7 @@
 import { field } from '@simonbackx/simple-encoding';
 
-import { TinyMember } from './Member';
-import { Registration } from './Registration';
+import { TinyMember } from './Member.js';
+import { Registration } from './Registration.js';
 
 export class RegistrationWithMember extends Registration {
     @field({ decoder: TinyMember })

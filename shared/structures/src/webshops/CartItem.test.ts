@@ -1,7 +1,7 @@
-import { Cart } from './Cart';
-import { CartItem, CartItemOption } from './CartItem';
-import { Option, OptionMenu, Product } from './Product';
-import { Webshop } from './Webshop';
+import { Cart } from './Cart.js';
+import { CartItem, CartItemOption } from './CartItem.js';
+import { Option, OptionMenu, Product } from './Product.js';
+import { Webshop } from './Webshop.js';
 
 describe('Structure.CartItem', () => {
     it('can contain multiple options for the same multiple choice menu', () => {

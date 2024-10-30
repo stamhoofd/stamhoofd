@@ -1,6 +1,6 @@
 import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { LoginProviderType } from './User';
+import { LoginProviderType } from './User.js';
 
 export class OpenIDClientConfiguration extends AutoEncoder {
     @field({ decoder: StringDecoder })

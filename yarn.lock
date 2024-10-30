@@ -3134,10 +3134,10 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@2.16.1":
-  version "2.16.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.16.1.tgz#94a87f97e6663da2ad8751395ad6e7d587d1ac03"
-  integrity sha512-qbozxKWHDMK/h8mlPJLP/7oCKB8+WtbO4WGFFHzOP1zrqUxy0MP0xQF7f2Xkjdrvj3wyXRbyJS4jqmEaEuqODA==
+"@simonbackx/simple-encoding@2.16.5":
+  version "2.16.5"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.16.5.tgz#9c8a70ee2bccb37a60ddcc59f11be0cc11da08af"
+  integrity sha512-VL4o3wwvph+9/gNkPpAr9GT92HSkaHlGLe0RkfgVx9b5UrNjD9Ub5Ij5yy5iAmK20xOpL1LH9UxlIHAa/198gw==
 
 "@simonbackx/simple-endpoints@1.14.0":
   version "1.14.0"
@@ -4306,6 +4306,13 @@
   dependencies:
     "@types/node" "*"
     kleur "^3.0.3"
+
+"@types/qrcode@1.5.3":
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/@types/qrcode/-/qrcode-1.5.3.tgz#73b1f6af1b81c08251006b7fe43ad073d7b7b7f6"
+  integrity sha512-TgVHRrlG9b3CHrVCS7slp57H+KhazcDFJbxz2Q5FXYd7RmA4OVdPKrzXcVnW6B19ywrp3YPmqYcfohGfc9te9g==
+  dependencies:
+    "@types/node" "*"
 
 "@types/readdir-glob@*":
   version "1.1.5"

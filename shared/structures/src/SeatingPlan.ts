@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Product } from './webshops/Product';
-import { Webshop, WebshopPreview } from './webshops/Webshop';
+import { Product } from './webshops/Product.js';
+import { Webshop, WebshopPreview } from './webshops/Webshop.js';
 
 export class SeatingSizeConfiguration {
     seatWidth = 30;

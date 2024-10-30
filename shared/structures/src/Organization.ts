@@ -1,14 +1,14 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from './addresses/Address';
-import { Group } from './Group';
-import { GroupCategoryTree } from './GroupCategory';
-import { OrganizationMetaData } from './OrganizationMetaData';
-import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
-import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod';
-import { UserWithMembers } from './UserWithMembers';
-import { Webshop, WebshopPreview } from './webshops/Webshop';
+import { Address } from './addresses/Address.js';
+import { Group } from './Group.js';
+import { GroupCategoryTree } from './GroupCategory.js';
+import { OrganizationMetaData } from './OrganizationMetaData.js';
+import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
+import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod.js';
+import { UserWithMembers } from './UserWithMembers.js';
+import { Webshop, WebshopPreview } from './webshops/Webshop.js';
 
 export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -58,7 +58,7 @@ export class Organization extends AutoEncoder {
         return this.period.categoryTree.getAllGroups();
     }
 
-    getGroupsForPermissions(permissions?: import('./LoadedPermissions').LoadedPermissions | null) {
+    getGroupsForPermissions(permissions?: import('./LoadedPermissions.js').LoadedPermissions | null) {
         return this.getCategoryTree({ permissions }).getAllGroups();
     }
 
@@ -137,7 +137,7 @@ export class Organization extends AutoEncoder {
      * For registration members perspective, try to use options.admin instead of options.permissions.
      * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
-    getCategoryTree(options?: { maxDepth?: number; filterGroups?: (group: Group) => boolean; permissions?: import('./LoadedPermissions').LoadedPermissions | null; smartCombine?: boolean; admin?: boolean }): GroupCategoryTree {
+    getCategoryTree(options?: { maxDepth?: number; filterGroups?: (group: Group) => boolean; permissions?: import('./LoadedPermissions.js').LoadedPermissions | null; smartCombine?: boolean; admin?: boolean }): GroupCategoryTree {
         return this.period.getCategoryTree(options ? { ...options, organization: this } : { organization: this });
     }
 

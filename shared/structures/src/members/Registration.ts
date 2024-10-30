@@ -1,15 +1,15 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Group } from '../Group';
-import { StockReservation } from '../StockReservation';
-import { GroupPrice } from '../GroupSettings';
-import { RegisterItemOption } from './checkout/RegisterItem';
-import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter';
-import { compileToInMemoryFilter } from '../filters/InMemoryFilter';
-import { registrationInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions';
-import { ObjectWithRecords } from './ObjectWithRecords';
-import { RecordSettings } from './records/RecordSettings';
+import { Group } from '../Group.js';
+import { StockReservation } from '../StockReservation.js';
+import { GroupPrice } from '../GroupSettings.js';
+import { RegisterItemOption } from './checkout/RegisterItem.js';
+import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
+import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
+import { registrationInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
+import { ObjectWithRecords } from './ObjectWithRecords.js';
+import { RecordSettings } from './records/RecordSettings.js';
 
 export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

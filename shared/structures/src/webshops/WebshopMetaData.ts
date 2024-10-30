@@ -3,24 +3,24 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../addresses/Address';
-import { City } from '../addresses/City';
-import { Country, CountryDecoder } from '../addresses/CountryDecoder';
-import { Province } from '../addresses/Province';
-import { DNSRecord, DNSRecordType } from '../DNSRecord';
-import { Replacement } from '../endpoints/EmailRequest';
-import { Image } from '../files/Image';
-import { RecordCategory } from '../members/records/RecordCategory';
-import { PaymentConfiguration, PrivatePaymentConfiguration } from '../PaymentConfiguration';
-import { PaymentMethod } from '../PaymentMethod';
-import { PermissionsByRole } from '../PermissionsByRole';
-import { Policy } from '../Policy';
-import { RichText } from '../RichText';
-import { SeatingPlan } from '../SeatingPlan';
-import { SponsorConfig } from '../SponsorConfig';
-import { Discount } from './Discount';
-import { TransferSettings } from './TransferSettings';
-import { WebshopField } from './WebshopField';
+import { Address } from '../addresses/Address.js';
+import { City } from '../addresses/City.js';
+import { Country, CountryDecoder } from '../addresses/CountryDecoder.js';
+import { Province } from '../addresses/Province.js';
+import { DNSRecord, DNSRecordType } from '../DNSRecord.js';
+import { Replacement } from '../endpoints/EmailRequest.js';
+import { Image } from '../files/Image.js';
+import { RecordCategory } from '../members/records/RecordCategory.js';
+import { PaymentConfiguration, PrivatePaymentConfiguration } from '../PaymentConfiguration.js';
+import { PaymentMethod } from '../PaymentMethod.js';
+import { PermissionsByRole } from '../PermissionsByRole.js';
+import { Policy } from '../Policy.js';
+import { RichText } from '../RichText.js';
+import { SeatingPlan } from '../SeatingPlan.js';
+import { SponsorConfig } from '../SponsorConfig.js';
+import { Discount } from './Discount.js';
+import { TransferSettings } from './TransferSettings.js';
+import { WebshopField } from './WebshopField.js';
 
 export enum WebshopLayout {
     Default = 'Default',

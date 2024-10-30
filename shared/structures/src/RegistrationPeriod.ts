@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Group, GroupStatus } from './Group';
-import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from './GroupCategory';
-import { Organization } from './Organization';
-import { RegistrationPeriodBase } from './RegistrationPeriodBase';
-import { SetupSteps } from './SetupSteps';
+import { Group, GroupStatus } from './Group.js';
+import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from './GroupCategory.js';
+import { Organization } from './Organization.js';
+import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
+import { SetupSteps } from './SetupSteps.js';
 
 export class RegistrationPeriodSettings extends AutoEncoder {
     // todo
@@ -89,7 +89,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         organization?: Organization;
         maxDepth?: number;
         filterGroups?: (group: Group) => boolean;
-        permissions?: import('./LoadedPermissions').LoadedPermissions | null;
+        permissions?: import('./LoadedPermissions.js').LoadedPermissions | null;
         smartCombine?: boolean;
         admin?: boolean;
     }): GroupCategoryTree {

@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord';
-import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel';
-import { PermissionRole } from './PermissionRole';
-import { PermissionsResourceType } from './PermissionsResourceType';
-import { ResourcePermissions } from './ResourcePermissions';
+import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
+import { getPermissionLevelNumber, PermissionLevel } from './PermissionLevel.js';
+import { PermissionRole } from './PermissionRole.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { ResourcePermissions } from './ResourcePermissions.js';
 
 export class Permissions extends AutoEncoder {
     /**

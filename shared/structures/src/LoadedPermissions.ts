@@ -1,10 +1,10 @@
-import { AccessRight, AccessRightHelper } from './AccessRight';
-import { MemberResponsibility } from './MemberResponsibility';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel';
-import { PermissionRole, PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole';
-import { Permissions } from './Permissions';
-import { PermissionsResourceType } from './PermissionsResourceType';
-import { ResourcePermissions } from './ResourcePermissions';
+import { AccessRight, AccessRightHelper } from './AccessRight.js';
+import { MemberResponsibility } from './MemberResponsibility.js';
+import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
+import { PermissionRole, PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
+import { Permissions } from './Permissions.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { ResourcePermissions } from './ResourcePermissions.js';
 
 /**
  * Identical to Permissions but with detailed roles, loaded from the organization or platform

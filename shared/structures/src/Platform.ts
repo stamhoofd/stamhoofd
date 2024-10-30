@@ -2,17 +2,17 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { v4 as uuidv4 } from 'uuid';
 
 import { Colors } from '@stamhoofd/utility';
-import { DefaultAgeGroup } from './DefaultAgeGroup';
-import { Replacement } from './endpoints/EmailRequest';
-import { Image } from './files/Image';
-import { ReduceablePrice } from './GroupSettings';
-import { MemberResponsibility } from './MemberResponsibility';
-import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
-import { OrganizationEmail } from './OrganizationEmail';
-import { PermissionRoleDetailed } from './PermissionRole';
-import { RegistrationPeriod } from './RegistrationPeriod';
-import { RichText } from './RichText';
-import { UserWithMembers } from './UserWithMembers';
+import { DefaultAgeGroup } from './DefaultAgeGroup.js';
+import { Replacement } from './endpoints/EmailRequest.js';
+import { Image } from './files/Image.js';
+import { ReduceablePrice } from './GroupSettings.js';
+import { MemberResponsibility } from './MemberResponsibility.js';
+import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
+import { OrganizationEmail } from './OrganizationEmail.js';
+import { PermissionRoleDetailed } from './PermissionRole.js';
+import { RegistrationPeriod } from './RegistrationPeriod.js';
+import { RichText } from './RichText.js';
+import { UserWithMembers } from './UserWithMembers.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })

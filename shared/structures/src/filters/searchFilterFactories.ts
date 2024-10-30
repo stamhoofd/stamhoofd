@@ -1,5 +1,5 @@
-import { ParsePhoneNumber, SearchFilterFactory } from './SearchFilterFactory';
-import { StamhoofdFilter } from './StamhoofdFilter';
+import { ParsePhoneNumber, SearchFilterFactory } from './SearchFilterFactory.js';
+import { StamhoofdFilter } from './StamhoofdFilter.js';
 
 export function getOrderSearchFilter(search: string | null, parsePhoneNumber: ParsePhoneNumber): StamhoofdFilter | null {
     if (search === null || search === undefined) {

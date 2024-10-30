@@ -1,18 +1,18 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field } from '@simonbackx/simple-encoding';
 
 import { Formatter } from '@stamhoofd/utility';
-import { Organization } from '../Organization';
-import { User } from '../User';
-import { EmailRecipient } from '../email/Email';
-import { Replacement } from '../endpoints/EmailRequest';
-import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions';
-import { compileToInMemoryFilter } from '../filters/InMemoryFilter';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter';
-import { Member } from './Member';
-import { MemberPlatformMembership } from './MemberPlatformMembership';
-import { Registration } from './Registration';
-import { Filterable } from './records/RecordCategory';
-import { MemberResponsibilityRecord } from './MemberResponsibilityRecord';
+import { Organization } from '../Organization.js';
+import { User } from '../User.js';
+import { EmailRecipient } from '../email/Email.js';
+import { Replacement } from '../endpoints/EmailRequest.js';
+import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
+import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
+import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import { Member } from './Member.js';
+import { MemberPlatformMembership } from './MemberPlatformMembership.js';
+import { Registration } from './Registration.js';
+import { Filterable } from './records/RecordCategory.js';
+import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(Registration) })

@@ -3,13 +3,13 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { CartReservedSeat } from '../SeatingPlan';
-import { Cart } from './Cart';
-import { CartStockHelper, StockDefinition } from './CartStockHelper';
-import { ProductDiscountSettings } from './Discount';
-import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product';
-import { Webshop } from './Webshop';
-import { WebshopFieldAnswer } from './WebshopField';
+import { CartReservedSeat } from '../SeatingPlan.js';
+import { Cart } from './Cart.js';
+import { CartStockHelper, StockDefinition } from './CartStockHelper.js';
+import { ProductDiscountSettings } from './Discount.js';
+import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product.js';
+import { Webshop } from './Webshop.js';
+import { WebshopFieldAnswer } from './WebshopField.js';
 
 export class CartItemPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })

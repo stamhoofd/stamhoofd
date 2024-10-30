@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { STInvoice } from '../billing/STInvoice';
+import { STInvoice } from '../billing/STInvoice.js';
 
 function isInvoiceComplete(invoice: STInvoice, payoutExport: StripePayoutExport) {
     // Find all payout items for this invoice

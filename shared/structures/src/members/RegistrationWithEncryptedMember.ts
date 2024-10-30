@@ -1,6 +1,6 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Member } from './Member';
+import { Member } from './Member.js';
 
 export class RegistrationWithEncryptedMember extends AutoEncoder {
     @field({ decoder: StringDecoder })

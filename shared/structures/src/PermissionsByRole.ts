@@ -1,6 +1,6 @@
 import { AutoEncoder, field, ArrayDecoder } from '@simonbackx/simple-encoding';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel';
-import { PermissionRole } from './PermissionRole';
+import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
+import { PermissionRole } from './PermissionRole.js';
 
 /**
  * @deprecated
@@ -17,7 +17,7 @@ export class PermissionsByRole extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRole) })
     full: PermissionRole[] = [];
 
-    getPermissionLevel(permissions: import('./LoadedPermissions').LoadedPermissions): PermissionLevel {
+    getPermissionLevel(permissions: import('./LoadedPermissions.js').LoadedPermissions): PermissionLevel {
         if (permissions.hasFullAccess()) {
             return PermissionLevel.Full;
         }
@@ -75,7 +75,7 @@ export class PermissionsByRole extends AutoEncoder {
         return PermissionLevel.None;
     }
 
-    hasAccess(permissions: import('./LoadedPermissions').LoadedPermissions | undefined | null, level: PermissionLevel): boolean {
+    hasAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | undefined | null, level: PermissionLevel): boolean {
         if (!permissions) {
             return false;
         }
@@ -86,15 +86,15 @@ export class PermissionsByRole extends AutoEncoder {
         return getPermissionLevelNumber(this.getRolePermissionLevel(role)) >= getPermissionLevelNumber(level);
     }
 
-    hasFullAccess(permissions: import('./LoadedPermissions').LoadedPermissions | undefined | null): boolean {
+    hasFullAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | undefined | null): boolean {
         return this.hasAccess(permissions, PermissionLevel.Full);
     }
 
-    hasWriteAccess(permissions: import('./LoadedPermissions').LoadedPermissions | undefined | null): boolean {
+    hasWriteAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | undefined | null): boolean {
         return this.hasAccess(permissions, PermissionLevel.Write);
     }
 
-    hasReadAccess(permissions: import('./LoadedPermissions').LoadedPermissions | undefined | null): boolean {
+    hasReadAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | undefined | null): boolean {
         return this.hasAccess(permissions, PermissionLevel.Read);
     }
 }

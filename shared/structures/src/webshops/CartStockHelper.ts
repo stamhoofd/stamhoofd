@@ -1,9 +1,9 @@
 import { Formatter } from '@stamhoofd/utility';
 
-import { Cart } from './Cart';
-import { CartItem, CartItemOption } from './CartItem';
-import { Option, Product, ProductPrice } from './Product';
-import { Webshop } from './Webshop';
+import { Cart } from './Cart.js';
+import { CartItem, CartItemOption } from './CartItem.js';
+import { Option, Product, ProductPrice } from './Product.js';
+import { Webshop } from './Webshop.js';
 
 export type StockLookupData = {
     product: Product;

@@ -1,8 +1,8 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 
-import { RecordAnswer } from './records/RecordAnswer';
-import { Filterable } from './records/RecordCategory';
-import { RecordSettings } from './records/RecordSettings';
+import { RecordAnswer } from './records/RecordAnswer.js';
+import { Filterable } from './records/RecordCategory.js';
+import { RecordSettings } from './records/RecordSettings.js';
 
 export type PatchAnswers = PatchMap<string, RecordAnswer | AutoEncoderPatchType<RecordAnswer> | null>;
 

@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
-import { Organization } from '../Organization';
-import { BalanceItemWithPayments } from '../BalanceItem';
-import { PaymentGeneral } from '../members/PaymentGeneral';
+import { Organization } from '../Organization.js';
+import { BalanceItemWithPayments } from '../BalanceItem.js';
+import { PaymentGeneral } from '../members/PaymentGeneral.js';
 
 export class PayableBalance extends AutoEncoder {
     @field({ decoder: Organization })

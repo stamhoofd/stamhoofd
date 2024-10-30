@@ -1,5 +1,5 @@
 import { AutoEncoder, field, StringDecoder, BooleanDecoder } from '@simonbackx/simple-encoding';
-import { Company } from './Company';
+import { Company } from './Company.js';
 
 /**
  * Who is paying / paid, and how can we contact them

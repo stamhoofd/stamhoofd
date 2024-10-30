@@ -2,12 +2,12 @@ import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDe
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../addresses/Address';
-import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod';
-import { PaymentProvider } from '../PaymentProvider';
-import { PaymentStatus } from '../PaymentStatus';
-import { TransferSettings } from '../webshops/TransferSettings';
-import { PaymentCustomer } from '../PaymentCustomer';
+import { Address } from '../addresses/Address.js';
+import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
+import { PaymentProvider } from '../PaymentProvider.js';
+import { PaymentStatus } from '../PaymentStatus.js';
+import { TransferSettings } from '../webshops/TransferSettings.js';
+import { PaymentCustomer } from '../PaymentCustomer.js';
 
 export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

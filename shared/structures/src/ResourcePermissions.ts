@@ -1,8 +1,8 @@
 import { AutoEncoder, field, StringDecoder, EnumDecoder, ArrayDecoder, AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
-import { AccessRight, AccessRightHelper } from './AccessRight';
-import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel';
-import { PermissionRoleDetailed } from './PermissionRole';
-import { PermissionsResourceType } from './PermissionsResourceType';
+import { AccessRight, AccessRightHelper } from './AccessRight.js';
+import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
+import { PermissionRoleDetailed } from './PermissionRole.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
 
 /**
  * More granular access rights to specific things in the system
@@ -37,9 +37,9 @@ export class ResourcePermissions extends AutoEncoder {
     }
 
     createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed): AutoEncoderPatchType<PermissionRoleDetailed>;
-    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: import('./Permissions').Permissions): AutoEncoderPatchType<import('./Permissions').Permissions>;
-    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed | import('./Permissions').Permissions): AutoEncoderPatchType<PermissionRoleDetailed> | AutoEncoderPatchType<import('./Permissions').Permissions> {
-        const patch = roleOrPermissions.static.patch({}) as AutoEncoderPatchType<PermissionRoleDetailed> | AutoEncoderPatchType<import('./Permissions').Permissions>;
+    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: import('./Permissions.js').Permissions): AutoEncoderPatchType<import('./Permissions.js').Permissions>;
+    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed | import('./Permissions.js').Permissions): AutoEncoderPatchType<PermissionRoleDetailed> | AutoEncoderPatchType<import('./Permissions.js').Permissions> {
+        const patch = roleOrPermissions.static.patch({}) as AutoEncoderPatchType<PermissionRoleDetailed> | AutoEncoderPatchType<import('./Permissions.js').Permissions>;
 
         // First check if we need to insert the type
         if (roleOrPermissions.resources.get(type)) {

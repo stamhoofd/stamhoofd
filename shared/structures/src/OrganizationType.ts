@@ -1,5 +1,5 @@
-import { GroupCategory, GroupCategorySettings } from './GroupCategory';
-import { UmbrellaOrganization } from './UmbrellaOrganization';
+import { GroupCategory, GroupCategorySettings } from './GroupCategory.js';
+import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 
 export enum OrganizationType {
     Youth = 'Youth',

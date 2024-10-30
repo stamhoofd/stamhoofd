@@ -1,11 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { PermissionRoleForResponsibility } from './PermissionRole';
-import { ResourcePermissions } from './ResourcePermissions';
+import { PermissionRoleForResponsibility } from './PermissionRole.js';
+import { ResourcePermissions } from './ResourcePermissions.js';
 
-import { Group } from './Group';
-import { PermissionLevel } from './PermissionLevel';
-import { PermissionsResourceType } from './PermissionsResourceType';
+import { Group } from './Group.js';
+import { PermissionLevel } from './PermissionLevel.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
 
 export class MemberResponsibility extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

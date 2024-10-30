@@ -1,14 +1,14 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Premise } from './addresses/Premise';
-import { DNSRecord } from './DNSRecord';
-import { MemberResponsibility } from './MemberResponsibility';
-import { OrganizationEmail } from './OrganizationEmail';
-import { PayconiqAccount, PrivatePaymentConfiguration } from './PaymentConfiguration';
-import { PaymentMethod } from './PaymentMethod';
-import { PaymentProvider } from './PaymentProvider';
-import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole';
-import { StripeMetaData } from './StripeAccount';
+import { Premise } from './addresses/Premise.js';
+import { DNSRecord } from './DNSRecord.js';
+import { MemberResponsibility } from './MemberResponsibility.js';
+import { OrganizationEmail } from './OrganizationEmail.js';
+import { PayconiqAccount, PrivatePaymentConfiguration } from './PaymentConfiguration.js';
+import { PaymentMethod } from './PaymentMethod.js';
+import { PaymentProvider } from './PaymentProvider.js';
+import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
+import { StripeMetaData } from './StripeAccount.js';
 
 export class CreditItem extends AutoEncoder {
     /**

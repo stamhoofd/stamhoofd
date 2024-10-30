@@ -1,6 +1,6 @@
 import { StringCompare } from '@stamhoofd/utility';
 
-import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter';
+import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
 
 export type InMemoryFilterRunner = (object: any) => boolean;
 
