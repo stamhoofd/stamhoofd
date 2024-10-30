@@ -3,7 +3,7 @@ import { ComputedRef, isRef, Ref, watch } from 'vue';
 export interface MetaTag {
     id: string;
     name: string;
-    content: string | number | ComputedRef<string | undefined> | Ref<string | undefined> | Ref<number | undefined> | ComputedRef<number | undefined>;
+    content: string | number | ComputedRef<string | undefined> | Ref<string | undefined> | Ref<number | undefined> | ComputedRef<number | undefined> | undefined;
 }
 
 export enum MetaKey {
@@ -70,7 +70,7 @@ export function useMetaInfo({ title, meta, options }: {
                     }
                 });
             }
-            else {
+            else if (data.content !== undefined) {
                 metaElementsToAdd.push(metaElement);
             }
         }
@@ -106,7 +106,7 @@ function getHeadElement(): HTMLHeadElement {
 
 function createMetaElement(key: MetaKey, data: MetaTag): HTMLMetaElement {
     const metaEl = document.createElement('meta');
-    const copy: Record<string, string | number | ComputedRef<string | undefined> | ComputedRef<number | undefined> | Ref<string | undefined> | Ref<number | undefined>> = {
+    const copy: Record<string, string | number | ComputedRef<string | undefined> | ComputedRef<number | undefined> | Ref<string | undefined> | Ref<number | undefined> | undefined> = {
         ...data,
     };
     delete copy.id;
@@ -114,7 +114,7 @@ function createMetaElement(key: MetaKey, data: MetaTag): HTMLMetaElement {
     metaEl.setAttribute(key, data.id);
 
     Object.entries(copy).forEach(([key, value]) => {
-        if (!isRef(value)) {
+        if (value !== undefined && !isRef(value)) {
             metaEl.setAttribute(key, value.toString());
         }
     });

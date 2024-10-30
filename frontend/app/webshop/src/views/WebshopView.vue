@@ -87,18 +87,18 @@ const dismiss = useDismiss();
 const webshopManager = useWebshopManager();
 const checkoutManager = useCheckoutManager();
 const organization = computed(() => webshopManager.organization);
-const webshop = computed(() => webshopManager.webshop);
-const cartEnabled = computed(() => webshop.value.shouldEnableCart);
-const webshopLayout = computed(() => webshop.value.meta.layout);
+const webshop = webshopManager.webshop;
+const cartEnabled = webshop.shouldEnableCart;
+const webshopLayout = webshop.meta.layout;
 const checkout = computed(() => checkoutManager.checkout);
 const cart = computed(() => checkoutManager.cart);
 const cartCount = computed(() => checkoutManager.cart.count);
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 const userName = computed(() => context.value.user?.firstName ?? '');
-const bannerImage = computed(() => webshop.value.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined));
-const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
-const bannerImageWidth = computed(() => bannerImage.value?.width);
-const bannerImageHeight = computed(() => bannerImage.value?.height);
+const bannerImage = webshop.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined);
+const bannerImageSrc = bannerImage?.file.getPublicPath();
+const bannerImageWidth = bannerImage?.width;
+const bannerImageHeight = bannerImage?.height;
 
 useMetaInfo({
     title: `${webshopManager.webshop.meta.name} | ${webshopManager.organization.name}`,
@@ -139,10 +139,7 @@ useMetaInfo({
         {
             id: 'og:image:type',
             name: 'og:image:type',
-            content: computed(() => {
-                if (bannerImageSrc.value === undefined) return undefined;
-                return bannerImageSrc.value.endsWith('.png') ? 'image/png' : 'image/jpeg';
-            }),
+            content: bannerImageSrc === undefined ? undefined : bannerImageSrc.endsWith('.png') ? 'image/png' : 'image/jpeg',
         },
     ],
 });
@@ -153,7 +150,7 @@ function switchAccount() {
 
     // Redirect to login
     context.value.startSSO({
-        webshopId: webshop.value.id,
+        webshopId: webshop.id,
         prompt: 'select_account',
         providerType: LoginProviderType.SSO,
     }).catch(console.error);
@@ -189,7 +186,7 @@ async function openCheckout(animated = true) {
 }
 
 function openCart(animated = true, components: ComponentWithProperties[] = [], url?: string) {
-    if (!cartEnabled.value && components.length === 0) {
+    if (!cartEnabled && components.length === 0) {
         openCheckout(animated).catch(console.error);
         return;
     }
@@ -199,7 +196,7 @@ function openCart(animated = true, components: ComponentWithProperties[] = [], u
         components: [
             new ComponentWithProperties(NavigationController, {
                 initialComponents: [
-                    ...(cartEnabled.value ? [new ComponentWithProperties(CartView)] : []),
+                    ...(cartEnabled ? [new ComponentWithProperties(CartView)] : []),
                     ...components,
                 ],
             }),
@@ -210,14 +207,14 @@ function openCart(animated = true, components: ComponentWithProperties[] = [], u
 }
 
 // 2 minutes in advance already
-const closed = computed(() => webshop.value.isClosed(2 * 60 * 1000) || !organization.value.meta.packages.useWebshops);
-const almostClosed = computed(() => webshop.value.isClosed(6 * 60 * 60 * 1000) && !closed.value);
-const showOpenAt = computed(() => closed.value && webshop.value.opensInTheFuture());
-const products = computed(() => webshop.value.products.filter(p => !p.hidden));
+const closed = computed(() => webshop.isClosed(2 * 60 * 1000) || !organization.value.meta.packages.useWebshops);
+const almostClosed = computed(() => webshop.isClosed(6 * 60 * 60 * 1000) && !closed.value);
+const showOpenAt = computed(() => closed.value && webshop.opensInTheFuture());
+const products = computed(() => webshop.products.filter(p => !p.hidden));
 const categories = computed(() => {
-    return webshop.value.categories.filter((c) => {
+    return webshop.categories.filter((c) => {
         const products = c.productIds.flatMap((id) => {
-            const product = webshop.value.products.find(p => p.id === id);
+            const product = webshop.products.find(p => p.id === id);
             if (product && !product.hidden) {
                 return [product];
             }
@@ -228,7 +225,7 @@ const categories = computed(() => {
 });
 
 function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss: ReturnType<typeof useDismiss> }) {
-    if (cartEnabled.value) {
+    if (cartEnabled) {
         if (args) {
             args.dismiss({ force: true }).catch(console.error);
         }
@@ -288,7 +285,7 @@ onMounted(() => {
     check().catch(console.error);
 
     if (path.length === 2 && path[0] === 'code') {
-        if (cartEnabled.value) {
+        if (cartEnabled) {
             openCart(false);
         }
 
@@ -378,7 +375,7 @@ onMounted(() => {
             console.error(e);
         });
     }
-    else if (path.length === 1 && path[0] === 'cart' && cartEnabled.value) {
+    else if (path.length === 1 && path[0] === 'cart' && cartEnabled) {
         openCart(false);
     }
 });
