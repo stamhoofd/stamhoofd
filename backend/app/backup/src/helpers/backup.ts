@@ -9,6 +9,8 @@ import { DateTime } from 'luxon';
 import path from 'path';
 import util from 'util';
 const execPromise = util.promisify(exec);
+import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 
 // Normally we'll have ±5 binary logs per day (if max size is set to 50MB)
 // Since well create a backup every day, keeping 500 binary logs would give
@@ -23,16 +25,38 @@ const BINARY_LOG_PREFIX = 'binlog.';
  * For the health endpoint
  */
 
-let LAST_BINARY_BACKUP: Date | null = null;
+let LAST_BINARY_BACKUP: { date: Date } | null = null;
 
-let LAST_BACKUP: Date | null = null;
+let LAST_BACKUP: { date: Date; size: number } | null = null;
+
+export class BackupDateSize extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    date: string;
+
+    @field({ decoder: StringDecoder, optional: true })
+    size?: string;
+}
+
+async function hashFile(path: string, algo = 'md5') {
+    const hashFunc = createHash(algo); // you can also sha256, sha512 etc
+
+    const contentStream = createReadStream(path);
+    const updateDone = new Promise((resolve, reject) => {
+        contentStream.on('data', data => hashFunc.update(data));
+        contentStream.on('close', resolve);
+        contentStream.on('error', reject);
+    });
+
+    await updateDone;
+    return hashFunc.digest('base64'); // will return hash, formatted to HEX
+}
 
 export class BackupHealth extends AutoEncoder {
-    @field({ decoder: StringDecoder, nullable: true })
-    lastBackup: string | null;
+    @field({ decoder: BackupDateSize, nullable: true })
+    lastBackup: BackupDateSize | null;
 
-    @field({ decoder: StringDecoder, nullable: true })
-    lastBinaryBackup: string | null;
+    @field({ decoder: BackupDateSize, nullable: true })
+    lastBinaryBackup: BackupDateSize | null;
 
     @field({ decoder: StringDecoder })
     status: 'ok' | 'error';
@@ -41,10 +65,36 @@ export class BackupHealth extends AutoEncoder {
 export function getHealth(): BackupHealth {
     const now = new Date();
 
+    let status: 'ok' | 'error' = 'ok';
+
+    if (!LAST_BINARY_BACKUP || !LAST_BACKUP) {
+        status = 'error';
+    }
+    else {
+        if (LAST_BINARY_BACKUP.date.getTime() - now.getTime() > 60 * 10 * 1000) {
+            status = 'error';
+        }
+        if (LAST_BACKUP.date.getTime() - now.getTime() > 60 * 60 * 1000 * 25) {
+            status = 'error';
+        }
+        if (LAST_BACKUP.size < 1 * 1000 * 1000) {
+            status = 'error';
+        }
+    }
+
     return BackupHealth.create({
-        lastBinaryBackup: LAST_BINARY_BACKUP ? Formatter.dateTimeIso(LAST_BINARY_BACKUP) : null,
-        lastBackup: LAST_BACKUP ? Formatter.dateTimeIso(LAST_BACKUP) : null,
-        status: LAST_BINARY_BACKUP && LAST_BACKUP && (LAST_BINARY_BACKUP.getTime() - now.getTime() < 60 * 10 * 1000) && (LAST_BACKUP.getTime() - now.getTime() < 60 * 60 * 1000 * 25) ? 'ok' : 'error',
+        lastBinaryBackup: LAST_BINARY_BACKUP
+            ? BackupDateSize.create({
+                date: Formatter.dateTimeIso(LAST_BINARY_BACKUP.date),
+            })
+            : null,
+        lastBackup: LAST_BACKUP
+            ? BackupDateSize.create({
+                date: Formatter.dateTimeIso(LAST_BACKUP.date),
+                size: Formatter.fileSize(LAST_BACKUP.size),
+            })
+            : null,
+        status,
     });
 }
 
@@ -60,7 +110,7 @@ export async function cleanBackups() {
     const now = new Date();
     const boundaryDateTime = new Date(now.getTime() - 1000 * 60 * 60 * 24 * MAX_BACKUPS);
     const boundaryFileName = getBackupBaseFileName(boundaryDateTime) + '.gz.enc';
-    let lastBackup: string | null = null;
+    let lastBackup: ObjectStorageFile | null = null;
 
     for (const file of allBackups) {
         const filename = path.basename(file.key);
@@ -74,8 +124,8 @@ export async function cleanBackups() {
                 }));
             }
             else {
-                if (!lastBackup || lastBackup < filename) {
-                    lastBackup = filename;
+                if (!lastBackup || lastBackup.key < file.key) {
+                    lastBackup = file;
                 }
             }
         }
@@ -83,8 +133,11 @@ export async function cleanBackups() {
 
     if (!LAST_BACKUP && lastBackup) {
         // Read timestamp from last backup file
-        console.log('Setting last backup timestamp from last backup ' + lastBackup);
-        LAST_BACKUP = getBackupFileDate(lastBackup);
+        console.log('Setting last backup timestamp from last backup ' + lastBackup.key);
+        LAST_BACKUP = {
+            date: getBackupFileDate(path.basename(lastBackup.key)),
+            size: lastBackup.size,
+        };
     }
 }
 
@@ -300,8 +353,9 @@ export async function backup() {
 
     // Assert disk space
     const availableDiskSpace = (await diskSpace()) / 1000 / 1000 / 1000;
-    if (availableDiskSpace < 20) {
-        throw new Error('Less than 20GB disk space available. Avoid creating backups now until this has been resolved.');
+    const required = Math.max(10, LAST_BACKUP ? Math.ceil(LAST_BACKUP?.size * 15 / 1000 / 1000 / 1000) : 0); // Minimum disk size = 15 times size of a backup (uncompressed size of backup is a lot more than compressed size)
+    if (availableDiskSpace < required) {
+        throw new Error(`Less than ${required.toFixed(2)}GB disk space available. Avoid creating backups now until this has been resolved.`);
     }
 
     // Recreate folder
@@ -346,28 +400,41 @@ export async function backup() {
     // Create read stream
     const stream = fs.createReadStream(encryptedFile);
     const key = objectStoragePath + '/' + encryptedFile.split('/').pop();
+    const fileSize = fs.statSync(encryptedFile).size;
 
-    const params = {
+    console.log('Calculating MD5...');
+    const md5 = await hashFile(encryptedFile);
+
+    console.log('Uploading backup to object storage at ' + key + '...');
+
+    const command = new PutObjectCommand({
         Bucket: STAMHOOFD.SPACES_BUCKET,
         Key: key,
         Body: stream,
         ContentType: 'application/octet-stream',
-        ContentLength: fs.statSync(encryptedFile).size,
+        ContentLength: fileSize,
         ACL: 'private' as const,
         CacheControl: 'no-cache',
-    };
+        ContentMD5: md5,
+    });
 
-    console.log('Uploading backup to object storage at ' + key + '...');
-
-    const command = new PutObjectCommand(params);
     const response = await client.send(command);
 
     if (response.$metadata.httpStatusCode !== 200) {
         throw new Error('Failed to upload backup');
     }
 
+    // Check ETag
+    if (response.ETag !== md5) {
+        throw new Error('ETag does not match MD5');
+    }
+
     console.log(chalk.green('✓ Backup uploaded to object storage at ' + key));
-    LAST_BACKUP = new Date();
+
+    LAST_BACKUP = {
+        date: new Date(),
+        size: fileSize,
+    };
 }
 
 export async function backupBinlogs() {
@@ -413,7 +480,9 @@ export async function backupBinlogs() {
         await uploadBinaryLog(fullPath, true, true, allBinaryLogs);
     }
 
-    LAST_BINARY_BACKUP = new Date();
+    LAST_BINARY_BACKUP = {
+        date: new Date(),
+    };
 }
 
 export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, gzip = true, allBinaryLogs: ObjectStorageFile[]) {
@@ -432,7 +501,6 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
         const key = STAMHOOFD.objectStoragePath + '/binlogs/' + uploadedName + (gzip ? '.gz' : '') + '.enc';
 
         if (allBinaryLogs.find(f => f.key === key)) {
-            console.log('Binary log already exists: ' + uploadedName);
             return;
         }
 
@@ -507,7 +575,9 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
     // Delete the compressed file
     await execPromise('rm ' + escapeShellArg(binaryLogPathMoved));
 
-    // Upload
+    // Calculate MD5
+    console.log('Calculating MD5...');
+    const md5 = await hashFile(encryptedFile);
 
     // Create read stream
     const stream = fs.createReadStream(encryptedFile);
@@ -522,9 +592,10 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
         ContentLength: fs.statSync(encryptedFile).size,
         ACL: 'private' as const,
         CacheControl: 'no-cache',
+        ContentMD5: md5,
     };
 
-    console.log('Uploading binlog to object storage at ' + key + '...');
+    console.log('Uploading binlog to ' + key + '...');
     const command = new PutObjectCommand(params);
     const response = await client.send(command);
 
@@ -532,7 +603,7 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
         throw new Error('Failed to upload binlog');
     }
 
-    console.log(chalk.green('✓ Binlog uploaded to object storage at ' + key));
+    console.log(chalk.green('✓ Binlog uploaded to ' + key));
 
     // Rm encrypted file
     await execPromise('rm ' + escapeShellArg(encryptedFile));

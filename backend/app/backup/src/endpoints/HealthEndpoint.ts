@@ -2,6 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { BackupHealth, getHealth } from '../helpers/backup';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { checkReplicaStatus } from '../helpers/replica-status';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -11,7 +12,12 @@ class Query extends AutoEncoder {
     key?: string;
 }
 
-type ResponseBody = BackupHealth;
+export class BackupWithReplicationHealth extends BackupHealth {
+    @field({ decoder: StringDecoder, nullable: true })
+    replicationError: string | null = null;
+}
+
+type ResponseBody = BackupWithReplicationHealth;
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -50,7 +56,21 @@ export class HealthEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             });
         }
 
-        const health = getHealth();
+        const baseHealth = getHealth();
+        const health = BackupWithReplicationHealth.create({
+            ...baseHealth,
+        });
+
+        if (STAMHOOFD.IS_REPLICA) {
+            try {
+                await checkReplicaStatus();
+            }
+            catch (e) {
+                health.replicationError = e.message;
+                health.status = 'error';
+            }
+        }
+
         const response = new Response(
             health,
         );
