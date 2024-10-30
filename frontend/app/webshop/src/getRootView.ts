@@ -42,6 +42,7 @@ export async function getWebshopRootView(session: SessionContext, webshop: Websh
             $organizationManager,
             $webshopManager,
             $checkoutManager,
+            reactive_navigation_url: '/',
         }),
         root,
     });

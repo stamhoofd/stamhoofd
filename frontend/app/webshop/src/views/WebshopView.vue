@@ -167,16 +167,18 @@ async function openCheckout(animated = true) {
             });
         }
 
+        const nextComponent = await nextStep.getComponent();
+        nextComponent.provide.reactive_navigation_url = nextStep.url;
+
         present({
             animated,
             adjustHistory: animated,
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    initialComponents: [await nextStep.getComponent()],
+                    initialComponents: [nextComponent],
                 }),
             ],
             modalDisplayStyle: 'popup',
-            url: UrlHelper.transformUrl(nextStep.url),
         }).catch(console.error);
     }
     catch (e) {
@@ -185,24 +187,30 @@ async function openCheckout(animated = true) {
     }
 }
 
-function openCart(animated = true, components: ComponentWithProperties[] = [], url?: string) {
+function openCart(animated = true, components: ComponentWithProperties[] = []) {
     if (!cartEnabled && components.length === 0) {
         openCheckout(animated).catch(console.error);
         return;
     }
+
+    const getCartComponentWithUrl = () => {
+        const cartComponent = new ComponentWithProperties(CartView);
+        cartComponent.provide.reactive_navigation_url = 'cart';
+        return cartComponent;
+    };
+
     present({
         animated,
         adjustHistory: animated,
         components: [
             new ComponentWithProperties(NavigationController, {
                 initialComponents: [
-                    ...(cartEnabled ? [new ComponentWithProperties(CartView)] : []),
+                    ...(cartEnabled ? [getCartComponentWithUrl()] : []),
                     ...components,
                 ],
             }),
         ],
         modalDisplayStyle: 'popup',
-        url: UrlHelper.transformUrl(url ?? '/cart'),
     }).catch(console.error);
 }
 
@@ -281,7 +289,6 @@ onMounted(() => {
     const params = UrlHelper.shared.getSearchParams();
     UrlHelper.shared.clear();
 
-    UrlHelper.setUrl('/');
     check().catch(console.error);
 
     if (path.length === 2 && path[0] === 'code') {
@@ -391,7 +398,14 @@ async function resumeStep(destination: string, animated = true) {
             if (!nextStep) {
                 break;
             }
-            waitingComponents.push(nextStep.getComponent());
+
+            const getComponentAndSetUrl = async () => {
+                const component = await nextStep.getComponent();
+                component.provide.reactive_navigation_url = nextStep.url;
+                return component;
+            };
+
+            waitingComponents.push(getComponentAndSetUrl());
             step = nextStep;
         }
         catch (e) {
@@ -401,7 +415,7 @@ async function resumeStep(destination: string, animated = true) {
     }
 
     const components = await Promise.all(waitingComponents);
-    openCart(animated, components, step?.url);
+    openCart(animated, components);
 }
 
 onDeactivated(() => {

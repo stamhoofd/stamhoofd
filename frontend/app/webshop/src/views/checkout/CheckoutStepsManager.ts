@@ -2,7 +2,6 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { ComponentWithProperties, useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { UrlHelper } from '@stamhoofd/networking';
 import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -304,9 +303,11 @@ export class CheckoutStepsManager {
             });
         }
 
+        const nextComponent = await nextStep.getComponent();
+        nextComponent.provide.reactive_navigation_url = nextStep.url;
+
         args.show({
-            components: [await nextStep.getComponent()],
-            url: UrlHelper.transformUrl(nextStep.url),
+            components: [nextComponent],
             animated: true,
         }).catch(console.error);
     }
