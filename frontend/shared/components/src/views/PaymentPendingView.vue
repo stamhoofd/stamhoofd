@@ -31,120 +31,99 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { LoadingButton, LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { useNavigationController, usePopup } from '@simonbackx/vue-app-navigation';
+import { LoadingButton, NavigationActions, Spinner, STNavigationBar, STToolbar, useNavigationActions } from '@stamhoofd/components';
 import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        LoadingView,
-        LoadingButton,
-        Spinner,
-    },
-})
-export default class PaymentPendingView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
     paymentId: string;
-
-    /**
-     * Try to cancel the payment if still possible
-     */
-    @Prop({ default: false })
-    cancel: boolean;
-
-    @Prop({ required: true })
+    // Try to cancel the payment if still possible
+    cancel?: boolean;
     server: Server;
+    finishedHandler: (navigationActions: NavigationActions & { popup: ReturnType<typeof usePopup> }, payment: PaymentGeneral | null) => void;
+    errorHandler?: null | ((navigationActions: NavigationActions, error: unknown) => Promise<void> | void);
+}>(), {
+    cancel: false,
+    errorHandler: null,
+});
 
-    payment: PaymentGeneral | null = null;
-    loading = false;
+const navigationActions = useNavigationActions();
+const popup = usePopup();
+const navigationController = useNavigationController();
+const payment = ref<PaymentGeneral | null>(null);
+const loading = ref(false);
 
-    // step = 4 // TODO?
-    isStepsPoppable = false;
+let pollCount = 0;
+let timeout: NodeJS.Timeout | null = null;
+let didFinish = false;
 
-    pollCount = 0;
-    timer: any = null;
-    didFinish = false;
+onMounted(() => {
+    timeout = setTimeout(() => poll(), 200);
+});
 
-    @Prop({ required: true })
-    finishedHandler: (payment: PaymentGeneral | null) => void;
-
-    @Prop({ required: false, default: null })
-    errorHandler: (error: unknown) => Promise<void> | void;
-
-    mounted() {
-        this.timer = setTimeout(this.poll.bind(this), 200);
-    }
-
-    retry() {
-        if (confirm('Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.')) {
-            const navigation = this.navigationController;
-
-            if (navigation!.components.length > 1) {
-                this.pop();
-            }
-            else {
-                this.finishedHandler.call(this, this.payment);
-            }
+function retry() {
+    if (confirm('Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.')) {
+        if (navigationController.value!.components.length > 1) {
+            navigationActions.pop()?.catch(console.error);
         }
-    }
-
-    poll() {
-        this.timer = null;
-
-        if (this.didFinish) {
-            return;
-        }
-        const paymentId = this.paymentId;
-        this.server
-            .request({
-                method: 'POST',
-                path: '/payments/' + paymentId,
-                decoder: PaymentGeneral as Decoder<PaymentGeneral>,
-                query: {
-                    cancel: this.cancel,
-                },
-            }).then((response) => {
-                const payment = response.data;
-                this.payment = payment;
-
-                this.pollCount++;
-
-                if (this.didFinish) {
-                    return;
-                }
-                if (this.payment && (this.payment.status === PaymentStatus.Succeeded || this.payment.status === PaymentStatus.Failed)) {
-                    this.didFinish = true;
-                    this.finishedHandler.call(this, this.payment);
-                    return;
-                }
-                this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10 * 1000, this.pollCount * 1000));
-            }).catch((e) => {
-                if (this.didFinish) {
-                    return;
-                }
-                this.didFinish = true;
-                if (this.errorHandler) {
-                    this.errorHandler.call(this, e);
-                }
-                else {
-                    this.finishedHandler.call(this, this.payment);
-                }
-            });
-    }
-
-    beforeUnmount() {
-        if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
+        else {
+            props.finishedHandler({ ...navigationActions, popup }, payment.value);
         }
     }
 }
+
+function poll() {
+    timeout = null;
+
+    if (didFinish) {
+        return;
+    }
+    const paymentId = props.paymentId;
+    props.server
+        .request({
+            method: 'POST',
+            path: '/payments/' + paymentId,
+            decoder: PaymentGeneral as Decoder<PaymentGeneral>,
+            query: {
+                cancel: props.cancel,
+            },
+        }).then((response) => {
+            const paymentFromResponse = response.data;
+            payment.value = paymentFromResponse;
+
+            pollCount++;
+
+            if (didFinish) {
+                return;
+            }
+            if (payment.value && (payment.value.status === PaymentStatus.Succeeded || payment.value.status === PaymentStatus.Failed)) {
+                didFinish = true;
+                props.finishedHandler({ ...navigationActions, popup }, payment.value);
+                return;
+            }
+            timeout = setTimeout(() => poll(), 3000 + Math.min(10 * 1000, pollCount * 1000));
+        }).catch((e) => {
+            if (didFinish) {
+                return;
+            }
+            didFinish = true;
+            if (props.errorHandler) {
+                props.errorHandler(navigationActions, e)?.catch(console.error);
+            }
+            else {
+                props.finishedHandler({ ...navigationActions, popup }, payment.value);
+            }
+        });
+}
+
+onBeforeUnmount(() => {
+    if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+    }
+});
 </script>

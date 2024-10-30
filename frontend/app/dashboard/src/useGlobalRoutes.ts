@@ -1,5 +1,5 @@
-import { ComponentWithProperties, NavigationController, NavigationMixin, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ForgotPasswordResetView, GlobalEventBus, PaymentPendingView, RegistrationSuccessView, useContext } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ForgotPasswordResetView, GlobalEventBus, NavigationActions, PaymentPendingView, RegistrationSuccessView, useContext } from '@stamhoofd/components';
 import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
 
 let didCheckGlobalRoutes = false;
@@ -46,18 +46,18 @@ export function useGlobalRoutes() {
                     server: context.value.optionalAuthenticatedServer,
                     paymentId,
                     cancel,
-                    errorHandler: async function (this: InstanceType<typeof NavigationMixin>, error: unknown) {
-                        await this.dismiss({ force: true });
+                    errorHandler: async function (navigationActions: NavigationActions, error: unknown) {
+                        await navigationActions.dismiss({ force: true });
                         CenteredMessage.fromError(error).addCloseButton().show();
                     },
-                    finishedHandler: async function (this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
+                    finishedHandler: async function (navigationActions: NavigationActions, payment: PaymentGeneral | null) {
                         GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
 
                         if (payment && payment.status === PaymentStatus.Succeeded) {
                             // TODO: fetch appropriate data for this payment!
 
                             if (payment.memberNames.length) {
-                                await this.show({
+                                await navigationActions.show({
                                     components: [
                                         new ComponentWithProperties(RegistrationSuccessView, {
                                             registrations: [], // todo: fetch registrations
@@ -69,12 +69,12 @@ export function useGlobalRoutes() {
                                 });
                             }
                             else {
-                                await this.dismiss({ force: true });
+                                await navigationActions.dismiss({ force: true });
                                 new CenteredMessage('Betaling voltooid', 'De betaling werd voltooid.').addCloseButton().show();
                             }
                         }
                         else {
-                            await this.dismiss({ force: true });
+                            await navigationActions.dismiss({ force: true });
                             new CenteredMessage('Betaling mislukt', 'De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.').addCloseButton().show();
                         }
                     },

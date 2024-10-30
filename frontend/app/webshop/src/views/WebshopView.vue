@@ -63,8 +63,8 @@
 <script lang="ts" setup>
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, NavigationMixin, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { CategoryBox, CenteredMessage, GlobalEventBus, LegalFooter, MetaKey, OrganizationLogo, PaymentPendingView, ProductGrid, STNavigationBar, Toast, useContext, useMetaInfo } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, type useDismiss, type usePopup, usePresent } from '@simonbackx/vue-app-navigation';
+import { CategoryBox, CenteredMessage, GlobalEventBus, LegalFooter, MetaKey, NavigationActions, OrganizationLogo, PaymentPendingView, ProductGrid, STNavigationBar, Toast, useContext, useMetaInfo } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, LoginProviderType, Payment, PaymentStatus } from '@stamhoofd/structures';
 
@@ -82,7 +82,6 @@ const visible = ref(true);
 
 const context = useContext();
 const present = usePresent();
-const dismiss = useDismiss();
 
 const webshopManager = useWebshopManager();
 const checkoutManager = useCheckoutManager();
@@ -332,9 +331,9 @@ onMounted(() => {
                     server: webshopManager.server,
                     paymentId,
                     cancel,
-                    finishedHandler: function (this: InstanceType<typeof NavigationMixin>, payment: Payment | null) {
+                    finishedHandler: function (navigationActions: NavigationActions & { popup: ReturnType<typeof usePopup> }, payment: Payment | null) {
                         if (payment && payment.status === PaymentStatus.Succeeded) {
-                            if (!this.popup) {
+                            if (!navigationActions.popup) {
                                 console.log('Presenting order by replacing current view');
 
                                 // We are not in a popup/sheet on mobile
@@ -350,7 +349,7 @@ onMounted(() => {
                             else {
                                 // In popup/sheet on desktop
                                 // Desktop: push
-                                this.dismiss({ force: true, animated: true }).catch(console.error);
+                                navigationActions.dismiss({ force: true, animated: true }).catch(console.error);
                                 present({
                                     components: [
                                         new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }),
@@ -359,7 +358,7 @@ onMounted(() => {
                             }
                         }
                         else {
-                            dismiss({ force: true }).catch(console.error);
+                            navigationActions.dismiss({ force: true }).catch(console.error);
 
                             // Force reload webshop (stock will have changed: prevent invalidating the cart)
                             // Update stock in background
