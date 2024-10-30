@@ -37,12 +37,12 @@ const props = defineProps<{ webshopManager: WebshopManager }>();
 const title = 'Bestellingen';
 const configurationId = 'orders';
 
-fetchOrders();
 useVisibilityChange(() => fetchOrders());
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
     requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
 });
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
+fetchOrders();
 
 function fetchOrders() {
     props.webshopManager.fetchOrders().then((hasUpdatedOrders) => {
