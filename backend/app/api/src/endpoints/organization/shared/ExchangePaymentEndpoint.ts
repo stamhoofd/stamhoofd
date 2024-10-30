@@ -2,7 +2,7 @@ import { createMollieClient, PaymentStatus as MolliePaymentStatus } from '@molli
 import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 
@@ -48,7 +48,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
         if (!request.query.exchange) {
-            await Context.authenticate();
+            await Context.optionalAuthenticate();
         }
 
         // Not method on payment because circular references (not supprted in ts)
@@ -64,8 +64,22 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             return new Response(undefined);
         }
 
+        // #region skip check permissions if order and created less than hour ago
+        let checkPermissions = true;
+        const hourAgo = new Date();
+        hourAgo.setHours(-1);
+
+        if (payment.createdAt > hourAgo) {
+            const orders = await Order.where({ paymentId: payment.id }, { limit: 1 });
+            const isOrder = orders[0] !== undefined;
+            if (isOrder) {
+                checkPermissions = false;
+            }
+        }
+        // #endregion
+
         return new Response(
-            await AuthenticatedStructures.paymentGeneral(payment, true),
+            await AuthenticatedStructures.paymentGeneral(payment, checkPermissions),
         );
     }
 
