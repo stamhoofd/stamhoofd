@@ -64,7 +64,7 @@
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { CategoryBox, CenteredMessage, GlobalEventBus, LegalFooter, OrganizationLogo, PaymentPendingView, ProductGrid, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
+import { CategoryBox, CenteredMessage, GlobalEventBus, LegalFooter, MetaKey, OrganizationLogo, PaymentPendingView, ProductGrid, STNavigationBar, Toast, useContext, useMetaInfo } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, LoginProviderType, Payment, PaymentStatus } from '@stamhoofd/structures';
 
@@ -78,66 +78,74 @@ import TicketView from './orders/TicketView.vue';
 
 import FullPageProduct from './FullPageProduct.vue';
 
-// todo: meta info
-
-// metaInfo() {
-//         return {
-//             title: webshopManager.webshop.meta.name,
-//             titleTemplate: '%s | ' + webshopManager.organization.name,
-//             meta: [
-//                 {
-//                     vmid: 'description',
-//                     name: 'description',
-//                     content: webshopManager.webshop.meta.description.text,
-//                 },
-//                 {
-//                     hid: 'og:site_name',
-//                     name: 'og:site_name',
-//                     content: webshopManager.organization.name,
-//                 },
-//                 {
-//                     hid: 'og:title',
-//                     name: 'og:title',
-//                     content: webshopManager.webshop.meta.title ?? webshopManager.webshop.meta.name,
-//                 },
-//                 ...(bannerImage.valueSrc
-//                     ? [
-//                             {
-//                                 hid: 'og:image',
-//                                 name: 'og:image',
-//                                 content: bannerImage.valueSrc,
-//                             },
-//                             {
-//                                 hid: 'og:image:width',
-//                                 name: 'og:image:width',
-//                                 content: bannerImage.valueWidth,
-//                             },
-//                             {
-//                                 hid: 'og:image:height',
-//                                 name: 'og:image:height',
-//                                 content: bannerImage.valueHeight,
-//                             },
-//                             {
-//                                 hid: 'og:image:type',
-//                                 name: 'og:image:type',
-//                                 content: bannerImage.valueSrc.endsWith('.png') ? 'image/png' : 'image/jpeg',
-//                             },
-//                         ]
-//                     : []),
-//             ],
-//         };
-//     },
-
 const visible = ref(true);
 
 const context = useContext();
-
 const present = usePresent();
 const dismiss = useDismiss();
+
 const webshopManager = useWebshopManager();
 const checkoutManager = useCheckoutManager();
+const organization = computed(() => webshopManager.organization);
+const webshop = computed(() => webshopManager.webshop);
+const cartEnabled = computed(() => webshop.value.shouldEnableCart);
+const webshopLayout = computed(() => webshop.value.meta.layout);
+const checkout = computed(() => checkoutManager.checkout);
+const cart = computed(() => checkoutManager.cart);
+const cartCount = computed(() => checkoutManager.cart.count);
 const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 const userName = computed(() => context.value.user?.firstName ?? '');
+const bannerImage = computed(() => webshop.value.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined));
+const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
+const bannerImageWidth = computed(() => bannerImage.value?.width);
+const bannerImageHeight = computed(() => bannerImage.value?.height);
+
+useMetaInfo({
+    title: `${webshopManager.webshop.meta.name} | ${webshopManager.organization.name}`,
+    options: {
+        key: MetaKey.Routing,
+    },
+    meta: [
+        {
+            id: 'description',
+            name: 'description',
+            content: webshopManager.webshop.meta.description.text,
+        },
+        {
+            id: 'og:site_name',
+            name: 'og:site_name',
+            content: webshopManager.organization.name,
+        },
+        {
+            id: 'og:title',
+            name: 'og:title',
+            content: webshopManager.webshop.meta.title ?? webshopManager.webshop.meta.name,
+        },
+        {
+            id: 'og:image',
+            name: 'og:image',
+            content: bannerImageSrc,
+        },
+        {
+            id: 'og:image:width',
+            name: 'og:image:width',
+            content: bannerImageWidth,
+        },
+        {
+            id: 'og:image:height',
+            name: 'og:image:height',
+            content: bannerImageHeight,
+        },
+        {
+            id: 'og:image:type',
+            name: 'og:image:type',
+            content: computed(() => {
+                if (bannerImageSrc.value === undefined) return undefined;
+                return bannerImageSrc.value.endsWith('.png') ? 'image/png' : 'image/jpeg';
+            }),
+        },
+    ],
+});
 
 function switchAccount() {
     // Do a silent logout
@@ -150,14 +158,6 @@ function switchAccount() {
         providerType: LoginProviderType.SSO,
     }).catch(console.error);
 }
-
-const organization = computed(() => webshopManager.organization);
-const webshop = computed(() => webshopManager.webshop);
-const cartEnabled = computed(() => webshop.value.shouldEnableCart);
-const webshopLayout = computed(() => webshop.value.meta.layout);
-const checkout = computed(() => checkoutManager.checkout);
-const cart = computed(() => checkoutManager.cart);
-const cartCount = computed(() => checkoutManager.cart.count);
 
 async function openCheckout(animated = true) {
     try {
@@ -209,10 +209,6 @@ function openCart(animated = true, components: ComponentWithProperties[] = [], u
     }).catch(console.error);
 }
 
-const bannerImage = computed(() => webshop.value.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined));
-const bannerImageWidth = computed(() => bannerImage.value?.width);
-const bannerImageHeight = computed(() => bannerImage.value?.height);
-const bannerImageSrc = computed(() => bannerImage.value?.file.getPublicPath());
 // 2 minutes in advance already
 const closed = computed(() => webshop.value.isClosed(2 * 60 * 1000) || !organization.value.meta.packages.useWebshops);
 const almostClosed = computed(() => webshop.value.isClosed(6 * 60 * 60 * 1000) && !closed.value);

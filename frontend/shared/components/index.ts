@@ -70,6 +70,7 @@ export { default as STListItemGridRow } from "./src/layout/STListItemGridRow.vue
 
 export * from "./src/context"
 export * from './src/composables'
+export * from './src/helpers'
 
 
 export { default as GroupAvatar } from "./src/GroupAvatar.vue"
