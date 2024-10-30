@@ -350,7 +350,7 @@ onMounted(() => {
                             else {
                                 // In popup/sheet on desktop
                                 // Desktop: push
-                                dismiss({ force: true, animated: true }).catch(console.error);
+                                this.dismiss({ force: true, animated: true }).catch(console.error);
                                 present({
                                     components: [
                                         new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }),
