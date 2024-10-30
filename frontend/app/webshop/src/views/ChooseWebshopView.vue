@@ -53,31 +53,30 @@
 </template>
 
 <script lang="ts" setup>
-import { LegalFooter, OrganizationLogo, STList, STListItem, STNavigationBar } from '@stamhoofd/components';
+import { LegalFooter, MetaKey, OrganizationLogo, STList, STListItem, STNavigationBar, useMetaInfo } from '@stamhoofd/components';
 import { Organization, WebshopPreview } from '@stamhoofd/structures';
 
-// todo: meta info
-
-// metaInfo() {
-//         return {
-//             title: this.organization.name + " - Webshops",
-//             meta: [
-//                 {
-//                     vmid: 'description',
-//                     name: 'description',
-//                     content: "Kies een webshop om door te gaan",
-//                 },
-//                 {
-//                     hid: 'og:site_name',
-//                     name: 'og:site_name',
-//                     content: this.organization.name
-//                 }
-//             ]
-//         }
-//     }
-
-defineProps<{
+const props = defineProps<{
     organization: Organization;
     webshops: WebshopPreview[];
 }>();
+
+useMetaInfo({
+    title: props.organization.name + ' - Webshops',
+    options: {
+        key: MetaKey.Routing,
+    },
+    meta: [
+        {
+            id: 'description',
+            name: 'description',
+            content: 'Kies een webshop om door te gaan',
+        },
+        {
+            id: 'og:site_name',
+            name: 'og:site_name',
+            content: props.organization.name,
+        },
+    ],
+});
 </script>

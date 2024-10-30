@@ -34,37 +34,12 @@
 </template>
 
 <script lang="ts" setup>
-import { LoadingView, OrganizationLogo, STNavigationBar, useContext } from '@stamhoofd/components';
+import { LoadingView, MetaKey, OrganizationLogo, STNavigationBar, useContext, useMetaInfo } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import { LoginProviderType } from '@stamhoofd/structures';
 
 import { computed, onMounted, ref } from 'vue';
 import { useWebshopManager } from '../composables/useWebshopManager';
-
-// todo: metaInfo
-
-// metaInfo() {
-//         return {
-//             title: this.organization.name + " - Inloggen",
-//             meta: [
-//                 {
-//                     vmid: 'description',
-//                     name: 'description',
-//                     content: "Log in om door te gaan",
-//                 },
-//                 {
-//                     hid: 'og:site_name',
-//                     name: 'og:site_name',
-//                     content: this.organization.name
-//                 },
-//                 {
-//                     // Prevent indexing login page
-//                     name: 'robots',
-//                     content: 'noindex'
-//                 }
-//             ]
-//         }
-//     }
 
 const webshopManager = useWebshopManager();
 const loading = ref(false);
@@ -98,4 +73,29 @@ async function login() {
     });
     loading.value = true;
 }
+
+useMetaInfo({
+    title: organization.value.name + ' - Inloggen',
+    options: {
+        key: MetaKey.Routing,
+    },
+    meta: [
+        {
+            id: 'description',
+            name: 'description',
+            content: 'Log in om door te gaan',
+        },
+        {
+            id: 'og:site_name',
+            name: 'og:site_name',
+            content: organization.value.name,
+        },
+        {
+            // Prevent indexing login page
+            id: 'robots',
+            name: 'robots',
+            content: 'noindex',
+        },
+    ],
+});
 </script>

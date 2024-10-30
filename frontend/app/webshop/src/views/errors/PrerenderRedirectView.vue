@@ -25,32 +25,32 @@
 </template>
 
 <script lang="ts" setup>
-import { Logo } from '@stamhoofd/components';
+import { Logo, MetaKey, useMetaInfo } from '@stamhoofd/components';
 
-// todo: meta info
-// metaInfo() {
-//         return {
-//             meta: [
-//                 {
-//                     hid: `prerender-status-code`,
-//                     name: 'prerender-status-code',
-//                     content: "301"
-//                 },
-//                 {
-//                     hid: `prerender-header-location`,
-//                     name: 'prerender-header',
-//                     content: "Location: "+this.location
-//                 },
-//                 {
-//                     hid: `prerender-header-cache`,
-//                     name: 'prerender-header',
-//                     content: "Cache-Control: no-cache"
-//                 }
-//             ]
-//         }
-//     }
-
-defineProps<{
+const props = defineProps<{
     location: string;
 }>();
+
+useMetaInfo({
+    options: {
+        key: MetaKey.Routing,
+    },
+    meta: [
+        {
+            id: `prerender-status-code`,
+            name: 'prerender-status-code',
+            content: '301',
+        },
+        {
+            id: `prerender-header-location`,
+            name: 'prerender-header',
+            content: 'Location: ' + props.location,
+        },
+        {
+            id: `prerender-header-cache`,
+            name: 'prerender-header',
+            content: 'Cache-Control: no-cache',
+        },
+    ],
+});
 </script>
