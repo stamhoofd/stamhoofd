@@ -541,7 +541,7 @@ function putOrder(order: PrivateOrder) {
         }
     }
 
-    tableObjectFetcher.reset();
+    tableObjectFetcher.reset(true, true);
 }
 
 async function onNewOrders(orders: PrivateOrder[]) {
