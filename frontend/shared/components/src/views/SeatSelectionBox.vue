@@ -9,13 +9,13 @@
             }"
         >
             <div class="padding-container">
-                <div 
+                <div
                     class="seating-plan-seats"
                 >
-                    <div 
-                        v-for="row of rows" 
-                        :key="row.uuid" 
-                        class="seating-plan-row" 
+                    <div
+                        v-for="row of rows"
+                        :key="row.uuid"
+                        class="seating-plan-row"
                         :style="{
                             '--rw': row.width + 'px',
                             '--rh': row.height + 'px',
@@ -27,11 +27,11 @@
                         <span class="row-label right">{{ row.label }}</span>
 
                         <div>
-                            <button 
-                                v-for="seat of row.seats" 
+                            <button
+                                v-for="seat of row.seats"
                                 :key="seat.uuid"
-                                :ref="isSelected(row, seat) ? 'selectedSeats' : undefined" 
-                                type="button" 
+                                :ref="isSelected(row, seat) ? 'selectedSeats' : undefined"
+                                type="button"
                                 class="seat"
                                 :class="{
                                     space: seat.isSpace,
@@ -63,60 +63,59 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartReservedSeat, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { CartReservedSeat, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-import { Toast } from "../overlays/Toast";
-
+import { Toast } from '../overlays/Toast';
 
 @Component({
     components: {
-        
+
     },
 })
 export default class SeatSelectionBox extends Mixins(NavigationMixin) {
     @Prop({ default: false })
-        admin: boolean
-        
-    @Prop({ required: false, default: null})
-        sizeConfig: SeatingSizeConfiguration|null
-
-    @Prop({ required: true })
-        seatingPlan!: SeatingPlan
-
-    @Prop({ required: true })
-        seatingPlanSection!: SeatingPlanSection
+    admin: boolean;
 
     @Prop({ required: false, default: null })
-        amount: number|null
+    sizeConfig: SeatingSizeConfiguration | null;
 
-    @Prop({ required: false, default: () => []  })
-        seats!: ReservedSeat[]
+    @Prop({ required: true })
+    seatingPlan!: SeatingPlan;
+
+    @Prop({ required: true })
+    seatingPlanSection!: SeatingPlanSection;
+
+    @Prop({ required: false, default: null })
+    amount: number | null;
+
+    @Prop({ required: false, default: () => [] })
+    seats!: ReservedSeat[];
 
     /**
      * Seats that are not available for selection anymore
      */
     @Prop({ required: false, default: () => [] })
-        reservedSeats!: ReservedSeat[]
+    reservedSeats!: ReservedSeat[];
 
     @Prop({ required: false, default: () => [] })
-        highlightSeats!: ReservedSeat[]
+    highlightSeats!: ReservedSeat[];
 
     @Prop({ required: false })
-        setSeats?: (seats: ReservedSeat[]) => void
+    setSeats?: (seats: ReservedSeat[]) => void;
 
     @Prop({ required: false })
-        onClickSeat?: (seat: ReservedSeat) => void
+    onClickSeat?: (seat: ReservedSeat) => void;
 
     @Prop({ required: false })
-        onHoverSeat?: (seat: ReservedSeat) => void
+    onHoverSeat?: (seat: ReservedSeat) => void;
 
-    lastPriceToast: Toast|null = null
+    lastPriceToast: Toast | null = null;
 
     created() {
-        this.seatingPlanSection.updatePositions(this.sizeConfig ?? this.defaultSizeConfig)
+        this.seatingPlanSection.updatePositions(this.sizeConfig ?? this.defaultSizeConfig);
 
         // Default selection
         if (this.amount && this.setSeats) {
@@ -129,21 +128,21 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             //                 if (seats.length >= this.amount) {
             //                     break
             //                 }
-            // 
+            //
             //                 if (seat.isSpace) {
             //                     continue
             //                 }
-            // 
+            //
             //                 const s = ReservedSeat.create({
             //                     section: section.id,
             //                     row: row.label,
             //                     seat: seat.label
             //                 })
-            // 
+            //
             //                 if (this.reservedSeats.find(r => r.equals(s))) {
             //                     continue
             //                 }
-            // 
+            //
             //                 seats.push(
             //                     s
             //                 )
@@ -152,17 +151,18 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             //     }
             //     this.setSeats?.(seats)
             // }
-            let updatedSeats = this.seats.slice()
+            let updatedSeats = this.seats.slice();
 
             // Remove invalid seats
-            updatedSeats = updatedSeats.filter(seat => {
-                return this.seatingPlan.isValidSeat(seat, this.reservedSeats)
-            })
+            updatedSeats = updatedSeats.filter((seat) => {
+                return this.seatingPlan.isValidSeat(seat, this.reservedSeats);
+            });
 
             if (updatedSeats.length > this.amount) {
-                this.setSeats(updatedSeats.slice(0, this.amount))
-            } else {
-                this.setSeats(updatedSeats)
+                this.setSeats(updatedSeats.slice(0, this.amount));
+            }
+            else {
+                this.setSeats(updatedSeats);
             }
         }
     }
@@ -170,21 +170,21 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
     mounted() {
         setTimeout(() => {
             if (this.$refs.selectedSeats) {
-                const selectedSeats = this.$refs.selectedSeats as HTMLElement[]
+                const selectedSeats = this.$refs.selectedSeats as HTMLElement[];
                 if (selectedSeats.length > 0) {
-                    const bounds = selectedSeats[0].getBoundingClientRect()
-                    const scrollHeight = selectedSeats[0].closest('main')?.clientHeight
+                    const bounds = selectedSeats[0].getBoundingClientRect();
+                    const scrollHeight = selectedSeats[0].closest('main')?.clientHeight;
 
                     if (!scrollHeight) {
-                        return
+                        return;
                     }
 
                     if (bounds.top + bounds.height > scrollHeight - 30) {
                         selectedSeats[0].scrollIntoView({
-                            behavior: "smooth",
-                            block: "center",
-                            inline: "center"
-                        })
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'center',
+                        });
 
                         // iOS fix:
                         document.documentElement.scrollTop = 0;
@@ -196,11 +196,11 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
 
     @Watch('seatingPlanSection')
     onPlanChange() {
-        this.seatingPlanSection.updatePositions(this.sizeConfig ?? this.defaultSizeConfig)
+        this.seatingPlanSection.updatePositions(this.sizeConfig ?? this.defaultSizeConfig);
     }
 
     get rows() {
-        return this.seatingPlanSection.rows
+        return this.seatingPlanSection.rows;
     }
 
     get defaultSizeConfig() {
@@ -209,8 +209,8 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
                 seatWidth: 20,
                 seatHeight: 20,
                 seatXSpacing: 2,
-                seatYSpacing: 8
-            })
+                seatYSpacing: 8,
+            });
         }
 
         if ((this as any).$isMobile) {
@@ -218,35 +218,35 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
                 seatWidth: 30,
                 seatHeight: 30,
                 seatXSpacing: 3,
-                seatYSpacing: 8
-            })
+                seatYSpacing: 8,
+            });
         }
         return new SeatingSizeConfiguration({
             seatWidth: 28,
             seatHeight: 28,
             seatXSpacing: 3,
-            seatYSpacing: 8
-        })
+            seatYSpacing: 8,
+        });
     }
 
     get size() {
-        return this.seatingPlanSection.calculateSize(this.sizeConfig ?? this.defaultSizeConfig)
+        return this.seatingPlanSection.calculateSize(this.sizeConfig ?? this.defaultSizeConfig);
     }
 
     isDisabledPersonSeat(seat: SeatingPlanSeat) {
-        return seat.markings.includes(SeatMarkings.DisabledPerson)
-    }  
+        return seat.markings.includes(SeatMarkings.DisabledPerson);
+    }
 
     isSelected(row: SeatingPlanRow, seat: SeatingPlanSeat) {
         const s = ReservedSeat.create({
             section: this.seatingPlanSection.id,
             row: row.label,
-            seat: seat.label
-        })
-        
+            seat: seat.label,
+        });
+
         for (const reservedSeat of this.seats) {
             if (reservedSeat.equals(s)) {
-                return true
+                return true;
             }
         }
         return false;
@@ -256,13 +256,13 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         const s = ReservedSeat.create({
             section: this.seatingPlanSection.id,
             row: row.label,
-            seat: seat.label
-        })
-        return !!this.highlightSeats.find(r => r.equals(s))
+            seat: seat.label,
+        });
+        return !!this.highlightSeats.find(r => r.equals(s));
     }
 
     isOccupied(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        const category = this.seatingPlan.categories.find(c => c.id === seat.category)
+        const category = this.seatingPlan.categories.find(c => c.id === seat.category);
         if (!this.admin && category && category.adminOnly) {
             return true;
         }
@@ -270,13 +270,13 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         const s = ReservedSeat.create({
             section: this.seatingPlanSection.id,
             row: row.label,
-            seat: seat.label
-        })
-        return !!this.reservedSeats.find(r => r.equals(s))
+            seat: seat.label,
+        });
+        return !!this.reservedSeats.find(r => r.equals(s));
     }
 
     getSeatColor(seat: SeatingPlanSeat) {
-        return this.seatingPlan.getSeatColor(seat)
+        return this.seatingPlan.getSeatColor(seat);
     }
 
     onHover(row: SeatingPlanRow, seat: SeatingPlanSeat) {
@@ -284,9 +284,9 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             this.onHoverSeat(ReservedSeat.create({
                 section: this.seatingPlanSection.id,
                 row: row.label,
-                seat: seat.label
-            }))
-            return
+                seat: seat.label,
+            }));
+            return;
         }
     }
 
@@ -295,92 +295,94 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             this.onClickSeat(ReservedSeat.create({
                 section: this.seatingPlanSection.id,
                 row: row.label,
-                seat: seat.label
-            }))
-            return
+                seat: seat.label,
+            }));
+            return;
         }
         if (!this.setSeats) {
-            return
+            return;
         }
 
         if (seat.isSpace) {
-            return
+            return;
         }
 
         if (this.lastPriceToast) {
-            this.lastPriceToast.hide()
-            this.lastPriceToast = null
+            this.lastPriceToast.hide();
+            this.lastPriceToast = null;
         }
 
         // select/deselect this seat
-        const selected = this.isSelected(row, seat)
+        const selected = this.isSelected(row, seat);
         if (selected) {
             // deselect
             this.setSeats(
-                this.seats.filter(s => s.section !== this.seatingPlanSection.id || s.row !== row.label || s.seat !== seat.label)
-            )
-        } else {
+                this.seats.filter(s => s.section !== this.seatingPlanSection.id || s.row !== row.label || s.seat !== seat.label),
+            );
+        }
+        else {
             if (this.isOccupied(row, seat)) {
-                new Toast('Deze plaats is al bezet', 'error red').show()
-                return
+                new Toast('Deze plaats is al bezet', 'error red').show();
+                return;
             }
 
             // select
             const addedSeat = ReservedSeat.create({
                 section: this.seatingPlanSection.id,
                 row: row.label,
-                seat: seat.label
-            })
+                seat: seat.label,
+            });
 
-            let seats = [...this.seats, addedSeat]
+            let seats = [...this.seats, addedSeat];
 
             if (this.amount && seats.length > this.amount) {
                 // Remove seat that is the furthest away
-                let currentPosition = {x: seat.x, y: seat.y}
+                let currentPosition = { x: seat.x, y: seat.y };
 
-                let furthestSeat: {seat: ReservedSeat, distance: number} | null = null
+                let furthestSeat: { seat: ReservedSeat; distance: number } | null = null;
 
                 for (const s of seats) {
                     if (s.equals(addedSeat)) {
-                        continue
+                        continue;
                     }
                     if (s.section !== this.seatingPlanSection.id) {
-                        continue
+                        continue;
                     }
 
-                    const row = this.seatingPlanSection.rows.find(r => r.label === s.row)
+                    const row = this.seatingPlanSection.rows.find(r => r.label === s.row);
                     if (!row) {
-                        continue
+                        continue;
                     }
 
-                    const seat = row.seats.find(ss => ss.label === s.seat)
+                    const seat = row.seats.find(ss => ss.label === s.seat);
                     if (!seat) {
-                        continue
+                        continue;
                     }
 
-                    const distance = Math.sqrt(Math.pow(currentPosition.x - seat.x, 2) + Math.pow(currentPosition.y - seat.y, 2))
+                    const distance = Math.sqrt(Math.pow(currentPosition.x - seat.x, 2) + Math.pow(currentPosition.y - seat.y, 2));
                     if (!furthestSeat || distance > furthestSeat.distance) {
-                        furthestSeat = { seat: s, distance }
+                        furthestSeat = { seat: s, distance };
                     }
                 }
 
                 if (furthestSeat) {
-                    seats = seats.filter(s => !s.equals(furthestSeat!.seat))
-                } else {
+                    seats = seats.filter(s => !s.equals(furthestSeat!.seat));
+                }
+                else {
                     // Remove first
-                    seats = seats.slice(1)
+                    seats = seats.slice(1);
                 }
             }
 
-            this.setSeats(seats)
+            this.setSeats(seats);
 
             // Show a toast if price is higher
-            const cartReservedSeat = CartReservedSeat.create(addedSeat)
-            cartReservedSeat.calculatePrice(this.seatingPlan)
+            const cartReservedSeat = CartReservedSeat.create(addedSeat);
+            cartReservedSeat.calculatePrice(this.seatingPlan);
 
             if (cartReservedSeat.price > 0) {
-                this.lastPriceToast = new Toast('Deze plaats heeft een meerprijs van ' + Formatter.price(cartReservedSeat.price), 'info')
-                this.lastPriceToast.show()
+                this.lastPriceToast = new Toast('Deze plaats heeft een meerprijs van ' + Formatter.price(cartReservedSeat.price), 'info');
+                this.lastPriceToast.show();
             }
         }
     }
@@ -394,8 +396,8 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
 .seat-selection-box {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     position: relative;
-    overflow-x: scroll;
-    
+    overflow-x: auto;
+
     // Fixes drawing issues
     transform: translate3d(0, 0, 0);
 
@@ -443,7 +445,6 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         width: var(--sw);
         height: var(--sh);
     }
-
 
     .seat {
         position: absolute;
@@ -534,14 +535,14 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         }
 
         &.selected {
-            color: $color-primary-contrast; 
+            color: $color-primary-contrast;
             font-weight: bold;
 
             &::after {
                 background: $color-primary;
                 animation: increase 0.2s;
                 border-color: $color-primary;
-                
+
                 background: var(--color, $color-primary);
                 border-color: var(--color, $color-primary);
             }
@@ -568,12 +569,10 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
                 opacity: 0.2;
             }
 
-
             &::after {
                 background: $color-border;
             }
 
-            
         }
     }
 

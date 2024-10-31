@@ -1517,7 +1517,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
     background: $color-background-shade;
     box-shadow: inset 0px 0px 200px rgba(0, 0, 0, 0.15), inset 0px 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: $border-radius;
-    overflow-x: scroll;
+    overflow-x: auto;
     margin-bottom: 10px;
     transform: translate3d(0,0,0); // fixes drawing rounding issues, and makes sure the seating section is drawn on its own before rendering in the page
 
