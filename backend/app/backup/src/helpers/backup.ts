@@ -504,7 +504,7 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
 
         if (allBinaryLogs.find(f => f.key === key)) {
             // Delete partial if found
-            await deletePartial(client, binaryLogPath, gzip, allBinaryLogs);
+            await deletePartial(client, uploadedName, binaryLogPath, gzip, allBinaryLogs);
             return;
         }
 
@@ -613,13 +613,13 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
     await execPromise('rm ' + escapeShellArg(encryptedFile));
 
     if (!partial) {
-        await deletePartial(client, binaryLogPath, gzip, allBinaryLogs);
+        await deletePartial(client, uploadedName, binaryLogPath, gzip, allBinaryLogs);
     }
 }
 
-async function deletePartial(client: S3Client, binaryLogPath: string, gzip: boolean, allBinaryLogs: ObjectStorageFile[]) {
+async function deletePartial(client: S3Client, uploadedName: string, binaryLogPath: string, gzip: boolean, allBinaryLogs: ObjectStorageFile[]) {
     // Check if a partial exists on the server and delete it to keep it clean
-    const key = STAMHOOFD.objectStoragePath + '/binlogs/' + path.basename(binaryLogPath) + '.partial' + (gzip ? '.gz' : '') + '.enc';
+    const key = STAMHOOFD.objectStoragePath + '/binlogs/' + uploadedName + '.partial' + (gzip ? '.gz' : '') + '.enc';
     try {
         if (allBinaryLogs.find(f => f.key === key)) {
             console.log('Partial binary log exists at ' + key + ', which is no longer needed. Deleting...');
