@@ -46,6 +46,9 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             .from(SQL.table(ordersTable))
             .where(compileToSQLFilter({
                 organizationId: organization.id,
+                number: {
+                    $neq: null,
+                },
             }, filterCompilers));
 
         if (q.filter) {
