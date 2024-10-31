@@ -11,6 +11,7 @@ import util from 'util';
 const execPromise = util.promisify(exec);
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
+import { QueueHandler } from '@stamhoofd/queues';
 
 // Normally we'll have ±5 binary logs per day (if max size is set to 50MB)
 // Since well create a backup every day, keeping 500 binary logs would give
@@ -293,148 +294,149 @@ export function getBackupFileDate(filename: string) {
 }
 
 export async function backup() {
-    // Create a backup of the local server and stores it in a .sql.gz file
-    const localBackupFolder = STAMHOOFD.localBackupFolder;
-
-    if (!localBackupFolder.endsWith('/')) {
-        throw new Error('Backup folder should end with a /');
+    if (QueueHandler.isRunning('backup')) {
+        console.log('Backup already running');
+        return;
     }
+    await QueueHandler.schedule('backup', async () => {
+        // Create a backup of the local server and stores it in a .sql.gz file
+        const localBackupFolder = STAMHOOFD.localBackupFolder;
 
-    if (!STAMHOOFD.DB_DATABASE) {
-        throw new Error('DB_DATABASE not set');
-    }
+        if (!localBackupFolder.endsWith('/')) {
+            throw new Error('Backup folder should end with a /');
+        }
 
-    if (!STAMHOOFD.DB_USER) {
-        throw new Error('DB_USER not set');
-    }
+        if (!STAMHOOFD.DB_DATABASE) {
+            throw new Error('DB_DATABASE not set');
+        }
 
-    if (!STAMHOOFD.DB_PASS) {
-        throw new Error('DB_PASS not set');
-    }
+        if (!STAMHOOFD.DB_USER) {
+            throw new Error('DB_USER not set');
+        }
 
-    if (!STAMHOOFD.keyFingerprint) {
-        throw new Error('keyFingerprint not set');
-    }
+        if (!STAMHOOFD.DB_PASS) {
+            throw new Error('DB_PASS not set');
+        }
 
-    const objectStoragePath = STAMHOOFD.objectStoragePath;
+        if (!STAMHOOFD.keyFingerprint) {
+            throw new Error('keyFingerprint not set');
+        }
 
-    if (!objectStoragePath) {
-        throw new Error('No object storage path defined');
-    }
+        const objectStoragePath = STAMHOOFD.objectStoragePath;
 
-    if (objectStoragePath.endsWith('/')) {
-        throw new Error('Object storage path should not end with a /');
-    }
+        if (!objectStoragePath) {
+            throw new Error('No object storage path defined');
+        }
 
-    if (objectStoragePath.startsWith('/')) {
-        throw new Error('Object storage path should not start with a /');
-    }
+        if (objectStoragePath.endsWith('/')) {
+            throw new Error('Object storage path should not end with a /');
+        }
 
-    if (!STAMHOOFD.SPACES_ENDPOINT) {
-        throw new Error('No SPACES_ENDPOINT defined');
-    }
+        if (objectStoragePath.startsWith('/')) {
+            throw new Error('Object storage path should not start with a /');
+        }
 
-    if (!STAMHOOFD.SPACES_BUCKET) {
-        throw new Error('No SPACES_BUCKET defined');
-    }
+        if (!STAMHOOFD.SPACES_ENDPOINT) {
+            throw new Error('No SPACES_ENDPOINT defined');
+        }
 
-    if (!STAMHOOFD.SPACES_KEY) {
-        throw new Error('No SPACES_KEY defined');
-    }
+        if (!STAMHOOFD.SPACES_BUCKET) {
+            throw new Error('No SPACES_BUCKET defined');
+        }
 
-    if (!STAMHOOFD.SPACES_SECRET) {
-        throw new Error('No SPACES_SECRET defined');
-    }
+        if (!STAMHOOFD.SPACES_KEY) {
+            throw new Error('No SPACES_KEY defined');
+        }
 
-    // Delete backups folder
-    console.log('Deleting old backups...');
-    await execPromise('rm -rf ' + escapeShellArg(localBackupFolder));
-    console.log('Deleted old backups');
+        if (!STAMHOOFD.SPACES_SECRET) {
+            throw new Error('No SPACES_SECRET defined');
+        }
 
-    // Assert disk space
-    const availableDiskSpace = (await diskSpace()) / 1000 / 1000 / 1000;
-    const required = Math.max(10, LAST_BACKUP ? Math.ceil(LAST_BACKUP?.size * 15 / 1000 / 1000 / 1000) : 0); // Minimum disk size = 15 times size of a backup (uncompressed size of backup is a lot more than compressed size)
-    if (availableDiskSpace < required) {
-        throw new Error(`Less than ${required.toFixed(2)}GB disk space available. Avoid creating backups now until this has been resolved.`);
-    }
+        // Delete backups folder
+        console.log('Deleting old backups...');
+        await execPromise('rm -rf ' + escapeShellArg(localBackupFolder));
+        console.log('Deleted old backups');
 
-    // Recreate folder
-    await execPromise('mkdir -p ' + escapeShellArg(localBackupFolder));
+        // Assert disk space
+        const availableDiskSpace = (await diskSpace()) / 1000 / 1000 / 1000;
+        const required = Math.max(10, LAST_BACKUP ? Math.ceil(LAST_BACKUP?.size * 15 / 1000 / 1000 / 1000) : 0); // Minimum disk size = 15 times size of a backup (uncompressed size of backup is a lot more than compressed size)
+        if (availableDiskSpace < required) {
+            throw new Error(`Less than ${required.toFixed(2)}GB disk space available. Avoid creating backups now until this has been resolved.`);
+        }
 
-    const tmpFile = `${localBackupFolder}${getBackupBaseFileName(new Date())}`;
-    const compressedFile = tmpFile + '.gz';
+        // Recreate folder
+        await execPromise('mkdir -p ' + escapeShellArg(localBackupFolder));
 
-    const cmd = 'mysqldump -u ' + escapeShellArg(STAMHOOFD.DB_USER) + ' -p' + escapeShellArg(STAMHOOFD.DB_PASS) + ' --flush-logs --single-transaction --triggers --routines --events --lock-tables=false ' + escapeShellArg(STAMHOOFD.DB_DATABASE) + ' > ' + escapeShellArg(tmpFile);
+        const tmpFile = `${localBackupFolder}${getBackupBaseFileName(new Date())}`;
+        const compressedFile = tmpFile + '.gz';
 
-    console.log('Creating MySQL dump...');
-    await execPromise(cmd);
+        const cmd = 'mysqldump -u ' + escapeShellArg(STAMHOOFD.DB_USER) + ' -p' + escapeShellArg(STAMHOOFD.DB_PASS) + ' --flush-logs --single-transaction --triggers --routines --events --lock-tables=false ' + escapeShellArg(STAMHOOFD.DB_DATABASE) + ' > ' + escapeShellArg(tmpFile);
 
-    console.log('MySQL dump created at ' + tmpFile);
+        console.log('Creating MySQL dump...');
+        await execPromise(cmd);
 
-    // gzipping
-    const cmd2 = `gzip -c ${escapeShellArg(tmpFile)} > ${escapeShellArg(compressedFile)}`;
-    console.log('Compressing dump...');
+        console.log('MySQL dump created at ' + tmpFile);
 
-    await execPromise(cmd2);
-    console.log('MySQL dump compressed at ' + compressedFile);
+        // gzipping
+        const cmd2 = `gzip -c ${escapeShellArg(tmpFile)} > ${escapeShellArg(compressedFile)}`;
+        console.log('Compressing dump...');
 
-    // Delete the uncompressed file
-    await execPromise('rm ' + escapeShellArg(tmpFile));
+        await execPromise(cmd2);
+        console.log('MySQL dump compressed at ' + compressedFile);
 
-    // Encrypt the compressed file using the public key in STAMHOOFD.publicEncryptionKey
-    const encryptedFile = compressedFile + '.enc';
-    const cmd3 = `gpg --recipient ${escapeShellArg(STAMHOOFD.keyFingerprint)} --encrypt --output ${escapeShellArg(encryptedFile)} ${escapeShellArg(compressedFile)}`;
+        // Delete the uncompressed file
+        await execPromise('rm ' + escapeShellArg(tmpFile));
 
-    console.log('Encrypting dump...');
-    await execPromise(cmd3);
-    console.log('MySQL dump encrypted at ' + encryptedFile);
+        // Encrypt the compressed file using the public key in STAMHOOFD.publicEncryptionKey
+        const encryptedFile = compressedFile + '.enc';
+        const cmd3 = `gpg --recipient ${escapeShellArg(STAMHOOFD.keyFingerprint)} --encrypt --output ${escapeShellArg(encryptedFile)} ${escapeShellArg(compressedFile)}`;
 
-    // Delete the compressed file
-    await execPromise('rm ' + escapeShellArg(compressedFile));
+        console.log('Encrypting dump...');
+        await execPromise(cmd3);
+        console.log('MySQL dump encrypted at ' + encryptedFile);
 
-    // Upload
+        // Delete the compressed file
+        await execPromise('rm ' + escapeShellArg(compressedFile));
 
-    // Download last backup file
-    const client = getS3Client();
+        // Upload
 
-    // Create read stream
-    const stream = fs.createReadStream(encryptedFile);
-    const key = objectStoragePath + '/' + encryptedFile.split('/').pop();
-    const fileSize = fs.statSync(encryptedFile).size;
+        // Download last backup file
+        const client = getS3Client();
 
-    console.log('Calculating MD5...');
-    const md5 = await hashFile(encryptedFile);
+        // Create read stream
+        const stream = fs.createReadStream(encryptedFile);
+        const key = objectStoragePath + '/' + encryptedFile.split('/').pop();
+        const fileSize = fs.statSync(encryptedFile).size;
 
-    console.log('Uploading backup to object storage at ' + key + '...');
+        console.log('Calculating MD5...');
+        const md5 = await hashFile(encryptedFile);
 
-    const command = new PutObjectCommand({
-        Bucket: STAMHOOFD.SPACES_BUCKET,
-        Key: key,
-        Body: stream,
-        ContentType: 'application/octet-stream',
-        ContentLength: fileSize,
-        ACL: 'private' as const,
-        CacheControl: 'no-cache',
-        ContentMD5: md5,
+        console.log('Uploading backup to object storage at ' + key + '...');
+
+        const command = new PutObjectCommand({
+            Bucket: STAMHOOFD.SPACES_BUCKET,
+            Key: key,
+            Body: stream,
+            ContentType: 'application/octet-stream',
+            ContentLength: fileSize,
+            ACL: 'private' as const,
+            CacheControl: 'no-cache',
+            ContentMD5: md5,
+        });
+
+        const response = await client.send(command);
+
+        if (response.$metadata.httpStatusCode !== 200) {
+            throw new Error('Failed to upload backup');
+        }
+
+        console.log(chalk.green('✓ Backup uploaded to object storage at ' + key));
+
+        LAST_BACKUP = {
+            date: new Date(),
+            size: fileSize,
+        };
     });
-
-    const response = await client.send(command);
-
-    if (response.$metadata.httpStatusCode !== 200) {
-        throw new Error('Failed to upload backup');
-    }
-
-    // Check ETag
-    if (response.ETag !== md5) {
-        throw new Error('ETag does not match MD5');
-    }
-
-    console.log(chalk.green('✓ Backup uploaded to object storage at ' + key));
-
-    LAST_BACKUP = {
-        date: new Date(),
-        size: fileSize,
-    };
 }
 
 export async function backupBinlogs() {
