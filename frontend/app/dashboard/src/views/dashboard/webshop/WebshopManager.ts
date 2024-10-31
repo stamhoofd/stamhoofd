@@ -1292,6 +1292,9 @@ export class WebshopManager {
             const objectStore = transaction.objectStore('orders');
 
             const request = objectStore.get(id);
+
+            const decoder = createPrivateOrderIndexBoxDecoder();
+
             request.onsuccess = () => {
                 const rawOrder = request.result;
 
@@ -1300,7 +1303,7 @@ export class WebshopManager {
                     return;
                 }
 
-                const order = (PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrder, { version: Version }));
+                const order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
                 resolve(order);
             };
         });
