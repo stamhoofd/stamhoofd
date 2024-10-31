@@ -47,7 +47,7 @@ fetchOrders();
 function fetchOrders() {
     props.webshopManager.fetchOrders().then((hasUpdatedOrders) => {
         if (hasUpdatedOrders) {
-            tableObjectFetcher.reset();
+            tableObjectFetcher.reset(true, true);
         }
     }).catch(console.error);
 }
