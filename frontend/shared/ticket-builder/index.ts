@@ -5,10 +5,14 @@ import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
 import { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { Buffer } from 'buffer';
 import PDFDocument from 'pdfkit/js/pdfkit.standalone';
 // PDFKit is used! Wrong warning below!
 // import PDFKit from "pdfkit"
 import QRCode from 'qrcode';
+
+// polyfill
+globalThis.Buffer = Buffer;
 
 // 1 mm
 const MM = 2.834666666666667;
