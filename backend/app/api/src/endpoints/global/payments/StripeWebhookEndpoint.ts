@@ -3,6 +3,7 @@ import { AnyDecoder, AutoEncoder, Decoder, field, StringDecoder } from '@simonba
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
+import { isDebouncedError, QueueHandler } from '@stamhoofd/queues';
 
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../../organization/shared/ExchangePaymentEndpoint';
@@ -77,7 +78,6 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
         // Check type
         switch (request.body.type) {
             case "account.updated": {
-                console.log(event);
                 const account = request.body.data.object;
                 if (account && account.id) {
                     const id = account.id as string;
@@ -113,12 +113,8 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                 const checkoutId = request.body.data.object.id;
                 const [model] = await StripeCheckoutSession.where({stripeSessionId: checkoutId}, {limit: 1})
                 if (model && model.organizationId) {
-                    const organization = await Organization.getByID(model.organizationId)
-                    if (organization) {
-                        await ExchangePaymentEndpoint.pollStatus(model.paymentId, organization)
-                    } else {
-                        console.warn("Could not find organization with id", model.organizationId)
-                    }
+                    await this.checkDebounced(model.paymentId, model.organizationId)
+
                 } else {
                     console.warn("Could not find stripe checkout session with id", checkoutId)
                 }
@@ -153,16 +149,33 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
         return new Response(undefined);
     }
 
+    async checkDebounced(paymentId: string, organizationId: string) {
+        // Stripe often sends a couple of webhooks for the same payment in short succession.
+        // Make sure we only do one check in a certain amount of time to prevent hammering the stripe API + system
+        try {
+            await QueueHandler.debounce("stripe-webhook/payment-" + paymentId, async () => {
+                const organization = await Organization.getByID(organizationId)
+                if (organization) {
+                    await ExchangePaymentEndpoint.pollStatus(paymentId, organization)
+                } else {
+                    console.warn("Could not find organization with id", organizationId)
+                }
+            }, 1000);
+        } catch (e) {
+            if (isDebouncedError(e)) {
+                // Okay, we are debounced (new request came in)
+                console.log("Debounced", paymentId)
+                return;
+            }
+            throw e;
+        }
+    }
+
     async updateIntent(intentId: string) {
         console.log("[Webooks] Updating intent", intentId)
         const [model] = await StripePaymentIntent.where({stripeIntentId: intentId}, {limit: 1})
         if (model && model.organizationId) {
-            const organization = await Organization.getByID(model.organizationId)
-            if (organization) {
-                await ExchangePaymentEndpoint.pollStatus(model.paymentId, organization)
-            } else {
-                console.warn("Could not find organization with id", model.organizationId)
-            }
+            await this.checkDebounced(model.paymentId, model.organizationId)
         } else {
             console.warn("Could not find stripe payment intent with id", intentId)
         }
