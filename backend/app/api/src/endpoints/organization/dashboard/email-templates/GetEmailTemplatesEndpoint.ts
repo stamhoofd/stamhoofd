@@ -3,6 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { EmailTemplate } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { StringArrayDecoder } from '../../../../decoders/StringArrayDecoder';
 import { StringNullableDecoder } from '../../../../decoders/StringNullableDecoder';
 import { Context } from '../../../../helpers/Context';
@@ -54,6 +55,13 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             }
         }
 
+        if (request.query.types?.length === 0) {
+            throw new SimpleError({
+                code: 'empty_types',
+                message: 'Types cannot be empty',
+            });
+        }
+
         const types = (request.query.types ?? [...Object.values(EmailTemplateType)]).filter((type) => {
             if (!organization) {
                 return EmailTemplateStruct.allowPlatformLevel(type);
@@ -61,14 +69,29 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             return EmailTemplateStruct.allowOrganizationLevel(type);
         });
 
+        if (types.length === 0) {
+            throw new SimpleError({
+                code: 'empty_types',
+                message: 'Types after filtering allowed types is empty',
+            });
+        }
+
         const templates = organization
             ? (
-                    await EmailTemplate.where({ organizationId: organization.id, webshopId: request.query.webshopId ?? null, groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null, type: { sign: 'IN', value: types } })
+                    await EmailTemplate.where({
+                        organizationId: organization.id,
+                        webshopId: request.query.webshopId ?? null,
+                        groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null,
+                        type: { sign: 'IN', value: types } })
                 )
             : (
                 // Required for event emails when logged in as the platform admin
                     (request.query.webshopId || request.query.groupIds)
-                        ? await EmailTemplate.where({ webshopId: request.query.webshopId ?? null, groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null, type: { sign: 'IN', value: types } })
+                        ? await EmailTemplate.where({
+                            webshopId: request.query.webshopId ?? null,
+                            groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null,
+                            type: { sign: 'IN', value: types },
+                        })
                         : []
                 );
 

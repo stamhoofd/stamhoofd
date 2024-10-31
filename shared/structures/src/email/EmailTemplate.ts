@@ -227,14 +227,14 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.RegistrationConfirmation: return true;
             case EmailTemplateType.RegistrationTransferDetails: return true;
 
-            // case EmailTemplateType.OrderConfirmationOnline: return true
-            // case EmailTemplateType.OrderConfirmationTransfer: return true
-            // case EmailTemplateType.OrderConfirmationPOS: return true
-            // case EmailTemplateType.OrderReceivedTransfer: return true
-            // case EmailTemplateType.TicketsConfirmation: return true
-            // case EmailTemplateType.TicketsConfirmationTransfer: return true
-            // case EmailTemplateType.TicketsConfirmationPOS: return true
-            // case EmailTemplateType.TicketsReceivedTransfer: return true
+            case EmailTemplateType.OrderConfirmationOnline: return true;
+            case EmailTemplateType.OrderConfirmationTransfer: return true;
+            case EmailTemplateType.OrderConfirmationPOS: return true;
+            case EmailTemplateType.OrderReceivedTransfer: return true;
+            case EmailTemplateType.TicketsConfirmation: return true;
+            case EmailTemplateType.TicketsConfirmationTransfer: return true;
+            case EmailTemplateType.TicketsConfirmationPOS: return true;
+            case EmailTemplateType.TicketsReceivedTransfer: return true;
         }
 
         return false;

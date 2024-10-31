@@ -407,8 +407,8 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSettingsView, CenteredMessage, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, useContext, useOrganization } from '@stamhoofd/components';
-import { AccessRight, EmailTemplate, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { AccountSettingsView, CenteredMessage, EditEmailTemplatesView, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, useContext, useOrganization } from '@stamhoofd/components';
+import { AccessRight, EmailTemplate, EmailTemplateType, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
@@ -574,8 +574,29 @@ function editPermissions(animated = true) {
     }).catch(console.error);
 }
 
-function editEmails(animated = true) {
-    // this.displayEditComponent(EditWebshopEmailsView, animated)
+async function editEmails(animated = true) {
+    await present({
+        components: [
+            new ComponentWithProperties(EditEmailTemplatesView, {
+                groups: null,
+                webshopId: props.preview.id,
+                allowEditGenerated: false,
+                types: [
+                    EmailTemplateType.OrderConfirmationOnline,
+                    EmailTemplateType.OrderConfirmationTransfer,
+                    EmailTemplateType.OrderConfirmationPOS,
+                    EmailTemplateType.OrderReceivedTransfer,
+                    EmailTemplateType.OrderOnlinePaymentFailed,
+                    EmailTemplateType.TicketsConfirmation,
+                    EmailTemplateType.TicketsConfirmationTransfer,
+                    EmailTemplateType.TicketsConfirmationPOS,
+                    EmailTemplateType.TicketsReceivedTransfer,
+                ],
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+        animated,
+    });
 }
 
 function editNotifications(animated = true) {
