@@ -655,7 +655,6 @@ async function checkDrips() {
 }
 
 registerCron('checkSettlements', checkSettlements);
-registerCron('checkFailedBuckarooPayments', checkFailedBuckarooPayments);
 registerCron('checkExpirationEmails', checkExpirationEmails);
 registerCron('checkPostmarkBounces', checkPostmarkBounces);
 registerCron('checkReservedUntil', checkReservedUntil);
