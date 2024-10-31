@@ -74,7 +74,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             const lastItem = arrayBuffer[arrayBuffer.length - 1];
             let next: LimitedFilteredRequest | undefined = undefined;
 
-            if (lastItem) {
+            if (lastItem && arrayBuffer.length >= data.limit) {
                 const sortList: SortItem[] = [...sortItems];
                 if (sortList.length > 0 && !sortList.some(item => item.key === 'id')) {
                     const order = sortList[0].order;

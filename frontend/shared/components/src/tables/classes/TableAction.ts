@@ -1,7 +1,7 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
-import { fetchAll, ObjectFetcher } from '.';
+import { fetchAll, FetchAllOptions, ObjectFetcher } from '.';
 import { Toast } from '../../..';
 
 type ObjectWithId = { id: string };
@@ -142,11 +142,11 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
         this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
     }
 
-    async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions) {
+    async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions<T>) {
         return await fetchAll(initialRequest, objectFetcher, options);
     }
 
-    async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions) {
+    async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions<T>) {
         if (selection.cachedAllValues) {
             return selection.cachedAllValues;
         }
