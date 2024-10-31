@@ -97,7 +97,14 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         async fetchCount(data: CountFilteredRequest): Promise<number> {
             let count = 0;
 
-            const filter = mergeFilters([data.filter, data.search], '$and');
+            const filters = [data.filter];
+
+            const searchFilter = searchToFilter(data.search);
+            if (searchFilter !== null) {
+                filters.push(searchFilter);
+            }
+
+            const filter = mergeFilters(filters, '$and');
 
             await manager.streamOrders({
                 callback: () => {
