@@ -168,7 +168,6 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
      */
     static async pollStatus(paymentId: string, org: Organization | null, cancel = false): Promise<Payment | undefined> {
         // Prevent polling the same payment multiple times at the same time: create a queue to prevent races
-        QueueHandler.cancel('payments/' + paymentId); // Prevent creating more than one queue item for the same payment
         return await QueueHandler.schedule('payments/' + paymentId, async () => {
             // Get a new copy of the payment (is required to prevent concurreny bugs)
             const payment = await Payment.getByID(paymentId);
