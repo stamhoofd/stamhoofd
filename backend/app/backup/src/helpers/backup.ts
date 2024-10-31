@@ -503,6 +503,8 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
         const key = STAMHOOFD.objectStoragePath + '/binlogs/' + uploadedName + (gzip ? '.gz' : '') + '.enc';
 
         if (allBinaryLogs.find(f => f.key === key)) {
+            // Delete partial if found
+            await deletePartial(client, binaryLogPath, gzip, allBinaryLogs);
             return;
         }
 
@@ -611,14 +613,15 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
     await execPromise('rm ' + escapeShellArg(encryptedFile));
 
     if (!partial) {
-        // Check if a partial exists on the server and delete it to keep it clean
-        const key = STAMHOOFD.objectStoragePath + '/binlogs/' + path.basename(binaryLogPath) + '.partial' + (gzip ? '.gz' : '') + '.enc';
-        try {
-            await client.send(new HeadObjectCommand({
-                Bucket: STAMHOOFD.SPACES_BUCKET,
-                Key: key,
-                ResponseCacheControl: 'no-cache',
-            }));
+        await deletePartial(client, binaryLogPath, gzip, allBinaryLogs);
+    }
+}
+
+async function deletePartial(client: S3Client, binaryLogPath: string, gzip: boolean, allBinaryLogs: ObjectStorageFile[]) {
+    // Check if a partial exists on the server and delete it to keep it clean
+    const key = STAMHOOFD.objectStoragePath + '/binlogs/' + path.basename(binaryLogPath) + '.partial' + (gzip ? '.gz' : '') + '.enc';
+    try {
+        if (allBinaryLogs.find(f => f.key === key)) {
             console.log('Partial binary log exists at ' + key + ', which is no longer needed. Deleting...');
 
             await client.send(new DeleteObjectCommand({
@@ -628,10 +631,10 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
 
             console.log('Partial binary log deleted');
         }
-        catch (e) {
-            if (e.name !== 'NotFound') {
-                throw e;
-            }
+    }
+    catch (e) {
+        if (e.name !== 'NotFound') {
+            throw e;
         }
     }
 }
