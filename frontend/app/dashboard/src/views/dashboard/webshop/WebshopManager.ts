@@ -734,31 +734,6 @@ export class WebshopManager {
         });
     }
 
-    async getOrdersFromDatabase(): Promise<PrivateOrder[]> {
-        const db = await this.getDatabase();
-
-        return new Promise<PrivateOrder[]>((resolve, reject) => {
-            const transaction = db.transaction(['orders'], 'readonly');
-
-            transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                reject(event);
-            };
-
-            // Do the actual saving
-            const objectStore = transaction.objectStore('orders');
-
-            const request = objectStore.getAll();
-            request.onsuccess = () => {
-                const rawOrders = request.result;
-
-                // TODO: need version fix here
-                const orders = new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrders, { version: Version }));
-                resolve(orders);
-            };
-        });
-    }
-
     async getTicketPatchesFromDatabase(): Promise<AutoEncoderPatchType<TicketPrivate>[]> {
         const db = await this.getDatabase();
 
