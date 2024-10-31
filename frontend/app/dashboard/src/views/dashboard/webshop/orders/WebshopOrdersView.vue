@@ -203,7 +203,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
 
     const hasDelivery = preview.value.meta.checkoutMethods.some(method => method.type === CheckoutMethodType.Delivery);
 
-    // Count checkoutm ethods that are not delivery
+    // Count checkout methods that are not delivery
     const nonDeliveryCount = preview.value.meta.checkoutMethods.filter(method => method.type !== CheckoutMethodType.Delivery).length;
 
     if (hasDelivery || nonDeliveryCount > 1) {
@@ -500,23 +500,24 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
     return cols;
 })();
 
-// const deliveryCities = computed(() => {
-//     const cities = new Map<string, string>();
-//     for (const order of orders.value) {
-//         if (order.data.checkoutMethod && order.data.checkoutMethod.type === CheckoutMethodType.Delivery && order.data.address) {
-//             cities.set(Formatter.slug(order.data.address.postalCode + ' ' + order.data.address.city), order.data.address.postalCode + ' ' + order.data.address.city);
-//         }
-//     }
-
-//     return [...cities.entries()].sort((a, b) => Sorter.byStringValue(a[0], b[0]));
-// });
-
 function openOrder(order: PrivateOrder) {
-    // todo: getNextOrder and getPreviousOrder?
+    const getCurrentIndex = (order: PrivateOrder): number => {
+        const objects = tableObjectFetcher.objects;
+        return objects.findIndex(o => o.id === order.id);
+    };
+
     const component = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(OrderView, {
             initialOrder: order,
             webshopManager: props.webshopManager,
+            getNextOrder: (order: PrivateOrder) => {
+                const currentIndex = getCurrentIndex(order);
+                return tableObjectFetcher.objects[currentIndex + 1];
+            },
+            getPreviousOrder: (order: PrivateOrder) => {
+                const currentIndex = getCurrentIndex(order);
+                return tableObjectFetcher.objects[currentIndex - 1];
+            },
         }),
     });
 
