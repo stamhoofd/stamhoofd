@@ -551,7 +551,7 @@ let lastBuckarooId = '';
 const startBuckarooDate = new Date(new Date().getTime() - 60*1000*60*24*7*4);
 
 // Keep checking pending paymetns for 3 days
-async function checkFailedBuckarooPayments() {
+async function checkFailedBuckarooPayments() {  
     if (STAMHOOFD.environment !== "production") {
         return
     }
@@ -861,12 +861,6 @@ const registeredCronJobs: CronJobDefinition[] = []
 registeredCronJobs.push({
     name: 'checkSettlements',
     method: checkSettlements,
-    running: false
-});
-
-registeredCronJobs.push({
-    name: 'checkFailedBuckarooPayments',
-    method: checkFailedBuckarooPayments,
     running: false
 });
 
