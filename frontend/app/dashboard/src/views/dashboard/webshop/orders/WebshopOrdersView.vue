@@ -564,6 +564,7 @@ async function onNewTickets(tickets: TicketPrivate[]) {
     console.log('Received new tickets from network');
 
     for (const order of tableObjectFetcher.objects) {
+        // also handles deleted tickets
         order.addTickets(tickets);
     }
 

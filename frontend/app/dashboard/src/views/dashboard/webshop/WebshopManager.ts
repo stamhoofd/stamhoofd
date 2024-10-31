@@ -1425,12 +1425,10 @@ export class WebshopManager {
                 if (!hasUpdatedTickets) {
                     hasUpdatedTickets = true;
                 }
-                const deletedTickets: TicketPrivate[] = [];
                 const nonDeletedTickets: TicketPrivate[] = [];
 
                 for (const ticket of tickets) {
                     if (ticket.deletedAt) {
-                        deletedTickets.push(ticket);
                         continue;
                     }
 
@@ -1450,14 +1448,9 @@ export class WebshopManager {
                     callback(nonDeletedTickets);
                 }
 
-                if (nonDeletedTickets.length > 0) {
-                    // todo: is this necessary and should this always be broadcasted (thus without if statement)?
-                    promises.push(this.ticketsEventBus.sendEvent('fetched', nonDeletedTickets));
-                }
-
-                if (deletedTickets.length > 0) {
-                    // todo: is this necessary
-                    promises.push(this.ticketsEventBus.sendEvent('deleted', deletedTickets));
+                if (tickets.length > 0) {
+                    // deleted tickets get handled in listener
+                    promises.push(this.ticketsEventBus.sendEvent('fetched', tickets));
                 }
 
                 await Promise.all(promises.map(promise => promise.catch(console.error)));
