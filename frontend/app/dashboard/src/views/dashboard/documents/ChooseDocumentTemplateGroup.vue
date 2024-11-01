@@ -40,61 +40,45 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+<script lang="ts" setup>
+import { NavigationActions, Spinner, STList, STListItem, STNavigationBar, Toast, useNavigationActions, useRequiredOrganization } from '@stamhoofd/components';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { DocumentTemplateGroup, Group, RecordCategory } from '@stamhoofd/structures';
+import { computed, onMounted, ref, Ref } from 'vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STList,
-        STListItem,
-        BackButton,
-        Spinner,
-    },
-})
-export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    addGroup: (group: DocumentTemplateGroup, component: NavigationMixin) => void;
+const props = defineProps<{
+    addGroup: (group: DocumentTemplateGroup, component: NavigationActions) => void;
+    fieldCategories: RecordCategory[];
+}>();
 
-    @Prop({ required: true })
-    fieldCategories!: RecordCategory[];
+const organization = useRequiredOrganization();
+const organizationManager = useOrganizationManager();
+const requestOwner = useRequestOwner();
+const navigationActions = useNavigationActions();
 
-    archivedGroups: Group[] = [];
-    loadingGroups = true;
+const archivedGroups = ref([]) as Ref<Group[]>;
+const loadingGroups = ref(true);
 
-    get categoryTree() {
-        return this.$organization.getCategoryTree({ maxDepth: 1, admin: true, smartCombine: true });
+const categoryTree = computed(() => organization.value.getCategoryTree({ maxDepth: 1, admin: true, smartCombine: true }));
+
+function selectGroup(group: Group) {
+    props.addGroup(DocumentTemplateGroup.create({
+        groupId: group.id,
+        cycle: group.cycle,
+    }), navigationActions);
+}
+
+onMounted(() => {
+    load().catch(console.error);
+});
+
+async function load() {
+    try {
+        archivedGroups.value = await organizationManager.value.loadArchivedGroups({ owner: requestOwner });
     }
-
-    selectGroup(group: Group) {
-        this.addGroup(DocumentTemplateGroup.create({
-            groupId: group.id,
-            cycle: group.cycle,
-        }), this);
+    catch (e) {
+        Toast.fromError(e).show();
     }
-
-    mounted() {
-        this.load().catch(console.error);
-    }
-
-    beforeUnmount() {
-        // Cancel all requests
-        Request.cancelAll(this);
-    }
-
-    async load() {
-        try {
-            this.archivedGroups = await this.$organizationManager.loadArchivedGroups({ owner: this });
-        }
-        catch (e) {
-            Toast.fromError(e).show();
-        }
-        this.loadingGroups = false;
-    }
+    loadingGroups.value = false;
 }
 </script>

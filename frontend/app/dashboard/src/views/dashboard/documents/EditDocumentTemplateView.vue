@@ -54,7 +54,7 @@
                     {{ $t('39d0d9ca-2f37-40b6-84a4-51fb29b4cce6') }}
                 </p>
 
-                <MultiSelectInput v-for="field of category.getAllRecords()" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @update:model-value="setLinkedFields(field, $event)" />
+                <MultiSelectInput v-for="field of category.getAllRecords()" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @update:model-value="setLinkedFields(field, $event)" />
             </div>
 
             <hr>
