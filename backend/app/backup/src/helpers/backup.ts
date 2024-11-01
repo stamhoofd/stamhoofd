@@ -228,9 +228,9 @@ export async function diskSpace(): Promise<number> {
     }
 
     const result = await execPromise('df --output=avail --block-size=1 /');
-    const parts = result.stdout.split('\n');
+    const parts = result.stdout.trim().split('\n');
     if (parts.length !== 2 || parts[0].trim() !== 'Avail') {
-        throw new Error('Unexected result for df cmd');
+        throw new Error('Unexected result for df cmd:' + result.stdout);
     }
     const size = parseInt(parts[1].trim());
     return size;

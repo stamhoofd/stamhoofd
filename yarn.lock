@@ -2,6 +2,18 @@
 # yarn lockfile v1
 
 
+"@1password/sdk-core@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@1password/sdk-core/-/sdk-core-0.1.3.tgz#0a2ac650eddaab2602d6050e71ee63177c3f7cae"
+  integrity sha512-yndomS1VV7Kw7SWOUNgXk5+Y18JkcvT4rW3FTPZIQl5q+Sjv+DUA5UcZ6gVBt4rEPDokmx8Ar2C2lXTYGUm2sQ==
+
+"@1password/sdk@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@1password/sdk/-/sdk-0.1.3.tgz#69e38fa0ec2e262436c7cbcd3922384e2c089210"
+  integrity sha512-OewbZB6jSojFIkc6ShbOSf6b36/bDp3n+YwEYAGifHyDrPj4h3gWvVf6uv1m5rwCU/MetUSa0xCUbVeJFq+yUQ==
+  dependencies:
+    "@1password/sdk-core" "0.1.3"
+
 "@aashutoshrathi/word-wrap@^1.2.3":
   version "1.2.6"
   resolved "https://registry.npmjs.org/@aashutoshrathi/word-wrap/-/word-wrap-1.2.6.tgz"
@@ -6822,9 +6834,9 @@ elementtree@^0.1.7:
     sax "1.1.4"
 
 elliptic@^6.5.4:
-  version "6.5.7"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.7.tgz#8ec4da2cb2939926a1b9a73619d768207e647c8b"
-  integrity sha512-ESVCtTwiA+XhY3wyh24QqRGBoP3rEdDUl3EDUUo9tft074fi19IrdpH7hLCMMP3CIj7jb3W96rn8lt/BqIlt5Q==
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.6.0.tgz#5919ec723286c1edf28685aa89261d4761afa210"
+  integrity sha512-dpwoQcLc/2WLQvJvLRHKZ+f9FgOdjnq11rurqwekGQygGPsYSK29OMMD2WalatiqQ+XGFDglTNixpPfI+lpaAA==
   dependencies:
     bn.js "^4.11.9"
     brorand "^1.1.0"

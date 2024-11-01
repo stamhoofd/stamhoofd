@@ -7,7 +7,9 @@ export async function checkReplicaStatus() {
         throw new Error('No replica status found');
     }
 
-    const row = rows[0]['namespace'];
+    console.log(rows);
+
+    const row = rows[0][''];
 
     // Check Replica_SQL_Running = Yes
     if (row['Replica_SQL_Running'] !== 'Yes') {
@@ -29,12 +31,12 @@ export async function checkReplicaStatus() {
         throw new Error('Last_SQL_Error is not empty: ' + row['Last_SQL_Error']);
     }
 
-    if (typeof row['Seconds_Behind_Source'] !== 'string') {
-        throw new Error('Seconds_Behind_Source is not a string');
+    if (typeof row['Seconds_Behind_Source'] !== 'number') {
+        throw new Error('Seconds_Behind_Source is not a number');
     }
 
     // Seconds_Behind_Source is not super accurate, so we add a large offset
-    if (parseInt(row['Seconds_Behind_Source']) > 60 * 5) {
+    if (row['Seconds_Behind_Source'] > 60 * 5) {
         throw new Error('Seconds_Behind_Source is greater than 5 minutes');
     }
 }
