@@ -96,7 +96,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
@@ -121,7 +121,7 @@ const errors = useErrors();
 const type = ref<string | null>(null);
 const { patch: patchDocument, patched: patchedDocument, addPatch, hasChanges } = usePatch(props.document);
 const saving = ref(false);
-const editingAnswers: Ref<RecordAnswer[]> = ref([...props.document.settings.fieldAnswers.values()].map(a => a.clone()));
+const editingAnswers: Ref<Map<string, RecordAnswer>> = ref(cloneMap(props.document.settings.fieldAnswers));
 const loadingHtml = ref(false);
 const loadingXml = ref(false);
 const fieldCategories = computed(() => RecordCategory.flattenCategories(patchedDocument.value.privateSettings.templateDefinition.fieldCategories, patchedDocument.value));
@@ -142,13 +142,24 @@ onMounted(() => {
 
 watch(editingAnswers, value => patchAnswers(value));
 
-function patchAnswers(patch: PatchAnswers | RecordAnswer[]) {
+function patchAnswers(patch: PatchAnswers | Map<string, RecordAnswer>) {
+    const fieldAnswers = patch instanceof PatchMap ? patch : new PatchMap([...patch]);
+
+    addPatch({
+        settings: DocumentSettings.patch({
+            fieldAnswers,
+        }),
+    });
+}
+
+const patchHandler = (patch: PatchAnswers): DocumentTemplatePrivate => {
     addPatch({
         settings: DocumentSettings.patch({
             fieldAnswers: patch as any,
         }),
     });
-}
+    return patchedDocument.value;
+};
 
 const isComplete = computed(() => !!patchedDocument.value.html && (!!patchedDocument.value.privateSettings.templateDefinition.xmlExport || !patchedDocument.value.privateSettings.templateDefinition.xmlExportDescription));
 
@@ -413,14 +424,14 @@ function autoLink() {
     const linkedInside: Set<string> = new Set();
     const globalData = getDefaultGlobalData();
     for (const field of patchedDocument.value.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
-        if (editingAnswers.value.find(a => a.settings.id === field.id) && !linkedInside.has(field.id)) {
+        if (editingAnswers.value.has(field.id) && !linkedInside.has(field.id)) {
             continue;
         }
         const d = globalData[field.id];
         if (d && d instanceof RecordAnswerDecoder.getClassForType(field.type)) {
             // add answer
             d.settings = field;
-            editingAnswers.value.push(d);
+            editingAnswers.value.set(field.id, d);
             linkedInside.add(field.id);
         }
     }
@@ -585,6 +596,7 @@ function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: Navigati
                 dataPermission: true,
                 hasNextStep: index < patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length - 1,
                 filterDefinitions: [],
+                patchHandler,
                 saveHandler: (fieldAnswers: RecordAnswer[], actions: NavigationActions) => {
                     const g = group.patch({
                         fieldAnswers: fieldAnswers as any,
@@ -677,6 +689,7 @@ function gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
         dataPermission: true,
         hasNextStep: index < patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length - 1,
         filterDefinitions: [],
+        patchHandler,
         saveHandler: (fieldAnswers: RecordAnswer[], actions: NavigationActions) => {
             const g = group.patch({
                 fieldAnswers: fieldAnswers as any,
@@ -757,7 +770,7 @@ async function save() {
         });
         const updatedDocument = response.data[0];
         if (updatedDocument) {
-            editingAnswers.value = [...props.document.settings.fieldAnswers.values()].map(a => a.clone());
+            editingAnswers.value = cloneMap(props.document.settings.fieldAnswers);
             patchDocument.value = DocumentTemplatePrivate.patch({});
             props.document.set(updatedDocument);
         }
@@ -774,6 +787,11 @@ async function save() {
     }
 
     saving.value = false;
+}
+
+function cloneMap<K, T extends AutoEncoder>(map: Map<K, T>): Map<K, T> {
+    return new Map([...map.entries()]
+        .map(([key, value]) => [key, value.clone()]));
 }
 
 defineExpose({

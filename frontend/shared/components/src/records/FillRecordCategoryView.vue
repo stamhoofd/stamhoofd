@@ -18,24 +18,24 @@ import FillRecordCategoryBox from './components/FillRecordCategoryBox.vue';
 
 const props = withDefaults(
     defineProps<{
-        category: RecordCategory,
-        value: T,
-        patchHandler: (patch: PatchAnswers) => T,
-        saveHandler: (patch: PatchAnswers, navigate: NavigationActions) => Promise<void>|void,
-        saveText?: string,
+        category: RecordCategory;
+        value: T;
+        patchHandler: (patch: PatchAnswers) => T;
+        saveHandler: (patch: PatchAnswers, navigate: NavigationActions) => Promise<void> | void;
+        saveText?: string;
     }>(), {
-        saveText: 'Opslaan'
-    }
+        saveText: 'Opslaan',
+    },
 );
 
-const patch = ref(new PatchMap() as PatchAnswers)
+const patch = ref(new PatchMap() as PatchAnswers);
 const patchedValue = computed(() => {
-    const patched = props.patchHandler(patch.value)
-    return patched
+    const patched = props.patchHandler(patch.value);
+    return patched;
 });
 
 function addPatch(p: PatchAnswers) {
-    patch.value = p.applyTo(patch.value) as PatchAnswers
+    patch.value = p.applyTo(patch.value) as PatchAnswers;
 }
 
 const show = useShow();
@@ -43,7 +43,7 @@ const present = usePresent();
 const dismiss = useDismiss();
 const pop = usePop();
 const loading = ref(false);
-const errors = useErrors()
+const errors = useErrors();
 
 async function save() {
     if (loading.value) {
@@ -59,27 +59,28 @@ async function save() {
         }
 
         await props.saveHandler(patch.value, {
-            show, present, dismiss, pop
+            show, present, dismiss, pop,
         });
-    } catch (e) {
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
 }
 
 const hasChanges = computed(() => {
-    return patch.value.size > 0
-})
+    return patch.value.size > 0;
+});
 
 async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
 }
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 
 </script>

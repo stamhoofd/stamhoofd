@@ -13,3 +13,9 @@ export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
 export const registerItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
 };
+
+export const documentInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    // todo: is this correct?
+    definitionId: createInMemoryFilterCompiler('privateSettings.templateDefinition.type'),
+};

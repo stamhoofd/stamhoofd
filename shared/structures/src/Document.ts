@@ -1,6 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
+import { documentInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
 import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
@@ -165,16 +167,25 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
     @field({ decoder: DateDecoder })
     updatedAt = new Date();
 
-    isRecordEnabled(record: RecordSettings): boolean {
-        throw new Error('Method not implemented.');
+    isRecordEnabled(_record: RecordSettings): boolean {
+        // todo: is this correct?
+        return true;
     }
 
     getRecordAnswers(): Map<string, RecordAnswer> {
-        throw new Error('Method not implemented.');
+        // todo: is this correct?
+        return this.settings.fieldAnswers;
     }
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {
-        throw new Error('Method not implemented.');
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, documentInMemoryFilterCompilers);
+            return compiledFilter(this);
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
     }
 
     patchRecordAnswers(patch: PatchAnswers): this {
