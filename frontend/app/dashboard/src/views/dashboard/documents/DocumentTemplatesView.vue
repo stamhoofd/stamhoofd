@@ -46,104 +46,88 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { LoadingView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { LoadingView, STList, STListItem, STNavigationBar, Toast, useContext, useRequiredOrganization } from '@stamhoofd/components';
 import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { computed, onActivated, onMounted, ref, Ref } from 'vue';
 import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STList,
-        STListItem,
-        LoadingView,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
-    templates: DocumentTemplatePrivate[] = [];
-    loading = true;
+const templates: Ref<DocumentTemplatePrivate[]> = ref([]);
+const loading = ref(true);
+const organization = useRequiredOrganization();
+const requestOwner = useRequestOwner();
+const context = useContext();
+const present = usePresent();
+const show = useShow();
+const $t = useTranslate();
 
-    mounted() {
-        this.loadTemplates().catch(console.error);
-    }
+onMounted(() => {
+    loadTemplates().catch(console.error);
+});
 
-    get organization() {
-        return this.$organization;
-    }
+onActivated(() => {
+    loadTemplates().catch(console.error);
+});
 
-    activated() {
-        this.loadTemplates().catch(console.error);
-    }
+function formatDate(date: Date) {
+    return Formatter.date(date);
+}
 
-    beforeUnmount() {
-        Request.cancelAll(this);
-    }
-
-    formatDate(date: Date) {
-        return Formatter.date(date);
-    }
-
-    async loadTemplates() {
-        try {
-            const response = await this.$context.authenticatedServer.request({
-                method: 'GET',
-                path: '/organization/document-templates',
-                decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
-                shouldRetry: false,
-                owner: this,
-            });
-            this.templates = response.data;
-        }
-        catch (e) {
-            console.error(e);
-            Toast.fromError(e).show();
-        }
-        this.loading = false;
-    }
-
-    get disableActivities() {
-        return this.organization.meta.packages.disableActivities;
-    }
-
-    addDocument() {
-        if (this.organization.meta.packages.disableActivities) {
-            new Toast(this.$t('f0ff8a76-a986-440c-b966-a5579e0844f4'), 'error red').show();
-            return;
-        }
-
-        this.present({
-            components: [
-                new ComponentWithProperties(EditDocumentTemplateView, {
-                    isNew: true,
-                    document: DocumentTemplatePrivate.create({}),
-                    callback: (template: DocumentTemplatePrivate) => {
-                        this.templates.push(template);
-                        this.openTemplate(template);
-                    },
-                }),
-            ],
-            modalDisplayStyle: 'popup',
+async function loadTemplates() {
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/organization/document-templates',
+            decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
+            shouldRetry: false,
+            owner: requestOwner,
         });
+        templates.value = response.data;
+    }
+    catch (e) {
+        console.error(e);
+        Toast.fromError(e).show();
+    }
+    loading.value = false;
+}
+
+const disableActivities = computed(() => organization.value.meta.packages.disableActivities);
+
+function addDocument() {
+    if (organization.value.meta.packages.disableActivities) {
+        new Toast($t('f0ff8a76-a986-440c-b966-a5579e0844f4'), 'error red').show();
+        return;
     }
 
-    openTemplate(template: DocumentTemplatePrivate) {
-        this.show({
-            components: [
-                new ComponentWithProperties(DocumentTemplateOverview, {
-                    template,
-                }),
-            ],
-        });
-    }
+    present({
+        components: [
+            new ComponentWithProperties(EditDocumentTemplateView, {
+                isNew: true,
+                document: DocumentTemplatePrivate.create({}),
+                callback: (template: DocumentTemplatePrivate) => {
+                    templates.value.push(template);
+                    openTemplate(template);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function openTemplate(template: DocumentTemplatePrivate) {
+    show({
+        components: [
+            new ComponentWithProperties(DocumentTemplateOverview, {
+                template,
+            }),
+        ],
+    }).catch(console.error);
 }
 </script>
