@@ -26,25 +26,25 @@ import { ObjectWithRecords, RecordCategory, RecordCheckboxAnswer } from '@stamho
 import { computed } from 'vue';
 
 const props = defineProps<{
-    value: T,
-    category: RecordCategory,
-}>()
+    value: T;
+    category: RecordCategory;
+}>();
 
 const answers = computed(() => {
-    return props.value.getRecordAnswers()
-})
+    return props.value.getRecordAnswers();
+});
 
 const recordsWithAnswers = computed(() => {
     const records = props.category.filterRecords(props.value);
 
-    return records.map(record => {
-        const answer = answers.value.get(record.id)
+    return records.map((record) => {
+        const answer = answers.value.get(record.id);
         return {
             record,
             answer,
-            recordCheckboxAnswer: answer instanceof RecordCheckboxAnswer ? answer : null
-        }
-    })
-})
+            recordCheckboxAnswer: answer instanceof RecordCheckboxAnswer ? answer : null,
+        };
+    });
+});
 
 </script>

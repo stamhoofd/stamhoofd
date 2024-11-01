@@ -12,7 +12,7 @@
                     <option :value="null" disabled>
                         Maak een keuze
                     </option>
-                    <option v-for="_type in availableTypes" :key="_type.value" :value="_type.value">
+                    <option v-for="_type in availableTypes" :key="_type.value ?? _type.definition.name" :value="_type.value">
                         {{ _type.definition.name }}
                     </option>
                 </Dropdown>
@@ -62,7 +62,7 @@
             <p>Kies de inschrijvingsgroepen waarvoor je dit attest wil aanmaken.</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
-                <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.id" :selectable="true" @click="updateGroupAnswers(group)">
+                <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.groupId" :selectable="true" @click="updateGroupAnswers(group)">
                     <h2 class="style-list-title">
                         {{ getGroupName(group) }}
                     </h2>

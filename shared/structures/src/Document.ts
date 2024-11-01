@@ -230,7 +230,7 @@ export class DocumentData extends AutoEncoder {
     }
 }
 
-export class Document extends AutoEncoder {
+export class Document extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -261,4 +261,29 @@ export class Document extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     templateId: string;
+
+    isRecordEnabled(_record: RecordSettings): boolean {
+        // todo: is this correct?
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        // todo: is this correct?
+        return this.data.fieldAnswers;
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter): boolean {
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, documentInMemoryFilterCompilers);
+            return compiledFilter(this);
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        throw new Error('Method not implemented.');
+    }
 }
