@@ -10,6 +10,6 @@ export class DateOption {
     }
 
     equals(range: DateRange) {
-        return this.range.start == range.start && this.range.end == range.end;
+        return this.range.start.getTime() === range.start.getTime() && this.range.end.getTime() === range.end.getTime();
     }
 }

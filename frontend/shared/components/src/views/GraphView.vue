@@ -31,7 +31,7 @@ import {
     LineElement, PointElement, Tooltip,
 } from 'chart.js';
 
-import { computed, ref, watch } from 'vue';
+import { computed, ComputedRef, ref, Ref, watch, WritableComputedRef } from 'vue';
 import { DateOption } from './DateRange';
 import GraphDateRangeSelector from './GraphDateRangeSelector.vue';
 import { GraphViewConfiguration } from './GraphViewConfiguration';
@@ -40,36 +40,51 @@ const props = defineProps<{
     configurations: GraphViewConfiguration[][];
 }>();
 
+const defaultConfiguration = props.configurations[0][0];
 const canvas = ref<HTMLCanvasElement | null>(null);
-const selectedConfiguration = ref(props.configurations[0][0]);
+const selectedConfiguration = ref(defaultConfiguration) as Ref<GraphViewConfiguration>;
 
 const sum = computed(() => selectedConfiguration.value.sum);
 const formatter = computed(() => selectedConfiguration.value.formatter);
 const title = computed(() => selectedConfiguration.value.title);
-const options = computed(() => selectedConfiguration.value.options);
-const range = computed({
+const options = computed(() => selectedConfiguration.value.options) as ComputedRef<DateOption[] | null>;
+const range = computed<DateOption | null>({
     get: () => selectedConfiguration.value.selectedRange,
     set: (range: DateOption | null) => {
-        selectedConfiguration.value.selectedRange = range;
+        selectedConfiguration.value.selectRange(range);
     },
-});
+}) as WritableComputedRef<DateOption | null>;
+
 const hasMultipleConfigurations = computed(() => props.configurations.length || props.configurations.find(c => c.length));
 const loading = ref(false);
 let chart: Chart;
-let graphData: Graph | null = null;
+const graphData = ref<Graph | null>(null);
 
-async function load(range: DateOption): Promise<Graph> {
-    return await selectedConfiguration.value.load(range);
-}
-
-watch(canvas, (canvas) => {
-    if (canvas && !chart) {
-        if (selectedConfiguration.value && options.value) {
-            range.value = options.value[0];
-        }
-        loadData().catch(console.error);
+watch(range, async (range: DateOption | null) => {
+    if (range) {
+        await loadData();
     }
-});
+}, { immediate: true });
+
+function setSelectedRangeOnConfiguration(config: GraphViewConfiguration, oldConfig: GraphViewConfiguration | undefined | null) {
+    const oldRangeValue = oldConfig?.selectedRange?.range;
+    const newOptions = config.options;
+
+    let equalRange: DateOption | undefined = undefined;
+
+    /**
+     * Check if the configuration contains an option with the same date range as
+     * the current selected range.
+     */
+    if (oldRangeValue) {
+        equalRange = newOptions?.find(option => option.equals(oldRangeValue));
+    }
+
+    /**
+     * Set default selected range.
+     */
+    config.selectedRange = equalRange ?? config.selectedRange ?? newOptions?.[0] ?? null;
+}
 
 function chooseConfiguration(event: MouseEvent) {
     const contextMenu = new ContextMenu(
@@ -78,6 +93,7 @@ function chooseConfiguration(event: MouseEvent) {
                 return new ContextMenuItem({
                     name: config.title,
                     action: () => {
+                        setSelectedRangeOnConfiguration(config, selectedConfiguration.value);
                         selectedConfiguration.value = config;
                         return true;
                     },
@@ -88,29 +104,18 @@ function chooseConfiguration(event: MouseEvent) {
     contextMenu.show({ button: event.currentTarget as HTMLElement, xPlacement: 'right' }).catch(console.error);
 }
 
-watch(() => options.value, (n) => {
-    if (n) {
-        range.value = n[0];
-    }
-});
-
-watch(() => range.value, () => {
-    loadData().catch(console.error);
-});
-
 async function loadData() {
-    if (!options.value) {
-        return;
-    }
-    if (!range.value) {
-        // should happen in watcher
+    const configuration = selectedConfiguration.value;
+    if (!configuration.selectedRange) {
+        console.error('Cannot load graph, no range selected.');
         return;
     }
 
     loading.value = true;
     try {
-        graphData = await load(range.value);
-        loadGraph(graphData);
+        const newGraphData = await configuration.load(configuration.selectedRange);
+        graphData.value = newGraphData;
+        loadGraph(newGraphData);
     }
     catch (e) {
         console.error(e);
@@ -128,18 +133,18 @@ function format(v: number) {
 }
 
 const lastValue = computed(() => {
-    if (!graphData) {
+    if (!graphData.value) {
         return 0;
     }
     if (sum.value) {
         let v = 0;
-        for (const d of graphData.data[0].values) {
+        for (const d of graphData.value.data[0].values) {
             v += d;
         }
 
         return v;
     }
-    const d = graphData.data[0];
+    const d = graphData.value.data[0];
     return d.values[d.values.length - 1];
 });
 

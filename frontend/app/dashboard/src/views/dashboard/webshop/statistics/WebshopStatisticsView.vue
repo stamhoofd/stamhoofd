@@ -531,7 +531,9 @@ async function reload() {
             averagePrice.value = Math.round(totalRevenue.value / totalOrders.value);
         }
 
-        revenueGraph.value.options = countGraph.value.options = buildDateRangeOptions();
+        // create seperate date range options for reactivity
+        revenueGraph.value.setOptions(buildDateRangeOptions());
+        countGraph.value.setOptions(buildDateRangeOptions());
 
         if (totalScannedTickets.value > 0 || totalScannedVouchers.value > 0) {
             const group: GraphViewConfiguration[] = [];
