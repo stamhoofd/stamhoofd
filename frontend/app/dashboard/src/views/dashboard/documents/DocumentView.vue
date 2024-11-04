@@ -96,9 +96,8 @@ import { ComponentWithProperties, useFocused } from '@simonbackx/vue-app-navigat
 import { STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, useContext, useNavigationActions, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import DocumentView from './DocumentsView.vue';
 
-import { computed, onActivated, onDeactivated, unref } from 'vue';
+import { computed, getCurrentInstance, onActivated, onDeactivated, unref } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
 
 const props = withDefaults(defineProps<{
@@ -193,50 +192,39 @@ function resetDocument() {
     actionBuilder.value.resetDocuments([props.document]).catch(console.error);
 }
 
-function goBack() {
-    if (!props.getPrevious) {
+const instance = getCurrentInstance();
+
+async function seek(previous = true) {
+    if (previous && !props.getPrevious) {
+        return;
+    }
+    else if (!props.getNext) {
         return;
     }
 
-    const document = props.getPrevious(props.document);
+    const document = previous ? props.getPrevious!(props.document) : props.getNext(props.document);
     if (!document) {
         return;
     }
-    const component = new ComponentWithProperties(DocumentView, {
-        document: document,
-        template: props.template,
-        getNext: props.getNext,
-        getPrevious: props.getPrevious,
+    const component = new ComponentWithProperties(instance!.type, {
+        ...props,
+        document,
     });
 
-    show({
+    await show({
         components: [component],
         replace: 1,
-        reverse: true,
+        reverse: previous,
         animated: false,
-    }).catch(console.error);
+    });
 }
 
-function goNext() {
-    if (!props.getNext) {
-        return;
-    }
+async function goBack() {
+    await seek(true);
+}
 
-    const document = props.getNext(props.document);
-    if (!document) {
-        return;
-    }
-    const component = new ComponentWithProperties(DocumentView, {
-        document: document,
-        template: props.template,
-        getNext: props.getNext,
-        getPrevious: props.getPrevious,
-    });
-    show({
-        components: [component],
-        replace: 1,
-        animated: false,
-    }).catch(console.error);
+async function goNext() {
+    await seek(false);
 }
 
 const onKey = (event: KeyboardEvent) => {
@@ -251,11 +239,11 @@ const onKey = (event: KeyboardEvent) => {
     const key = event.key || event.keyCode;
 
     if (key === 'ArrowLeft' || key === 'ArrowUp' || key === 'PageUp') {
-        goBack();
+        goBack().catch(console.error);
         event.preventDefault();
     }
     else if (key === 'ArrowRight' || key === 'ArrowDown' || key === 'PageDown') {
-        goNext();
+        goNext().catch(console.error);
         event.preventDefault();
     }
 };

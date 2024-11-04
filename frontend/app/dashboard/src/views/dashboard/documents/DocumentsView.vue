@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { Column, getDocumentsUIFilterBuilders, InMemoryTableAction, ModernTableView, UIFilterBuilders, useContext, useIsMobile, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, getDocumentsUIFilterBuilders, InMemoryTableAction, ModernTableView, UIFilterBuilders, useContext, useIsMobile, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -43,6 +43,7 @@ const objectFetcher = useDocumentsObjectFetcher({
 const tableObjectFetcher = useTableObjectFetcher<Document>(objectFetcher);
 
 const filterBuilders: UIFilterBuilders = getDocumentsUIFilterBuilders();
+const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 
 const allColumns: Column<Document, any>[] = [
     new Column<Document, string>({
@@ -161,10 +162,17 @@ const actions = computed(() => {
 });
 
 function openDocument(document: Document) {
+    if (!modernTableView.value) {
+        return;
+    }
+
+    const table = modernTableView.value;
     const component = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(DocumentView, {
             document,
             template: props.template,
+            getNext: table.getNext,
+            getPrevious: table.getPrevious,
         }),
     });
 
