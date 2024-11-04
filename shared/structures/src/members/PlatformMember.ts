@@ -8,6 +8,7 @@ import { Organization } from '../Organization.js';
 import { PermissionLevel } from '../PermissionLevel.js';
 import { PermissionsResourceType } from '../PermissionsResourceType.js';
 
+import { Document as DocumentStruct } from '@stamhoofd/structures';
 import { Platform } from '../Platform.js';
 import { UserPermissions } from '../UserPermissions.js';
 import { UserWithMembers } from '../UserWithMembers.js';
@@ -27,6 +28,7 @@ import { RecordSettings } from './records/RecordSettings.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
+    documents: DocumentStruct[] = [];
 
     /**
      * Checkout is required for the member to know whether certain fields are required to get collected
@@ -343,6 +345,10 @@ export class PlatformFamily {
 
     deleteMember(id: string) {
         this.members = this.members.filter(m => m.id !== id);
+    }
+
+    setDocuments(documents: DocumentStruct[]) {
+        this.documents = documents;
     }
 }
 

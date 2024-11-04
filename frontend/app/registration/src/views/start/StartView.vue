@@ -128,17 +128,44 @@
                     </STListItem>
                 </STList>
             </div>
+
+            <div v-if="documents.length > 0" class="container">
+                <hr>
+                <h2>
+                    Documenten
+                </h2>
+                <STList>
+                    <STListItem v-for="document of documents" :key="document.id" class="left-center hover-box member-registration-block" :selectable="true" @click="onDownloadDocument(document)">
+                        <template #left>
+                            <span class="icon file-pdf red" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ document.data.name }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ document.data.description }}
+                        </p>
+                        <span v-if="document.status === 'MissingData'" class="style-tag error">Onvolledig</span>
+
+                        <template #right>
+                            <Spinner v-if="isDocumentDownloading(document)" class="gray" />
+                            <span v-else class="icon download gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </div>
         </main>
     </section>
 </template>
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { MemberIcon, QuickActionsBox, Toast, useAddMember, useChooseGroupForMember, useRegistrationQuickActions, useUser } from '@stamhoofd/components';
-import { GroupType, PlatformMember } from '@stamhoofd/structures';
+import { MemberIcon, QuickActionsBox, Toast, useAddMember, useChooseGroupForMember, useContext, useRegistrationQuickActions, useUser } from '@stamhoofd/components';
+import { downloadDocument } from '@stamhoofd/document-helper';
+import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';
+import { Document, DocumentStatus, GroupType, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useMemberManager } from '@stamhoofd/networking';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
@@ -200,7 +227,10 @@ const $navigate = useNavigate();
 const memberManager = useMemberManager();
 const user = useUser();
 const quickActions = useRegistrationQuickActions();
+const context = useContext();
+const requestOwner = useRequestOwner();
 
+const documents = computed(() => memberManager.family.documents);
 const members = computed(() => memberManager.family.members);
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
 const chooseGroupForMember = useChooseGroupForMember();
@@ -233,5 +263,29 @@ async function addNewMember() {
             });
         },
     });
+}
+
+let downloadingDocuments: Document[] = [];
+
+async function onDownloadDocument(document: Document) {
+    if (isDocumentDownloading(document)) {
+        return;
+    }
+    if (document.status === DocumentStatus.MissingData) {
+        new Toast('Dit document kan niet gedownload worden omdat er nog gegevens ontbreken. Vul eerst alle ontbrekende gegevens aan en contacteer ons indien het probleem nog niet is verholpen.', 'error red').show();
+        return;
+    }
+    downloadingDocuments.push(document);
+    try {
+        await downloadDocument(context.value, document, requestOwner);
+    }
+    catch (e) {
+        console.error(e);
+    }
+    downloadingDocuments = downloadingDocuments.filter(d => d.id !== document.id);
+}
+
+function isDocumentDownloading(document: Document) {
+    return !!downloadingDocuments.find(d => d.id === document.id);
 }
 </script>

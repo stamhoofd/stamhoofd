@@ -1,47 +1,47 @@
-import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors'
-import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
-import { Toast } from '@stamhoofd/components'
-import { LoginProviderType, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures'
-import { isReactive, reactive } from 'vue'
+import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Request, RequestMiddleware } from '@simonbackx/simple-networking';
+import { Toast } from '@stamhoofd/components';
+import { LoginProviderType, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
+import { isReactive, reactive } from 'vue';
 
-import { SessionManager, UrlHelper } from '..'
-import { ContextPermissions } from './ContextPermissions'
-import { ManagedToken } from './ManagedToken'
-import { NetworkManager } from './NetworkManager'
-import { Storage } from './Storage'
+import { SessionManager, UrlHelper } from '..';
+import { ContextPermissions } from './ContextPermissions';
+import { ManagedToken } from './ManagedToken';
+import { NetworkManager } from './NetworkManager';
+import { Storage } from './Storage';
 
-type AuthenticationStateListener = (changed: "user" | "organization" | "token" | "preventComplete") => void
+type AuthenticationStateListener = (changed: 'user' | 'organization' | 'token' | 'preventComplete') => void;
 
 // dec2hex :: Integer -> String
 // i.e. 0-255 -> '00'-'ff'
-function dec2hex (dec) {
-    return dec.toString(16).padStart(2, "0")
+function dec2hex(dec) {
+    return dec.toString(16).padStart(2, '0');
 }
 
 // generateId :: Integer -> String
-function generateId (len) {
-    const arr = new Uint8Array((len || 40) / 2)
-    window.crypto.getRandomValues(arr)
-    return Array.from(arr, dec2hex).join('')
+function generateId(len) {
+    const arr = new Uint8Array((len || 40) / 2);
+    window.crypto.getRandomValues(arr);
+    return Array.from(arr, dec2hex).join('');
 }
 
 export class SessionContext implements RequestMiddleware {
     /**
      * This will become optional in the future
      */
-    organization: Organization | null = null
-    user: UserWithMembers | null = null
-    loadingError: Error|null = null
+    organization: Organization | null = null;
+    user: UserWithMembers | null = null;
+    loadingError: Error | null = null;
 
-    /** 
+    /**
      * Manually mark the session as incomplete by setting this to true
      * Not using #private syntax because that messes with Vue proxies
     */
-    _preventComplete = false
+    _preventComplete = false;
 
-    protected token: ManagedToken | null = null
-    protected usedPlatformStorage = false
+    protected token: ManagedToken | null = null;
+    protected usedPlatformStorage = false;
 
     // Stored: encryption key to obtain the private keys (valid token needed in order to have any meaning => revokable in case of leakage, lost device, theft)
     // Storage is required since otherwise you would have to enter your password again every time you reload the page
@@ -50,13 +50,13 @@ export class SessionContext implements RequestMiddleware {
     // We can store the private key in the browser, because on password change it will get changed
     // protected userPrivateKey: string | null = null // Used to decrypt messages for this user
 
-    protected listeners: Map<any, AuthenticationStateListener> = new Map()
+    protected listeners: Map<any, AuthenticationStateListener> = new Map();
 
     isStorageDisabled = false;
 
-    constructor(organization: Organization|null) {
-        this.organization = organization
-        this.usedPlatformStorage = this.organization === null
+    constructor(organization: Organization | null) {
+        this.organization = organization;
+        this.usedPlatformStorage = this.organization === null;
 
         // Reactive hack: always force creating reactive SessionContext
         return reactive(this) as unknown as SessionContext;
@@ -68,14 +68,14 @@ export class SessionContext implements RequestMiddleware {
 
     enableStorage() {
         this.isStorageDisabled = false;
-        this.saveToStorage().catch(console.error)
+        this.saveToStorage().catch(console.error);
     }
 
     /**
      * @deprecated
      */
     get organizationId() {
-        return this.organization?.id ?? null
+        return this.organization?.id ?? null;
     }
 
     /**
@@ -84,9 +84,9 @@ export class SessionContext implements RequestMiddleware {
      */
     get organizationPermissions() {
         if (!this.organization) {
-            return null
+            return null;
         }
-        return this.user?.permissions?.forOrganization(this.organization, Platform.shared) ?? null
+        return this.user?.permissions?.forOrganization(this.organization, Platform.shared) ?? null;
     }
 
     /**
@@ -94,38 +94,39 @@ export class SessionContext implements RequestMiddleware {
      * Use auth
      */
     get organizationAuth() {
-        return new ContextPermissions(this.user, this.organization, Platform.shared)
+        return new ContextPermissions(this.user, this.organization, Platform.shared);
     }
 
     get auth() {
-        return new ContextPermissions(this.user, this.organization, Platform.shared)
+        return new ContextPermissions(this.user, this.organization, Platform.shared);
     }
 
-    static async createFrom(data: ({organization: Organization} | {organizationId: string})) {
+    static async createFrom(data: ({ organization: Organization } | { organizationId: string })) {
         let organization: Organization;
-        if ("organizationId" in data) {
+        if ('organizationId' in data) {
             // If we have the token, we better do an authenticated request
             const response = await SessionContext.serverForOrganization(data.organizationId).request({
-                method: "GET",
-                path: "/organization",
+                method: 'GET',
+                path: '/organization',
                 decoder: Organization as Decoder<Organization>,
-                shouldRetry: false
-            })
-            organization = response.data
-        } else {
-            organization = data.organization
+                shouldRetry: false,
+            });
+            organization = response.data;
+        }
+        else {
+            organization = data.organization;
         }
 
-        return new SessionContext(organization)
+        return new SessionContext(organization);
     }
 
     get preventComplete() {
-        return this._preventComplete
+        return this._preventComplete;
     }
 
     set preventComplete(preventComplete: boolean) {
-        this._preventComplete = preventComplete
-        this.callListeners("preventComplete");
+        this._preventComplete = preventComplete;
+        this.callListeners('preventComplete');
     }
 
     async loadTokenFromStorage() {
@@ -133,40 +134,43 @@ export class SessionContext implements RequestMiddleware {
             return;
         }
 
-        console.log('[SessionContext] Loading Token from Storage')
+        console.log('[SessionContext] Loading Token from Storage');
 
         // Check localstorage
         try {
-            let usePlatformStorage = !this.organization || STAMHOOFD.userMode === 'platform'
-            const json = await Storage.secure.getItem('token-' + (!usePlatformStorage ? this.organization!.id : 'platform'))
+            let usePlatformStorage = !this.organization || STAMHOOFD.userMode === 'platform';
+            const json = await Storage.secure.getItem('token-' + (!usePlatformStorage ? this.organization!.id : 'platform'));
             if (json) {
                 try {
-                    const parsed = JSON.parse(json)
-                    const token = Token.decode(new ObjectData(parsed, { version: Version }))
-                    this.setTokenWithoutSaving(token, usePlatformStorage)
+                    const parsed = JSON.parse(json);
+                    const token = Token.decode(new ObjectData(parsed, { version: Version }));
+                    this.setTokenWithoutSaving(token, usePlatformStorage);
                     return;
-                } catch (e) {
-                    console.error(e)
+                }
+                catch (e) {
+                    console.error(e);
                 }
             }
 
             if (!usePlatformStorage) {
                 usePlatformStorage = true;
                 // Also try platform token
-                const json2 = await Storage.secure.getItem('token-' + 'platform')
+                const json2 = await Storage.secure.getItem('token-' + 'platform');
                 if (json2) {
                     try {
-                        const parsed = JSON.parse(json2)
-                        const token = Token.decode(new ObjectData(parsed, { version: Version }))
-                        this.setTokenWithoutSaving(token, usePlatformStorage)
-                    } catch (e) {
-                        console.error(e)
+                        const parsed = JSON.parse(json2);
+                        const token = Token.decode(new ObjectData(parsed, { version: Version }));
+                        this.setTokenWithoutSaving(token, usePlatformStorage);
+                    }
+                    catch (e) {
+                        console.error(e);
                     }
                 }
             }
-        } catch (e) {
-            console.error("Localstorage error")
-            console.error(e)
+        }
+        catch (e) {
+            console.error('Localstorage error');
+            console.error(e);
         }
     }
 
@@ -177,25 +181,27 @@ export class SessionContext implements RequestMiddleware {
 
         // Check localstorage
         try {
-            await this.loadTokenFromStorage()
+            await this.loadTokenFromStorage();
 
             if (this.token) {
                 // Also check if we have the user (optional)
-                const json = await Storage.secure.getItem('user-' + (!this.usedPlatformStorage ? this.organization!.id : 'platform'))
+                const json = await Storage.secure.getItem('user-' + (!this.usedPlatformStorage ? this.organization!.id : 'platform'));
                 if (json) {
                     try {
-                        const parsed = JSON.parse(json)
-                        this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(UserWithMembers as Decoder<UserWithMembers>) as Decoder<VersionBox<UserWithMembers>>).data
-                        this.callListeners("user")
+                        const parsed = JSON.parse(json);
+                        this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(UserWithMembers as Decoder<UserWithMembers>) as Decoder<VersionBox<UserWithMembers>>).data;
+                        this.callListeners('user');
                         return;
-                    } catch (e) {
-                        console.error(e)
+                    }
+                    catch (e) {
+                        console.error(e);
                     }
                 }
             }
-        } catch (e) {
-            console.error("Localstorage error")
-            console.error(e)
+        }
+        catch (e) {
+            console.error('Localstorage error');
+            console.error(e);
         }
     }
 
@@ -207,36 +213,38 @@ export class SessionContext implements RequestMiddleware {
         try {
             // Save token to localStorage
             if (this.token) {
-                const suffix = (this.user ? (this.user.organizationId ? this.user.organizationId : 'platform') : (
-                    this.usedPlatformStorage ? 'platform' : (this.organization!.id)
-                ));
+                const suffix = (this.user
+                    ? (this.user.organizationId ? this.user.organizationId : 'platform')
+                    : (
+                            this.usedPlatformStorage ? 'platform' : (this.organization!.id)
+                        ));
 
                 if (suffix == 'platform' && this.organization) {
-                    await Storage.secure.removeItem('token-' + this.organization.id)
-                    await Storage.secure.removeItem('user-' + this.organization.id)
+                    await Storage.secure.removeItem('token-' + this.organization.id);
+                    await Storage.secure.removeItem('user-' + this.organization.id);
                 }
 
                 if (suffix !== 'platform') {
-                    await Storage.secure.removeItem('token-platform')
-                    await Storage.secure.removeItem('user-platform')
+                    await Storage.secure.removeItem('token-platform');
+                    await Storage.secure.removeItem('user-platform');
                 }
 
-                await Storage.secure.setItem('token-' + suffix, JSON.stringify(this.token.token.encode({ version: Version })))
+                await Storage.secure.setItem('token-' + suffix, JSON.stringify(this.token.token.encode({ version: Version })));
 
                 if (this.user) {
-                    await Storage.secure.setItem('user-' + suffix, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
-                } else {
-                    await Storage.secure.removeItem('user-' + suffix)
+                    await Storage.secure.setItem('user-' + suffix, JSON.stringify(new VersionBox(this.user).encode({ version: Version })));
+                }
+                else {
+                    await Storage.secure.removeItem('user-' + suffix);
                 }
 
-                console.log('[SessionContext] Saved token to storage, suffix: ' + suffix)
+                console.log('[SessionContext] Saved token to storage, suffix: ' + suffix);
             }
-            
-        } catch (e) {
-            console.error("Storage error when saving session")
-            console.error(e)
         }
-        
+        catch (e) {
+            console.error('Storage error when saving session');
+            console.error(e);
+        }
     }
 
     deleteFromStorage() {
@@ -246,19 +254,20 @@ export class SessionContext implements RequestMiddleware {
 
         try {
             if (this.organization) {
-                void Storage.secure.removeItem('token-' + this.organization.id)
-                void Storage.secure.removeItem('user-' + this.organization.id)
+                void Storage.secure.removeItem('token-' + this.organization.id);
+                void Storage.secure.removeItem('user-' + this.organization.id);
             }
             if (this.usedPlatformStorage || STAMHOOFD.userMode === 'platform') {
-                void Storage.secure.removeItem('token-platform')
-                void Storage.secure.removeItem('user-platform')
+                void Storage.secure.removeItem('token-platform');
+                void Storage.secure.removeItem('user-platform');
             }
-        } catch (e) {
-            console.error("Storage error when saving session")
-            console.error(e)
         }
-        
-        console.log('Deleted token to storage')
+        catch (e) {
+            console.error('Storage error when saving session');
+            console.error(e);
+        }
+
+        console.log('Deleted token to storage');
     }
 
     removeFromStorage() {
@@ -266,17 +275,18 @@ export class SessionContext implements RequestMiddleware {
             return;
         }
         try {
-            void Storage.secure.removeItem('token-' + this.organizationId)
-            void Storage.secure.removeItem('user-' + this.organizationId)
+            void Storage.secure.removeItem('token-' + this.organizationId);
+            void Storage.secure.removeItem('user-' + this.organizationId);
 
             // Deprecated: but best to delete it for now
-            void Storage.secure.removeItem('key-' + this.organizationId)
-        } catch (e) {
-            console.error("Storage error when deleting session")
-            console.error(e)
+            void Storage.secure.removeItem('key-' + this.organizationId);
         }
-        
-        console.log('Deleted token to storage')
+        catch (e) {
+            console.error('Storage error when deleting session');
+            console.error(e);
+        }
+
+        console.log('Deleted token to storage');
     }
 
     async checkSSO() {
@@ -287,21 +297,22 @@ export class SessionContext implements RequestMiddleware {
         if (oid_rt && state) {
             // Check valid state
             try {
-                const savedState = await Storage.secure.getItem("oid-state")
+                const savedState = await Storage.secure.getItem('oid-state');
                 if (savedState !== state) {
-                    console.warn('SSO state didn\'t match')
+                    console.warn('SSO state didn\'t match');
 
                     if (!this.canGetCompleted()) {
-                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
                     }
-                    return
+                    return;
                 }
-                Storage.secure.removeItem("oid-state").catch(console.error)
-            } catch (e) {
+                Storage.secure.removeItem('oid-state').catch(console.error);
+            }
+            catch (e) {
                 console.error(e);
-                
+
                 if (!this.canGetCompleted()) {
-                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
                 }
                 return;
             }
@@ -309,56 +320,59 @@ export class SessionContext implements RequestMiddleware {
             await this.setToken(new Token({
                 accessToken: '',
                 refreshToken: oid_rt,
-                accessTokenValidUntil: new Date(0)
-            }))
+                accessTokenValidUntil: new Date(0),
+            }));
         }
 
         if (state && error) {
             // Check valid state
             try {
-                const savedState = await Storage.secure.getItem("oid-state")
+                const savedState = await Storage.secure.getItem('oid-state');
                 if (savedState !== state) {
-                    console.warn('SSO state didn\'t match')
-                    
+                    console.warn('SSO state didn\'t match');
+
                     if (!this.canGetCompleted()) {
-                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
                     }
-                    return
+                    return;
                 }
-                Storage.secure.removeItem("oid-state").catch(console.error)
-            } catch (e) {
+                Storage.secure.removeItem('oid-state').catch(console.error);
+            }
+            catch (e) {
                 console.error(e);
                 if (!this.canGetCompleted()) {
-                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
                 }
                 return;
             }
 
-            new Toast(error, 'error red').setHide(20000).show()
-        } else {
+            new Toast(error, 'error red').setHide(20000).show();
+        }
+        else {
             if (error) {
                 // Message not authorized
-                new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
             }
         }
     }
 
-    async startSSO(data: {webshopId?: string, prompt?: string, providerType: LoginProviderType}) {
-        const spaState = generateId(40)
+    async startSSO(data: { webshopId?: string; prompt?: string; providerType: LoginProviderType }) {
+        const spaState = generateId(40);
         try {
-            await Storage.secure.setItem("oid-state", spaState)
-        } catch (e) {
-            console.error("Could not save state in local storage")
-            new Toast('Jouw browser ondersteunt geen lokale opslag, wat noodzakelijk is om in te kunnen loggen. Kijk na of je de browser niet in incognito/prive mode gebruikt. Schakel het indien mogelijk uit, of probeer in een andere browser.', 'error red').setHide(20000).show()
+            await Storage.secure.setItem('oid-state', spaState);
+        }
+        catch (e) {
+            console.error('Could not save state in local storage');
+            new Toast('Jouw browser ondersteunt geen lokale opslag, wat noodzakelijk is om in te kunnen loggen. Kijk na of je de browser niet in incognito/prive mode gebruikt. Schakel het indien mogelijk uit, of probeer in een andere browser.', 'error red').setHide(20000).show();
             return;
         }
 
         // Check SSO required?
         // if SSO
         const url = new URL(this.server.host + '/openid/start');
-        
+
         const form = document.createElement('form');
-        form.action= url.href;
+        form.action = url.href;
         form.method = 'POST';
 
         const spaStateInput = document.createElement('input');
@@ -410,31 +424,31 @@ export class SessionContext implements RequestMiddleware {
     }
 
     addListener(owner: any, listener: AuthenticationStateListener) {
-        this.listeners.set(owner, listener)
+        this.listeners.set(owner, listener);
     }
 
     removeListener(owner: any) {
-        this.listeners.delete(owner)
+        this.listeners.delete(owner);
     }
 
-    callListeners(changed: "user" | "organization" | "token" | "preventComplete") {
+    callListeners(changed: 'user' | 'organization' | 'token' | 'preventComplete') {
         for (const listener of this.listeners.values()) {
-            listener(changed)
+            listener(changed);
         }
     }
 
     hasToken(): boolean {
-        return !!this.token
+        return !!this.token;
     }
 
     canGetCompleted(): boolean {
-        //console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
-        return !!this.token
+        // console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
+        return !!this.token;
     }
 
     hasPermissions(): boolean {
-        //console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
-        return !!this.auth?.permissions
+        // console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
+        return !!this.auth?.permissions;
     }
 
     isComplete(): boolean {
@@ -457,21 +471,21 @@ export class SessionContext implements RequestMiddleware {
             }
         }
 
-        return true
+        return true;
     }
 
-    static serverForOrganization(organizationId: string|null|undefined) {
-        const server = NetworkManager.server
+    static serverForOrganization(organizationId: string | null | undefined) {
+        const server = NetworkManager.server;
         if (!organizationId) {
-            return server
+            return server;
         }
 
-        server.host = "https://" + organizationId + "." + STAMHOOFD.domains.api;
-        return server
+        server.host = 'https://' + organizationId + '.' + STAMHOOFD.domains.api;
+        return server;
     }
 
     get server() {
-        return SessionContext.serverForOrganization(this.organization?.id)
+        return SessionContext.serverForOrganization(this.organization?.id);
     }
 
     /**
@@ -479,109 +493,111 @@ export class SessionContext implements RequestMiddleware {
      */
     get authenticatedServer() {
         if (!this.hasToken()) {
-            throw new Error("Could not get authenticated server without token")
+            throw new Error('Could not get authenticated server without token');
         }
-        const server = this.server
-        server.middlewares.push(this)
-        return server
+        const server = this.server;
+        server.middlewares.push(this);
+        return server;
     }
 
     getAuthenticatedServerForOrganization(organizationId: string) {
         if (!this.hasToken()) {
-            throw new Error("Could not get authenticated server without token")
+            throw new Error('Could not get authenticated server without token');
         }
-        const server = SessionContext.serverForOrganization(organizationId)
-        server.middlewares.push(this)
-        return server
+        const server = SessionContext.serverForOrganization(organizationId);
+        server.middlewares.push(this);
+        return server;
     }
 
     get optionalAuthenticatedServer() {
         if (this.hasToken()) {
-            return this.authenticatedServer
+            return this.authenticatedServer;
         }
-        return this.server
+        return this.server;
     }
 
     protected async onTokenChanged() {
-        await this.saveToStorage()
-        this.callListeners("token")
+        await this.saveToStorage();
+        this.callListeners('token');
     }
 
     setTokenWithoutSaving(token: Token, usedPlatformStorage?: boolean) {
-        console.log('[SessionContext] Setting Token. Platform: ' + usedPlatformStorage)
+        console.log('[SessionContext] Setting Token. Platform: ' + usedPlatformStorage);
 
         if (this.token) {
             // Disable listener before clearing the token
             this.token.onChange = () => {
                 // emtpy
-            }
+            };
         }
         this.token = new ManagedToken(token, async () => {
-            await this.onTokenChanged()
+            await this.onTokenChanged();
         });
 
         if (usedPlatformStorage !== undefined) {
-            this.usedPlatformStorage = usedPlatformStorage
+            this.usedPlatformStorage = usedPlatformStorage;
         }
-        this.callListeners("token")
+        this.callListeners('token');
     }
 
     async setToken(token: Token, usedPlatformStorage?: boolean) {
-        this.setTokenWithoutSaving(token, usedPlatformStorage)
-        await this.onTokenChanged()
+        this.setTokenWithoutSaving(token, usedPlatformStorage);
+        await this.onTokenChanged();
     }
 
-    _lastFetchedUser: Date|null = null;
-    _lastFetchedOrganization: Date|null = null;
+    _lastFetchedUser: Date | null = null;
+    _lastFetchedOrganization: Date | null = null;
 
     async fetchUser(shouldRetry = true): Promise<UserWithMembers> {
-        console.log("Fetching session user...")
+        console.log('Fetching session user...');
 
         if (!isReactive(this)) {
-            console.error("SessionContext is not reactive while fetching user!")
+            console.error('SessionContext is not reactive while fetching user!');
         }
 
         const response = await this.authenticatedServer.request({
-            method: "GET",
-            path: "/user",
+            method: 'GET',
+            path: '/user',
             decoder: UserWithMembers as Decoder<UserWithMembers>,
-            shouldRetry
-        })
-        this._lastFetchedUser = new Date()
+            shouldRetry,
+        });
+        this._lastFetchedUser = new Date();
 
         if (this.user) {
-            this.user.deepSet(response.data)
-        } else {
-            this.user = response.data
+            this.user.deepSet(response.data);
         }
-        console.log("Fetched session user")
+        else {
+            this.user = response.data;
+        }
+        console.log('Fetched session user');
 
         if (!isReactive(this.user)) {
-            console.error("SessionContext.user is not reactive after fetching user!")
+            console.error('SessionContext.user is not reactive after fetching user!');
         }
 
         // Auto copy organization data from the response
         if (this.organization) {
-            const returnedOrganization = this.user.members.organizations.find(o => o.id == this.organization?.id)
+            const returnedOrganization = this.user.members.organizations.find(o => o.id == this.organization?.id);
             if (returnedOrganization) {
-                this._lastFetchedOrganization = new Date()
-                this.updateOrganization(returnedOrganization)
-            } else {
-                console.warn('Did not find organization in user response')
+                this._lastFetchedOrganization = new Date();
+                this.updateOrganization(returnedOrganization);
+            }
+            else {
+                console.warn('Did not find organization in user response');
             }
         }
 
-        await this.saveToStorage()
-        this.callListeners("user")
-        return this.user
+        await this.saveToStorage();
+        this.callListeners('user');
+        return this.user;
     }
 
     /**
      * Set the organization, including the reference
      */
     setOrganization(organization: Organization) {
-        this.organization = organization
-        this.callListeners("organization")
+        this.organization = organization;
+        this.callListeners('organization');
     }
 
     /**
@@ -590,31 +606,32 @@ export class SessionContext implements RequestMiddleware {
      */
     updateOrganization(organization: Organization) {
         if (!this.organization) {
-            this.setOrganization(organization)
-        } else {
-            const oldAdmins = this.organization.admins
+            this.setOrganization(organization);
+        }
+        else {
+            const oldAdmins = this.organization.admins;
 
-            this.organization.deepSet(organization)
+            this.organization.deepSet(organization);
 
             if (oldAdmins && !this.organization.admins) {
-                this.organization.admins = oldAdmins
+                this.organization.admins = oldAdmins;
             }
-            this.callListeners("organization")
+            this.callListeners('organization');
         }
     }
 
     async fetchOrganization(shouldRetry = true): Promise<Organization> {
         if (!this.organization) {
-            throw new Error('Cannot fetch organization in a context with no organization')
+            throw new Error('Cannot fetch organization in a context with no organization');
         }
-        console.log("Fetching session organization...")
+        console.log('Fetching session organization...');
 
         const response = await (this.hasToken() ? this.authenticatedServer : this.server).request({
-            method: "GET",
-            path: "/organization",
+            method: 'GET',
+            path: '/organization',
             decoder: Organization as Decoder<Organization>,
-            shouldRetry
-        })
+            shouldRetry,
+        });
 
         if (this.hasToken() && this.organizationPermissions && !response.data.privateMeta) {
             console.error('Missing privateMeta in authenticated organization response');
@@ -623,70 +640,72 @@ export class SessionContext implements RequestMiddleware {
             this.setLoadingError(new SimpleError({
                 code: 'failed',
                 message: 'Something went wrong',
-                human: 'Er ging iets mis. Je hebt geen toegang tot deze vereniging.'
-            }))
-            throw new Error("Missing privateMeta in authenticated organization response")
+                human: 'Er ging iets mis. Je hebt geen toegang tot deze vereniging.',
+            }));
+            throw new Error('Missing privateMeta in authenticated organization response');
         }
 
-        this.updateOrganization(response.data)
-        this._lastFetchedOrganization = new Date()
-        this.callListeners("organization")
-        return this.organization!
+        this.updateOrganization(response.data);
+        this._lastFetchedOrganization = new Date();
+        this.callListeners('organization');
+        return this.organization!;
     }
 
-    isOutdated(date: Date|null) {
-        return date === null || date < new Date(new Date().getTime() - 10 * 1000)
+    isOutdated(date: Date | null) {
+        return date === null || date < new Date(new Date().getTime() - 10 * 1000);
     }
 
     /**
-     * 
+     *
      * @param force Always fetch new information, even when it is available
      * @param shouldRetry Keep retrying on network or server issues
      * @param background If we don't need to update the data right away, initiate a forced background update
      */
     async updateData(force = false, shouldRetry = true, background = false, skipIfNotOutdated = false) {
         if (force) {
-            console.log("SessionContext force update data, background: ", background, skipIfNotOutdated)
-        } else {
-            console.log("SessionContext update data, background: ", background, skipIfNotOutdated)
+            console.log('SessionContext force update data, background: ', background, skipIfNotOutdated);
+        }
+        else {
+            console.log('SessionContext update data, background: ', background, skipIfNotOutdated);
         }
 
         if (skipIfNotOutdated) {
             if (!this.isOutdated(this._lastFetchedUser) && !this.isOutdated(this._lastFetchedOrganization)) {
-                console.log("Data is not outdated, skipping update")
+                console.log('Data is not outdated, skipping update');
                 return;
             }
 
-            console.log('Data is outdated, updating...', this._lastFetchedUser, this._lastFetchedOrganization)
+            console.log('Data is outdated, updating...', this._lastFetchedUser, this._lastFetchedOrganization);
         }
 
         try {
-            let fetchedUser = false
-            let fetchedOrganization = false
+            let fetchedUser = false;
+            let fetchedOrganization = false;
 
             if (force || !this.user) {
-                fetchedUser = true
-                await this.fetchUser(shouldRetry)
+                fetchedUser = true;
+                await this.fetchUser(shouldRetry);
 
                 // The user also includes the organization, so we don't need to fetch it again
-                fetchedOrganization = true
+                fetchedOrganization = true;
             }
 
-            if (this.organization && ((force && !fetchedOrganization) || (this.organizationPermissions && !this.organization.privateMeta))) { 
-                fetchedOrganization = true
-                await this.fetchOrganization(shouldRetry)
+            if (this.organization && ((force && !fetchedOrganization) || (this.organizationPermissions && !this.organization.privateMeta))) {
+                fetchedOrganization = true;
+                await this.fetchOrganization(shouldRetry);
             }
 
             if (((!fetchedOrganization && this.organization) || (!fetchedUser)) && background) {
                 // Initiate a slow background update without retry
                 // = we don't need to block the UI for this ;)
-                this.updateData(true, false, false).catch(e => {
+                this.updateData(true, false, false).catch((e) => {
                     // Ignore network errors
-                    console.error(e)
-                })
+                    console.error(e);
+                });
             }
-        } catch (e) {
-            console.error('Error while updating session data', e)
+        }
+        catch (e) {
+            console.error('Error while updating session data', e);
             throw e;
         }
     }
@@ -700,22 +719,22 @@ export class SessionContext implements RequestMiddleware {
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy
-            }
+            };
             this.token = null;
-            this.callListeners("token")
+            this.callListeners('token');
         }
         this.user = null;
-        this.callListeners("user")
+        this.callListeners('user');
     }
 
     // Logout without clearing this token
-    setLoadingError(error: Error|null) {
+    setLoadingError(error: Error | null) {
         this.loadingError = error;
-        this.callListeners("token")
-        this.callListeners("user")
+        this.callListeners('token');
+        this.callListeners('user');
     }
 
-    isLoggingOut = false
+    isLoggingOut = false;
 
     async logout() {
         if (this.isLoggingOut) {
@@ -730,27 +749,28 @@ export class SessionContext implements RequestMiddleware {
             // Delete first to prevent loops (could be already invalid so the deletion might fail)
             try {
                 await this.authenticatedServer.request({
-                    method: "DELETE",
-                    path: "/oauth/token",
+                    method: 'DELETE',
+                    path: '/oauth/token',
                     shouldRetry: false,
-                    allowErrorRetry: true // sometimes we need to refresh a token before we can delete it
-                })
-            } catch (e) {
+                    allowErrorRetry: true, // sometimes we need to refresh a token before we can delete it
+                });
+            }
+            catch (e) {
                 if (Request.isNetworkError(e) || Request.isAbortError(e)) {
                     // Network access is required for a reliable logout
                     this.isLoggingOut = false;
                     throw e;
                 }
-                console.error('Failed to delete token. Probably already deleted?', e)
+                console.error('Failed to delete token. Probably already deleted?', e);
             }
 
             this.isLoggingOut = false;
             this.token.onChange = () => {
                 // emtpy
-            }
+            };
             this.token = null;
             this.user = null; // force refetch in the future
-            await this.deleteFromStorage()
+            await this.deleteFromStorage();
             await this.onTokenChanged();
         }
     }
@@ -768,27 +788,28 @@ export class SessionContext implements RequestMiddleware {
             // Delete first to prevent loops (could be already invalid so the deletion might fail)
             try {
                 await this.authenticatedServer.request({
-                    method: "DELETE",
-                    path: "/user",
+                    method: 'DELETE',
+                    path: '/user',
                     shouldRetry: false,
-                    allowErrorRetry: true // sometimes we need to refresh a token before we can delete it
-                })
-            } catch (e) {
+                    allowErrorRetry: true, // sometimes we need to refresh a token before we can delete it
+                });
+            }
+            catch (e) {
                 if (Request.isNetworkError(e) || Request.isAbortError(e)) {
                     // Network access is required for a reliable logout
                     this.isLoggingOut = false;
                     throw e;
                 }
-                console.error('Failed to delete token. Probably already deleted?', e)
+                console.error('Failed to delete token. Probably already deleted?', e);
             }
 
             this.isLoggingOut = false;
             this.token.onChange = () => {
                 // emtpy
-            }
+            };
             this.token = null;
             this.user = null; // force refetch in the future
-            await this.deleteFromStorage()
+            await this.deleteFromStorage();
             await this.onTokenChanged();
         }
     }
@@ -797,26 +818,27 @@ export class SessionContext implements RequestMiddleware {
 
     async onBeforeRequest(request: Request<any>): Promise<void> {
         // Check if we have an updated token in storage (other browser tab refreshed the token)
-        await this.loadTokenFromStorage()
+        await this.loadTokenFromStorage();
 
         if (!this.token) {
             // Euhm? The user is not signed in!
-            throw new Error("Could not authenticate request without token")
+            throw new Error('Could not authenticate request without token');
         }
 
         if (this.token.isRefreshing() || this.token.needsRefresh()) {
             // Already expired.
-            console.log("Request started with expired access token, refreshing before starting request...")
+            console.log('Request started with expired access token, refreshing before starting request...');
             try {
-                await this.token.refresh(this.server, () => request.shouldRetry)
-            } catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) { 
-                    if (e.hasCode("invalid_refresh_token")) {
-                        await this.logout()                        
+                await this.token.refresh(this.server, () => request.shouldRetry);
+            }
+            catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    if (e.hasCode('invalid_refresh_token')) {
+                        await this.logout();
                         throw new SimpleError({
                             code: '',
                             message: '',
-                            human: 'Je bent niet langer ingelogd. Log opnieuw in om verder te gaan.'
+                            human: 'Je bent niet langer ingelogd. Log opnieuw in om verder te gaan.',
                         });
                     }
                 }
@@ -824,7 +846,7 @@ export class SessionContext implements RequestMiddleware {
             }
         }
 
-        request.headers["Authorization"] = "Bearer " + this.token.token.accessToken;
+        request.headers['Authorization'] = 'Bearer ' + this.token.token.accessToken;
     }
 
     async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
@@ -833,17 +855,17 @@ export class SessionContext implements RequestMiddleware {
             return false;
         }
 
-        if (error.hasCode("invalid_organization") && this.organization) {
+        if (error.hasCode('invalid_organization') && this.organization) {
             // Clear from session storage
-            await SessionManager.removeOrganizationFromStorage(this.organization.id)
-            this.setLoadingError(error)
+            await SessionManager.removeOrganizationFromStorage(this.organization.id);
+            this.setLoadingError(error);
             window.location.reload();
             return false;
         }
 
         if (error.hasCode('not_activated') && !this.isStorageDisabled) {
             // The user is not activated, logout
-            await this.logout()
+            await this.logout();
             return false;
         }
 
@@ -851,23 +873,24 @@ export class SessionContext implements RequestMiddleware {
             return false;
         }
 
-        if (error.hasCode("expired_access_token")) {
-            if (request.headers.Authorization !== "Bearer " + this.token.token.accessToken) {
-                console.log("This request started with an old token that might not be valid anymore. Retry with new token before doing a refresh")
-                return true
+        if (error.hasCode('expired_access_token')) {
+            if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
+                console.log('This request started with an old token that might not be valid anymore. Retry with new token before doing a refresh');
+                return true;
             }
 
             // Try to refresh
             try {
-                console.log("Request failed due to expired access token, refreshing...")
-                await this.token.refresh(this.server, () => request.shouldRetry)
-                console.log("Retrying request...")
-            } catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) { 
-                    if (e.hasCode("invalid_refresh_token")) {
-                        console.log("Refresh token is invalid, logout")
-                        this.setLoadingError(e)
-                        await this.logout()
+                console.log('Request failed due to expired access token, refreshing...');
+                await this.token.refresh(this.server, () => request.shouldRetry);
+                console.log('Retrying request...');
+            }
+            catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    if (e.hasCode('invalid_refresh_token')) {
+                        console.log('Refresh token is invalid, logout');
+                        this.setLoadingError(e);
+                        await this.logout();
                         return false;
                     }
                 }
@@ -875,25 +898,28 @@ export class SessionContext implements RequestMiddleware {
                 if (Request.isNetworkError(e) || Request.isAbortError(e)) {
                     return false;
                 }
-                
+
                 // Something went wrong
-                this.setLoadingError(e)
+                this.setLoadingError(e);
                 return false;
             }
-            return true
-        } else {
-            if (request.headers.Authorization !== "Bearer " + this.token.token.accessToken) {
-                console.log("This request started with an old token that might not be valid anymore. Retry with new token")
-                return true
-            } else {
-                if (error.hasCode("invalid_access_token")) {
+            return true;
+        }
+        else {
+            if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
+                console.log('This request started with an old token that might not be valid anymore. Retry with new token');
+                return true;
+            }
+            else {
+                if (error.hasCode('invalid_access_token')) {
                     await this.logout();
-                } else {
+                }
+                else {
                     this.setLoadingError(error);
                 }
             }
         }
 
-        return false
+        return false;
     }
 }
