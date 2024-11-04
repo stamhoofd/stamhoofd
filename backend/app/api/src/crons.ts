@@ -718,14 +718,16 @@ async function checkSGV() {
             "Laatst lid geschrapt",
             "Totaal aantal gekoppelde leden in Stamhoofd",
             "Waarvan volledig gesynchroniseerd",
+            "Waarvan ongewijzigd of gesynchroniseerd in laatste 30 dagen",
             "Waarvan nooit gesynchroniseerd",
             "Waarvan mogelijks verouderd",
-            "Waarvan gegevens gewijzigd",
+            "Waarvan gegevens mogelijks gewijzigd",
 
             ...countKeysArray.map(k => 'Aantal gesynchroniseerd onder ' + k)
         ],
     ];
 
+    const last30Days = new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30)
 
     for (const organization of allOrganizations) {
         // Calculate syncable members
@@ -737,7 +739,8 @@ async function checkSGV() {
             ok: 0,
             never: 0,
             outdated: 0,
-            changed: 0
+            changed: 0,
+            syncedLast30Days: 0
         };
 
         const groupStructures = groups.map(g => g.getStructure())
@@ -767,6 +770,10 @@ async function checkSGV() {
 
                 const status = structure.syncStatus
 
+                if (status === 'ok' || (structure.details.lastExternalSync && structure.details.lastExternalSync > last30Days)) {
+                    counts.syncedLast30Days++
+                }
+
                 switch (status) {
                     case "ok":
                         counts.ok++
@@ -784,6 +791,20 @@ async function checkSGV() {
             }
         }
 
+        /**
+         * "Naam",
+            "Gemeente",
+            "Laatst volledig gesynchroniseerd",
+            "Laatst gedeeltelijk gesynchroniseerd",
+            "Laatst lid geschrapt",
+            "Totaal aantal gekoppelde leden in Stamhoofd",
+            "Waarvan volledig gesynchroniseerd",
+            "Waarvan ongewijzigd of gesynchroniseerd in laatste 30 dagen",
+            "Waarvan nooit gesynchroniseerd",
+            "Waarvan mogelijks verouderd",
+            "Waarvan gegevens mogelijks gewijzigd",
+         */
+
         wsData.push([
             organization.name,
             organization.address.city,
@@ -792,6 +813,7 @@ async function checkSGV() {
             organization.privateMeta.externalSyncData?.lastDeleted ? Formatter.dateTime(organization.privateMeta.externalSyncData.lastDeleted) : "Nooit",
             counts.total,
             counts.ok,
+            counts.syncedLast30Days,
             counts.never,
             counts.outdated,
             counts.changed,
