@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, CachedBalance, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { BalanceItem, CachedBalance, Document, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
+import { AccessRight, Document as DocumentStruct, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -454,6 +454,37 @@ export class AuthenticatedStructures {
             const struct = PrivateOrder.create({
                 ...order,
                 balanceItems: await BalanceItem.getStructureWithPrivatePayments(balanceItems),
+            });
+
+            result.push(struct);
+        }
+
+        return result;
+    }
+
+    static async documents(documents: Document[]): Promise<DocumentStruct[]> {
+        const result: DocumentStruct[] = [];
+        const templateIds = new Set(documents.map(d => d.templateId));
+
+        for (const templateId of templateIds) {
+            const organizationId = documents.find(d => d.templateId === templateId)!.organizationId;
+
+            const canAccess = await Context.auth.canAccessDocumentTemplate({
+                organizationId,
+            }, PermissionLevel.Read);
+
+            if (!canAccess) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Permission denied',
+                    human: 'Je hebt geen toegang tot de documenten van deze template',
+                });
+            }
+        }
+
+        for (const document of documents) {
+            const struct = DocumentStruct.create({
+                ...document,
             });
 
             result.push(struct);

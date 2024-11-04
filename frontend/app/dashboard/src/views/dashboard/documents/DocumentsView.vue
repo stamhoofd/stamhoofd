@@ -1,19 +1,29 @@
 <template>
-    <div>
-        Work in progress
-    </div>
+    <ModernTableView
+        ref="modernTableView"
+        :table-object-fetcher="tableObjectFetcher"
+        :filter-builders="filterBuilders"
+        :title="title"
+        :column-configuration-id="configurationId"
+        :actions="actions"
+        :all-columns="allColumns"
+        :prefix-column="allColumns[0]"
+        @click="($event: Document) => openDocument($event)"
+    >
+        <template #empty>
+            {{ $t('Er zijn nog geen documenten.') }}
+        </template>
+    </ModernTableView>
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { Column, InMemoryTableAction, Toast, useContext, useIsMobile, useRequiredOrganization } from '@stamhoofd/components';
+import { Column, InMemoryTableAction, ModernTableView, UIFilterBuilders, useContext, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
-import { useRequestOwner } from '@stamhoofd/networking';
-import { computed, onMounted, Ref, ref } from 'vue';
+import { useDocumentsObjectFetcher } from '@stamhoofd/components/src/fetchers/useDocumentsObjectFetcher';
+import { computed, Ref, ref } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
 import DocumentView from './DocumentView.vue';
 
@@ -22,24 +32,109 @@ const props = defineProps<{
 }>();
 
 const title = 'Documenten';
-const allColumns = ref(getColumns());
-const defaultSortColumn = computed(() => allColumns.value[1]);
+const configurationId = 'documents';
 
-const requestOwner = useRequestOwner();
+const objectFetcher = useDocumentsObjectFetcher({
+    requiredFilter: {
+        templateId: props.template.id,
+    },
+});
+
+const tableObjectFetcher = useTableObjectFetcher<Document>(objectFetcher);
+
+// todo
+const filterBuilders: UIFilterBuilders = [];
+
+const allColumns: Column<Document, any>[] = [
+    new Column<Document, string>({
+        id: 'id',
+        enabled: false,
+        name: 'Volgnummer',
+        getValue: v => v.id,
+        compare: (a, b) => Sorter.byStringValue(a, b),
+        minimumWidth: 100,
+        recommendedWidth: 370,
+        grow: false,
+    }),
+
+    new Column<Document, number | null>({
+        id: 'number',
+        name: 'Nummer',
+        getValue: v => v.number,
+        compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
+        format: n => n ? n.toString() : 'Niet toegekend',
+        getStyle: (status) => {
+            if (status === null) {
+                return 'gray';
+            }
+            return '';
+        },
+        minimumWidth: 100,
+        recommendedWidth: 200,
+        grow: false,
+        enabled: false,
+    }),
+
+    new Column<Document, string>({
+        id: 'description',
+        name: 'Beschrijving',
+        getValue: v => v.data.description,
+        compare: (a, b) => Sorter.byStringValue(a, b),
+        minimumWidth: 100,
+        recommendedWidth: 320,
+        grow: true,
+    }),
+
+    new Column<Document, DocumentStatus>({
+        id: 'status',
+        name: 'Status',
+        getValue: document => document.status,
+        format: status => DocumentStatusHelper.getName(status),
+        compare: (a, b) => Sorter.byEnumValue(a, b, DocumentStatus),
+        getStyle: (status) => {
+            return DocumentStatusHelper.getColor(status);
+        },
+        minimumWidth: 100,
+        recommendedWidth: 120,
+    }),
+
+    new Column<Document, RecordWarning[]>({
+        name: 'Waarschuwingen',
+        allowSorting: false,
+        getValue: (document) => {
+            return [...document.data.fieldAnswers.values()].flatMap(answer => answer.getWarnings());
+        },
+        format: (warnings) => {
+            if (warnings.length === 1) {
+                return 'Waarschuwing';
+            }
+            if (warnings.length > 1) {
+                return `${warnings.length} waarschuwingen`;
+            }
+            return 'Geen';
+        },
+        compare: (a, b) => -Sorter.byNumberValue(a.length, b.length),
+        getStyle: (warnings) => {
+            if (warnings.length > 0) {
+                if (warnings.find(w => w.type === RecordWarningType.Error)) {
+                    return 'error';
+                }
+                return 'warn';
+            }
+            return 'gray';
+        },
+        minimumWidth: 100,
+        recommendedWidth: 150,
+    }),
+];
+
 const context = useContext();
 const present = usePresent();
 const show = useShow();
 const isMobile = useIsMobile();
 
-const loading = ref(true);
 const allValues = ref([]) as Ref<Document[]>;
-const organization = useRequiredOrganization();
 
-onMounted(() => {
-    reload().catch(console.error);
-});
-
-const estimatedRows = computed(() => !loading.value ? 0 : 30);
 const actions = computed(() => {
     const builder = new DocumentActionBuilder({
         $context: context.value,
@@ -66,88 +161,6 @@ const actions = computed(() => {
     ];
 });
 
-function getColumns() {
-    const cols: Column<Document, any>[] = [
-        new Column<Document, string>({
-            enabled: false,
-            name: 'Volgnummer',
-            getValue: v => v.id,
-            compare: (a, b) => Sorter.byStringValue(a, b),
-            minimumWidth: 100,
-            recommendedWidth: 370,
-            grow: false,
-        }),
-
-        new Column<Document, number | null>({
-            name: 'Nummer',
-            getValue: v => v.number,
-            compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
-            format: n => n ? n.toString() : 'Niet toegekend',
-            getStyle: (status) => {
-                if (status === null) {
-                    return 'gray';
-                }
-                return '';
-            },
-            minimumWidth: 100,
-            recommendedWidth: 200,
-            grow: false,
-            enabled: false,
-        }),
-
-        new Column<Document, string>({
-            name: 'Beschrijving',
-            getValue: v => v.data.description,
-            compare: (a, b) => Sorter.byStringValue(a, b),
-            minimumWidth: 100,
-            recommendedWidth: 320,
-            grow: true,
-        }),
-
-        new Column<Document, DocumentStatus>({
-            name: 'Status',
-            getValue: document => document.status,
-            format: status => DocumentStatusHelper.getName(status),
-            compare: (a, b) => Sorter.byEnumValue(a, b, DocumentStatus),
-            getStyle: (status) => {
-                return DocumentStatusHelper.getColor(status);
-            },
-            minimumWidth: 100,
-            recommendedWidth: 120,
-        }),
-
-        new Column<Document, RecordWarning[]>({
-            name: 'Waarschuwingen',
-            getValue: (document) => {
-                return [...document.data.fieldAnswers.values()].flatMap(answer => answer.getWarnings());
-            },
-            format: (warnings) => {
-                if (warnings.length === 1) {
-                    return 'Waarschuwing';
-                }
-                if (warnings.length > 1) {
-                    return `${warnings.length} waarschuwingen`;
-                }
-                return 'Geen';
-            },
-            compare: (a, b) => -Sorter.byNumberValue(a.length, b.length),
-            getStyle: (warnings) => {
-                if (warnings.length > 0) {
-                    if (warnings.find(w => w.type === RecordWarningType.Error)) {
-                        return 'error';
-                    }
-                    return 'warn';
-                }
-                return 'gray';
-            },
-            minimumWidth: 100,
-            recommendedWidth: 150,
-        }),
-    ];
-
-    return cols;
-}
-
 function openDocument(document: Document) {
     const component = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(DocumentView, {
@@ -162,30 +175,6 @@ function openDocument(document: Document) {
     else {
         component.modalDisplayStyle = 'popup';
         present(component).catch(console.error);
-    }
-}
-
-async function reload(visibleReload = true) {
-    Request.cancelAll(requestOwner);
-    loading.value = visibleReload;
-
-    try {
-        const response = await context.value.authenticatedServer.request({
-            method: 'GET',
-            path: '/organization/document-templates/' + encodeURIComponent(props.template.id) + '/documents',
-            decoder: new ArrayDecoder(Document as Decoder<Document>),
-            shouldRetry: false,
-            owner: requestOwner,
-        });
-        allValues.value = response.data;
-    }
-    catch (e) {
-        if (!Request.isNetworkError(e as Error) || visibleReload) {
-            Toast.fromError(e).show();
-        }
-    }
-    if (visibleReload) {
-        loading.value = false;
     }
 }
 </script>
