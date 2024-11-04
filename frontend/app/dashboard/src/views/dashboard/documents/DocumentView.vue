@@ -105,9 +105,11 @@ const props = withDefaults(defineProps<{
     template: DocumentTemplatePrivate;
     getNext?: ((document: Document) => Document) | null;
     getPrevious?: ((document: Document) => Document) | null;
+    addDocument?: ((document: Document) => void) | null;
 }>(), {
     getNext: null,
     getPrevious: null,
+    addDocument: null,
 });
 
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('document', props);
@@ -147,6 +149,7 @@ const actionBuilder = computed(() => {
         $context: context.value,
         template: props.template,
         navigationActions,
+        addDocument: props.addDocument ?? undefined,
     });
 });
 

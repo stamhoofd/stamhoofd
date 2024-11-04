@@ -2,19 +2,19 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { CenteredMessage, InMemoryTableAction, LoadComponent, NavigationActions, TableAction, Toast } from '@stamhoofd/components';
 import { downloadDocuments } from '@stamhoofd/document-helper';
 import { SessionContext } from '@stamhoofd/networking';
-import { Document, DocumentData, DocumentStatus, DocumentTemplatePrivate } from '@stamhoofd/structures';
+import { DocumentData, DocumentStatus, Document as DocumentStruct, DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export class DocumentActionBuilder {
     navigationActions: NavigationActions;
     template: DocumentTemplatePrivate;
-    addDocument?: (document: Document) => void;
+    addDocument?: (document: DocumentStruct) => void;
     $context: SessionContext;
 
     constructor(settings: {
         navigationActions: NavigationActions;
         template: DocumentTemplatePrivate;
-        addDocument?: (document: Document) => void;
+        addDocument?: (document: DocumentStruct) => void;
         $context: SessionContext;
     }) {
         this.navigationActions = settings.navigationActions;
@@ -23,7 +23,7 @@ export class DocumentActionBuilder {
         this.$context = settings.$context;
     }
 
-    getActions(): TableAction<Document>[] {
+    getActions(): TableAction<DocumentStruct>[] {
         return [
             new InMemoryTableAction({
                 name: 'Downloaden',
@@ -32,7 +32,7 @@ export class DocumentActionBuilder {
                 groupIndex: 2,
                 needsSelection: true,
                 allowAutoSelectAll: true,
-                handler: (documents: Document[]) => {
+                handler: (documents: DocumentStruct[]) => {
                     this.downloadDocuments(documents).catch(console.error);
                 },
             }),
@@ -44,7 +44,7 @@ export class DocumentActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
-                handler: async (documents: Document[]) => {
+                handler: async (documents: DocumentStruct[]) => {
                     await this.editDocument(documents[0]);
                 },
             }),
@@ -57,7 +57,7 @@ export class DocumentActionBuilder {
                 needsSelection: true,
                 singleSelection: true,
                 allowAutoSelectAll: false,
-                handler: async (documents: Document[]) => {
+                handler: async (documents: DocumentStruct[]) => {
                     await this.duplicateDocument(documents[0]);
                 },
             }),
@@ -69,7 +69,7 @@ export class DocumentActionBuilder {
                 groupIndex: 3,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                handler: async (documents: Document[]) => {
+                handler: async (documents: DocumentStruct[]) => {
                     await this.deleteDocuments(documents);
                 },
             }),
@@ -81,30 +81,30 @@ export class DocumentActionBuilder {
                 groupIndex: 3,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                handler: async (documents: Document[]) => {
+                handler: async (documents: DocumentStruct[]) => {
                     await this.undoDocuments(documents);
                 },
             }),
         ];
     }
 
-    async editDocument(document: Document) {
+    async editDocument(document: DocumentStruct) {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "EditDocumentView" */ './EditDocumentView.vue'), {
             document,
             template: this.template,
-            isNew: false,
+            isNew: false
         });
         this.navigationActions.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
     }
 
-    async deleteDocuments(documents: Document[]) {
+    async deleteDocuments(documents: DocumentStruct[]) {
         if (!(await CenteredMessage.confirm(documents.length > 1 ? `${documents.length} documenten verwijderen?` : 'Dit document verwijderen?', 'Verwijderen'))) {
             return;
         }
         try {
-            const patch: PatchableArrayAutoEncoder<Document> = new PatchableArray() as PatchableArrayAutoEncoder<Document>;
+            const patch: PatchableArrayAutoEncoder<DocumentStruct> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentStruct>;
             for (const document of documents) {
-                patch.addPatch(Document.patch({
+                patch.addPatch(DocumentStruct.patch({
                     id: document.id,
                     status: DocumentStatus.Deleted,
                 }));
@@ -115,7 +115,7 @@ export class DocumentActionBuilder {
                 path: '/organization/documents',
                 shouldRetry: false,
                 owner: this.navigationActions,
-                decoder: new ArrayDecoder(Document as Decoder<Document>),
+                decoder: new ArrayDecoder(DocumentStruct as Decoder<DocumentStruct>),
             });
             for (const d of response.data) {
                 const originalDocument = documents.find(d2 => d2.id == d.id);
@@ -130,14 +130,14 @@ export class DocumentActionBuilder {
         }
     }
 
-    async undoDocuments(documents: Document[]) {
+    async undoDocuments(documents: DocumentStruct[]) {
         if (!(await CenteredMessage.confirm(documents.length > 1 ? `${documents.length} documenten uit prullenmand terug halen?` : 'Dit document uit prullenmand terug halen?', 'Terugzetten'))) {
             return;
         }
         try {
-            const patch: PatchableArrayAutoEncoder<Document> = new PatchableArray() as PatchableArrayAutoEncoder<Document>;
+            const patch: PatchableArrayAutoEncoder<DocumentStruct> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentStruct>;
             for (const document of documents) {
-                patch.addPatch(Document.patch({
+                patch.addPatch(DocumentStruct.patch({
                     id: document.id,
                     status: DocumentStatus.Draft,
                 }));
@@ -148,7 +148,7 @@ export class DocumentActionBuilder {
                 path: '/organization/documents',
                 shouldRetry: false,
                 owner: this.navigationActions,
-                decoder: new ArrayDecoder(Document as Decoder<Document>),
+                decoder: new ArrayDecoder(DocumentStruct as Decoder<DocumentStruct>),
             });
             for (const d of response.data) {
                 const originalDocument = documents.find(d2 => d2.id == d.id);
@@ -163,12 +163,12 @@ export class DocumentActionBuilder {
         }
     }
 
-    async duplicateDocument(document: Document) {
+    async duplicateDocument(document: DocumentStruct) {
         if (!(await CenteredMessage.confirm('Dit document dupliceren?', 'Dupliceren', 'Gebruik dit als je hetzelfde attest in verschillende versies wilt beschikbaar maken aan hetzelfde lid.'))) {
             return;
         }
         try {
-            const patch: PatchableArrayAutoEncoder<Document> = new PatchableArray() as PatchableArrayAutoEncoder<Document>;
+            const patch: PatchableArrayAutoEncoder<DocumentStruct> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentStruct>;
             patch.addPut(document.clone().patch({
                 id: uuidv4(),
                 data: DocumentData.patch({
@@ -183,7 +183,7 @@ export class DocumentActionBuilder {
                 path: '/organization/documents',
                 shouldRetry: false,
                 owner: this.navigationActions,
-                decoder: new ArrayDecoder(Document as Decoder<Document>),
+                decoder: new ArrayDecoder(DocumentStruct as Decoder<DocumentStruct>),
             });
             const duplicatedDocument = response.data[0];
             if (duplicatedDocument) {
@@ -201,7 +201,7 @@ export class DocumentActionBuilder {
         }
     }
 
-    async downloadDocuments(documents: Document[]) {
+    async downloadDocuments(documents: DocumentStruct[]) {
         // Filter invalid documents
         const invalidDocuments = documents.filter(d => d.status === DocumentStatus.MissingData);
         if (invalidDocuments.length > 0) {
@@ -213,14 +213,14 @@ export class DocumentActionBuilder {
         }
     }
 
-    async resetDocuments(documents: Document[]) {
+    async resetDocuments(documents: DocumentStruct[]) {
         if (!(await CenteredMessage.confirm(documents.length == 1 ? 'Dit document resetten?' : 'Weet je zeker dat je de documenten wilt resetten?', 'Resetten'))) {
             return;
         }
         try {
-            const arr: PatchableArrayAutoEncoder<Document> = new PatchableArray();
+            const arr: PatchableArrayAutoEncoder<DocumentStruct> = new PatchableArray();
             for (const document of documents) {
-                arr.addPatch(Document.patch(({
+                arr.addPatch(DocumentStruct.patch(({
                     id: document.id,
                     data: DocumentData.patch({
                         fieldAnswers: [] as any,
@@ -232,7 +232,7 @@ export class DocumentActionBuilder {
                 method: 'PATCH',
                 path: '/organization/documents',
                 body: arr,
-                decoder: new ArrayDecoder(Document as Decoder<Document>),
+                decoder: new ArrayDecoder(DocumentStruct as Decoder<DocumentStruct>),
                 owner: this.navigationActions,
             });
             for (const d of response.data) {

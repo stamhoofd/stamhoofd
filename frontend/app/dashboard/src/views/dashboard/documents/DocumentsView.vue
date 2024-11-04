@@ -133,16 +133,17 @@ const navigationActions = useNavigationActions();
 const { present, show } = navigationActions;
 const isMobile = useIsMobile();
 
-const allValues = ref([]) as Ref<Document[]>;
+function addDocument(_document: Document) {
+    // reset the table
+    tableObjectFetcher.reset(true, true);
+}
 
 const actions = computed(() => {
     const builder = new DocumentActionBuilder({
         $context: context.value,
         template: props.template,
         navigationActions,
-        addDocument: (document: Document) => {
-            allValues.value.push(document);
-        },
+        addDocument: (document: Document) => addDocument(document),
     });
     return [
         ...builder.getActions(),
@@ -173,6 +174,7 @@ function openDocument(document: Document) {
             template: props.template,
             getNext: table.getNext,
             getPrevious: table.getPrevious,
+            addDocument: (document: Document) => addDocument(document),
         }),
     });
 
