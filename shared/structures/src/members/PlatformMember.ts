@@ -8,7 +8,7 @@ import { Organization } from '../Organization.js';
 import { PermissionLevel } from '../PermissionLevel.js';
 import { PermissionsResourceType } from '../PermissionsResourceType.js';
 
-import { Document as DocumentStruct } from '@stamhoofd/structures';
+import { Document as DocumentStruct } from '../Document.js';
 import { Platform } from '../Platform.js';
 import { UserPermissions } from '../UserPermissions.js';
 import { UserWithMembers } from '../UserWithMembers.js';
