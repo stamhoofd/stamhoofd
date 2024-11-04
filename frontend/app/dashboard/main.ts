@@ -22,17 +22,17 @@ VueGlobalHelper.setup(app);
 const i18n = I18nController.getI18n();
 app.use(i18n);
 
-if (!isPrerender) {
+if (!isPrerender && STAMHOOFD.PLAUSIBLE_DOMAIN) {
     ViewportHelper.setup(true);
 
     // Load plausible if not production
-    if (STAMHOOFD.environment == 'production') {
+    if (STAMHOOFD.environment === 'production') {
         const script = document.createElement('script');
         script.onload = function () {
             // do stuff with the script
             console.log('Plausible loaded');
         };
-        script.setAttribute('data-domain', 'stamhoofd.app');
+        script.setAttribute('data-domain', STAMHOOFD.PLAUSIBLE_DOMAIN);
         script.src = 'https://plausible.io/js/plausible.js';
         document.head.appendChild(script); // or something of the likes
         const w = window as any;
