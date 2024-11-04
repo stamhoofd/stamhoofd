@@ -140,7 +140,7 @@ onMounted(() => {
     }
 });
 
-watch(editingAnswers, value => patchAnswers(value));
+watch(editingAnswers, value => patchAnswers(value), { deep: true });
 
 function patchAnswers(patch: PatchAnswers | Map<string, RecordAnswer>) {
     const fieldAnswers = patch instanceof PatchMap ? patch : new PatchMap([...patch]);
