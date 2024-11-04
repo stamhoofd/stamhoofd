@@ -143,8 +143,6 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
                         }
                     }
                 }
-            } else {
-                console.error("Group not found", registration.groupId)
             }
         }
         this.groups = Array.from(groupMap.values())

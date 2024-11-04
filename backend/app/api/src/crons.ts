@@ -718,7 +718,6 @@ async function checkSGV() {
             "Laatst lid geschrapt",
             "Totaal aantal gekoppelde leden in Stamhoofd",
             "Waarvan volledig gesynchroniseerd",
-            "Waarvan ooit gesynchroniseerd",
             "Waarvan nooit gesynchroniseerd",
             "Waarvan mogelijks verouderd",
             "Waarvan gegevens gewijzigd",
