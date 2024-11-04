@@ -57,7 +57,7 @@ const editingAnswers = ref(cloneMap(props.document.data.fieldAnswers));
 // }
 
 const fieldCategories = computed(() => {
-    return RecordCategory.flattenCategories([...props.template.privateSettings.templateDefinition.documentFieldCategories, ...props.template.privateSettings.templateDefinition.groupFieldCategories], {} as any);
+    return RecordCategory.flattenCategories([...props.template.privateSettings.templateDefinition.documentFieldCategories, ...props.template.privateSettings.templateDefinition.groupFieldCategories], props.document);
 }) as ComputedRef<RecordCategory[]>;
 
 function saveAnswers() {

@@ -1,23 +1,23 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, InMemoryTableAction, LoadComponent, TableAction, Toast } from '@stamhoofd/components';
+import { CenteredMessage, InMemoryTableAction, LoadComponent, NavigationActions, TableAction, Toast } from '@stamhoofd/components';
 import { downloadDocuments } from '@stamhoofd/document-helper';
 import { SessionContext } from '@stamhoofd/networking';
 import { Document, DocumentData, DocumentStatus, DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export class DocumentActionBuilder {
-    component: any;
+    navigationActions: NavigationActions;
     template: DocumentTemplatePrivate;
     addDocument?: (document: Document) => void;
     $context: SessionContext;
 
     constructor(settings: {
-        component: any;
+        navigationActions: NavigationActions;
         template: DocumentTemplatePrivate;
         addDocument?: (document: Document) => void;
         $context: SessionContext;
     }) {
-        this.component = settings.component;
+        this.navigationActions = settings.navigationActions;
         this.template = settings.template;
         this.addDocument = settings.addDocument;
         this.$context = settings.$context;
@@ -94,7 +94,7 @@ export class DocumentActionBuilder {
             template: this.template,
             isNew: false,
         });
-        this.component.present(displayedComponent.setDisplayStyle('popup'));
+        this.navigationActions.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
     }
 
     async deleteDocuments(documents: Document[]) {
@@ -114,7 +114,7 @@ export class DocumentActionBuilder {
                 body: patch,
                 path: '/organization/documents',
                 shouldRetry: false,
-                owner: this.component,
+                owner: this.navigationActions,
                 decoder: new ArrayDecoder(Document as Decoder<Document>),
             });
             for (const d of response.data) {
@@ -147,7 +147,7 @@ export class DocumentActionBuilder {
                 body: patch,
                 path: '/organization/documents',
                 shouldRetry: false,
-                owner: this.component,
+                owner: this.navigationActions,
                 decoder: new ArrayDecoder(Document as Decoder<Document>),
             });
             for (const d of response.data) {
@@ -182,7 +182,7 @@ export class DocumentActionBuilder {
                 body: patch,
                 path: '/organization/documents',
                 shouldRetry: false,
-                owner: this.component,
+                owner: this.navigationActions,
                 decoder: new ArrayDecoder(Document as Decoder<Document>),
             });
             const duplicatedDocument = response.data[0];
@@ -209,7 +209,7 @@ export class DocumentActionBuilder {
         }
         const validDocuments = documents.filter(d => d.status !== DocumentStatus.MissingData);
         if (validDocuments.length) {
-            await downloadDocuments(this.$context, validDocuments, this.component);
+            await downloadDocuments(this.$context, validDocuments, this.navigationActions);
         }
     }
 
@@ -233,7 +233,7 @@ export class DocumentActionBuilder {
                 path: '/organization/documents',
                 body: arr,
                 decoder: new ArrayDecoder(Document as Decoder<Document>),
-                owner: this.component,
+                owner: this.navigationActions,
             });
             for (const d of response.data) {
                 const originalDocument = documents.find(d2 => d2.id == d.id);

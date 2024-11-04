@@ -20,68 +20,68 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, Toast } from "@stamhoofd/components";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, Toast } from '@stamhoofd/components';
 
-import { TableAction, TableActionSelection } from "./classes";
+import { TableAction, TableActionSelection } from './classes';
 
 @Component({
     components: {
         ContextMenuView,
         ContextMenuItemView,
         ContextMenuLine,
-        Checkbox
+        Checkbox,
     },
 })
 export default class TableActionsContextMenu extends VueComponent {
     @Prop({ required: true })
-        actions: TableAction<any>[];
+    actions: TableAction<any>[];
 
     @Prop({ default: () => {
         // Required to return a default method
-        return () => {}
+        return () => {};
     } })
-        onDismiss!: (() => void);
+    onDismiss!: (() => void);
 
     /**
      * Act only on selection given here
      */
     @Prop({ default: () => [] })
-        selection!: TableActionSelection<any>
+    selection!: TableActionSelection<any>;
 
     isDisabled(action: TableAction<any>) {
-        return action.isDisabled(this.hasSelection)
+        return action.isDisabled(this.hasSelection);
     }
 
     unmounted() {
-        this.onDismiss()
+        this.onDismiss();
     }
 
     get hasSelection() {
-        return this.selection.markedRows.size > 0 || this.selection.markedRowsAreSelected === false
+        return this.selection.markedRows.size > 0 || this.selection.markedRowsAreSelected === false;
     }
 
     get isSingleSelection() {
-        return this.selection.markedRows.size === 1 && this.selection.markedRowsAreSelected === true
+        return this.selection.markedRows.size === 1 && this.selection.markedRowsAreSelected === true;
     }
 
     handleAction(action: TableAction<any>, event) {
         if (this.isDisabled(action)) {
-            return
+            return;
         }
         action.handle(this.selection)?.catch((e) => {
-            console.error(e)
-            Toast.fromError(e).show()
-        })
+            console.error(e);
+            Toast.fromError(e).show();
+        });
     }
 
     get groupedActions() {
         // Group all actions based on their groupIndex property, sorted by groupIndex
         return this.actions
-            .filter(action => {
+            .filter((action) => {
                 if (!action.enabled) {
-                    return false
+                    return false;
                 }
                 if (action.singleSelection && !this.isSingleSelection) {
                     return false;
@@ -89,31 +89,31 @@ export default class TableActionsContextMenu extends VueComponent {
 
                 if ((this as any).$isMobile && this.isDisabled(action)) {
                     // On mobile, hide disabled actions, because we don't have enough room
-                    return false
+                    return false;
                 }
-                return true
+                return true;
             })
             .sort((a, b) => {
                 if (a.groupIndex !== b.groupIndex) {
-                    return a.groupIndex - b.groupIndex
+                    return a.groupIndex - b.groupIndex;
                 }
-                return b.priority - a.priority
+                return b.priority - a.priority;
             })
             .reduce((acc, action) => {
                 const group = acc[acc.length - 1];
                 if (group && group[0].groupIndex === action.groupIndex) {
                     group.push(action);
-                } else {
+                }
+                else {
                     acc.push([action]);
                 }
                 return acc;
-            }, [] as TableAction<any>[][])
-
+            }, [] as TableAction<any>[][]);
     }
 
     getChildContextMenu(action: TableAction<any>) {
         if (action.childMenu) {
-            return action.childMenu
+            return action.childMenu;
         }
 
         if (!action.hasChildActions) {
@@ -122,13 +122,12 @@ export default class TableActionsContextMenu extends VueComponent {
 
         return new ComponentWithProperties(TableActionsContextMenu, {
             actions: action.getChildActions(),
-            selection: this.selection
-        })
+            selection: this.selection,
+        });
     }
 
     pop(popParents = false) {
-        this.$refs.contextMenuView?.pop(popParents)
+        this.$refs.contextMenuView?.pop(popParents);
     }
-
 }
 </script>

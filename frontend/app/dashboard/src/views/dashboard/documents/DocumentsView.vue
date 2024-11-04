@@ -17,8 +17,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { Column, getDocumentsUIFilterBuilders, InMemoryTableAction, ModernTableView, UIFilterBuilders, useContext, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { Column, getDocumentsUIFilterBuilders, InMemoryTableAction, ModernTableView, UIFilterBuilders, useContext, useIsMobile, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -128,8 +128,8 @@ const allColumns: Column<Document, any>[] = [
 ];
 
 const context = useContext();
-const present = usePresent();
-const show = useShow();
+const navigationActions = useNavigationActions();
+const { present, show } = navigationActions;
 const isMobile = useIsMobile();
 
 const allValues = ref([]) as Ref<Document[]>;
@@ -138,7 +138,7 @@ const actions = computed(() => {
     const builder = new DocumentActionBuilder({
         $context: context.value,
         template: props.template,
-        component: this,
+        navigationActions,
         addDocument: (document: Document) => {
             allValues.value.push(document);
         },

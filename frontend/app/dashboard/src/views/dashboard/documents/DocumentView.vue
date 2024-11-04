@@ -92,8 +92,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useCurrentComponent, useFocused, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem, STNavigationBar, TableActionsContextMenu, useContext, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { ComponentWithProperties, useFocused } from '@simonbackx/vue-app-navigation';
+import { STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, useContext, useNavigationActions, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import DocumentView from './DocumentsView.vue';
@@ -112,10 +112,9 @@ const props = withDefaults(defineProps<{
 });
 
 const context = useContext();
-const component = useCurrentComponent();
+const navigationActions = useNavigationActions();
+const { present, show } = navigationActions;
 const isFocused = useFocused();
-const show = useShow();
-const present = usePresent();
 
 const usedAnswers = computed(() => {
     return [...props.document.getRecordAnswers().values()].filter((a) => {
@@ -162,7 +161,7 @@ const actionBuilder = computed(() => {
     return new DocumentActionBuilder({
         $context: context.value,
         template: props.template,
-        component,
+        navigationActions,
     });
 });
 
@@ -180,6 +179,12 @@ function showContextMenu(event: MouseEvent) {
         yPlacement: 'bottom',
         actions: actionBuilder.value.getActions(),
         // selection: todo
+        selection: {
+            filter: {}, // todo
+            fetcher: {}, // todo
+            markedRows: new Map([[props.document.id, props.document]]),
+            markedRowsAreSelected: true,
+        } as TableActionSelection<Document>,
     });
     present(displayedComponent.setDisplayStyle('overlay')).catch(console.error);
 }
