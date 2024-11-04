@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { Column, InMemoryTableAction, ModernTableView, UIFilterBuilders, useContext, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, getDocumentsUIFilterBuilders, InMemoryTableAction, ModernTableView, UIFilterBuilders, useContext, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -42,8 +42,7 @@ const objectFetcher = useDocumentsObjectFetcher({
 
 const tableObjectFetcher = useTableObjectFetcher<Document>(objectFetcher);
 
-// todo
-const filterBuilders: UIFilterBuilders = [];
+const filterBuilders: UIFilterBuilders = getDocumentsUIFilterBuilders();
 
 const allColumns: Column<Document, any>[] = [
     new Column<Document, string>({

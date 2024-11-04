@@ -1,6 +1,6 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { CheckoutMethodType, CheckoutMethodTypeHelper, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -1105,6 +1105,40 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
             }));
     }
 
+    const groupFilter = new GroupUIFilterBuilder({ builders });
+
+    return [groupFilter, ...builders];
+}
+
+export function getDocumentsUIFilterBuilders() {
+    const builders: UIFilterBuilders = [
+        new StringFilterBuilder({
+            name: 'Volgnummer',
+            key: 'id',
+        }),
+        new NumberFilterBuilder({
+            name: 'Nummer',
+            key: 'number',
+        }),
+        new StringFilterBuilder({
+            name: 'Beschrijving',
+            key: 'description',
+        }),
+        new MultipleChoiceFilterBuilder({
+            name: 'status',
+            options: Object.values(DocumentStatus).map((status) => {
+                return new MultipleChoiceUIFilterOption(
+                    Formatter.capitalizeFirstLetter(DocumentStatusHelper.getName(status)),
+                    status,
+                );
+            }),
+            wrapper: {
+                status: {
+                    $in: UIFilterWrapperMarker,
+                },
+            },
+        }),
+    ];
     const groupFilter = new GroupUIFilterBuilder({ builders });
 
     return [groupFilter, ...builders];
