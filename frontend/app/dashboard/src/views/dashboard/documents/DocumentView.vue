@@ -3,7 +3,7 @@
         <STNavigationBar :title="'Document'">
             <template #right>
                 <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorig document'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende document'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goNext" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende document'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
                 <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
@@ -92,12 +92,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useFocused } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, useContext, useNavigationActions, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, useBackForward, useContext, useNavigationActions, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { computed, getCurrentInstance, onActivated, onDeactivated, unref } from 'vue';
+import { computed } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
 
 const props = withDefaults(defineProps<{
@@ -110,10 +110,10 @@ const props = withDefaults(defineProps<{
     getPrevious: null,
 });
 
+const { hasNext, hasPrevious, goBack, goForward } = useBackForward('document', props);
 const context = useContext();
 const navigationActions = useNavigationActions();
-const { present, show } = navigationActions;
-const isFocused = useFocused();
+const { present } = navigationActions;
 
 const usedAnswers = computed(() => {
     return [...props.document.getRecordAnswers().values()].filter((a) => {
@@ -141,20 +141,6 @@ const hasWarnings = computed(() => warnings.value.length > 0);
 
 const unlinkedAnswers = computed(() => usedAnswers.value.filter(a => !!a.reviewedAt));
 const unlinkedAnswersText = computed(() => Formatter.joinLast(unlinkedAnswers.value.map(a => a.settings.name), ', ', ' en '));
-
-const hasNext = computed(() => {
-    if (!props.getNext || !props.document) {
-        return false;
-    }
-    return !!props.getNext(props.document);
-});
-
-const hasPrevious = computed(() => {
-    if (!props.getPrevious || !props.document) {
-        return false;
-    }
-    return !!props.getPrevious(props.document);
-});
 
 const actionBuilder = computed(() => {
     return new DocumentActionBuilder({
@@ -192,74 +178,10 @@ function resetDocument() {
     actionBuilder.value.resetDocuments([props.document]).catch(console.error);
 }
 
-const instance = getCurrentInstance();
-
-async function seek(previous = true) {
-    if (previous && !props.getPrevious) {
-        return;
-    }
-    else if (!props.getNext) {
-        return;
-    }
-
-    const document = previous ? props.getPrevious!(props.document) : props.getNext(props.document);
-    if (!document) {
-        return;
-    }
-    const component = new ComponentWithProperties(instance!.type, {
-        ...props,
-        document,
-    });
-
-    await show({
-        components: [component],
-        replace: 1,
-        reverse: previous,
-        animated: false,
-    });
-}
-
-async function goBack() {
-    await seek(true);
-}
-
-async function goNext() {
-    await seek(false);
-}
-
-const onKey = (event: KeyboardEvent) => {
-    if (event.defaultPrevented || event.repeat) {
-        return;
-    }
-
-    if (!unref(isFocused)) {
-        return;
-    }
-
-    const key = event.key || event.keyCode;
-
-    if (key === 'ArrowLeft' || key === 'ArrowUp' || key === 'PageUp') {
-        goBack().catch(console.error);
-        event.preventDefault();
-    }
-    else if (key === 'ArrowRight' || key === 'ArrowDown' || key === 'PageDown') {
-        goNext().catch(console.error);
-        event.preventDefault();
-    }
-};
-
 const recordCategories = computed(() => {
     return RecordCategory.flattenCategoriesForAnswers(
         [...props.template.privateSettings.templateDefinition.documentFieldCategories, ...props.template.privateSettings.templateDefinition.groupFieldCategories],
         [...props.document.data.fieldAnswers.values()],
     );
-});
-
-onActivated(() => {
-    document.addEventListener('keydown', onKey);
-});
-
-onDeactivated(() => {
-    document.removeEventListener('keydown', onKey);
 });
 </script>
