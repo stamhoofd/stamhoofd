@@ -31,5 +31,8 @@
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",
         "puppeteer": "22.12.0"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

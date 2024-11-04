@@ -59,5 +59,8 @@
         "openid-client": "^5.4.0",
         "postmark": "^4.0.5",
         "stripe": "^16.6.0"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }
