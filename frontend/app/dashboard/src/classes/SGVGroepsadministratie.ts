@@ -4,15 +4,13 @@ import { Request, RequestMiddleware, RequestResult, Server } from '@simonbackx/s
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { getDefaultGroepFuncties, getPatch, GroepFunctie, isManaged, MemberWithRegistrations, schrappen, SGVFoutenDecoder, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVSyncReport, SGVZoekenResponse, SGVZoekLid } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import { MemberManager } from './MemberManager';
 import { OrganizationManager } from './OrganizationManager';
-import { getDefaultGroepFuncties, getPatch, GroepFunctie, isManaged, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
-import { SGVFoutenDecoder, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
 
 class SGVGroepsadministratieStatic implements RequestMiddleware {
     token: {accessToken: string; refreshToken: string; validUntil: Date} | null = null // null to keep reactive

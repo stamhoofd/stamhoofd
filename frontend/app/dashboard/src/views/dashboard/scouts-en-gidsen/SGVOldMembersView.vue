@@ -44,10 +44,9 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,LoadingButton, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar} from "@stamhoofd/components";
+import { SGVLid } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-
-import { SGVLid } from '../../../classes/SGVStructures';
 
 @Component({
     components: {

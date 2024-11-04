@@ -1,6 +1,13 @@
-import { Address, Country, Group, GroupSettings, MemberDetails, MemberWithRegistrations, Parent, ParentType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
+import { Address } from "../addresses/Address";
+import { Country } from "../addresses/CountryDecoder";
+import { Group } from "../Group";
+import { GroupSettings } from "../GroupSettings";
+import { MemberDetails } from "../members/MemberDetails";
+import { MemberWithRegistrations } from "../members/MemberWithRegistrations";
+import { Parent } from "../members/Parent";
+import { ParentType } from "../members/ParentType";
 import groepFuncties from './SGVDefaultFuncties.json';
 import { getPatch, isManaged, splitStreetNumber } from './SGVGroepsadministratieSync';
 

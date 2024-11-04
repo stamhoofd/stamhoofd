@@ -1,7 +1,9 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, field, IntegerDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Country, CountryDecoder, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
+
+import { Country,CountryDecoder } from '../addresses/CountryDecoder';
+import { MemberWithRegistrations } from '../members/MemberWithRegistrations';
 
 export class SGVFoutDecoder implements Decoder<SimpleError> {
 
@@ -173,9 +175,9 @@ export class SGVLid {
 
     // Typo in name or birthday
     isProbablyEqualLastResort(member: MemberWithRegistrations) {
-        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
+        const t = StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.firstName+" "+this.lastName)
 
-        if (t <= 2 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
+        if (t <= 2 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length+member.details.lastName.length)) {
             return true;
         }
         return false;
@@ -243,10 +245,10 @@ export class SGVZoekLid extends AutoEncoder {
             return false
         }
 
-        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
+        const t = StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.firstName+" "+this.lastName)
         const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay))
 
-        if (t <= 2 && y <= 2 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
+        if (t <= 2 && y <= 2 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length+member.details.lastName.length)) {
             return true;
         }
         return false;

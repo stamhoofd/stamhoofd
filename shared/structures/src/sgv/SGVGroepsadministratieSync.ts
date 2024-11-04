@@ -1,6 +1,14 @@
-import { Address, ExternalSyncData, Gender, Group, MemberDetails, MemberWithRegistrations,Parent, ParentType, User } from '@stamhoofd/structures';
 import { Formatter,StringCompare } from '@stamhoofd/utility';
 
+import { Address } from '../addresses/Address';
+import { Group } from '../Group';
+import { Gender } from '../members/Gender';
+import { MemberDetails } from '../members/MemberDetails';
+import { MemberWithRegistrations } from '../members/MemberWithRegistrations';
+import { Parent } from '../members/Parent';
+import { ParentType } from '../members/ParentType';
+import { ExternalSyncData } from '../OrganizationPrivateMetaData';
+import { User } from '../User';
 import { SGVLid } from './SGVStructures';
 
 export type GroepFunctie = {

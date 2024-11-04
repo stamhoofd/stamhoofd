@@ -49,10 +49,9 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { SGVLidMatchVerify } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-
-import { SGVLidMatchVerify } from '../../../classes/SGVStructures';
 
 @Component({
     components: {
@@ -75,13 +74,13 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
     didVerify = false
 
     @Prop({ required: true })
-    matches: SGVLidMatchVerify[]
+        matches: SGVLidMatchVerify[]
 
     @Prop({ required: true })
-    onVerified: (verified: SGVLidMatchVerify[]) => void
+        onVerified: (verified: SGVLidMatchVerify[]) => void
 
     @Prop({ required: true })
-    onCancel: () => void
+        onCancel: () => void
 
     beforeDestroy() {
         if (!this.didVerify) {

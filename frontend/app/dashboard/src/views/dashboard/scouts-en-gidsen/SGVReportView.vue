@@ -7,8 +7,11 @@
                 Synchronisatie-rapport
             </h1>
 
-            <div class="info-box">
+            <div class="info-box" v-if="report.errors.length === 0">
                 Kijk zelf ook nog snel eens alles na in de groepsadministratie als het de eerste keer is dat je synchroniseert.
+            </div>
+            <div class="error-box" v-else>
+                De synchronisatie is niet volledig gelukt. Kijk de foutmeldingen hieronder na en los ze op. Synchroniseer daarna opnieuw.
             </div>
 
             <div v-for="(error, index) in report.errors" :key="index" class="error-box-parent">
@@ -185,11 +188,10 @@ import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { getLidBirthDay, getLidFuncties, getLidName, SGVMemberError, SGVSyncReport } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { getLidBirthDay, getLidFuncties, getLidName, SGVSyncReport } from '../../../classes/SGVGroepsadministratieSync';
-import { SGVMemberError } from "../../../classes/SGVStructures";
 import MemberView from '../member/MemberView.vue';
 
 @Component({

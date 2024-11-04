@@ -330,14 +330,13 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, MemberDetailsWithGroups, MemberWithRegistrations, OrganizationType, Parent, ParentTypeHelper, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, UmbrellaOrganization, User } from '@stamhoofd/structures';
+import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, isMemberManaged, MemberDetailsWithGroups, MemberWithRegistrations, OrganizationType, Parent, ParentTypeHelper, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, UmbrellaOrganization, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
-import { isMemberManaged } from "../../../classes/SGVGroepsadministratieSync";
 import { MemberActionBuilder } from "../groups/MemberActionBuilder";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';

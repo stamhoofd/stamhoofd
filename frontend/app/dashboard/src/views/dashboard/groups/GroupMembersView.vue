@@ -31,13 +31,12 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
-import { FilterDefinition, Group, GroupCategoryTree, MemberWithRegistrations, OrganizationType, RecordCategory, UmbrellaOrganization } from '@stamhoofd/structures';
+import { FilterDefinition, Group, GroupCategoryTree, isMemberManaged,MemberWithRegistrations, OrganizationType, RecordCategory, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
-import { isMemberManaged } from "../../../classes/SGVGroepsadministratieSync";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
@@ -88,43 +87,102 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         })
     }
 
-    get syncStatus() {
+    get syncStatusCounts() {
         if (!this.isSGV) {
             return null
         }
 
-        let base = 'ok';
+        const counts = {
+            never: 0,
+            outdated: 0,
+            changed: 0
+        }
 
         for (const member of this.allValues) {
             if (!isMemberManaged(member)) {
                 continue    
             }
+
             const status = member.syncStatus
             if (status === 'never') {
-                return 'never'
+                counts.never++
+                continue;
             }
 
-            if (status === 'outdated' && base !== 'outdated') {
-                base = 'outdated'
+            if (status === 'outdated') {
+                counts.outdated++
+                continue
             }
 
-            if (status === 'changed' && base === 'ok') {
-                base = 'changed'
+            if (status === 'changed') {
+                counts.changed++
+                continue
             }
         }
 
-        return base
+        return counts
+    }
+
+
+    get syncStatus() {
+        const counts = this.syncStatusCounts
+        if (!counts) {
+            return null
+        }
+
+        if (counts.never > 0) {
+            return 'never'
+        }
+
+        if (counts.outdated > 0) {
+            return 'outdated'
+        }
+
+        if (counts.changed > 0) {
+            return 'changed'
+        }
+
+        return 'ok'
     }
 
     get syncWarning() {
-        const syncStatus = this.syncStatus
-        if (syncStatus === 'never') {
-            return this.hasFull ? 'Eén of meerdere leden staan nog niet in de groepsadministratie van Scouts & Gidsen Vlaanderen. Deze zijn mogelijks niet verzekerd! Synchroniseer met de groepsadministratie.' :  'Eén of meerdere leden staan nog niet in de groepsadministratie van Scouts & Gidsen Vlaanderen. Deze zijn mogelijks niet verzekerd! Vraag jouw VGA/groepsleiding om te synchroniseren.'
-        } else if (syncStatus === 'outdated') {
-            return this.hasFull ? 'Gewijzigde inschrijvingen. Synchroniseer met de groepsadministratie.' : 'Gewijzigde inschrijvingen. Vraag jouw VGA/groepsleiding om te synchroniseren met de groepsadministratie.'
-        } else if (syncStatus === 'changed') {
-            return this.hasFull ? 'Gewijzigde gegevens. Synchroniseer met de groepsadministratie' : 'Gewijzigde gegevens. Vraag jouw VGA/groepsleiding om te synchroniseren met de groepsadministratie.'
+        const counts = this.syncStatusCounts
+
+        if (!counts) {
+            return null
         }
+
+        const texts: string[] = []
+
+        if (counts.never > 0) {
+            texts.push(
+                Formatter.capitalizeFirstLetter(Formatter.pluralText(counts.never, 'lid staat', 'leden staan')) + " nog niet in de groepsadministratie van Scouts & Gidsen Vlaanderen. Deze zijn mogelijks niet verzekerd! "
+            )
+        }
+
+        if (counts.outdated > 0) {
+            texts.push(
+                Formatter.capitalizeFirstLetter(Formatter.pluralText(counts.outdated, 'lid met gewijzigde inschrijving', 'lid met gewijzigde inschrijvingen')) + "."
+            )
+        }
+
+        if (counts.changed > 0) {
+            texts.push(
+                Formatter.capitalizeFirstLetter(Formatter.pluralText(counts.changed, 'lid met gewijzigd gegevens', 'leden met gewijzigde gegevens')) + "."
+            )
+        }
+
+        if (texts.length == 0) {
+            return null
+        }
+
+        if (this.hasFull) {
+            texts.push("Synchroniseer met de groepsadministratie.")
+        } else {
+            texts.push("Vraag jouw VGA/groepsleiding om te synchroniseren.")
+        }
+
+        return texts.join(" ")
     }
 
 

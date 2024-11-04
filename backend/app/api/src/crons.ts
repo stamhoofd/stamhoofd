@@ -10,7 +10,7 @@ import { Registration } from '@stamhoofd/models';
 import { STInvoice } from '@stamhoofd/models';
 import { STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentMethod, PaymentProvider, PaymentStatus, UmbrellaOrganization } from '@stamhoofd/structures';
+import { GroupStatus, isMemberManaged, MemberWithRegistrations, PaymentMethod, PaymentProvider, PaymentStatus, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
@@ -667,10 +667,16 @@ async function checkSGV() {
     }
 
     // Check today is a monday
-    if (new Date().getDay() !== 1) {
-        console.log("[S&GV] Not a Monday, skipping.")
-        return
-    }
+    //if (new Date().getDay() !== 1) {
+    //    console.log("[S&GV] Not a Monday, skipping.")
+    //    return
+    //}
+    //
+    //// Check if between 2 - 3 AM
+    //if (new Date().getHours() < 2 || new Date().getHours() >= 3) {
+    //    console.log("[S&GV] Not between 2 and 3 AM, skipping.")
+    //    return
+    //}
     
     lastSGVCheck = new Date()
 
@@ -707,18 +713,90 @@ async function checkSGV() {
         [
             "Naam",
             "Gemeente",
-            "Laatst gesynchroniseerd",
+            "Laatst volledig gesynchroniseerd",
+            "Laatst gedeeltelijk gesynchroniseerd",
             "Laatst lid geschrapt",
-            ...countKeysArray
+            "Totaal aantal gekoppelde leden in Stamhoofd",
+            "Waarvan volledig gesynchroniseerd",
+            "Waarvan ooit gesynchroniseerd",
+            "Waarvan nooit gesynchroniseerd",
+            "Waarvan mogelijks verouderd",
+            "Waarvan gegevens gewijzigd",
+
+            ...countKeysArray.map(k => 'Aantal gesynchroniseerd onder ' + k)
         ],
     ];
 
+
     for (const organization of allOrganizations) {
+        // Calculate syncable members
+        let lastPartialSync: Date|null = null;
+        const groups = (await Group.getAll(organization.id)).filter(g => g.status !== GroupStatus.Archived && g.deletedAt === null)
+        const memberSet = new Set<string>()
+        const counts = {
+            total: 0,
+            ok: 0,
+            never: 0,
+            outdated: 0,
+            changed: 0
+        };
+
+        const groupStructures = groups.map(g => g.getStructure())
+        
+        for (const group of groups) {
+            const members = await group.getMembersWithRegistration(false, 0)
+
+            for (const member of members) {
+                if (memberSet.has(member.id)) {
+                    continue
+                }
+                memberSet.add(member.id)
+
+                if (member.details.lastExternalSync && (!lastPartialSync || member.details.lastExternalSync > lastPartialSync)) {
+                    lastPartialSync = member.details.lastExternalSync
+                }
+
+                const enc = member.getStructureWithRegistrations(true)
+                const structure = MemberWithRegistrations.fromMember(enc, groupStructures)
+
+                if (!isMemberManaged(structure)) {
+                    continue;
+                }
+
+                // Process
+                counts.total++
+
+                const status = structure.syncStatus
+
+                switch (status) {
+                    case "ok":
+                        counts.ok++
+                        break;
+                    case "never":
+                        counts.never++
+                        break;
+                    case "outdated":
+                        counts.outdated++
+                        break;
+                    case "changed":
+                        counts.changed++
+                        break;
+                }
+            }
+        }
+
         wsData.push([
             organization.name,
             organization.address.city,
             organization.privateMeta.externalSyncData?.lastExternalSync ? Formatter.dateTime(organization.privateMeta.externalSyncData.lastExternalSync) : "Nooit",
+            lastPartialSync ? Formatter.dateTime(lastPartialSync) : "Nooit",
             organization.privateMeta.externalSyncData?.lastDeleted ? Formatter.dateTime(organization.privateMeta.externalSyncData.lastDeleted) : "Nooit",
+            counts.total,
+            counts.ok,
+            counts.never,
+            counts.outdated,
+            counts.changed,
+
             ...countKeysArray.map(key => organization.privateMeta.externalSyncData?.counts.get(key) ?? 0)
         ])
     }
@@ -735,7 +813,7 @@ async function checkSGV() {
     XLSX.utils.book_append_sheet(
         wb, 
         ExcelHelper.buildWorksheet(wsData, {
-            defaultColumnWidth: 13
+            defaultColumnWidth: 35
         }), 
         "Groepen"
     );
@@ -743,7 +821,8 @@ async function checkSGV() {
 
     // Send to S&GV
     Email.sendInternal({
-        to: 'groepsadministratie@scoutsengidsenvlaanderen.be',
+        //to: 'groepsadministratie@scoutsengidsenvlaanderen.be',
+        to: 'hallo@stamhoofd.be',
         bcc: 'hallo@stamhoofd.be',
         subject: 'Stamhoofd: synchronisatieoverzicht',
         replyTo: 'hallo@stamhoofd.be',

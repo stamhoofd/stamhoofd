@@ -104,12 +104,14 @@ export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 // Webshop
 export * from "./src/endpoints/WebshopOrdersQuery"
 export * from "./src/endpoints/WebshopTicketsQuery"
-export * from "./src/webshops/CartItem"
 export * from "./src/webshops/Cart"
+export * from "./src/webshops/CartItem"
 export * from "./src/webshops/CartStockHelper"
 export * from "./src/webshops/Category"
 export * from "./src/webshops/Checkout"
 export * from "./src/webshops/Customer"
+export * from "./src/webshops/Discount"
+export * from "./src/webshops/DiscountCode"
 export * from "./src/webshops/Order"
 export * from "./src/webshops/Product"
 export * from "./src/webshops/Ticket"
@@ -117,8 +119,6 @@ export * from "./src/webshops/TransferSettings"
 export * from "./src/webshops/Webshop"
 export * from "./src/webshops/WebshopField"
 export * from "./src/webshops/WebshopMetaData"
-export * from "./src/webshops/Discount"
-export * from "./src/webshops/DiscountCode"
 
 // billing
 export * from "./src/billing/STBillingStatus"
@@ -139,12 +139,12 @@ export * from "./src/email/EmailAddressSettings"
 export * from "./src/email/EmailTemplate"
 
 // Filters
+export * from "./src/filters/new/FilteredRequest"
 export * from "./src/filters/new/InMemoryFilter"
 export * from "./src/filters/new/InMemorySorter"
 export * from "./src/filters/new/Sorters"
 export * from "./src/filters/new/SortList"
 export * from "./src/filters/new/StamhoofdFilter"
-export * from "./src/filters/new/FilteredRequest"
 
 // Filters old
 export * from "./src/filters/ChoicesFilter"
@@ -160,3 +160,7 @@ export * from "./src/filters/StringFilter";
 export * from "./src/BalanceItem"
 export * from "./src/BalanceItemDetailed"
 export * from "./src/SponsorConfig"
+
+// SGV
+export * from "./src/sgv/SGVGroepsadministratieSync"
+export * from "./src/sgv/SGVStructures"

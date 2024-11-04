@@ -20,7 +20,8 @@
         "types": [
             "node",
             "jest"
-        ]
+        ],
+        "resolveJsonModule": true
     },
     "include": [
         "index.ts",

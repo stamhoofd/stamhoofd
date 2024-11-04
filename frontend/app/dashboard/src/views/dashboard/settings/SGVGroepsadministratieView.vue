@@ -59,12 +59,12 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { BackButton, CenteredMessage, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPrivateMetaData } from "@stamhoofd/structures";
+import { SGVSyncReport } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie";
-import { SGVSyncReport } from "../../../classes/SGVGroepsadministratieSync";
 import SGVReportView from "../scouts-en-gidsen/SGVReportView.vue";
 
 @Component({
