@@ -1,7 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { signInternal } from '@stamhoofd/backend-env';
-import { Document } from '@stamhoofd/models';
+import { Document, Organization } from '@stamhoofd/models';
 
 import { Context } from '../../../helpers/Context';
 type Params = { id: string };
@@ -24,7 +24,7 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
         const document = await Document.getByID(request.params.id);
@@ -32,6 +32,15 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Onbekend document',
+            });
+        }
+
+        const organization = await Organization.getByID(document.organizationId);
+
+        if (!organization) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'Organization not found',
             });
         }
 
