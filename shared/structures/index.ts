@@ -189,3 +189,4 @@ export * from './src/SponsorConfig.js';
 
 export * from './src/filters/ExcelExportRequest.js';
 export * from './src/helpers/index.js';
+export * from './src/filters/SearchFilterFactory.js';

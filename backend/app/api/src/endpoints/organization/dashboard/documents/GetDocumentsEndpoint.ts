@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Document } from '@stamhoofd/models';
-import { assertSort, CountFilteredRequest, Document as DocumentStruct, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, Document as DocumentStruct, getSortFilter, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { compileToSQLFilter, compileToSQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
@@ -55,12 +55,11 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
         }
 
         if (q.search) {
-            // todo
-            // const searchFilter: StamhoofdFilter | null = getOrderSearchFilter(q.search, parsePhoneNumber);
+            const searchFilter: StamhoofdFilter | null = getDocumentSearchFilter(q.search);
 
-            // if (searchFilter) {
-            //     query.where(compileToSQLFilter(searchFilter, filterCompilers));
-            // }
+            if (searchFilter) {
+                query.where(compileToSQLFilter(searchFilter, filterCompilers));
+            }
         }
 
         if (q instanceof LimitedFilteredRequest) {
@@ -125,4 +124,34 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
             await GetDocumentsEndpoint.buildData(request.query),
         );
     }
+}
+
+function getDocumentSearchFilter(search: string | null): StamhoofdFilter | null {
+    if (search === null || search === undefined) {
+        return null;
+    }
+
+    const numberFilter = SearchFilterFactory.getIntegerFilter(search);
+
+    if (numberFilter) {
+        return {
+            number: numberFilter,
+        };
+    }
+
+    return {
+        $or: [
+            {
+                description: {
+                    $contains: search,
+                },
+            },
+            {
+                id: {
+                    $contains: search,
+                },
+            },
+        ]
+        ,
+    };
 }
