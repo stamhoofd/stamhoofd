@@ -13,11 +13,11 @@ import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { QueueHandler } from '@stamhoofd/queues';
 
-// Normally we'll have ±5 binary logs per day (if max size is set to 50MB)
-// Since well create a backup every day, keeping 500 binary logs would give
-// a full history of 100 days - and leaves us enough margin in case more
+// Normally we'll have ±24 binary logs per day (if max size is set to 50MB)
+// Since well create a backup every day, keeping 1000 binary logs would give
+// a full history of 40 days - and leaves us enough margin in case more
 // logs are created in a day
-const MAX_BINARY_LOGS = 500;
+const MAX_BINARY_LOGS = 1000;
 const MAX_BACKUPS = 30; // in days
 const BACKUP_PREFIX = 'backup-';
 const BINARY_LOG_PREFIX = 'binlog.';
