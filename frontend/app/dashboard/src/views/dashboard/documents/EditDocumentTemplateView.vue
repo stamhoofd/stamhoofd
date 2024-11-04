@@ -630,7 +630,7 @@ function addGroup() {
 }
 
 function getGroupName(group: DocumentTemplateGroup) {
-    const groups = organization.value.period.categoryTree.getAllGroups();
+    const groups = organization.value.period.groups;
     const g = groups.find(g => g.id === group.groupId);
     return g?.settings?.name ?? 'Onbekende groep';
 }
