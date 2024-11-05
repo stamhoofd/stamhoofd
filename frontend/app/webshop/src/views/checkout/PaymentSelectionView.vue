@@ -78,10 +78,15 @@ function goToOrder(id: string, args: { dismiss: ReturnType<typeof useDismiss>; p
         // So replace with a force instead of dimissing
         args.present({
             components: [
-                new ComponentWithProperties(OrderView, { orderId: id, success: true }),
+                new ComponentWithProperties(OrderView, { orderId: id, success: true }, {
+                    provide: {
+                        reactive_navigation_url: 'order/' + id,
+                    }
+                }),
             ],
             replace: 1,
             force: true,
+            
         }).catch(console.error);
     }
     else {
@@ -89,7 +94,11 @@ function goToOrder(id: string, args: { dismiss: ReturnType<typeof useDismiss>; p
         args.dismiss({ force: true }).catch(console.error);
         args.present({
             components: [
-                new ComponentWithProperties(OrderView, { orderId: id, success: true }),
+                new ComponentWithProperties(OrderView, { orderId: id, success: true }, {
+                    provide: {
+                        reactive_navigation_url: 'order/' + id,
+                    }
+                }),
             ],
         }).catch(console.error);
     }

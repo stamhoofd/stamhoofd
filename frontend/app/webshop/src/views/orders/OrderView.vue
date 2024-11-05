@@ -343,10 +343,10 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, setUrl, usePop, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { CartItemRow, CenteredMessage, DetailedTicketView, LoadingView, Logo, OrganizationLogo, PriceBreakdownBox, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { Order, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
-import { Ref, computed, onMounted, ref } from 'vue';
+import { Ref, computed, onMounted, ref, watch } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';
@@ -378,6 +378,16 @@ const singleTicket = computed(() => tickets.value.length === 1 || webshop.value.
 const canShare = computed(() => !!navigator.share);
 const isPaid = computed(() => order.value && (order.value.payment === null || order.value.payment.status === PaymentStatus.Succeeded));
 const isTransfer = computed(() => getDefaultTransferPayment() !== null);
+
+// Make sure the url is overriden
+setUrl('order/' + (order.value?.id ?? props.orderId), 'Bestelling ' + (order.value?.number ?? ''));
+
+const urlHelpers = useUrl();
+
+watch(() => order.value, () => {
+    // Change if we loaded the order id or number
+    urlHelpers.overrideUrl('order/' + (order.value?.id ?? props.orderId), 'Bestelling ' + (order.value?.number ?? ''));
+});
 
 function isPaymentTransfer(payment: Payment) {
     return payment.method === PaymentMethod.Transfer;

@@ -306,6 +306,7 @@ onMounted(() => {
             components: [
                 new ComponentWithProperties(OrderView, { orderId }),
             ],
+            url: path.join('/'),
         }).catch(console.error);
     }
     else if (path.length === 2 && path[0] === 'tickets') {
@@ -316,6 +317,7 @@ onMounted(() => {
             components: [
                 new ComponentWithProperties(TicketView, { secret }),
             ],
+            url: path.join('/'),
         }).catch(console.error);
     }
     else if (path.length === 1 && path[0] === 'payment' && params.get('id')) {
@@ -374,6 +376,7 @@ onMounted(() => {
                 }),
             ],
             modalDisplayStyle: 'sheet', // warning: if changing to popup: present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
+            url: path.join('/'),
         }).catch(console.error);
     }
     else if (path.length === 2 && path[0] === 'checkout') {
