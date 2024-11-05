@@ -6,7 +6,7 @@
     margin-top: auto;
     line-height: 1.6;
     padding: 15px 20px;
-    opacity: 0.6;
+    opacity: 0.9;
 
     .st-view > main > & {
         margin: 0 calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px)));
@@ -62,7 +62,7 @@
                 --color-primary: #{$color-primary-original};
                 text-align: right;
 
-                 a {
+                > a {
                     display: flex;
                     flex-direction: row;
                     align-items: center;

@@ -1151,6 +1151,21 @@
         }
     }
 
+    &.no-underline-links {
+        a {
+            &, &:link, &:visited {
+                color: $color-primary;
+                text-decoration: none;
+
+                &:hover {
+                    color: $color-primary;
+                    text-decoration: underline;
+                    text-decoration-color: $color-primary;
+                }
+            }
+        }
+    }
+
     ul, ol {
         padding-left: 25px;
 

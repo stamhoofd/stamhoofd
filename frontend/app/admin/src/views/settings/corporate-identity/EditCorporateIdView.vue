@@ -74,6 +74,17 @@
                 editor-class="gray subtle-links"
             />
         </STInputBox>
+
+        <hr>
+        <h2>Webshop footer</h2>
+
+        <STInputBox error-fields="shopFooterText" :error-box="errors.errorBox" class="max">
+            <WYSIWYGTextInput
+                v-model="shopFooterText"
+                placeholder="Tekst en links die onderaan in de footer zichtbaar zijn"
+                editor-class="gray subtle-links"
+            />
+        </STInputBox>
     </SaveView>
 </template>
 
@@ -119,6 +130,11 @@ const coverBottomLeftOverlayImage = computed({
 const footerText = computed({
     get: () => patched.value.config.footerText,
     set: value => addPatch(Platform.patch({ config: PlatformConfig.patch({ footerText: value }) })),
+});
+
+const shopFooterText = computed({
+    get: () => patched.value.config.shopFooterText,
+    set: value => addPatch(Platform.patch({ config: PlatformConfig.patch({ shopFooterText: value }) })),
 });
 
 const coverBottomLeftOverlayWidth = computed({

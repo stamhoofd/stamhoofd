@@ -9,6 +9,6 @@
 
 <script setup lang="ts">
 import { usePlatform } from '../hooks';
-const platform = usePlatform()
+const platform = usePlatform();
 
 </script>
