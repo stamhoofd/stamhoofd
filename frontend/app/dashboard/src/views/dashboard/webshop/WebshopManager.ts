@@ -276,6 +276,8 @@ export class WebshopManager {
             DBOpenRequest.onupgradeneeded = (event: IDBVersionChangeEvent) => {
                 const db = DBOpenRequest.result;
 
+                console.info('Database upgrade', event.oldVersion, event.newVersion);
+
                 function addTicketStoreIndexes(ticketStore: IDBObjectStore) {
                     // Search tickets by order id
                     ticketStore.createIndex('orderId', 'orderId', { unique: false });
@@ -327,8 +329,7 @@ export class WebshopManager {
                         addTicketStoreIndexes(ticketStore);
                     }
 
-                    // todo: determine version!!!
-                    if (event.oldVersion < 999999999) {
+                    if (event.oldVersion < 341) {
                         const orderStore = DBOpenRequest.transaction!.objectStore('orders');
                         addOrderStoreIndexes(orderStore);
                     }
