@@ -26,7 +26,7 @@ export async function wrapContext(context: SessionContext, app: AppType | 'auto'
         throw new Error('Webshop is required for webshop app');
     }
 
-    const $webshopManager = options?.webshop ? reactive(new WebshopManager(context, options.webshop) as any) as WebshopManager : null;
+    const $webshopManager = options?.webshop ? reactive(new WebshopManager(context, platformManager.$platform, options.webshop) as any) as WebshopManager : null;
     const $checkoutManager = $webshopManager ? reactive(new CheckoutManager($webshopManager)) : null;
 
     return new ComponentWithProperties(ContextProvider, {

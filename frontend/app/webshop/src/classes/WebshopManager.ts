@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ColorHelper } from '@stamhoofd/components';
 import { NetworkManager, SessionContext } from '@stamhoofd/networking';
-import { DarkMode, Webshop } from '@stamhoofd/structures';
+import { DarkMode, Platform, Webshop } from '@stamhoofd/structures';
 
 /**
  * Convenient access to the organization of the current session
@@ -9,14 +9,16 @@ import { DarkMode, Webshop } from '@stamhoofd/structures';
 export class WebshopManager {
     webshop!: Webshop;
     $context: SessionContext;
+    platform: Platform;
 
     get organization() {
         return this.$context.organization!;
     }
 
-    constructor($context: SessionContext, webshop: Webshop) {
+    constructor($context: SessionContext, platform: Platform, webshop: Webshop) {
         this.webshop = webshop;
         this.$context = $context;
+        this.platform = platform;
 
         // Set color
         if (this.webshop.meta.color) {
@@ -24,6 +26,11 @@ export class WebshopManager {
         }
         else if (this.$context.organization?.meta.color) {
             ColorHelper.setColor(this.$context.organization?.meta.color);
+        }
+        else {
+            if (this.platform.config.color) {
+                ColorHelper.setColor(this.platform.config.color);
+            }
         }
         ColorHelper.setDarkMode(this.webshop.meta.darkMode ?? DarkMode.Off);
 
