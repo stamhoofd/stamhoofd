@@ -1,11 +1,11 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
-import { Toast } from '@stamhoofd/components';
+import { NavigationActions, Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, Webshop } from '@stamhoofd/structures';
+import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Ref } from 'vue';
+import { patchObject } from '@simonbackx/simple-encoding';
 import { CheckoutManager } from '../../classes/CheckoutManager';
 
 export enum CheckoutStepType {
@@ -15,8 +15,6 @@ export enum CheckoutStepType {
     Time = 'Time',
     Payment = 'Payment',
 }
-
-type Unref<T> = T extends Ref<infer U> ? U : T;
 
 export class CheckoutStep {
     id: string;
@@ -181,13 +179,19 @@ export class CheckoutStepsManager {
                         value: checkout,
                         markReviewed: true,
                         dataPermission: true,
-                        // saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
-                        //    checkout.recordAnswers = answers
-                        //    this.$checkoutManager.saveCheckout()
-                        //
-                        //    // Force a save if nothing changed (to fix timeSlot + updated data)
-                        //    await this.goNext(id, component)
-                        // }
+                        patchHandler: (patch: PatchAnswers) => {
+                            const clone = checkout.clone();
+                            clone.recordAnswers = patchObject(clone.recordAnswers, patch);
+                            return clone;
+                        },
+                        saveHandler: async (patch: PatchAnswers, navigate: NavigationActions) => {
+                            checkout.recordAnswers = patchObject(checkout.recordAnswers, patch);
+                            this.$checkoutManager.saveCheckout();
+
+                            // Force a save if nothing changed (to fix timeSlot + updated data)
+                            await this.goNext(id, navigate);
+                        },
+                        saveText: 'Doorgaan'
                     });
                 },
                 validate: (checkout, webshop) => {
@@ -253,11 +257,7 @@ export class CheckoutStepsManager {
         return undefined;
     }
 
-    async goNext(step: string | undefined, args: {
-        navigationController: Unref<ReturnType<typeof useNavigationController>>;
-        dismiss: ReturnType<typeof useDismiss>;
-        show: ReturnType<typeof useShow>;
-    }) {
+    async goNext(step: string | undefined, navigate: NavigationActions) {
         const webshop = this.$webshopManager.webshop;
         let nextStep: CheckoutStep | undefined;
 
@@ -272,10 +272,10 @@ export class CheckoutStepsManager {
                     await this.$webshopManager.reload();
 
                     if (webshop.shouldEnableCart) {
-                        args.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
+                        navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
                     }
                     else {
-                        args.dismiss({ force: true }).catch(console.error);
+                        navigate.dismiss({ force: true }).catch(console.error);
                     }
                     Toast.fromError(error).show();
                 }
@@ -284,10 +284,10 @@ export class CheckoutStepsManager {
                     await this.$webshopManager.reload();
 
                     if (webshop.shouldEnableCart) {
-                        args.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
+                        navigate.navigationController!.popToRoot({ force: true }).catch(e => console.error(e));
                     }
                     else {
-                        args.dismiss({ force: true }).catch(console.error);
+                        navigate.dismiss({ force: true }).catch(console.error);
                     }
 
                     Toast.fromError(error).show();
@@ -306,7 +306,7 @@ export class CheckoutStepsManager {
         const nextComponent = await nextStep.getComponent();
         nextComponent.provide.reactive_navigation_url = nextStep.url;
 
-        args.show({
+        navigate.show({
             components: [nextComponent],
             animated: true,
         }).catch(console.error);

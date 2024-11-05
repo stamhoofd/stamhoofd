@@ -20,6 +20,8 @@ import { DiscountCode } from './DiscountCode.js';
 import { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData.js';
+import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
+import { checkoutInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 
 export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -177,8 +179,15 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return this.totalPrice - this.administrationFee;
     }
 
-    doesMatchFilter(_filter: StamhoofdFilter): boolean {
-        throw new Error('Method not implemented.');
+    doesMatchFilter(filter: StamhoofdFilter) {
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, checkoutInMemoryFilterCompilers);
+            return compiledFilter(this);
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
     }
 
     isRecordEnabled(_record: RecordSettings): boolean {
@@ -186,12 +195,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     }
 
     getRecordAnswers(): Map<string, RecordAnswer> {
-        return new Map();
-        // return this.recordAnswers
-    }
-
-    patchRecordAnswers(_patch: PatchAnswers): this {
-        throw new Error('Method not implemented.');
+        return this.recordAnswers;
     }
 
     validateAnswers(webshop: Webshop) {

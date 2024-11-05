@@ -3,22 +3,31 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController, Pus
 import { AccountSwitcher, AppType, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { AccessRight, Country, Organization } from '@stamhoofd/structures';
-import { computed, markRaw, ref } from 'vue';
+import { AccessRight, Country, Organization, Webshop } from '@stamhoofd/structures';
+import { computed, markRaw, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { useGlobalRoutes } from './useGlobalRoutes';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
+import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
+import { CheckoutManager } from '../../webshop/src/classes/CheckoutManager';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
 }
 
-export async function wrapContext(context: SessionContext, app: AppType | 'auto', component: ComponentWithProperties, options?: { ownDomain?: boolean; initialPresents?: PushOptions[] }) {
+export async function wrapContext(context: SessionContext, app: AppType | 'auto', component: ComponentWithProperties, options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
     const platformManager = await PlatformManager.createFromCache(context, app, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);
     await I18nController.loadDefault(context, Country.Belgium, 'nl', context?.organization?.address?.country);
+
+    if (app === 'webshop' && !options?.webshop) {
+        throw new Error('Webshop is required for webshop app');
+    }
+
+    const $webshopManager = options?.webshop ? reactive(new WebshopManager(context, options.webshop) as any) as WebshopManager : null;
+    const $checkoutManager = $webshopManager ? reactive(new CheckoutManager($webshopManager)) : null;
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
@@ -26,6 +35,8 @@ export async function wrapContext(context: SessionContext, app: AppType | 'auto'
             $platformManager: platformManager,
             $memberManager,
             $organizationManager: new OrganizationManager(context),
+            $webshopManager,
+            $checkoutManager,
             reactive_components: {
                 'tabbar-left': options?.ownDomain && context.organization
                     ? new ComponentWithProperties(OrganizationLogo, {

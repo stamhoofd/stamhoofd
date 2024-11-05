@@ -8,6 +8,7 @@ import { CheckoutManager } from './classes/CheckoutManager';
 import { WebshopManager } from './classes/WebshopManager';
 import RequiredLoginView from './views/RequiredLoginView.vue';
 import WebshopView from './views/WebshopView.vue';
+import { wrapContext } from '@stamhoofd/dashboard';
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, { initialComponents: components });
@@ -47,5 +48,8 @@ export async function getWebshopRootView(session: SessionContext, webshop: Websh
         root,
     });
 
-    return rootView;
+    return wrapContext(session, 'webshop', root, {
+        ownDomain: true,
+        webshop,
+    });
 }

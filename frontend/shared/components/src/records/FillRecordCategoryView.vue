@@ -13,7 +13,7 @@ import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { NavigationActions } from '../types/NavigationActions';
+import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 import FillRecordCategoryBox from './components/FillRecordCategoryBox.vue';
 
 const props = withDefaults(
@@ -38,12 +38,9 @@ function addPatch(p: PatchAnswers) {
     patch.value = p.applyTo(patch.value) as PatchAnswers;
 }
 
-const show = useShow();
-const present = usePresent();
-const dismiss = useDismiss();
-const pop = usePop();
 const loading = ref(false);
 const errors = useErrors();
+const navigate = useNavigationActions();
 
 async function save() {
     if (loading.value) {
@@ -58,9 +55,8 @@ async function save() {
             return;
         }
 
-        await props.saveHandler(patch.value, {
-            show, present, dismiss, pop,
-        });
+        await props.saveHandler(patch.value, navigate);
+        patch.value = new PatchMap() as PatchAnswers;
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
