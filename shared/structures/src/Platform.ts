@@ -355,7 +355,7 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: RichText, version: 332 })
     footerText = RichText.create({});
 
-    @field({ decoder: RichText, ...NextVersion })
+    @field({ decoder: RichText, version: 342 })
     shopFooterText = RichText.create({});
 
     @field({ decoder: StringDecoder, nullable: true, version: 310 })
