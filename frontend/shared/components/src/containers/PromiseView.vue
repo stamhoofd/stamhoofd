@@ -84,7 +84,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 
-.promise-view {
+.promise-view.st-view {
     background: transparent; // Ticket scanning requires all views to be transparent
 }
 </style>
