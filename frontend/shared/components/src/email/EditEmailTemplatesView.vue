@@ -17,11 +17,11 @@
                         <span class="icon email-edited-layer-2 primary" />
                     </span>
                 </template>
-                
+
                 <p v-if="getTemplatePrefix(emailTemplate)" class="style-title-prefix-list">
                     {{ getTemplatePrefix(emailTemplate) }}
                 </p>
-                
+
                 <h2 class="style-title-list">
                     {{ EmailTemplate.isSavedEmail(emailTemplate.type) ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type) }}
                 </h2>
@@ -76,40 +76,40 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Group } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 import { computed, Ref, ref } from 'vue';
 import EditEmailTemplateView from './EditEmailTemplateView.vue';
 
 const props = withDefaults(
     defineProps<{
         types: EmailTemplateType[];
-        groups: Group[]|null;
-        webshopId?: string|null;
-        onSelect?: ((template: EmailTemplate) => boolean|Promise<boolean>) | null;
-        createOption?: EmailTemplate|null;
+        groups: Group[] | null;
+        webshopId?: string | null;
+        onSelect?: ((template: EmailTemplate) => boolean | Promise<boolean>) | null;
+        createOption?: EmailTemplate | null;
         allowEditGenerated?: boolean;
     }>(), {
         groups: null,
         webshopId: null,
         types: () => {
-            return [...Object.values(EmailTemplateType)].filter(type => {
-                const app = useAppContext()
+            return [...Object.values(EmailTemplateType)].filter((type) => {
+                const app = useAppContext();
                 if (app === 'admin') {
-                    return EmailTemplate.allowPlatformLevel(type)
+                    return EmailTemplate.allowPlatformLevel(type);
                 }
-                return EmailTemplate.allowOrganizationLevel(type)
-            })
+                return EmailTemplate.allowOrganizationLevel(type);
+            });
         },
         onSelect: null,
         createOption: null,
-        allowEditGenerated: true
-    })
+        allowEditGenerated: true,
+    });
 
 const viewTitle = computed(() => props.onSelect ? 'Kies een emailtemplate' : 'Wijzig automatische e-mails');
-const templates = ref([]) as Ref<EmailTemplate[]>
+const templates = ref([]) as Ref<EmailTemplate[]>;
 const errors = useErrors();
-const {patched, addPatch, addPut, addDelete, patch, hasChanges} = usePatchArray(templates);
-const owner = useRequestOwner()
+const { patched, addPatch, addPut, addDelete, patch, hasChanges } = usePatchArray(templates);
+const owner = useRequestOwner();
 const context = useContext();
 const loading = ref(true);
 const organization = useOrganization();
@@ -119,28 +119,32 @@ const saving = ref(false);
 const $t = useTranslate();
 loadTemplates().catch(console.error);
 
-const tabItems = props.onSelect ? [
-    {
-        id: 'userGenerated',
-        label: 'Opgeslagen'
-    }
-] : (
-    props.allowEditGenerated ? [
-        {
-            id: 'auto',
-            label: 'Automatische'
-        },
-        {
-            id: 'userGenerated',
-            label: 'Opgeslagen'
-        },
-    ] : [
-        {
-            id: 'auto',
-            label: 'Automatische'
-        }
-    ]
-);
+const tabItems = props.onSelect
+    ? [
+            {
+                id: 'userGenerated',
+                label: 'Opgeslagen',
+            },
+        ]
+    : (
+            props.allowEditGenerated
+                ? [
+                        {
+                            id: 'auto',
+                            label: 'Automatische',
+                        },
+                        {
+                            id: 'userGenerated',
+                            label: 'Opgeslagen',
+                        },
+                    ]
+                : [
+                        {
+                            id: 'auto',
+                            label: 'Automatische',
+                        },
+                    ]
+        );
 
 const tab = ref(tabItems[0].id);
 
@@ -167,7 +171,7 @@ const editableList = computed(() => {
                 if (orgId) {
                     defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === orgId) ?? defaultTemplate ?? null;
                 }
-                
+
                 base.push(
                     EmailTemplate.create({
                         ...defaultTemplate,
@@ -175,8 +179,8 @@ const editableList = computed(() => {
                         organizationId: organization.value?.id ?? null,
                         groupId: group?.id ?? null,
                         webshopId: props.webshopId,
-                        type
-                    })
+                        type,
+                    }),
                 );
             }
         }
@@ -186,18 +190,18 @@ const editableList = computed(() => {
     base.sort((a, b) => {
         return Sorter.stack(
             Sorter.byStringValue(a.groupId ?? '', b.groupId ?? ''),
-            EmailTemplate.getTypeTitle(a.type).localeCompare(EmailTemplate.getTypeTitle(b.type))
-        )
+            EmailTemplate.getTypeTitle(a.type).localeCompare(EmailTemplate.getTypeTitle(b.type)),
+        );
     });
 
     return base;
-})
+});
 
 function getTemplatePrefix(emailTemplate: EmailTemplate) {
     if (emailTemplate.groupId && props.groups) {
-        const group = props.groups.find(g => g.id === emailTemplate.groupId)
+        const group = props.groups.find(g => g.id === emailTemplate.groupId);
         if (group) {
-            return group.settings.name
+            return group.settings.name;
         }
     }
     return '';
@@ -216,7 +220,8 @@ async function editEmail(emailTemplate: EmailTemplate) {
                         patch.id = emailTemplate.id;
                         patch.updatedAt = new Date();
                         addPatch(patch);
-                    } else {
+                    }
+                    else {
                         // Create
                         const toCreate = emailTemplate.patch(patch);
                         toCreate.id = uuidv4();
@@ -224,28 +229,28 @@ async function editEmail(emailTemplate: EmailTemplate) {
                     }
 
                     if (props.onSelect) {
-                        await saveWithoutDismiss()
+                        await saveWithoutDismiss();
                     }
-                }
-            })
+                },
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function addTemplate() {
     const template = EmailTemplate.create({
         id: '',
         type: EmailTemplateType.SavedMembersEmail,
-    })
-    await editEmail(template)
+    });
+    await editEmail(template);
 }
 
 async function addCreateOption() {
     if (!props.createOption) {
         return;
     }
-    await editEmail(props.createOption)
+    await editEmail(props.createOption);
 }
 
 async function deleteEmail(emailTemplate: EmailTemplate) {
@@ -256,7 +261,7 @@ async function deleteEmail(emailTemplate: EmailTemplate) {
         addDelete(emailTemplate.id);
 
         if (props.onSelect) {
-            await saveWithoutDismiss()
+            await saveWithoutDismiss();
         }
     }
 }
@@ -264,36 +269,36 @@ async function deleteEmail(emailTemplate: EmailTemplate) {
 async function loadTemplates() {
     try {
         const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/email-templates",
-            query: { 
+            method: 'GET',
+            path: '/email-templates',
+            query: {
                 groupIds: props.groups !== null ? [props.groups.map(g => g.id)].join(',') : null,
                 webshopId: props.webshopId,
                 types: props.types.join(','),
             },
             shouldRetry: true,
             owner,
-            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>)
-        })
-        templates.value = response.data
-        loading.value = false
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
+        });
+        templates.value = response.data;
+        loading.value = false;
     }
-    
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
 }
 
 async function doSelectItem(item: EmailTemplate) {
     if (props.onSelect) {
         if (await saveWithoutDismiss()) {
             if (await props.onSelect(item)) {
-                await pop({force: true})
+                await pop({ force: true });
             }
         }
-    } else {
-        await editEmail(item)
     }
-    
+    else {
+        await editEmail(item);
+    }
 }
 async function saveWithoutDismiss() {
     if (saving.value) {
@@ -307,30 +312,30 @@ async function saveWithoutDismiss() {
     saving.value = true;
     try {
         await context.value.authenticatedServer.request({
-            method: "PATCH",
-            path: "/email-templates",
+            method: 'PATCH',
+            path: '/email-templates',
             shouldRetry: false,
             owner,
             body: patch.value,
-            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>)
-        })
+            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
+        });
 
-        await loadTemplates()
-        patch.value = new PatchableArray()
-        saving.value = false
-        
+        await loadTemplates();
+        patch.value = new PatchableArray();
+        saving.value = false;
+
         return true;
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
     }
-    saving.value = false
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    saving.value = false;
     return false;
 }
 
-
 async function save() {
     if (await saveWithoutDismiss()) {
-        await pop({force: true})
+        await pop({ force: true });
     }
 }
 
@@ -338,10 +343,10 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

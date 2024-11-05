@@ -407,8 +407,8 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSettingsView, CenteredMessage, EditEmailTemplatesView, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, useContext, useOrganization } from '@stamhoofd/components';
-import { AccessRight, EmailTemplate, EmailTemplateType, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { AccountSettingsView, CenteredMessage, EditEmailTemplatesView, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useContext, useOrganization } from '@stamhoofd/components';
+import { AccessRight, EmailTemplate, EmailTemplateType, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
@@ -459,14 +459,15 @@ function getFeatureFlag(flag: string) {
     return organization.value?.privateMeta?.featureFlags.includes(flag) ?? false;
 }
 
+const auth = useAuth();
 const isOpen = computed(() => !webshopManager.value.preview.isClosed());
 const isArchive = computed(() => webshopManager.value.preview.meta.status === WebshopStatus.Archived);
 const title = computed(() => props.preview.meta.name);
 const webshopUrl = computed(() => props.preview.getUrl(organization.value!));
-const hasFullPermissions = computed(() => props.preview.privateMeta.permissions.hasFullAccess(context.value.organizationPermissions));
-const hasWritePermissions = computed(() => props.preview.privateMeta.permissions.hasWriteAccess(context.value.organizationPermissions));
-const hasReadPermissions = computed(() => props.preview.privateMeta.permissions.hasReadAccess(context.value.organizationPermissions));
-const hasScanPermissions = computed(() => hasWritePermissions.value || props.preview.privateMeta.scanPermissions.hasWriteAccess(context.value.organizationPermissions));
+const hasFullPermissions = computed(() =>auth.canAccessWebshop(props.preview, PermissionLevel.Full));
+const hasReadPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Read));
+
+const hasScanPermissions = computed(() => auth.canAccessWebshopTickets(props.preview, PermissionLevel.Write));
 const isTicketsOnly = computed(() => webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets);
 const hasTickets = computed(() => webshopManager.value.preview.meta.ticketType !== WebshopTicketType.None);
 const hasSeating = computed(() => webshopManager.value.preview.meta.seatingPlans.length > 0 && (!webshop.value || !!webshop.value?.products?.find(p => p.seatingPlanId !== null)));

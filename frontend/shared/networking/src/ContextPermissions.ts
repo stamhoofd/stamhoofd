@@ -175,6 +175,38 @@ export class ContextPermissions {
         return false;
     }
 
+    async canAccessWebshop(webshop: { id: string; }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (!this.permissions) {
+            return false;
+        }
+
+        if (this.permissions.hasResourceAccess(PermissionsResourceType.Webshops, webshop.id, permissionLevel)) {
+            return true;
+        }
+
+        if (permissionLevel === PermissionLevel.Read && this.permissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    async canAccessWebshopTickets(webshop: { id: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (!this.permissions) {
+            return false;
+        }
+
+        if (this.permissions.hasResourceAccess(PermissionsResourceType.Webshops, webshop.id, permissionLevel)) {
+            return true;
+        }
+
+        if ((permissionLevel === PermissionLevel.Read || permissionLevel === PermissionLevel.Write) && this.permissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
+            return true;
+        }
+
+        return false;
+    }
+
     hasSomePlatformAccess(): boolean {
         return !!this.platformPermissions;
     }
