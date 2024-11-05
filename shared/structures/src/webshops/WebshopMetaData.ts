@@ -605,6 +605,14 @@ export class WebshopPrivateMetaData extends AutoEncoder {
     numberingType = WebshopNumberingType.Continuous;
 
     static buildDNSRecords(domain: string): DNSRecord[] {
+        if (!STAMHOOFD.domains.webshopCname) {
+            throw new SimpleError({
+                code: 'invalid_configuration',
+                message: 'Missing configuration for webshop domain',
+                human: 'Momenteel kan je geen eigen webshop domeinnaam instellen. Probeer het later opnieuw.',
+                statusCode: 500,
+            });
+        }
         return [
             DNSRecord.create({
                 type: DNSRecordType.CNAME,

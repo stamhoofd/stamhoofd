@@ -165,8 +165,7 @@ function created() {
     if (!hasOrders.value && props.webshopManager) {
         props.webshopManager.streamOrders({ callback: () => {
             hasOrders.value = true;
-            throw new Error('Stop streaming');
-        } }).catch(console.error);
+        }, limit: 1 }).catch(console.error);
     }
 }
 
@@ -423,7 +422,12 @@ const dnsRecords = computed(() => {
     if (!webshop.value.domain) {
         return [];
     }
-    return webshop.value.buildDNSRecords();
+    try {
+        return webshop.value.buildDNSRecords();
+    } catch (e) {
+        Toast.fromError(e).show()
+    }
+    return []
 });
 
 async function copyLink(event: MouseEvent) {
