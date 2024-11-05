@@ -17,7 +17,7 @@
         <p v-if="scannedAtDescription" class="style-description-small" v-text="scannedAtDescription" />
 
         <template #right>
-            <button class="button text" type="button" @click="markAs">
+            <button class="button text" type="button" @click.stop="markAs">
                 <span :class="'style-tag '+statusColor">{{ statusName }}</span>
                 <span v-if="hasWrite" class="icon arrow-down-small" />
             </button>
@@ -27,8 +27,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, STListItem, useContext, useOrganization } from '@stamhoofd/components';
-import { Order, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import { ContextMenu, ContextMenuItem, STListItem, useAuth, useContext, useOrganization } from '@stamhoofd/components';
+import { Order, PermissionLevel, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { computed } from 'vue';
@@ -49,6 +49,7 @@ const webshop = computed(() => props.webshopManager.preview);
 // todo: multiple item support needed!
 const cartItem = computed(() => props.ticket.items[0]);
 const name = computed(() => props.ticket.getTitle());
+const auth = useAuth();
 
 const scannedAtDescription = computed(() => {
     if (!props.ticket.scannedAt) {
@@ -62,15 +63,15 @@ const scannedAtDescription = computed(() => {
 
 const isSingle = computed(() => webshop.value.meta.ticketType === WebshopTicketType.SingleTicket);
 const hasWrite = computed(() => {
-    const p = context.value.organizationPermissions;
-    if (!p) {
-        return false;
-    }
-    return webshop.value.privateMeta.permissions.hasWriteAccess(p);
+    return auth.canAccessWebshopTickets(webshop.value, PermissionLevel.Write);
 });
 
-function openTicket() {
-    present({
+async function openTicket() {
+    if (!hasWrite.value) {
+        await download();
+        return;
+    }
+    await present({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(props.ticket.scannedAt !== null ? TicketAlreadyScannedView : ValidTicketView, {
@@ -81,22 +82,23 @@ function openTicket() {
             }),
         ],
         modalDisplayStyle: 'popup',
-    }).catch(console.error);
+    })
 }
 
 function openMenu(clickEvent: MouseEvent) {
     const contextMenu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Open scanscherm',
+                name: 'Openen',
+                disabled: !hasWrite.value,
                 action: () => {
                     openTicket();
                     return true;
-                },
-                icon: 'qr-code',
+                }
             }),
             new ContextMenuItem({
                 name: 'Markeer als',
+                disabled: !hasWrite.value,
                 childMenu: getMarkAsMenu(),
             }),
             new ContextMenuItem({
@@ -113,6 +115,9 @@ function openMenu(clickEvent: MouseEvent) {
 }
 
 function markAs(event: MouseEvent) {
+    if (!hasWrite.value) {
+        return
+    }
     const el: HTMLElement = (event.currentTarget as HTMLElement).querySelector('.right') ?? event.currentTarget as HTMLElement;
     const contextMenu = getMarkAsMenu();
     contextMenu.show({ button: el, xPlacement: 'left' }).catch(console.error);

@@ -3,7 +3,7 @@ import { isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { EventBus, fetchAll, ObjectFetcher, Toast } from '@stamhoofd/components';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version, WebshopPreview } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, PrivateWebshop, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version, WebshopPreview } from '@stamhoofd/structures';
 import { toRaw } from 'vue';
 import { createCompiledFilterForPrivateOrderIndexBox, createPrivateOrderIndexBox, createPrivateOrderIndexBoxDecoder, OrderStoreDataIndex, OrderStoreGeneratedIndex, OrderStoreIndex } from './getPrivateOrderIndexes';
 
@@ -49,11 +49,11 @@ export class WebshopManager {
     }
 
     get hasWrite() {
-        return this.preview.privateMeta.permissions.hasWriteAccess(this.context.organizationPermissions);
+        return this.context.auth.canAccessWebshop(this.preview, PermissionLevel.Write)
     }
 
     get hasRead() {
-        return this.preview.privateMeta.permissions.hasReadAccess(this.context.organizationPermissions);
+        return this.context.auth.canAccessWebshop(this.preview, PermissionLevel.Read)
     }
 
     /**

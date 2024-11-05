@@ -318,8 +318,8 @@
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { AsyncPaymentView, CartItemRow, EditPaymentView, GlobalEventBus, PriceBreakdownBox, STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, Toast, useContext, useKeyUpDown, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { AccessRight, BalanceItemWithPrivatePayments, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
+import { AsyncPaymentView, CartItemRow, EditPaymentView, GlobalEventBus, PriceBreakdownBox, STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, Toast, useAuth, useContext, useKeyUpDown, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { AccessRight, BalanceItemWithPrivatePayments, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import OrderView from './OrderView.vue';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -351,6 +351,7 @@ useKeyUpDown({
 });
 
 const webshop = computed(() => props.webshopManager.webshop);
+const auth = useAuth()
 
 props.webshopManager.loadWebshopIfNeeded().catch(console.error);
 
@@ -431,15 +432,11 @@ const hasPreviousOrder = computed(() => {
 });
 
 const hasPaymentsWrite = computed(() => {
-    const p = context.value.organizationPermissions;
-    if (!p) {
-        return false;
-    }
-    if (p.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+    if (auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
         return true;
     }
 
-    if (p.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
+    if (auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
         return true;
     }
 
@@ -447,20 +444,15 @@ const hasPaymentsWrite = computed(() => {
         return false;
     }
 
-    return webshop.value.privateMeta.permissions.hasWriteAccess(p);
+    return auth.canAccessWebshop(webshop.value, PermissionLevel.Write);
 });
 
 const hasWrite = computed(() => {
-    const p = context.value.organizationPermissions;
-    if (!p) {
-        return false;
-    }
-
     if (!webshop.value) {
         return false;
     }
 
-    return webshop.value.privateMeta.permissions.hasWriteAccess(p);
+    return auth.canAccessWebshop(webshop.value, PermissionLevel.Write);
 });
 
 const hasSingleTickets = computed(() => {

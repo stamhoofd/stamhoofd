@@ -3,7 +3,7 @@ import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metrop
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
-import { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
+import { Country, Order, Organization, Sponsor, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
 import PDFDocument from 'pdfkit/js/pdfkit.standalone';
@@ -509,7 +509,7 @@ export class TicketBuilder {
             this.document.text('Ticketverkoop via ', PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN * 2, lineGap: 2, paragraphGap: 2, continued: true });
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
-            this.document.text(I18nController.i18n.$t('68914509-aa54-40c7-9f53-7b8a02149198'), { continued: false, link: 'https://' + LocalizedDomains.marketing });
+            this.document.text('Stamhoofd', { continued: false, link: I18nController.shared.country === Country.Netherlands ? 'https://www.stamhoofd.nl' : 'https://www.stamhoofd.be' });
         }
 
         height += expectedHeight + 2;

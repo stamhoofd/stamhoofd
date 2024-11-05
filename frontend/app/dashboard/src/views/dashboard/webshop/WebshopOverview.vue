@@ -464,7 +464,7 @@ const isOpen = computed(() => !webshopManager.value.preview.isClosed());
 const isArchive = computed(() => webshopManager.value.preview.meta.status === WebshopStatus.Archived);
 const title = computed(() => props.preview.meta.name);
 const webshopUrl = computed(() => props.preview.getUrl(organization.value!));
-const hasFullPermissions = computed(() =>auth.canAccessWebshop(props.preview, PermissionLevel.Full));
+const hasFullPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Full));
 const hasReadPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Read));
 
 const hasScanPermissions = computed(() => auth.canAccessWebshopTickets(props.preview, PermissionLevel.Write));

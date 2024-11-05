@@ -175,7 +175,7 @@ export class ContextPermissions {
         return false;
     }
 
-    async canAccessWebshop(webshop: { id: string; }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    canAccessWebshop(webshop: { id: string; }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!this.permissions) {
             return false;
         }
@@ -191,7 +191,7 @@ export class ContextPermissions {
         return false;
     }
 
-    async canAccessWebshopTickets(webshop: { id: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    canAccessWebshopTickets(webshop: { id: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!this.permissions) {
             return false;
         }

@@ -180,10 +180,9 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, useContext } from '@stamhoofd/components';
-import { AccessRight, PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 
-import { useOrganizationManager } from '@stamhoofd/networking';
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 
@@ -202,35 +201,8 @@ const { isNew, webshop, addPatch, patch: webshopPatch, originalWebshop, errors, 
         }
     },
 });
-const organizationManager = useOrganizationManager();
 const context = useContext();
 const organization = computed(() => context.value.organization);
-
-onMounted(() => {
-    // Auto assign roles
-    if (isNew && organizationManager.value.user.permissions && !webshop.value.privateMeta.permissions.hasFullAccess(context.value.organizationPermissions)) {
-        // By default, add full permissions for all the roles this user has, that also have create webshop permissions
-        const roles = organization.value?.privateMeta?.roles.flatMap((r) => {
-            const has = organizationManager.value.user.permissions?.organizationPermissions.get(organization.value!.id)?.roles.find(i => i.id === r.id);
-            if (r.hasAccessRight(AccessRight.OrganizationCreateWebshops) && has) {
-                return [PermissionRole.create(r)];
-            }
-            return [];
-        }) ?? [];
-
-        if (roles.length > 0) {
-            const permissions = PermissionsByRole.patch({});
-            for (const role of roles) {
-                permissions.full.addPut(role);
-            }
-            addPatch(PrivateWebshop.patch({
-                privateMeta: WebshopPrivateMetaData.patch({
-                    permissions,
-                }),
-            }));
-        }
-    }
-});
 
 const viewTitle = computed(() => {
     if (isNew.value) {
