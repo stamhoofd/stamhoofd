@@ -3,7 +3,7 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController, Pus
 import { AccountSwitcher, AppType, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { AccessRight, Country, Organization, Webshop } from '@stamhoofd/structures';
+import { AccessRight, Country, Organization, PermissionLevel, Webshop } from '@stamhoofd/structures';
 import { computed, markRaw, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -365,7 +365,9 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                         tabs.push(calendarTab);
 
                         if (organization?.meta.packages.useWebshops && (organization?.privateMeta?.featureFlags.includes('webshops') ?? false)) {
-                            tabs.push(webshopsTab);
+                            if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationCreateWebshops) || !!organization.webshops.find(w => reactiveSession.auth.canAccessWebshop(w, PermissionLevel.Read))) {
+                                tabs.push(webshopsTab);
+                            }
                         }
 
                         const moreTab = new TabBarItemGroup({

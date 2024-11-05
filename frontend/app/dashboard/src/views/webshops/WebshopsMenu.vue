@@ -4,26 +4,27 @@
         <main>
             <h1>Webshops</h1>
 
-            <STList class="">
-                <!-- webshops -->
-                <template v-if="enableWebshopModule && visibleWebshops.length > 0">
-                    <STListItem
-                        v-for="webshop in visibleWebshops" :key="webshop.id" element-name="button"
-                        :selectable="true" :class="{
-                            selected: isSelected('webshop-' + webshop.id),
-                        }" @click="openWebshop(webshop)"
-                    >
-                        <h2 class="style-title-list">
-                            {{ webshop.meta.name }}
-                        </h2>
-                        <template #right>
-                            <span
-                                v-if="isWebshopOpen(webshop)"
-                                class="icon dot green right-icon small"
-                            />
-                        </template>
-                    </STListItem>
-                </template>
+            <p class="info-box" v-if="visibleWebshops.length === 0">
+                Je hebt nog geen webshops gemaakt
+            </p>
+
+            <STList v-if="visibleWebshops.length > 0">
+                <STListItem
+                    v-for="webshop in visibleWebshops" :key="webshop.id" element-name="button"
+                    :selectable="true" :class="{
+                        selected: isSelected('webshop-' + webshop.id),
+                    }" @click="openWebshop(webshop)"
+                >
+                    <h2 class="style-title-list">
+                        {{ webshop.meta.name }}
+                    </h2>
+                    <template #right>
+                        <span
+                            v-if="isWebshopOpen(webshop)"
+                            class="icon dot green right-icon small"
+                        />
+                    </template>
+                </STListItem>
             </STList>
 
             <!-- other -->
@@ -82,7 +83,7 @@ const auth = useAuth();
 
 // #region refs
 const selectedWebshop = ref<string | null>(null);
-const currentlySelected = ref<string | null>(null);
+const currentlySelected = ref<string | null>(null); // todo: avoid this pattern - there is a built in pattern for this that is much simpler
 // #endregion
 
 // #region enums
@@ -117,7 +118,7 @@ const visibleWebshops = computed(() =>
 );
 
 const canCreateWebshops = computed(() =>
-    hasAccessRight(AccessRight.OrganizationCreateWebshops),
+    auth.hasAccessRight(AccessRight.OrganizationCreateWebshops),
 );
 
 const hasWebshopArchive = computed(() =>
@@ -125,12 +126,6 @@ const hasWebshopArchive = computed(() =>
         webshop => webshop.meta.status === WebshopStatus.Archived,
     ),
 );
-// #endregion
-
-// #region functions
-function hasAccessRight(right: AccessRight) {
-    return auth.permissions?.hasAccessRight(right) ?? false;
-}
 
 function selectButton(button: Button | string) {
     currentlySelected.value = button;
@@ -158,9 +153,7 @@ function isWebshopOpen(webshop: WebshopPreview) {
     return !webshop.isClosed();
 }
 
-// #endregion
 
-// #region routes
 enum Routes {
     Webshop = 'webshop',
     AddWebshop = 'addWebshop',
@@ -217,7 +210,6 @@ defineRoutes([
             },
         },
     },
-    // add webshop
     {
         url: 'nieuw',
         name: Routes.AddWebshop,
@@ -231,7 +223,6 @@ defineRoutes([
             return {};
         },
     },
-    // archive
     {
         url: 'archief',
         name: Routes.Archive,
@@ -245,5 +236,4 @@ defineRoutes([
         },
     },
 ]);
-// #endregion
 </script>

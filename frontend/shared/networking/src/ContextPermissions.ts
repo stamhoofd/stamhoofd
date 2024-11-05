@@ -175,7 +175,7 @@ export class ContextPermissions {
         return false;
     }
 
-    canAccessWebshop(webshop: { id: string; }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    canAccessWebshop(webshop: { id: string }, permissionLevel: PermissionLevel = PermissionLevel.Read, autoIncludeScanTickets = true) {
         if (!this.permissions) {
             return false;
         }
@@ -184,7 +184,7 @@ export class ContextPermissions {
             return true;
         }
 
-        if (permissionLevel === PermissionLevel.Read && this.permissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
+        if (autoIncludeScanTickets && permissionLevel === PermissionLevel.Read && this.permissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
             return true;
         }
 

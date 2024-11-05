@@ -465,7 +465,7 @@ const isArchive = computed(() => webshopManager.value.preview.meta.status === We
 const title = computed(() => props.preview.meta.name);
 const webshopUrl = computed(() => props.preview.getUrl(organization.value!));
 const hasFullPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Full));
-const hasReadPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Read));
+const hasReadPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Read, false));
 
 const hasScanPermissions = computed(() => auth.canAccessWebshopTickets(props.preview, PermissionLevel.Write));
 const isTicketsOnly = computed(() => webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets);
