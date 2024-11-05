@@ -39,7 +39,7 @@ useHideTabBar();
     > div {
         padding: 10px var(--st-horizontal-padding, 40px);
         --default-footer-padding: 10px;
-        
+
         padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 10px);
         background: $color-current-background;
         border-top: $border-width-thin solid $color-border;
@@ -68,6 +68,10 @@ useHideTabBar();
         @media (max-width: 500px) {
             > div:first-child {
                 display: none;
+            }
+
+            > div:last-child > .button:not(:first-child), > div:last-child > .loading-button:not(:first-child)  {
+                margin-left: 0;
             }
 
             > div .button, > div .loading-button {
