@@ -5,15 +5,10 @@
             <template #left>
                 <OrganizationLogo :organization="organization" :webshop="webshop" />
             </template>
-            <template #right>
-                <button class="text button" type="button" @click="() => pop()">
-                    Sluiten
-                </button>
-            </template>
         </STNavigationBar>
 
         <main>
-            <p v-if="!webshop.meta.reduceBranding" class="stamhoofd-header">
+            <p v-if="!webshop.meta.reduceBranding && STAMHOOFD.platformName === 'stamhoofd'" class="stamhoofd-header">
                 <a :href="'https://'+$domains.marketing+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">Verkoop ook tickets via </span><span v-else>Bouw je betaalbare webshop via</span>  <Logo /></a>
             </p>
             <div class="box">

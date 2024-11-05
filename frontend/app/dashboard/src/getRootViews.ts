@@ -16,7 +16,7 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
 }
 
 export async function wrapContext(context: SessionContext, app: AppType | 'auto', component: ComponentWithProperties, options?: { ownDomain?: boolean; initialPresents?: PushOptions[] }) {
-    const platformManager = await PlatformManager.createFromCache(context, true);
+    const platformManager = await PlatformManager.createFromCache(context, app, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);
     await I18nController.loadDefault(context, Country.Belgium, 'nl', context?.organization?.address?.country);
 
@@ -348,10 +348,10 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                         ];
 
                         if (organization?.meta.packages.useMembers) {
-                            tabs.push(membersTab)
+                            tabs.push(membersTab);
                         }
 
-                        tabs.push(calendarTab)
+                        tabs.push(calendarTab);
 
                         if (organization?.meta.packages.useWebshops && (organization?.privateMeta?.featureFlags.includes('webshops') ?? false)) {
                             tabs.push(webshopsTab);

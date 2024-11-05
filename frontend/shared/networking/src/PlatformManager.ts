@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { ColorHelper } from '@stamhoofd/components';
+import { AppType, ColorHelper } from '@stamhoofd/components';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { Platform, RegistrationPeriod, UserWithMembers, Version } from '@stamhoofd/structures';
+import { Platform, RegistrationPeriod, UserWithMembers, Version, Webshop } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { inject, reactive, Ref, toRef } from 'vue';
 
@@ -15,15 +15,17 @@ export function usePlatformManager(): Ref<PlatformManager> {
 export class PlatformManager {
     $context: SessionContext;
     $platform: Platform;
+    $app: AppType | 'auto';
 
-    constructor($context: SessionContext, $platform: Platform) {
+    constructor($context: SessionContext, $platform: Platform, app: AppType | 'auto') {
         this.$context = $context;
         this.$platform = $platform;
+        this.$app = app;
 
         $platform.setShared();
 
         // Set color
-        if ($platform.config.color) {
+        if ($platform.config.color && app !== 'webshop') {
             ColorHelper.setColor($platform.config.color);
         }
         this.setFavicon();
@@ -32,11 +34,11 @@ export class PlatformManager {
     /**
      * Create one from cache, otherwise load it using the network
      */
-    static async createFromCache($context: SessionContext, backgroundFetch = true, requirePrivateConfig = false): Promise<PlatformManager> {
+    static async createFromCache($context: SessionContext, app: AppType | 'auto', backgroundFetch = true, requirePrivateConfig = false): Promise<PlatformManager> {
         const fromStorage = await PlatformManager.loadPlatform();
 
         if (fromStorage && (fromStorage.privateConfig || !requirePrivateConfig)) {
-            const manager = new PlatformManager($context, reactive(fromStorage as Platform) as Platform);
+            const manager = new PlatformManager($context, reactive(fromStorage as any) as Platform, app);
 
             if (backgroundFetch) {
                 manager.forceUpdate().catch(console.error);
@@ -46,13 +48,16 @@ export class PlatformManager {
         }
 
         const platform = reactive(await PlatformManager.fetchPlatform($context)) as Platform;
-        const platformManager = new PlatformManager($context, platform);
+        const platformManager = new PlatformManager($context, platform, app);
         await platformManager.savePlatform();
         return platformManager;
     }
 
     setFavicon() {
         if (!this.$platform.config.squareLogo) {
+            return;
+        }
+        if (this.$app === 'webshop') {
             return;
         }
 

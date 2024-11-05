@@ -1,151 +1,31 @@
 <template>
-    <div>
-        <figure v-if="horizontalLogo" class="organization-logo horizontal" :class="{expand, 'hide-smartphone': !!squareLogo}">
-            <!--<source 
-                v-if="horizontalLogoDark && (darkMode === 'Auto' || darkMode === 'On')"
-                :srcset="logoHorizontalSrcSet(horizontalLogoDark)"
-                :media="darkMode === 'Auto' ? '(prefers-color-scheme: dark)' : ''"
-
-                :width="getHorizontalResolution(horizontalLogoDark).width"
-                :height="getHorizontalResolution(horizontalLogoDark).height"
-            >
-            <img 
-                :src="logoHorizontalSrc" :srcset="logoHorizontalSrcSet(horizontalLogo)"
-                :width="getHorizontalResolution(horizontalLogo).width"
-                :height="getHorizontalResolution(horizontalLogo).height"
-                :alt="name"
-            >
-            -->
-        </figure>
-
-        <figure v-if="squareLogo" class="organization-logo" :class="{expand, 'only-smartphone': !!horizontalLogo}">
-            <!--<source 
-                v-if="darkMode === 'Auto' || darkMode === 'On'"
-                :srcset="logoSrcSet(squareLogoDark)"
-                :media="darkMode === 'Auto' ? '(prefers-color-scheme: dark)' : ''"
-
-                :width="getResolution(squareLogoDark).width"
-                :height="getResolution(squareLogoDark).height"
-            >
-            <img 
-                :src="logoSrc" :srcset="logoSrcSet(squareLogo)"
-                :width="getResolution(squareLogo).width"
-                :height="getResolution(squareLogo).height"
-                :alt="name"
-            >-->
-        </figure>
-
-        <span v-if="!horizontalLogo && !squareLogo" class="organization-logo-text">
-            {{ name }}
-        </span>
+    <div class="meta-logo" :class="{expand: metaData.expandLogo}">
+        <ImageComponent v-if="logo" :image="logo" :image-dark="logoDark"/>
+        <template v-else>
+            <span class="organization-logo-text">{{ name }}</span>
+        </template>
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
-import { DarkMode, Image, OrganizationMetaData, WebshopMetaData } from "@stamhoofd/structures";
+<script setup lang="ts">
+import { ImageComponent, useDeviceWidth } from '@stamhoofd/components';
+import { OrganizationMetaData, WebshopMetaData } from '@stamhoofd/structures';
+import { computed } from 'vue';
 
-@Component
-export default class OrganizationLogo extends VueComponent {
-    @Prop({ required: true })
-        metaData!: OrganizationMetaData | WebshopMetaData
+const props = defineProps<{
+    metaData: OrganizationMetaData | WebshopMetaData;
+    name: string;
+}>();
 
-    @Prop({ required: true })
-        name!: string
+const width = useDeviceWidth();
 
-    created() {
-        // Inject favicon if no favicon is present
-        if (!document.querySelector("link[rel='icon']")) {
-            const resolution = this.squareLogo?.getResolutionForSize(256, 256);
+const logo = computed(() => width.value > 800 ? (props.metaData.horizontalLogo ?? props.metaData.squareLogo) : (props.metaData.squareLogo ?? props.metaData.horizontalLogo));
+const logoDark = computed(() => width.value > 800 ? (props.metaData.horizontalLogoDark ?? props.metaData.squareLogoDark) : (props.metaData.squareLogoDark ?? props.metaData.horizontalLogoDark));
 
-            if (resolution && resolution.width === resolution.height) {
-                const path = resolution.file.getPublicPath();
-                const link = document.createElement("link");
-                link.rel = "icon";
-                link.href = path;
-                link.type = path.endsWith('.png') ? "image/png" : (path.endsWith('.svg') ? "image/svg+xml" : "image/jpeg");
-                document.head.appendChild(link);
-            }
-        }
-    }
-
-    get expand() {
-        return this.metaData.expandLogo
-    }
-
-    get darkMode() {
-        return (this.metaData as any).darkMode ?? DarkMode.Off
-    }
-
-    get horizontalLogo() {
-        return this.metaData.horizontalLogo ?? this.metaData.horizontalLogoDark;
-    }
-
-    get horizontalLogoDark() {
-        return this.metaData.horizontalLogoDark ?? this.metaData.horizontalLogo;
-    }
-
-    get squareLogo() {
-        return this.metaData.squareLogo ?? this.metaData.squareLogoDark
-    }
-
-    get squareLogoDark() {
-        return this.metaData.squareLogoDark ?? this.metaData.squareLogo
-    }
-
-    get logoSrc() {
-        if (!this.metaData.squareLogo) {
-            return null
-        }
-        if (this.metaData.expandLogo) {
-            return this.metaData.squareLogo.getPathForSize(100, 70)
-        }
-        return this.metaData.squareLogo.getPathForSize(70, 50)
-    }
-
-    get logoHorizontalSrc() {
-        if (!this.metaData.horizontalLogo) {
-            return null
-        }
-        if (this.metaData.expandLogo) {
-            return this.metaData.horizontalLogo.getPathForSize(undefined, 70)
-        }
-        return this.metaData.horizontalLogo.getPathForSize(150, 50)
-    }
-
-    getHorizontalResolution(image: Image) {
-        if (this.expand) {
-            return image.getResolutionForSize(undefined, 70)
-        }
-        return image.getResolutionForSize(150, 50)
-    }
-
-    getResolution(image: Image) {
-        if (this.expand) {
-            return image.getResolutionForSize(100, 70)
-        }
-        return image.getResolutionForSize(70, 50)
-    }
-
-    logoHorizontalSrcSet(image) {
-        if (this.expand) {
-            return image.getPathForSize(undefined, 70) + " 1x, "+image.getPathForSize(undefined, 70*2)+" 2x, "+image.getPathForSize(undefined, 70*3)+" 3x"
-        }
-        return image.getPathForSize(150, 50) + " 1x, "+image.getPathForSize(150*2, 50*2)+" 2x, "+image.getPathForSize(150*3, 50*3)+" 3x"
-    }
-
-    logoSrcSet(image) {
-        if (this.expand) {
-            return image.getPathForSize(100, 70) + " 1x, "+image.getPathForSize(100*2, 70*2)+" 2x, "+image.getPathForSize(100*3, 70*3)+" 3x"
-        }
-        return image.getPathForSize(70, 50) + " 1x, "+image.getPathForSize(70*2, 50*2)+" 2x, "+image.getPathForSize(70*3, 50*3)+" 3x"
-    }
-}
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .organization-logo-text {
     color: $color-dark;
@@ -158,37 +38,29 @@ export default class OrganizationLogo extends VueComponent {
     font-size: 16px;
 }
 
-.organization-logo {
-    img {
-        object-fit: contain;
-        object-position: left center;
-        height: 50px;
-        width: 70px;
-    }
+.meta-logo {
+    height: 40px;
+    width: 100%;
+    position: relative;
+    display: block;
+    max-width: 200px;
+    line-height: 40px;
 
     &.expand {
-        img {
-            height: 70px;
-            width: 100px;
-
-            @media (max-width: 300px) {
-                width: 40vw;
-            }
-        }
+        height: 60px;
+        max-width: 50vw;
+        line-height: 60px;
     }
 
-    &.horizontal {
-        img {
-            height: 50px;
-            width: 38vw;
-            width: min(150px, 38vw);
-        }
+    > .image-component {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
 
-        &.expand {
-            img {
-                height: 70px;
-                width: 38vw;
-            }
+        img {
+            object-position: left center;
         }
     }
 }

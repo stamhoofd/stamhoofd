@@ -84,15 +84,6 @@ const root = new ComponentWithProperties(PromiseView, {
 
             I18nController.skipUrlPrefixForLocale = 'nl-' + response.data.organization.address.country;
 
-            // Set color
-            if (response.data.webshop?.meta.color) {
-                ColorHelper.setColor(response.data.webshop.meta.color);
-            }
-            else if (response.data.organization.meta.color) {
-                ColorHelper.setColor(response.data.organization.meta.color);
-            }
-            ColorHelper.setDarkMode(response.data.webshop?.meta.darkMode ?? DarkMode.Off);
-
             // Set session
             const session = new SessionContext(response.data.organization);
             await session.loadFromStorage();

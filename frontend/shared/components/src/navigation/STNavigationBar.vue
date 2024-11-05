@@ -62,6 +62,9 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
     @Prop({ default: false, type: Boolean })
         disablePop!: boolean;
 
+    @Prop({ default: false, type: Boolean })
+        leftLogo!: boolean;
+
     scrolled = false;
     scrollElement!: HTMLElement | null;
 
@@ -86,6 +89,9 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
         }
 
         if (!this.hasMiddle) {
+            if (this.leftLogo) {
+                return "1fr auto"
+            }
             return "auto 1fr"
         }
 

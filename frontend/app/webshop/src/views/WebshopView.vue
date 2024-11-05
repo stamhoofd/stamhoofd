@@ -1,6 +1,6 @@
 <template>
     <section class="st-view shade webshop-view">
-        <STNavigationBar :large="true">
+        <STNavigationBar :large="true" :left-logo="true">
             <template #left>
                 <OrganizationLogo :organization="organization" :webshop="webshop" />
             </template>

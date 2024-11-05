@@ -2,7 +2,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Organization } from '@stamhoofd/structures';
 import { inject } from 'vue';
 
-export type AppType = 'registration' | 'dashboard' | 'admin';
+export type AppType = 'registration' | 'dashboard' | 'admin' | 'webshop';
 
 export function useAppContext(): AppType | 'auto' {
     return inject('stamhoofd_app', 'dashboard') as AppType | 'auto';
@@ -13,6 +13,7 @@ export const getAppName = (app: AppType) => {
         case 'dashboard': return 'Mijn groep';
         case 'registration': return 'Mijn account';
         case 'admin': return 'Administratieportaal';
+        case 'webshop': return 'Webshop';
     }
 };
 

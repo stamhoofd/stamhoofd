@@ -27,7 +27,7 @@ export async function getWebshopRootView(session: SessionContext, webshop: Websh
             })),
         });
     }
-    const platformManager = await PlatformManager.createFromCache(session, true);
+    const platformManager = await PlatformManager.createFromCache(session, 'webshop', true);
     const $webshopManager = reactive(new WebshopManager(session, webshop) as any) as WebshopManager;
 
     const $context = session;

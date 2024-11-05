@@ -3,35 +3,35 @@
 </template>
 
 <script lang="ts">
-import { Organization, Webshop } from "@stamhoofd/structures";
-import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
+import { Organization, Webshop } from '@stamhoofd/structures';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
-import MetaLogo from "../MetaLogo.vue";
+import MetaLogo from '../MetaLogo.vue';
 
 @Component({
     components: {
-        MetaLogo
-    }
+        MetaLogo,
+    },
 })
 export default class OrganizationLogo extends VueComponent {
     @Prop({ required: true })
-        organization!: Organization
+    organization!: Organization;
 
     @Prop({ required: false, default: null })
-        webshop: Webshop | null
+    webshop: Webshop | null;
 
     get metaData() {
         if (!this.webshop || !this.webshop.meta.useLogo) {
-            return this.organization.meta
+            return this.organization.meta;
         }
-        return this.webshop.meta
+        return this.webshop.meta;
     }
 
     get name() {
         if (!this.webshop || !this.webshop.meta.useLogo) {
-            return this.organization.name
+            return this.organization.name;
         }
-        return this.webshop.meta.name
+        return this.webshop.meta.name;
     }
 }
 </script>

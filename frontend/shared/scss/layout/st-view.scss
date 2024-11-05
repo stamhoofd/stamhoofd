@@ -287,6 +287,7 @@ body.modern.web-iOS {
 
     // Box is a container for a different view
     main > .box {
+
         @media (min-width: 801px) and (min-height: 701px) {
             background: $color-background;
             --color-current-background: #{$color-background};
@@ -300,12 +301,14 @@ body.modern.web-iOS {
             box-sizing: border-box;
             max-width: 800px;
             max-width: var(--box-width, 800px);
+            --st-horizontal-padding: var(--box-horizontal-padding, 40px);
 
             padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
 
             // We handled safe areas
             --st-safe-area-top: 0px;
             --st-safe-area-bottom: 0px;
+
         }
     }
 
