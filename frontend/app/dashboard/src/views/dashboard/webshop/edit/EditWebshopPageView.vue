@@ -122,7 +122,7 @@
             Logo van vereniging gebruiken
         </Checkbox>
 
-        <LogoEditor v-if="useLogo" :meta-data="webshop.meta" :validator="errors.validator" :dark-mode="darkMode" @patch="addMetaPatch" />
+        <LogoEditor v-if="!useLogo" :meta-data="webshop.meta" :validator="errors.validator" :dark-mode="darkMode" @patch="addMetaPatch" />
 
         <template v-if="hasTickets">
             <hr>
@@ -242,9 +242,9 @@ const darkMode = computed({
 });
 
 const useLogo = computed({
-    get: () => webshop.value.meta.useLogo,
+    get: () => !webshop.value.meta.useLogo,
     set: (useLogo: boolean) => {
-        addMetaPatch(WebshopMetaData.patch({ useLogo }));
+        addMetaPatch(WebshopMetaData.patch({ useLogo: !useLogo }));
     },
 });
 
