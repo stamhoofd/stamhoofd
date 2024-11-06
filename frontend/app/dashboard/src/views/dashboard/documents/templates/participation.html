@@ -5,6 +5,7 @@
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <style>
+            /* Default styles */
             body, html {
                 padding: 0;
                 margin: 0;
@@ -20,7 +21,7 @@
                 font-variant-east-asian: normal;
             }
 
-            /* Targets all the pages */
+            /* Make sure we print to A4 paper size */
             @page {
                 size: A4;
                 margin: 2cm;
@@ -192,32 +193,40 @@
                 <table>
                     <tbody>
                         {{#if registration.showGroup}}
-                        <tr>
-                            <td>Beschrijving</td>
-                            <td>{{ group.name }}</td>
-                        </tr>
+                            <tr>
+                                <td>
+                                    {{#if (eq group.type 'EventRegistration') }}
+                                        Activiteit
+                                    {{else}}
+                                        Groep
+                                    {{/if}}
+                                </td>
+                                <td>{{ group.name }}</td>
+                            </tr>
                         {{/if}}
                         {{#if registration.showDate}}
-                        <tr>
-                            <td>Datum</td>
-                            <td>{{ formatDate registration.startDate }} tot {{ formatDate registration.endDate }}</td>
-                        </tr>
-                        <tr>
-                            <td>Aantal dagen</td>
-                            <td>{{ days registration.startDate registration.endDate }}</td>
-                        </tr>
+                            <tr>
+                                <td>Datum</td>
+                                <td>{{ formatDate registration.startDate }} tot {{ formatDate registration.endDate }}</td>
+                            </tr>
+                            {{#if (eq group.type 'EventRegistration') }}
+                                <tr>
+                                    <td>Aantal dagen</td>
+                                    <td>{{ days registration.startDate registration.endDate }}</td>
+                                </tr>
+                            {{/if}}
                         {{/if}}
                         {{#if registration.price}}
-                        <tr>
-                            <td>Bedrag</td>
-                            <td>{{ formatPrice registration.price }}</td>
-                        </tr>
+                            <tr>
+                                <td>Bedrag</td>
+                                <td>{{ formatPrice registration.price }}</td>
+                            </tr>
                         {{/if}}
                         {{#if (and registration.showPaidAt registration.paidAt) }}
-                        <tr>
-                            <td>Betaald op</td>
-                            <td>{{ formatDate registration.paidAt }}</td>
-                        </tr>
+                            <tr>
+                                <td>Betaald op</td>
+                                <td>{{ formatDate registration.paidAt }}</td>
+                            </tr>
                         {{/if}}
                     </tbody>
                 </table>

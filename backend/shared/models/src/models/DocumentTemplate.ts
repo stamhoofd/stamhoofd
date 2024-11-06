@@ -298,18 +298,6 @@ export class DocumentTemplate extends Model {
             return null;
         }
 
-        const fieldId = 'registration.startDate';
-        let startDate: null | Date = null;
-
-        for (const answer of fieldAnswers) {
-            if (answer instanceof RecordDateAnswer) {
-                if (answer.settings.id === fieldId && !answer.isEmpty) {
-                    startDate = answer.dateValue;
-                    break;
-                }
-            }
-        }
-
         const group = await Group.getByID(registration.groupId);
         const description = `${registration.member.details.name}, ${group ? group.settings.name : ''}`;
 

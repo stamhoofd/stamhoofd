@@ -81,6 +81,8 @@ export class Event extends Model {
 
         group.settings.requireDefaultAgeGroupIds = this.meta.defaultAgeGroupIds ?? [];
         group.settings.requireGroupIds = this.meta.groups?.map(g => g.id) ?? [];
+        group.settings.startDate = this.startDate;
+        group.settings.endDate = this.endDate;
 
         if (group.type === GroupType.EventRegistration) {
             // Don't change the name of the waiting list

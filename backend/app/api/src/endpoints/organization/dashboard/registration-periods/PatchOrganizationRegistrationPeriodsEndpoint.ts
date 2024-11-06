@@ -321,6 +321,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (period) {
             model.periodId = period.id;
             model.settings.period = period.getBaseStructure();
+            model.settings.startDate = period.startDate;
+            model.settings.endDate = period.endDate;
         }
 
         const patch = struct;
@@ -424,6 +426,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.status = struct.status;
         model.type = struct.type;
         model.settings.period = period.getBaseStructure();
+        model.settings.startDate = period.startDate;
+        model.settings.endDate = period.endDate;
 
         if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
             // Create a temporary permission role for this user
