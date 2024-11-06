@@ -10,19 +10,21 @@
         <p v-if="description" class="style-description-small">
             {{ description }}
         </p>
+
+        <slot />
     </STListItem>
 </template>
 
 <script lang="ts" setup>
 
 withDefaults(defineProps<{
-    disabled?: boolean,
-    label: string,
-    description?: string|null,
+    disabled?: boolean;
+    label: string;
+    description?: string | null;
 }>(), {
     disabled: false,
     description: null,
-})
-const model = defineModel<boolean>()
+});
+const model = defineModel<boolean>();
 
 </script>

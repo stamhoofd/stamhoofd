@@ -18,6 +18,7 @@
                 </Dropdown>
             </LoadingButton>
         </STInputBox>
+
         <template v-if="editingType || !isNew">
             <STInputBox title="Naam" error-fields="name" :error-box="errors.errorBox">
                 <input
@@ -91,6 +92,31 @@
             <Checkbox v-model="paidOnly">
                 Enkel aanmaken indien gekoppelde prijs groter is dan 0 euro
             </Checkbox>
+
+            <hr>
+            <h2>Geavanceerd</h2>
+
+            <STList>
+                <CheckboxListItem v-model="useCustomHtml" label="Eigen HTML gebruiken voor document" description="Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit.">
+                    <div v-if="useCustomHtml" class="style-button-bar">
+                        <button class="button text" type="button" @click="downloadHtml">
+                            <span class="icon download" />
+                            <span>
+                                Download huidige HTML
+                            </span>
+                        </button>
+
+                        <label class="button text">
+                            <span class="icon sync" />
+                            <span>
+                                Vervangen
+                            </span>
+
+                            <input type="file" multiple="true" style="display: none;" accept=".html, text/html" @change="(event) => changedFile(event as any)">
+                        </label>
+                    </div>
+                </CheckboxListItem>
+            </STList>
         </template>
     </SaveView>
 </template>
@@ -99,10 +125,10 @@
 import { ArrayDecoder, AutoEncoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
-import { StringCompare } from '@stamhoofd/utility';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref, watch } from 'vue';
 
 import ChooseDocumentTemplateGroup from './ChooseDocumentTemplateGroup.vue';
@@ -131,10 +157,20 @@ const organization = useRequiredOrganization();
 const present = usePresent();
 const dismiss = useDismiss();
 const context = useContext();
+const useCustomHtml = computed({
+    get: () => !!patchedDocument.value.privateSettings.customHtml,
+    set: (customHtml) => {
+        addPatch({
+            privateSettings: DocumentPrivateSettings.patch({
+                customHtml,
+            }),
+        });
+    },
+});
 
 onMounted(() => {
     // temporary!
-    if (!props.isNew && !AppManager.shared.isNative) {
+    if (!props.isNew && !AppManager.shared.isNative && !useCustomHtml.value) {
         // Force update of html etc
         editingType.value = patchedDocument.value?.privateSettings?.templateDefinition?.type ?? null;
     }
@@ -164,9 +200,8 @@ const patchHandler = (patch: PatchAnswers): DocumentTemplatePrivate => {
 const isComplete = computed(() => !!patchedDocument.value.html && (!!patchedDocument.value.privateSettings.templateDefinition.xmlExport || !patchedDocument.value.privateSettings.templateDefinition.xmlExportDescription));
 
 const editingType = computed({
-    get: () => type.value,
+    get: () => patchedDocument.value?.privateSettings?.templateDefinition?.type ?? null,
     set: (value: string | null) => {
-        type.value = value;
         if (value) {
             const definition = availableTypes.value.find(t => t.value === value)?.definition;
             if (definition) {
@@ -513,7 +548,7 @@ async function loadHtml(type: string) {
     loadingHtml.value = true;
 
     console.log('loadHtml', type);
-    const imported = ((await import(/* webpackChunkName: "attest-html" */ './templates/' + type + '.html?raw')).default);
+    const imported = ((await import(`./templates/${type}.html?raw`)).default);
     if (typeof imported !== 'string') {
         throw new Error('Imported attest html is not a string');
     }
@@ -525,7 +560,7 @@ async function loadHtml(type: string) {
 
 async function loadXML(type: string) {
     loadingXml.value = true;
-    const imported = ((await import(/* webpackChunkName: "attest-html" */ './templates/' + type + '.xml?raw')).default);
+    const imported = ((await import(`./templates/${type}.xml?raw`)).default);
     if (typeof imported !== 'string') {
         throw new Error('Imported attest xml is not a string');
     }
@@ -797,4 +832,40 @@ function cloneMap<K, T extends AutoEncoder>(map: Map<K, T>): Map<K, T> {
 defineExpose({
     shouldNavigateAway,
 });
+
+async function downloadHtml() {
+    const saveAs = (await import('file-saver')).default.saveAs;
+    const blob = new Blob([patchedDocument.value.html], { type: 'pplication/octet-stream' });
+    saveAs(blob, Formatter.fileSlug(editingType.value ?? 'unknown') + '.html');
+}
+
+async function changedFile(event: InputEvent & { target: HTMLInputElement & { files: FileList } }) {
+    if (!event.target.files || event.target.files.length === 0) {
+        return;
+    }
+
+    if (event.target.files.length > 1) {
+        const error = 'Je kan maar één HTML-bestand toevoegen.';
+        Toast.error(error).setHide(20 * 1000).show();
+        return;
+    }
+
+    for (const file of event.target.files as FileList) {
+        if (file.size > 1 * 1024 * 1024) {
+            const error = 'HTML-bestanden groter dan 1MB kunnen niet worden gebruikt.';
+            Toast.error(error).setHide(20 * 1000).show();
+            continue;
+        }
+
+        const htmlContents = await file.text();
+        addPatch({
+            html: htmlContents,
+        });
+
+        Toast.success('HTML-bestand succesvol geüpload').setHide(10 * 1000).show();
+    }
+
+    // Clear selection
+    (event.target as any).value = null;
+}
 </script>

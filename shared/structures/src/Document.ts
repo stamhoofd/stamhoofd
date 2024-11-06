@@ -140,6 +140,9 @@ export class DocumentPrivateSettings extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(DocumentTemplateGroup) })
     groups: DocumentTemplateGroup[] = [];
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    customHtml = false;
 }
 
 export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRecords {
