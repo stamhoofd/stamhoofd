@@ -323,8 +323,26 @@ export class AuthenticatedStructures {
                 if (includeContextOrganization || organizationId !== Context.auth.organization?.id) {
                     const found = organizations.get(organizationId);
                     if (!found) {
-                        const organization = await Context.auth.getOrganization(organizationId);
-                        organizations.set(organization.id, organization);
+                        try {
+                            const organization = await Context.auth.getOrganization(organizationId);
+                            organizations.set(organization.id, organization);
+                        }
+                        catch (e) {
+                            if (e.message.includes('Unexpected missing organization')) {
+                                // This user has permissions for an organization that is deleted
+                                console.error(e);
+                                console.error('User has permissions for an organization that is not found:', organizationId, 'userid', includeUser.id);
+
+                                // Remove permissions for this organization
+                                if (includeUser.permissions) {
+                                    includeUser.permissions.organizationPermissions.delete(organizationId);
+                                    await includeUser.save();
+                                }
+                            }
+                            else {
+                                throw e;
+                            }
+                        }
                     }
                 }
             }

@@ -3,7 +3,6 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
-import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 type Params = Record<string, never>;
 
