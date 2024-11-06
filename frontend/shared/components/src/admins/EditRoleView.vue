@@ -288,8 +288,7 @@ const props = withDefaults(
 );
 
 const app = useAppContext();
-const webshopsFeature = useFeatureFlag()('webshops');
-const enableWebshopModule = computed(() => webshopsFeature && (organization.value?.meta?.packages.useWebshops ?? false));
+const enableWebshopModule = computed(() => (organization.value?.meta?.packages.useWebshops ?? false));
 const enableMemberModule = computed(() => organization.value?.meta?.packages.useMembers ?? false);
 const enableActivities = computed(() => organization.value?.meta?.packages.useActivities ?? false);
 const pop = usePop();

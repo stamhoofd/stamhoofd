@@ -364,7 +364,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
                         tabs.push(calendarTab);
 
-                        if (organization?.meta.packages.useWebshops && (organization?.privateMeta?.featureFlags.includes('webshops') ?? false)) {
+                        if (organization?.meta.packages.useWebshops) {
                             if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationCreateWebshops) || !!organization.webshops.find(w => reactiveSession.auth.canAccessWebshop(w, PermissionLevel.Read))) {
                                 tabs.push(webshopsTab);
                             }
