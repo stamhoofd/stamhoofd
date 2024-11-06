@@ -1,7 +1,7 @@
 import { column, Model } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -299,7 +299,7 @@ export class DocumentTemplate extends Model {
         }
 
         const group = await Group.getByID(registration.groupId);
-        const description = `${registration.member.details.name}, ${group ? group.settings.name : ''}`;
+        const description = `${registration.member.details.name}, ${group ? group.settings.name : ''}${group && group.settings.period && group.type === GroupType.Membership ? ' ' + group.settings.period?.nameShort : ''}`;
 
         if (existingDocuments.length > 0) {
             for (const document of existingDocuments) {
