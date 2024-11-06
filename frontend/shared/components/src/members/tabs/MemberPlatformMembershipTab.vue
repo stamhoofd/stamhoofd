@@ -36,11 +36,11 @@
                         Verlopen. Verleng de aansluiting om de verzekering te behouden.
                     </p>
 
-                    <p v-if="membership.balanceItemId && auth.hasFullPlatformAccess()" class="style-description-small">
+                    <p v-if="membership.balanceItemId && auth.hasPlatformFullAccess()" class="style-description-small">
                         Deze aansluiting werd al aangerekend.
                     </p>
 
-                    <p v-if="membership.generated && auth.hasFullPlatformAccess()" class="style-description-small">
+                    <p v-if="membership.generated && auth.hasPlatformFullAccess()" class="style-description-small">
                         Deze aansluiting werd automatisch aangemaakt.
                     </p>
 
@@ -51,7 +51,7 @@
                             <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
                         </template>
 
-                        <LoadingButton v-if="!membership.generated" :loading="deletingMemberships.has(membership.id)">
+                        <LoadingButton v-if="(!membership.generated || !isRegistered) && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
                             <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
                         </LoadingButton>
                     </template>
@@ -72,7 +72,7 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType } from '@stamhoofd/structures';
+import { GroupType, MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAuth, usePlatform } from '../../hooks';
@@ -84,6 +84,7 @@ import { CenteredMessage } from '../../overlays/CenteredMessage';
 const props = defineProps<{
     member: PlatformMember;
 }>();
+
 const $t = useTranslate();
 const present = usePresent();
 const platformFamilyManager = usePlatformFamilyManager();
@@ -92,6 +93,10 @@ const platform = usePlatform();
 const now = new Date();
 const auth = useAuth();
 const hasFull = auth.hasFullAccess();
+
+const isRegistered = computed(() => {
+    return props.member.filterRegistrations({ types: [GroupType.Membership], currentPeriod: true }).length > 0;
+});
 
 const memberships = computed(() => {
     return props.member.member.platformMemberships
