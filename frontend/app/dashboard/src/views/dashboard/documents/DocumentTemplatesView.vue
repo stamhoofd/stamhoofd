@@ -16,6 +16,10 @@
                 Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
             </p>
 
+            <p class="info-box" v-if="!enabled">
+                Deze functie komt binnenkort beschikbaar!
+            </p>
+
             <STList>
                 <STListItem v-for="template of templates" :key="template.id" :selectable="true" class="right-stack" @click="openTemplate(template)">
                     <h2 class="style-title-list">
@@ -32,7 +36,7 @@
                 </STListItem>
             </STList>
 
-            <p class="style-button-bar">
+            <p class="style-button-bar" v-if="enabled">
                 <button type="button" class="button text" @click="addDocument">
                     <span class="icon add" />
                     <span class="text">Nieuw document</span>
@@ -45,7 +49,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { LoadingView, STList, STListItem, STNavigationBar, Toast, useContext, useRequiredOrganization } from '@stamhoofd/components';
+import { LoadingView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useRequiredOrganization } from '@stamhoofd/components';
 import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -63,6 +67,7 @@ const context = useContext();
 const present = usePresent();
 const show = useShow();
 const $t = useTranslate();
+const enabled = useFeatureFlag()('documents');
 
 onMounted(() => {
     loadTemplates().catch(console.error);
