@@ -141,7 +141,7 @@ export class DocumentPrivateSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(DocumentTemplateGroup) })
     groups: DocumentTemplateGroup[] = [];
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 343 })
     customHtml = false;
 }
 
