@@ -3,7 +3,20 @@
         <STNavigationBar title="Inschrijvingsgroep" />
 
         <main>
-            <h1>Kies een inschrijvingsgroep</h1>
+            <h1>Kies voor welke inschrijvingen je dit document wilt aanmaken</h1>
+
+            <SegmentedControl :items="['Groepen', 'Activiteiten']" />
+
+            <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
+                <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
+            </form>
+
+            <p>
+                <button type="button" class="button text">
+                    <span>Werkjaar: xxxx</span>
+                    <span class="icon arrow-down-small" />
+                </button>
+            </p>
 
             <div v-for="category in categoryTree.categories" :key="category.id" class="container">
                 <hr>
@@ -41,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { NavigationActions, Spinner, STList, STListItem, STNavigationBar, Toast, useNavigationActions, useRequiredOrganization } from '@stamhoofd/components';
+import { NavigationActions, SegmentedControl, Spinner, STList, STListItem, STNavigationBar, Toast, useNavigationActions, useRequiredOrganization } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { DocumentTemplateGroup, Group, RecordCategory } from '@stamhoofd/structures';
 import { computed, onMounted, ref, Ref } from 'vue';
@@ -60,6 +73,7 @@ const archivedGroups = ref([]) as Ref<Group[]>;
 const loadingGroups = ref(true);
 
 const categoryTree = computed(() => organization.value.getCategoryTree({ maxDepth: 1, admin: true, smartCombine: true }));
+const searchQuery = ref('');
 
 function selectGroup(group: Group) {
     props.addGroup(DocumentTemplateGroup.create({
@@ -80,5 +94,9 @@ async function load() {
         Toast.fromError(e).show();
     }
     loadingGroups.value = false;
+}
+
+function blurFocus() {
+    (document.activeElement as HTMLElement)?.blur();
 }
 </script>

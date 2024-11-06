@@ -59,8 +59,8 @@
             </div>
 
             <hr>
-            <h2>Inschrijvingsgroepen</h2>
-            <p>Kies de inschrijvingsgroepen waarvoor je dit attest wil aanmaken.</p>
+            <h2>Inschrijvingen</h2>
+            <p>Kies voor welke inschrijvingen je dit document wilt aanmaken. Er wordt altijd één document aangemaakt per inschrijving.</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
                 <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.groupId" :selectable="true" @click="updateGroupAnswers(group)">
@@ -77,7 +77,7 @@
             <p>
                 <button type="button" class="button text" @click="addGroup">
                     <span class="icon add" />
-                    <span>Inschrijvingsgroep toevoegen</span>
+                    <span>Inschrijvingen toevoegen</span>
                 </button>
             </p>
 
@@ -611,18 +611,18 @@ async function shouldNavigateAway() {
     return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
 }
 
-function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: NavigationActions, index: number) {
+async function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: NavigationActions, index: number) {
     if (index >= patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length) {
         addPatch({
             privateSettings: DocumentPrivateSettings.patch({
                 groups: patchedDocument.value.privateSettings.groups.concat(group),
             }),
         });
-        actions.dismiss({ force: true }).catch(console.error);
+        await actions.dismiss({ force: true }).catch(console.error);
         return;
     }
     const category = patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories[index];
-    actions.show({
+    await actions.show({
         components: [
             new ComponentWithProperties(FillRecordCategoryView, {
                 category,
@@ -636,7 +636,7 @@ function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: Navigati
                     const g = group.patch({
                         fieldAnswers: fieldAnswers as any,
                     });
-                    gotoGroupRecordCategory(g, actions, index + 1);
+                    gotoGroupRecordCategory(g, actions, index + 1).catch(console.error);
                 },
                 filterValueForAnswers: (fieldAnswers: RecordAnswer[]) => {
                     return group.patch({
@@ -645,11 +645,11 @@ function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: Navigati
                 },
             }),
         ],
-    }).catch(console.error);
+    })
 }
 
-function addGroup() {
-    present({
+async function addGroup() {
+    await present({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseDocumentTemplateGroup, {
@@ -660,8 +660,8 @@ function addGroup() {
                 }),
             }),
         ],
-        modalDisplayStyle: 'sheet',
-    }).catch(console.error);
+        modalDisplayStyle: 'popup',
+    })
 }
 
 function getGroupName(group: DocumentTemplateGroup) {
