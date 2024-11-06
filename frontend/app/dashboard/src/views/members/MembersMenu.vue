@@ -81,14 +81,15 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController, useUrl } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
+import { GroupAvatar, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, onActivated, Ref, ref } from 'vue';
+import { ComponentOptions, computed, onActivated } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
 import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
 import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
+import { useSwitchablePeriod } from './useSwitchablePeriod';
 
 const $organization = useOrganization();
 const $context = useContext();
@@ -108,7 +109,19 @@ const tree = computed(() => {
         organization: $organization.value!,
     });
 });
-const period = ref($organization.value?.period) as Ref<OrganizationRegistrationPeriod>;
+const { period, switchPeriod } = useSwitchablePeriod({
+    onSwitch: async () => {
+        // Make sure we open the first group again
+        if (!splitViewController.value?.shouldCollapse()) {
+            await $navigate(Routes.Group, {
+                properties: {
+                    group: tree.value.getAllGroups()[0],
+                    period: period.value,
+                },
+            });
+        }
+    },
+});
 const newestPeriod = computed(() => {
     return platform.value.period;
 });
@@ -227,67 +240,6 @@ defineRoutes([
     },
 ]);
 const checkRoute = useCheckRoute();
-
-async function switchPeriod(event: MouseEvent) {
-    const button = event.currentTarget as HTMLElement;
-
-    // Load groups
-    const list = await organizationManager.value.loadPeriods(false, false, owner);
-    const organization = $organization.value!;
-
-    const menu = new ContextMenu([
-        (list.periods.slice(0, 10) ?? []).map((p) => {
-            return new ContextMenuItem({
-                name: p.name,
-                selected: p.id === period.value.period.id,
-                icon: p.id === platform.value.period.id && p.id !== period.value.period.id ? 'dot' : '',
-                action: async () => {
-                    const organizationPeriod = list.organizationPeriods.find(o => o.period.id === p.id);
-                    if (!organizationPeriod) {
-                        // Can not start if ended, or if not starging withing 2 months
-                        if (p.endDate < new Date() || p.startDate < organization.period.period.startDate) {
-                            new CenteredMessage('Niet beschikbaar', 'Deze periode is niet beschikbaar voor jouw organisatie.').addCloseButton().show();
-                            return false;
-                        }
-
-                        if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 62 && STAMHOOFD.environment !== 'development') {
-                            new CenteredMessage('Niet beschikbaar', 'Je kan pas 2 maand voor de start van het nieuwe werkjaar overschakelen.').addCloseButton().show();
-                            return false;
-                        }
-
-                        await present({
-                            components: [
-                                new ComponentWithProperties(StartNewRegistrationPeriodView, {
-                                    period: p,
-                                    callback: () => {
-                                        period.value = organizationManager.value.organization.period;
-                                    },
-                                }),
-                            ],
-                            modalDisplayStyle: 'popup',
-                        });
-                        return true;
-                    }
-
-                    new Toast('Je bekijkt nu ' + p.name, 'success').show();
-                    period.value = organizationPeriod;
-
-                    // Make sure we open the first group again
-                    if (!splitViewController.value?.shouldCollapse()) {
-                        await $navigate(Routes.Group, {
-                            properties: {
-                                group: tree.value.getAllGroups()[0],
-                                period: period.value,
-                            },
-                        });
-                    }
-                    return true;
-                },
-            });
-        }),
-    ]);
-    menu.show({ button, yOffset: -10 }).catch(console.error);
-}
 
 async function setDefaultPeriod() {
     // Patch organization period id

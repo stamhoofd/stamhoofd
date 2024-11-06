@@ -241,7 +241,7 @@ export class DocumentTemplate extends Model {
         }
 
         // Add group based answers (same for each group)
-        for (const answer of this.privateSettings.groups.find(g => g.groupId === registration.groupId && g.cycle === registration.cycle)?.fieldAnswers?.values() ?? []) {
+        for (const answer of this.privateSettings.groups.find(g => g.group.id === registration.groupId)?.fieldAnswers?.values() ?? []) {
             // todo: check duplicate
             answer.reviewedAt = null;
             fieldAnswers.set(answer.settings.id, answer);
@@ -276,7 +276,7 @@ export class DocumentTemplate extends Model {
     async createForRegistrationIfNeeded(registration: RegistrationWithMember) {
         // Check group and cycle
         for (const groupDefinition of this.privateSettings.groups) {
-            if (groupDefinition.groupId === registration.groupId && groupDefinition.cycle === registration.cycle) {
+            if (groupDefinition.group.id === registration.groupId) {
                 const document = await this.generateForRegistration(registration);
                 if (document) {
                     await document.save();
@@ -430,7 +430,7 @@ export class DocumentTemplate extends Model {
 
             for (const groupDefinition of this.privateSettings.groups) {
                 // Get the registrations for this group with this cycle
-                const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.groupId);
+                const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.group.id);
 
                 for (const registration of registrations) {
                     const document = await this.generateForRegistration(registration);

@@ -63,11 +63,11 @@
             <p>Kies voor welke inschrijvingen je dit document wilt aanmaken. Er wordt altijd één document aangemaakt per inschrijving.</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
-                <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.groupId" :selectable="true" @click="updateGroupAnswers(group)">
+                <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.group.id" :selectable="true" @click="updateGroupAnswers(group)">
                     <h2 class="style-list-title">
-                        {{ getGroupName(group) }}
+                        {{ group.group.name }}
                     </h2>
-                    <p class="style-description-small pre-wrap" v-text="getGroupDescription(group)" />
+                    <p class="style-description-small pre-wrap" v-text="group.group.description" />
 
                     <template #right>
                         <button class="button icon text trash" type="button" @click="removeGroup(group)" />
@@ -612,6 +612,14 @@ async function shouldNavigateAway() {
 }
 
 async function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: NavigationActions, index: number) {
+    // Check already added this group
+    if (patchedDocument.value.privateSettings.groups.find(g => g.group.id === group.group.id)) {
+        throw new SimpleError({
+            code: 'already_added',
+            message: 'Deze inschrijvingen werden al toegevoegd',
+        });
+    }
+
     if (index >= patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length) {
         addPatch({
             privateSettings: DocumentPrivateSettings.patch({
@@ -654,38 +662,14 @@ async function addGroup() {
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseDocumentTemplateGroup, {
                     fieldCategories: patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories,
-                    addGroup: (group: DocumentTemplateGroup, actions: NavigationActions) => {
-                        gotoGroupRecordCategory(group, actions, 0);
+                    addGroup: async (group: DocumentTemplateGroup, actions: NavigationActions) => {
+                        await gotoGroupRecordCategory(group, actions, 0);
                     },
                 }),
             }),
         ],
         modalDisplayStyle: 'popup',
     })
-}
-
-function getGroupName(group: DocumentTemplateGroup) {
-    const groups = organization.value.period.groups;
-    const g = groups.find(g => g.id === group.groupId);
-    return g?.settings?.name ?? 'Onbekende groep';
-}
-
-function getGroupDescription(group: DocumentTemplateGroup) {
-    const groups = organization.value.groups;
-    const g = groups.find(g => g.id === group.groupId);
-    const currentCycle = g?.cycle ?? 0;
-    const cycleOffset = currentCycle - group.cycle;
-
-    let period = cycleOffset + ' inschrijvingsperiodes geleden';
-    if (cycleOffset === 0) {
-        period = 'Huidige inschrijvingsperiode';
-    }
-    else if (cycleOffset === 1) {
-        period = 'Vorige inschrijvingsperiode';
-    }
-
-    // Append answers
-    return period + (group.fieldAnswers.size ? ('\n' + [...group.fieldAnswers.values()].map(a => a.descriptionValue).join('\n')) : '');
 }
 
 function updateGroupAnswers(group: DocumentTemplateGroup) {
@@ -705,7 +689,7 @@ function updateGroupAnswers(group: DocumentTemplateGroup) {
 
 function gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
     if (index >= patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length) {
-        const groups = patchedDocument.value.privateSettings.groups.filter(g => g.groupId !== group.groupId);
+        const groups = patchedDocument.value.privateSettings.groups.filter(g => g.group.id !== group.group.id);
         groups.push(group);
 
         addPatch({
