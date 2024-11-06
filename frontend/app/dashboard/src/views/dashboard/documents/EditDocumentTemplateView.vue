@@ -144,7 +144,6 @@ const props = withDefaults(defineProps<{
 });
 
 const errors = useErrors();
-const type = ref<string | null>(null);
 const { patch: patchDocument, patched: patchedDocument, addPatch, hasChanges } = usePatch(props.document);
 const saving = ref(false);
 const editingAnswers: Ref<Map<string, RecordAnswer>> = ref(cloneMap(props.document.settings.fieldAnswers));
@@ -165,6 +164,11 @@ const useCustomHtml = computed({
                 customHtml,
             }),
         });
+
+        if (!customHtml) {
+            // Force update of html etc
+            editingType.value = patchedDocument.value?.privateSettings?.templateDefinition?.type ?? null;
+        }
     },
 });
 

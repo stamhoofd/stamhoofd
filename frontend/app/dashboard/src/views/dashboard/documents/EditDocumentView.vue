@@ -25,7 +25,7 @@
             <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
             <!-- todo: should records be filtered? -->
-            <RecordAnswerInput v-for="record of category.records" :key="record.id" :record="record" :answers="editingAnswers" :validator="errors.validator" />
+            <RecordAnswerInput v-for="record of category.records" :key="record.id" :record="record" :answers="answers" :validator="errors.validator" @patch="patchAnswers" />
         </div>
     </SaveView>
 </template>
@@ -35,8 +35,8 @@ import { ArrayDecoder, AutoEncoder, Decoder, PatchableArray, PatchableArrayAutoE
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, useContext, useErrors, usePatch } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Document, DocumentData, DocumentTemplatePrivate, RecordCategory } from '@stamhoofd/structures';
-import { computed, ComputedRef, ref, watch } from 'vue';
+import { Document, DocumentData, DocumentTemplatePrivate, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import { computed, ComputedRef, ref } from 'vue';
 
 const props = defineProps<{
     isNew: boolean;
@@ -46,39 +46,44 @@ const props = defineProps<{
 
 const requestOwner = useRequestOwner();
 const context = useContext();
-const { patch: patchDocument, patched: patchedDocument, hasChanges } = usePatch(props.document);
+const { patch: patchDocument, patched: patchedDocument, hasChanges, addPatch } = usePatch(props.document);
 const errors = useErrors();
 const dismiss = useDismiss();
 const saving = ref(false);
-const editingAnswers = ref(cloneMap(props.document.data.fieldAnswers));
-
-// get definitions() {
-//     return [];
-// }
 
 const fieldCategories = computed(() => {
     return RecordCategory.flattenCategories([...props.template.privateSettings.templateDefinition.documentFieldCategories, ...props.template.privateSettings.templateDefinition.groupFieldCategories], props.document);
 }) as ComputedRef<RecordCategory[]>;
 
-function saveAnswers() {
-    for (const answer of editingAnswers.value.values()) {
+function markReviewed() {
+    for (const answer of answers.value.values()) {
         const previousAnswer = props.document.data.fieldAnswers.get(answer.settings.id);
         if (!previousAnswer || previousAnswer.stringValue !== answer.stringValue) {
             answer.markReviewed();
         }
     }
+}
 
-    patchDocument.value = patchDocument.value.patch({
+const title = props.isNew ? 'Nieuw document' : 'Document bewerken';
+const description = computed({
+    get: () => patchedDocument.value.data.description,
+    set: (value) => {
+        addPatch({
+            data: DocumentData.patch({
+                description: value,
+            }),
+        });
+    },
+});
+const answers = computed(() => patchedDocument.value.data.fieldAnswers);
+
+function patchAnswers(patch: PatchAnswers) {
+    addPatch({
         data: DocumentData.patch({
-            fieldAnswers: editingAnswers.value as any,
+            fieldAnswers: patch,
         }),
     });
 }
-
-watch(editingAnswers, () => saveAnswers());
-
-const title = props.isNew ? 'Nieuw document' : 'Document bewerken';
-const description = computed(() => patchedDocument.value.data.description);
 
 async function shouldNavigateAway() {
     if (!hasChanges.value) {
@@ -100,7 +105,7 @@ async function save() {
 
     try {
         // Make sure answers are updated
-        saveAnswers();
+        markReviewed();
 
         if (!await errors.validator.validate()) {
             saving.value = false;
@@ -128,8 +133,8 @@ async function save() {
             owner: requestOwner,
         });
         const updatedDocument = response.data[0];
+
         if (updatedDocument) {
-            editingAnswers.value = cloneMap(props.document.data.fieldAnswers);
             patchDocument.value = Document.patch({});
             props.document.deepSet(updatedDocument);
         }
@@ -142,11 +147,6 @@ async function save() {
     }
 
     saving.value = false;
-}
-
-function cloneMap<K, T extends AutoEncoder>(map: Map<K, T>): Map<K, T> {
-    return new Map([...map.entries()]
-        .map(([key, value]) => [key, value.clone()]));
 }
 
 defineExpose({
