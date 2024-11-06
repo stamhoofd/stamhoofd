@@ -106,12 +106,16 @@ export class DocumentTemplate extends Model {
             }),
             'registration.price':
                 RecordPriceAnswer.create({
-                    settings: RecordSettings.create({}), // settings will be overwritten
+                    settings: RecordSettings.create({
+                        type: RecordType.Price,
+                    }), // settings will be overwritten
                     value: registration.price,
                 }),
             'registration.pricePaid':
                 RecordPriceAnswer.create({
-                    settings: RecordSettings.create({}), // settings will be overwritten
+                    settings: RecordSettings.create({
+                        type: RecordType.Price,
+                    }), // settings will be overwritten
                     value: registration.pricePaid,
                 }),
             'registration.paidAt':
@@ -119,6 +123,7 @@ export class DocumentTemplate extends Model {
                     settings: RecordSettings.create({
                         id: 'registration.paidAt',
                         type: RecordType.Date,
+                        required: false,
                     }), // settings will be overwritten
                     dateValue: paidAt,
                 }),
@@ -222,6 +227,7 @@ export class DocumentTemplate extends Model {
 
             if (!found && field.required) {
                 missingData = true;
+                console.log('Missing data because of required not found field');
             }
 
             if (!found) {
@@ -262,6 +268,8 @@ export class DocumentTemplate extends Model {
                 }
                 catch (e) {
                     missingData = true;
+
+                    console.log('Missing data because of validation error', e, answer, answer.settings);
                     break;
                 }
             }
@@ -303,7 +311,7 @@ export class DocumentTemplate extends Model {
 
         if (existingDocuments.length > 0) {
             for (const document of existingDocuments) {
-                await this.updateDocumentFor(document, registration);
+                await this.updateDocumentWithAnswers(document, fieldAnswers);
                 document.data.name = this.settings.name;
                 document.data.description = description;
                 if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
@@ -335,12 +343,10 @@ export class DocumentTemplate extends Model {
             const fieldId = 'registration.startDate';
             let startDate: null | Date = null;
 
-            for (const answer of fieldAnswers.values()) {
-                if (answer instanceof RecordDateAnswer) {
-                    if (answer.settings.id === fieldId && !answer.isEmpty) {
-                        startDate = answer.dateValue;
-                        break;
-                    }
+            const answer = fieldAnswers.get(fieldId);
+            if (answer && answer instanceof RecordDateAnswer) {
+                if (!answer.isEmpty) {
+                    startDate = answer.dateValue;
                 }
             }
 
@@ -365,22 +371,15 @@ export class DocumentTemplate extends Model {
             const fieldId = 'registration.price';
             let price: null | number = null;
 
-            for (const answer of fieldAnswers) {
-                if (answer instanceof RecordPriceAnswer) {
-                    if (answer.settings.id === fieldId && answer.value !== null) {
-                        price = answer.value;
-                        break;
-                    }
+            const answer = fieldAnswers.get(fieldId);
+            if (answer && answer instanceof RecordPriceAnswer) {
+                if (answer.value !== null) {
+                    price = answer.value;
                 }
             }
 
-            if (price !== null) {
-                if (price < this.settings.minPrice) {
-                    return false;
-                }
-            }
-            else {
-                console.warn('Missing registration.price in fieldAnswers when checking minPrice');
+            if ((price ?? 0) < this.settings.minPrice) {
+                return false;
             }
         }
 
@@ -388,11 +387,13 @@ export class DocumentTemplate extends Model {
     }
 
     async buildAll({ generateNumbers = false } = {}) {
-        return await QueueHandler.schedule('documents-build-all/' + this.id, async () => {
+        QueueHandler.abort('documents-build-all/' + this.id);
+        return await QueueHandler.schedule('documents-build-all/' + this.id, async ({ abort }) => {
             if (!this.updatesEnabled) {
                 // Check status
                 const documents = await Document.where({ templateId: this.id });
                 for (const document of documents) {
+                    abort.throwIfAborted();
                     if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
                         document.status = this.status;
                         await document.save();
@@ -403,6 +404,7 @@ export class DocumentTemplate extends Model {
                 if (generateNumbers) {
                     let nextNumber = Math.max(0, ...documents.map(d => d.number).filter(n => n !== null) as number[]) + 1;
                     for (const document of documents) {
+                        abort.throwIfAborted();
                         if (document.number === null && document.status === DocumentStatus.Published) {
                             document.number = nextNumber;
                             await document.save();
@@ -417,10 +419,13 @@ export class DocumentTemplate extends Model {
             const documentSet: Map<string, Document> = new Map();
 
             for (const groupDefinition of this.privateSettings.groups) {
+                abort.throwIfAborted();
+
                 // Get the registrations for this group with this cycle
                 const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.group.id);
 
                 for (const registration of registrations) {
+                    abort.throwIfAborted();
                     const document = await this.generateForRegistration(registration);
                     if (document) {
                         documentSet.set(document.id, document);
@@ -431,6 +436,7 @@ export class DocumentTemplate extends Model {
             // Delete documents that no longer match and don't have a number yet
             const documents = await Document.where({ templateId: this.id });
             for (const document of documents) {
+                abort.throwIfAborted();
                 if (!documentSet.has(document.id)) {
                     if (document.number === null) {
                         await document.delete();
@@ -448,6 +454,7 @@ export class DocumentTemplate extends Model {
             if (generateNumbers) {
                 let nextNumber = Math.max(0, ...allDocuments.map(d => d.number).filter(n => n !== null) as number[]) + 1;
                 for (const document of allDocuments) {
+                    abort.throwIfAborted();
                     if (document.number === null && document.status === DocumentStatus.Published) {
                         document.number = nextNumber;
                         await document.save();
@@ -544,8 +551,7 @@ export class DocumentTemplate extends Model {
         return true;
     }
 
-    async updateDocumentFor(document: Document, registration: RegistrationWithMember) {
-        const { fieldAnswers } = await this.buildAnswers(registration);
+    async updateDocumentWithAnswers(document: Document, fieldAnswers: Map<string, RecordAnswer>) {
         const existingAnswers = document.data.fieldAnswers;
 
         const newAnswers = new Map(existingAnswers);
@@ -576,5 +582,10 @@ export class DocumentTemplate extends Model {
                 }
             }
         }
+    }
+
+    async updateDocumentFor(document: Document, registration: RegistrationWithMember) {
+        const { fieldAnswers } = await this.buildAnswers(registration);
+        await this.updateDocumentWithAnswers(document, fieldAnswers);
     }
 }

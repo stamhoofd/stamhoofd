@@ -145,7 +145,7 @@ export const participation = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             name: 'Prijs',
-            description: 'Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit Stamhoofd gehaald worden, waarbij ook rekening gehouden wordt met kortingen.',
+            description: 'Het bedrag dat je wilt tonen op het document, waarbij je kan kiezen tussen ofwel het deel dat betaald werd of het totaalbedrag (dus ook een document uitreiken als de inschrijving nog niet volledig werd betaald).',
             records: [
                 RecordSettings.create({
                     id: 'registration.price',
