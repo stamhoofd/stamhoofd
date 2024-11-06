@@ -7,58 +7,59 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import { ErrorBox } from "../errors/ErrorBox";
-import LoadingBox from "./LoadingBox.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import LoadingBox from './LoadingBox.vue';
 
 @Component({
     components: {
         ComponentWithPropertiesInstance,
-        LoadingBox
-    }
+        LoadingBox,
+    },
 })
 export default class PromiseView extends Mixins(NavigationMixin) {
-    @Prop({required: true})
-        promise!: (this: typeof PromiseView) => Promise<ComponentWithProperties>
+    @Prop({ required: true })
+    promise!: (this: typeof PromiseView) => Promise<ComponentWithProperties>;
 
-    root: ComponentWithProperties | null = null
+    root: ComponentWithProperties | null = null;
     passRoutes = false;
     errorBox: ErrorBox | null = null;
 
     mounted() {
-        this.run()
+        this.run();
     }
 
     customRoutes() {
         this.passRoutes = true;
     }
-    
+
     run() {
         this.errorBox = null;
         this.promise.call(this).then((value) => {
-            if(!value) {
-                console.error("Promise view did not return a component.")
-                throw new Error('Missing component in promise')
+            if (!value) {
+                console.error('Promise view did not return a component.');
+                throw new Error('Missing component in promise');
             }
-            
-            const c = value
+
+            const c = value;
             if (this.passRoutes) {
                 this.passRoutes = false;
-                c.setCheckRoutes()
+                c.setCheckRoutes();
             }
-            this.root = c
-        }).catch(e => {
-            console.error(e)
-            console.error("Promise error not caught, defaulting to dismiss behaviour in PromiseView")
+            this.root = c;
+        }).catch((e) => {
+            console.error(e);
+            console.error('Promise error not caught, defaulting to dismiss behaviour in PromiseView');
 
             if (this.canDismiss) {
                 this.dismiss({ force: true });
-            } else {
-                this.errorBox = new ErrorBox(e)
             }
-        })
+            else {
+                this.errorBox = new ErrorBox(e);
+            }
+        });
     }
 
     reload() {
@@ -68,7 +69,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
 
     returnToHistoryIndex() {
         if (this.root) {
-            return this.root.returnToHistoryIndex()
+            return this.root.returnToHistoryIndex();
         }
         return false;
     }
