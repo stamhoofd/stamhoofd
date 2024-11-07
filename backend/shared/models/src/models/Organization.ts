@@ -760,8 +760,7 @@ export class Organization extends Model {
                 if (deactivatedTime !== null && deactivatedTime > 10 * 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 13 * 31 * 24 * 60 * 60 * 1000) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripTrialExpiredReminder,
-                        personal: true,
-                        bcc: true
+                        personal: true
                     })
 
                     this.serverMeta.addEmail(EmailTemplateType.OrganizationDripTrialExpiredReminder);
@@ -779,8 +778,7 @@ export class Organization extends Model {
                 if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 30*3 * 24 * 60 * 60 * 1000) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripWebshopNotRenewed,
-                        personal: true,
-                        bcc: true
+                        personal: true
                     })
 
                     this.serverMeta.addEmail(EmailTemplateType.OrganizationDripWebshopNotRenewed);
@@ -798,8 +796,7 @@ export class Organization extends Model {
                 if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 30*3 * 24 * 60 * 60 * 1000) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripMembersNotRenewed,
-                        personal: true,
-                        bcc: true
+                        personal: true
                     })
 
                     this.serverMeta.addEmail(EmailTemplateType.OrganizationDripMembersNotRenewed);
