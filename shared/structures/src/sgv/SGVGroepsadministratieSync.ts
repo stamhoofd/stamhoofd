@@ -192,10 +192,16 @@ export function getLidName(lid: any) {
 }
 
 export function getLidBirthDay(lid: any) {
+    if (!lid.vgagegevens || !lid.vgagegevens.geboortedatum) {
+        return ''
+    }
     return lid.vgagegevens.geboortedatum;
 }
 
 export function getLidFuncties(lid: any) {
+    if (!lid.functies) {
+        return ''
+    }
     return lid.functies.filter(f => !f.einde).map(f => f.omschrijving || f.code || 'Onbekend').join(', ')
 }
 

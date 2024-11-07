@@ -7,10 +7,10 @@
                 Synchronisatie-rapport
             </h1>
 
-            <div class="info-box" v-if="report.errors.length === 0">
+            <div v-if="report.errors.length === 0" class="info-box">
                 Kijk zelf ook nog snel eens alles na in de groepsadministratie als het de eerste keer is dat je synchroniseert.
             </div>
-            <div class="error-box" v-else>
+            <div v-else class="error-box">
                 De synchronisatie is niet volledig gelukt. Kijk de foutmeldingen hieronder na en los ze op. Synchroniseer daarna opnieuw.
             </div>
 
@@ -103,7 +103,7 @@
                             <h2 class="style-title-list">
                                 {{ member.details.firstName }} {{ member.details.lastName }}
                             </h2>
-                            <p class="style-description-small">
+                            <p class="style-description-small" v-if="member.details.birthDay">
                                 {{ member.details.birthDay | date }}
                             </p>
                             <p class="style-description-small">
