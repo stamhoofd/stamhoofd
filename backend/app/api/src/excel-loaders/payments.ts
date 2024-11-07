@@ -245,7 +245,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
             name: 'Betaalprovider',
             width: 16,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
-                value: object.provider,
+                value: object.provider ?? PaymentMethodHelper.getNameCapitalized(object.method),
             }),
         },
         {
