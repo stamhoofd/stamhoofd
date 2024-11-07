@@ -37,7 +37,7 @@ export class PaymentGeneral extends Payment {
     /**
      * Only set for administrators with the correct permissions
      */
-    @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
+    @field({ decoder: BaseOrganization, nullable: true, version: 344 })
     payingOrganization: BaseOrganization | null = null;
 
     get groupIds() {

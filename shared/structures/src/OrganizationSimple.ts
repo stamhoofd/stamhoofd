@@ -6,7 +6,7 @@ export class OrganizationSimple extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
 
-    @field({ decoder: StringDecoder, ...NextVersion })
+    @field({ decoder: StringDecoder, version: 344 })
     uri = '';
 
     /**
