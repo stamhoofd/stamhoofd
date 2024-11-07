@@ -1,19 +1,69 @@
-import { SelectableColumn, SelectableSheet, SelectableWorkbook } from "@stamhoofd/frontend-excel-export";
-import { FinancialSupportSettings, Organization, Platform, RecordCategory } from "@stamhoofd/structures";
+import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
+import { FinancialSupportSettings, Group, Organization, Platform, RecordCategory } from '@stamhoofd/structures';
 
 // , permissions?: UserPermissions|null
-export function getSelectableWorkbook(platform: Platform, organization: Organization | null) {
+export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = []) {
     const recordCategories = [
         ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
-        ...platform.config.recordsConfiguration.recordCategories
-    ]
+        ...platform.config.recordsConfiguration.recordCategories,
+    ];
 
     // todo: check permissions
     // const recordsConfiguration = OrganizationRecordsConfiguration.build({platform, organization});
     const financialSupportSettings = platform.config.financialSupport ?? FinancialSupportSettings.create({});
     const financialSupportTitle = financialSupportSettings.title;
-    
-    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, (r) => r.excelColumns.length > 0);
+
+    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
+
+    const groupColumns: SelectableColumn[] = [];
+
+    for (const group of groups) {
+        if (group.settings.prices.length > 1) {
+            groupColumns.push(
+                new SelectableColumn({
+                    id: `groups.${group.id}.price`,
+                    name: 'Tarief',
+                    category: group.settings.name,
+                }),
+            );
+        }
+
+        for (const menu of group.settings.optionMenus) {
+            groupColumns.push(
+                new SelectableColumn({
+                    id: `groups.${group.id}.optionMenu.${menu.id}`,
+                    name: menu.name,
+                    category: group.settings.name,
+                }),
+            );
+
+            for (const option of menu.options) {
+                if (option.allowAmount) {
+                    groupColumns.push(
+                        new SelectableColumn({
+                            id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
+                            name: menu.name + ' → Aantal "' + option.name + '"',
+                            category: group.settings.name,
+                        }),
+                    );
+                }
+            }
+        }
+
+        for (const recordCategory of group.settings.recordCategories) {
+            const records = recordCategory.getAllRecords();
+
+            for (const record of records) {
+                groupColumns.push(
+                    new SelectableColumn({
+                        id: `groups.${group.id}.recordAnswers.${record.id}`,
+                        name: recordCategory.name + ' → ' + record.name,
+                        category: group.settings.name,
+                    }),
+                );
+            }
+        }
+    }
 
     return new SelectableWorkbook({
         sheets: [
@@ -25,7 +75,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         id: 'id',
                         name: 'ID',
                         description: 'Unieke identificatie van het lid',
-                        enabled: false
+                        enabled: false,
                     }),
 
                     // todo: only if platform?
@@ -37,51 +87,51 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
 
                     new SelectableColumn({
                         id: 'firstName',
-                        name: 'Voornaam'
+                        name: 'Voornaam',
                     }),
 
                     new SelectableColumn({
                         id: 'lastName',
-                        name: 'Achternaam'
+                        name: 'Achternaam',
                     }),
 
                     new SelectableColumn({
                         id: 'birthDay',
-                        name: 'Geboortedatum'
+                        name: 'Geboortedatum',
                     }),
 
                     new SelectableColumn({
                         id: 'age',
                         name: 'Leeftijd',
-                        enabled: false
+                        enabled: false,
                     }),
 
                     new SelectableColumn({
                         id: 'gender',
-                        name: 'Geslacht'
+                        name: 'Geslacht',
                     }),
 
                     new SelectableColumn({
                         id: 'phone',
-                        name: 'Telefoonnummer'
+                        name: 'Telefoonnummer',
                     }),
 
                     new SelectableColumn({
                         id: 'email',
-                        name: 'E-mailadres'
+                        name: 'E-mailadres',
                     }),
 
                     new SelectableColumn({
                         id: 'address',
                         name: 'Adres',
-                        description: 'Adres van het lid, of het adres van de eerste ouder met een adres.'
+                        description: 'Adres van het lid, of het adres van de eerste ouder met een adres.',
                     }),
 
                     new SelectableColumn({
                         id: 'securityCode',
                         name: 'Beveiligingscode',
                         enabled: false,
-                        description: 'Code om een onbekende gebruiker toegang te geven tot een lid.'
+                        description: 'Code om een onbekende gebruiker toegang te geven tot een lid.',
                     }),
 
                     new SelectableColumn({
@@ -92,7 +142,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
 
                     new SelectableColumn({
                         id: 'uitpasNumber',
-                        name: 'UiTPAS-nummer'
+                        name: 'UiTPAS-nummer',
                     }),
 
                     new SelectableColumn({
@@ -101,33 +151,39 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         enabled: false,
                     }),
 
-                    ...(!organization ? [
-                        new SelectableColumn({
-                            id: 'organization',
-                            name: 'Groep',
-                            enabled: false,
-                        }),
-                        new SelectableColumn({
-                            id: 'uri',
-                            name: 'Groepsnummer',
-                            enabled: false,
-                        }),
-                        new SelectableColumn({
-                            id: 'defaultAgeGroup',
-                            name: 'Standaard leeftijdsgroep',
-                            enabled: false,
-                        }),
-                    ] : []),
+                    ...groupColumns,
 
-                    ...(organization ? [
-                        new SelectableColumn({
-                            id: 'group',
-                            name: 'Leeftijdsgroep',
-                            enabled: false,
-                        }),
-                    ] : []),
+                    ...(!organization
+                        ? [
+                                new SelectableColumn({
+                                    id: 'organization',
+                                    name: 'Groep',
+                                    enabled: false,
+                                }),
+                                new SelectableColumn({
+                                    id: 'uri',
+                                    name: 'Groepsnummer',
+                                    enabled: false,
+                                }),
+                                new SelectableColumn({
+                                    id: 'defaultAgeGroup',
+                                    name: 'Standaard leeftijdsgroep',
+                                    enabled: false,
+                                }),
+                            ]
+                        : []),
 
-                    ...[1,2].flatMap((parentNumber, parentIndex) => {
+                    ...(organization
+                        ? [
+                                new SelectableColumn({
+                                    id: 'group',
+                                    name: 'Leeftijdsgroep',
+                                    enabled: false,
+                                }),
+                            ]
+                        : []),
+
+                    ...[1, 2].flatMap((parentNumber, parentIndex) => {
                         const getId = (value: string) => `parent.${parentIndex}.${value}`;
                         const category = `Ouder ${parentNumber}`;
                         const enabled = false;
@@ -135,65 +191,65 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         return [
                             new SelectableColumn({
                                 id: getId('type'),
-                                name: 'Type',
+                                name: 'Type ' + category,
                                 category,
-                                enabled
+                                enabled,
                             }),
                             new SelectableColumn({
                                 id: getId('firstName'),
-                                name: 'Voornaam',
+                                name: 'Voornaam ' + category,
                                 category,
-                                enabled
+                                enabled,
                             }),
                             new SelectableColumn({
                                 id: getId('lastName'),
-                                name: 'Achternaam',
+                                name: 'Achternaam ' + category,
                                 category,
-                                enabled
+                                enabled,
                             }),
                             new SelectableColumn({
                                 id: getId('phone'),
-                                name: 'Telefoonnummer',
+                                name: 'Telefoonnummer ' + category,
                                 category,
-                                enabled
+                                enabled,
                             }),
-        
+
                             new SelectableColumn({
                                 id: getId('email'),
-                                name: 'E-mailadres',
+                                name: 'E-mailadres ' + category,
                                 category,
-                                enabled
+                                enabled,
                             }),
                             new SelectableColumn({
                                 id: getId('address'),
-                                name: 'Adres',
+                                name: 'Adres ' + category,
                                 category,
-                                enabled
+                                enabled,
                             }),
-                        ]
+                        ];
                     }),
 
                     new SelectableColumn({
                         id: 'unverifiedPhones',
                         name: 'Telefoonnummers',
                         category: 'Niet-geverifieerde gegevens',
-                        enabled: false
+                        enabled: false,
                     }),
 
                     new SelectableColumn({
                         id: 'unverifiedEmails',
                         name: 'E-mailadressen',
                         category: 'Niet-geverifieerde gegevens',
-                        enabled: false
+                        enabled: false,
                     }),
 
                     ...[1, 2].map((number, index) => {
                         return new SelectableColumn({
-                            id:  `unverifiedAddresses.${index}`,
+                            id: `unverifiedAddresses.${index}`,
                             name: `Adres ${number}`,
                             category: 'Niet-geverifieerde gegevens',
-                            enabled: false
-                        })
+                            enabled: false,
+                        });
                     }),
 
                     ...flattenedCategories.flatMap((category) => {
@@ -202,14 +258,14 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                                 id: `recordAnswers.${record.id}`,
                                 name: record.name,
                                 category: category.name,
-                                description: record.description
-                            })
-                        })
-                    })
-                ]
-            })
-        ]
-    })
+                                description: record.description,
+                            });
+                        });
+                    }),
+                ],
+            }),
+        ],
+    });
 }
 
 // function getEnabledRecordCategories(permissions: UserPermissions | null, recordsConfiguration: OrganizationRecordsConfiguration) {

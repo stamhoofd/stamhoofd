@@ -589,7 +589,7 @@ export class MemberActionBuilder {
                     root: new ComponentWithProperties(ExcelExportView, {
                         type: ExcelExportType.Members,
                         filter: selection.filter,
-                        workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null),
+                        workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups),
                         configurationId: 'members',
                     }),
                 }),

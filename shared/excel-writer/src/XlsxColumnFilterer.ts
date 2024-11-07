@@ -34,13 +34,15 @@ export class XlsxColumnFilterer<T> {
 
             // Validate sheetFilter
             const concreteColumns: XlsxTransformerConcreteColumn<T>[] = [];
-            for (const id of sheetFilter.columns) {
+            for (const { id, name } of sheetFilter.columns) {
                 let found = false;
 
                 for (const column of sheet.columns) {
                     if ('id' in column) {
                         if (column.id === id) {
-                            concreteColumns.push(column);
+                            const c = { ...column };
+                            c.name = name || c.name;
+                            concreteColumns.push(c);
                             found = true;
                             break;
                         }
@@ -48,6 +50,16 @@ export class XlsxColumnFilterer<T> {
                     else {
                         const matched = column.match(id);
                         if (matched !== undefined) {
+                            if (name) {
+                                for (const m of matched) {
+                                    if (matched.length === 1) {
+                                        m.name = name || m.name;
+                                    }
+                                    else {
+                                        m.name = name + ' ' + m.name;
+                                    }
+                                }
+                            }
                             concreteColumns.push(...matched);
                             found = true;
                             break;

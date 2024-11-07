@@ -6,13 +6,13 @@
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
-                <span class="icon disabled small" v-if="item.enabledCount === 0" v-tooltip="'Dit werkblad wordt niet mee geëxporteerd'" />
+                <span v-if="item.enabledCount === 0" v-tooltip="'Dit werkblad wordt niet mee geëxporteerd'" class="icon disabled small" />
             </template>
         </ScrollableSegmentedControl>
 
         <p v-if="visibleSheet.description" class="style-description-block">
             {{ visibleSheet.description }}
-        </p> 
+        </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -23,7 +23,7 @@
             <STList>
                 <STListItem element-name="label" :selectable="true" class="full-border">
                     <template #left>
-                        <Checkbox :model-value="getAllSelected(columns)" @update:model-value="setAllSelected($event, columns)" :indeterminate="getAllSelectedindeterminate(columns)" />
+                        <Checkbox :model-value="getAllSelected(columns)" :indeterminate="getAllSelectedindeterminate(columns)" @update:model-value="setAllSelected($event, columns)" />
                     </template>
 
                     <div class="style-table-head">
@@ -54,26 +54,26 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, ScrollableSegmentedControl, Toast, ToastButton, useContext, useErrors } from '@stamhoofd/components';
 import { Storage } from '@stamhoofd/networking';
 import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelWorkbookFilter, LimitedFilteredRequest, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
 import { SelectableColumn } from './SelectableColumn';
 import { SelectableWorkbook } from './SelectableWorkbook';
-import { Formatter } from '@stamhoofd/utility';
 
 const props = defineProps<{
-    type: ExcelExportType,
-    filter: LimitedFilteredRequest,
-    workbook: SelectableWorkbook,
-    configurationId: string // How to store the filters for easy reuse
+    type: ExcelExportType;
+    filter: LimitedFilteredRequest;
+    workbook: SelectableWorkbook;
+    configurationId: string; // How to store the filters for easy reuse
 }>();
 
 const visibleSheet = ref(props.workbook.sheets[0]);
 const exporting = ref(false);
-const errors = useErrors()
-const context = useContext()
-const pop = usePop()
+const errors = useErrors();
+const context = useContext();
+const pop = usePop();
 
 const groupedColumns = computed(() => {
-    const categories: Map<string, {columns: SelectableColumn[], categoryName: string}> = new Map();
+    const categories: Map<string, { columns: SelectableColumn[]; categoryName: string }> = new Map();
 
     for (const column of visibleSheet.value.columns) {
         const category = column.category || '';
@@ -81,7 +81,7 @@ const groupedColumns = computed(() => {
         if (!categories.has(category)) {
             categories.set(category, {
                 columns: [],
-                categoryName: category
+                categoryName: category,
             });
         }
         categories.get(category)!.columns.push(column);
@@ -98,7 +98,6 @@ function getAllSelectedindeterminate(columns: SelectableColumn[]) {
     return !getAllSelected(columns) && columns.some(c => c.enabled);
 }
 
-
 function setAllSelected(selected: boolean, columns: SelectableColumn[]) {
     for (const column of columns) {
         column.enabled = selected;
@@ -113,26 +112,27 @@ onMounted(async () => {
         if (savedFilter) {
             const decodedJson = JSON.parse(savedFilter);
             const decoder = new VersionBoxDecoder(ExcelWorkbookFilter as Decoder<ExcelWorkbookFilter>);
-            const filter = decoder.decode(new ObjectData(decodedJson, {version: 0}));
+            const filter = decoder.decode(new ObjectData(decodedJson, { version: 0 }));
 
             if (filter) {
                 console.log('Loaded filter', filter);
                 props.workbook.from(filter.data);
             }
         }
-
-    } catch (e) {
+    }
+    catch (e) {
         console.error('Failed to load filter', e);
     }
-})
+});
 
 async function saveFilter() {
     const filter = props.workbook.getFilter();
-    const encoded = new VersionBox(filter).encode({version: Version})
+    const encoded = new VersionBox(filter).encode({ version: Version });
 
     try {
         await Storage.keyValue.setItem('excel-filter-' + props.configurationId, JSON.stringify(encoded));
-    } catch (e) {
+    }
+    catch (e) {
         console.error('Failed to save filter', e);
     }
 }
@@ -146,55 +146,48 @@ async function startExport() {
 
     try {
         await saveFilter();
-        await doExport()
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await doExport();
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     exporting.value = false;
 }
 
-function downloadURL(url: string, name: string) {
-    
-    const link = document.createElement("a");
-    link.download = name;
-    link.href = url;
-    //document.body.appendChild(link);
-    link.click();
-    //document.body.removeChild(link);
-}
-
 async function doExport() {
     try {
         const response = await context.value.authenticatedServer.request({
-            method: "POST",
+            method: 'POST',
             path: `/export/excel/${props.type}`,
             body: ExcelExportRequest.create({
                 filter: props.filter,
-                workbookFilter: props.workbook.getFilter()
+                workbookFilter: props.workbook.getFilter(),
             }),
             decoder: ExcelExportResponse as Decoder<ExcelExportResponse>,
-            shouldRetry: false
-        })
+            shouldRetry: false,
+        });
 
         if (response.data.url) {
-            const filename = Formatter.fileSlug(props.type) + '.xlsx'
+            const filename = Formatter.fileSlug(props.type) + '.xlsx';
             new Toast('Jouw bestand is klaar, download het hier', 'download')
                 .setButton(
                     new ToastButton('Downloaden')
                         .setHref(response.data.url)
-                        .setDownload(filename)
+                        .setDownload(filename),
                 )
                 .setHide(null)
                 .setForceButtonClick()
                 .show();
-        } else {
-            Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show()
+        }
+        else {
+            Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show();
         }
 
-        await pop()
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await pop();
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 }
 

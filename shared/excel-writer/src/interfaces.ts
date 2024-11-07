@@ -52,7 +52,8 @@ export interface XlsxWriterAdapter {
 export type XlsxWorkbookFilter = {
     sheets: {
         id: string;
-        columns: string[];
+        name?: string;
+        columns: { id: string; name?: string }[];
     }[];
 };
 

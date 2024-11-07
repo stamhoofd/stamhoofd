@@ -624,7 +624,7 @@ export class PlatformMember implements ObjectWithRecords {
         }
     }
 
-    filterRegistrations(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
+    filterRegistrations(filters: { groups?: Group[] | null; groupIds?: string[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
         return this.patchedMember.registrations.filter((r) => {
             if (r.registeredAt === null || r.deactivatedAt !== null) {
                 return false;
@@ -641,6 +641,10 @@ export class PlatformMember implements ObjectWithRecords {
             }
 
             if (filters.groups && !filters.groups.find(g => g.id === r.groupId)) {
+                return false;
+            }
+
+            if (filters.groupIds && !filters.groupIds.includes(r.groupId)) {
                 return false;
             }
 

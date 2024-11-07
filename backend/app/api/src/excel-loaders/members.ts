@@ -96,7 +96,6 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
         },
         XlsxTransformerColumnHelper.createAddressColumns<PlatformMember>({
             matchId: 'address',
-            identifier: 'Adres',
             getAddress: ({ patchedMember: object }: PlatformMember) => {
                 // get member address if exists
                 const memberAddress = object.details.address;
@@ -227,7 +226,6 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
         },
         ...XlsxTransformerColumnHelper.createColumnsForAddresses<PlatformMember>({
             matchIdStart: 'unverifiedAddresses',
-            identifier: 'Niet-geverifieerd adres',
             getAddresses: object => object.patchedMember.details.unverifiedAddresses,
             limit: 2,
         }),
@@ -274,6 +272,153 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
                             }),
                         };
                     });
+                }
+            },
+        },
+
+        // Registration records
+        {
+            match(id) {
+                if (id.startsWith('groups.')) {
+                    const splitted = id.split('.');
+                    if (splitted.length < 3) {
+                        return;
+                    }
+
+                    const groupId = splitted[1];
+                    const recordName = splitted[2];
+
+                    function getRegistration(object: PlatformMember) {
+                        return object.filterRegistrations({ groupIds: [groupId] })[0] ?? null;
+                    }
+
+                    if (recordName === 'price') {
+                        // Tarief
+                        return [
+                            {
+                                id: `groups.${groupId}.${recordName}`,
+                                name: 'Tarief',
+                                width: 30,
+                                getValue: (member: PlatformMember) => {
+                                    const registration = getRegistration(member);
+                                    if (!registration) {
+                                        return {
+                                            value: '',
+                                        };
+                                    }
+
+                                    return {
+                                        value: registration.groupPrice.name,
+                                    };
+                                },
+                            },
+                        ];
+                    }
+
+                    if (recordName === 'optionMenu') {
+                        if (splitted.length < 4) {
+                            return;
+                        }
+
+                        const menuId = splitted[3];
+
+                        if (splitted.length > 4) {
+                            const optionId = splitted[4];
+                            const returnAmount = splitted.length > 5 && splitted[5] === 'amount';
+
+                            // Option menu
+                            return [
+                                {
+                                    id: `groups.${groupId}.${recordName}.${menuId}.${optionId}${returnAmount ? '.amount' : ''}`,
+                                    name: 'Keuzemenu aantal',
+                                    width: 30,
+                                    getValue: (member: PlatformMember) => {
+                                        const registration = getRegistration(member);
+                                        if (!registration) {
+                                            return {
+                                                value: '',
+                                            };
+                                        }
+                                        const options = registration.options.filter(o => o.optionMenu.id === menuId && o.option.id === optionId);
+
+                                        if (!options.length) {
+                                            return {
+                                                value: '',
+                                            };
+                                        }
+
+                                        return {
+                                            style: options.length === 1 && returnAmount
+                                                ? {
+                                                        numberFormat: {
+                                                            id: XlsxBuiltInNumberFormat.Number,
+                                                        },
+                                                    }
+                                                : {},
+                                            value: options.length === 1 && returnAmount ? options[0].amount : options.map(option => returnAmount ? option.amount : option).join(', '),
+                                        };
+                                    },
+                                },
+                            ];
+                        }
+
+                        // Option menu
+                        return [
+                            {
+                                id: `groups.${groupId}.${recordName}.${menuId}`,
+                                name: 'Keuzemenu',
+                                width: 30,
+                                getValue: (member: PlatformMember) => {
+                                    const registration = getRegistration(member);
+                                    if (!registration) {
+                                        return {
+                                            value: '',
+                                        };
+                                    }
+                                    const options = registration.options.filter(o => o.optionMenu.id === menuId);
+
+                                    if (!options.length) {
+                                        return {
+                                            value: '',
+                                        };
+                                    }
+
+                                    return {
+                                        value: options.map(option => (option.amount > 1 ? `${option.amount}x ` : '') + option.option.name).join(', '),
+                                    };
+                                },
+                            },
+                        ];
+                    }
+
+                    if (recordName === 'recordAnswers') {
+                        if (splitted.length < 4) {
+                            return;
+                        }
+
+                        const recordId = splitted[3];
+                        return [
+                            {
+                                id: `groups.${groupId}.${recordName}.${recordId}`,
+                                name: 'Vraag',
+                                width: 35,
+                                getValue: (member: PlatformMember) => {
+                                    const registration = getRegistration(member);
+                                    if (!registration) {
+                                        return {
+                                            value: '',
+                                        };
+                                    }
+
+                                    return {
+                                        value: registration.recordAnswers.get(recordId)?.excelValues[0]?.value ?? '',
+                                    };
+                                },
+                            },
+                        ];
+                    }
+
+                    return;
                 }
             },
         },

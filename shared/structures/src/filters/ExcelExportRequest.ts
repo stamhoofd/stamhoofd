@@ -7,12 +7,24 @@ export enum ExcelExportType {
     Organizations = 'organizations',
 }
 
+export class ExcelSheetColumnFilter extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name: string;
+}
+
 export class ExcelSheetFilter extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
 
+    @field({ decoder: StringDecoder, ...NextVersion })
+    name: string = '';
+
+    @field({ decoder: new ArrayDecoder(ExcelSheetColumnFilter), ...NextVersion, upgrade: (old: string[]) => old.map(id => ExcelSheetColumnFilter.create({ id, name: '' })) })
     @field({ decoder: new ArrayDecoder(StringDecoder) })
-    columns: string[] = [];
+    columns: ExcelSheetColumnFilter[] = [];
 }
 
 /**

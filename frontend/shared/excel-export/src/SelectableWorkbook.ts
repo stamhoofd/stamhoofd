@@ -1,10 +1,10 @@
-import { ExcelWorkbookFilter, ExcelSheetFilter } from "@stamhoofd/structures";
-import { SelectableSheet } from "./SelectableSheet";
+import { ExcelSheetColumnFilter, ExcelSheetFilter, ExcelWorkbookFilter } from '@stamhoofd/structures';
+import { SelectableSheet } from './SelectableSheet';
 
 export class SelectableWorkbook {
     sheets: SelectableSheet[] = [];
 
-    constructor(data: {sheets: SelectableSheet[]}) {
+    constructor(data: { sheets: SelectableSheet[] }) {
         this.sheets = data.sheets;
     }
 
@@ -18,13 +18,13 @@ export class SelectableWorkbook {
         this.disableAll();
 
         for (const s of filter.sheets) {
-            const sheet = this.sheets.find(sheet => sheet.id == s.id);
+            const sheet = this.sheets.find(sheet => sheet.id === s.id);
             if (!sheet) {
                 continue;
             }
 
-            for (const id of s.columns) {
-                const column = sheet.columns.find(c => c.id == id);
+            for (const { id } of s.columns) {
+                const column = sheet.columns.find(c => c.id === id);
                 if (column) {
                     column.enabled = true;
                 }
@@ -34,7 +34,7 @@ export class SelectableWorkbook {
 
     getFilter(): ExcelWorkbookFilter {
         return ExcelWorkbookFilter.create({
-            sheets: this.sheets.flatMap(sheet => {
+            sheets: this.sheets.flatMap((sheet) => {
                 if (!sheet.enabled) {
                     return [];
                 }
@@ -42,10 +42,11 @@ export class SelectableWorkbook {
                 return [
                     ExcelSheetFilter.create({
                         id: sheet.id,
-                        columns: sheet.columns.filter(c => c.enabled).map(c => c.id)
-                    })
-                ]
-            })
-        })
+                        name: sheet.name,
+                        columns: sheet.columns.filter(c => c.enabled).map(c => (ExcelSheetColumnFilter.create({ id: c.id, name: c.name }))),
+                    }),
+                ];
+            }),
+        });
     }
 }
