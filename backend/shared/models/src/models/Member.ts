@@ -443,24 +443,32 @@ export class Member extends Model {
                 return;
             }
             const platform = await Platform.getShared();
-            const registrations = me.registrations.filter(r => r.group.periodId == platform.periodId && r.registeredAt && !r.deactivatedAt);
+            const registrations = me.registrations.filter(r => r.group.periodId === platform.periodId && r.registeredAt && !r.deactivatedAt);
+            const now = new Date();
 
             const defaultMemberships = registrations.flatMap((r) => {
                 if (!r.group.defaultAgeGroupId) {
                     return [];
                 }
-                const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id == r.group.defaultAgeGroupId);
+                const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === r.group.defaultAgeGroupId);
                 if (!defaultAgeGroup || !defaultAgeGroup.defaultMembershipTypeId) {
                     return [];
                 }
 
-                const defaultMembership = platform.config.membershipTypes.find(m => m.id == defaultAgeGroup.defaultMembershipTypeId);
+                const defaultMembership = platform.config.membershipTypes.find(m => m.id === defaultAgeGroup.defaultMembershipTypeId);
                 if (!defaultMembership) {
                     return [];
                 }
+                const periodConfig = defaultMembership.periods.get(platform.periodId);
 
-                if (defaultMembership.periods.get(platform.periodId) === undefined) {
+                if (periodConfig === undefined) {
                     console.warn('Found default membership without period configuration', defaultMembership.id, platform.periodId);
+                    return [];
+                }
+
+                if (!(periodConfig.startDate <= now && periodConfig.endDate >= now)) {
+                    // Do not add this membership automatically because it won't match as an active membership
+                    // later on (edge case but otherwise we'll get duplicate memberships and add a new one every time)
                     return [];
                 }
 
@@ -472,11 +480,10 @@ export class Member extends Model {
 
             // Get active memberships for this member that
             const memberships = await MemberPlatformMembership.where({ memberId: me.id, periodId: platform.periodId });
-            const now = new Date();
             const activeMemberships = memberships.filter(m => m.startDate <= now && m.endDate >= now && m.deletedAt === null);
             const activeMembershipsUndeletable = activeMemberships.filter(m => !m.canDelete() || !m.generated);
 
-            if (defaultMemberships.length == 0) {
+            if (defaultMemberships.length === 0) {
                 // Stop all active memberships that were added automatically
                 for (const membership of activeMemberships) {
                     if (membership.canDelete() && membership.generated) {

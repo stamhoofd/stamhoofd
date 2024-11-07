@@ -8,6 +8,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
+import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
@@ -440,10 +441,32 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 // Check duplicate memberships
+                const existing = await MemberPlatformMembership.select()
+                    .where('memberId', member.id)
+                    .where('membershipTypeId', put.membershipTypeId)
+                    .where('periodId', put.periodId)
+                    .where(
+                        SQL.where('startDate', SQLWhereSign.LessEqual, put.startDate)
+                            .and('endDate', SQLWhereSign.GreaterEqual, put.startDate),
+                    )
+                    .orWhere(
+                        SQL.where('startDate', SQLWhereSign.LessEqual, put.endDate)
+                            .and('endDate', SQLWhereSign.GreaterEqual, put.endDate),
+                    )
+                    .orWhere(
+                        SQL.where('startDate', SQLWhereSign.GreaterEqual, put.startDate)
+                            .and('endDate', SQLWhereSign.LessEqual, put.endDate),
+                    )
+                    .first(false);
 
-                // Check dates
-
-                // Calculate prices
+                if (existing) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'startDate',
+                        message: 'Invalid start date',
+                        human: 'Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting van hetzelfde type',
+                    });
+                }
 
                 const membership = new MemberPlatformMembership();
                 membership.id = put.id;
