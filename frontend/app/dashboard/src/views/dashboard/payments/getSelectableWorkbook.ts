@@ -73,6 +73,12 @@ export function getSelectableWorkbook() {
                     }),
 
                     new SelectableColumn({
+                        id: 'balanceItem.category',
+                        name: 'Categorie',
+                        description: 'Extra kolom om betalingen makkelijker te groeperen. Dit bevat de naam van de activiteit/groep, de naam van de webshop of de beschrijving bij andere aanrekeningen.',
+                    }),
+
+                    new SelectableColumn({
                         id: 'balanceItem.description',
                         name: 'Beschrijving',
                     }),

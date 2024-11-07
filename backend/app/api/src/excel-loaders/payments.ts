@@ -130,6 +130,16 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             }),
         },
         {
+            id: 'balanceItem.category',
+            name: 'Categorie',
+            width: 30,
+            getValue: (object: PaymentWithItem) => {
+                return {
+                    value: Formatter.capitalizeFirstLetter(object.balanceItemPayment.balanceItem.category),
+                };
+            },
+        },
+        {
             id: 'balanceItem.description',
             name: 'Beschrijving',
             width: 40,

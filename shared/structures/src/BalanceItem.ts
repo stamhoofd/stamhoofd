@@ -164,7 +164,7 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     registrationId: string | null = null;
 
-    get paymentShortDescription(): string | null {
+    get paymentShortDescription(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 return this.relations.get(BalanceItemRelationType.Group)?.name ?? 'inschrijving';
@@ -173,6 +173,22 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.FreeContribution: return 'vrije bijdrage';
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? 'webshop';
             case BalanceItemType.Other: return 'andere';
+            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? 'aansluitingen';
+        }
+    }
+
+    /**
+     * To help split payments in categories: return a more detailed category than purely the type
+     */
+    get category(): string {
+        switch (this.type) {
+            case BalanceItemType.Registration: {
+                return this.relations.get(BalanceItemRelationType.Group)?.name ?? 'onbekende inschrijvingsgroep';
+            }
+            case BalanceItemType.AdministrationFee: return 'administratiekosten';
+            case BalanceItemType.FreeContribution: return 'vrije bijdrage';
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? 'onbekende webshop';
+            case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? 'aansluitingen';
         }
     }
