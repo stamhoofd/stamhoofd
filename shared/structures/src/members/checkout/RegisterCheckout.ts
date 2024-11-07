@@ -233,6 +233,11 @@ export class RegisterCheckout {
         }
 
         this.cart.validate(this, data);
+
+        if (this.singleOrganization && (this.singleOrganization.meta.recordsConfiguration.freeContribution?.amounts.length ?? 0) === 0) {
+            // Automatically clear free contribution if there are no options
+            this.freeContribution = 0;
+        }
     }
 
     clear() {
