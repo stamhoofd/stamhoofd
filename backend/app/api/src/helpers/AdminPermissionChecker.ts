@@ -131,7 +131,10 @@ export class AdminPermissionChecker {
         if (organizationId) {
             // If request is scoped to a different organization
             if (this.organization && organizationId !== this.organization.id) {
-                return false;
+                if (STAMHOOFD.userMode === 'organization') {
+                    return false;
+                }
+                // Otherwise allow for convenience
             }
 
             // If user is limited to scope

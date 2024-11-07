@@ -80,7 +80,7 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform();
-const defaultFilter = app === 'admin'
+const defaultFilter = app === 'admin' && !props.group
     ? {
             platformMemberships: {
                 $elemMatch: {
@@ -129,19 +129,37 @@ function getRequiredFilter(): StamhoofdFilter | null {
         return null;
     }
 
-    return {
-        registrations: {
-            $elemMatch: props.group
-                ? {
-                        groupId: props.group.id,
-                    }
-                : {
-                        groupId: {
-                            $in: groups.map(g => g.id),
+    const extra: StamhoofdFilter[] = [];
+
+    if (organization.value && props.group && props.group.organizationId !== organization.value?.id) {
+        // Only show members that are registered in the current period AND in this group
+        // (avoid showing old members that moved to other groups)
+        extra.push({
+            registrations: {
+                $elemMatch: {
+                    organizationId: organization.value.id,
+                    periodId: props.group.periodId,
+                },
+            },
+        });
+    }
+
+    return [
+        {
+            registrations: {
+                $elemMatch: props.group
+                    ? {
+                            groupId: props.group.id,
+                        }
+                    : {
+                            groupId: {
+                                $in: groups.map(g => g.id),
+                            },
                         },
-                    },
+            },
         },
-    };
+        ...extra,
+    ];
 }
 
 const objectFetcher = useMembersObjectFetcher({
