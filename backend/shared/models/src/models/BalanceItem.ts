@@ -225,7 +225,7 @@ export class BalanceItem extends Model {
     }
 
     updateStatus() {
-        this.status = this.pricePaid !== 0 && this.pricePaid >= this.price ? BalanceItemStatus.Paid : (this.pricePaid !== 0 ? BalanceItemStatus.Pending : (this.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending));
+        this.status = (this.pricePaid !== 0 || this.price === 0) && this.pricePaid >= this.price ? BalanceItemStatus.Paid : (this.pricePaid !== 0 ? BalanceItemStatus.Pending : (this.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending));
     }
 
     static async deleteItems(items: BalanceItem[]) {
