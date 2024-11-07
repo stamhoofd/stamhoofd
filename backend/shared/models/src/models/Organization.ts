@@ -839,33 +839,7 @@ export class Organization extends Model {
         const admins = await User.getAdmins([this.id], {verified: true})
 
         // Only full access
-        return admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
-    }
-
-    /**
-     * These email addresess are private
-     */
-    async getAdminToEmails(): Promise<EmailInterfaceRecipient[]> {
-        const filtered = await this.getFullAdmins()
-
-        if (STAMHOOFD.environment === "production") {
-            if (filtered.length > 1) {
-                // remove stamhoofd email addresses
-                const f = filtered.flatMap(f => f.getEmailTo() ).filter(e => !e.email.endsWith("@stamhoofd.be") && !e.email.endsWith("@stamhoofd.nl"))
-                if (f.length > 0) {
-                    return f
-                }
-            }
-        }
-
-        return filtered.flatMap(f => f.getEmailTo() )
-    }
-
-    /**
-     * These email addresess are private
-     */
-    async getAdminRecipients(): Promise<Recipient[]> {
-        let filtered = await this.getFullAdmins()
+        let filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
 
         if (STAMHOOFD.environment === "production") {
             if (filtered.length > 1) {
@@ -873,6 +847,23 @@ export class Organization extends Model {
                 filtered = filtered.filter(e => !e.email.endsWith("@stamhoofd.be") && !e.email.endsWith("@stamhoofd.nl"))
             }
         }
+
+        return filtered
+    }
+
+    /**
+     * These email addresess are private
+     */
+    async getAdminToEmails(): Promise<EmailInterfaceRecipient[]> {
+        const filtered = await this.getFullAdmins()
+        return filtered.flatMap(f => f.getEmailTo() )
+    }
+
+    /**
+     * These email addresess are private
+     */
+    async getAdminRecipients(): Promise<Recipient[]> {
+        const filtered = await this.getFullAdmins()
 
         return filtered.flatMap(f => {
             return Recipient.create({
