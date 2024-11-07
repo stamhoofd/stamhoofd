@@ -115,6 +115,10 @@ export class SGVSyncReport {
 
         for (const item of [...this.created, ...this.synced]) {
             for (const functie of item.lid.functies) {
+                if (functie.einde) {
+                    continue;
+                }
+
                 const code: string = functie.omschrijving || functie.code || 'Onbekende functie';
                 if (counts.has(code)) {
                     counts.set(code, counts.get(code)! + 1)
@@ -134,6 +138,10 @@ export class SGVSyncReport {
 
                 if (post.functies) {
                     for (const functie of post.functies) {
+                        if (functie.einde) {
+                            continue;
+                        }
+
                         const functieId = functie.functie;
                         const f = getDefaultGroepFuncties().find(f => f.id === functieId)
                         if (f) {
