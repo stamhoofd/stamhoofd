@@ -56,6 +56,9 @@ export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 324 })
     organizationId: string | null = null;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    payingOrganizationId: string | null = null;
+
     get isPending() {
         return this.status !== PaymentStatus.Succeeded && this.status !== PaymentStatus.Failed;
     }

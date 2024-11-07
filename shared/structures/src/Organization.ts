@@ -10,7 +10,7 @@ import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodL
 import { UserWithMembers } from './UserWithMembers.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
 
-export class Organization extends AutoEncoder {
+export class BaseOrganization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -38,6 +38,36 @@ export class Organization extends AutoEncoder {
     @field({ decoder: Address })
     address: Address;
 
+    @field({ decoder: DateDecoder, version: 259 })
+    createdAt = new Date();
+
+    get resolvedRegisterDomain() {
+        if (this.registerDomain) {
+            return this.registerDomain;
+        }
+
+        if (!STAMHOOFD.domains.registration) {
+            return null;
+        }
+
+        return this.uri + '.' + (STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration['']);
+    }
+
+    get registerUrl() {
+        const d = this.resolvedRegisterDomain;
+        if (!d) {
+            return 'https://' + STAMHOOFD.domains.dashboard + '/leden/' + this.uri;
+        }
+
+        return 'https://' + d;
+    }
+
+    get dashboardDomain(): string {
+        return STAMHOOFD.domains.dashboard;
+    }
+}
+
+export class Organization extends BaseOrganization {
     /**
      * @deprecated
      * Please use period instead now
@@ -47,9 +77,6 @@ export class Organization extends AutoEncoder {
 
     @field({ decoder: OrganizationRegistrationPeriod, version: 264, defaultValue: () => OrganizationRegistrationPeriod.create({ period: RegistrationPeriod.create({}) }) })
     period: OrganizationRegistrationPeriod;
-
-    @field({ decoder: DateDecoder, version: 259 })
-    createdAt = new Date();
 
     /**
      * Get all groups that are in a category
@@ -170,31 +197,6 @@ export class Organization extends AutoEncoder {
      * Keep admins accessible and in memory
      */
     periods?: RegistrationPeriodList;
-
-    get resolvedRegisterDomain() {
-        if (this.registerDomain) {
-            return this.registerDomain;
-        }
-
-        if (!STAMHOOFD.domains.registration) {
-            return null;
-        }
-
-        return this.uri + '.' + (STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration['']);
-    }
-
-    get registerUrl() {
-        const d = this.resolvedRegisterDomain;
-        if (!d) {
-            return 'https://' + STAMHOOFD.domains.dashboard + '/leden/' + this.uri;
-        }
-
-        return 'https://' + d;
-    }
-
-    get dashboardDomain(): string {
-        return STAMHOOFD.domains.dashboard;
-    }
 }
 
 export class OrganizationWithWebshop extends AutoEncoder {

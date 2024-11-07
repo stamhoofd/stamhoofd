@@ -2,6 +2,16 @@ import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoof
 import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+/**
+ * Todo: in the future when we need to read injects to update the available columns
+ * -> a hook is better suited for this
+ */
+export function useSelectableWorkbook() {
+    return {
+        getSelectableWorkbook: () => getSelectableWorkbook(),
+    };
+}
+
 export function getSelectableWorkbook() {
     return new SelectableWorkbook({
         sheets: [
@@ -29,11 +39,13 @@ export function getSelectableWorkbook() {
 
                     ...getGeneralColumns(),
 
-                    // Facturatiegegevens
-                    ...getInvoiceColumns(),
                     ...getSettlementColumns(),
                     ...getStripeColumns(),
                     ...getTransferColumns(),
+
+                    // Facturatiegegevens
+                    ...getInvoiceColumns(),
+                    ...getPayingOrganizationColumns(),
 
                 ],
             }),
@@ -87,7 +99,10 @@ export function getSelectableWorkbook() {
                     }),
 
                     ...getGeneralColumns({ category: 'Betaling (herhaling)' }),
+
+                    // Facturatiegegevens
                     ...getInvoiceColumns(),
+                    ...getPayingOrganizationColumns(),
                 ],
             }),
         ],
@@ -202,6 +217,29 @@ function getTransferColumns() {
             name: 'Rekeningnummer begunstigde',
             description: 'Rekeningnummer waarnaar de betaler heeft overgeschreven',
             category: 'Overschrijvingen',
+        }),
+    ];
+}
+
+function getPayingOrganizationColumns() {
+    return [
+        new SelectableColumn({
+            id: 'payingOrganization.id',
+            name: 'ID betalende groep',
+            category: 'Betalende groep',
+            enabled: false,
+        }),
+
+        new SelectableColumn({
+            id: 'payingOrganization.uri',
+            name: 'Groepsnummer betalende groep',
+            category: 'Betalende groep',
+        }),
+
+        new SelectableColumn({
+            id: 'payingOrganization.name',
+            name: 'Naam betalende groep',
+            category: 'Betalende groep',
         }),
     ];
 }

@@ -6,6 +6,9 @@ export class OrganizationSimple extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
 
+    @field({ decoder: StringDecoder, ...NextVersion })
+    uri = '';
+
     /**
      * Name of the organization you are creating
      */

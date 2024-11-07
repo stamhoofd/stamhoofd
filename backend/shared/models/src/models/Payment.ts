@@ -1,5 +1,5 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings } from '@stamhoofd/structures';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings, BaseOrganization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -135,26 +135,35 @@ export class Payment extends Model {
         }
 
         const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);
+        const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
 
         return this.getGeneralStructureFromRelations({
             payments,
             balanceItemPayments,
             balanceItems,
+            payingOrganizations,
         }, includeSettlements);
     }
 
-    static getGeneralStructureFromRelations({ payments, balanceItemPayments, balanceItems }: {
+    static getGeneralStructureFromRelations({ payments, balanceItemPayments, balanceItems, payingOrganizations }: {
         payments: Payment[];
         balanceItemPayments: import('./BalanceItemPayment').BalanceItemPayment[];
         balanceItems: import('./BalanceItem').BalanceItem[];
+        payingOrganizations: Organization[];
     }, includeSettlements = false): PaymentGeneral[] {
         if (payments.length === 0) {
             return [];
         }
 
         return payments.map((payment) => {
+            const payingOrganization = payment.payingOrganizationId ? payingOrganizations.find(o => o.id === payment.payingOrganizationId) : null;
             return PaymentGeneral.create({
                 ...payment,
+                payingOrganization: payingOrganization
+                    ? BaseOrganization.create({
+                        ...payingOrganization,
+                    })
+                    : null,
                 balanceItemPayments: balanceItemPayments.filter(item => item.paymentId === payment.id).map((item) => {
                     const balanceItem = balanceItems.find(b => b.id === item.balanceItemId);
 
@@ -194,10 +203,21 @@ export class Payment extends Model {
                 value: payments.map(p => p.id),
             },
         });
-        const ids = Formatter.uniqueArray(balanceItemPayments.flatMap(p => p.balanceItemId));
+        const ids = Formatter.uniqueArray(balanceItemPayments.map(p => p.balanceItemId));
         const balanceItems = await BalanceItem.getByIDs(...ids);
 
         return { balanceItemPayments, balanceItems };
+    }
+
+    static async loadPayingOrganizations(payments: Payment[]) {
+        const ids = Formatter.uniqueArray(payments.map(p => p.payingOrganizationId).filter(p => p !== null));
+        if (ids.length === 0) {
+            return { payingOrganizations: [] };
+        }
+
+        const payingOrganizations = await Organization.getByIDs(...ids);
+
+        return { payingOrganizations };
     }
 
     static async loadBalanceItemRelations(balanceItems: import('./BalanceItem').BalanceItem[]) {

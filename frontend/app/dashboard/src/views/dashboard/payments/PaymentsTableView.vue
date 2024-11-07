@@ -19,12 +19,12 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { ExcelExportType, LimitedFilteredRequest, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref } from 'vue';
-import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
 
 const props = withDefaults(
@@ -246,6 +246,8 @@ async function showPayment(payment: PaymentGeneral) {
         getPrevious: modernTableView.value?.getPrevious,
     } });
 }
+
+const { getSelectableWorkbook } = useSelectableWorkbook();
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({

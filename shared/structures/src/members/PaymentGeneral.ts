@@ -1,9 +1,10 @@
 import { ArrayDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
-import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
-import { Payment, Settlement } from './Payment.js';
 import { BalanceItemRelationType } from '../BalanceItem.js';
+import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
+import { BaseOrganization } from '../Organization.js';
+import { Payment, Settlement } from './Payment.js';
 
 export class PaymentGeneral extends Payment {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })
@@ -32,6 +33,12 @@ export class PaymentGeneral extends Payment {
      */
     @field({ decoder: StringDecoder, nullable: true, version: 198 })
     stripeAccountId: string | null = null;
+
+    /**
+     * Only set for administrators with the correct permissions
+     */
+    @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
+    payingOrganization: BaseOrganization | null = null;
 
     get groupIds() {
         const ids = this.balanceItemPayments.flatMap((p) => {

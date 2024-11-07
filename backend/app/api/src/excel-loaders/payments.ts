@@ -45,6 +45,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             columns: [
                 ...getGeneralColumns(),
                 ...getInvoiceColumns(),
+                ...getPayingOrganizationColumns(),
                 ...getSettlementColumns(),
                 ...getStripeColumns(),
                 ...getTransferColumns(),
@@ -64,6 +65,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
                 ...[
                     ...getGeneralColumns(),
                     ...getInvoiceColumns(),
+                    ...getPayingOrganizationColumns(),
                 ].map((c) => {
                     if ('match' in c) {
                         return {
@@ -429,6 +431,46 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                 };
             },
         },
+    ];
+}
+
+function getPayingOrganizationColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
+    return [
+        {
+            id: 'payingOrganization.id',
+            name: 'ID betalende groep',
+            width: 30,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
+                return {
+                    value: object.payingOrganization?.id || '',
+                };
+            },
+        },
+        {
+            id: 'payingOrganization.name',
+            name: 'Naam betalende groep',
+            width: 30,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
+                return {
+                    value: object.payingOrganization?.name || '',
+                };
+            },
+        },
+        {
+            id: 'payingOrganization.uri',
+            name: 'Groepsnummer betalende groep',
+            width: 30,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
+                return {
+                    value: object.payingOrganization?.uri || '',
+                };
+            },
+        },
+        XlsxTransformerColumnHelper.createAddressColumns<PaymentGeneralWithStripeAccount>({
+            matchId: 'payingOrganization.address',
+            getAddress: object => object.payingOrganization?.address,
+            identifier: 'Adres betalende groep',
+        }),
     ];
 }
 

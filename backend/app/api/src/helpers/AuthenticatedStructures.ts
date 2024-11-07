@@ -42,10 +42,13 @@ export class AuthenticatedStructures {
 
         console.log('includeSettlements', includeSettlements);
 
+        const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
+
         return Payment.getGeneralStructureFromRelations({
             payments,
             balanceItemPayments,
             balanceItems,
+            payingOrganizations,
         }, includeSettlements);
     }
 
