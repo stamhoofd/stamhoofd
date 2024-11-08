@@ -28,23 +28,27 @@
                     <p v-copyable class="style-definition-text">
                         {{ organization.address }}
                     </p>
-                    <p v-if="organization.meta.companyAddress && organization.meta.companyAddress !== organization.address" class="style-description-small">
-                        {{ $t('10c2c710-3c0d-445b-bb2e-c3f43cd6397b') }}: {{ organization.meta.companyAddress }}
-                    </p>
                 </STListItem>
 
-                <STListItem>
+                <STListItem v-for="company of organization.meta.companies" :key="company.id">
                     <h3 class="style-definition-label">
                         {{ $t('3dae9ed2-c904-448a-834e-c60bfaed88d1') }}
                     </h3>
                     <p v-copyable class="style-definition-text">
-                        {{ organization.meta.companyName || organization.name }}
+                        {{ company.name }}
                     </p>
-                    <p v-if="organization.meta.companyAddress" v-copyable class="style-description-small">
-                        {{ organization.meta.companyAddress }}
+                    <p v-if="company.VATNumber" class="style-description-small" v-copyable>
+                        {{ company.VATNumber }} (BTW-plichtig)
                     </p>
-                    <p v-copyable class="style-description-small">
-                        {{ organization.meta.VATNumber || organization.meta.companyNumber || 'Geen ondernemingsnummer' }}
+                    <p v-else-if="company.companyNumber" class="style-description-small" v-copyable>
+                        {{ company.companyNumber }}
+                    </p>
+                    <p v-else class="style-description-small">
+                        Feitelijke vereniging
+                    </p>
+
+                    <p v-if="company.address" v-copyable class="style-description-small">
+                        {{ company.address }}
                     </p>
                 </STListItem>
 
