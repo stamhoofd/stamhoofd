@@ -13,16 +13,16 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import ContextMenuView from "./ContextMenuView.vue";
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import ContextMenuView from './ContextMenuView.vue';
 
 @Component({
-    inheritAttrs: false
+    inheritAttrs: false,
 })
 export default class ContextMenuItemView extends Mixins(NavigationMixin) {
     clicked = false;
-    isHovered = false
+    isHovered = false;
 
     @Prop({ default: 'button' })
     elementName!: string;
@@ -33,24 +33,23 @@ export default class ContextMenuItemView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     childContextMenu!: ComponentWithProperties | null;
 
-    @Prop({required: true})
+    @Prop({ required: true })
     contextMenuView!: InstanceType<typeof ContextMenuView>;
 
     get isOpen() {
-        return (this.contextMenuView)?.childMenu && (this.contextMenuView).childMenu === this.childContextMenu
+        return (this.contextMenuView)?.childMenu && (this.contextMenuView).childMenu === this.childContextMenu;
     }
 
     onMouseOver() {
-        (this.contextMenuView).onHoverItem(this)
+        (this.contextMenuView).onHoverItem(this);
     }
 
     onMouseLeave() {
-        (this.contextMenuView).onMouseLeaveItem(this)
+        (this.contextMenuView).onMouseLeaveItem(this);
     }
 
     onClick(event) {
-        (this.contextMenuView).onClickItem(this, event)
-        
+        (this.contextMenuView).onClickItem(this, event);
     }
 }
 </script>
