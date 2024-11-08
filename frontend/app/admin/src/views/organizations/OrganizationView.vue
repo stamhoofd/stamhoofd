@@ -9,10 +9,10 @@
         </STNavigationBar>
 
         <main>
-            <aside class="style-title-prefix">
+            <aside v-copyable class="style-title-prefix style-copyable">
                 {{ organization.uri }}
             </aside>
-            <h1 class="style-navigation-title">
+            <h1 v-copyable class="style-navigation-title style-copyable">
                 {{ title }}
             </h1>
 
@@ -25,7 +25,7 @@
                     <h3 class="style-definition-label">
                         {{ $t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5') }}
                     </h3>
-                    <p v-copyable class="style-definition-text">
+                    <p v-copyable class="style-definition-text style-copyable">
                         {{ organization.address }}
                     </p>
                 </STListItem>
@@ -34,20 +34,20 @@
                     <h3 class="style-definition-label">
                         {{ $t('3dae9ed2-c904-448a-834e-c60bfaed88d1') }}
                     </h3>
-                    <p v-copyable class="style-definition-text">
+                    <p v-copyable class="style-definition-text style-copyable">
                         {{ company.name }}
                     </p>
-                    <p v-if="company.VATNumber" class="style-description-small" v-copyable>
+                    <p v-if="company.VATNumber" v-copyable class="style-description-small style-copyable">
                         {{ company.VATNumber }} (BTW-plichtig)
                     </p>
-                    <p v-else-if="company.companyNumber" class="style-description-small" v-copyable>
+                    <p v-else-if="company.companyNumber" v-copyable class="style-description-small style-copyable">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
                         Feitelijke vereniging
                     </p>
 
-                    <p v-if="company.address" v-copyable class="style-description-small">
+                    <p v-if="company.address" v-copyable class="style-description-small style-copyable">
                         {{ company.address }}
                     </p>
                 </STListItem>
