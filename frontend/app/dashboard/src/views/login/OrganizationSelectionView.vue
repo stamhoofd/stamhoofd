@@ -19,7 +19,11 @@
                     <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
                 </form>
 
-                <Spinner v-if="loadingResults" class="gray center" />
+                <div v-if="showVersionFooter" class="version-box">
+                    <VersionFooter />
+                </div>
+
+                <Spinner v-else-if="loadingResults" class="gray center" />
                 <template v-else>
                     <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
                         <ContextLogo :organization="option.organization" :app="option.app" />
@@ -66,7 +70,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, getAppDescription, getAppTitle, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useContextOptions, usePlatform } from '@stamhoofd/components';
+import { ContextLogo, getAppDescription, getAppTitle, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
@@ -103,6 +107,10 @@ let counter = 0;
 const help = () => {
     // todo
 };
+
+const showVersionFooter = computed(() => {
+    return query.value.toLocaleLowerCase().trim() === 'stamhoofd dev';
+});
 
 const focusResult = (index: number) => {
     if (index === -1) {
