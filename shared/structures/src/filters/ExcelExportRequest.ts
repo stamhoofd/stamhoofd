@@ -19,10 +19,10 @@ export class ExcelSheetFilter extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
 
-    @field({ decoder: StringDecoder, ...NextVersion })
+    @field({ decoder: StringDecoder, version: 345 })
     name: string = '';
 
-    @field({ decoder: new ArrayDecoder(ExcelSheetColumnFilter), ...NextVersion, upgrade: (old: string[]) => old.map(id => ExcelSheetColumnFilter.create({ id, name: '' })) })
+    @field({ decoder: new ArrayDecoder(ExcelSheetColumnFilter), version: 345, upgrade: (old: string[]) => old.map(id => ExcelSheetColumnFilter.create({ id, name: '' })) })
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     columns: ExcelSheetColumnFilter[] = [];
 }
