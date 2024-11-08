@@ -63,7 +63,7 @@ export class OrganizationManager {
         // Keep admins
         const admins = this.$context.organization.admins;
 
-        this.$context.setOrganization(response.data);
+        this.$context.updateOrganization(response.data);
         console.log('Organization updated', this.$context);
 
         if (admins && !response.data.admins && patch.admins) {
