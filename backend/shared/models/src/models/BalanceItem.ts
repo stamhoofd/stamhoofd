@@ -134,7 +134,11 @@ export class BalanceItem extends Model {
         }
     }
 
-    async markPaid(payment: Payment, organization: Organization) {
+    async markPaid(payment: Payment | null, organization: Organization) {
+        if (this.status === BalanceItemStatus.Hidden) {
+            await BalanceItem.reactivateItems([this]);
+        }
+
         // status and pricePaid changes are handled inside balanceitempayment
         if (this.dependingBalanceItemId) {
             const depending = await BalanceItem.getByID(this.dependingBalanceItemId);
@@ -186,7 +190,7 @@ export class BalanceItem extends Model {
         }
     }
 
-    async undoPaid(payment: Payment, organization: Organization) {
+    async undoPaid(payment: Payment | null, organization: Organization) {
         // If order
         if (this.orderId) {
             const { Order } = await import('./Order');

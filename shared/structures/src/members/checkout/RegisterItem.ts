@@ -664,10 +664,6 @@ export class RegisterItem {
             return;
         }
 
-        if (group.type === GroupType.EventRegistration) {
-            return;
-        }
-
         const platform = this.family.platform;
 
         const periodId = group.periodId;

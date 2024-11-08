@@ -408,7 +408,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 balanceItem2.memberId = registration.memberId;
 
                 // If the paying organization hasn't paid yet, this should be hidden and move to pending as soon as the paying organization has paid
-                balanceItem2.status = shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
+                balanceItem2.status = BalanceItemStatus.Hidden; // shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
                 await balanceItem2.save();
 
                 // do not add to createdBalanceItems array because we don't want to add this to the payment if we create a payment
@@ -419,7 +419,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 balanceItem.userId = user.id;
             }
 
-            balanceItem.status = shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
+            balanceItem.status = BalanceItemStatus.Hidden; // shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
             balanceItem.pricePaid = 0;
 
             // Connect the 'pay back' balance item to this balance item. As soon as this balance item is paid, we'll mark the other one as pending so the outstanding balance for the member increases
@@ -434,24 +434,24 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const { item, registration } = bundle;
             registration.reservedUntil = null;
 
-            if (shouldMarkValid) {
+            /* if (shouldMarkValid) {
                 await registration.markValid({ skipEmail: bundle.item.replaceRegistrations.length > 0 });
             }
-            else {
-                // Reserve registration for 30 minutes (if needed)
-                const group = groups.find(g => g.id === registration.groupId);
+            else { */
+            // Reserve registration for 30 minutes (if needed)
+            const group = groups.find(g => g.id === registration.groupId);
 
-                if (group && group.settings.maxMembers !== null) {
-                    registration.reservedUntil = new Date(new Date().getTime() + 1000 * 60 * 30);
-                }
-                await registration.save();
+            if (group && group.settings.maxMembers !== null) {
+                registration.reservedUntil = new Date(new Date().getTime() + 1000 * 60 * 30);
             }
+            await registration.save();
+            // }
 
             // Note: we should always create the balance items: even when the price is zero
             // Otherwise we don't know which registrations to activate after payment
 
             if (shouldMarkValid && item.calculatedPrice === 0) {
-                continue;
+                // continue;
             }
 
             // Create balance items
@@ -538,7 +538,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (oldestMember) {
                 balanceItem.memberId = oldestMember.id;
             }
-            balanceItem.status = shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
+            balanceItem.status = BalanceItemStatus.Hidden; // shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
             await balanceItem.save();
             createdBalanceItems.push(balanceItem);
         }
@@ -563,7 +563,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 }
             }
 
-            balanceItem.status = shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
+            balanceItem.status = BalanceItemStatus.Hidden; // shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
             await balanceItem.save();
 
             createdBalanceItems.push(balanceItem);
@@ -579,6 +579,16 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         let paymentUrl: string | null = null;
         let payment: Payment | null = null;
+
+        // Delaying markign as valid as late as possible so any errors will prevent creating valid balance items
+        async function markValidIfNeeded() {
+            if (shouldMarkValid) {
+                for (const balanceItem of [...createdBalanceItems, ...unrelatedCreatedBalanceItems]) {
+                    // Mark vlaid
+                    await balanceItem.markPaid(payment, organization);
+                }
+            }
+        }
 
         if (whoWillPayNow !== 'nobody') {
             const mappedBalanceItems = new Map<BalanceItem, number>();
@@ -606,6 +616,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     checkout: request.body,
                     members,
                 });
+                await markValidIfNeeded();
 
                 if (response) {
                     paymentUrl = response.paymentUrl;
@@ -618,6 +629,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
         else {
+            await markValidIfNeeded();
             await BalanceItem.updateOutstanding([...createdBalanceItems, ...unrelatedCreatedBalanceItems]);
         }
 
