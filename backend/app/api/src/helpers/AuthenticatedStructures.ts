@@ -315,6 +315,10 @@ export class AuthenticatedStructures {
         return structs;
     }
 
+    static async members(members: MemberWithRegistrations[]): Promise<MemberWithRegistrationsBlob[]> {
+        return (await this.membersBlob(members, false)).members;
+    }
+
     static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<MembersBlob> {
         if (members.length === 0 && !includeUser) {
             return MembersBlob.create({ members: [], organizations: [] });
