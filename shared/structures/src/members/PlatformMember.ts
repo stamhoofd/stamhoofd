@@ -711,7 +711,7 @@ export class PlatformMember implements ObjectWithRecords {
         return base;
     }
 
-    filterRecordsConfigurations(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[] }) {
+    filterRecordsConfigurations(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
         const groups = this.filterGroups(filters);
         const configurations: OrganizationRecordsConfiguration[] = [];
 
@@ -784,20 +784,6 @@ export class PlatformMember implements ObjectWithRecords {
             }
         }
 
-        // for (const responsibility of this.patchedMember.responsibilities) {
-        //     if (!responsibility.isActive) {
-        //         continue;
-        //     }
-        //     if (base.find(g => g.id === responsibility.organizationId)) {
-        //         continue;
-        //     }
-        //
-        //     const organization = this.organizations.find(o => o.id === responsibility.organizationId);
-        //     if (organization) {
-        //         base.push(organization)
-        //     }
-        // }
-
         return base;
     }
 
@@ -868,8 +854,7 @@ export class PlatformMember implements ObjectWithRecords {
         // From organization
         const categories: RecordCategory[] = [];
         const scopedOrganizations = options.scopeOrganization ? [options.scopeOrganization] : this.filterOrganizations({ currentPeriod: true });
-
-        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: true, groups: options.scopeGroup ? [options.scopeGroup] : null });
+        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: true, groups: options.scopeGroup ? [options.scopeGroup] : null, organizationId: options.scopeOrganization?.id ?? undefined });
 
         for (const recordsConfiguration of recordsConfigurations) {
             for (const recordCategory of recordsConfiguration.recordCategories) {

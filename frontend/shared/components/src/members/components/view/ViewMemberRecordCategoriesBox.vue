@@ -11,12 +11,12 @@ import { useAuth, useOrganization } from '../../../hooks';
 import ViewMemberRecordCategoryBox from './ViewMemberRecordCategoryBox.vue';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = defineProps<{
-    member: PlatformMember
-}>()
+    member: PlatformMember;
+}>();
 
 const organization = useOrganization();
 const auth = useAuth();
@@ -24,11 +24,11 @@ const auth = useAuth();
 const recordCategories = computed(() => {
     return RecordCategory.flattenCategories(props.member.getEnabledRecordCategories({
         checkPermissions: {
-            permissions: auth.userPermissions, 
-            level: PermissionLevel.Read
+            permissions: auth.userPermissions,
+            level: PermissionLevel.Read,
         },
-        scopeOrganization: organization.value
+        scopeOrganization: organization.value,
     }), props.member);
-})
+});
 
 </script>

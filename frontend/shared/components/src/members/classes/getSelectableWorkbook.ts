@@ -267,7 +267,3 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         ],
     });
 }
-
-// function getEnabledRecordCategories(permissions: UserPermissions | null, recordsConfiguration: OrganizationRecordsConfiguration) {
-
-// }
