@@ -1,6 +1,6 @@
 import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailRecipientFilterType } from './Email.js';
+import { Email, EmailRecipientFilterType } from './Email.js';
 
 export enum EmailTemplateType {
     /**
@@ -12,6 +12,8 @@ export enum EmailTemplateType {
      * Defaults
      */
     DefaultMembersEmail = 'DefaultMembersEmail',
+    DefaultReceivableBalancesEmail = 'DefaultReceivableBalancesEmail',
+    SavedReceivableBalancesEmail = 'SavedReceivableBalancesEmail',
 
     //
     MembersExpirationReminder = 'MembersExpirationReminder',
@@ -131,11 +133,31 @@ export class EmailTemplate extends AutoEncoder {
             return EmailTemplateType.DefaultMembersEmail;
         }
 
+        if (type === EmailRecipientFilterType.ReceivableBalances) {
+            return EmailTemplateType.DefaultReceivableBalancesEmail;
+        }
+
+        return null;
+    }
+
+    static getSavedForRecipient(type: EmailRecipientFilterType): EmailTemplateType | null {
+        if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents) {
+            return EmailTemplateType.SavedMembersEmail;
+        }
+
+        if (type === EmailRecipientFilterType.ReceivableBalances) {
+            return EmailTemplateType.SavedReceivableBalancesEmail;
+        }
+
         return null;
     }
 
     static isSavedEmail(type: EmailTemplateType): boolean {
         if (type === EmailTemplateType.SavedMembersEmail) {
+            return true;
+        }
+
+        if (type === EmailTemplateType.SavedReceivableBalancesEmail) {
             return true;
         }
 
@@ -158,7 +180,10 @@ export class EmailTemplate extends AutoEncoder {
     static getTypeTitle(type: EmailTemplateType): string {
         switch (type) {
             case EmailTemplateType.SavedMembersEmail: return 'Opgeslagen e-mail naar leden';
+            case EmailTemplateType.SavedReceivableBalancesEmail: return 'Opgeslagen e-mail naar openstaande bedragen';
+
             case EmailTemplateType.DefaultMembersEmail: return 'Placeholder: Standaard e-mail naar leden';
+            case EmailTemplateType.DefaultReceivableBalancesEmail: return 'Placeholder: Standaard e-mail naar openstaande bedragen';
 
             case EmailTemplateType.MembersExpirationReminder: return 'Billing: Herinnering verlopen pakket ledenadministratie';
             case EmailTemplateType.WebshopsExpirationReminder: return 'Billing: Herinnering verlopen pakket webshops';
@@ -222,7 +247,10 @@ export class EmailTemplate extends AutoEncoder {
     static allowOrganizationLevel(type: EmailTemplateType): boolean {
         switch (type) {
             case EmailTemplateType.DefaultMembersEmail: return true;
+            case EmailTemplateType.DefaultReceivableBalancesEmail: return true;
+
             case EmailTemplateType.SavedMembersEmail: return true;
+            case EmailTemplateType.SavedReceivableBalancesEmail: return true;
 
             case EmailTemplateType.RegistrationConfirmation: return true;
             case EmailTemplateType.RegistrationTransferDetails: return true;
@@ -270,6 +298,7 @@ export class EmailTemplate extends AutoEncoder {
     static getTypeDescription(type: EmailTemplateType): string {
         switch (type) {
             case EmailTemplateType.DefaultMembersEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan leden, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.';
+            case EmailTemplateType.DefaultReceivableBalancesEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan leden met openstaande bedragen, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.';
 
             case EmailTemplateType.OrderNotification: return 'E-mail die webshop eigenaren ontvangen wanneer er een bestelling is geplaatst (indien ze die functie hebben ingeschakeld)';
             case EmailTemplateType.RegistrationConfirmation: return 'Leden en ouders (die toegang hebben of moeten krijgen) ontvangen deze e-mail nadat ze worden ingeschreven of zelf inschrijven.';
@@ -289,6 +318,17 @@ export class EmailTemplate extends AutoEncoder {
     }
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
+        if (type === EmailTemplateType.DefaultReceivableBalancesEmail || type === EmailTemplateType.SavedReceivableBalancesEmail) {
+            return [
+                'greeting',
+                'firstName',
+                'lastName',
+                'email',
+                'paymentUrl',
+                'organizationName',
+                'outstandingBalance',
+            ];
+        }
         if (type === EmailTemplateType.SignupAlreadyHasAccount) {
             return [
                 'greeting',
@@ -468,14 +508,6 @@ export class EmailTemplate extends AutoEncoder {
             );
         }
 
-        if (type !== EmailTemplateType.OrderNotification) {
-            sharedReplacements.push(
-                'greeting',
-                'firstName',
-                'lastName',
-            );
-        }
-
         if (type === EmailTemplateType.OrderConfirmationTransfer || type === EmailTemplateType.TicketsConfirmationTransfer) {
             return [
                 ...sharedReplacements,
@@ -483,6 +515,14 @@ export class EmailTemplate extends AutoEncoder {
                 'transferBankAccount',
                 'transferBankCreditor',
             ];
+        }
+
+        if (type !== EmailTemplateType.OrderNotification) {
+            sharedReplacements.push(
+                'greeting',
+                'firstName',
+                'lastName',
+            );
         }
 
         return sharedReplacements;

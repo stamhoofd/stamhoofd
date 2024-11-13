@@ -7,13 +7,14 @@ import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { MemberDetails } from '../members/MemberDetails.js';
 import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob.js';
-import { EmailTemplateType } from './EmailTemplate.js';
+import { EmailTemplate, EmailTemplateType } from './EmailTemplate.js';
 
 export enum EmailRecipientFilterType {
     Members = 'Members',
     MemberParents = 'MemberParents',
     MemberUnverified = 'MemberUnverified',
     Orders = 'Orders',
+    ReceivableBalances = 'ReceivableBalances',
 }
 
 export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {
@@ -48,6 +49,13 @@ export class EmailRecipientSubfilter extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true })
     search: string | null = null;
+
+    /**
+     * In case the email is sent to a specific type of relation, we can filter that relation here.
+     * E.g. sending an email to organziations -> filter on who to email to for a specific organization (e.g. members with specific role)
+     */
+    @field({ decoder: StamhoofdFilterDecoder, nullable: true, ...NextVersion })
+    subfilter: StamhoofdFilter | null = null;
 }
 
 export class EmailRecipientFilter extends AutoEncoder {
@@ -106,11 +114,11 @@ export class Email extends AutoEncoder {
 
     getTemplateType() {
         for (const filter of this.recipientFilter.filters) {
-            if (filter.type === EmailRecipientFilterType.Members) {
-                return EmailTemplateType.SavedMembersEmail;
+            const d = EmailTemplate.getSavedForRecipient(filter.type);
+            if (d) {
+                return d;
             }
         }
-
         return null;
     }
 }

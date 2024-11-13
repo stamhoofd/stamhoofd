@@ -560,10 +560,20 @@ export class AuthenticatedStructures {
 
         const organizationIds = Formatter.uniqueArray(balances.filter(b => b.objectType === ReceivableBalanceType.organization).map(b => b.objectId));
         const organizations = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
-        const admins = await User.getAdmins(organizationIds, { verified: true });
+
+        const responsibilities = organizationIds.length > 0
+            ? (await MemberResponsibilityRecord.select()
+                    .where('organizationId', organizationIds)
+                    .where('endDate', null)
+                    .fetch())
+            : [];
+
         const organizationStructs = await this.organizations(organizations);
 
-        const memberIds = Formatter.uniqueArray(balances.filter(b => b.objectType === ReceivableBalanceType.member).map(b => b.objectId));
+        const memberIds = Formatter.uniqueArray([
+            ...balances.filter(b => b.objectType === ReceivableBalanceType.member).map(b => b.objectId),
+            ...responsibilities.map(r => r.memberId),
+        ]);
         const members = memberIds.length > 0 ? await Member.getBlobByIds(...memberIds) : [];
 
         const result: ReceivableBalanceStruct[] = [];
@@ -576,14 +586,28 @@ export class AuthenticatedStructures {
             if (balance.objectType === ReceivableBalanceType.organization) {
                 const organization = organizationStructs.find(o => o.id == balance.objectId) ?? null;
                 if (organization) {
-                    const thisAdmins = admins.filter(a => a.permissions && a.permissions.forOrganization(organization)?.hasAccessRight(AccessRight.OrganizationFinanceDirector));
+                    const theseResponsibilities = responsibilities.filter(r => r.organizationId === organization.id);
+                    const thisMembers = members.flatMap((m) => {
+                        const resp = theseResponsibilities.filter(r => r.memberId === m.id);
+                        return resp.length > 0
+                            ? [{
+                                    member: m,
+                                    responsibilities: resp,
+                                }]
+                            : [];
+                    });
+
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: organization.name,
-                        contacts: thisAdmins.map(a => ReceivableBalanceObjectContact.create({
-                            firstName: a.firstName ?? '',
-                            lastName: a.lastName ?? '',
-                            emails: [a.email],
+                        contacts: thisMembers.map(({ member, responsibilities }) => ReceivableBalanceObjectContact.create({
+                            firstName: member.firstName ?? '',
+                            lastName: member.lastName ?? '',
+                            emails: member.details.getMemberEmails(),
+                            meta: {
+                                responsibilityIds: responsibilities.map(r => r.responsibilityId),
+                                url: organization.dashboardUrl + '/boekhouding/openstaand/' + (Context.organization?.uri ?? ''),
+                            },
                         })),
                     });
                 }

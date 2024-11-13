@@ -18,9 +18,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, GlobalEventBus, ModernTableView, TableAction, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, EmailView, GlobalEventBus, ModernTableView, RecipientMultipleChoiceOption, TableAction, TableActionSelection, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { getReceivableBalanceTypeName, ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, getReceivableBalanceTypeName, isEmptyFilter, ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import ReceivableBalanceView from './ReceivableBalanceView.vue';
@@ -30,6 +30,7 @@ type ObjectType = ReceivableBalance;
 const $t = useTranslate();
 const present = usePresent();
 const owner = useRequestOwner();
+const platform = usePlatform();
 
 const title = computed(() => {
     return $t('e09c97db-85d7-40b0-8043-65fa24a09a01');
@@ -138,6 +139,68 @@ async function showBalance(item: ReceivableBalance) {
         modalDisplayStyle: 'popup',
     });
 }
+
+async function openMail(selection: TableActionSelection<ObjectType>) {
+    const filter = selection.filter.filter;
+    const search = selection.filter.search;
+
+    const option: RecipientMultipleChoiceOption = {
+        type: 'MultipleChoice',
+        options: [],
+        build: (selectedIds: string[]) => {
+            const q = EmailRecipientSubfilter.create({
+                type: EmailRecipientFilterType.ReceivableBalances,
+                filter,
+                search,
+                subfilter: {
+                    meta: {
+                        responsibilityIds: {
+                            $in: selectedIds,
+                        },
+                    },
+                },
+            });
+
+            return [
+                q,
+            ];
+        },
+    };
+
+    for (const responsibility of platform.value.config.responsibilities) {
+        if (!responsibility.organizationBased) {
+            continue;
+        }
+        option.options.push(
+            {
+                id: responsibility.id,
+                name: responsibility.name,
+            },
+        );
+    }
+
+    const displayedComponent = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(EmailView, {
+            recipientFilterOptions: [option],
+        }),
+    });
+    await present({
+        components: [
+            displayedComponent,
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+actions.push(new AsyncTableAction({
+    name: 'E-mailen',
+    icon: 'email',
+    priority: 12,
+    groupIndex: 3,
+    handler: async (selection: TableActionSelection<ObjectType>) => {
+        await openMail(selection);
+    },
+}));
 
 // Listen for patches in payments
 GlobalEventBus.addListener(owner, 'paymentPatch', () => {

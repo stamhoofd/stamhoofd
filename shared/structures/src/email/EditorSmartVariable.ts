@@ -168,7 +168,7 @@ export class EditorSmartVariable extends AutoEncoder {
             EditorSmartVariable.create({
                 id: 'outstandingBalance',
                 name: 'Openstaand bedrag',
-                example: '',
+                example: '€ 12,50',
                 deleteMessage: 'Je kan het openstaand bedrag van een lid enkel gebruiken als je één e-mail per lid verstuurt.',
             }),
             EditorSmartVariable.create({

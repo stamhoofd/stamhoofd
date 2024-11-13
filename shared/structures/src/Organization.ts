@@ -62,6 +62,10 @@ export class BaseOrganization extends AutoEncoder {
         return 'https://' + d;
     }
 
+    get dashboardUrl() {
+        return 'https://' + STAMHOOFD.domains.dashboard + '/beheerders/' + this.uri;
+    }
+
     get dashboardDomain(): string {
         return STAMHOOFD.domains.dashboard;
     }

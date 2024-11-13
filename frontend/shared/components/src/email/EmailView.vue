@@ -705,6 +705,7 @@ async function openTemplates() {
                         id: '',
                         ...current,
                         subject: subject.value,
+                        type
                     })
                     : null,
             }),

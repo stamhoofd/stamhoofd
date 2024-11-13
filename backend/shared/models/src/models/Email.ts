@@ -1,5 +1,5 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, SortItemDirection } from '@stamhoofd/structures';
+import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -95,8 +95,8 @@ export class Email extends Model {
     updatedAt: Date;
 
     static recipientLoaders: Map<EmailRecipientFilterType, {
-        fetch(request: LimitedFilteredRequest): Promise<PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>>;
-        count(request: LimitedFilteredRequest): Promise<number>;
+        fetch(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null): Promise<PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>>;
+        count(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null): Promise<number>;
     }> = new Map();
 
     throwIfNotReadyToSend() {
@@ -425,7 +425,7 @@ export class Email extends Model {
                         search: subfilter.search,
                     });
 
-                    const c = await loader.count(request);
+                    const c = await loader.count(request, subfilter.subfilter);
 
                     count += c;
                 }
@@ -499,7 +499,7 @@ export class Email extends Model {
 
                     while (request) {
                         console.log('Loading email page', subfilter.type, request);
-                        const response = await loader.fetch(request);
+                        const response = await loader.fetch(request, subfilter.subfilter);
 
                         count += response.results.length;
 
@@ -574,7 +574,7 @@ export class Email extends Model {
 
                     while (request) {
                         console.log('Loading email page', subfilter.type, request);
-                        const response = await loader.fetch(request);
+                        const response = await loader.fetch(request, subfilter.subfilter);
 
                         // Note: it is possible that a result in the database doesn't return a recipient (in memory filtering)
                         // so we do need pagination

@@ -233,11 +233,11 @@ function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, Stam
     return filter;
 }
 
-export function createInMemoryFilterCompiler(path: string): InMemoryFilterCompiler {
+export function createInMemoryFilterCompiler(path: string, overrideFilterDefinitions?: InMemoryFilterDefinitions): InMemoryFilterCompiler {
     const splitted = path.split('.');
 
     return (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
-        const runner = $andInMemoryFilterCompiler(filter, filters);
+        const runner = $andInMemoryFilterCompiler(filter, overrideFilterDefinitions ?? filters);
 
         return (object) => {
             const value = objectPathValue(object, splitted);

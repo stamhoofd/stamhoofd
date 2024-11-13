@@ -1,4 +1,5 @@
 import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from './InMemoryFilter.js';
+import { StamhoofdFilter } from './StamhoofdFilter.js';
 
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
@@ -22,4 +23,12 @@ export const documentInMemoryFilterCompilers: InMemoryFilterDefinitions = {
 
 export const checkoutInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
+};
+
+export const receivableBalanceObjectContactInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    meta: createInMemoryFilterCompiler('meta', {
+        ...baseInMemoryFilterCompilers,
+        responsibilityIds: createInMemoryFilterCompiler('responsibilityIds'),
+    }),
 };

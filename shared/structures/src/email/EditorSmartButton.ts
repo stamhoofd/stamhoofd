@@ -44,6 +44,13 @@ export class EditorSmartButton extends AutoEncoder {
         const buttons: EditorSmartButton[] = [];
 
         buttons.push(EditorSmartButton.create({
+            id: 'paymentUrl',
+            name: 'Knop om te betalen',
+            text: 'Betalen',
+            hint: 'Met deze knop kunnen ontvangers betalen.',
+        }));
+
+        buttons.push(EditorSmartButton.create({
             id: 'downloadUrl',
             name: 'Knop om te downloaden',
             text: 'Download',

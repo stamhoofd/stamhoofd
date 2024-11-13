@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { TranslateMethod } from './I18nInterface.js';
 import { BalanceItemWithPayments } from './BalanceItem.js';
@@ -27,6 +27,12 @@ export class ReceivableBalanceObjectContact extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     emails: string[] = [];
+
+    /**
+     * Meta data that is used for filtering who to email
+     */
+    @field({ decoder: AnyDecoder, nullable: true, ...NextVersion })
+    meta: any = null;
 }
 
 export class ReceivableBalanceObject extends AutoEncoder {
