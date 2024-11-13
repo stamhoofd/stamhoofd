@@ -32,6 +32,25 @@ export class PayconiqPayment extends Model {
             });
         }
 
+        if (organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production') {
+            const payment = await Payment.getByID(this.paymentId);
+            if (!payment) {
+                throw new SimpleError({
+                    code: '',
+                    message: 'Payment not found',
+                });
+            }
+
+            const age = (new Date().getTime() - new Date(payment.createdAt).getTime()) / 1000;
+
+            // 10 seconds pending
+            if (age < 10) {
+                return PaymentStatus.Pending;
+            }
+
+            return PaymentStatus.Succeeded;
+        }
+
         const response = await PayconiqPayment.request('GET', '/v3/payments/' + this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
         if (response.status) {
             switch (response.status) {

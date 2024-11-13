@@ -22,15 +22,16 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Payment,PaymentStatus } from '@stamhoofd/structures';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import EmailInput from '../inputs/EmailInput.vue';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import STFloatingFooter from '../navigation/STFloatingFooter.vue';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 
 @Component({
     components: {
@@ -38,32 +39,32 @@ import STFloatingFooter from '../navigation/STFloatingFooter.vue';
         STFloatingFooter,
         EmailInput,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
     },
     filters: {
-        price: Formatter.price.bind(Formatter)
-    }
+        price: Formatter.price.bind(Formatter),
+    },
 })
-export default class PayconiqBannerView extends Mixins(NavigationMixin){
+export default class PayconiqBannerView extends Mixins(NavigationMixin) {
     @Prop({})
-        paymentUrl: string;
+    paymentUrl: string;
 
     @Prop({ required: true })
-        initialPayment!: Payment
+    initialPayment!: Payment;
 
-    payment: Payment = this.initialPayment
-
-    @Prop({ required: true })
-        server: Server
+    payment: Payment = this.initialPayment;
 
     @Prop({ required: true })
-        finishedHandler: (payment: Payment | null) => void
+    server: Server;
 
-    pollCount = 0
-    timer: any = null
+    @Prop({ required: true })
+    finishedHandler: (payment: Payment | null) => void;
 
-    loading = false
-    canceling = false
+    pollCount = 0;
+    timer: any = null;
+
+    loading = false;
+    canceling = false;
 
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 3000);
@@ -79,20 +80,20 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             return;
         }
         this.canceling = true;
-        const paymentId = this.payment.id
+        const paymentId = this.payment.id;
         this.server
             .request({
-                method: "POST",
-                path: "/payments/" +paymentId,
+                method: 'POST',
+                path: '/payments/' + paymentId,
                 query: {
-                    cancel: true
+                    cancel: true,
                 },
                 decoder: Payment as Decoder<Payment>,
-            }).catch(console.error)
+            }).catch(console.error);
     }
 
     async shouldNavigateAway() {
-        if (await CenteredMessage.confirm("Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.", "Ik heb nog niet betaald")) {
+        if (await CenteredMessage.confirm('Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.', 'Ik heb nog niet betaald')) {
             this.cancel();
             return true;
         }
@@ -100,34 +101,34 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
     }
 
     get price() {
-        return this.payment?.price ?? 0
+        return this.payment?.price ?? 0;
     }
 
     poll() {
         this.timer = null;
-        const paymentId = this.payment.id
+        const paymentId = this.payment.id;
         this.server
             .request({
-                method: "POST",
-                path: "/payments/" +paymentId,
+                method: 'POST',
+                path: '/payments/' + paymentId,
                 decoder: Payment as Decoder<Payment>,
-            }).then(response => {
-                const payment = response.data
-                this.payment = payment
+            }).then((response) => {
+                const payment = response.data;
+                this.payment = payment;
 
                 if (payment.status === PaymentStatus.Succeeded) {
-                    this.finishedHandler(payment)
-                    this.dismiss({ force: true })
+                    this.finishedHandler(payment);
+                    this.dismiss({ force: true });
                 }
 
                 if (payment.status === PaymentStatus.Failed) {
                     // TODO: temporary message
-                    this.finishedHandler(payment)
-                    this.dismiss({ force: true })
+                    this.finishedHandler(payment);
+                    this.dismiss({ force: true });
                 }
-            }).catch(e => {
+            }).catch((e) => {
                 // too: handle this
-                console.error(e)
+                console.error(e);
             }).finally(() => {
                 this.pollCount++;
                 if (this.payment.status === PaymentStatus.Succeeded || this.payment.status === PaymentStatus.Failed) {
@@ -139,19 +140,18 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
     beforeUnmount() {
         if (this.timer) {
-            clearTimeout(this.timer)
-            this.timer = null
+            clearTimeout(this.timer);
+            this.timer = null;
         }
 
         if (this.payment.status !== PaymentStatus.Succeeded && this.payment.status !== PaymentStatus.Failed) {
-            this.finishedHandler(this.payment)
+            this.finishedHandler(this.payment);
         }
     }
 
     get qrCodeSrc() {
-        return "https://portal.payconiq.com/qrcode?s=L&c="+encodeURIComponent(this.paymentUrl);
+        return 'https://portal.payconiq.com/qrcode?s=L&c=' + encodeURIComponent(this.paymentUrl);
     }
-
 }
 </script>
 
@@ -169,8 +169,8 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
         --st-sheet-width: 380px;
 
         .payconiq-close {
-            color: $color-payconiq-dark-original;
-            position: absolute;
+            color: $color-payconiq-dark-original !important;
+            position: absolute !important;
             top: 15px;
             right: 15px;
         }

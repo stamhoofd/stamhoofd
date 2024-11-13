@@ -1,7 +1,7 @@
 <template>
     <LoadingView v-if="!order" />
     <div v-else class="st-view order-view box-shade">
-        <STNavigationBar :large="true" :sticky="false">
+        <STNavigationBar :large="true" :sticky="false" :left-logo="true">
             <template #left>
                 <OrganizationLogo :organization="organization" :webshop="webshop" />
             </template>

@@ -25,7 +25,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, useNavigationController, usePopup, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, PaymentHandler, PaymentSelectionList, SaveView, STErrorsDefault, Toast, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox, NavigationActions, PaymentHandler, PaymentSelectionList, SaveView, STErrorsDefault, Toast, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 
@@ -66,7 +66,7 @@ const organization = computed(() => webshopManager.organization);
 const isTrial = computed(() => organization.value.meta.packages.isWebshopsTrial);
 const paymentConfiguration = computed(() => webshop.value.meta.paymentConfiguration);
 
-function goToOrder(id: string, args: { dismiss: ReturnType<typeof useDismiss>; present: ReturnType<typeof usePresent> }) {
+async function goToOrder(id: string, args: NavigationActions) {
     // Force reload webshop (stock will have changed: prevent invalidating the cart)
     // Update stock in background
     webshopManager.reload().catch((e) => {
@@ -76,31 +76,31 @@ function goToOrder(id: string, args: { dismiss: ReturnType<typeof useDismiss>; p
     if (!popup) {
         // We are not in a popup: on mobile
         // So replace with a force instead of dimissing
-        args.present({
+        await args.present({
             components: [
                 new ComponentWithProperties(OrderView, { orderId: id, success: true }, {
                     provide: {
                         reactive_navigation_url: 'order/' + id,
-                    }
+                    },
                 }),
             ],
             replace: 1,
             force: true,
-            
-        }).catch(console.error);
+
+        });
     }
     else {
         // Desktop: push
-        args.dismiss({ force: true }).catch(console.error);
-        args.present({
+        await args.dismiss({ force: true })
+        await args.present({
             components: [
                 new ComponentWithProperties(OrderView, { orderId: id, success: true }, {
                     provide: {
                         reactive_navigation_url: 'order/' + id,
-                    }
+                    },
                 }),
             ],
-        }).catch(console.error);
+        });
     }
 }
 
@@ -134,14 +134,12 @@ async function goNext() {
                 organization: organization.value,
                 payment,
                 paymentUrl: response.data.paymentUrl,
-                // returnUrl: 'https://' + webshop.value.getUrl(organization.value) + '/payment?id=' + encodeURIComponent(payment.id),
-                // component: this,
                 transferSettings: webshopManager.webshop.meta.paymentConfiguration.transferSettings,
                 type: 'order',
                 navigate: navigationActions,
-            }, (_payment: Payment, args: { dismiss: ReturnType<typeof useDismiss>; present: ReturnType<typeof usePresent> }) => {
+            }, async (_payment: Payment, args: NavigationActions) => {
                 loading.value = false;
-                goToOrder(response.data.order.id, args);
+                await goToOrder(response.data.order.id, args);
             }, () => {
                 // failure
                 loading.value = false;
@@ -151,10 +149,7 @@ async function goNext() {
 
         // Go to success page
         loading.value = false;
-        goToOrder(response.data.order.id, {
-            dismiss,
-            present,
-        });
+        await goToOrder(response.data.order.id, navigationActions);
     }
     catch (e) {
         let error = e;
