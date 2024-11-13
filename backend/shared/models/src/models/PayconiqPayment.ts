@@ -32,7 +32,9 @@ export class PayconiqPayment extends Model {
             });
         }
 
-        if (organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production') {
+        const testMode = organization.privateMeta.useTestPayments ?? (STAMHOOFD.environment !== 'production');
+
+        if (testMode) {
             const payment = await Payment.getByID(this.paymentId);
             if (!payment) {
                 throw new SimpleError({
@@ -51,7 +53,7 @@ export class PayconiqPayment extends Model {
             return PaymentStatus.Succeeded;
         }
 
-        const response = await PayconiqPayment.request('GET', '/v3/payments/' + this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+        const response = await PayconiqPayment.request('GET', '/v3/payments/' + this.payconiqId, {}, apiKey, testMode);
         if (response.status) {
             switch (response.status) {
                 case 'AUTHORIZED': return PaymentStatus.Pending;
