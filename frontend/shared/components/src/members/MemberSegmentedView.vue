@@ -24,8 +24,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { SegmentedControl, TableActionsContextMenu, TableActionSelection, useAuth, useBackForward, useOrganization } from '@stamhoofd/components';
+import { ComponentWithProperties, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { SegmentedControl, TableActionsContextMenu, TableActionSelection, useAuth, useBackForward, useGlobalEventListener, useOrganization } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, markRaw, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
@@ -51,7 +51,7 @@ const props = withDefaults(
     }
 );
 const auth = useAuth();
-const show = useShow();
+const dismiss = useDismiss()
 const present = usePresent();
 const editMember = useEditMember();
 const organization = useOrganization();
@@ -140,4 +140,16 @@ async function showContextMenu(event: MouseEvent) {
 async function editThisMember() {
     await editMember(props.member);
 }
+
+useGlobalEventListener('members-deleted', async (members) => {
+    if (Array.isArray(members)) {
+        for (const member of members) {
+            if (member !== null && typeof member === 'object' && member.id === props.member.id) {
+                await dismiss({force: true})
+                return
+            }
+        }
+    }
+});
+
 </script>
