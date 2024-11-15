@@ -43,7 +43,7 @@
                         <Checkbox v-model="group.selected" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ group.group.settings.name }}<h3 />
+                        {{ group.group.settings.name }}
                     </h3>
                 </STListItem>
             </STList>
@@ -62,7 +62,7 @@
                         <Checkbox v-model="webshop.selected" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ webshop.webshop.meta.name }}<h3 />
+                        {{ webshop.webshop.meta.name }}
                     </h3>
                 </STListItem>
             </STList>

@@ -179,7 +179,8 @@ watch(modalStack, (modalStack) => {
     CenteredMessage.addListener(owner, async (centeredMessage) => {
         modalStack.present(
             {
-                components: [new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle('overlay')],
+                components: [new ComponentWithProperties(CenteredMessageView, { centeredMessage })],
+                modalDisplayStyle: 'overlay',
             },
         );
     });

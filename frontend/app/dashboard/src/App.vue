@@ -7,7 +7,7 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import { CenteredMessage, CenteredMessageView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox, uriToApp } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
@@ -115,6 +115,7 @@ async function checkGlobalRoutes() {
         }
     }
 }
+const manualPresent = useManualPresent()
 
 onMounted(async () => {
     if (!modalStack.value) {
@@ -125,10 +126,10 @@ onMounted(async () => {
 
     ModalStackEventBus.addListener(this, 'present', async (options: PushOptions | ComponentWithProperties) => {
         if (!(options as any).components) {
-            stack.present({ components: [options] });
+            await manualPresent(stack.present, { components: [options] });
         }
         else {
-            stack.present(options);
+            await manualPresent(stack.present, options);
         }
     });
 
@@ -138,10 +139,15 @@ onMounted(async () => {
     });
 
     CenteredMessage.addListener(this, async (centeredMessage) => {
-        stack.present({
+        await manualPresent(stack.present, {
             components: [
-                new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle('overlay'),
+                new ComponentWithProperties(CenteredMessageView, { 
+                    centeredMessage
+                }, {
+                    forceCanHaveFocus: true
+                }),
             ],
+            modalDisplayStyle: 'overlay'
         });
     });
 
