@@ -60,6 +60,10 @@
         <template v-if="groups.length > 0 || categories.length === 0">
             <hr>
             <h2>Groepen</h2>
+            <p class="error-box" v-if="categories.length > 0">
+                Je kan groepen niet combineren met categorieën op hetzelfde niveau. Verplaats deze groepen naar een categorie of verwijder ze.
+            </p>
+
             <STList v-model="draggableGroups" :draggable="true">
                 <template #item="{item: group}">
                     <GroupRow :group="group" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" />

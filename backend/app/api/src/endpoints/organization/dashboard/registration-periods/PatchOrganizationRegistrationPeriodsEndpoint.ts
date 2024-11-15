@@ -121,6 +121,20 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 }
             }
 
+            // Check if we have a category with groups and categories combined
+            if (patch.settings) {
+                for (const category of organizationPeriod.settings.categories) {
+                    if (category.groupIds.length && category.categoryIds.length) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'categories',
+                            message: 'Cannot have groups and categories combined',
+                            human: 'Een categorie kan niet zowel groepen als subcategorieën bevatten. Mogelijks zijn meerdere mensen tegelijk aanpassingen aan het maken aan de categorieën. Herlaadt de pagina en probeer opnieuw.',
+                        })
+                    }
+                }
+            }
+
             // #region handle locked categories
             if (!Context.auth.hasPlatformFullAccess()) {
                 const categoriesAfterPatch = organizationPeriod.settings.categories;
