@@ -446,16 +446,18 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     .where('membershipTypeId', put.membershipTypeId)
                     .where('periodId', put.periodId)
                     .where(
-                        SQL.where('startDate', SQLWhereSign.LessEqual, put.startDate)
-                            .and('endDate', SQLWhereSign.GreaterEqual, put.startDate),
-                    )
-                    .orWhere(
-                        SQL.where('startDate', SQLWhereSign.LessEqual, put.endDate)
-                            .and('endDate', SQLWhereSign.GreaterEqual, put.endDate),
-                    )
-                    .orWhere(
-                        SQL.where('startDate', SQLWhereSign.GreaterEqual, put.startDate)
-                            .and('endDate', SQLWhereSign.LessEqual, put.endDate),
+                        SQL.where(
+                            SQL.where('startDate', SQLWhereSign.LessEqual, put.startDate)
+                                .and('endDate', SQLWhereSign.GreaterEqual, put.startDate),
+                        )
+                        .or(
+                            SQL.where('startDate', SQLWhereSign.LessEqual, put.endDate)
+                                .and('endDate', SQLWhereSign.GreaterEqual, put.endDate),
+                        )
+                        .or(
+                            SQL.where('startDate', SQLWhereSign.GreaterEqual, put.startDate)
+                                .and('endDate', SQLWhereSign.LessEqual, put.endDate),
+                        )
                     )
                     .first(false);
 
