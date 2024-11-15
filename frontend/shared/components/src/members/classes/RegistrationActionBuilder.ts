@@ -164,9 +164,53 @@ export class RegistrationActionBuilder {
         ];
     }
 
+    getAdminActions(): TableAction<PlatformMember>[] {
+        if (this.registrations.length !== 1) {
+            return [];
+        }
+        const organizationId = this.registrations[0].organizationId
+        if (this.context.organization?.id === organizationId) {
+            return [];
+        }
+
+        if (this.context.auth.platformPermissions === null) {
+            return [];
+        }
+
+        const memberId = this.registrations[0].memberId
+        const registration =  this.registrations[0]
+        const member = this.members.find(m => m.id === memberId)
+        if (!member) {
+            return []
+        }
+        const organization = member.organizations.find(o => o.id === registration.organizationId)
+        if (!organization) {
+            return []
+        }
+
+        // Add quick switch action
+        return [
+            new InMemoryTableAction({
+                name: "Open beheerderportaal",
+                description: organization.name,
+                priority: 0,
+                groupIndex: 5,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                icon: 'external',
+                enabled: this.hasWrite,
+                handler: async () => {
+                    const href = '/beheerders/' + organization.uri
+                    window.open(href, '_blank')
+                }
+            })
+        ]
+    }
+
     getActions(): TableAction<PlatformMember>[] {
         return [
             ...this.getMoveAction(),
+            ...this.getAdminActions(),
             ...this.getEditAction(),
             ...this.getUnsubscribeAction()
         ]
