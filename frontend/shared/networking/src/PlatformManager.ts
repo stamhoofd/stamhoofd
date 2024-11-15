@@ -24,9 +24,13 @@ export class PlatformManager {
 
         $platform.setShared();
 
+        this.updateStyles()
+    }
+
+    updateStyles() {
         // Set color
-        if ($platform.config.color && app !== 'webshop') {
-            ColorHelper.setColor($platform.config.color);
+        if (this.$platform.config.color && this.$app !== 'webshop') {
+            ColorHelper.setColor(this.$platform.config.color);
         }
         this.setFavicon();
     }
@@ -86,6 +90,7 @@ export class PlatformManager {
 
     async forceUpdate() {
         this.$platform.deepSet(await PlatformManager.fetchPlatform(this.$context));
+        this.updateStyles();
         await this.savePlatform();
     }
 
@@ -112,6 +117,8 @@ export class PlatformManager {
 
         // Save platform in localstorage
         this.savePlatform().catch(console.error);
+
+        this.updateStyles();
     }
 
     async loadAdmins(force = false, shouldRetry?: boolean, owner?: any): Promise<void> {
