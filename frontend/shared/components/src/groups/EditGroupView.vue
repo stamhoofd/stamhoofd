@@ -671,6 +671,10 @@ const virtualOpenStatus = computed({
             }
         }
 
+        if (patched.value.status !== props.group.status) {
+            return patched.value.status;
+        }
+
         if (patched.value.closed && props.group.closed) {
             return GroupStatus.Closed;
         }
@@ -920,7 +924,7 @@ const useRegistrationEndDate = computed({
         else {
             addPatch({
                 settings: GroupSettings.patch({
-                    registrationEndDate: props.group.settings.registrationEndDate ?? new Date(),
+                    registrationEndDate: props.group.settings.registrationEndDate ?? new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
                 }),
             });
         }
