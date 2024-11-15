@@ -1,5 +1,9 @@
 <template>
     <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
+        <template #buttons>
+            <button class="button icon add" type="button" @click="addResponsibility" v-tooltip="'Functie toevoegen'" />
+        </template>
+
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
