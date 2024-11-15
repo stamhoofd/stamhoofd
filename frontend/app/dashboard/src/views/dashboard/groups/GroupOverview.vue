@@ -324,6 +324,7 @@ function getResponsibilityFilter(responsibility: MemberResponsibility) {
                 group: {
                     id: props.group.id,
                 },
+                endDate: null
             },
         },
     };
