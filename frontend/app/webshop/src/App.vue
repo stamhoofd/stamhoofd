@@ -9,7 +9,7 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -161,6 +161,7 @@ function created() {
 }
 
 created();
+const manualPresent = useManualPresent()
 
 watch(modalStack, (modalStack) => {
     if (modalStack === null) {
@@ -177,12 +178,16 @@ watch(modalStack, (modalStack) => {
     });
 
     CenteredMessage.addListener(owner, async (centeredMessage) => {
-        modalStack.present(
-            {
-                components: [new ComponentWithProperties(CenteredMessageView, { centeredMessage })],
-                modalDisplayStyle: 'overlay',
-            },
-        );
+        await manualPresent(modalStack.present, {
+            components: [
+                new ComponentWithProperties(CenteredMessageView, { 
+                    centeredMessage
+                }, {
+                    forceCanHaveFocus: true
+                }),
+            ],
+            modalDisplayStyle: 'overlay'
+        });
     });
 });
 </script>

@@ -143,8 +143,13 @@ export default class App extends VueComponent {
             }
             (this.$refs.modalStack as any).present({
                 components: [
-                    new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay")
-                ]
+                    new ComponentWithProperties(CenteredMessageView, { 
+                        centeredMessage
+                    }, {
+                        forceCanHaveFocus: true
+                    }),
+                ],
+                modalDisplayStyle: 'overlay'
             })
         })
     }
