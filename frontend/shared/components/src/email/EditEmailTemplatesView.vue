@@ -60,9 +60,14 @@
         </p>
 
         <p v-if="tab === 'userGenerated'">
-            <button class="button text" type="button" @click="addTemplate">
+            <button class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedMembersEmail)" v-if="types.includes(EmailTemplateType.SavedMembersEmail)">
                 <span class="icon add" />
-                <span>Nieuwe template</span>
+                <span>Nieuwe template naar leden</span>
+            </button>
+
+            <button class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedReceivableBalancesEmail)" v-if="cachedOutstandingBalancesEnabled && types.includes(EmailTemplateType.SavedReceivableBalancesEmail)">
+                <span class="icon add" />
+                <span>Nieuwe template naar openstaande bedragen</span>
             </button>
         </p>
     </SaveView>
@@ -71,7 +76,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useContext, useErrors, useOrganization, usePatchArray } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useContext, useErrors, useFeatureFlag, useOrganization, usePatchArray } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Group } from '@stamhoofd/structures';
@@ -118,6 +123,8 @@ const pop = usePop();
 const saving = ref(false);
 const $t = useTranslate();
 loadTemplates().catch(console.error);
+
+const cachedOutstandingBalancesEnabled = useFeatureFlag()('cached-outstanding-balances');
 
 const tabItems = props.onSelect
     ? [
@@ -238,10 +245,10 @@ async function editEmail(emailTemplate: EmailTemplate) {
     });
 }
 
-async function addTemplate() {
+async function addTemplate(type: EmailTemplateType) {
     const template = EmailTemplate.create({
         id: '',
-        type: EmailTemplateType.SavedMembersEmail,
+        type,
     });
     await editEmail(template);
 }
