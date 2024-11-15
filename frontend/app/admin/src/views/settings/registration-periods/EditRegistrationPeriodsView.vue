@@ -1,6 +1,5 @@
 <template>
-    <LoadingView v-if="loading" />
-    <SaveView v-else :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" :loadingView="loading">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
@@ -50,7 +49,7 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, RegistrationPeriod } from '@stamhoofd/structures';
+import { RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
 import RegistrationPeriodRow from './components/RegistrationPeriodRow.vue';

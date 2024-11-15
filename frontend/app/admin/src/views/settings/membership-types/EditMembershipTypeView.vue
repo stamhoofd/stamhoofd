@@ -1,6 +1,5 @@
 <template>
-    <LoadingView v-if="loading" />
-    <SaveView v-else :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
+    <SaveView :loadingView="loading" :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -71,7 +70,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, SaveView, Toast, useErrors, usePatch, Dropdown, TagIdsInput } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, Dropdown, ErrorBox, SaveView, TagIdsInput, Toast, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';

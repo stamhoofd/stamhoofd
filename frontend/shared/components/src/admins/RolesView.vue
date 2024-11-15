@@ -1,6 +1,5 @@
 <template>
-    <LoadingView v-if="loading" />
-    <SaveView v-else class="st-view background" title="Rollen" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :loadingView="loading" :error-box="errors.errorBox" class="st-view background" title="Rollen" :loading="saving" :disabled="!hasChanges" @save="save">
         <template #buttons>
             <button class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
         </template>
@@ -69,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import { type AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { type AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, SaveView, Toast, useDraggableArray, useOrganization, usePlatform } from '@stamhoofd/components';
 import { Group, MemberResponsibility, PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';

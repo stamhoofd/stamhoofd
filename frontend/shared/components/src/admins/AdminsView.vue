@@ -1,129 +1,130 @@
 <template>
-    <LoadingBox :show="loading" />
-    <div v-if="!loading" class="st-view background">
-        <STNavigationBar title="Beheerders" />
+    <LoadingViewTransition>
+        <div v-if="!loading" class="st-view background">
+            <STNavigationBar title="Beheerders" />
 
-    
-        <main class="center">
-            <h1>Beheerders</h1>
-            <p>{{ $t('ac3b2a14-e029-404c-9fe1-2aab4279a3ac') }}</p>
+        
+            <main class="center">
+                <h1>Beheerders</h1>
+                <p>{{ $t('ac3b2a14-e029-404c-9fe1-2aab4279a3ac') }}</p>
 
-            <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        Functies beheren
-                    </h2>
-                    <p class="style-description">
-                        Voeg functies toe en stel de toegangsrechten voor elke functie in.
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                <STList class="illustration-list">    
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            Functies beheren
+                        </h2>
+                        <p class="style-description">
+                            Voeg functies toe en stel de toegangsrechten voor elke functie in.
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
 
-            <hr>
-            <h2>Interne beheerders (leden)</h2>
-            <p>Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.</p>
+                <hr>
+                <h2>Interne beheerders (leden)</h2>
+                <p>Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.</p>
 
-            <p v-if="sortedMembers.length === 0" class="info-box">
-                Deze groep heeft nog geen interne beheerders. 
-            </p>
-            <STList v-else>
-                <STListItem v-for="member in sortedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
-                    <template #left>
-                        <span v-if="memberHasFullAccess(member)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
-                            <span class="icon user-admin-layer-1" />
-                            <span class="icon user-admin-layer-2 yellow" />
-                        </span>
-                        <span v-else-if="memberHasNoRoles(member)" v-tooltip="'Heeft geen rol'" class="icon layered">
-                            <span class="icon user-blocked-layer-1" />
-                            <span class="icon user-blocked-layer-2 red" />
-                        </span>
-                        <span v-else class="icon user" />
-                    </template>
+                <p v-if="sortedMembers.length === 0" class="info-box">
+                    Deze groep heeft nog geen interne beheerders. 
+                </p>
+                <STList v-else>
+                    <STListItem v-for="member in sortedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
+                        <template #left>
+                            <span v-if="memberHasFullAccess(member)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
+                                <span class="icon user-admin-layer-1" />
+                                <span class="icon user-admin-layer-2 yellow" />
+                            </span>
+                            <span v-else-if="memberHasNoRoles(member)" v-tooltip="'Heeft geen rol'" class="icon layered">
+                                <span class="icon user-blocked-layer-1" />
+                                <span class="icon user-blocked-layer-2 red" />
+                            </span>
+                            <span v-else class="icon user" />
+                        </template>
 
-                    <h2 class="style-title-list">
-                        <span>{{ member.patchedMember.name }}</span>
-                    </h2>
-                    <p class="style-description-small">
-                        {{ member.patchedMember.users.filter(u => u.memberId === member.id).map(u => u.email).join(', ') }}
-                    </p>
-                    <p class="style-description-small">
-                        {{ Formatter.joinLast(member.getResponsibilities(organization).map(l => l.getName(member, false)), ', ', ' en ') }}
-                    </p>
+                        <h2 class="style-title-list">
+                            <span>{{ member.patchedMember.name }}</span>
+                        </h2>
+                        <p class="style-description-small">
+                            {{ member.patchedMember.users.filter(u => u.memberId === member.id).map(u => u.email).join(', ') }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ Formatter.joinLast(member.getResponsibilities(organization).map(l => l.getName(member, false)), ', ', ' en ') }}
+                        </p>
 
-                    <template #right>
-                        <span v-if="member.id === me?.memberId" class="style-tag">
-                            Ik
-                        </span>
-                        <span v-else-if="!member.patchedMember.users.find(u => u.hasAccount)" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
-                        <span><span class="icon gray edit" /></span>
-                    </template>
-                </STListItem>
-            </STList>
+                        <template #right>
+                            <span v-if="member.id === me?.memberId" class="style-tag">
+                                Ik
+                            </span>
+                            <span v-else-if="!member.patchedMember.users.find(u => u.hasAccount)" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+                </STList>
 
-            <hr>
-            <h2 class="style-with-button">
-                <div>Externe beheerders</div>
-                <div>
-                    <button type="button" class="button icon add" @click="createAdmin" />
-                </div>
-            </h2>
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Externe beheerders</div>
+                    <div>
+                        <button type="button" class="button icon add" @click="createAdmin" />
+                    </div>
+                </h2>
 
-            <p>Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).</p>
-            <p class="info-box">
-                Opgelet, deze beheerders zijn ook niet aangesloten bij de koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.
-            </p>
+                <p>Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).</p>
+                <p class="info-box">
+                    Opgelet, deze beheerders zijn ook niet aangesloten bij de koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.
+                </p>
 
 
-            <p v-if="sortedAdmins.length === 0" class="info-box">
-                Deze groep heeft nog geen externe beheerders. Nodig iemand uit om beheerder te worden.
-            </p>
+                <p v-if="sortedAdmins.length === 0" class="info-box">
+                    Deze groep heeft nog geen externe beheerders. Nodig iemand uit om beheerder te worden.
+                </p>
 
-            <STList v-else>
-                <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
-                    <template #left>
-                        <span v-if="hasFullAccess(admin)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
-                            <span class="icon user-admin-layer-1" />
-                            <span class="icon user-admin-layer-2 yellow" />
-                        </span>
-                        <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen rol'" class="icon layered">
-                            <span class="icon user-blocked-layer-1" />
-                            <span class="icon user-blocked-layer-2 red" />
-                        </span>
-                        <span v-else class="icon user" />
-                    </template>
+                <STList v-else>
+                    <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
+                        <template #left>
+                            <span v-if="hasFullAccess(admin)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
+                                <span class="icon user-admin-layer-1" />
+                                <span class="icon user-admin-layer-2 yellow" />
+                            </span>
+                            <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen rol'" class="icon layered">
+                                <span class="icon user-blocked-layer-1" />
+                                <span class="icon user-blocked-layer-2 red" />
+                            </span>
+                            <span v-else class="icon user" />
+                        </template>
 
-                    <h2 class="style-title-list">
-                        <span>{{ admin.name || admin.email }}</span>
-                    </h2>
-                    <p class="style-description-small">
-                        {{ admin.email }}
-                    </p>
-                    <p class="style-description-small">
-                        {{ permissionList(admin) }}
-                    </p>
+                        <h2 class="style-title-list">
+                            <span>{{ admin.name || admin.email }}</span>
+                        </h2>
+                        <p class="style-description-small">
+                            {{ admin.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(admin) }}
+                        </p>
 
-                    <template #right>
-                        <span v-if="admin.id === me?.id" class="style-tag">
-                            Ik
-                        </span>
-                        <span v-else-if="!admin.hasAccount" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
-                        <span><span class="icon gray edit" /></span>
-                    </template>
-                </STListItem>
-            </STList>
-        </main>
-    </div>
+                        <template #right>
+                            <span v-if="admin.id === me?.id" class="style-tag">
+                                Ik
+                            </span>
+                            <span v-else-if="!admin.hasAccount" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+                </STList>
+            </main>
+        </div>
+    </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EditResponsibilitiesView, LoadingBox, useOrganization, useUser } from '@stamhoofd/components';
+import { EditResponsibilitiesView, LoadingViewTransition, useOrganization, useUser } from '@stamhoofd/components';
 import { PermissionLevel, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions } from 'vue';

@@ -1,33 +1,34 @@
 <template>
-    <LoadingView v-if="loading" />
-    <STList v-else>
-        <STListItem v-if="nullable" :selectable="true" element-name="label">
-            <template #left>
-                <Checkbox v-model="allGroups" />
-            </template>
-            <h3 class="style-title-list">
-                {{ $t('07d642d2-d04a-4d96-b155-8dbdb1a9e4ff') }}
-            </h3>
-        </STListItem>
-
-        <template v-if="model !== null">
-            <STListItem v-for="option of options" :key="option.group.id" :selectable="option.isEnabled && !option.isLocked" element-name="label">
+    <LoadingBoxTransition>
+        <STList v-if="!loading">
+            <STListItem v-if="nullable" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox :model-value="getGroupValue(option.group)" :disabled="!option.isEnabled || option.isLocked" @update:model-value="setGroupValue(option.group, $event)" />
+                    <Checkbox v-model="allGroups" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ option.group.name }}
+                    {{ $t('07d642d2-d04a-4d96-b155-8dbdb1a9e4ff') }}
                 </h3>
-                <p v-if="option.group.description" class="style-description-small">
-                    {{ option.group.description }}
-                </p>
             </STListItem>
-        </template>
-    </STList>
+
+            <template v-if="model !== null">
+                <STListItem v-for="option of options" :key="option.group.id" :selectable="option.isEnabled && !option.isLocked" element-name="label">
+                    <template #left>
+                        <Checkbox :model-value="getGroupValue(option.group)" :disabled="!option.isEnabled || option.isLocked" @update:model-value="setGroupValue(option.group, $event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ option.group.name }}
+                    </h3>
+                    <p v-if="option.group.description" class="style-description-small">
+                        {{ option.group.description }}
+                    </p>
+                </STListItem>
+            </template>
+        </STList>
+    </LoadingBoxTransition>
 </template>
 
 <script setup lang="ts">
-import { useOrganization, usePlatform } from '@stamhoofd/components';
+import { LoadingBoxTransition, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { GroupType, NamedObject, RegistrationPeriodList } from '@stamhoofd/structures';
 import { computed, Ref, ref, watch, watchEffect } from 'vue';

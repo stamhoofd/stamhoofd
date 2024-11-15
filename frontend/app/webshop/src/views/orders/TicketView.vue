@@ -1,18 +1,19 @@
 <template>
-    <LoadingView v-if="loading" />
-    <div v-else class="st-view ticket-view">
-        <STNavigationBar v-if="!$isMobile" :large="!true" :sticky="false">
-            <template #left>
-                <OrganizationLogo :organization="organization" />
-            </template>
-        </STNavigationBar>
-    </div>
+    <LoadingViewTransition>
+        <div v-if="!loading"> class="st-view ticket-view">
+            <STNavigationBar v-if="!$isMobile" :large="!true" :sticky="false">
+                <template #left>
+                    <OrganizationLogo :organization="organization" />
+                </template>
+            </STNavigationBar>
+        </div>
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { DetailedTicketView, LoadingView, OrganizationLogo, STNavigationBar, Toast, useIsMobile } from '@stamhoofd/components';
+import { DetailedTicketView, LoadingViewTransition, OrganizationLogo, STNavigationBar, Toast, useIsMobile } from '@stamhoofd/components';
 import { TicketPublic } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import { useWebshopManager } from '../../composables/useWebshopManager';

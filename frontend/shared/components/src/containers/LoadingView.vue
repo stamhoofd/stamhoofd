@@ -1,5 +1,5 @@
 <template>
-    <LoadingBox :appear="true" :show="show" :errorBox="errorBox" />
+    <LoadingBox :appear="true" :show="show" :errorBox="errorBox" :view="true" />
 </template>
 
 

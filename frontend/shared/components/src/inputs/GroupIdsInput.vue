@@ -1,51 +1,52 @@
 <template>
-    <LoadingView v-if="loading" />
-    <div v-else class="container">
-        <hr>
-        <h2 class="style-with-button">
-            <span>{{ title }}</span>
-            <div>
-                <button v-long-press="(e) => switchCycle(e)" type="button" class="button text" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
-                    {{ period.name }}
-                    <span class="icon arrow-down-small" />
-                </button>
-            </div>
-        </h2>
+    <LoadingBoxTransition>
+        <div v-if="!loading" class="container">
+            <hr>
+            <h2 class="style-with-button">
+                <span>{{ title }}</span>
+                <div>
+                    <button v-long-press="(e) => switchCycle(e)" type="button" class="button text" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
+                        {{ period.name }}
+                        <span class="icon arrow-down-small" />
+                    </button>
+                </div>
+            </h2>
 
 
-        <STList v-if="nullable || groups.length > 0">
-            <STListItem v-if="nullable" :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox v-model="allGroups" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('07d642d2-d04a-4d96-b155-8dbdb1a9e4ff') }}
-                </h3>
-            </STListItem>
-
-            <template v-if="model !== null">
-                <STListItem v-for="group of groups" :key="group.id" :selectable="true" element-name="label">
+            <STList v-if="nullable || groups.length > 0">
+                <STListItem v-if="nullable" :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox :model-value="getGroupValue(group)" @update:model-value="setGroupValue(group, $event)" />
+                        <Checkbox v-model="allGroups" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ group.name }}
+                        {{ $t('07d642d2-d04a-4d96-b155-8dbdb1a9e4ff') }}
                     </h3>
-                    <p v-if="group.description" class="style-description-small">
-                        {{ group.description }}
-                    </p>
                 </STListItem>
-            </template>
-        </STList>
 
-        <p v-if="groups.length === 0" class="info-box">
-            Geen groepen beschikbaar in dit werkjaar
-        </p>
-    </div>
+                <template v-if="model !== null">
+                    <STListItem v-for="group of groups" :key="group.id" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox :model-value="getGroupValue(group)" @update:model-value="setGroupValue(group, $event)" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ group.name }}
+                        </h3>
+                        <p v-if="group.description" class="style-description-small">
+                            {{ group.description }}
+                        </p>
+                    </STListItem>
+                </template>
+            </STList>
+
+            <p v-if="groups.length === 0" class="info-box">
+                Geen groepen beschikbaar in dit werkjaar
+            </p>
+        </div>
+    </LoadingBoxTransition>
 </template>
 
 <script setup lang="ts">
-import { ContextMenu, ContextMenuItem, useOrganization, usePlatform } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, LoadingBoxTransition, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { GroupType, NamedObject, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

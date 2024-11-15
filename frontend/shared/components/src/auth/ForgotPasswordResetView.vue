@@ -1,7 +1,6 @@
 <template>
-    <div class="forgot-password-reset-view-container">
-        <LoadingView v-if="loadingSession" key="loadingView" />
-        <form v-else key="form" class="forgot-password-reset-view st-view" @submit.prevent="submit">
+    <LoadingViewTransition>
+        <form v-if="!loadingSession" key="form" class="forgot-password-reset-view st-view" @submit.prevent="submit">
             <STNavigationBar :title="title" />
             <main>
                 <h1>{{ title }}</h1>
@@ -46,18 +45,17 @@
                 </SignupPoliciesBox>
             </main>
         </form>
-    </div>
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingView, PasswordStrength, ReplaceRootEventBus, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
+import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingViewTransition, PasswordStrength, ReplaceRootEventBus, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { NewUser, Token } from '@stamhoofd/structures';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
-import { reactive } from 'vue';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -71,7 +69,7 @@ import { reactive } from 'vue';
         Checkbox,
         Spinner,
         PasswordStrength,
-        LoadingView,
+        LoadingViewTransition,
         SignupPoliciesBox
     }
 })

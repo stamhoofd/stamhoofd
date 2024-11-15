@@ -1,11 +1,12 @@
 <template>
-    <LoadingView v-if="!payableBalanceCollection" :error-box="errors.errorBox" />
-    <PayableBalanceCollectionView v-else :collection="payableBalanceCollection" :single-organization="false" />
+    <LoadingViewTransition :error-box="errors.errorBox" >
+        <PayableBalanceCollectionView v-if="payableBalanceCollection" :collection="payableBalanceCollection" :single-organization="false" />
+    </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { PayableBalanceCollectionView, ErrorBox, useContext, useErrors } from '@stamhoofd/components';
+import { PayableBalanceCollectionView, ErrorBox, useContext, useErrors, LoadingViewTransition } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';

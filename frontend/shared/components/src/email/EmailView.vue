@@ -1,103 +1,104 @@
 <template>
-    <LoadingView v-if="creatingEmail || !email || !patchedEmail" :error-box="errors.errorBox" />
-    <EditorView v-else ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="send">
-        <h1 class="style-navigation-title">
-            Nieuwe e-mail
-        </h1>
+    <LoadingViewTransition :error-box="errors.errorBox">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="send">
+            <h1 class="style-navigation-title">
+                Nieuwe e-mail
+            </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox" />
 
-        <!-- Buttons -->
-        <template #buttons>
-            <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
-                <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
-                <span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
-            </label>
+            <!-- Buttons -->
+            <template #buttons>
+                <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
+                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
+                    <span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
+                </label>
 
-            <hr v-if="canOpenTemplates">
-            <button v-if="canOpenTemplates" v-tooltip="'Templates'" class="button icon email-template" type="button" @click="openTemplates" />
-        </template>
+                <hr v-if="canOpenTemplates">
+                <button v-if="canOpenTemplates" v-tooltip="'Templates'" class="button icon email-template" type="button" @click="openTemplates" />
+            </template>
 
-        <!-- List -->
-        <template #list>
-            <STListItem class="no-padding right-stack">
-                <div class="list-input-box">
-                    <span>Aan:</span>
+            <!-- List -->
+            <template #list>
+                <STListItem class="no-padding right-stack">
+                    <div class="list-input-box">
+                        <span>Aan:</span>
 
-                    <div v-if="onlyOption" class="list-input">
-                        {{ toDescription }}
+                        <div v-if="onlyOption" class="list-input">
+                            {{ toDescription }}
+                        </div>
+                        <button v-else class="list-input dropdown" type="button" @click="showToMenu">
+                            <span>{{ toDescription }}</span>
+                            <span class="icon arrow-down-small gray" />
+                        </button>
                     </div>
-                    <button v-else class="list-input dropdown" type="button" @click="showToMenu">
-                        <span>{{ toDescription }}</span>
-                        <span class="icon arrow-down-small gray" />
-                    </button>
-                </div>
-                <template #right>
-                    <span v-if="patchedEmail.recipientCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.recipientCount) }}</span>
-                    <span v-else class="style-placeholder-skeleton" />
-                </template>
-            </STListItem>
-            <STListItem class="no-padding" element-name="label">
-                <div class="list-input-box">
-                    <span>Onderwerp:</span>
-                    <input id="mail-subject" v-model="subject" class="list-input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
-                </div>
-            </STListItem>
-            <STListItem v-if="emails.length > 0" class="no-padding" element-name="label">
-                <div class="list-input-box">
-                    <span>Van:</span>
-
-                    <div class="input-icon-container right icon arrow-down-small gray">
-                        <select v-model="selectedEmailAddress" class="list-input">
-                            <option v-for="e in emails" :key="e.id" :value="e">
-                                {{ e.name ? (e.name+" <"+e.email+">") : e.email }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-
-                <template v-if="auth.hasFullAccess()" #right>
-                    <button class="button text" type="button" @click="manageEmails">
-                        <span class="icon settings" />
-                    </button>
-                </template>
-            </STListItem>
-        </template>
-
-        <!-- Editor footer -->
-        <template #footer>
-            <!-- E-mail attachments -->
-            <STList v-if="patchedEmail.attachments.length > 0">
-                <STListItem v-for="attachment in patchedEmail.attachments" :key="attachment.id" class="file-list-item">
-                    <template #left>
-                        <span :class="'icon '+getFileIcon(attachment)" />
-                    </template>
-                    <h3 class="style-title-list" v-text="attachment.filename" />
-                    <p class="style-description-small">
-                        {{ Formatter.fileSize(attachment.bytes) }}
-                    </p>
-
                     <template #right>
-                        <button class="button icon gray trash" type="button" @click.stop="deleteAttachment(attachment)" />
+                        <span v-if="patchedEmail.recipientCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.recipientCount) }}</span>
+                        <span v-else class="style-placeholder-skeleton" />
                     </template>
                 </STListItem>
-            </STList>
-        </template>
+                <STListItem class="no-padding" element-name="label">
+                    <div class="list-input-box">
+                        <span>Onderwerp:</span>
+                        <input id="mail-subject" v-model="subject" class="list-input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
+                    </div>
+                </STListItem>
+                <STListItem v-if="emails.length > 0" class="no-padding" element-name="label">
+                    <div class="list-input-box">
+                        <span>Van:</span>
 
-        <!-- Warnings and errors -->
-        <template v-if="emails.length === 0">
-            <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
-                Stel eerst jouw e-mailadressen in
-                <span class="button text inherit-color">
-                    <span class="icon settings" />
-                    <span>Wijzigen</span>
-                </span>
-            </p>
-            <p v-else class="warning-box">
-                Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
-            </p>
-        </template>
-    </EditorView>
+                        <div class="input-icon-container right icon arrow-down-small gray">
+                            <select v-model="selectedEmailAddress" class="list-input">
+                                <option v-for="e in emails" :key="e.id" :value="e">
+                                    {{ e.name ? (e.name+" <"+e.email+">") : e.email }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <template v-if="auth.hasFullAccess()" #right>
+                        <button class="button text" type="button" @click="manageEmails">
+                            <span class="icon settings" />
+                        </button>
+                    </template>
+                </STListItem>
+            </template>
+
+            <!-- Editor footer -->
+            <template #footer>
+                <!-- E-mail attachments -->
+                <STList v-if="patchedEmail.attachments.length > 0">
+                    <STListItem v-for="attachment in patchedEmail.attachments" :key="attachment.id" class="file-list-item">
+                        <template #left>
+                            <span :class="'icon '+getFileIcon(attachment)" />
+                        </template>
+                        <h3 class="style-title-list" v-text="attachment.filename" />
+                        <p class="style-description-small">
+                            {{ Formatter.fileSize(attachment.bytes) }}
+                        </p>
+
+                        <template #right>
+                            <button class="button icon gray trash" type="button" @click.stop="deleteAttachment(attachment)" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <!-- Warnings and errors -->
+            <template v-if="emails.length === 0">
+                <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
+                    Stel eerst jouw e-mailadressen in
+                    <span class="button text inherit-color">
+                        <span class="icon settings" />
+                        <span>Wijzigen</span>
+                    </span>
+                </p>
+                <p v-else class="warning-box">
+                    Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
+                </p>
+            </template>
+        </EditorView>
+    </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">
@@ -117,6 +118,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
+import { LoadingViewTransition } from '../containers';
 
 export type RecipientChooseOneOption = {
     type: 'ChooseOne';

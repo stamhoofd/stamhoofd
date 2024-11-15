@@ -1,117 +1,118 @@
 <template>
-    <LoadingView v-if="loadingRegisterCode" />
-    <form v-else id="signup-general-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Nieuwe vereniging" />
+    <LoadingViewTransition>
+        <form v-if="!loadingRegisterCode"  id="signup-general-view" class="st-view" @submit.prevent="goNext">
+            <STNavigationBar title="Nieuwe vereniging" />
 
-        <main>
-            <h1>
-                {{ $t("92f76d54-282e-448e-ae15-21411b7bc085") }}
-            </h1>
-            <p>
-                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
-            </p>
-            <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
-                {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }}
-                <span class="button text" type="button">
-                    Log dan hier in
-                </span>
-            </button>
+            <main>
+                <h1>
+                    {{ $t("92f76d54-282e-448e-ae15-21411b7bc085") }}
+                </h1>
+                <p>
+                    Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
+                </p>
+                <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
+                    {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }}
+                    <span class="button text" type="button">
+                        Log dan hier in
+                    </span>
+                </button>
 
-            <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
-                Je ontvangt {{ formatPrice(validatedRegisterCode.value) }} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
-            </p>
-            <p v-else-if="validatedRegisterCode" class="success-box icon gift">
-                {{ validatedRegisterCode.customMessage }}
-            </p>
+                <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
+                    Je ontvangt {{ formatPrice(validatedRegisterCode.value) }} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
+                </p>
+                <p v-else-if="validatedRegisterCode" class="success-box icon gift">
+                    {{ validatedRegisterCode.customMessage }}
+                </p>
 
-            <p v-if="reuseRegisterCode" class="warning-box">
-                {{ $t('5e60cf0f-5489-4e90-8dab-97c56c2e989c') }}
-            </p>
+                <p v-if="reuseRegisterCode" class="warning-box">
+                    {{ $t('5e60cf0f-5489-4e90-8dab-97c56c2e989c') }}
+                </p>
 
-            <STErrorsDefault :error-box="errorBox" />
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Naam van jouw vereniging" error-fields="name" :error-box="errorBox">
-                        <input
-                            id="organization-name"
-                            ref="firstInput"
-                            v-model="name"
-                            class="input"
-                            type="text"
-                            placeholder="De naam van je vereniging"
-                            autocomplete="organization"
-                        >
-                    </STInputBox>
+                <STErrorsDefault :error-box="errorBox" />
+                <div class="split-inputs">
+                    <div>
+                        <STInputBox title="Naam van jouw vereniging" error-fields="name" :error-box="errorBox">
+                            <input
+                                id="organization-name"
+                                ref="firstInput"
+                                v-model="name"
+                                class="input"
+                                type="text"
+                                placeholder="De naam van je vereniging"
+                                autocomplete="organization"
+                            >
+                        </STInputBox>
 
-                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
-                    <p class="style-description-small">
-                        Geen adres? Vul dan een adres in dat in de buurt ligt
-                    </p>
-                </div>
+                        <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
+                        <p class="style-description-small">
+                            Geen adres? Vul dan een adres in dat in de buurt ligt
+                        </p>
+                    </div>
 
-                <div>
-                    <STInputBox title="Type vereniging" error-fields="type" :error-box="errorBox">
-                        <Dropdown v-model="type">
-                            <option :value="null" disabled>
-                                Maak een keuze
-                            </option>
-
-                            <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
-                                <option v-for="_type in group.types" :key="_type.value" :value="_type.value">
-                                    {{ _type.name }}
+                    <div>
+                        <STInputBox title="Type vereniging" error-fields="type" :error-box="errorBox">
+                            <Dropdown v-model="type">
+                                <option :value="null" disabled>
+                                    Maak een keuze
                                 </option>
-                            </optgroup>
-                        </Dropdown>
-                    </STInputBox>
-                    <p class="style-description-small">
-                        Hiermee stellen we automatisch al enkele instellingen goed in.
-                    </p>
 
-                    <STInputBox v-if="type === 'Youth' && isBelgium" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
-                        <Dropdown v-model="umbrellaOrganization">
-                            <option :value="null" disabled>
-                                Maak een keuze
-                            </option>
-                            <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
-                                {{ item.name }}
-                            </option>
-                        </Dropdown>
-                    </STInputBox>
+                                <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
+                                    <option v-for="_type in group.types" :key="_type.value" :value="_type.value">
+                                        {{ _type.name }}
+                                    </option>
+                                </optgroup>
+                            </Dropdown>
+                        </STInputBox>
+                        <p class="style-description-small">
+                            Hiermee stellen we automatisch al enkele instellingen goed in.
+                        </p>
+
+                        <STInputBox v-if="type === 'Youth' && isBelgium" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
+                            <Dropdown v-model="umbrellaOrganization">
+                                <option :value="null" disabled>
+                                    Maak een keuze
+                                </option>
+                                <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
+                                    {{ item.name }}
+                                </option>
+                            </Dropdown>
+                        </STInputBox>
+                    </div>
                 </div>
-            </div>
 
-            <template v-if="!validatedRegisterCode">
-                <hr>
-                <h2>Hoe ken je Stamhoofd?</h2>
+                <template v-if="!validatedRegisterCode">
+                    <hr>
+                    <h2>Hoe ken je Stamhoofd?</h2>
 
-                <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
-                    Op aanraden van andere vereniging / persoon
-                </Checkbox>
-                <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
-                    Gezien bij andere vereniging
-                </Checkbox>
-                <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
-                    Via sociale media
-                </Checkbox>
-                <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
-                    Via opzoekwerk (bv. Google)
-                </Checkbox>
-                <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
-                    Andere
-                </Checkbox>
-            </template>
-        </main>
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
+                        Op aanraden van andere vereniging / persoon
+                    </Checkbox>
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
+                        Gezien bij andere vereniging
+                    </Checkbox>
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
+                        Via sociale media
+                    </Checkbox>
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
+                        Via opzoekwerk (bv. Google)
+                    </Checkbox>
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
+                        Andere
+                    </Checkbox>
+                </template>
+            </main>
 
-        <STToolbar>
-            <template #right>
-                <LoadingButton :loading="loading">
-                    <button class="button primary" type="submit" @click.prevent="goNext">
-                        Vereniging aanmaken
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </form>
+            <STToolbar>
+                <template #right>
+                    <LoadingButton :loading="loading">
+                        <button class="button primary" type="submit" @click.prevent="goNext">
+                            Vereniging aanmaken
+                        </button>
+                    </LoadingButton>
+                </template>
+            </STToolbar>
+        </form>
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts">
@@ -119,7 +120,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, LoadingView, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
+import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, LoadingViewTransition, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, Storage } from '@stamhoofd/networking';
 import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
@@ -139,7 +140,7 @@ import SignupAccountView from './SignupAccountView.vue';
         LoadingButton,
         Checkbox,
         Dropdown,
-        LoadingView,
+        LoadingViewTransition,
     },
     metaInfo() {
         return {

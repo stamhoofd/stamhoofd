@@ -1,38 +1,39 @@
 <template>
-    <LoadingBox :show="loading" :error-box="errorBox" />
-    <div v-if="actions.length" class="container" key="view">
-        <hr>
-        <h2>
-            Snelle acties
-        </h2>
+    <LoadingBoxTransition :error-box="errorBox" v-if="actions.length || loading">
+        <div v-if="actions.length" class="container" key="view">
+            <hr>
+            <h2>
+                Snelle acties
+            </h2>
 
-        <STList>
-            <STListItem v-for="action of actions" class="left-center right-stack" :selectable="true" @click="action.action">
-                <template #left>
-                    <component :is="action.leftComponent" v-if="action.leftComponent" />
-                    <img v-else :src="action.illustration" class="style-illustration-img">
-                </template>
-                <h3 class="style-title-list">
-                    {{ action.title }}
-                </h3>
-                <p v-if="action.description" class="style-description-small">
-                    {{ action.description }}
-                </p>
+            <STList>
+                <STListItem v-for="action of actions" class="left-center right-stack" :selectable="true" @click="action.action">
+                    <template #left>
+                        <component :is="action.leftComponent" v-if="action.leftComponent" />
+                        <img v-else :src="action.illustration" class="style-illustration-img">
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ action.title }}
+                    </h3>
+                    <p v-if="action.description" class="style-description-small">
+                        {{ action.description }}
+                    </p>
 
-                <template #right>
-                    <span :class="action.rightTextClass ?? ''" v-if="action.rightText">
-                        {{ action.rightText }}
-                    </span>
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
-        </STList>
-    </div>
+                    <template #right>
+                        <span :class="action.rightTextClass ?? ''" v-if="action.rightText">
+                            {{ action.rightText }}
+                        </span>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+        </div>
+    </LoadingBoxTransition>
 </template>
 
 <script setup lang="ts">
 import { computed, unref } from 'vue';
-import LoadingBox from '../containers/LoadingBox.vue';
+import { LoadingBoxTransition } from '../containers';
 import { QuickActions } from './classes/QuickActions';
 
 const props = defineProps<{

@@ -1,52 +1,53 @@
 <template>
-    <LoadingView v-if="loading || !seatingPlan" />
-    <div v-else class="st-view webshop-seating-view">
-        <STNavigationBar title="Zaaloverzicht">
-            <template v-if="hasFullPermissions" #right>
-                <button class="icon navigation edit button" type="button" @click="editSeatingPlan" />
-            </template>
-        </STNavigationBar>
+    <LoadingViewTransition>
+        <div v-if="!loading && seatingPlan" class="st-view webshop-seating-view">
+            <STNavigationBar title="Zaaloverzicht">
+                <template v-if="hasFullPermissions" #right>
+                    <button class="icon navigation edit button" type="button" @click="editSeatingPlan" />
+                </template>
+            </STNavigationBar>
 
-        <main>
-            <h1 class="style-navigation-title">
-                Zaaloverzicht
-            </h1>
+            <main>
+                <h1 class="style-navigation-title">
+                    Zaaloverzicht
+                </h1>
 
-            <button v-if="selectedProduct && availableProducts.length > 1" class="button text inline" type="button" @click="chooseProduct">
-                <span>{{ selectedProduct.name }}</span>
-                <span class="icon arrow-down-small" />
-            </button>
+                <button v-if="selectedProduct && availableProducts.length > 1" class="button text inline" type="button" @click="chooseProduct">
+                    <span>{{ selectedProduct.name }}</span>
+                    <span class="icon arrow-down-small" />
+                </button>
 
-            <p v-if="webshop !== null && selectedProduct && duplicateSeats.length" class="error-box">
-                Dubbele boekingen gedetecteerd voor plaatsen: {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
-            </p>
+                <p v-if="webshop !== null && selectedProduct && duplicateSeats.length" class="error-box">
+                    Dubbele boekingen gedetecteerd voor plaatsen: {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
+                </p>
 
-            <div v-for="section of sections" :key="section.id" class="container">
-                <hr>
-                <h2>{{ section.name }}</h2>
+                <div v-for="section of sections" :key="section.id" class="container">
+                    <hr>
+                    <h2>{{ section.name }}</h2>
 
-                <div>
-                    <SeatSelectionBox
-                        v-if="seatingPlan && section"
-                        :seating-plan="seatingPlan"
-                        :seating-plan-section="section"
-                        :reserved-seats="reservedSeats"
-                        :seats="highlightedSeats"
-                        :highlight-seats="scannedSeats"
-                        :on-click-seat="onClickSeat"
-                        :on-hover-seat="onHoverSeat"
-                        :admin="true"
-                    />
+                    <div>
+                        <SeatSelectionBox
+                            v-if="seatingPlan && section"
+                            :seating-plan="seatingPlan"
+                            :seating-plan-section="section"
+                            :reserved-seats="reservedSeats"
+                            :seats="highlightedSeats"
+                            :highlight-seats="scannedSeats"
+                            :on-click-seat="onClickSeat"
+                            :on-hover-seat="onHoverSeat"
+                            :admin="true"
+                        />
+                    </div>
                 </div>
-            </div>
-        </main>
-    </div>
+            </main>
+        </div>
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox, STNavigationBar, Toast, useContext, useIsMobile } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, LoadingViewTransition, SeatSelectionBox, STNavigationBar, Toast, useContext, useIsMobile } from '@stamhoofd/components';
 import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';

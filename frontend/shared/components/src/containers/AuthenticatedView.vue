@@ -1,10 +1,11 @@
 <template>
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
     <div class="authenticated-view">
-        <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
-        <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
-        <LoadingView v-else-if="hasToken" key="loadingView" :error-box="errorBox" />
-        <ComponentWithPropertiesInstance v-else :key="loginRoot.key" :component="loginRoot" />
+        <LoadingViewTransition :error-box="errorBox">
+            <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
+            <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
+            <ComponentWithPropertiesInstance v-else-if="!hasToken" :key="loginRoot.key" :component="loginRoot" />
+        </LoadingViewTransition>
     </div>
 </template>
 
@@ -12,13 +13,13 @@
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
-import LoadingView from "./LoadingView.vue";
 import { ErrorBox } from "../errors/ErrorBox";
+import LoadingViewTransition from "./LoadingViewTransition.vue";
 
 @Component({
     components: {
         ComponentWithPropertiesInstance,
-        LoadingView
+        LoadingViewTransition,
     }
 })
 export default class AuthenticatedView extends VueComponent {

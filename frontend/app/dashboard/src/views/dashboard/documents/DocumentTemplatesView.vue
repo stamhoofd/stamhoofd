@@ -1,55 +1,56 @@
 <template>
-    <LoadingView v-if="loading" />
-    <div v-else id="documents-view" class="st-view background">
-        <STNavigationBar title="Documenten" />
+    <LoadingViewTransition>
+        <div v-if="!loading" id="documents-view" class="st-view background">
+            <STNavigationBar title="Documenten" />
 
-        <main class="center">
-            <h1 class="style-navigation-title">
-                Documenten
-            </h1>
+            <main class="center">
+                <h1 class="style-navigation-title">
+                    Documenten
+                </h1>
 
-            <p v-if="disableActivities" class="error-box">
-                Deze functie is niet beschikbaar omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.
-            </p>
+                <p v-if="disableActivities" class="error-box">
+                    Deze functie is niet beschikbaar omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.
+                </p>
 
-            <p class="style-description">
-                Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
-            </p>
+                <p class="style-description">
+                    Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
+                </p>
 
-            <p class="info-box" v-if="!enabled">
-                Deze functie komt binnenkort beschikbaar!
-            </p>
+                <p class="info-box" v-if="!enabled">
+                    Deze functie komt binnenkort beschikbaar!
+                </p>
 
-            <STList>
-                <STListItem v-for="template of templates" :key="template.id" :selectable="true" class="right-stack" @click="openTemplate(template)">
-                    <h2 class="style-title-list">
-                        {{ template.settings.name }}
-                    </h2>
-                    <p class="style-description-small">
-                        Aangemaakt op {{ formatDate(template.createdAt) }}
-                    </p>
+                <STList>
+                    <STListItem v-for="template of templates" :key="template.id" :selectable="true" class="right-stack" @click="openTemplate(template)">
+                        <h2 class="style-title-list">
+                            {{ template.settings.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            Aangemaakt op {{ formatDate(template.createdAt) }}
+                        </p>
 
-                    <template #right>
-                        <span v-if="template.status === 'Draft'" class="style-tag">Klad</span>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                        <template #right>
+                            <span v-if="template.status === 'Draft'" class="style-tag">Klad</span>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
 
-            <p class="style-button-bar" v-if="enabled">
-                <button type="button" class="button text" @click="addDocument">
-                    <span class="icon add" />
-                    <span class="text">Nieuw document</span>
-                </button>
-            </p>
-        </main>
-    </div>
+                <p class="style-button-bar" v-if="enabled">
+                    <button type="button" class="button text" @click="addDocument">
+                        <span class="icon add" />
+                        <span class="text">Nieuw document</span>
+                    </button>
+                </p>
+            </main>
+        </div>
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { LoadingView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useRequiredOrganization } from '@stamhoofd/components';
+import { LoadingViewTransition, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useRequiredOrganization } from '@stamhoofd/components';
 import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

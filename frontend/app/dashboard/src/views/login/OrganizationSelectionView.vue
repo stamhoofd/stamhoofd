@@ -1,76 +1,77 @@
 <template>
-    <LoadingView v-if="loadingDefault" />
-    <div v-else>
-        <STGradientBackground v-if="!platform.config.horizontalLogo" />
+    <LoadingViewTransition>
+        <div v-if="!loadingDefault">
+            <STGradientBackground v-if="!platform.config.horizontalLogo" />
 
-        <div class="st-view">
-            <STNavigationBar :large="!isNative" class="transparent" title="Beheer jouw groep" />
+            <div class="st-view">
+                <STNavigationBar :large="!isNative" class="transparent" title="Beheer jouw groep" />
 
-            <main class="flex center small organization-selection-view">
-                <h1>
-                    {{ $t('24a048f6-3c97-4c80-87b7-eccc244b5d12') }}
-                </h1>
+                <main class="flex center small organization-selection-view">
+                    <h1>
+                        {{ $t('24a048f6-3c97-4c80-87b7-eccc244b5d12') }}
+                    </h1>
 
-                <p class="style-description-block style-description-large">
-                    {{ $t('b4307772-62dd-48a4-bae3-9d46df314727') }}
-                </p>
+                    <p class="style-description-block style-description-large">
+                        {{ $t('b4307772-62dd-48a4-bae3-9d46df314727') }}
+                    </p>
 
-                <form class="input-icon-container icon search gray" @submit.prevent>
-                    <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
-                </form>
+                    <form class="input-icon-container icon search gray" @submit.prevent>
+                        <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
+                    </form>
 
-                <div v-if="showVersionFooter" class="version-box">
-                    <VersionFooter />
-                </div>
+                    <div v-if="showVersionFooter" class="version-box">
+                        <VersionFooter />
+                    </div>
 
-                <Spinner v-else-if="loadingResults" class="gray center" />
-                <template v-else>
-                    <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
-                        <ContextLogo :organization="option.organization" :app="option.app" />
-                        <div>
-                            <h1>{{ getAppTitle(option.app, option.organization) }}</h1>
+                    <Spinner v-else-if="loadingResults" class="gray center" />
+                    <template v-else>
+                        <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
+                            <ContextLogo :organization="option.organization" :app="option.app" />
+                            <div>
+                                <h1>{{ getAppTitle(option.app, option.organization) }}</h1>
 
-                            <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
-                                {{ getAppDescription(option.app, option.organization) }}
-                            </p>
-                            <p v-if="option.userDescription" class="style-description-small style-em">
-                                Ingelogd als {{ option.userDescription }}
-                            </p>
+                                <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
+                                    {{ getAppDescription(option.app, option.organization) }}
+                                </p>
+                                <p v-if="option.userDescription" class="style-description-small style-em">
+                                    Ingelogd als {{ option.userDescription }}
+                                </p>
 
-                            <span v-if="option.userDescription" class="icon gray sync floating" />
-                            <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
-                            <span v-if="isPlatform && option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
-                        </div>
-                    </button>
-                </template>
+                                <span v-if="option.userDescription" class="icon gray sync floating" />
+                                <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
+                                <span v-if="isPlatform && option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
+                            </div>
+                        </button>
+                    </template>
 
-                <p v-if="!loadingResults && visibleOptions.length === 0 && query" class="info-box">
-                    Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
-                </p>
+                    <p v-if="!loadingResults && visibleOptions.length === 0 && query" class="info-box">
+                        Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
+                    </p>
 
-                <footer v-if="!isPlatform">
-                    <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
-                        <span class="icon add" />
-                        <span>Mijn vereniging aansluiten</span>
-                    </a>
+                    <footer v-if="!isPlatform">
+                        <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
+                            <span class="icon add" />
+                            <span>Mijn vereniging aansluiten</span>
+                        </a>
 
-                    <button class="button text full" type="button" @click="help">
-                        <span class="icon help" />
-                        <span>Mijn vereniging staat er niet tussen</span>
-                    </button>
-                </footer>
+                        <button class="button text full" type="button" @click="help">
+                            <span class="icon help" />
+                            <span>Mijn vereniging staat er niet tussen</span>
+                        </button>
+                    </footer>
 
-                <PlatformFooter />
-            </main>
+                    <PlatformFooter />
+                </main>
+            </div>
         </div>
-    </div>
+    </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, getAppDescription, getAppTitle, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
+import { ContextLogo, getAppDescription, getAppTitle, Option, PlatformFooter, Spinner, LoadingViewTransition, STGradientBackground, Toast, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';

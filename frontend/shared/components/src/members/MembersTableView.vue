@@ -1,27 +1,28 @@
 <template>
-    <LoadingView v-if="loading" />
-    <ModernTableView
-        v-else
-        ref="modernTableView"
-        :table-object-fetcher="tableObjectFetcher"
-        :filter-builders="filterBuilders"
-        :title="title"
-        :column-configuration-id="configurationId"
-        :default-filter="defaultFilter"
-        :actions="actions"
-        :all-columns="allColumns"
-        :estimated-rows="estimatedRows"
-        @click="showMember"
-    >
-        <template #empty>
-            Geen leden ingeschreven
-        </template>
-    </ModernTableView>
+    <LoadingViewTransition>
+        <ModernTableView
+            v-if="!loading"
+            ref="modernTableView"
+            :table-object-fetcher="tableObjectFetcher"
+            :filter-builders="filterBuilders"
+            :title="title"
+            :column-configuration-id="configurationId"
+            :default-filter="defaultFilter"
+            :actions="actions"
+            :all-columns="allColumns"
+            :estimated-rows="estimatedRows"
+            @click="showMember"
+        >
+            <template #empty>
+                Geen leden ingeschreven
+            </template>
+        </ModernTableView>
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';

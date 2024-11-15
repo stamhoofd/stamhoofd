@@ -1,41 +1,42 @@
 <template>
-    <LoadingView v-if="showLoading" class="check-update-loading-view" />
-    <div v-else class="st-view check-update-view">
-        <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true" />
+    <LoadingViewTransition>
+        <div v-if="!showLoading" class="st-view check-update-view">
+            <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true" />
 
-        <main class="flex">
-            <h1 v-if="status.options.customText">
-                {{ status.options.customText }}
-            </h1>
-            <h1 v-else-if="status.status === 'checking'">
-                Controleren op updates...
-            </h1>
-            <h1 v-else-if="status.status === 'downloading'">
-                Nieuwe functionaliteiten in elkaar timmeren...
-            </h1>
-            <h1 v-else-if="status.status === 'installing'">
-                Nieuwe functionaliteiten klaarzetten...
-            </h1>
+            <main class="flex">
+                <h1 v-if="status.options.customText">
+                    {{ status.options.customText }}
+                </h1>
+                <h1 v-else-if="status.status === 'checking'">
+                    Controleren op updates...
+                </h1>
+                <h1 v-else-if="status.status === 'downloading'">
+                    Nieuwe functionaliteiten in elkaar timmeren...
+                </h1>
+                <h1 v-else-if="status.status === 'installing'">
+                    Nieuwe functionaliteiten klaarzetten...
+                </h1>
 
-            <div class="comment-box">
-                <p v-for="(text, index) in texts" :key="index" class="style-description" :class="{down: index === nextTextIndex, up: index !== visibleText && index !== nextTextIndex}">
-                    {{ text }}
-                </p>
-            </div>
-
-            <div class="progress" :class="{ hide: status.progress !== null && status.progress >= 1 }">
-                <div class="progress-transform-box" :style="{transform: transform }">
-                    <div :style="{ width: width}" />
+                <div class="comment-box">
+                    <p v-for="(text, index) in texts" :key="index" class="style-description" :class="{down: index === nextTextIndex, up: index !== visibleText && index !== nextTextIndex}">
+                        {{ text }}
+                    </p>
                 </div>
-            </div>
-        </main>
-    </div>
+
+                <div class="progress" :class="{ hide: status.progress !== null && status.progress >= 1 }">
+                    <div class="progress-transform-box" :style="{transform: transform }">
+                        <div :style="{ width: width}" />
+                    </div>
+                </div>
+            </main>
+        </div>
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { LoadingView, Spinner, STNavigationBar } from '@stamhoofd/components';
+import { LoadingViewTransition, Spinner, STNavigationBar } from '@stamhoofd/components';
 
 import { UpdateStatus } from "./UpdateStatus";
 
@@ -43,7 +44,7 @@ import { UpdateStatus } from "./UpdateStatus";
     components: {
         Spinner,
         STNavigationBar,
-        LoadingView
+        LoadingViewTransition
     }
 })
 export default class CheckUpdateView extends Mixins(NavigationMixin) {

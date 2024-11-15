@@ -1,8 +1,9 @@
 <template>
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
-    <div class="st-view promise-view">
-        <LoadingBox key="promiseLoadingView" :error-box="errorBox" :show="!root" :appear="true" />
-        <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
+    <div class="promise-view">
+        <LoadingViewTransition :errorBox="errorBox">
+            <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
+        </LoadingViewTransition>
     </div>
 </template>
 
@@ -11,12 +12,12 @@ import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMix
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import LoadingBox from './LoadingBox.vue';
+import LoadingViewTransition from './LoadingViewTransition.vue';
 
 @Component({
     components: {
         ComponentWithPropertiesInstance,
-        LoadingBox,
+        LoadingViewTransition,
     },
 })
 export default class PromiseView extends Mixins(NavigationMixin) {

@@ -1,12 +1,11 @@
 <template>
-    <SaveView :loading="saving" title="Betaalmethodes" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" title="Betaalmethodes" :disabled="!hasChanges" @save="save" :loadingView="loadingStripeAccounts">
         <h1>
             Betaalaccounts
         </h1>
 
         <p>Koppel betaalaccounts via <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">Stripe</a> of <a class="inline-link" :href="$domains.getDocs('payconiq')" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">Meer info</a>.</p>
 
-        <LoadingView :show="loadingStripeAccounts" />
         <STErrorsDefault :error-box="errorBox" />
 
         <template v-if="isBuckarooActive">
@@ -346,7 +345,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     saving = false;
     temp_organization = this.$organization;
     loadingMollie = false;
-    loadingStripeAccounts = false;
+    loadingStripeAccounts = true;
     creatingStripeAccount = false;
     stripeAccounts: StripeAccount[] = [];
     mollieProfiles: MollieProfile[] = [];

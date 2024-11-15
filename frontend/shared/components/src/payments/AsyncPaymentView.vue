@@ -1,6 +1,7 @@
 <template>
-    <LoadingView v-if="!loadedPayment" :error-box="errors.errorBox" />
-    <PaymentView v-else :payment="loadedPayment" />
+    <LoadingViewTransition :error-box="errors.errorBox">
+        <PaymentView v-if="loadedPayment" :payment="loadedPayment" />
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts" setup>
@@ -8,6 +9,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Payment, PaymentGeneral } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
+import { LoadingViewTransition } from '../containers';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useContext } from '../hooks';

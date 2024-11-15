@@ -1,75 +1,76 @@
 <template>
-    <LoadingView v-if="loadingStripeAccounts" />
-    <div v-else class="container">
-        <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" title="Betaalaccount" error-fields="stripeAccountId">
-            <Dropdown v-model="stripeAccountId">
-                <option v-if="hasMollieOrBuckaroo" :value="null">
-                    {{ mollieOrBuckarooName }}
-                </option>
-                <option v-else :value="null">
-                    Geen
-                </option>
-                <option v-for="account in stripeAccounts" :key="account.id" :value="account.id">
-                    {{ account.meta.settings.dashboard.display_name }} - {{ account.meta.business_profile.name }}, xxxx {{ account.meta.bank_account_last4 }} - {{ account.accountId }}
-                </option>
-            </Dropdown>
-        </STInputBox>
-        <p v-if="stripeAccountObject && stripeAccountObject.warning" :class="stripeAccountObject.warning.type + '-box'">
-            {{ stripeAccountObject.warning.text }}
-            <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                Meer info
-            </a>
-        </p>
-
-        <STList>
-            <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)">
-                <template #left>
-                    <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ getName(method) }}
-                </h3>
-                <p v-if="getPaymentMethod(method) && getDescription(method)" class="style-description-small pre-wrap" v-text="getDescription(method)" />
-                <p v-if="getPaymentMethod(method) && getSettingsDescription(method)" class="style-description-small pre-wrap" v-text="getSettingsDescription(method)" />
-
-                <template #right>
-                    <button v-if="getPaymentMethod(method)" class="icon button settings" type="button" @click="editPaymentMethodSettings(method)" />
-                </template>
-            </STListItem>
-        </STList>
-
-        <template v-if="showAdministrationFee">
-            <hr>
-            <h2>Administratiekosten</h2>
-            <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
-
-            <div class="split-inputs">
-                <STInputBox title="Vaste kost" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                    <PriceInput v-model="fixed" :min="0" placeholder="Vaste kost" :required="true" />
-                </STInputBox>
-
-                <STInputBox title="Percentage" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
-                    <PermyriadInput v-model="percentage" placeholder="Percentage" :required="true" />
-                </STInputBox>
-            </div>
-
-            <Checkbox v-if="fixed > 0" v-model="zeroIfZero">
-                Reken geen administratiekosten aan als het totaalbedrag 0 euro is
-            </Checkbox>
-
-            <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
-                Voorbeeld: de aangerekende administratiekost bedraagt {{ formatPrice(exampleAdministrationFee1) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue1) }}, en {{ formatPrice(exampleAdministrationFee2) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue2) }}.
+    <LoadingBoxTransition :loading="loadingStripeAccounts">
+        <div class="container">
+            <STErrorsDefault :error-box="errors.errorBox" />
+            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" title="Betaalaccount" error-fields="stripeAccountId">
+                <Dropdown v-model="stripeAccountId">
+                    <option v-if="hasMollieOrBuckaroo" :value="null">
+                        {{ mollieOrBuckarooName }}
+                    </option>
+                    <option v-else :value="null">
+                        Geen
+                    </option>
+                    <option v-for="account in stripeAccounts" :key="account.id" :value="account.id">
+                        {{ account.meta.settings.dashboard.display_name }} - {{ account.meta.business_profile.name }}, xxxx {{ account.meta.bank_account_last4 }} - {{ account.accountId }}
+                    </option>
+                </Dropdown>
+            </STInputBox>
+            <p v-if="stripeAccountObject && stripeAccountObject.warning" :class="stripeAccountObject.warning.type + '-box'">
+                {{ stripeAccountObject.warning.text }}
+                <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
+                    Meer info
+                </a>
             </p>
-        </template>
-    </div>
+
+            <STList>
+                <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)">
+                    <template #left>
+                        <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ getName(method) }}
+                    </h3>
+                    <p v-if="getPaymentMethod(method) && getDescription(method)" class="style-description-small pre-wrap" v-text="getDescription(method)" />
+                    <p v-if="getPaymentMethod(method) && getSettingsDescription(method)" class="style-description-small pre-wrap" v-text="getSettingsDescription(method)" />
+
+                    <template #right>
+                        <button v-if="getPaymentMethod(method)" class="icon button settings" type="button" @click="editPaymentMethodSettings(method)" />
+                    </template>
+                </STListItem>
+            </STList>
+
+            <template v-if="showAdministrationFee">
+                <hr>
+                <h2>Administratiekosten</h2>
+                <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
+
+                <div class="split-inputs">
+                    <STInputBox title="Vaste kost" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
+                        <PriceInput v-model="fixed" :min="0" placeholder="Vaste kost" :required="true" />
+                    </STInputBox>
+
+                    <STInputBox title="Percentage" error-fields="administrationFee.fixed" :error-box="errors.errorBox">
+                        <PermyriadInput v-model="percentage" placeholder="Percentage" :required="true" />
+                    </STInputBox>
+                </div>
+
+                <Checkbox v-if="fixed > 0" v-model="zeroIfZero">
+                    Reken geen administratiekosten aan als het totaalbedrag 0 euro is
+                </Checkbox>
+
+                <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
+                    Voorbeeld: de aangerekende administratiekost bedraagt {{ formatPrice(exampleAdministrationFee1) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue1) }}, en {{ formatPrice(exampleAdministrationFee2) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue2) }}.
+                </p>
+            </template>
+        </div>
+    </LoadingBoxTransition>
 </template>
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, Dropdown, ErrorBox, LoadingView, PermyriadInput, PriceInput, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useCountry, useErrors, useRequiredOrganization, useValidation, Validator } from '@stamhoofd/components';
+import { Checkbox, Dropdown, ErrorBox, LoadingBoxTransition, PermyriadInput, PriceInput, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useCountry, useErrors, useRequiredOrganization, useValidation, Validator } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AdministrationFeeSettings, Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';

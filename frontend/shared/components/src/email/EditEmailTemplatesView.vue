@@ -1,6 +1,5 @@
 <template>
-    <LoadingView v-if="loading" :error-box="errors.errorBox" />
-    <SaveView v-else :title="viewTitle" :loading="saving" :save-text="onSelect ? 'Sluiten' : 'Opslaan'" @save="save">
+    <SaveView :loadingView="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? 'Sluiten' : 'Opslaan'" @save="save">
         <h1>{{ viewTitle }}</h1>
         <SegmentedControl v-if="tabItems.length > 1" v-model="tab" :items="tabItems.map(i => i.id)" :labels="tabItems.map(i => i.label)" />
 
