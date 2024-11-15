@@ -54,7 +54,7 @@ export class EmailRecipientSubfilter extends AutoEncoder {
      * In case the email is sent to a specific type of relation, we can filter that relation here.
      * E.g. sending an email to organziations -> filter on who to email to for a specific organization (e.g. members with specific role)
      */
-    @field({ decoder: StamhoofdFilterDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StamhoofdFilterDecoder, nullable: true, version: 346 })
     subfilter: StamhoofdFilter | null = null;
 }
 

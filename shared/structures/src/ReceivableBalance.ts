@@ -31,7 +31,7 @@ export class ReceivableBalanceObjectContact extends AutoEncoder {
     /**
      * Meta data that is used for filtering who to email
      */
-    @field({ decoder: AnyDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: AnyDecoder, nullable: true, version: 346 })
     meta: any = null;
 }
 
