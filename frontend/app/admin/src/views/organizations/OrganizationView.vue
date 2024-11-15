@@ -192,7 +192,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, MemberCountSpan, SetupStepRows, Toast, useAuth, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
@@ -341,6 +341,8 @@ async function deleteMe() {
             shouldRetry: false,
             owner,
         });
+
+        GlobalEventBus.sendEvent('organizations-deleted', [props.organization]).catch(console.error);
         await pop({ force: true });
     }
     catch (e) {
