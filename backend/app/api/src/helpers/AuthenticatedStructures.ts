@@ -574,7 +574,7 @@ export class AuthenticatedStructures {
             ...balances.filter(b => b.objectType === ReceivableBalanceType.member).map(b => b.objectId),
             ...responsibilities.map(r => r.memberId),
         ]);
-        const members = memberIds.length > 0 ? await Member.getBlobByIds(...memberIds) : [];
+        const members = memberIds.length > 0 ? await Member.getByIDs(...memberIds) : [];
 
         const result: ReceivableBalanceStruct[] = [];
         for (const balance of balances) {
@@ -623,13 +623,6 @@ export class AuthenticatedStructures {
                                 firstName: member.details.firstName ?? '',
                                 lastName: member.details.lastName ?? '',
                                 emails: member.details.getMemberEmails(),
-                            }),
-                            ...member.users.filter(u => !member.details.getMemberEmails().includes(u.email)).map((a) => {
-                                return ReceivableBalanceObjectContact.create({
-                                    firstName: a.firstName ?? '',
-                                    lastName: a.lastName ?? '',
-                                    emails: [a.email],
-                                });
                             }),
                         ],
                     });
