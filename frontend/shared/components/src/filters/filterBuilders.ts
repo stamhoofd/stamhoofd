@@ -1,5 +1,5 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { SessionContext, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
@@ -12,6 +12,7 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoice
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from './UIFilter';
+import { AppType } from '../context';
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
@@ -918,7 +919,7 @@ export function useGetOrganizationUIFilterBuilders() {
 }
 
 // Events
-export function getEventUIFilterBuilders(platform: Platform, organizations: Organization[]) {
+export function getEventUIFilterBuilders(platform: Platform, organizations: Organization[], app: AppType | 'auto') {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     const groupFilter = new MultipleChoiceFilterBuilder({
@@ -980,6 +981,22 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
             },
         });
         all.push(groupFilter);
+    }
+
+    if (app !== 'registration') {
+        const typeFilter = new MultipleChoiceFilterBuilder({
+            name: 'Type',
+            options: [
+                ...platform.config.eventTypes.map(type => new MultipleChoiceUIFilterOption(type.name, type.id)),
+            ],
+            wrapper: {
+                typeId: {
+                    $in: UIFilterWrapperMarker,
+                },
+            },
+        });
+
+        all.push(typeFilter);
     }
 
     all.unshift(

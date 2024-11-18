@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useEventsObjectFetcher, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
 import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, ref, Ref, watchEffect } from 'vue';
@@ -55,7 +55,7 @@ const $navigate = useNavigate();
 const {presentPositionableSheet} = usePositionableSheet()
 const memberManager = useMemberManager()
 
-const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : (memberManager.family.organizations ?? []))
+const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : (memberManager.family.organizations ?? []), useAppContext())
 
 let recommendedFilter = filterBuilders[0].fromFilter(memberManager.family.getRecommendedEventsFilter())
 const selectedUIFilter = ref(recommendedFilter) as Ref<null|UIFilter>;

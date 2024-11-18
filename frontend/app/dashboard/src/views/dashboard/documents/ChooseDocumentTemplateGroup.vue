@@ -7,9 +7,20 @@
 
             <SegmentedControl v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
 
-            <form v-if="selectedTab === Tab.Activities" class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
-            </form>
+            <div v-if="selectedTab === Tab.Activities" class="input-with-buttons">
+                <div>
+                    <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
+                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
+                    </form>
+                </div>
+                <div>
+                    <button type="button" class="button text" @click="editFilter">
+                        <span class="icon filter" />
+                        <span class="hide-small">Filter</span>
+                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
+                    </button>
+                </div>
+            </div>
 
             <template v-if="selectedTab === Tab.Groups">
                 <p>
@@ -68,19 +79,29 @@
                     Het archief is leeg.
                 </p>
             </template>
+
+            <template v-else>
+                <STList>
+                    <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" @click="selectGroup(event.group!)" />
+                </STList>
+                <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher" />
+            </template>
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { GroupAvatar, NavigationActions, SegmentedControl, Spinner, STList, STListItem, STNavigationBar, Toast, useNavigationActions } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { EventRow, getEventUIFilterBuilders, GroupAvatar, InfiniteObjectFetcherEnd, NavigationActions, SegmentedControl, Spinner, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useInfiniteObjectFetcher, useNavigationActions, useOrganization, usePlatform, usePositionableSheet } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
-import { DocumentTemplateGroup, Group, GroupType, NamedObject, RecordCategory } from '@stamhoofd/structures';
-import { computed, onMounted, ref, Ref } from 'vue';
+import { DocumentTemplateGroup, Event, Group, GroupType, isEmptyFilter, NamedObject, RecordCategory, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { computed, onMounted, ref, Ref, watchEffect } from 'vue';
 import { useSwitchablePeriod } from '../../members/useSwitchablePeriod';
+type ObjectType = Event;
 
 const props = defineProps<{
-    addGroup: (group: DocumentTemplateGroup, component: NavigationActions) => Promise<void>|void;
+    addGroup: (group: DocumentTemplateGroup, component: NavigationActions) => Promise<void> | void;
     fieldCategories: RecordCategory[];
 }>();
 
@@ -92,6 +113,23 @@ enum Tab {
 const organizationManager = useOrganizationManager();
 const requestOwner = useRequestOwner();
 const navigationActions = useNavigationActions();
+const organization = useOrganization();
+const platform = usePlatform();
+const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [], useAppContext());
+const selectedUIFilter = ref(null) as Ref<null | UIFilter>;
+const { presentPositionableSheet } = usePositionableSheet();
+const objectFetcher = useEventsObjectFetcher({
+    get requiredFilter() {
+        return getRequiredFilter();
+    },
+});
+
+const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
+fetcher.setSort([{
+    key: 'startDate',
+    order: SortItemDirection.DESC
+}])
+
 const tabs = ref([{
     id: Tab.Groups,
     label: 'Groepen',
@@ -107,6 +145,12 @@ const loadingGroups = ref(true);
 const categoryTree = computed(() => period.value.getCategoryTree({ maxDepth: 1, admin: true, smartCombine: true }));
 const searchQuery = ref('');
 
+watchEffect(() => {
+    fetcher.setSearchQuery(searchQuery.value);
+    const filter = selectedUIFilter.value ? selectedUIFilter.value.build() : null;
+    fetcher.setFilter(filter);
+});
+
 const { period, switchPeriod } = useSwitchablePeriod();
 
 async function selectGroup(group: Group) {
@@ -115,10 +159,11 @@ async function selectGroup(group: Group) {
             group: NamedObject.create({
                 id: group.id,
                 name: group.settings.name,
-                description: group.type === GroupType.Membership ? period.value.period.name : undefined,
+                description: group.type === GroupType.Membership ? period.value.period.name : (Formatter.dateRange(group.settings.startDate, group.settings.endDate)),
             }),
         }), navigationActions);
-    } catch (e) {
+    }
+    catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -140,4 +185,45 @@ async function load() {
 function blurFocus() {
     (document.activeElement as HTMLElement)?.blur();
 }
+
+function getRequiredFilter(): StamhoofdFilter | null {
+    const org = organization.value;
+
+    const filters: StamhoofdFilter = {
+        groupId: {
+            $neq: null,
+        },
+        startDate: {
+            $lte: new Date(),
+        },
+    };
+
+    // filter on organization tag ids, if organization lvl
+    if (org) {
+        filters['organizationId'] = org.id;
+    }
+
+    return filters;
+}
+
+async function editFilter(event: MouseEvent) {
+    if (!filterBuilders) {
+        return;
+    }
+    const filter = selectedUIFilter.value ?? filterBuilders[0].create();
+    if (!selectedUIFilter.value) {
+        selectedUIFilter.value = filter;
+    }
+
+    await presentPositionableSheet(event, {
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(UIFilterEditor, {
+                    filter,
+                }),
+            }),
+        ],
+    });
+}
+
 </script>

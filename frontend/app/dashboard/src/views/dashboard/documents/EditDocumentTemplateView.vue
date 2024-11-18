@@ -639,7 +639,7 @@ async function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: Na
             new ComponentWithProperties(FillRecordCategoryView, {
                 category,
                 answers: group.fieldAnswers,
-                markReviewed: true,
+                forceMarkReviewed: true,
                 dataPermission: true,
                 hasNextStep: index < patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length - 1,
                 filterDefinitions: [],
@@ -712,6 +712,7 @@ function gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
         dataPermission: true,
         hasNextStep: index < patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length - 1,
         filterDefinitions: [],
+        forceMarkReviewed: true,
         patchHandler,
         saveHandler: (fieldAnswers: RecordAnswer[], actions: NavigationActions) => {
             const g = group.patch({

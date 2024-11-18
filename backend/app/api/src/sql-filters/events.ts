@@ -11,6 +11,8 @@ export const eventFilterCompilers: SQLFilterDefinitions = {
         SQL.jsonValue(SQL.column('meta'), '$.value.groups[*].id'),
         { isJSONValue: true, isJSONObject: true },
     ),
+    'groupId': createSQLColumnFilterCompiler('groupId'),
+    'typeId': createSQLColumnFilterCompiler('typeId'),
     'defaultAgeGroupIds': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
         { isJSONValue: true, isJSONObject: true },

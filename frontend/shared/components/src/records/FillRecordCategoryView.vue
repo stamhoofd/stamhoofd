@@ -1,12 +1,11 @@
 <template>
     <SaveView :loading="loading" :save-text="saveText" @save="save">
-        <FillRecordCategoryBox :category="category" :value="patchedValue" :validator="errors.validator" @patch="addPatch" />
+        <FillRecordCategoryBox :category="category" :value="patchedValue" :validator="errors.validator" :force-mark-reviewed="forceMarkReviewed" @patch="addPatch" />
     </SaveView>
 </template>
 
 <script setup lang="ts" generic="T extends ObjectWithRecords">
 import { PatchMap } from '@simonbackx/simple-encoding';
-import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -23,8 +22,10 @@ const props = withDefaults(
         patchHandler: (patch: PatchAnswers) => T;
         saveHandler: (patch: PatchAnswers, navigate: NavigationActions) => Promise<void> | void;
         saveText?: string;
+        forceMarkReviewed?: boolean | null;
     }>(), {
         saveText: 'Opslaan',
+        forceMarkReviewed: null,
     },
 );
 

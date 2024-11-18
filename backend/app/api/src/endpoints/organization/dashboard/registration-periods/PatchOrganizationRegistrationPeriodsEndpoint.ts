@@ -130,7 +130,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                             field: 'categories',
                             message: 'Cannot have groups and categories combined',
                             human: 'Een categorie kan niet zowel groepen als subcategorieën bevatten. Mogelijks zijn meerdere mensen tegelijk aanpassingen aan het maken aan de categorieën. Herlaadt de pagina en probeer opnieuw.',
-                        })
+                        });
                     }
                 }
             }
@@ -335,8 +335,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (period) {
             model.periodId = period.id;
             model.settings.period = period.getBaseStructure();
-            model.settings.startDate = period.startDate;
-            model.settings.endDate = period.endDate;
+
+            if (model.type !== GroupType.EventRegistration) {
+                model.settings.startDate = period.startDate;
+                model.settings.endDate = period.endDate;
+            }
         }
 
         const patch = struct;

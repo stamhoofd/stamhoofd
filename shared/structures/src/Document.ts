@@ -108,8 +108,8 @@ export class DocumentTemplateDefinition extends AutoEncoder {
 }
 
 export class DocumentTemplateGroup extends AutoEncoder {
-    @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: 'Onbekend' }) })
     @field({ decoder: StringDecoder, field: 'groupId' })
+    @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: 'Onbekend' }) })
     group: NamedObject;
 
     /**

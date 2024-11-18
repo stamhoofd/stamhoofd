@@ -27,6 +27,10 @@
             <span v-else>Inschrijvingen open</span>
         </p>
 
+        <p v-if="event.group && app !== 'registration'" class="style-description-small">
+            <span v-if="event.group.getMemberCount() !== null">{{ capitalizeFirstLetter(pluralText(event.group.getMemberCount() ?? 0, 'inschrijving', 'inschrijvingen')) }}</span>
+        </p>
+
         <template #right>
             <span v-if="!event.meta.visible" v-tooltip="'Verborgen'" class="icon gray eye-off" />
             <span v-if="event.id" class="icon arrow-right-small gray" />
@@ -41,6 +45,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useOrganization, usePlatform } from '../../hooks';
 import EventImageBox from './EventImageBox.vue';
+import { useAppContext } from '../../context';
 
 const props = defineProps<{
     event: Event
@@ -48,6 +53,7 @@ const props = defineProps<{
 
 const platform = usePlatform()
 const organization = useOrganization()
+const app = useAppContext()
 
 const levelPrefix = computed(() => {
     const prefixes: string[] = []

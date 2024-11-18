@@ -70,6 +70,7 @@ import EventRow from './components/EventRow.vue';
 import { useEventPermissions } from './composables/useEventPermissions';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
+import { useAppContext } from '../context';
 
 type ObjectType = Event;
 
@@ -89,7 +90,7 @@ const { presentPositionableSheet } = usePositionableSheet();
 const auth = useAuth();
 const eventPermissions = useEventPermissions();
 
-const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : []);
+const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [], useAppContext());
 const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
 
 const yearLabels = computed(() => {

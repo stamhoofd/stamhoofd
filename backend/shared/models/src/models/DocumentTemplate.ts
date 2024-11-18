@@ -90,6 +90,13 @@ export class DocumentTemplate extends Model {
                 }), // settings will be overwritten
                 value: group?.settings?.name ?? '',
             }),
+            'group.type': RecordTextAnswer.create({
+                settings: RecordSettings.create({
+                    id: 'group.type',
+                    type: RecordType.Text,
+                }), // settings will be overwritten
+                value: group?.type ?? '',
+            }),
             'registration.startDate': RecordDateAnswer.create({
                 settings: RecordSettings.create({
                     id: 'registration.startDate',
