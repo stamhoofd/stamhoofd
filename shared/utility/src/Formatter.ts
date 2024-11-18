@@ -233,7 +233,8 @@ export class Formatter {
             return Formatter.dateWithDay(startDate) + ', ' + Formatter.time(startDate) + join + Formatter.time(endDate);
         }
 
-        return Formatter.startDate(startDate) + join + Formatter.endDate(endDate);
+        const differentYear = Formatter.year(startDate) !== Formatter.year(endDate);
+        return Formatter.startDate(startDate, false, differentYear) + join + Formatter.endDate(endDate, false, differentYear);
     }
 
     /**
