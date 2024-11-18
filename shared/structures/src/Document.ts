@@ -97,6 +97,12 @@ export class DocumentTemplateDefinition extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     defaultMinPrice: number | null = null;
 
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    allowChangingMaxAge = false;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    allowChangingMinPrice = false;
+
     @field({ decoder: new ArrayDecoder(RecordCategory), version: 179 })
     exportFieldCategories: RecordCategory[] = [];
 

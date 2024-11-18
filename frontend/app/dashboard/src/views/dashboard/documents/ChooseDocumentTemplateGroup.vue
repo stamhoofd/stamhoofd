@@ -127,8 +127,8 @@ const objectFetcher = useEventsObjectFetcher({
 const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
 fetcher.setSort([{
     key: 'startDate',
-    order: SortItemDirection.DESC
-}])
+    order: SortItemDirection.DESC,
+}]);
 
 const tabs = ref([{
     id: Tab.Groups,

@@ -81,17 +81,21 @@
                 </button>
             </p>
 
-            <hr>
-            <h2>Leeftijdsbeperking</h2>
-            <STInputBox title="Maximum leeftijd" error-fields="maxAge" :error-box="errors.errorBox">
-                <NumberInput v-model="maxAge" placeholder="Geen" :required="false" suffix="jaar" />
-            </STInputBox>
+            <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMaxAge">
+                <hr>
+                <h2>Leeftijdsbeperking</h2>
+                <STInputBox title="Maximum leeftijd" error-fields="maxAge" :error-box="errors.errorBox">
+                    <NumberInput v-model="maxAge" placeholder="Geen" :required="false" suffix="jaar" />
+                </STInputBox>
+            </template>
 
-            <hr>
-            <h2>Bedrag</h2>
-            <Checkbox v-model="paidOnly">
-                Enkel aanmaken indien gekoppelde prijs groter is dan 0 euro
-            </Checkbox>
+            <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPrice">
+                <hr>
+                <h2>Bedrag</h2>
+                <Checkbox v-model="paidOnly">
+                    Enkel aanmaken indien gekoppelde prijs groter is dan 0 euro
+                </Checkbox>
+            </template>
 
             <hr>
             <h2>Geavanceerd</h2>

@@ -125,34 +125,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             ],
         }),
     ],
-    groupFieldCategories: [
-        RecordCategory.create({
-            name: 'Periode',
-            description: 'Vul de exacte begin en einddatum van deze activiteit in, als je andere data wilt gebruiken dan ingesteld staat voor de activiteit zelf.',
-            records: [
-                RecordSettings.create({
-                    id: 'registration.startDate',
-                    name: 'Startdatum',
-                    required: true,
-                    type: RecordType.Date,
-                }),
-                RecordSettings.create({
-                    id: 'registration.endDate',
-                    name: 'Einddatum',
-                    required: true,
-                    type: RecordType.Date,
-                }),
-                RecordSettings.create({
-                    id: 'registration.days',
-                    name: 'Aantal dagen',
-                    description: 'Laat leeg om automatisch te berekenen. Vul in als het aantal dagen minder is dan het aantal dagen van de start tot einddatum (inclusief beide).',
-                    required: false,
-                    inputPlaceholder: 'Automatisch',
-                    type: RecordType.Integer,
-                }),
-            ],
-        }),
-    ],
+    groupFieldCategories: [],
     documentFieldCategories: [
         RecordCategory.create({
             name: 'Schuldenaar',
