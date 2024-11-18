@@ -504,7 +504,15 @@ export class Member extends Model {
             if (activeMembershipsUndeletable.length) {
                 // Skip automatic additions
                 for (const m of activeMembershipsUndeletable) {
-                    await m.calculatePrice(me);
+                    try {
+                        await m.calculatePrice(me);
+                    }
+                    catch (e) {
+                        // Ignore error: membership might not be available anymore
+                        if (!silent) {
+                            console.error('Failed to calculate price for undeletable membership', m.id, e);
+                        }
+                    }
                     await m.save();
                 }
                 return;
@@ -538,7 +546,15 @@ export class Member extends Model {
             for (const m of activeMemberships) {
                 if (m.membershipTypeId === cheapestMembership.membership.id) {
                     // Update the price of this active membership (could have changed)
-                    await m.calculatePrice(me);
+                    try {
+                        await m.calculatePrice(me);
+                    }
+                    catch (e) {
+                        // Ignore error: membership might not be available anymore
+                        if (!silent) {
+                            console.error('Failed to calculate price for active membership', m.id, e);
+                        }
+                    }
                     await m.save();
                     return;
                 }
