@@ -30,8 +30,13 @@ export async function resumeEmails() {
             continue;
         }
 
-        await ContextInstance.startForUser(user, organization, async () => {
-            await email.send();
-        });
+        try {
+            await ContextInstance.startForUser(user, organization, async () => {
+                await email.send();
+            });
+        }
+        catch (e) {
+            console.error('Error resuming email', email.id, e);
+        }
     }
 }
