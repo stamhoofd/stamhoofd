@@ -8,6 +8,7 @@
         <EditPaymentMethodsBox 
             type="webshop"
             :organization="organization" 
+            :webshop="webshop"
             :config="config"
             :private-config="privateConfig" 
             :validator="validator" 

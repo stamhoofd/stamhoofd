@@ -85,10 +85,10 @@
         <div class="container">
             <hr>
             <h2>Nummering</h2>
-            <p class="warning-box" v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous">
+            <p v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" class="warning-box">
                 Je kan de bestelnummering niet meer wijzigen van willekeurig naar opeenvolgend (dupliceer de webshop als je dat toch nog wilt doen). 
             </p>
-            <p class="warning-box" v-else-if="numberingType == WebshopNumberingType.Random">
+            <p v-else-if="numberingType == WebshopNumberingType.Random" class="warning-box">
                 Je kan de bestelnummering achteraf niet meer wijzigen van willekeurig naar opeenvolgend. 
             </p>
 
@@ -121,6 +121,7 @@
 
             <EditPaymentMethodsBox
                 type="webshop"
+                :webshop="webshop"
                 :organization="organization" 
                 :config="config"
                 :private-config="privateConfig" 

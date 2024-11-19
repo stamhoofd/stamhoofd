@@ -80,11 +80,11 @@
                 Voorbeeld: <span class="style-em">{{ transferExample }}</span>
             </p>
 
-            <p v-if="transferType === 'Fixed' && type === 'webshop'" class="style-description-small">
-                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />, <code v-copyable class="style-inline-code style-copyable" v-text="`{{email}}`" /> of <code v-copyable class="style-inline-code style-copyable" v-text="`{{nr}}`" />
-            </p>
-            <p v-else-if="transferType === 'Fixed' && type === 'registration'" class="style-description-small">
-                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />
+            <p v-if="transferType === 'Fixed'" class="style-description-small">
+                Gebruik automatische tekstvervangingen in de mededeling via <template v-for="(w, i) in transferReplacementsList">
+                    <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+                    <code :key="i" v-copyable class="style-inline-code style-copyable" v-text="'{{' + w[0] + '}}'" /><template v-if="i < transferReplacementsList.length - 1">, </template><template v-else>.</template>
+                </template>
             </p>
         </template>
 
@@ -121,7 +121,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Checkbox, Dropdown, ErrorBox, IBANInput,LoadingView,PermyriadInput,PriceInput,Radio, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { SessionManager } from "@stamhoofd/networking";
-import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from "@stamhoofd/structures";
+import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, RecordCategory, StripeAccount, TransferDescriptionType, TransferSettings, Webshop } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
@@ -169,6 +169,9 @@ export default class EditPaymentMethodsBox extends Vue {
 
     @Prop({ required: false, default: true })
         showPrices: boolean
+
+    @Prop({ required: false, default: null })
+        webshop: Webshop | null
 
     loadingStripeAccounts = false
     stripeAccounts: StripeAccount[] = []
@@ -609,17 +612,40 @@ export default class EditPaymentMethodsBox extends Vue {
         return this.organization.address.country == Country.Belgium
     }
 
+
+    get transferReplacements() {
+        if (this.type === 'registration') {
+            return {
+                name: this.$t('shared.exampleData.names').toString(),
+                naam: this.$t('shared.exampleData.names').toString(),
+            }
+        }
+
+        const base = {
+            nr: "152",
+            email: this.$t('shared.exampleData.email').toString(),
+            phone:  this.$t('shared.exampleData.phone').toString(),
+            name: this.$t('shared.exampleData.name').toString(),
+            naam: this.$t('shared.exampleData.name').toString(),
+        }
+
+        for (const record of (this.webshop?.meta.recordCategories?.flatMap(c => c.getAllRecords()) ?? [])) {
+            base[Formatter.slug(record.name)] = 'voorbeeld';
+        }
+
+        return base
+    }
+
+    get transferReplacementsList() {
+        return Object.entries(this.transferReplacements).filter(([key, value]) => key != 'name')
+    }
+
+
     get transferExample() {
         const fakeReference = this.type === 'registration' ? this.$t('shared.exampleData.names').toString() : "152";
         const settings = this.config.transferSettings
 
-        return settings.generateDescription(fakeReference, this.organization.address.country, {
-            nr: this.type === 'registration' ? '' : fakeReference,
-            email: this.type === 'registration' ? '' : this.$t('shared.exampleData.email').toString(),
-            phone: this.type === 'registration' ? '' : this.$t('shared.exampleData.phone').toString(),
-            name: this.type === 'registration' ? this.$t('shared.exampleData.names').toString() : this.$t('shared.exampleData.name').toString(),
-            naam: this.type === 'registration' ? this.$t('shared.exampleData.names').toString() : this.$t('shared.exampleData.name').toString(),
-        })
+        return settings.generateDescription(fakeReference, this.organization.address.country, this.transferReplacements)
     }
 
 }

@@ -72,13 +72,19 @@ export class Order extends Model {
     static organization = new ManyToOneRelation(Organization, "organization");
 
     getTransferReplacements(): { [key: string]: string } {
-        return {
+        const base = {
             nr: this.number?.toString() ?? "",
             email: this.data.customer.email ?? '',
             phone: this.data.customer.phone ?? '',
             name: this.data.customer.name ?? '',
             naam: this.data.customer.name ?? '',
         }
+
+        for (const answer of this.data.recordAnswers) {
+            base[Formatter.slug(answer.settings.name)] = answer.stringValue
+        }
+
+        return base;
     }
 
     getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
