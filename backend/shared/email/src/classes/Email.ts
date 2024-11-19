@@ -1,69 +1,69 @@
 import { DataValidator, Formatter } from '@stamhoofd/utility';
-import nodemailer from "nodemailer"
+import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import { EmailAddress } from '../models/EmailAddress';
 import htmlToText from 'html-to-text';
 import { sleep } from '@stamhoofd/utility';
-import { I18n } from "@stamhoofd/backend-i18n"
+import { I18n } from '@stamhoofd/backend-i18n';
 import { SimpleError } from '@simonbackx/simple-errors';
-import {type default as Postmark} from "postmark";
+import { type default as Postmark } from 'postmark';
 
 // Importing postmark returns undefined (this is a bug, so we need to use require)
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const postmark = require("postmark")
+
+const postmark = require('postmark');
 
 export type EmailInterfaceRecipient = {
-    name?: string|null;
+    name?: string | null;
     email: string;
-}
+};
 
 export type EmailInterfaceBase = {
-    to: string|EmailInterfaceRecipient[];
+    to: string | EmailInterfaceRecipient[];
     bcc?: string;
     replyTo?: string;
     subject: string;
     text?: string;
     html?: string;
-    attachments?: { filename: string; path?: string; href?: string; content?: string|Buffer; contentType?: string }[];
+    attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string }[];
     retryCount?: number;
-    type?: "transactional" | "broadcast",
-    headers?: Record<string, string>|null,
-    callback?: (error: Error|null) => void;
-}
+    type?: 'transactional' | 'broadcast';
+    headers?: Record<string, string> | null;
+    callback?: (error: Error | null) => void;
+};
 
 export type EmailInterface = EmailInterfaceBase & {
     from: string;
-}
+};
 
 /// An email builder is called until it returns undefined. This allows to reduce memory usage for an e-mail with multiple recipients
-export type EmailBuilder = () => EmailInterface | undefined
+export type EmailBuilder = () => EmailInterface | undefined;
 
 type InternalEmailData = {
     from: string;
-    bcc: string|undefined;
-    replyTo: string|undefined;
+    bcc: string | undefined;
+    replyTo: string | undefined;
     to: string;
     subject: string;
     text?: string;
     html?: string;
-    attachments?: { filename: string; path?: string; href?: string; content?: string|Buffer; contentType?: string }[];
+    attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string }[];
     headers?: Record<string, string>;
-}
+};
 
 class EmailStatic {
     transporter: Mail;
     transactionalTransporter: Mail;
-    rps = 14
+    rps = 14;
 
-    currentQueue: EmailBuilder[] = []
-    sending = false
+    currentQueue: EmailBuilder[] = [];
+    sending = false;
 
     setupIfNeeded() {
         if (this.transporter) {
             return;
         }
         if (!STAMHOOFD.SMTP_HOST || !STAMHOOFD.SMTP_PORT) {
-            throw new Error("Missing environment variables to send emails");
+            throw new Error('Missing environment variables to send emails');
             return;
         }
 
@@ -74,10 +74,10 @@ class EmailStatic {
             port: STAMHOOFD.SMTP_PORT,
             auth: {
                 user: STAMHOOFD.SMTP_USERNAME, // generated ethereal user
-                pass: STAMHOOFD.SMTP_PASSWORD // generated ethereal password
-            }
+                pass: STAMHOOFD.SMTP_PASSWORD, // generated ethereal password
+            },
         });
-        
+
         // create reusable transporter object using the default SMTP transport
         this.transactionalTransporter = nodemailer.createTransport({
             pool: true,
@@ -85,25 +85,27 @@ class EmailStatic {
             port: STAMHOOFD.TRANSACTIONAL_SMTP_PORT,
             auth: {
                 user: STAMHOOFD.TRANSACTIONAL_SMTP_USERNAME, // generated ethereal user
-                pass: STAMHOOFD.TRANSACTIONAL_SMTP_PASSWORD // generated ethereal password
-            }
+                pass: STAMHOOFD.TRANSACTIONAL_SMTP_PASSWORD, // generated ethereal password
+            },
         });
 
         // verify connection configuration
         this.transporter.verify((error) => {
             if (error) {
-                console.error("SMTP server not working", error);
-            } else {
-                console.log("SMTP server is ready to take our messages");
+                console.error('SMTP server not working', error);
+            }
+            else {
+                console.log('SMTP server is ready to take our messages');
             }
         });
 
         // verify connection configuration
         this.transactionalTransporter.verify((error) => {
             if (error) {
-                console.error("Transactinoal SMTP server not working", error);
-            } else {
-                console.log("Transactinoal SMTP server is ready to take our messages");
+                console.error('Transactinoal SMTP server not working', error);
+            }
+            else {
+                console.log('Transactinoal SMTP server is ready to take our messages');
             }
         });
     }
@@ -111,122 +113,123 @@ class EmailStatic {
     private sendNextIfNeeded() {
         if (!this.sending) {
             if (this.currentQueue.length == 0) {
-                console.log("mail queue is empty")
-                return
+                console.log('mail queue is empty');
+                return;
             }
-            let next = this.currentQueue[0]()
+            let next = this.currentQueue[0]();
 
             while (next === undefined) {
-                this.currentQueue.shift()
+                this.currentQueue.shift();
                 if (this.currentQueue.length == 0) {
-                    console.log("mail queue is empty")
-                    return
+                    console.log('mail queue is empty');
+                    return;
                 }
-                next = this.currentQueue[0]()
+                next = this.currentQueue[0]();
             }
 
             this.sending = true;
-            this.doSend(next).catch(e => {
-                console.error(e)
+            this.doSend(next).catch((e) => {
+                console.error(e);
             }).finally(() => {
-                this.sending = false
-                this.sendNextIfNeeded()
-            })
+                this.sending = false;
+                this.sendNextIfNeeded();
+            });
         }
     }
 
-    parseTo(to: string|EmailInterfaceRecipient[]): EmailInterfaceRecipient[] {
-        if (typeof to === "string") {
-            return this.parseEmailStr(to).map(email => ({ email }))
+    parseTo(to: string | EmailInterfaceRecipient[]): EmailInterfaceRecipient[] {
+        if (typeof to === 'string') {
+            return this.parseEmailStr(to).map(email => ({ email }));
         }
 
         // Filter invalid email addresses
-        return to.filter(r => DataValidator.isEmailValid(r.email))
+        return to.filter(r => DataValidator.isEmailValid(r.email));
     }
 
     /**
      * Get the raw email
      */
     parseEmailStr(emailStr: string): string[] {
-        let insideQuote = false
-        let escaped = false
-        let inAddr = false
-        let email = ""
-        let didFindAddr = false
-        let cleanedStr = ""
+        let insideQuote = false;
+        let escaped = false;
+        let inAddr = false;
+        let email = '';
+        let didFindAddr = false;
+        let cleanedStr = '';
 
-        const addresses: string[] = []
+        const addresses: string[] = [];
 
         function endAddress() {
-            let m: string
+            let m: string;
             if (didFindAddr) {
-                m = email.trim()
-            } else {
-                m = cleanedStr.trim()
+                m = email.trim();
+            }
+            else {
+                m = cleanedStr.trim();
             }
             if (DataValidator.isEmailValid(m)) {
-                addresses.push(m)
+                addresses.push(m);
             }
-            didFindAddr = false
-            email = ""
-            inAddr = false
-            insideQuote = false
-            escaped = false
-            cleanedStr = ""
+            didFindAddr = false;
+            email = '';
+            inAddr = false;
+            insideQuote = false;
+            escaped = false;
+            cleanedStr = '';
         }
 
         // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let index = 0; index < emailStr.length; index++) {
-            const shouldEscape = escaped
+            const shouldEscape = escaped;
             if (escaped) {
-                escaped = false
+                escaped = false;
             }
             const character = emailStr[index];
             if (insideQuote) {
-                if (character === "\\") {
-                    escaped = true
-                    continue
+                if (character === '\\') {
+                    escaped = true;
+                    continue;
                 }
             }
 
             if (!shouldEscape) {
-                if (character === "\"") {
+                if (character === '"') {
                     if (insideQuote) {
-                        insideQuote = false
-                        continue
+                        insideQuote = false;
+                        continue;
                     }
-                    insideQuote = true
-                    continue
+                    insideQuote = true;
+                    continue;
                 }
 
                 if (!insideQuote) {
-                    if (character === "<") {
-                        inAddr = true
-                        continue
+                    if (character === '<') {
+                        inAddr = true;
+                        continue;
                     }
 
-                    if (character === ">") {
-                        inAddr = false
-                        didFindAddr = true
-                        continue
+                    if (character === '>') {
+                        inAddr = false;
+                        didFindAddr = true;
+                        continue;
                     }
 
-                    if (character === ",") {
+                    if (character === ',') {
                         // End previous address
-                        endAddress()
-                        continue
+                        endAddress();
+                        continue;
                     }
                 }
             }
 
             if (inAddr) {
-                email += character
+                email += character;
             }
-            cleanedStr += character
+            cleanedStr += character;
         }
 
-        endAddress()
-        return addresses
+        endAddress();
+        return addresses;
     }
 
     private matchWhitelist(email: string, whitelist: string[]) {
@@ -237,27 +240,27 @@ class EmailStatic {
             }
 
             const domainIndex = l.indexOf('@');
-            const domain = l.substring(domainIndex)
+            const domain = l.substring(domainIndex);
 
             if (whitelist.includes('*' + domain)) {
                 return true;
             }
 
-            console.warn("Filtered email to " + l + ": not whitelisted")
+            console.warn('Filtered email to ' + l + ': not whitelisted');
             return false;
         }
 
-        return true
+        return true;
     }
 
     private filterWhitelist(recipients: EmailInterfaceRecipient[], whitelist: string[]) {
         if (!whitelist.includes('*') && !whitelist.includes('*@*')) {
-            return recipients.filter(mail => {
-                return this.matchWhitelist(mail.email, whitelist)
-            })
+            return recipients.filter((mail) => {
+                return this.matchWhitelist(mail.email, whitelist);
+            });
         }
 
-        return recipients
+        return recipients;
     }
 
     private async doSend(data: EmailInterface) {
@@ -268,38 +271,39 @@ class EmailStatic {
 
         // Check if this email is not marked as spam
         // Filter recipients if bounced or spam
-        let recipients = this.parseTo(data.to)
+        let recipients = this.parseTo(data.to);
         if (recipients.length === 0) {
             // Invalid string
-            console.warn("Invalid e-mail string: '"+data.to+"'. E-mail skipped")
-            return
+            console.warn("Invalid e-mail string: '" + data.to + "'. E-mail skipped");
+            return;
         }
 
         // Check spam and bounces
-        recipients = await EmailAddress.filterSendTo(recipients)
+        recipients = await EmailAddress.filterSendTo(recipients);
 
         if (recipients.length === 0) {
             // Invalid string
-            console.warn("Filtered all emails due hard bounce or spam '"+data.to+"'. E-mail skipped")
+            console.warn("Filtered all emails due hard bounce or spam '" + data.to + "'. E-mail skipped");
 
             try {
                 data.callback?.(
                     new SimpleError({
                         code: 'all_filtered',
-                        message: "All recipients are filtered due to hard bounce or spam",
-                        human: 'Alle ontvangers zijn gefilterd wegens een hard bounce of spam'
-                    })
-                )
-            } catch (e) {
-                console.error("Error in email callback", e)
+                        message: 'All recipients are filtered due to hard bounce or spam',
+                        human: 'Alle ontvangers zijn gefilterd wegens een hard bounce of spam',
+                    }),
+                );
             }
-            return
+            catch (e) {
+                console.error('Error in email callback', e);
+            }
+            return;
         }
 
         // Filter by environment
         if (STAMHOOFD.environment !== 'production' || (STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS && STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS.length > 0)) {
-            const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? []
-            recipients = this.filterWhitelist(recipients, whitelist)
+            const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? [];
+            recipients = this.filterWhitelist(recipients, whitelist);
         }
 
         if (recipients.length === 0) {
@@ -308,37 +312,38 @@ class EmailStatic {
                 data.callback?.(
                     new SimpleError({
                         code: 'all_filtered',
-                        message: "All recipients are filtered due to environment",
-                        human: 'Alle ontvangers zijn gefilterd omwille van de demo-omgeving die het versturen van bepaalde e-mails limiteert'
-                    })
-                )
-            } catch (e) {
-                console.error("Error in email callback", e)
+                        message: 'All recipients are filtered due to environment',
+                        human: 'Alle ontvangers zijn gefilterd omwille van de demo-omgeving die het versturen van bepaalde e-mails limiteert',
+                    }),
+                );
             }
-            return
+            catch (e) {
+                console.error('Error in email callback', e);
+            }
+            return;
         }
-    
+
         // Rebuild to
         const to = recipients.map((recipient) => {
             if (!recipient.name) {
-                return recipient.email
+                return recipient.email;
             }
-            const cleanedName = Formatter.emailSenderName(recipient.name)
+            const cleanedName = Formatter.emailSenderName(recipient.name);
             if (cleanedName.length < 2) {
-                return recipient.email
+                return recipient.email;
             }
-            return '"'+cleanedName+'" <'+recipient.email+'>'
-        }).join(", ")
+            return '"' + cleanedName + '" <' + recipient.email + '>';
+        }).join(', ');
 
         this.setupIfNeeded();
 
         // send mail with defined transport object
         const mail: InternalEmailData = {
             from: data.from, // sender address
-            bcc: (STAMHOOFD.environment === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
+            bcc: (STAMHOOFD.environment === 'production' || !data.bcc) ? data.bcc : 'simon@stamhoofd.be',
             replyTo: data.replyTo,
             to,
-            subject: data.subject, // Subject line
+            subject: data.subject.substring(0, 1000), // Subject line
             text: data.text, // plain text body
         };
 
@@ -356,14 +361,14 @@ class EmailStatic {
             if (!data.text) {
                 mail.text = htmlToText.fromString(data.html, {
                     wordwrap: null,
-                    unorderedListItemPrefix: " - "
+                    unorderedListItemPrefix: ' - ',
                 });
             }
         }
 
-        const parsedFrom = this.parseEmailStr(data.from)
+        const parsedFrom = this.parseEmailStr(data.from);
         if (parsedFrom.length !== 1) {
-            throw new Error("Invalid from email " + data.from)
+            throw new Error('Invalid from email ' + data.from);
         }
 
         try {
@@ -371,39 +376,43 @@ class EmailStatic {
             if (STAMHOOFD.TRANSACTIONAL_WHITELIST !== undefined && data.type === 'transactional') {
                 if (!this.matchWhitelist(parsedFrom[0], STAMHOOFD.TRANSACTIONAL_WHITELIST)) {
                     // Not supported
-                    data.type = 'broadcast'
+                    data.type = 'broadcast';
                 }
             }
 
-            const transporter = (data.type === "transactional") ? this.transactionalTransporter : this.transporter
+            const transporter = (data.type === 'transactional') ? this.transactionalTransporter : this.transporter;
 
-            if (data.type === "transactional") {
+            if (data.type === 'transactional') {
                 mail.headers = {
                     ...data.headers,
-                    ...STAMHOOFD.TRANSACTIONAL_SMTP_HEADERS
-                }
-            } else {
+                    ...STAMHOOFD.TRANSACTIONAL_SMTP_HEADERS,
+                };
+            }
+            else {
                 mail.headers = {
                     ...data.headers,
-                    ...STAMHOOFD.SMTP_HEADERS
-                }
+                    ...STAMHOOFD.SMTP_HEADERS,
+                };
             }
 
             if (STAMHOOFD.POSTMARK_SERVER_TOKEN && (data.retryCount === 1)) {
-                await this.sendApi(mail)
-                console.log("Message sent via api:", to, data.subject, data.type);
-            } else {
+                await this.sendApi(mail);
+                console.log('Message sent via api:', to, data.subject, data.type);
+            }
+            else {
                 const info = await transporter.sendMail(mail);
-                console.log("Message sent:", to, data.subject, info.messageId, data.type);
+                console.log('Message sent:', to, data.subject, info.messageId, data.type);
             }
-            
+
             try {
-                data.callback?.(null)
-            } catch (e) {
-                console.error("Error in email callback", e)
+                data.callback?.(null);
             }
-        } catch (e) {
-            console.error("Failed to send e-mail:")
+            catch (e) {
+                console.error('Error in email callback', e);
+            }
+        }
+        catch (e) {
+            console.error('Failed to send e-mail:');
             console.error(e);
             console.error(mail);
 
@@ -414,26 +423,27 @@ class EmailStatic {
             data.retryCount = (data.retryCount ?? 0) + 1;
 
             if (data.retryCount <= 2) {
-                
                 if (data.type === 'transactional' && data.retryCount === 2) {
                     data.type = 'broadcast';
                 }
                 this.send(data);
-            } else {
+            }
+            else {
                 try {
-                    data.callback?.(e)
-                } catch (e2) {
-                    console.error("Error in email failure callback", e2, 'for original error', e)
+                    data.callback?.(e);
+                }
+                catch (e2) {
+                    console.error('Error in email failure callback', e2, 'for original error', e);
                 }
 
                 // Email address is not verified.
                 if (STAMHOOFD.environment !== 'development') {
                     if (data.from !== this.getWebmasterFromEmail()) {
                         this.sendWebmaster({
-                            subject: "E-mail kon niet worden verzonden",
-                            text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd aan "+mail.to+": \n\n"+e+"\n\n"+(mail.text ?? ""),
-                            type: (data.type === "transactional") ? "broadcast" : "transactional"
-                        })
+                            subject: 'E-mail kon niet worden verzonden',
+                            text: 'Een e-mail vanaf ' + data.from + ' kon niet worden verstuurd aan ' + mail.to + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
+                            type: (data.type === 'transactional') ? 'broadcast' : 'transactional',
+                        });
                     }
                 }
             }
@@ -442,36 +452,36 @@ class EmailStatic {
 
     private async sendApi(data: InternalEmailData) {
         if (!STAMHOOFD.POSTMARK_SERVER_TOKEN) {
-            throw new Error("Missing POSTMARK_SERVER_TOKEN")
+            throw new Error('Missing POSTMARK_SERVER_TOKEN');
         }
         const client = new postmark.ServerClient(STAMHOOFD.POSTMARK_SERVER_TOKEN);
-        const headers: {Name: string, Value: string}[] = [];
+        const headers: { Name: string; Value: string }[] = [];
         for (const key in data.headers) {
             headers.push({ Name: key, Value: data.headers[key] });
         }
 
         const message: Postmark.Models.Message = {
-            "From": data.from,
-            "To": data.to,
-            "Bcc": data.bcc,
-            "Subject": data.subject,
-            "TextBody": data.text,
-            "HtmlBody": data.html,
-            "Headers": headers,
-            "ReplyTo": data.replyTo,
-            "Tag": "api",
-            "MessageStream": (data.headers?.["X-PM-Message-Stream"] ?? "outbound")
+            From: data.from,
+            To: data.to,
+            Bcc: data.bcc,
+            Subject: data.subject,
+            TextBody: data.text,
+            HtmlBody: data.html,
+            Headers: headers,
+            ReplyTo: data.replyTo,
+            Tag: 'api',
+            MessageStream: (data.headers?.['X-PM-Message-Stream'] ?? 'outbound'),
         };
 
         console.log('Falling back to Postmark API', message);
 
         try {
             await client.sendEmail(message);
-        } catch (e) {
+        }
+        catch (e) {
             console.error('Failed to send email with Postmark API', e);
             throw e;
         }
-
     }
 
     /**
@@ -480,15 +490,15 @@ class EmailStatic {
      */
     getInternalEmailFor(i18n: I18n) {
         // todo: use default email in platform settings
-        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <hallo@'+ (i18n.localizedDomains.defaultTransactionalEmail()) +'>'
+        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <hallo@' + (i18n.localizedDomains.defaultTransactionalEmail()) + '>';
     }
 
     getWebmasterFromEmail() {
-        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <webmaster@'+ (new I18n("nl", "BE").localizedDomains.defaultTransactionalEmail()) +'>'
+        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <webmaster@' + (new I18n('nl', 'BE').localizedDomains.defaultTransactionalEmail()) + '>';
     }
 
     getWebmasterToEmail() {
-        return 'hallo@stamhoofd.be'
+        return 'hallo@stamhoofd.be';
     }
 
     /**
@@ -496,18 +506,18 @@ class EmailStatic {
      * Please use EmailBuilder.sendEmailTemplate
      */
     getPersonalEmailFor(i18n: I18n) {
-        return '"Simon Backx" <'+ (i18n.$t("5670bc42-cf94-46b6-9ce0-7cdc4ffbb4d9")) +'>'
+        return '"Simon Backx" <' + (i18n.$t('5670bc42-cf94-46b6-9ce0-7cdc4ffbb4d9')) + '>';
     }
 
     /**
      * Send an email to the webmaster
      */
-    sendWebmaster(data: Omit<EmailInterfaceBase, "to">) {
-        const mail = Object.assign(data, { 
+    sendWebmaster(data: Omit<EmailInterfaceBase, 'to'>) {
+        const mail = Object.assign(data, {
             from: this.getWebmasterFromEmail(),
-            to: this.getWebmasterToEmail()
-        })
-        this.send(mail)
+            to: this.getWebmasterToEmail(),
+        });
+        this.send(mail);
     }
 
     send(data: EmailInterface) {
@@ -515,25 +525,25 @@ class EmailStatic {
             // Do not send any emails
             return;
         }
-        let didSend = false
+        let didSend = false;
 
         this.schedule(() => {
             if (didSend) {
-                return undefined
+                return undefined;
             }
             didSend = true;
-            return data
-        })
+            return data;
+        });
     }
 
     schedule(builder: EmailBuilder) {
-        this.currentQueue.push(builder)
-        this.sendNextIfNeeded()
+        this.currentQueue.push(builder);
+        this.sendNextIfNeeded();
     }
 
     scheduleAndWait(builder: EmailBuilder) {
-        this.currentQueue.push(builder)
-        this.sendNextIfNeeded()
+        this.currentQueue.push(builder);
+        this.sendNextIfNeeded();
     }
 }
 
