@@ -82,7 +82,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         };
 
-        if (type !== 'none') {
+        if (type !== 'express') {
             expressData = {};
         }
 
