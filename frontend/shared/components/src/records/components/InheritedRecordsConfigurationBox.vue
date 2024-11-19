@@ -25,7 +25,7 @@
             <template #left>
                 <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked" />
             </template>
-            
+
             <p v-if="property.value.configuration" class="style-title-prefix-list">
                 {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
             </p>
@@ -67,42 +67,41 @@
 
 <script setup lang="ts">
 import { PatchMap } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, PropertyFilterView, Toast, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, MemberProperty, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
 import { RecordEditorSettings } from '../RecordEditorSettings';
-type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts' | 'uitpasNumber';
 
 const props = withDefaults(
     defineProps<{
-        recordsConfiguration: OrganizationRecordsConfiguration,
-        inheritedRecordsConfiguration?: OrganizationRecordsConfiguration|null,
-        overrideOrganization?: Organization|null,
-        groupLevel?: boolean
+        recordsConfiguration: OrganizationRecordsConfiguration;
+        inheritedRecordsConfiguration?: OrganizationRecordsConfiguration | null;
+        overrideOrganization?: Organization | null;
+        groupLevel?: boolean;
     }>(),
     {
         inheritedRecordsConfiguration: null,
         overrideOrganization: null,
-        groupLevel: false
-    }
+        groupLevel: false,
+    },
 );
 
-const emit = defineEmits(['patch:recordsConfiguration'])
-const {patched, addPatch} = useEmitPatch<OrganizationRecordsConfiguration>(props, emit, 'recordsConfiguration');
+const emit = defineEmits(['patch:recordsConfiguration']);
+const { patched, addPatch } = useEmitPatch<OrganizationRecordsConfiguration>(props, emit, 'recordsConfiguration');
 const $t = useTranslate();
-const baseOrg = useOrganization()
-const organization = computed(() => props.overrideOrganization ?? baseOrg.value)
+const baseOrg = useOrganization();
+const organization = computed(() => props.overrideOrganization ?? baseOrg.value);
 const present = usePresent();
-const filterBuilder = memberWithRegistrationsBlobUIFilterBuilders[0]
-const {financialSupportSettings} = useFinancialSupportSettings()
+const filterBuilder = memberWithRegistrationsBlobUIFilterBuilders[0];
+const { financialSupportSettings } = useFinancialSupportSettings();
 
 const family = new PlatformFamily({
     platform: Platform.shared,
-    contextOrganization: organization.value
-})
+    contextOrganization: organization.value,
+});
 
 const settings = new RecordEditorSettings({
     dataPermission: true,
@@ -115,60 +114,61 @@ const settings = new RecordEditorSettings({
             details: MemberDetails.create({
                 firstName: 'Voorbeeld',
                 lastName: 'Lid',
-                dataPermissions: BooleanStatus.create({value: true}),
+                dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),
             users: [],
-            registrations: []
+            registrations: [],
         }),
         isNew: true,
-        family
+        family,
     }),
     patchExampleValue(value: PlatformMember, patch) {
-        const cloned = value.clone()
+        const cloned = value.clone();
         value.addDetailsPatch(MemberDetails.patch({
-            recordAnswers: patch
-        }))
+            recordAnswers: patch,
+        }));
         return cloned;
     },
-})
-family.members.push(settings.exampleValue)
+});
+family.members.push(settings.exampleValue);
 
 const properties = [
     buildPropertyRefs('gender', 'Gender'),
     buildPropertyRefs('birthDay', 'Geboortedatum'),
+    buildPropertyRefs('nationalRegisterNumber', 'Rijksregisternummer'),
     buildPropertyRefs('parents', 'Oudergegevens', {
-        description: 'Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders'
+        description: 'Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders',
     }),
     buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' (van lid zelf)', {
         description: 'Het GSM-nummer van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen GSM-nummer kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een GSM-nummer heeft.',
         warning: 'Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.',
-        preventAlways: true
+        preventAlways: true,
     }),
     buildPropertyRefs('emailAddress', 'E-mailadres (van lid zelf)', {
         description: 'Het e-mailadres van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen e-mailadres kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een e-mailadres heeft.',
         warning: 'Maak dit niet verplicht voor alle leden, anders moeten erg jonge leden ook verplicht een eigen e-mailadres invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.',
-        preventAlways: true
+        preventAlways: true,
     }),
     buildPropertyRefs('address', 'Adres (van lid zelf)', {
         description: 'Het adres van elke ouder wordt al verzameld via de oudergegevens. We raden af om dit te activeren voor minderjarige leden. Bij ouders kan er namelijk per ouder een apart adres ingesteld worden, wat beter geschikt is. Enkel voor volwassen leden is dit beter aangewezen.',
         warning: 'We raden heel sterk af om dit in te schakelen voor minderjarige leden. Gebruik een leeftijdsfilter om dit enkel in te schakelen voor volwassen leden.',
-        preventAlways: true
+        preventAlways: true,
     }),
     buildPropertyRefs('emergencyContacts', 'Extra noodcontactpersonen', {
-        description: 'Naam, relatie en telefoonnummer van één of meerdere noodcontactpersonen (als uitbreiding op ouders, niet de ouders zelf)'
+        description: 'Naam, relatie en telefoonnummer van één of meerdere noodcontactpersonen (als uitbreiding op ouders, niet de ouders zelf)',
     }),
-    buildPropertyRefs('uitpasNumber', 'UiTPAS-nummer')
-]
+    buildPropertyRefs('uitpasNumber', 'UiTPAS-nummer'),
+];
 
 watchEffect(() => {
     // Clear locked properties
     for (const property of properties) {
         if (property.value.locked && patched.value[property.value.name]) {
-            addPatch({[property.value.name]: null})
+            addPatch({ [property.value.name]: null });
         }
     }
-})
+});
 
 const dataPermissions = {
     locked: computed(() => !!props.inheritedRecordsConfiguration?.dataPermission && !patched.value.dataPermission),
@@ -176,11 +176,11 @@ const dataPermissions = {
         get: () => !!props.inheritedRecordsConfiguration?.dataPermission || patched.value.dataPermission,
         set: (value: boolean) => {
             addPatch({
-                dataPermission: value
+                dataPermission: value,
             });
-        }
-    })
-}
+        },
+    }),
+};
 
 const financialSupport = {
     locked: computed(() => !!props.inheritedRecordsConfiguration?.financialSupport && !patched.value.financialSupport),
@@ -189,36 +189,38 @@ const financialSupport = {
         set: (value: boolean) => {
             if (value) {
                 if (!dataPermissions.enabled.value) {
-                    Toast.error('De financiële status van een lid is gevoelige informatie en vereist toestemming voor gegevensverzameling').show()
-                    return
+                    Toast.error('De financiële status van een lid is gevoelige informatie en vereist toestemming voor gegevensverzameling').show();
+                    return;
                 }
                 addPatch({
-                    financialSupport: true
-                });
-            } else {
-                addPatch({
-                    financialSupport: false
+                    financialSupport: true,
                 });
             }
-        }
-    })
-}
+            else {
+                addPatch({
+                    financialSupport: false,
+                });
+            }
+        },
+    }),
+};
 
 // Methods
-function buildPropertyRefs(property: PropertyName, title: string, options?: {warning?: string, description?: string, preventAlways?: boolean}) {
-    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property])
+function buildPropertyRefs(property: MemberProperty, title: string, options?: { warning?: string; description?: string; preventAlways?: boolean }) {
+    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property]);
     const enabled = computed({
         get: () => !!getFilterConfiguration(property),
         set: (value: boolean) => {
             if (value) {
                 // Show dialog
-                editPropertyFilterConfiguration(property, title, options)
-            } else {
-                setEnableProperty(property, value)
+                editPropertyFilterConfiguration(property, title, options).catch(console.error);
             }
-        }
-    })
-    const configuration = computed(() => getFilterConfiguration(property))
+            else {
+                setEnableProperty(property, value);
+            }
+        },
+    });
+    const configuration = computed(() => getFilterConfiguration(property));
 
     return ref({
         name: property,
@@ -228,33 +230,34 @@ function buildPropertyRefs(property: PropertyName, title: string, options?: {war
         enabled,
         locked,
         configuration,
-        edit: () => editPropertyFilterConfiguration(property, title, options)
-    })
+        edit: () => editPropertyFilterConfiguration(property, title, options),
+    });
 }
 
-function getFilterConfiguration(property: PropertyName): PropertyFilter|null {
-    return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property]
+function getFilterConfiguration(property: MemberProperty): PropertyFilter | null | boolean {
+    return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property];
 }
 
-function setEnableProperty(property: PropertyName, enable: boolean) {
+function setEnableProperty(property: MemberProperty, enable: boolean) {
     if (props.inheritedRecordsConfiguration?.[property]) {
-        return
+        return;
     }
     if (enable === !!getFilterConfiguration(property)) {
-        return
+        return;
     }
     if (enable) {
         addPatch({
-            [property]: props.recordsConfiguration[property] ?? PropertyFilter.createDefault()
-        })
-    } else {
+            [property]: props.recordsConfiguration[property] ?? PropertyFilter.createDefault(),
+        });
+    }
+    else {
         addPatch({
-            [property]: null
-        })
+            [property]: null,
+        });
     }
 }
 
-async function editPropertyFilterConfiguration(property: PropertyName, title: string, options?: {warning?: string, description?: string}) {
+async function editPropertyFilterConfiguration(property: MemberProperty, title: string, options?: { warning?: string; description?: string }) {
     await present({
         components: [
             new ComponentWithProperties(PropertyFilterView, {
@@ -264,60 +267,61 @@ async function editPropertyFilterConfiguration(property: PropertyName, title: st
                 builder: settings.filterBuilder([]),
                 setConfiguration: (configuration: PropertyFilter) => {
                     addPatch({
-                        [property]: configuration
-                    })
-                }
-            })
+                        [property]: configuration,
+                    });
+                },
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 // Inherited categories
 const cachedInheritedCategories = new Map<string, ReturnType<typeof buildRefForInheritedCategory>>();
 function getRefForInheritedCategory(categoryId: string) {
     if (!cachedInheritedCategories.has(categoryId)) {
-        cachedInheritedCategories.set(categoryId, buildRefForInheritedCategory(categoryId))
+        cachedInheritedCategories.set(categoryId, buildRefForInheritedCategory(categoryId));
     }
-    return cachedInheritedCategories.get(categoryId)!
+    return cachedInheritedCategories.get(categoryId)!;
 }
 
 function buildRefForInheritedCategory(categoryId: string) {
-    const category = computed(() => props.inheritedRecordsConfiguration?.recordCategories?.find(c => c.id === categoryId))
+    const category = computed(() => props.inheritedRecordsConfiguration?.recordCategories?.find(c => c.id === categoryId));
 
-    const requiresDataPermissions = computed(() => !!category.value?.containsSensitiveData)
-    
-    const locked = computed(() => !category.value || category.value.defaultEnabled)
+    const requiresDataPermissions = computed(() => !!category.value?.containsSensitiveData);
+
+    const locked = computed(() => !category.value || category.value.defaultEnabled);
     const enabled = computed({
         get: () => locked.value || !!patched.value.inheritedRecordCategories.has(categoryId),
         set: (enable: boolean) => {
             if (enable === enabled.value) {
-                return
+                return;
             }
-            const patchMap = new PatchMap() as PatchMap<string, PropertyFilter|null>;
+            const patchMap = new PatchMap() as PatchMap<string, PropertyFilter | null>;
 
             if (enable) {
                 if (requiresDataPermissions.value && !dataPermissions.enabled.value) {
-                    Toast.error('Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.').show()
-                    return
+                    Toast.error('Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.').show();
+                    return;
                 }
 
                 // Set
                 patchMap.set(
-                    categoryId, 
+                    categoryId,
                     // Reuse saved one in case of accidental disable - enable
-                    props.recordsConfiguration.inheritedRecordCategories.get(categoryId) ?? PropertyFilter.createDefault()
-                )
-            } else {
+                    props.recordsConfiguration.inheritedRecordCategories.get(categoryId) ?? PropertyFilter.createDefault(),
+                );
+            }
+            else {
                 // Remove
-                patchMap.set(categoryId, null)
+                patchMap.set(categoryId, null);
             }
             addPatch({
-                inheritedRecordCategories: patchMap
-            })
-        }
-    })
-    const configuration = computed(() => patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? null)
+                inheritedRecordCategories: patchMap,
+            });
+        },
+    });
+    const configuration = computed(() => patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? null);
 
     return ref({
         title: category.value?.name ?? 'Naamloos',
@@ -326,15 +330,15 @@ function buildRefForInheritedCategory(categoryId: string) {
         configuration,
         requiresDataPermissions,
         edit: async () => {
-            await editInheritedFilterConfiguration(categoryId)
-        }
-    })
+            await editInheritedFilterConfiguration(categoryId);
+        },
+    });
 }
 
 async function editInheritedFilterConfiguration(categoryId: string) {
     const category = props.inheritedRecordsConfiguration?.recordCategories?.find(c => c.id === categoryId);
     if (!category) {
-        return
+        return;
     }
 
     await present({
@@ -344,20 +348,20 @@ async function editInheritedFilterConfiguration(categoryId: string) {
                 title: category.name,
                 builder: settings.filterBuilder([]),
                 setConfiguration: (configuration: PropertyFilter) => {
-                    const patchMap = new PatchMap() as PatchMap<string, PropertyFilter|null>;
+                    const patchMap = new PatchMap() as PatchMap<string, PropertyFilter | null>;
                     patchMap.set(
-                        categoryId, 
-                        configuration
-                    )
+                        categoryId,
+                        configuration,
+                    );
 
                     addPatch({
-                        inheritedRecordCategories: patchMap
-                    })
-                }
-            })
+                        inheritedRecordCategories: patchMap,
+                    });
+                },
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function previewCategory(category: RecordCategory) {
@@ -368,14 +372,14 @@ async function previewCategory(category: RecordCategory) {
                 value: settings.exampleValue,
                 markReviewed: false,
                 patchHandler: (patch: PatchAnswers) => {
-                    return settings.patchExampleValue(settings.exampleValue, patch)
+                    return settings.patchExampleValue(settings.exampleValue, patch);
                 },
                 saveHandler: async (_patch: PatchAnswers, navigate: NavigationActions) => {
-                    await navigate.pop({force: true})
-                }
-            })
+                    await navigate.pop({ force: true });
+                },
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 </script>

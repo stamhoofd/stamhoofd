@@ -1,32 +1,34 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { MemberStepView } from "../..";
-import { NavigationActions } from "../../../types/NavigationActions";
-import EditMemberParentsBox from "../../components/edit/EditMemberParentsBox.vue";
-import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
-import { markRaw } from "vue";
-import { PermissionLevel } from "@stamhoofd/structures";
-import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { PermissionLevel } from '@stamhoofd/structures';
+import { markRaw } from 'vue';
+import { MemberStepView } from '../..';
+import { NavigationActions } from '../../../types/NavigationActions';
+import EditMemberParentsBox from '../../components/edit/EditMemberParentsBox.vue';
+import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
+import { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberParentsStep implements EditMemberStep {
-    options: MemberSharedStepOptions
+    options: MemberSharedStepOptions;
 
     constructor(options: MemberSharedStepOptions) {
-        this.options = options
+        this.options = options;
     }
 
     getName(manager: MemberStepManager) {
-        return 'Ouders'
+        return 'Ouders';
     }
 
     isEnabled(manager: MemberStepManager) {
-        const member = manager.member
+        const member = manager.member;
         const details = member.patchedMember.details;
 
         if (!member.isPropertyEnabled('parents', {
-            checkPermissions: manager.context.user ? {
-                level: PermissionLevel.Write,
-                user: manager.context.user
-            } : undefined
+            checkPermissions: manager.context.user
+                ? {
+                        level: PermissionLevel.Write,
+                        user: manager.context.user,
+                    }
+                : undefined,
         })) {
             return false;
         }
@@ -35,10 +37,13 @@ export class MemberParentsStep implements EditMemberStep {
             return true;
         }
 
+        if (member.isPropertyRequired('nationalRegisterNumber') && !details.parents.some(p => !!p.nationalRegisterNumber)) {
+            return true;
+        }
 
         // Check if it has been a while since this information was reviewed
         if (this.options.outdatedTime) {
-            if (details.reviewTimes.isOutdated("parents", this.options.outdatedTime)) {
+            if (details.reviewTimes.isOutdated('parents', this.options.outdatedTime)) {
                 return true;
             }
         }
@@ -50,11 +55,11 @@ export class MemberParentsStep implements EditMemberStep {
             title: 'Ouders',
             member: manager.member,
             component: markRaw(EditMemberParentsBox),
-            saveText: "Doorgaan",
+            saveText: 'Doorgaan',
             markReviewed: ['parents'],
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate)
-            }
-        })
+                await manager.saveHandler(this, navigate);
+            },
+        });
     }
 }

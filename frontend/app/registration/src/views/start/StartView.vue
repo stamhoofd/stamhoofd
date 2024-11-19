@@ -272,7 +272,8 @@ async function onDownloadDocument(document: Document) {
         return;
     }
     if (document.status === DocumentStatus.MissingData) {
-        new Toast('Dit document kan niet gedownload worden omdat er nog gegevens ontbreken. Vul eerst alle ontbrekende gegevens aan en contacteer ons indien het probleem nog niet is verholpen.', 'error red').show();
+        const member = members.value.find(m => m.id === document.memberId);
+        new Toast('Dit document kan niet gedownload worden omdat er nog gegevens ontbreken of ongeldig zijn. Kijk alle gegevens van ' + (member?.member.firstName ?? 'dit lid') + ' na en contacteer ons indien het probleem nog niet is verholpen.', 'error red').setHide(20000).show();
         return;
     }
     downloadingDocuments.push(document);

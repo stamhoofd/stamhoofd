@@ -11,6 +11,7 @@ import { Gender } from './Gender.js';
 import { Parent } from './Parent.js';
 import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
 import { ReviewTimes } from './ReviewTime.js';
+import { Country } from '../addresses/CountryDecoder.js';
 
 /**
  * Keep track of date nad time of an edited boolean value
@@ -31,6 +32,8 @@ export class BooleanStatus extends AutoEncoder {
     }
 }
 
+export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber';
+
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form.
  * The public key of the member is stored in the member model, the private key is stored in the keychain for the 'owner' users. The organization has a copy that is encrypted with the organization's public key.
@@ -45,6 +48,9 @@ export class MemberDetails extends AutoEncoder {
 
     @field({ decoder: StringDecoder, version: 30, nullable: true })
     memberNumber: string | null = null;
+
+    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    nationalRegisterNumber: string | null = null;
 
     /**
      * Code needed to get access to this member when detecting duplicates. It is only visible for admins, otherwise it will be null.
@@ -795,5 +801,36 @@ export class MemberDetails extends AutoEncoder {
     hasEmail(email: string) {
         const cleanedEmail = email.toLowerCase().trim();
         return this.getMemberEmails().includes(cleanedEmail) || this.getParentEmails().includes(cleanedEmail);
+    }
+
+    getAllAddresses() {
+        const addresses: Address[] = [];
+
+        if (this.address) {
+            addresses.push(this.address);
+        }
+
+        for (const parent of this.parents) {
+            if (parent.address && !addresses.find(a => a.id === parent.address!.id)) {
+                addresses.push(parent.address);
+            }
+        }
+
+        for (const address of this.unverifiedAddresses) {
+            if (!addresses.find(a => a.id === address.id)) {
+                addresses.push(address);
+            }
+        }
+
+        return addresses;
+    }
+
+    hasAllCountry(country: Country) {
+        const aa = this.getAllAddresses();
+
+        if (aa.length === 0) {
+            return false;
+        }
+        return aa.every(a => a.country === country);
     }
 }

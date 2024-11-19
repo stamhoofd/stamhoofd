@@ -124,6 +124,16 @@ export class Formatter {
         return datetime.year;
     }
 
+    // 1 - 12
+    static monthNumber(date: Date): number {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return 0;
+        }
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        return datetime.month;
+    }
+
     /**
      * maandag, 1 januari (2020). Year only in different year
      */

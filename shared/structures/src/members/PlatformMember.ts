@@ -15,7 +15,7 @@ import { UserWithMembers } from '../UserWithMembers.js';
 import { Address } from '../addresses/Address.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { EmergencyContact } from './EmergencyContact.js';
-import { MemberDetails } from './MemberDetails.js';
+import { MemberDetails, MemberProperty } from './MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { ObjectWithRecords } from './ObjectWithRecords.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
@@ -25,6 +25,7 @@ import { RegisterItem } from './checkout/RegisterItem.js';
 import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
+import { Country } from '../addresses/CountryDecoder.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -291,6 +292,10 @@ export class PlatformFamily {
         }
     }
 
+    getMembersForParent(parent: Parent) {
+        return this.members.filter(m => m.patchedMember.details.parents.find(p => p.id === parent.id));
+    }
+
     updateEmergencyContact(emergencyContact: EmergencyContact) {
         for (const member of this.members) {
             const patch = member.patchedMember.details.updateEmergencyContactPatch(emergencyContact);
@@ -495,7 +500,7 @@ export class PlatformMember implements ObjectWithRecords {
         });
     }
 
-    isPropertyEnabledForPlatform(property: 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber') {
+    isPropertyEnabledForPlatform(property: MemberProperty) {
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && !this.patchedMember.details.dataPermissions?.value) {
             return false;
@@ -515,11 +520,7 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isEnabled(this);
     }
 
-    isPropertyEnabled(property: 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber', options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } }) {
-        if (this.isPropertyEnabledForPlatform(property)) {
-            return true;
-        }
-
+    isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } }) {
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && !this.patchedMember.details.dataPermissions?.value) {
             return false;
@@ -540,6 +541,27 @@ export class PlatformMember implements ObjectWithRecords {
                     return false;
                 }
             }
+        }
+
+        if (options?.checkPermissions && (property === 'nationalRegisterNumber')) {
+            const isUserManager = options.checkPermissions.user.members.members.some(m => m.id === this.id);
+            if (!isUserManager) {
+                // Need permission to view financial support
+                let foundPermissions = false;
+                for (const organization of this.filterOrganizations({ currentPeriod: true })) {
+                    if (options.checkPermissions.user.permissions?.forOrganization(organization, Platform.shared)?.hasAccessRight(AccessRight.MemberManageNRR)) {
+                        foundPermissions = true;
+                        break;
+                    }
+                }
+                if (!foundPermissions) {
+                    return false;
+                }
+            }
+        }
+
+        if (this.isPropertyEnabledForPlatform(property)) {
+            return true;
         }
 
         const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: true });
@@ -566,20 +588,33 @@ export class PlatformMember implements ObjectWithRecords {
         return false;
     }
 
-    isPropertyRequiredForPlatform(property: 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'uitpasNumber') {
+    isPropertyRequiredForPlatform(property: MemberProperty) {
         if (!this.isPropertyEnabledForPlatform(property)) {
             return false;
         }
 
+        if (property === 'nationalRegisterNumber' && !this.patchedMember.details.hasAllCountry(Country.Belgium)) {
+            return false;
+        }
+
         const def = this.platform.config.recordsConfiguration[property];
+
+        if (typeof def === 'boolean') {
+            return def;
+        }
+
         if (def === null) {
             return false;
         }
         return def.isRequired(this);
     }
 
-    isPropertyRequired(property: 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'uitpasNumber') {
+    isPropertyRequired(property: MemberProperty) {
         if (!this.isPropertyEnabled(property)) {
+            return false;
+        }
+
+        if (property === 'nationalRegisterNumber' && !this.patchedMember.details.hasAllCountry(Country.Belgium)) {
             return false;
         }
 
@@ -587,6 +622,13 @@ export class PlatformMember implements ObjectWithRecords {
 
         for (const recordsConfiguration of recordsConfigurations) {
             const def = recordsConfiguration[property];
+            if (typeof def === 'boolean') {
+                if (def === true) {
+                    return def;
+                }
+                continue;
+            }
+
             if (def === null) {
                 continue;
             }

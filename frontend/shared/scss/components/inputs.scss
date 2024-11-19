@@ -94,6 +94,11 @@
         opacity: 1;
     }
 
+    &.placeholder:not(:focus) {
+        color: $color-gray-5;
+        opacity: 1;
+    }
+
     &.error {
         border-color: $color-error-border;
         box-shadow: 0 0 0 1px $color-error-border;

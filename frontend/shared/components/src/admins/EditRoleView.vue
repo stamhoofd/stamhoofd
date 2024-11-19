@@ -183,6 +183,13 @@
                         @patch:role="addPatch"
                     />
 
+                    <AccessRightPermissionRow
+                        :access-right="AccessRight.MemberManageNRR"
+                        :inherited-roles="inheritedRoles"
+                        :role="patched"
+                        @patch:role="addPatch"
+                    />
+
                     <ResourcePermissionRow
                         v-for="recordCategory in recordCategories"
                         :key="recordCategory.id"

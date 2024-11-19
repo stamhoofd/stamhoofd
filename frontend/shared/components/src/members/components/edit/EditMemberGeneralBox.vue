@@ -18,7 +18,7 @@
                 </STInputBox>
 
                 <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
-                
+
                 <STInputBox v-if="isPropertyEnabled('gender') || gender !== Gender.Other" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
                     <RadioGroup>
                         <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
@@ -39,14 +39,14 @@
                         <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
-                <EmailInput 
-                    v-for="n in alternativeEmails.length" 
-                    :model-value="getEmail(n - 1)" 
-                    :key="n" 
-                    :required="true" 
-                    :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') " 
-                    :placeholder="'Enkel van lid zelf'"  
-                    :validator="validator" 
+                <EmailInput
+                    v-for="n in alternativeEmails.length"
+                    :key="n"
+                    :model-value="getEmail(n - 1)"
+                    :required="true"
+                    :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') "
+                    :placeholder="'Enkel van lid zelf'"
+                    :validator="validator"
                     @update:model-value="setEmail(n - 1, $event)"
                 >
                     <template #right>
@@ -69,8 +69,15 @@
                         </template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
                     </p>
                 </template>
+
+                <template v-if="!member.isNew && (isPropertyEnabled('nationalRegisterNumber') || nationalRegisterNumber)">
+                    <NRRInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay" />
+                    <p class="style-description-small">
+                        Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken.
+                    </p>
+                </template>
             </div>
-            
+
             <div v-if="!member.isNew">
                 <SelectionAddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
             </div>
@@ -97,49 +104,50 @@ import BirthDayInput from '../../../inputs/BirthDayInput.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
+import NRRInput from '../../../inputs/NRRInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = defineProps<{
-    member: PlatformMember,
-    validator: Validator,
-    parentErrorBox?: ErrorBox | null,
-    willMarkReviewed?: boolean
-}>()
+    member: PlatformMember;
+    validator: Validator;
+    parentErrorBox?: ErrorBox | null;
+    willMarkReviewed?: boolean;
+}>();
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
-const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true)
-const errors = useErrors({validator: props.validator});
-const app = useAppContext()
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
+const errors = useErrors({ validator: props.validator });
+const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 
 const title = computed(() => {
     if (props.member.isNew) {
-        return "Nieuw lid"
+        return 'Nieuw lid';
     }
-    return "Algemeen"
-})
+    return 'Algemeen';
+});
 
 useValidation(errors.validator, () => {
-    const se = new SimpleErrors()
+    const se = new SimpleErrors();
     if (firstName.value.trim().length < 2) {
         se.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Vul de voornaam in",
-            field: "firstName"
-        }))
+            code: 'invalid_field',
+            message: 'Vul de voornaam in',
+            field: 'firstName',
+        }));
     }
     if (lastName.value.trim().length < 2) {
         se.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Vul de achternaam in",
-            field: "lastName"
-        }))
+            code: 'invalid_field',
+            message: 'Vul de achternaam in',
+            field: 'lastName',
+        }));
     }
 
     if (isPropertyEnabled('phone') && phone.value) {
@@ -148,10 +156,10 @@ useValidation(errors.validator, () => {
         clone.cleanData();
         if (clone.phone === null) {
             se.addError(new SimpleError({
-                code: "invalid_field",
+                code: 'invalid_field',
                 message: `Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van ${props.member.patchedMember.details.firstName}. Vul het GSM-nummer van ${props.member.patchedMember.details.firstName} zelf in.`,
-                field: "phone"
-            }))
+                field: 'phone',
+            }));
         }
     }
 
@@ -161,85 +169,89 @@ useValidation(errors.validator, () => {
         clone.cleanData();
         if (clone.email === null) {
             se.addError(new SimpleError({
-                code: "invalid_field",
+                code: 'invalid_field',
                 message: `Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van ${props.member.patchedMember.details.firstName}. Vul het e-mailadres van ${props.member.patchedMember.details.firstName} zelf in.`,
-                field: "email"
-            }))
+                field: 'email',
+            }));
         }
     }
 
-
     if (se.errors.length > 0) {
-        errors.errorBox = new ErrorBox(se)
-        return false
+        errors.errorBox = new ErrorBox(se);
+        return false;
     }
-    errors.errorBox = null
+    errors.errorBox = null;
 
-    return true
+    return true;
 });
 
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
         if (props.member.patchedMember.details.defaultAge < 24) {
-            return " van dit lid"
+            return ' van dit lid';
         }
-        return ""
+        return '';
     }
     if (props.member.patchedMember.details.defaultAge < 24) {
-        return " van "+firstName.value
+        return ' van ' + firstName.value;
     }
-    return ""
-})
+    return '';
+});
 
 const firstName = computed({
     get: () => props.member.patchedMember.details.firstName,
-    set: (firstName) => props.member.addDetailsPatch({firstName})
+    set: firstName => props.member.addDetailsPatch({ firstName }),
 });
 
 const lastName = computed({
     get: () => props.member.patchedMember.details.lastName,
-    set: (lastName) => props.member.addDetailsPatch({lastName})
+    set: lastName => props.member.addDetailsPatch({ lastName }),
+});
+
+const nationalRegisterNumber = computed({
+    get: () => props.member.patchedMember.details.nationalRegisterNumber,
+    set: nationalRegisterNumber => props.member.addDetailsPatch({ nationalRegisterNumber }),
 });
 
 const birthDay = computed({
     get: () => props.member.patchedMember.details.birthDay,
-    set: (birthDay) => props.member.addDetailsPatch({birthDay})
+    set: birthDay => props.member.addDetailsPatch({ birthDay }),
 });
 
 const gender = computed({
     get: () => props.member.patchedMember.details.gender,
-    set: (gender) => props.member.addDetailsPatch({gender})
+    set: gender => props.member.addDetailsPatch({ gender }),
 });
 
 const address = computed({
     get: () => props.member.patchedMember.details.address,
-    set: (address) => props.member.addDetailsPatch({address})
+    set: address => props.member.addDetailsPatch({ address }),
 });
 
 const email = computed({
     get: () => props.member.patchedMember.details.email,
-    set: (email) => props.member.addDetailsPatch({email})
+    set: email => props.member.addDetailsPatch({ email }),
 });
 
 const phone = computed({
     get: () => props.member.patchedMember.details.phone,
-    set: (phone) => props.member.addDetailsPatch({phone})
+    set: phone => props.member.addDetailsPatch({ phone }),
 });
 
 const alternativeEmails = computed({
     get: () => props.member.patchedMember.details.alternativeEmails,
-    set: (alternativeEmails) => props.member.addDetailsPatch({
-        alternativeEmails: alternativeEmails as any
-    })
+    set: alternativeEmails => props.member.addDetailsPatch({
+        alternativeEmails: alternativeEmails as any,
+    }),
 });
 
 const availableAddresses = computed(() => {
-    const list = props.member.family.addresses
-    
+    const list = props.member.family.addresses;
+
     if (props.member.patchedMember.details.address !== null && !list.find(a => a.toString() === props.member.patchedMember.details.address!.toString())) {
-        list.push(props.member.patchedMember.details.address)
+        list.push(props.member.patchedMember.details.address);
     }
-    return list
+    return list;
 });
 
 function deleteEmail(n: number) {
@@ -249,11 +261,11 @@ function deleteEmail(n: number) {
 }
 
 function addEmail() {
-    alternativeEmails.value = [...alternativeEmails.value, ""];
+    alternativeEmails.value = [...alternativeEmails.value, ''];
 }
 
 function getEmail(index: number) {
-    return alternativeEmails.value[index] ?? "";
+    return alternativeEmails.value[index] ?? '';
 }
 
 function setEmail(index: number, value: string) {
@@ -270,7 +282,7 @@ function clear() {
     const times = props.member.patchedMember.details.reviewTimes.clone();
     times.removeReview('details');
     props.member.addDetailsPatch({
-        reviewTimes: times
-    })
+        reviewTimes: times,
+    });
 }
 </script>

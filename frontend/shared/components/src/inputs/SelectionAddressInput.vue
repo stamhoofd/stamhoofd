@@ -8,7 +8,7 @@
                     </template>
                     {{ _address.street }} {{ _address.number }}<br>
                     {{ _address.postalCode }} {{ _address.city }}
-                    <template v-if="hasModifyListener" #right>
+                    <template #right>
                         <button class="button icon gray edit" type="button" @click.stop="doEditAddress(_address)" />
                     </template>
                 </STListItem>
@@ -158,10 +158,17 @@ export default class SelectionAddressInput extends VueComponent {
     }
 
     doEditAddress(address: Address) {
-        this.$emit('update:modelValue', address);
-        this.editingAddress = true;
-        this.selectedAddress = address;
-        this.customAddress = address;
+        if (this.hasModifyListener) {
+            this.$emit('update:modelValue', address);
+            this.editingAddress = true;
+            this.selectedAddress = address;
+            this.customAddress = address;
+        }
+        else {
+            this.editingAddress = false;
+            this.selectedAddress = null;
+            this.customAddress = address;
+        }
     }
 
     get editAddress() {
@@ -174,6 +181,9 @@ export default class SelectionAddressInput extends VueComponent {
             this.selectedAddress = address;
             this.$emit('update:modelValue', address);
             this.editingAddress = true;
+        }
+        else {
+            this.$emit('update:modelValue', address);
         }
         this.customAddress = address;
     }

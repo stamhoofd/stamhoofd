@@ -935,6 +935,60 @@ export class AdminPermissionChecker {
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
+    async hasNRRAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+        const isUserManager = this.isUserManager(member);
+
+        if (isUserManager) {
+            return true;
+        }
+
+        if (!await this.canAccessMember(member, level)) {
+            return false;
+        }
+
+        // First list all organizations this member is part of
+        const organizations: Organization[] = [];
+
+        if (member.organizationId) {
+            if (this.checkScope(member.organizationId)) {
+                organizations.push(await this.getOrganization(member.organizationId));
+            }
+        }
+
+        for (const registration of member.registrations) {
+            if (this.checkScope(registration.organizationId)) {
+                if (!organizations.find(o => o.id === registration.organizationId)) {
+                    organizations.push(await this.getOrganization(registration.organizationId));
+                }
+            }
+        }
+
+        // Loop all organizations.
+        for (const organization of organizations) {
+            const permissions = await this.getOrganizationPermissions(organization);
+            if (!permissions) {
+                continue;
+            }
+
+            if (permissions.hasAccessRight(AccessRight.MemberManageNRR)) {
+                return true;
+            }
+        }
+
+        // Platform data
+        const platformPermissions = this.platformPermissions;
+        if (platformPermissions) {
+            if (platformPermissions.hasAccessRight(AccessRight.MemberManageNRR)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Return a list of RecordSettings the current user can view or edit
+     */
     async getAccessibleRecordSet(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<Set<string>> {
         const categories = await this.getAccessibleRecordCategories(member, level);
         const set = new Set<string>();
@@ -1006,6 +1060,14 @@ export class AdminPermissionChecker {
             cloned.details.securityCode = null;
         }
 
+        if (!await this.hasNRRAccess(member, PermissionLevel.Read)) {
+            cloned.details.nationalRegisterNumber = null;
+
+            for (const parent of cloned.details.parents) {
+                parent.nationalRegisterNumber = null;
+            }
+        }
+
         return cloned;
     }
 
@@ -1017,6 +1079,14 @@ export class AdminPermissionChecker {
             throw new SimpleError({
                 code: 'invalid_request',
                 message: 'Cannot PUT a full member details object',
+                statusCode: 400,
+            });
+        }
+
+        if (Array.isArray(data.details.parents)) {
+            throw new SimpleError({
+                code: 'invalid_request',
+                message: 'Cannot PUT a full member details parents',
                 statusCode: 400,
             });
         }
@@ -1149,6 +1219,26 @@ export class AdminPermissionChecker {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: 'Je hebt geen toegangsrechten om het betaalde bedrag van een inschrijving te bepalen',
+                        statusCode: 400,
+                    });
+                }
+            }
+        }
+
+        if (!await this.hasNRRAccess(member, PermissionLevel.Write)) {
+            if (data.details.nationalRegisterNumber) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Je hebt geen toegangsrechten om het rijksregisternummer van dit lid aan te passen',
+                    statusCode: 400,
+                });
+            }
+
+            for (const parent of data.details.parents.getPatches()) {
+                if (parent.nationalRegisterNumber) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om het rijksregisternummer van een ouder aan te passen',
                         statusCode: 400,
                     });
                 }

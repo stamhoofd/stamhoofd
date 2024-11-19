@@ -27,6 +27,9 @@
                 <p v-if="parent.address" class="style-description-small">
                     {{ parent.address }}
                 </p>
+                <p v-if="parent.nationalRegisterNumber" class="style-description-small">
+                    RRN: {{ parent.nationalRegisterNumber }}
+                </p>
 
                 <template #right>
                     <span v-if="!isParentSelected(parent)" class="button text limit-space">
@@ -75,37 +78,46 @@ import Title from './Title.vue';
 import { useAppContext } from '../../../context';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 const props = defineProps<{
-    member: PlatformMember,
-    validator: Validator,
-    parentErrorBox?: ErrorBox,
-    willMarkReviewed?: boolean
+    member: PlatformMember;
+    validator: Validator;
+    parentErrorBox?: ErrorBox;
+    willMarkReviewed?: boolean;
 }>();
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const present = usePresent();
-const errors = useErrors({validator: props.validator});
+const errors = useErrors({ validator: props.validator });
+
 useValidation(errors.validator, () => {
-    const se = new SimpleErrors()
-    if (isPropertyRequired("parents") && parents.value.length === 0) {
+    const se = new SimpleErrors();
+    if (isPropertyRequired('parents') && parents.value.length === 0) {
         se.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Voeg minstens één ouder toe",
-            field: "parents"
-        }))
+            code: 'invalid_field',
+            message: 'Voeg minstens één ouder toe',
+            field: 'parents',
+        }));
+    }
+
+    if (isPropertyRequired('nationalRegisterNumber') && !parents.value.some(p => !!p.nationalRegisterNumber)) {
+        se.addError(new SimpleError({
+            code: 'invalid_field',
+            message: 'Voeg bij minstens één ouder een rijksregisternummer toe.',
+            field: 'parents',
+        }));
     }
 
     if (se.errors.length > 0) {
-        errors.errorBox = new ErrorBox(se)
-        return false
+        errors.errorBox = new ErrorBox(se);
+        return false;
     }
-    errors.errorBox = null
+    errors.errorBox = null;
 
-    return true
+    return true;
 });
-const app = useAppContext()
+const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 
 const initialParents = computed(() => props.member.member.details.parents);
@@ -134,12 +146,11 @@ const visibleParents = computed(() => {
         }
     }
 
-    
     return result;
 });
 
 function isParentSelected(parent: Parent) {
-    return !!parents.value.find(p => p.id === parent.id)
+    return !!parents.value.find(p => p.id === parent.id);
 }
 function setParentSelected(parent: Parent, selected: boolean) {
     if (selected === isParentSelected(parent)) {
@@ -150,11 +161,12 @@ function setParentSelected(parent: Parent, selected: boolean) {
         const patch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
         patch.addDelete(parent.id); // avoids creating duplicates
         patch.addPut(parent);
-        props.member.addDetailsPatch({parents: patch})
-    } else {
+        props.member.addDetailsPatch({ parents: patch });
+    }
+    else {
         const patch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
         patch.addDelete(parent.id);
-        props.member.addDetailsPatch({parents: patch})
+        props.member.addDetailsPatch({ parents: patch });
     }
 }
 
@@ -164,25 +176,25 @@ async function editParent(parent: Parent) {
             new ComponentWithProperties(EditParentView, {
                 member: props.member,
                 parent,
-                isNew: false
-            })
+                isNew: false,
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function addParent() {
-    const parent = Parent.create({})
+    const parent = Parent.create({});
     await present({
         components: [
             new ComponentWithProperties(EditParentView, {
                 member: props.member,
                 parent,
-                isNew: true
-            })
+                isNew: true,
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 const reviewDate = computed(() => {
@@ -193,7 +205,7 @@ function clear() {
     const times = props.member.patchedMember.details.reviewTimes.clone();
     times.removeReview('parents');
     props.member.addDetailsPatch({
-        reviewTimes: times
-    })
+        reviewTimes: times,
+    });
 }
 </script>

@@ -18,6 +18,9 @@ export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder })
     lastName = '';
 
+    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    nationalRegisterNumber: string | null = null;
+
     @field({ decoder: StringDecoder, nullable: true })
     phone: string | null = null;
 

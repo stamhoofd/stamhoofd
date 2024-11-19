@@ -21,71 +21,71 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Server } from '@simonbackx/simple-networking';
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Address, Country, CountryHelper, ValidatedAddress } from "@stamhoofd/structures";
+import { Address, Country, CountryHelper, ValidatedAddress } from '@stamhoofd/structures';
 
-import { ErrorBox } from "../errors/ErrorBox";
-import { Validator } from "../errors/Validator";
+import { ErrorBox } from '../errors/ErrorBox';
+import { Validator } from '../errors/Validator';
 import Dropdown from './Dropdown.vue';
 import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
         STInputBox,
-        Dropdown
+        Dropdown,
     },
-    emits: ["update:modelValue"]
+    emits: ['update:modelValue'],
 })
 export default class AddressInput extends VueComponent {
-    @Prop({ default: "" }) 
-        title: string;
+    @Prop({ default: '' })
+    title: string;
 
     /**
      * Assign a validator if you want to offload the validation to components
      */
-    @Prop({ default: null }) 
-        validator: Validator | null
-
-    errorBox: ErrorBox | null = null
-    pendingErrorBox: ErrorBox | null = null
-    
     @Prop({ default: null })
-        modelValue: Address | ValidatedAddress | null
+    validator: Validator | null;
+
+    errorBox: ErrorBox | null = null;
+    pendingErrorBox: ErrorBox | null = null;
+
+    @Prop({ default: null })
+    modelValue: Address | ValidatedAddress | null;
 
     /**
      * Validate on the server or not? -> will return a ValidatedAddress if this is true
      */
     @Prop({ default: null })
-        validateServer: Server | null
+    validateServer: Server | null;
 
     @Prop({ default: true })
-        required: boolean
+    required: boolean;
 
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
-        nullable!: boolean
+    nullable!: boolean;
 
-    addressLine1 = ""
-    city = ""
-    postalCode = ""
-    country = this.getDefaultCountry()
+    addressLine1 = '';
+    city = '';
+    postalCode = '';
+    country = this.getDefaultCountry();
 
     @Prop({ default: false })
-        linkCountryToLocale: boolean
+    linkCountryToLocale: boolean;
 
     getDefaultCountry() {
-        return I18nController.shared?.country ?? Country.Belgium
+        return I18nController.shared?.country ?? Country.Belgium;
     }
 
-    hasFocus = false
+    hasFocus = false;
 
     get countries() {
-        return CountryHelper.getList()
+        return CountryHelper.getList();
     }
 
     @Watch('modelValue', { deep: true })
@@ -97,146 +97,150 @@ export default class AddressInput extends VueComponent {
 
         if (!val) {
             if (!this.required && !this.pendingErrorBox && !this.errorBox) {
-                this.addressLine1 = ""
-                this.city = ""
-                this.postalCode = ""
+                this.addressLine1 = '';
+                this.city = '';
+                this.postalCode = '';
             }
-            return
+            return;
         }
-        this.addressLine1 = val.street.length > 0 ? (val.street+" "+val.number) : (val.number+"")
-        this.city = val.city
-        this.postalCode = val.postalCode
-        this.country = val.country
+        this.addressLine1 = val.street.length > 0 ? (val.street + ' ' + val.number) : (val.number + '');
+        this.city = val.city;
+        this.postalCode = val.postalCode;
+        this.country = val.country;
     }
 
     @Watch('required', { deep: true })
     onChangeRequired() {
         // Revalidate, because the fields might be empty, and required goes false -> send null so any saved address gets cleared
-        this.isValid(false, true).catch(console.error)
+        this.isValid(false, true).catch(console.error);
     }
 
     updateValues(val: Address | null) {
         if (!val) {
             if (!this.required && !this.pendingErrorBox && !this.errorBox) {
-                this.addressLine1 = ""
-                this.city = ""
-                this.postalCode = ""
+                this.addressLine1 = '';
+                this.city = '';
+                this.postalCode = '';
             }
-            return
+            return;
         }
-        this.addressLine1 = val.street.length > 0 ? (val.street+" "+val.number) : (val.number+"")
-        this.city = val.city
-        this.postalCode = val.postalCode
-        this.country = val.country
+        this.addressLine1 = val.street.length > 0 ? (val.street + ' ' + val.number) : (val.number + '');
+        this.city = val.city;
+        this.postalCode = val.postalCode;
+        this.country = val.country;
     }
 
     onBlur() {
-        this.hasFocus = false
+        this.hasFocus = false;
 
         // Sometimes the blur happens without a onChange event, so we always need to update the address after a blur
         // it will only make the errors visible if hasFocus is still false after 200ms
-        this.updateAddress()
+        this.updateAddress();
     }
 
     onFocus() {
-        this.hasFocus = true
+        this.hasFocus = true;
     }
 
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.isValid(true, false)
-            })
+                return this.isValid(true, false);
+            });
         }
-        
+
         if (this.modelValue) {
-            this.addressLine1 = this.modelValue.street.length > 0 ? (this.modelValue.street+" "+this.modelValue.number) : (this.modelValue.number+"")
-            this.city = this.modelValue.city
-            this.postalCode = this.modelValue.postalCode
-            this.country = this.modelValue.country
+            this.addressLine1 = this.modelValue.street.length > 0 ? (this.modelValue.street + ' ' + this.modelValue.number) : (this.modelValue.number + '');
+            this.city = this.modelValue.city;
+            this.postalCode = this.modelValue.postalCode;
+            this.country = this.modelValue.country;
         }
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
     async isValid(isFinal: boolean, silent = false): Promise<boolean> {
         if (!this.required && this.addressLine1.length === 0 && this.postalCode.length === 0 && this.city.length === 0) {
             if (!silent) {
-                this.errorBox = null
+                this.errorBox = null;
             }
 
             if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null)
+                this.$emit('update:modelValue', null);
             }
-            return true
+            return true;
         }
 
         if (this.required && this.addressLine1.length === 0 && this.postalCode.length === 0 && this.city.length === 0) {
             if (!isFinal) {
                 if (!silent) {
-                    this.errorBox = null
+                    this.errorBox = null;
                 }
 
                 if (this.nullable && this.modelValue !== null) {
-                    this.$emit('update:modelValue', null)
+                    this.$emit('update:modelValue', null);
                 }
-                return false
+                return false;
             }
         }
 
-        let address: Address
+        let address: Address;
 
         try {
-            address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country)
+            address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country);
 
             if (!this.modelValue || (this.validateServer && !(this.modelValue instanceof ValidatedAddress) && !silent && isFinal) || address.toString() !== this.modelValue.toString()) {
                 // Do we need to validate on the server?
                 if (this.validateServer && !silent && isFinal) {
                     const response = await this.validateServer.request({
-                        method: "POST",
-                        path: "/address/validate",
+                        method: 'POST',
+                        path: '/address/validate',
                         body: address,
                         decoder: ValidatedAddress as Decoder<ValidatedAddress>,
-                        shouldRetry: false
-                    })
+                        shouldRetry: false,
+                    });
                     if (!this.hasFocus) {
-                        this.updateValues(response.data)
+                        this.updateValues(response.data);
                     }
-                    this.$emit('update:modelValue', response.data)
-                } else {
-                    if (!this.hasFocus) {
-                        this.updateValues(address)
-                    }
-                    this.$emit('update:modelValue', address)
+                    this.$emit('update:modelValue', response.data);
                 }
-            } else {
+                else {
+                    if (!this.hasFocus) {
+                        this.updateValues(address);
+                    }
+                    this.$emit('update:modelValue', address);
+                }
+            }
+            else {
                 if (!this.hasFocus) {
-                    this.updateValues(address)
+                    this.updateValues(address);
                 }
             }
-            
+
             if (!silent) {
-                this.errorBox = null
-                this.pendingErrorBox = null
+                this.errorBox = null;
+                this.pendingErrorBox = null;
             }
-            return true
-        } catch (e) {
+            return true;
+        }
+        catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
-                e.addNamespace("address")
+                e.addNamespace('address');
 
                 if (!silent) {
                     if (isFinal) {
-                        this.errorBox = new ErrorBox(e)
-                    } else {
-                        this.pendingErrorBox = new ErrorBox(e)
+                        this.errorBox = new ErrorBox(e);
+                    }
+                    else {
+                        this.pendingErrorBox = new ErrorBox(e);
 
-                        setTimeout( () => {
+                        setTimeout(() => {
                             if (!this.hasFocus) {
-                                this.errorBox = this.pendingErrorBox
+                                this.errorBox = this.pendingErrorBox;
                             }
                         }, 200);
                     }
@@ -244,17 +248,17 @@ export default class AddressInput extends VueComponent {
             }
 
             if (!this.required && !silent) {
-                this.$emit('update:modelValue', null)
+                this.$emit('update:modelValue', null);
             }
-            return false
+            return false;
         }
     }
 
     updateAddress() {
         if (this.country && this.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(this.country)) {
-            I18nController.shared.switchToLocale({ country: this.country }).catch(console.error)
+            I18nController.shared.switchToLocale({ country: this.country }).catch(console.error);
         }
-        this.isValid(false).catch(console.error)
+        this.isValid(false).catch(console.error);
     }
 
     /**
@@ -262,9 +266,9 @@ export default class AddressInput extends VueComponent {
      */
     updateAddressRealTime() {
         if (this.country && this.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(this.country)) {
-            I18nController.shared.switchToLocale({ country: this.country }).catch(console.error)
+            I18nController.shared.switchToLocale({ country: this.country }).catch(console.error);
         }
-        this.isValid(false, true).catch(console.error)
+        this.isValid(false, true).catch(console.error);
     }
 }
 </script>

@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
-import { Formatter, StringCompare } from '@stamhoofd/utility';
+import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../../addresses/Address.js';
@@ -162,31 +162,6 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
 }
 export const RecordAnswerDecoder = new RecordAnswerDecoderStatic();
 
-function verifyBelgianNationalNumber(text: string) {
-    const trimmed = text.replace(/[^A-Za-z0-9]+/g, ''); // keep A-Z for validation
-    if (trimmed.length !== 11) {
-        return false;
-    }
-    const toCheck = parseInt(trimmed.substring(0, trimmed.length - 2));
-    const checksum = parseInt(trimmed.substring(trimmed.length - 2));
-
-    // we calculate the expected checksum. again
-    const realChecksum = 97 - (toCheck % 97); // Dates before 2000
-    const realChecksum2 = 97 - ((2000000000 + toCheck) % 97); // Dates after 2000
-
-    return checksum === realChecksum || checksum === realChecksum2;
-}
-
-function formatBelgianNationalNumber(text: string) {
-    const trimmed = text.replace(/[^A-Za-z0-9]+/g, ''); // keep A-Z for validation
-    if (trimmed.length !== 11) {
-        return text;
-    }
-
-    // JJ.MM.DD-XXX.XX
-    return trimmed.substring(0, 2) + '.' + trimmed.substring(2, 4) + '.' + trimmed.substring(4, 6) + '-' + trimmed.substring(6, 9) + '.' + trimmed.substring(9, 11);
-}
-
 export class RecordTextAnswer extends RecordAnswer {
     @field({ decoder: StringDecoder, nullable: true })
     value: string | null = null;
@@ -220,7 +195,7 @@ export class RecordTextAnswer extends RecordAnswer {
         }
 
         if (this.value && this.settings.name.toLocaleLowerCase().includes('rijksregisternummer')) {
-            if (!verifyBelgianNationalNumber(this.value)) {
+            if (!DataValidator.verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: "'" + (this.value) + "' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
@@ -229,7 +204,7 @@ export class RecordTextAnswer extends RecordAnswer {
             }
 
             // Auto format the number
-            this.value = formatBelgianNationalNumber(this.value);
+            this.value = DataValidator.formatBelgianNationalNumber(this.value);
         }
     }
 

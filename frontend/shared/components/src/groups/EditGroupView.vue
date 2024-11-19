@@ -491,7 +491,7 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, registrationUIFilterBuilders, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, RecordCategory, Registration, WaitingListType } from '@stamhoofd/structures';
+import { Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, RecordCategory, Registration, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -1084,7 +1084,7 @@ async function addWaitingList() {
     });
 }
 
-function isPropertyEnabled(name: 'emailAddress' | 'birthDay' | 'phone' | 'address' | 'gender') {
+function isPropertyEnabled(name: MemberProperty) {
     return !!OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: externalOrganization.value,

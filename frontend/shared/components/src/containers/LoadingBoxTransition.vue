@@ -1,4 +1,3 @@
-
 <template>
     <div class="loading-box-container">
         <transition name="fade" :appear="true">
@@ -11,38 +10,36 @@
 </template>
 
 <script setup lang="ts">
-import { Fragment,Comment, isVNode, useSlots } from "vue";
-import { ErrorBox } from "../errors/ErrorBox";
+import { Comment, Fragment, isVNode } from 'vue';
+import { ErrorBox } from '../errors/ErrorBox';
 import LoadingBox from './LoadingBox.vue';
 
 withDefaults(
     defineProps<{
-        loading?: boolean,
-        view?: boolean,
-        errorBox?: ErrorBox|null;
+        loading?: boolean;
+        view?: boolean;
+        errorBox?: ErrorBox | null;
     }>(),
     {
         loading: false,
         errorBox: null,
-        view: false
-    }
+        view: false,
+    },
 );
 
 // Helps detect empty nodes
 function isValidVnodes(vnodes: any) {
-    console.log('vnodes', vnodes);
-	return vnodes.some((child: any) => {
-		if (!isVNode(child)) return false;
-		if (child.type === Comment) return false;
-		if (child.type === Fragment && !isValidVnodes(child.children)) return false;
-		return true;
-	})
-		? true
-		: false;
+    return vnodes.some((child: any) => {
+        if (!isVNode(child)) return false;
+        if (child.type === Comment) return false;
+        if (child.type === Fragment && !isValidVnodes(child.children)) return false;
+        return true;
+    })
+        ? true
+        : false;
 }
 
 </script>
-
 
 <style lang="scss">
 @use '@stamhoofd/scss/base/variables' as *;

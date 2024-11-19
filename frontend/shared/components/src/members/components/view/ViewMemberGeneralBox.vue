@@ -61,6 +61,13 @@
                     {{ member.patchedMember.details.uitpasNumber }}
                 </dd>
             </template>
+
+            <template v-if="member.patchedMember.details.nationalRegisterNumber">
+                <dt>Rijksregisternummer</dt>
+                <dd v-copyable>
+                    {{ member.patchedMember.details.nationalRegisterNumber }}
+                </dd>
+            </template>
         </dl>
     </div>
 </template>
@@ -70,12 +77,12 @@ import { PlatformMember } from '@stamhoofd/structures';
 import { useCountry } from '../../../hooks';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 defineProps<{
-    member: PlatformMember
-}>()
+    member: PlatformMember;
+}>();
 
 const currentCountry = useCountry();
 </script>
