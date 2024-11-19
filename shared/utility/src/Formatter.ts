@@ -448,4 +448,22 @@ export class Formatter {
         const splitted = Formatter.slug(str).split('-');
         return splitted.slice(0, maxLength).map(s => s.substr(0, 1).toLocaleUpperCase()).join('');
     }
+
+    static injectPattern(value: string, parts: (string | { length: number })[]) {
+        let result = '';
+        for (const part of parts) {
+            if (typeof part === 'string') {
+                result += part;
+                continue;
+            }
+            result += value.substring(0, part.length);
+            value = value.substring(part.length);
+
+            if (value.length === 0) {
+                break;
+            }
+        }
+
+        return result;
+    }
 }

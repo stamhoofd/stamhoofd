@@ -70,14 +70,35 @@ export class DataValidator {
         return false;
     }
 
-    static formatBelgianNationalNumber(text: string) {
-        const trimmed = text.replace(/[^A-Za-z0-9]+/g, ''); // keep A-Z for validation
-        if (trimmed.length !== 11) {
-            return text;
-        }
+    static cleanBelgianNationalNumber(text: string) {
+        return text.replace(/[^0-9]+/g, '');
+    }
 
+    static getBelgianNationalNumberInputFormatter() {
+        return {
+            cleaner: (value: string) => {
+                return this.cleanBelgianNationalNumber(value);
+            },
+            formatter: (value: string) => {
+                return this.formatBelgianNationalNumber(value);
+            },
+        };
+    }
+
+    static formatBelgianNationalNumber(text: string) {
+        const trimmed = this.cleanBelgianNationalNumber(text);
         // JJ.MM.DD-XXX.XX
-        return trimmed.substring(0, 2) + '.' + trimmed.substring(2, 4) + '.' + trimmed.substring(4, 6) + '-' + trimmed.substring(6, 9) + '.' + trimmed.substring(9, 11);
+        return Formatter.injectPattern(trimmed, [
+            { length: 2 },
+            '.',
+            { length: 2 },
+            '.',
+            { length: 2 },
+            '-',
+            { length: 3 },
+            '.',
+            { length: 2 },
+        ]);
     }
 
     static generateBelgianNationalNumber(date: Date): string {

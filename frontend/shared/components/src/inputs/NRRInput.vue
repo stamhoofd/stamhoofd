@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="nationalRegisterNumber" :error-box="errors.errorBox" :class="class">
-        <input v-model="nrrRaw" :placeholder="!required ? 'Optioneel' : 'JJ.MM.DD-XXX.XX'" class="email-input-field input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}">
+        <input v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="!required ? 'Optioneel' : 'JJ.MM.DD-XXX.XX'" class="email-input-field input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)">
         <template #right>
             <slot name="right" />
         </template>
