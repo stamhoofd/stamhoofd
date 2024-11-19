@@ -67,10 +67,9 @@ const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const markReviewed = props.forceMarkReviewed ?? (app !== 'dashboard' && app !== 'admin');
 
-useValidation(props.validator, async () => {
+useValidation(props.validator, () => {
     if (markReviewed) {
         doMarkReviewed();
-        await nextTick();
     }
     return true;
 });

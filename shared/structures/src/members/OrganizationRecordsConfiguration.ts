@@ -275,8 +275,8 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             return configs[0];
         }
 
-        const first = configs[0].clone();
-        const second = configs[1].clone();
+        const first = configs[0];
+        const second = configs[1];
 
         return this.mergeChildren(this.mergeChild(first, second), ...configs.slice(2));
     }

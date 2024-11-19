@@ -1,3 +1,5 @@
+import { nextTick } from 'vue';
+
 export type Validation = () => Promise<boolean> | boolean;
 /***
  * Pass a Validator instance to mutliple components so you can validate the state of multiple input components at once.
@@ -41,13 +43,31 @@ export class Validator {
      */
     async validate(): Promise<boolean> {
         let valid = true;
+
+        // Because the async validation can cause Vue performance issues (a validator updates a value -> vue update caused due to async validation so all the updates don't happen in one go)
+        // we need to be very careful with async validation and try to perform them in one go.
+        const promises: Promise<boolean>[] = [];
         for (const [_, validation] of this.validations) {
-            const result = await validation();
-            if (!result) {
-                valid = false;
-                // we do not return yet, since validation method can have side effects in UI
+            const result = validation();
+
+            if (typeof result === 'boolean') {
+                if (!result) {
+                    valid = false;
+                    // we do not return yet, since validation method can have side effects in UI
+                }
+            }
+            else {
+                promises.push(result);
             }
         }
+
+        if (promises.length > 0) {
+            const results = await Promise.all(promises);
+            valid = valid && results.every(r => r);
+        }
+
+        // Process vue updates before returning value
+        await nextTick();
         return valid;
     }
 
@@ -67,6 +87,7 @@ export class Validator {
             }
         }
 
+        await nextTick();
         return isValid;
     }
 }

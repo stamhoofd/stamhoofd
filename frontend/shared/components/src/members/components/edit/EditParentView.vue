@@ -91,19 +91,19 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { Address, Country, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
-import { DataValidator, Formatter } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import { usePatch } from '../../../hooks';
+import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
+import { usePatch } from '../../../hooks';
 import Dropdown from '../../../inputs/Dropdown.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
-import PhoneInput from '../../../inputs/PhoneInput.vue';
 import NRRInput from '../../../inputs/NRRInput.vue';
+import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { NavigationActions, useNavigationActions } from '../../../types/NavigationActions';
-import { useAppContext } from '../../../context/appContext';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks';
 
 const props = withDefaults(defineProps<{

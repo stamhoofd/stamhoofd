@@ -53,7 +53,7 @@
                         <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
                     </template>
                 </EmailInput>
-                <template v-if="!member.isNew && (isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
+                <div v-if="!member.isNew && (isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
                     <p v-if="member.patchedMember.details.parentsHaveAccess" class="style-description-small">
                         {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
                             één van de ingevoerde e-mailadressen
@@ -68,18 +68,18 @@
                             het ingevoerde e-mailadres
                         </template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
                     </p>
-                </template>
+                </div>
 
-                <template v-if="!member.isNew && (isPropertyEnabled('nationalRegisterNumber') || nationalRegisterNumber)">
+                <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
                     <NRRInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay" />
                     <p class="style-description-small">
                         Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken.
                     </p>
-                </template>
+                </div>
             </div>
 
             <div v-if="!member.isNew">
-                <SelectionAddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
+                <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
             </div>
         </div>
 

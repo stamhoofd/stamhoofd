@@ -93,15 +93,14 @@ const errors = useErrors({ validator: props.validator });
 
 useValidation(errors.validator, () => {
     const se = new SimpleErrors();
-    if (isPropertyRequired('parents') && parents.value.length === 0) {
+    if (parents.value.length === 0 && isPropertyRequired('parents')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
             message: 'Voeg minstens één ouder toe',
             field: 'parents',
         }));
     }
-
-    if (isPropertyRequired('nationalRegisterNumber') && !parents.value.some(p => !!p.nationalRegisterNumber)) {
+    else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('nationalRegisterNumber')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
             message: 'Voeg bij minstens één ouder een rijksregisternummer toe.',

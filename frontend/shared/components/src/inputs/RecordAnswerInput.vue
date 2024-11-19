@@ -297,13 +297,12 @@ function setChoiceSelected(choice: RecordChoice, selected: boolean) {
     }
 }
 
-useValidation(props.validator, async () => {
-    const valid = await isValid();
+useValidation(props.validator, () => {
+    const valid = isValid();
 
     if (valid) {
         if (props.markReviewed) {
             answer.value = answer.value as any;
-            await nextTick();
         }
     }
 
@@ -319,7 +318,7 @@ onMounted(() => {
     }
 });
 
-async function isValid() {
+function isValid() {
     if (props.allOptional && answer.value.isEmpty) {
         return true;
     }

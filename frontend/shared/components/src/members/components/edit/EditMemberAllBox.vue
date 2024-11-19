@@ -10,17 +10,17 @@
             <EditMemberDataPermissionsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
-        <div v-if="isPropertyEnabled('parents') || member.patchedMember.details.parents.length" class="container">
+        <div v-if="member.patchedMember.details.parents.length || isPropertyEnabled('parents')" class="container">
             <hr>
             <EditMemberParentsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
-        <div v-if="isPropertyEnabled('emergencyContacts')" class="container">
+        <div v-if="member.patchedMember.details.emergencyContacts.length || isPropertyEnabled('emergencyContacts')" class="container">
             <hr>
             <EditEmergencyContactsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
-        <div v-if="isPropertyEnabled('uitpasNumber') || member.patchedMember.details.uitpasNumber" class="container">
+        <div v-if="member.patchedMember.details.uitpasNumber || isPropertyEnabled('uitpasNumber')" class="container">
             <hr>
             <EditMemberUitpasBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
@@ -35,9 +35,9 @@
             <EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :mark-reviewed="true" :level="level + 1" :validator="validator" />
         </div>
 
-        <div class="container" v-if="app !== 'registration'">
+        <div v-if="app !== 'registration'" class="container">
             <hr>
-            <EditMemberNotesBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
+            <EditMemberNotesBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
     </div>
 </template>
@@ -62,34 +62,36 @@ import EditMemberUitpasBox from './EditMemberUitpasBox.vue';
 import Title from './Title.vue';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = withDefaults(
     defineProps<{
-        member: PlatformMember,
-        validator: Validator,
-        level?: number,
-        parentErrorBox?: ErrorBox | null
+        member: PlatformMember;
+        validator: Validator;
+        level?: number;
+        parentErrorBox?: ErrorBox | null;
     }>(), {
         level: 0,
-        parentErrorBox: null
-    }
+        parentErrorBox: null,
+    },
 );
-const auth = useAuth()
-const organization = useOrganization()
+const auth = useAuth();
+const organization = useOrganization();
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
-const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true)
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
 
-const recordCategories = computed(() => 
+const recordCategories = computed(() =>
     props.member.getEnabledRecordCategories({
-        checkPermissions: isAdmin ? {
-            permissions: auth.userPermissions, 
-            level: PermissionLevel.Write
-        } : null,
-        scopeOrganization: organization.value
-    })
-)
+        checkPermissions: isAdmin
+            ? {
+                    permissions: auth.userPermissions,
+                    level: PermissionLevel.Write,
+                }
+            : null,
+        scopeOrganization: organization.value,
+    }),
+);
 
 </script>

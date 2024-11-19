@@ -66,35 +66,35 @@ import EditEmergencyContactView from './EditEmergencyContactView.vue';
 import Title from './Title.vue';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = defineProps<{
-    member: PlatformMember,
-    validator: Validator,
-    parentErrorBox?: ErrorBox | null
+    member: PlatformMember;
+    validator: Validator;
+    parentErrorBox?: ErrorBox | null;
 }>();
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const present = usePresent();
-const errors = useErrors({validator: props.validator});
+const errors = useErrors({ validator: props.validator });
 
 useValidation(errors.validator, () => {
-    const se = new SimpleErrors()
-    if (isPropertyRequired("emergencyContacts") && emergencyContacts.value.length === 0) {
+    const se = new SimpleErrors();
+    if (isPropertyRequired('emergencyContacts') && emergencyContacts.value.length === 0) {
         se.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Voeg minstens één noodcontactpersoon toe",
-            field: "emergencyContacts"
-        }))
+            code: 'invalid_field',
+            message: 'Voeg minstens één noodcontactpersoon toe',
+            field: 'emergencyContacts',
+        }));
     }
 
     if (se.errors.length > 0) {
-        errors.errorBox = new ErrorBox(se)
-        return false
+        errors.errorBox = new ErrorBox(se);
+        return false;
     }
-    errors.errorBox = null
+    errors.errorBox = null;
 
-    return true
+    return true;
 });
 
 const initialContacts = computed(() => props.member.member.details.emergencyContacts);
@@ -126,7 +126,7 @@ const visibleContacts = computed(() => {
 });
 
 function isContactSelected(contact: EmergencyContact) {
-    return !!emergencyContacts.value.find(p => p.id === contact.id)
+    return !!emergencyContacts.value.find(p => p.id === contact.id);
 }
 function setContactSelected(contact: EmergencyContact, selected: boolean) {
     if (selected === isContactSelected(contact)) {
@@ -137,11 +137,12 @@ function setContactSelected(contact: EmergencyContact, selected: boolean) {
         const patch = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
         patch.addDelete(contact.id); // avoids creating duplicates
         patch.addPut(contact);
-        props.member.addDetailsPatch({emergencyContacts: patch})
-    } else {
+        props.member.addDetailsPatch({ emergencyContacts: patch });
+    }
+    else {
         const patch = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
         patch.addDelete(contact.id);
-        props.member.addDetailsPatch({emergencyContacts: patch})
+        props.member.addDetailsPatch({ emergencyContacts: patch });
     }
 }
 
@@ -151,24 +152,24 @@ async function editContact(emergencyContact: EmergencyContact) {
             new ComponentWithProperties(EditEmergencyContactView, {
                 member: props.member,
                 emergencyContact,
-                isNew: false
-            })
+                isNew: false,
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function addContact() {
-    const emergencyContact = EmergencyContact.create({})
+    const emergencyContact = EmergencyContact.create({});
     await present({
         components: [
             new ComponentWithProperties(EditEmergencyContactView, {
                 member: props.member,
                 emergencyContact,
-                isNew: true
-            })
+                isNew: true,
+            }),
         ],
-        modalDisplayStyle: "popup"
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 </script>
