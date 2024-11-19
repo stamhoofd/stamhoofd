@@ -89,6 +89,19 @@
                                 <span slot="right" class="icon arrow-right-small gray" />
                             </STListItem>
 
+                            <STListItem v-if="notYetPaidBalance < 0" class="left-center" :selectable="true" @click="managePayments(true)">
+                                <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg" class="style-illustration-img">
+                                <h3 class="style-title-list">
+                                    Terug te krijgen bedrag
+                                </h3>
+                                <p class="style-description-small">
+                                    Je hebt een saldo van {{ formatPrice(-notYetPaidBalance) }} in jouw voordeel. Voeg het toe aan je winkelmandje om het in mindering te brengen bij een volgende betaling.
+                                </p>
+
+                                <span slot="right" class="icon arrow-right-small gray" />
+                            </STListItem>
+
+
                             <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
                                 <img v-if="!suggestion.group" slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
                                 <template v-else slot="left">

@@ -108,6 +108,13 @@
                 <span>Betalen</span>
             </button>
         </STToolbar>
+
+        <STToolbar v-else-if="outstandingBalance.totalOpen < 0">
+            <button slot="right" class="button primary full" type="button" @click="startPayment">
+                <span class="icon card" />
+                <span>In mindering brengen</span>
+            </button>
+        </STToolbar>
     </div>
 </template>
 
