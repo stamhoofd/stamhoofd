@@ -443,13 +443,20 @@ function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterDefinit
             runners.push(andSQLFilterCompiler(objectToArray(f), definitions));
             continue;
         }
+
+        if (Array.isArray(f)) {
+            // Arrays in filters not direclty underneath $and or $or should be combined with AND
+            runners.push(andSQLFilterCompiler(f, definitions));
+            continue;
+        }
+
         for (const key of Object.keys(f)) {
-            const filter = definitions[key];
-            if (!filter) {
+            const ff = definitions[key];
+            if (!ff) {
                 throw new Error('Unsupported filter ' + key);
             }
 
-            const s = filter(f[key] as StamhoofdFilter, definitions);
+            const s = ff(f[key] as StamhoofdFilter, definitions);
             if (s === undefined || s === null) {
                 throw new Error('Unsupported filter value for ' + key);
             }

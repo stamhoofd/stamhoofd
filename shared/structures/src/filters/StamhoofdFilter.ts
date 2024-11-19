@@ -52,7 +52,7 @@ export function isEmptyFilter(filter: StamhoofdFilter) {
 }
 
 export function mergeFilters(filters: (StamhoofdFilter | null)[], type: '$and' | '$or' = '$and'): StamhoofdFilter | null {
-    const filteredFilters = filters.filter(f => !isEmptyFilter(f));
+    const filteredFilters = filters.filter(f => !isEmptyFilter(f)).flatMap(f => Array.isArray(f) ? (type === '$and' ? f : [{ $and: f }]) : [f]);
 
     if (filteredFilters.length === 0) {
         return null;
