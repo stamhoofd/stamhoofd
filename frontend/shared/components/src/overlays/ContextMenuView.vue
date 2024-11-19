@@ -228,10 +228,13 @@ export default class ContextMenuView extends VueComponent {
         this.transformOrigin = xTransform + '% ' + yTransform + '%';
 
         if (!this.usedPreferredHeight) {
-            // Allow scrolling if height is restricted, else add touch listeners to allow selection by dragging
-            window.addEventListener('touchstart', this.onTouchStart, { passive: false });
-            window.addEventListener('touchmove', this.onTouchMove, { passive: false });
-            window.addEventListener('touchend', this.onTouchUp, { passive: false });
+            // Only assign drag selectors if we actually  have context items
+            if (this.$refs.context.querySelector('.context-menu-item')) {
+                // Allow scrolling if height is restricted, else add touch listeners to allow selection by dragging
+                window.addEventListener('touchstart', this.onTouchStart, { passive: false });
+                window.addEventListener('touchmove', this.onTouchMove, { passive: false });
+                window.addEventListener('touchend', this.onTouchUp, { passive: false });
+            }
         }
 
         if (this.isPopped || this.parentMenu?.isPopped || (this.parentMenu && (!this.parentMenu.$el || !this.parentMenu.$el.isConnected))) {

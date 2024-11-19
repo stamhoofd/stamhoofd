@@ -51,57 +51,57 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
-import { Formatter } from "@stamhoofd/utility"
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { Formatter } from '@stamhoofd/utility';
 
-import LongPressDirective from "../directives/LongPress";
-import Dropdown from "../inputs/Dropdown.vue";
-import ContextMenuView from "./ContextMenuView.vue";
+import LongPressDirective from '../directives/LongPress';
+import Dropdown from '../inputs/Dropdown.vue';
+import ContextMenuView from './ContextMenuView.vue';
 
 @Component({
     components: {
         ContextMenuView,
-        Dropdown
+        Dropdown,
     },
     directives: {
-        LongPress: LongPressDirective
-    }
+        LongPress: LongPressDirective,
+    },
 })
 export default class DateSelectionView extends Mixins(NavigationMixin) {
     @Prop()
-        setDate!: (date: Date | null) => void;
+    setDate!: (date: Date | null) => void;
 
     @Prop()
-        onClose!: () => void;
+    onClose!: () => void;
 
     @Prop({ default: true })
-        autoDismiss!: boolean;
+    autoDismiss!: boolean;
 
     @Prop({ required: true })
-        selectedDay!: Date
+    selectedDay!: Date;
 
-    currentMonth: Date = new Date((this.selectedDay ?? new Date()).getTime())
-    weeks: any = null
-    monthTitle = ""
-    yearTitle = ""
+    currentMonth: Date = new Date((this.selectedDay ?? new Date()).getTime());
+    weeks: any = null;
+    monthTitle = '';
+    yearTitle = '';
 
     @Prop({ default: false })
-        allowClear!: boolean
+    allowClear!: boolean;
 
     created() {
-        this.weeks = this.generateDays()
-        this.updateMonthTitle()
+        this.weeks = this.generateDays();
+        this.updateMonthTitle();
     }
 
     beforeUnmount() {
-        this.onClose()
+        this.onClose();
     }
 
     mounted() {
         if (!this.autoDismiss) {
-            (this.$refs?.aside as any)?.addEventListener("mousedown", (e) => {
-                e.preventDefault()
+            (this.$refs?.aside as any)?.addEventListener('mousedown', (e) => {
+                e.preventDefault();
             });
         }
     }
@@ -109,111 +109,112 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     generateDays() {
         const weeks: any = [];
 
-        const start = new Date(this.currentMonth.getTime())
-        start.setDate(1)
+        const start = new Date(this.currentMonth.getTime());
+        start.setDate(1);
 
-        const month = start.getMonth()
-        const year = start.getFullYear()
+        const month = start.getMonth();
+        const year = start.getFullYear();
 
         // Make sure first day is 1
         while (start.getDay() !== 1) {
-            start.setDate(start.getDate() - 1)
+            start.setDate(start.getDate() - 1);
         }
 
         // loop days
         while ((start.getMonth() <= month && start.getFullYear() === year) || start.getFullYear() < year || start.getDay() !== 1) {
             if (start.getDay() === 1) {
                 // Start new week
-                weeks.push([])
+                weeks.push([]);
             }
 
             weeks[weeks.length - 1].push({
                 number: start.getDate(),
                 value: new Date(start.getTime()),
                 otherMonth: start.getMonth() !== month,
-                selected: this.selectedDay && start.getDate() === this.selectedDay.getDate() && start.getFullYear() === this.selectedDay.getFullYear() && start.getMonth() === this.selectedDay.getMonth()
-            })
+                selected: this.selectedDay && start.getDate() === this.selectedDay.getDate() && start.getFullYear() === this.selectedDay.getFullYear() && start.getMonth() === this.selectedDay.getMonth(),
+            });
 
-            start.setDate(start.getDate() + 1)
+            start.setDate(start.getDate() + 1);
 
             if (weeks[weeks.length - 1].length > 7 || weeks.length > 6) {
-                console.error("Calendar infinite loop")
+                console.error('Calendar infinite loop');
                 break;
             }
         }
-        return weeks
+        return weeks;
     }
 
     clear() {
-        this.setDate(null)
+        this.setDate(null);
         this.pop();
     }
 
     setDateValue(date: Date) {
-        const selectedDay = this.selectedDay
-        selectedDay.setTime(date.getTime())
-        this.currentMonth = new Date(selectedDay.getTime())
-        this.weeks = this.generateDays()
-        this.updateMonthTitle()
-        this.setDate(new Date(date.getTime()))
+        const selectedDay = this.selectedDay;
+        selectedDay.setTime(date.getTime());
+        this.currentMonth = new Date(selectedDay.getTime());
+        this.weeks = this.generateDays();
+        this.updateMonthTitle();
+        this.setDate(new Date(date.getTime()));
     }
 
     setToday() {
-        this.setDateValue(new Date())
+        this.setDateValue(new Date());
         this.pop();
     }
 
     updateMonthTitle() {
         this.monthTitle = Formatter.capitalizeFirstLetter(Formatter.month(this.currentMonth.getMonth() + 1));
-        this.yearTitle = this.currentMonth.getFullYear().toString()
+        this.yearTitle = this.currentMonth.getFullYear().toString();
     }
 
     nextMonth() {
-        this.month = this.month + 1
+        this.month = this.month + 1;
     }
 
     updateSelectedMonth() {
         if (!this.selectedDay) {
-            return
+            return;
         }
         // Don't make a copy
-        const selectedDay = this.selectedDay
+        const selectedDay = this.selectedDay;
         const day = selectedDay.getDate();
-        selectedDay.setMonth(this.currentMonth.getMonth())
-        selectedDay.setMonth(this.currentMonth.getMonth())
-        selectedDay.setFullYear(this.currentMonth.getFullYear())
+        selectedDay.setMonth(this.currentMonth.getMonth());
+        selectedDay.setMonth(this.currentMonth.getMonth());
+        selectedDay.setFullYear(this.currentMonth.getFullYear());
         if (selectedDay.getDate() < day) {
-            selectedDay.setDate(new Date(selectedDay.getFullYear(), selectedDay.getMonth() + 1, 0).getDate())
+            selectedDay.setDate(new Date(selectedDay.getFullYear(), selectedDay.getMonth() + 1, 0).getDate());
         }
-        this.setDate(selectedDay)
+        this.setDate(selectedDay);
     }
 
     previousMonth() {
-        this.month = this.month - 1
+        this.month = this.month - 1;
     }
 
     nextYear() {
-        this.currentYear = this.currentYear + 1
+        this.currentYear = this.currentYear + 1;
     }
 
     previousYear() {
-        this.currentYear = this.currentYear - 1
+        this.currentYear = this.currentYear - 1;
     }
 
     onSelect(day) {
+        console.log('Select', day);
         day.selected = true;
-        this.setDate(day.value)
+        this.setDate(day.value);
         this.pop();
     }
 
     get nowYear() {
-        const ny = new Date().getFullYear(); 
+        const ny = new Date().getFullYear();
 
         if (this.currentYear < ny - 50) {
-            return this.currentYear + 50
+            return this.currentYear + 50;
         }
         if (this.currentYear > ny) {
-            return this.currentYear
+            return this.currentYear;
         }
         return ny;
     }
@@ -227,9 +228,9 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
             // Weird vue thing
             return;
         }
-        const d = new Date(this.currentMonth)
-        d.setFullYear(year)
-        this.setDateValue(d)
+        const d = new Date(this.currentMonth);
+        d.setFullYear(year);
+        this.setDateValue(d);
     }
 
     get month() {
@@ -238,30 +239,30 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     }
 
     set month(month: number) {
-        console.log('Set month', month)
-        const d = new Date(this.currentMonth)
-        d.setDate(1)
+        console.log('Set month', month);
+        const d = new Date(this.currentMonth);
+        d.setDate(1);
         if (month < 1) {
-            month = 12
-            d.setMonth(month - 1)
-            d.setFullYear(this.currentMonth.getFullYear() - 1)
+            month = 12;
+            d.setMonth(month - 1);
+            d.setFullYear(this.currentMonth.getFullYear() - 1);
         }
-        d.setMonth(month - 1)
-        d.setDate(this.currentMonth.getDate())
+        d.setMonth(month - 1);
+        d.setDate(this.currentMonth.getDate());
 
         // If date overflowed
         if (d.getDate() !== this.currentMonth.getDate()) {
-            d.setTime(this.currentMonth.getTime())
-            d.setDate(1)
-            d.setMonth(month)
-            d.setDate(0)
+            d.setTime(this.currentMonth.getTime());
+            d.setDate(1);
+            d.setMonth(month);
+            d.setDate(0);
         }
 
-        this.setDateValue(d)
+        this.setDateValue(d);
     }
 
     monthText(month: number) {
-        return Formatter.capitalizeFirstLetter(Formatter.month(month))
+        return Formatter.capitalizeFirstLetter(Formatter.month(month));
     }
 }
 </script>

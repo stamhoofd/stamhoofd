@@ -30,86 +30,86 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { Formatter } from "@stamhoofd/utility";
+import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { Formatter } from '@stamhoofd/utility';
 
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 
 @Component
 export default class DateSelection extends Mixins(NavigationMixin) {
     @Prop({ default: () => {
-        const d = new Date()
-        d.setHours(0, 0, 0, 0)
-        return d
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d;
     } })
-        modelValue: Date | null
+    modelValue: Date | null;
 
     @Prop({ default: true })
-        required!: boolean
+    required!: boolean;
 
-    @Prop({ default: "Kies een datum" })
-        placeholder!: string
+    @Prop({ default: 'Kies een datum' })
+    placeholder!: string;
 
     @Prop({ default: null })
-        time!: {hours: number, minutes: number, seconds: number}|null
+    time!: { hours: number; minutes: number; seconds: number } | null;
 
     hasFocus = false;
     hasFocusUnbounced = false;
 
-    dayText = ""
-    monthText = ""
-    yearText = ""
+    dayText = '';
+    monthText = '';
+    yearText = '';
 
-    displayedComponent: ComponentWithProperties | null = null
+    displayedComponent: ComponentWithProperties | null = null;
 
     mounted() {
-        this.updateTextStrings()
+        this.updateTextStrings();
 
-        document.addEventListener("keydown", this.onKey);
-        document.addEventListener("focusin", this.updateHasFocus);
-        document.addEventListener("focusout", this.updateHasFocus);
-        document.addEventListener("visibilitychange", this.updateHasFocus);
+        document.addEventListener('keydown', this.onKey);
+        document.addEventListener('focusin', this.updateHasFocus);
+        document.addEventListener('focusout', this.updateHasFocus);
+        document.addEventListener('visibilitychange', this.updateHasFocus);
 
         // Sometimes focusin/focusout isn't called reliably
-        document.addEventListener("click", this.updateHasFocus, {passive: true});
+        document.addEventListener('click', this.updateHasFocus, { passive: true });
     }
 
     activated() {
-        document.addEventListener("keydown", this.onKey);
-        document.addEventListener("focusin", this.updateHasFocus);
-        document.addEventListener("focusout", this.updateHasFocus);
-        document.addEventListener("visibilitychange", this.updateHasFocus);
+        document.addEventListener('keydown', this.onKey);
+        document.addEventListener('focusin', this.updateHasFocus);
+        document.addEventListener('focusout', this.updateHasFocus);
+        document.addEventListener('visibilitychange', this.updateHasFocus);
 
         // Sometimes focusin/focusout isn't called reliably
-        document.addEventListener("click", this.updateHasFocus, {passive: true});
+        document.addEventListener('click', this.updateHasFocus, { passive: true });
     }
 
     deactivated() {
-        document.removeEventListener("keydown", this.onKey);
-        document.removeEventListener("focusin", this.updateHasFocus);
-        document.removeEventListener("focusout", this.updateHasFocus);
-        document.removeEventListener("visibilitychange", this.updateHasFocus);
-        document.removeEventListener("click", this.updateHasFocus);
+        document.removeEventListener('keydown', this.onKey);
+        document.removeEventListener('focusin', this.updateHasFocus);
+        document.removeEventListener('focusout', this.updateHasFocus);
+        document.removeEventListener('visibilitychange', this.updateHasFocus);
+        document.removeEventListener('click', this.updateHasFocus);
     }
 
     beforeUnmount() {
-        document.removeEventListener("keydown", this.onKey);
-        document.removeEventListener("focusin", this.updateHasFocus);
-        document.removeEventListener("focusout", this.updateHasFocus);
-        document.removeEventListener("visibilitychange", this.updateHasFocus);
-        document.removeEventListener("click", this.updateHasFocus);
+        document.removeEventListener('keydown', this.onKey);
+        document.removeEventListener('focusin', this.updateHasFocus);
+        document.removeEventListener('focusout', this.updateHasFocus);
+        document.removeEventListener('visibilitychange', this.updateHasFocus);
+        document.removeEventListener('click', this.updateHasFocus);
     }
 
     updateTextStrings() {
-        const currentDateValue = this.textDate
+        const currentDateValue = this.textDate;
 
-        const iso1 = this.modelValue ? Formatter.dateIso(this.modelValue) : ""
-        const iso2 = currentDateValue ? Formatter.dateIso(currentDateValue) : ""
+        const iso1 = this.modelValue ? Formatter.dateIso(this.modelValue) : '';
+        const iso2 = currentDateValue ? Formatter.dateIso(currentDateValue) : '';
 
         if (iso1 !== iso2 || !this.hasFocusUnbounced) {
-            this.dayText = this.modelValue ? this.modelValue.getDate().toString() : ""
-            this.monthText = this.modelValue ? (this.modelValue.getMonth() + 1).toString() : ""
-            this.yearText = this.modelValue ? this.modelValue.getFullYear().toString() : ""
+            this.dayText = this.modelValue ? this.modelValue.getDate().toString() : '';
+            this.monthText = this.modelValue ? (this.modelValue.getMonth() + 1).toString() : '';
+            this.yearText = this.modelValue ? this.modelValue.getFullYear().toString() : '';
         }
 
         if (this.modelValue && this.time) {
@@ -119,17 +119,17 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         }
     }
 
-    @Watch("modelValue")
+    @Watch('modelValue')
     onValueChange() {
-        this.updateTextStrings()
+        this.updateTextStrings();
     }
 
     get monthTextLong() {
-        return this.modelValue ? Formatter.month(this.modelValue.getMonth() + 1) : ""
+        return this.modelValue ? Formatter.month(this.modelValue.getMonth() + 1) : '';
     }
 
     get numberInputs() {
-        return [this.$refs.dayInput, this.$refs.monthInput, this.$refs.yearInput]
+        return [this.$refs.dayInput, this.$refs.monthInput, this.$refs.yearInput];
     }
 
     get numberConfig() {
@@ -138,42 +138,42 @@ export default class DateSelection extends Mixins(NavigationMixin) {
                 maxLength: 2,
                 max: 31,
                 min: 1,
-                type: "day",
+                type: 'day',
                 getValue: () => {
-                    return this.dayText
+                    return this.dayText;
                 },
                 setValue: (modelValue: string) => {
-                    this.dayText = modelValue
-                    this.updateDate()
-                }
+                    this.dayText = modelValue;
+                    this.updateDate();
+                },
             },
             {
                 maxLength: 2,
                 max: 12,
                 min: 1,
-                type: "month",
+                type: 'month',
                 getValue: () => {
-                    return this.monthText
+                    return this.monthText;
                 },
                 setValue: (modelValue: string) => {
-                    this.monthText = modelValue
-                    this.updateDate()
-                }
+                    this.monthText = modelValue;
+                    this.updateDate();
+                },
             },
             {
                 maxLength: 4,
                 max: 2100,
                 min: 1900,
-                type: "year",
+                type: 'year',
                 getValue: () => {
-                    return this.yearText
+                    return this.yearText;
                 },
                 setValue: (modelValue: string) => {
-                    this.yearText = modelValue
-                    this.updateDate()
-                }
-            }
-        ]
+                    this.yearText = modelValue;
+                    this.updateDate();
+                },
+            },
+        ];
     }
 
     blurAll() {
@@ -181,62 +181,64 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         for (let index = 0; index < this.numberInputs.length; index++) {
             const element = this.numberInputs[index] as HTMLInputElement;
             if (!element) {
-                continue
+                continue;
             }
-            element.blur()
+            element.blur();
         }
     }
 
     selectNext(index: number) {
         if (index < 0) {
-            return
+            return;
         }
 
         if (index >= this.numberInputs.length) {
             // Remove extra characters of last input
-            const config = this.numberConfig[index - 1]
-            let val = config.getValue().replace(/[^0-9]/g, "")
+            const config = this.numberConfig[index - 1];
+            let val = config.getValue().replace(/[^0-9]/g, '');
 
-            while(val.length >= 2) {
-                const shorter = val.substring(0, val.length - 1)
+            while (val.length >= 2) {
+                const shorter = val.substring(0, val.length - 1);
                 if (this.isFull(shorter, config)) {
-                    val = shorter
-                } else {
-                    break
+                    val = shorter;
+                }
+                else {
+                    break;
                 }
             }
 
-            config.setValue(val)
+            config.setValue(val);
 
             // Blur all
-            this.blurAll()
+            this.blurAll();
 
-            return
+            return;
         }
 
         if (index >= 1) {
-            const config = this.numberConfig[index - 1]
-            const val = config.getValue()
+            const config = this.numberConfig[index - 1];
+            const val = config.getValue();
 
             // Get location of first special character after a number
-            const firstSpecialCharacter = val.search(/[0-9][^0-9]/)
-            const cutIndex = firstSpecialCharacter > -1 ? Math.min(firstSpecialCharacter + 1, config.maxLength, val.length) : Math.min(config.maxLength, val.length)
+            const firstSpecialCharacter = val.search(/[0-9][^0-9]/);
+            const cutIndex = firstSpecialCharacter > -1 ? Math.min(firstSpecialCharacter + 1, config.maxLength, val.length) : Math.min(config.maxLength, val.length);
 
             if (val.length > cutIndex) {
-                config.setValue(val.substr(0, cutIndex).replace(/[^0-9]/g, ""))
+                config.setValue(val.substr(0, cutIndex).replace(/[^0-9]/g, ''));
 
-                const currentConfig = this.numberConfig[index]
+                const currentConfig = this.numberConfig[index];
 
-                const moveText = val.substr(cutIndex).replace(/^[^0-9]+/, "");
-                currentConfig.setValue(moveText + currentConfig.getValue())
+                const moveText = val.substr(cutIndex).replace(/^[^0-9]+/, '');
+                currentConfig.setValue(moveText + currentConfig.getValue());
 
                 if (this.isFull(currentConfig.getValue(), currentConfig)) {
-                    this.selectNext(index + 1)
-                    return
+                    this.selectNext(index + 1);
+                    return;
                 }
-            } else {
+            }
+            else {
                 // Clean previous
-                config.setValue(val.replace(/[^0-9]/g, ""))
+                config.setValue(val.replace(/[^0-9]/g, ''));
             }
         }
 
@@ -249,7 +251,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     }
 
     onFocus(index: number) {
-        this.selectNext(index)
+        this.selectNext(index);
     }
 
     updateHasFocus() {
@@ -264,23 +266,28 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             }
         }
 
+        if (this.$isMobile) {
+            focus = false;
+        }
+
         if (focus) {
-            this.hasFocus = true
-            this.hasFocusUnbounced = true
-        } else {
-            this.hasFocus = false
+            this.hasFocus = true;
+            this.hasFocusUnbounced = true;
+        }
+        else {
+            this.hasFocus = false;
             setTimeout(() => {
-                this.hasFocusUnbounced = this.hasFocus
-            }, 50)
+                this.hasFocusUnbounced = this.hasFocus;
+            }, 50);
         }
     }
 
     onFocusIn() {
-        this.updateHasFocus()
+        this.updateHasFocus();
     }
 
     onFocusOut() {
-        this.updateHasFocus()
+        this.updateHasFocus();
     }
 
     onBlur() {
@@ -289,22 +296,22 @@ export default class DateSelection extends Mixins(NavigationMixin) {
 
     isFull(value: string, config) {
         if (value.length >= config.maxLength) {
-            return true
+            return true;
         }
 
         // If any addition of a zero would go above maximum value
-        const valueWithZero = parseInt(value + "0")
+        const valueWithZero = parseInt(value + '0');
         if (valueWithZero > config.max) {
-            return true
+            return true;
         }
-        
-        return false
+
+        return false;
     }
 
     onTyping() {
         // Check if we can move to the next field
-        const focusedInput = document.activeElement as HTMLInputElement
-        const index = this.numberInputs.indexOf(focusedInput)
+        const focusedInput = document.activeElement as HTMLInputElement;
+        const index = this.numberInputs.indexOf(focusedInput);
 
         if (index !== -1) {
             // TODO remove and split on special characters
@@ -312,34 +319,35 @@ export default class DateSelection extends Mixins(NavigationMixin) {
 
             // Check move to next date
             if (this.isFull(focusedInput.value, this.numberConfig[index])) {
-                this.selectNext(index + 1)
+                this.selectNext(index + 1);
             }
         }
     }
 
     focusFirst() {
         if (!this.hasFocus) {
-            this.onFocus(0)
+            this.onFocus(0);
         }
     }
 
-    @Watch("hasFocusUnbounced")
+    @Watch('hasFocusUnbounced')
     onHasFocusUnbouncedChanged() {
         if (!this.hasFocusUnbounced) {
-            this.hideDisplayedComponent({unlessFocused: true})
+            this.hideDisplayedComponent({ unlessFocused: true });
 
             // Clear invalid date text
-            this.updateTextStrings()
-        } else {
+            this.updateTextStrings();
+        }
+        else {
             this.openContextMenu(false);
         }
     }
 
     updateDate() {
-        const date = this.textDate
+        const date = this.textDate;
 
         if (date) {
-            this.emitDate(date)
+            this.emitDate(date);
             if (this.displayedComponent) {
                 const instance = this.displayedComponent.componentInstance();
                 if (instance) {
@@ -350,45 +358,46 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     }
 
     get textDate() {
-        const day = parseInt(this.dayText.replace(/[^0-9]/g, ""))
-        const month = parseInt(this.monthText.replace(/[^0-9]/g, ""))
-        const year = parseInt(this.yearText.replace(/[^0-9]/g, ""))
+        const day = parseInt(this.dayText.replace(/[^0-9]/g, ''));
+        const month = parseInt(this.monthText.replace(/[^0-9]/g, ''));
+        const year = parseInt(this.yearText.replace(/[^0-9]/g, ''));
         if (day && month && year && !isNaN(day) && !isNaN(month) && !isNaN(year)) {
-            const date = new Date(year, month - 1, day)
+            const date = new Date(year, month - 1, day);
             if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
                 return date;
             }
 
             // The date has automatically been corrected
-            return new Date(year, month , 0)
-            
+            return new Date(year, month, 0);
         }
-        return null
+        return null;
     }
 
     get isValidTextDate() {
-        return this.textDate !== null
+        return this.textDate !== null;
     }
 
     get dateText() {
-        return this.modelValue ? Formatter.date(this.modelValue, true) : this.placeholder
+        return this.modelValue ? Formatter.date(this.modelValue, true) : this.placeholder;
     }
 
     emitDate(value: Date | null) {
         if (!value) {
-            this.$emit('update:modelValue', null)
-            return
+            this.$emit('update:modelValue', null);
+            return;
         }
-        const d = new Date(value.getTime())
+        const d = new Date(value.getTime());
 
         if (this.time) {
-            d.setHours(this.time.hours, this.time.minutes, this.time.seconds, 0)
-        } else if (this.modelValue) {
-            d.setHours(this.modelValue.getHours(), this.modelValue.getMinutes(), 0, 0)
-        } else {
-            d.setHours(12, 0, 0, 0)
+            d.setHours(this.time.hours, this.time.minutes, this.time.seconds, 0);
         }
-        this.$emit('update:modelValue', d)
+        else if (this.modelValue) {
+            d.setHours(this.modelValue.getHours(), this.modelValue.getMinutes(), 0, 0);
+        }
+        else {
+            d.setHours(12, 0, 0, 0);
+        }
+        this.$emit('update:modelValue', d);
     }
 
     openContextMenu(autoDismiss = true) {
@@ -403,37 +412,37 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             wrapHeight: el.offsetHeight - 4,
             xPlacement: 'left',
             autoDismiss,
-            //preferredWidth: el.offsetWidth, 
+            // preferredWidth: el.offsetWidth,
             selectedDay: this.modelValue ? new Date(this.modelValue) : new Date(),
             allowClear: !this.required,
             setDate: (value: Date | null) => {
-                this.emitDate(value)
+                this.emitDate(value);
             },
             onClose: () => {
-                this.blurAll()
-                this.displayedComponent = null
-            }
+                this.blurAll();
+                this.displayedComponent = null;
+            },
         });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+        this.present(displayedComponent.setDisplayStyle('overlay'));
         this.displayedComponent = displayedComponent;
     }
 
-    hideDisplayedComponent({unlessFocused} = {unlessFocused: false}) {
+    hideDisplayedComponent({ unlessFocused } = { unlessFocused: false }) {
         if (this.displayedComponent) {
             const instance = this.displayedComponent.componentInstance();
             if (instance) {
                 if (unlessFocused && instance.$el && document.activeElement && instance.$el.contains(document.activeElement)) {
-                    // Add an event listener to focus yearInput when blur 
-                    const activeElement = document.activeElement
+                    // Add an event listener to focus yearInput when blur
+                    const activeElement = document.activeElement;
                     const listener = () => {
-                        activeElement.removeEventListener("change", listener)
-                        activeElement.removeEventListener("focusout", listener)
-                        //this.selectNext(2)
-                    }
-                    activeElement.addEventListener("change", listener)
-                    activeElement.addEventListener("focusout", listener)
+                        activeElement.removeEventListener('change', listener);
+                        activeElement.removeEventListener('focusout', listener);
+                        // this.selectNext(2)
+                    };
+                    activeElement.addEventListener('change', listener);
+                    activeElement.addEventListener('focusout', listener);
 
-                    //return;
+                    // return;
                 }
                 (instance as any).dismiss();
             }
@@ -450,8 +459,8 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             return;
         }
 
-        const focusedInput = document.activeElement as HTMLInputElement
-        const index = this.numberInputs.indexOf(focusedInput)
+        const focusedInput = document.activeElement as HTMLInputElement;
+        const index = this.numberInputs.indexOf(focusedInput);
 
         if (index === -1) {
             return;
@@ -461,26 +470,30 @@ export default class DateSelection extends Mixins(NavigationMixin) {
 
         const key = event.key || event.keyCode;
 
-        if (key === "ArrowLeft") {
+        if (key === 'ArrowLeft') {
             if (index > 0) {
-                this.selectNext(index - 1)
-            } else {
-                this.blurAll()
+                this.selectNext(index - 1);
+            }
+            else {
+                this.blurAll();
             }
             event.preventDefault();
-        } else if (key === "ArrowRight") {
-            this.selectNext(index + 1)
+        }
+        else if (key === 'ArrowRight') {
+            this.selectNext(index + 1);
             event.preventDefault();
-        } else if (key === "ArrowUp" || key === "PageUp") {
-            const value = parseInt(config.getValue())
+        }
+        else if (key === 'ArrowUp' || key === 'PageUp') {
+            const value = parseInt(config.getValue());
             if (!isNaN(value) && value < config.max) {
-                config.setValue((value + 1).toString())
+                config.setValue((value + 1).toString());
             }
             event.preventDefault();
-        } else if (key === "ArrowDown" || key === "PageDown") {
-            const value = parseInt(config.getValue())
+        }
+        else if (key === 'ArrowDown' || key === 'PageDown') {
+            const value = parseInt(config.getValue());
             if (!isNaN(value) && value > config.min) {
-                config.setValue((value - 1).toString())
+                config.setValue((value - 1).toString());
             }
             event.preventDefault();
         }
