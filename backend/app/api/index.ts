@@ -13,6 +13,7 @@ import { sleep } from '@stamhoofd/utility';
 import { stopCrons, startCrons, waitForCrons } from '@stamhoofd/crons';
 import { resumeEmails } from './src/helpers/EmailResumer';
 import { ContextMiddleware } from './src/middleware/ContextMiddleware';
+import { Platform } from '@stamhoofd/models';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -82,6 +83,9 @@ const start = async () => {
 
     // Add CORS headers
     routerServer.addResponseMiddleware(CORSMiddleware);
+
+    // Init platform shared struct: otherwise permissions won't work with missing responsibilities
+    await Platform.getSharedStruct();
 
     // Register Excel loaders
     await import('./src/excel-loaders/members');
