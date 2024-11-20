@@ -177,8 +177,7 @@ export class CheckoutStepsManager {
                         category,
                         url,
                         value: checkout,
-                        markReviewed: true,
-                        dataPermission: true,
+                        forceMarkReviewed: true,
                         patchHandler: (patch: PatchAnswers) => {
                             const clone = checkout.clone();
                             clone.recordAnswers = patchObject(clone.recordAnswers, patch);
@@ -191,7 +190,7 @@ export class CheckoutStepsManager {
                             // Force a save if nothing changed (to fix timeSlot + updated data)
                             await this.goNext(id, navigate);
                         },
-                        saveText: 'Doorgaan'
+                        saveText: 'Doorgaan',
                     });
                 },
                 validate: (checkout, webshop) => {

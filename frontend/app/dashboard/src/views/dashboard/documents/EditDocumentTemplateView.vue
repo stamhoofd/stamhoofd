@@ -706,21 +706,17 @@ async function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: Na
         components: [
             new ComponentWithProperties(FillRecordCategoryView, {
                 category,
-                answers: group.fieldAnswers,
+                value: group,
                 forceMarkReviewed: true,
-                dataPermission: true,
-                hasNextStep: index < patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length - 1,
-                filterDefinitions: [],
-                patchHandler,
-                saveHandler: (fieldAnswers: RecordAnswer[], actions: NavigationActions) => {
+                saveHandler: (fieldAnswers: PatchAnswers, actions: NavigationActions) => {
                     const g = group.patch({
-                        fieldAnswers: fieldAnswers as any,
+                        fieldAnswers,
                     });
                     gotoGroupRecordCategory(g, actions, index + 1).catch(console.error);
                 },
-                filterValueForAnswers: (fieldAnswers: RecordAnswer[]) => {
+                patchHandler: (fieldAnswers: PatchAnswers) => {
                     return group.patch({
-                        fieldAnswers: fieldAnswers as any,
+                        fieldAnswers,
                     });
                 },
             }),
@@ -776,15 +772,16 @@ function gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
     const category = patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories[index];
     return new ComponentWithProperties(FillRecordCategoryView, {
         category,
-        answers: group.fieldAnswers,
-        dataPermission: true,
-        hasNextStep: index < patchedDocument.value.privateSettings.templateDefinition.groupFieldCategories.length - 1,
-        filterDefinitions: [],
         forceMarkReviewed: true,
-        patchHandler,
-        saveHandler: (fieldAnswers: RecordAnswer[], actions: NavigationActions) => {
+        value: group,
+        patchHandler: (fieldAnswers: PatchAnswers) => {
+            return group.patch({
+                fieldAnswers,
+            });
+        },
+        saveHandler: (fieldAnswers: PatchAnswers, actions: NavigationActions) => {
             const g = group.patch({
-                fieldAnswers: fieldAnswers as any,
+                fieldAnswers,
             });
             const c = gotoRecordCategory(g, index + 1);
             if (!c) {
@@ -792,11 +789,6 @@ function gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
                 return;
             }
             actions.show(c).catch(console.error);
-        },
-        filterValueForAnswers: (fieldAnswers: RecordAnswer[]) => {
-            return group.patch({
-                fieldAnswers: fieldAnswers as any,
-            });
         },
     });
 }

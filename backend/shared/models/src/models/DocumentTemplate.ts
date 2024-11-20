@@ -204,7 +204,7 @@ export class DocumentTemplate extends Model {
 
         if (hasDebtor) {
             const parentsWithNRR = registration.member.details.parents.filter(p => p.nationalRegisterNumber);
-            let debtor: Parent | undefined = parentsWithNRR[0];
+            let debtor: Parent | undefined = parentsWithNRR[0] ?? registration.member.details.parents[0];
             if (parentsWithNRR.length > 1) {
                 for (const balanceItem of balanceItems) {
                     if (balanceItem && balanceItem.userId && balanceItem.status === BalanceItemStatus.Paid) {
@@ -215,6 +215,13 @@ export class DocumentTemplate extends Model {
                             if (parent) {
                                 debtor = parent;
                                 break;
+                            }
+
+                            if (!debtor.nationalRegisterNumber) {
+                                const parent = registration.member.details.parents.find(p => p.hasEmail(user.email));
+                                if (parent) {
+                                    debtor = parent;
+                                }
                             }
                         }
                     }

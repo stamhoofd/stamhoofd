@@ -131,7 +131,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableA
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, FillRecordCategoryView, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
-import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, RecordAnswer } from '@stamhoofd/structures';
+import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 
@@ -339,17 +339,20 @@ function gotoRecordCategory(index: number) {
     const category = props.template.privateSettings.templateDefinition.exportFieldCategories[index];
     return new ComponentWithProperties(FillRecordCategoryView, {
         category,
-        answers: props.template.settings.fieldAnswers,
-        hasNextStep: index < props.template.privateSettings.templateDefinition.exportFieldCategories.length - 1,
-        filterValue: props.template,
-        patchHandler: () => {
-
+        value: props.template,
+        forceMarkReviewed: true,
+        patchHandler: (fieldAnswers: PatchAnswers) => {
+            return props.template.patch({
+                settings: DocumentSettings.patch({
+                    fieldAnswers,
+                }),
+            });
         },
 
-        saveHandler: async (fieldAnswers: RecordAnswer[], component: NavigationActions) => {
+        saveHandler: async (fieldAnswers: PatchAnswers, component: NavigationActions) => {
             await patchTemplate(DocumentTemplatePrivate.patch({
                 settings: DocumentSettings.patch({
-                    fieldAnswers: fieldAnswers as any,
+                    fieldAnswers,
                 }),
             }));
 
@@ -359,10 +362,6 @@ function gotoRecordCategory(index: number) {
                 return;
             }
             component.show(c).catch(console.error);
-        },
-
-        filterValueForAnswers: (_fieldAnswers: RecordAnswer[]) => {
-            return props.template;
         },
     });
 }
