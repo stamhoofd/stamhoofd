@@ -158,6 +158,13 @@ function objectPathValue(object: any, path: string[]) {
     }
 
     const nextSearched = path[0];
+    if (object instanceof Map) {
+        if (object.has(nextSearched)) {
+            return objectPathValue(object.get(nextSearched), path.slice(1));
+        }
+        return undefined;
+    }
+
     if (nextSearched in object) {
         return objectPathValue(object[nextSearched], path.slice(1));
     }
@@ -233,8 +240,8 @@ function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, Stam
     return filter;
 }
 
-export function createInMemoryFilterCompiler(path: string, overrideFilterDefinitions?: InMemoryFilterDefinitions): InMemoryFilterCompiler {
-    const splitted = path.split('.');
+export function createInMemoryFilterCompiler(path: string | string[], overrideFilterDefinitions?: InMemoryFilterDefinitions): InMemoryFilterCompiler {
+    const splitted = Array.isArray(path) ? path : path.split('.');
 
     return (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
         const runner = $andInMemoryFilterCompiler(filter, overrideFilterDefinitions ?? filters);

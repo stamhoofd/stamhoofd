@@ -88,8 +88,10 @@ export const fiscal = DocumentTemplateDefinition.create({
                 }),
             ],
             filter: new PropertyFilter({
-                definitionId: {
-                    $in: ['kind-en-gezin', 'authorities', 'foreign', 'schools'],
+                fieldAnswers: {
+                    'certification.type': {
+                        $in: ['kind-en-gezin', 'authorities', 'foreign', 'schools'],
+                    },
                 },
             }, null),
         }),

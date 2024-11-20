@@ -142,7 +142,7 @@ import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRe
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
-import { computed, onMounted, ref, Ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import ChooseDocumentTemplateGroup from './ChooseDocumentTemplateGroup.vue';
 import { fiscal } from './definitions/fiscal';

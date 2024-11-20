@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { v4 as uuidv4 } from 'uuid';
 
 import { NamedObject } from './Event.js';
-import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
+import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
 import { documentInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
@@ -202,7 +202,18 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {
         try {
-            const compiledFilter = compileToInMemoryFilter(filter, documentInMemoryFilterCompilers);
+            const recordAnswerFilters = {
+                ...baseInMemoryFilterCompilers,
+            };
+            for (const a of this.settings.fieldAnswers.values()) {
+                recordAnswerFilters[a.settings.id] = createInMemoryFilterCompiler([a.settings.id, 'objectValue']);
+            }
+            const defs = {
+                ...documentInMemoryFilterCompilers,
+                fieldAnswers: createInMemoryFilterCompiler('settings.fieldAnswers', recordAnswerFilters),
+            };
+
+            const compiledFilter = compileToInMemoryFilter(filter, defs);
             return compiledFilter(this);
         }
         catch (e) {
