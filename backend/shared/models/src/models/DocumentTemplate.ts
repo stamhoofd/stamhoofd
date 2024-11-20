@@ -1,7 +1,7 @@
 import { column, Model } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, Parent, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,6 +11,7 @@ import { Document } from './Document';
 import { Group } from './Group';
 import { Member, RegistrationWithMember } from './Member';
 import { Organization } from './Organization';
+import { User } from './User';
 
 export class DocumentTemplate extends Model {
     static table = 'document_templates';
@@ -72,7 +73,7 @@ export class DocumentTemplate extends Model {
         let missingData = false;
 
         const group = await Group.getByID(registration.groupId);
-        const { payments } = await BalanceItem.getForRegistration(registration.id);
+        const { items: balanceItems, payments } = await BalanceItem.getForRegistration(registration.id);
 
         const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : []);
 
@@ -81,13 +82,11 @@ export class DocumentTemplate extends Model {
 
         // Some fields are supported by default in linked fields
         const defaultData: Record<string, RecordAnswer> = {
-            // "registration.startDate": registration.group.settings.startDate,
-            // "registration.endDate": registration.group.settings.endDate,
             'group.name': RecordTextAnswer.create({
                 settings: RecordSettings.create({
                     id: 'group.name',
                     type: RecordType.Text,
-                }), // settings will be overwritten
+                }),
                 value: group?.settings?.name ?? '',
             }),
             'group.type': RecordTextAnswer.create({
@@ -142,13 +141,17 @@ export class DocumentTemplate extends Model {
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.lastName,
             }),
+            'member.nationalRegisterNumber': RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.nationalRegisterNumber,
+            }),
             'member.address': RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
-                address: registration.member.details.address ?? null,
+                address: registration.member.details.address ?? registration.member.details.getAllAddresses()[0] ?? null,
             }),
             'member.email': RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.email ?? null,
+                value: registration.member.details.getMemberEmails()[0] ?? registration.member.details.getParentEmails()[0],
             }),
             'member.birthDay': RecordDateAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
@@ -161,6 +164,10 @@ export class DocumentTemplate extends Model {
             'parents[0].lastName': RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[0]?.lastName,
+            }),
+            'parents[0].nationalRegisterNumber': RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.parents[0]?.nationalRegisterNumber,
             }),
             'parents[0].address': RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
@@ -178,6 +185,10 @@ export class DocumentTemplate extends Model {
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[1]?.lastName,
             }),
+            'parents[1].nationalRegisterNumber': RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.parents[1]?.nationalRegisterNumber,
+            }),
             'parents[1].address': RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 address: registration.member.details.parents[1]?.address ?? null,
@@ -188,13 +199,76 @@ export class DocumentTemplate extends Model {
             }),
         };
 
+        const allRecords = this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords());
+        const hasDebtor = allRecords.find(s => s.id.startsWith('debtor.'));
+
+        if (hasDebtor) {
+            const parentsWithNRR = registration.member.details.parents.filter(p => p.nationalRegisterNumber);
+            let debtor: Parent | undefined = parentsWithNRR[0];
+            if (parentsWithNRR.length > 1) {
+                for (const balanceItem of balanceItems) {
+                    if (balanceItem && balanceItem.userId && balanceItem.status === BalanceItemStatus.Paid) {
+                        const user = await User.getByID(balanceItem.userId);
+                        if (user) {
+                            const parent = parentsWithNRR.find(p => p.hasEmail(user.email));
+
+                            if (parent) {
+                                debtor = parent;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            Object.assign(defaultData, {
+                'debtor.firstName': RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: debtor?.firstName ?? '',
+                }),
+                'debtor.lastName': RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: debtor?.lastName ?? '',
+                }),
+                'debtor.nationalRegisterNumber': RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: debtor?.nationalRegisterNumber ?? '',
+                }),
+                'debtor.address': RecordAddressAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    address: debtor?.address ?? null,
+                }),
+                'debtor.email': RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: debtor?.email ?? null,
+                }),
+            });
+        }
+
         // Add data that is different for each member
-        for (const field of this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords())) {
+        for (const field of allRecords) {
             // Where do we need to find the answer to this linked field?
             // - Could either return an id of a recordSetting connected to member
             // - or an idea of defaultData that is supported by default
             // The result is always a recordAnswer whose type should match the type of the linkedField
-            const linkedToMemberAnswerSettingsIds = this.settings.linkedFields.get(field.id);
+            let linkedToMemberAnswerSettingsIds = this.settings.linkedFields.get(field.id) ?? [field.id];
+
+            if (linkedToMemberAnswerSettingsIds.length === 0) {
+                linkedToMemberAnswerSettingsIds = [field.id];
+            }
+            console.log('Checking', field.id);
+
+            // Check if this field has been manually disabled by a global checkbox
+            const enableField = this.settings.fieldAnswers.get('enable[' + field.id + ']');
+            if (enableField && enableField.objectValue === false) {
+                field.required = false;
+
+                const clone = RecordAnswerDecoder.getClassForType(field.type).create({
+                    settings: field,
+                });
+                fieldAnswers.set(field.id, clone);
+                continue;
+            }
 
             let found = false;
 
@@ -375,17 +449,13 @@ export class DocumentTemplate extends Model {
         }
 
         if (this.settings.minPrice !== null) {
-            const fieldId = 'registration.price';
-            let price: null | number = null;
-
-            const answer = fieldAnswers.get(fieldId);
-            if (answer && answer instanceof RecordPriceAnswer) {
-                if (answer.value !== null) {
-                    price = answer.value;
-                }
+            if ((registration.price ?? 0) < this.settings.minPrice) {
+                return false;
             }
+        }
 
-            if ((price ?? 0) < this.settings.minPrice) {
+        if (this.settings.minPricePaid !== null) {
+            if ((registration.pricePaid ?? 0) < this.settings.minPricePaid && (registration.price ?? 0) > 0) {
                 return false;
             }
         }
@@ -527,7 +597,7 @@ export class DocumentTemplate extends Model {
 
         try {
             const context = await this.buildContext(organization);
-            const renderedHtml = render(this.privateSettings.templateDefinition.xmlExport, context);
+            const renderedHtml = await render(this.privateSettings.templateDefinition.xmlExport, context);
             return renderedHtml;
         }
         catch (e) {

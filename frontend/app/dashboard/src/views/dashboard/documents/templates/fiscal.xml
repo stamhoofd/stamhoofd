@@ -53,7 +53,7 @@
 							<!--<f2010_referentie>test-1</f2010_referentie>-->
 
                             <!-- Rijksregisternummer schuldenaar -->
-							<f2011_nationaalnr>{{filterString debtor.nationalRegistryNumber}}</f2011_nationaalnr>
+							<f2011_nationaalnr>{{filterString debtor.nationalRegisterNumber}}</f2011_nationaalnr>
 
                             <!-- Achternaam van de schuldenaar -->
 							<f2013_naam>{{debtor.lastName}}</f2013_naam>
@@ -141,7 +141,7 @@
 							<f86_2139_childpostnr>{{filterString member.address.postalCode}}</f86_2139_childpostnr>
 							<f86_2140_childmunicipality>{{member.address.city}}</f86_2140_childmunicipality>
 
-							<f86_2153_nnchild>{{filterString member.nationalRegistryNumber}}</f86_2153_nnchild>  <!-- Rijksregisternummer -->
+							<f86_2153_nnchild>{{filterString member.nationalRegisterNumber}}</f86_2153_nnchild>  <!-- Rijksregisternummer -->
 
 							{{#if (neq certification.type 'exception')}}
                                 <f86_2154_certifiermunicipality>{{certification.address.city}}</f86_2154_certifiermunicipality>

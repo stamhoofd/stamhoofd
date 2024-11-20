@@ -1,5 +1,5 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { Document as DocumentStruct, DocumentData, DocumentStatus } from '@stamhoofd/structures';
+import { Document as DocumentStruct, DocumentData, DocumentStatus, Platform, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -67,13 +67,26 @@ export class Document extends Model {
 
     buildContext(organization: Organization) {
         // Convert the field answers in a simplified javascript object
-        const data = {
-            'id': this.id,
-            'name': this.data.name,
-            'number': this.number,
-            'created_at': this.createdAt,
-            'organization.logo': organization.meta.squareLogo,
+        const data: Record<string, any> = {
+            id: this.id,
+            name: this.data.name,
+            number: this.number,
+            created_at: this.createdAt,
         };
+        const platformLogo = Platform.shared.config.logoDocuments ?? Platform.shared.config.horizontalLogo ?? Platform.shared.config.squareLogo;
+        const organizationLogo = organization.meta.horizontalLogo ?? organization.meta.squareLogo;
+
+        if (organizationLogo) {
+            data['organization'] = {
+                logo: organizationLogo.encode({ version: Version }) ?? null,
+            };
+        }
+
+        if (platformLogo) {
+            data['platform'] = {
+                logo: platformLogo.encode({ version: Version }) ?? null,
+            };
+        }
 
         for (const field of this.data.fieldAnswers.values()) {
             const keys = field.settings.id.split('.');
@@ -188,14 +201,14 @@ export class Document extends Model {
             return null;
         }
 
-        return this.getRenderedHtmlForTemplate(organization, template.html);
+        return await this.getRenderedHtmlForTemplate(organization, template.html);
     }
 
     // Rander handlebars template
-    private getRenderedHtmlForTemplate(organization: Organization, htmlTemplate: string): string | null {
+    private async getRenderedHtmlForTemplate(organization: Organization, htmlTemplate: string): Promise<string | null> {
         try {
             const context = this.buildContext(organization);
-            const renderedHtml = render(htmlTemplate, context);
+            const renderedHtml = await render(htmlTemplate, context);
             return renderedHtml;
         }
         catch (e) {

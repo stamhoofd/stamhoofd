@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { NamedObject } from './Event.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { documentInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
@@ -8,7 +9,6 @@ import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js'
 import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
 import { RecordSettings } from './members/records/RecordSettings.js';
-import { NamedObject } from './Event.js';
 
 export enum DocumentStatus {
     Draft = 'Draft',
@@ -44,6 +44,9 @@ export class DocumentSettings extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true })
     minPrice: number | null = null;
+
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    minPricePaid: number | null = null;
 
     /**
      * Fields defined by the template that can be set.
@@ -97,11 +100,17 @@ export class DocumentTemplateDefinition extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     defaultMinPrice: number | null = null;
 
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    defaultMinPricePaid: number | null = null;
+
     @field({ decoder: BooleanDecoder, version: 347 })
     allowChangingMaxAge = false;
 
     @field({ decoder: BooleanDecoder, version: 347 })
     allowChangingMinPrice = false;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    allowChangingMinPricePaid = false;
 
     @field({ decoder: new ArrayDecoder(RecordCategory), version: 179 })
     exportFieldCategories: RecordCategory[] = [];

@@ -3,6 +3,7 @@ import { Image } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Handlebars from 'handlebars';
 import { Interval } from 'luxon';
+import bwipjs from '@bwip-js/node';
 
 Handlebars.registerHelper('eq', (a, b) => a == b);
 Handlebars.registerHelper('neq', (a, b) => a !== b);
@@ -192,8 +193,22 @@ Handlebars.registerHelper('src-height', (a, options) => {
     }
 });
 
+Handlebars.registerHelper('datamatrix', (a) => {
+    if (typeof a !== 'string') {
+        return '';
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const svgCode = bwipjs.toSVG({
+        bcid: 'datamatrix',
+        text: a,
+    } as any);
+
+    // Base64 encode the string
+    return 'data:image/svg+xml;base64,' + Buffer.from(svgCode).toString('base64');
+});
+
 // Rander handlebars template
-export function render(htmlTemplate: string, context: any): string | null {
+export async function render(htmlTemplate: string, context: any): Promise<string | null> {
     try {
         const template = Handlebars.compile(htmlTemplate);
         const renderedHtml = template(context);

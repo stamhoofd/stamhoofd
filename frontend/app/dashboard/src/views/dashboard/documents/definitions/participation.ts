@@ -1,8 +1,9 @@
-import { DocumentTemplateDefinition, PropertyFilter, RecordCategory, RecordSettings, RecordType, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
+import { DocumentTemplateDefinition, RecordCategory, RecordSettings, RecordType, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 
 export const participation = DocumentTemplateDefinition.create({
     type: 'participation',
     name: 'Deelname of inschrijvingsbewijs',
+    allowChangingMinPricePaid: true,
     fieldCategories: [
         RecordCategory.create({
             name: 'Vereniging',
@@ -74,14 +75,13 @@ export const participation = DocumentTemplateDefinition.create({
                 }),
             ],
         }),
-    ],
-    groupFieldCategories: [
         RecordCategory.create({
-            name: 'Informatie',
+            name: 'Zichtbare gegevens',
+            description: 'Kies welke gegevens je wilt vermelden op de documenten. Afhankelijk van waarvoor het document gebruikt moet worden, zijn bepaalde gegevens vereist. Sommige mutualiteiten vereisen bijvoorbeeld een rijksregisternummer.',
             records: [
                 RecordSettings.create({
                     id: 'registration.showGroup',
-                    name: 'Toon inschrijvingsgroepnaam op document',
+                    name: 'Toon naam groep/activiteit op document',
                     required: false,
                     type: RecordType.Checkbox,
                 }),
@@ -92,18 +92,48 @@ export const participation = DocumentTemplateDefinition.create({
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
+                    id: 'enable[registration.price]',
+                    name: 'Toon bedrag',
+                    required: false,
+                    type: RecordType.Checkbox,
+                }),
+                RecordSettings.create({
                     id: 'registration.showPaidAt',
                     name: 'Toon betaaldatum op document (indien betaald)',
+                    required: false,
+                    type: RecordType.Checkbox,
+                }),
+                RecordSettings.create({
+                    id: 'enable[member.birthDay]',
+                    name: 'Toon geboortedatum (indien beschikbaar)',
+                    required: false,
+                    type: RecordType.Checkbox,
+                }),
+                RecordSettings.create({
+                    id: 'enable[member.nationalRegisterNumber]',
+                    name: 'Toon rijksregisternummer (indien beschikbaar)',
+                    required: false,
+                    type: RecordType.Checkbox,
+                }),
+                RecordSettings.create({
+                    id: 'enable[member.email]',
+                    name: 'Toon e-mailadres (indien beschikbaar)',
+                    required: false,
+                    type: RecordType.Checkbox,
+                }),
+                RecordSettings.create({
+                    id: 'enable[member.address]',
+                    name: 'Toon adres (indien beschikbaar)',
                     required: false,
                     type: RecordType.Checkbox,
                 }),
             ],
         }),
     ],
+    groupFieldCategories: [],
     documentFieldCategories: [
         RecordCategory.create({
             name: 'Gegevens lid',
-            description: 'Deze gegevens zijn allemaal standaard beschikbaar in Stamhoofd. Je kiest zelf wat je wilt tonen op het document, en kan iets weglaten door het niet te koppelen.',
             records: [
                 RecordSettings.create({
                     id: 'member.firstName',
@@ -130,7 +160,7 @@ export const participation = DocumentTemplateDefinition.create({
                     type: RecordType.Address,
                 }),
                 RecordSettings.create({
-                    id: 'member.nationalRegistryNumber',
+                    id: 'member.nationalRegisterNumber',
                     name: 'Rijksregisternummer',
                     required: false,
                     type: RecordType.Text,
@@ -145,7 +175,6 @@ export const participation = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             name: 'Prijs',
-            description: 'Het bedrag dat je wilt tonen op het document, waarbij je kan kiezen tussen ofwel het deel dat betaald werd of het totaalbedrag (dus ook een document uitreiken als de inschrijving nog niet volledig werd betaald).',
             records: [
                 RecordSettings.create({
                     id: 'registration.price',

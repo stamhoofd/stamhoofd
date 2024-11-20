@@ -144,12 +144,12 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
-                    id: 'debtor.nationalRegistryNumber',
+                    id: 'debtor.nationalRegisterNumber',
                     name: 'Rijksregisternummer',
                     required: false,
                     type: RecordType.Text,
                     warning: RecordWarning.create({
-                        id: 'missing.debtor.nationalRegistryNumber',
+                        id: 'missing.debtor.nationalRegisterNumber',
                         text: 'Rijksregisternummer schuldenaar ontbreekt. Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
                         type: RecordWarningType.Warning,
                         inverted: true,
@@ -168,12 +168,12 @@ export const fiscal = DocumentTemplateDefinition.create({
             description: 'Deze gegevens zijn allemaal standaard beschikbaar in Stamhoofd, met uitzondering van het rijksregisternummer.',
             records: [
                 RecordSettings.create({
-                    id: 'member.nationalRegistryNumber',
+                    id: 'member.nationalRegisterNumber',
                     name: 'Rijksregisternummer',
                     required: false,
                     type: RecordType.Text,
                     warning: RecordWarning.create({
-                        id: 'missing.member.nationalRegistryNumber',
+                        id: 'missing.member.nationalRegisterNumber',
                         text: 'Rijksregisternummer lid ontbreekt. Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
                         type: RecordWarningType.Warning,
                         inverted: true,
@@ -207,7 +207,7 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             name: 'Prijs',
-            description: 'Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit Stamhoofd gehaald worden, waarbij ook rekening gehouden wordt met kortingen. De dagprijs wordt berekend op basis van de begin en einddatum. Gratis inschrijvingen komen niet in aanmerking voor een fiscale aftrek en daarvoor wordt dus geen document aangemaakt.',
+            description: 'Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit het systeem gehaald worden, waarbij ook rekening gehouden wordt met kortingen. De dagprijs wordt berekend op basis van de begin en einddatum. Gratis inschrijvingen komen niet in aanmerking voor een fiscale aftrek en daarvoor wordt dus geen document aangemaakt.',
             records: [
                 RecordSettings.create({
                     id: 'registration.price',

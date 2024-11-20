@@ -24,6 +24,8 @@
 
         <LogoEditor :meta-data="patched.config" :dark-mode="DarkMode.Auto" :validator="errors.validator" @patch="addPatch(Platform.patch({config: $event}))" />
 
+        <ImageInput v-model="logoDocuments" :placeholder="patched.config.horizontalLogo ?? patched.config.squareLogo" title="Logo op documenten (PDF)" :validator="errors.validator" :resolutions="printLogoResolutions" :required="false" />
+
         <hr>
         <h2 class="style-with-button">
             <div>Omslagfoto</div>
@@ -90,7 +92,7 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, LogoEditor, NumberInput, STInputBox, Toast, UploadButton, useErrors, usePatch, usePlatform, WYSIWYGTextInput } from '@stamhoofd/components';
+import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, LogoEditor, NumberInput, STInputBox, Toast, UploadButton, useErrors, usePatch, usePlatform, WYSIWYGTextInput, ImageInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { DarkMode, Image, Platform, PlatformConfig, ResolutionRequest } from '@stamhoofd/structures';
@@ -135,6 +137,11 @@ const footerText = computed({
 const shopFooterText = computed({
     get: () => patched.value.config.shopFooterText,
     set: value => addPatch(Platform.patch({ config: PlatformConfig.patch({ shopFooterText: value }) })),
+});
+
+const logoDocuments = computed({
+    get: () => patched.value.config.logoDocuments,
+    set: (value: Image | null) => addPatch(Platform.patch({ config: PlatformConfig.patch({ logoDocuments: value }) })),
 });
 
 const coverBottomLeftOverlayWidth = computed({
@@ -201,6 +208,12 @@ const resolutions = [
     }),
     ResolutionRequest.create({
         width: 100,
+    }),
+];
+
+const printLogoResolutions = [
+    ResolutionRequest.create({
+        height: 120,
     }),
 ];
 

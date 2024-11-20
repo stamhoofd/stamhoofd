@@ -373,6 +373,9 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: Image, nullable: true, version: 310 })
     squareLogo: Image | null = null;
 
+    @field({ decoder: Image, nullable: true, ...NextVersion })
+    logoDocuments: Image | null = null;
+
     @field({ decoder: BooleanDecoder, optional: true, version: 310 })
     expandLogo = false;
 

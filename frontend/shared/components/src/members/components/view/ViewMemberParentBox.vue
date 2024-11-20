@@ -19,7 +19,7 @@
             </template>
 
             <template v-if="parent.email">
-                <dt>E-mailadres {{ parent.alternativeEmails.length ? '1' : ''}}</dt>
+                <dt>E-mailadres {{ parent.alternativeEmails.length ? '1' : '' }}</dt>
                 <dd v-copyable>
                     {{ parent.email }}
                 </dd>
@@ -42,6 +42,13 @@
                     </template>
                 </dd>
             </template>
+
+            <template v-if="parent.nationalRegisterNumber">
+                <dt>Rijksregisternummer</dt>
+                <dd v-copyable>
+                    {{ parent.nationalRegisterNumber }}
+                </dd>
+            </template>
         </dl>
     </div>
 </template>
@@ -51,13 +58,13 @@ import { Parent, PlatformMember, ParentTypeHelper } from '@stamhoofd/structures'
 import { useCountry } from '../../../hooks';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 defineProps<{
-    parent: Parent,
-    member: PlatformMember
-}>()
+    parent: Parent;
+    member: PlatformMember;
+}>();
 
 const currentCountry = useCountry();
 

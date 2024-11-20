@@ -53,6 +53,11 @@ export async function getDocumentPdfBuffer($context: SessionContext, document: D
         throw new Error('Missing cache headers');
     }
 
+    /* if (STAMHOOFD.environment === 'development') {
+        // Return html
+        return response.data as Buffer;
+    } */
+
     const form = new FormData();
     // We need to send the html as a Blob, because FormData otherwise breaks the html signature by changing LF to CRLF
     form.append('html', response.data as Blob);
@@ -77,6 +82,14 @@ export async function getDocumentPdfBuffer($context: SessionContext, document: D
 export async function downloadDocument($context: SessionContext, document: Document, owner?: any) {
     try {
         const buffer = await getDocumentPdfBuffer($context, document, owner);
+
+        /* if (STAMHOOFD.environment === 'development') {
+            // Open html in new tab
+            const blob = new Blob([buffer], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+            return;
+        } */
         const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
         saveAs(buffer, Formatter.fileSlug(document.data.name + ' - ' + document.data.description) + '.pdf');
     }

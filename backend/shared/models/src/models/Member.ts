@@ -188,7 +188,7 @@ export class Member extends Model {
     static async getRegistrationWithMembersForGroup(groupId: string): Promise<RegistrationWithMember[]> {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
 
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`canRegister\` = 1)\n`;
+        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null AND \`${Registration.table}\`.\`deactivatedAt\` is null\n`;
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
         query += `where \`${Registration.table}\`.\`groupId\` = ?`;

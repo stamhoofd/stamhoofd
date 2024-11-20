@@ -24,8 +24,9 @@
             /* Make sure we print to A4 paper size */
             @page {
                 size: A4;
-                margin: 2cm;
+                margin: 1.75cm 2cm;
             }
+
 
             p, h1, div, h2, h3, h4 {
                 margin: 0;
@@ -34,7 +35,7 @@
 
             hr {
                 border: 0;
-                border-top: 0.2px solid gray;
+                border-top: 1px dashed lightgray;
                 margin: 30px 0;
             }
 
@@ -67,9 +68,31 @@
                 text-decoration: none;
             }
 
+            h3 {
+                font-size: 15px;
+                font-weight: bold;
+                margin-bottom: 15px;
+                margin-top: 0.75cm;
+            }
+
+            h3 span {
+                font-weight: normal;
+                text-decoration: none;
+            }
+
             .plaintext {
                 white-space: pre-wrap;
-                margin-bottom: 40px;
+                margin-bottom: 30px;
+                line-height: 2;
+            }
+
+            .plaintext:first-child {
+                margin-top: 0;
+            }
+
+            .subtitle {
+                font-size: 13px;
+                margin-top: 8px;
             }
 
             .space {
@@ -134,26 +157,107 @@
                 position: absolute;
             }
 
+            header, footer {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                align-items: flex-start;
+            }
+
+            .title-container {
+                min-width: 25vw;
+            }
+
+            header {
+                margin-bottom: 0.75cm;
+                page-break-after: avoid;
+            }
+
             footer {
-                position: fixed;
-                bottom: 0;
-                width: 100%;
+                margin-top: 0.5cm;
+                align-items: center;
+                page-break-before: avoid;
+            }
+
+            .barcode-container img + p {
+                margin-top: 5px;
+            }
+
+            .document-id {
                 text-align: right;
                 color: gray;
-                font-size: 12px;
+                font-size: 10px;
+                font-family: monospace;
             }
+
+            main.page-container {
+                position: relative;
+                display: grid;
+                grid-template-rows: auto 1fr auto;
+                height: 100vh;
+                max-height: 100%;
+            }
+
+            .page-box {
+                border-top: 1px solid lightgray;
+                border-bottom: 1px solid lightgray;
+                padding: 0.75cm  0;
+            }
+
+            .logo-container {
+                img {
+                    height: 60px;
+                    width: 100%;
+                    object-fit: contain;
+                    object-position: left;
+                    max-width: 400px;
+                }
+            }
+
+            /*@media screen {
+                body {
+                    padding: 2cm;
+                    width: 21cm;
+                    height: 29.7cm;
+                    background: white;
+                    margin: 0 auto;
+                }
+
+                html {
+                    background: black;
+                }
+            }*/
         </style>
     </head>
     <body>
-        <main>
-            <div class="page-box">
-                <h1>{{name}}</h1>
+        <main class="page-container">
+            <header>
+                <div class="logo-container">
+                    {{#if platform.logo}}
+                        <img src="{{src platform.logo height=120}}" alt="" width="{{src-width platform.logo height=120}}"
+                            height="{{src-width platform.logo height=120}}" />
+                    {{/if}}
+                </div>
 
+                <div class="title-container">
+                    <h1>{{name}}</h1>
+
+                    {{#if registration.showGroup}}
+                        <p class="subtitle">{{ group.name }}</p>
+                    {{/if}}
+
+                    {{#if registration.showDate}}
+                        <p class="subtitle">{{ formatDate registration.startDate }} tot {{ formatDate registration.endDate }}</p>
+                    {{else}}
+                        <p class="subtitle">{{ formatDate created_at }}</p>
+                    {{/if}}
+
+                </div>
+            </header>
+            <div class="page-box">
                 {{#if comments}}
                 <p class="plaintext">{{comments}}</p>
                 {{/if}}
 
-                <hr>
                 <table>
                     <tbody>
                         <tr>
@@ -166,10 +270,10 @@
                             <td>{{ formatDate member.birthDay}}</td>
                         </tr>
                         {{/if}}
-                        {{#if member.nationalRegistryNumber}}
+                        {{#if member.nationalRegisterNumber}}
                         <tr>
                             <td>Rijksregisternummer</td>
-                            <td>{{member.nationalRegistryNumber}}</td>
+                            <td>{{member.nationalRegisterNumber}}</td>
                         </tr>
                         {{/if}}
                         {{#if member.address}}
@@ -185,13 +289,6 @@
                             <td>{{member.email}}</td>
                         </tr>
                         {{/if}}
-                    </tbody>
-                </table>
-
-                {{#if (or registration.showGroup registration.showDate registration.price) }}
-                <hr>
-                <table>
-                    <tbody>
                         {{#if registration.showGroup}}
                             <tr>
                                 <td>
@@ -230,10 +327,8 @@
                         {{/if}}
                     </tbody>
                 </table>
-                {{/if}}
 
-                <hr>
-                <h2>Uitgereikt door</h2>
+                <h3>Uitgereikt door</h3>
                 <table>
                     <tbody>
                         <tr>
@@ -253,25 +348,23 @@
                         </tr>
                     </tbody>
                 </table>
-                <hr>
 
                 {{#if commentsFooter}}
                 <p class="plaintext">{{commentsFooter}}</p>
                 {{/if}}
 
-                <p class="avoid">Opgemaakt op {{ formatDate created_at }}</p>
+                <p class="avoid">Opgemaakt op {{ formatDate created_at }}. {{#if signature.name}}Ondertekend door {{signature.name}}.{{/if}}</p>
 
                 {{#if signature.image}}
-                    <p class="avoid">Handtekening en/of stempel van de organisatie:</p>
-                    <p class="avoid">{{signature.name}}</p>
                     <img src="{{src signature.image height=150}}" alt="" width="{{src-width signature.image height=150}}"
                         height="{{src-width signature.image height=150}}" class="signature" />
-                {{else}}
-                <p>Ondertekend door {{signature.name}}</p>
                 {{/if}}
             </div>
             <footer>
-                Volgnummer {{id}}
+                <div class="barcode-container">
+                    <img src="{{datamatrix id}}" alt="" class="barcode" height="50"/>
+                </div>
+                <p class="document-id">{{id}}</p>
             </footer>
         </main>
     </body>

@@ -39,8 +39,9 @@
                     v-for="record of category.filterRecords(patchedDocument)"
                     :key="record.id"
                     :record="record"
-                    :answers="patchedDocument.getRecordAnswers()"
+                    :answers="recordAnswers"
                     :validator="errors.validator"
+                    :mark-reviewed="true"
                     @patch="patchAnswers"
                 />
             </div>
@@ -55,7 +56,7 @@
                     {{ $t('39d0d9ca-2f37-40b6-84a4-51fb29b4cce6') }}
                 </p>
 
-                <MultiSelectInput v-for="field of category.getAllRecords()" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @update:model-value="setLinkedFields(field, $event)" />
+                <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @update:model-value="setLinkedFields(field, $event)" />
             </div>
 
             <hr>
@@ -92,8 +93,16 @@
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPrice">
                 <hr>
                 <h2>Bedrag</h2>
+                <Checkbox v-model="nonZeroPriceOnly">
+                    Enkel aanmaken indien inschrijvingsbedrag groter is dan 0 euro
+                </Checkbox>
+            </template>
+
+            <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPricePaid">
+                <hr>
+                <h2>Betaald</h2>
                 <Checkbox v-model="paidOnly">
-                    Enkel aanmaken indien gekoppelde prijs groter is dan 0 euro
+                    Enkel aanmaken indien inschrijving betaald is
                 </Checkbox>
             </template>
 
@@ -150,11 +159,20 @@ const props = withDefaults(defineProps<{
 const errors = useErrors();
 const { patch: patchDocument, patched: patchedDocument, addPatch, hasChanges } = usePatch(props.document);
 const saving = ref(false);
-const editingAnswers: Ref<Map<string, RecordAnswer>> = ref(cloneMap(props.document.settings.fieldAnswers));
 const loadingHtml = ref(false);
 const loadingXml = ref(false);
 const fieldCategories = computed(() => RecordCategory.flattenCategories(patchedDocument.value.privateSettings.templateDefinition.fieldCategories, patchedDocument.value));
-const documentFieldCategories = computed(() => patchedDocument.value.privateSettings.templateDefinition.documentFieldCategories);
+const documentFieldCategories = computed(() => patchedDocument.value.privateSettings.templateDefinition.documentFieldCategories.filter(c => c.getAllRecords().filter(r => isDocumentFieldEditable(r)).length > 0));
+
+function isDocumentFieldEditable(field: RecordSettings) {
+    const supportedFields = getDefaultSupportedIds();
+    return !supportedFields.includes(field.id);
+}
+
+const recordAnswers = computed(() => {
+    return patchedDocument.value.getRecordAnswers();
+});
+
 const requestOwner = useRequestOwner();
 const organization = useRequiredOrganization();
 const present = usePresent();
@@ -184,8 +202,6 @@ onMounted(() => {
     }
 });
 
-watch(editingAnswers, value => patchAnswers(value), { deep: true });
-
 function patchAnswers(patch: PatchAnswers | Map<string, RecordAnswer>) {
     const fieldAnswers = patch instanceof PatchMap ? patch : new PatchMap([...patch]);
 
@@ -213,7 +229,6 @@ const editingType = computed({
         if (value) {
             const definition = availableTypes.value.find(t => t.value === value)?.definition;
             if (definition) {
-                console.log('set definition', definition);
                 addPatch({
                     privateSettings: DocumentPrivateSettings.patch({
                         templateDefinition: definition,
@@ -222,6 +237,7 @@ const editingType = computed({
                         name: patchedDocument.value.settings.name || definition.name,
                         maxAge: patchedDocument.value.settings.maxAge ?? definition.defaultMaxAge,
                         minPrice: patchedDocument.value.settings.minPrice ?? definition.defaultMinPrice,
+                        minPricePaid: patchedDocument.value.settings.minPricePaid ?? definition.defaultMinPricePaid,
                     }),
                 });
                 autoLink();
@@ -265,10 +281,28 @@ const minPrice = computed({
     },
 });
 
-const paidOnly = computed({
+const minPricePaid = computed({
+    get: () => patchedDocument.value.settings.minPricePaid,
+    set: (minPricePaid: number | null) => {
+        addPatch({
+            settings: DocumentSettings.patch({
+                minPricePaid,
+            }),
+        });
+    },
+});
+
+const nonZeroPriceOnly = computed({
     get: () => minPrice.value === 1,
     set: (paidOnly: boolean) => {
         minPrice.value = paidOnly ? 1 : 0;
+    },
+});
+
+const paidOnly = computed({
+    get: () => minPricePaid.value === 1,
+    set: (paidOnly: boolean) => {
+        minPricePaid.value = paidOnly ? 1 : 0;
     },
 });
 
@@ -320,6 +354,11 @@ function getLinkedFieldsChoices(field: RecordSettings) {
             label: 'Achternaam',
             categories: ['Lid'],
         });
+        choices.push({
+            value: 'member.nationalRegisterNumber',
+            label: 'Rijksregisternummer',
+            categories: ['Lid'],
+        });
     }
     if (field.type === RecordType.Address) {
         choices.push({
@@ -356,6 +395,11 @@ function getLinkedFieldsChoices(field: RecordSettings) {
             label: 'Achternaam',
             categories: ['Ouder 1'],
         });
+        choices.push({
+            value: 'parents[0].nationalRegisterNumber',
+            label: 'Rijksregisternummer',
+            categories: ['Ouder 1'],
+        });
     }
     if (field.type === RecordType.Address) {
         choices.push({
@@ -381,6 +425,11 @@ function getLinkedFieldsChoices(field: RecordSettings) {
         choices.push({
             value: 'parents[1].lastName',
             label: 'Achternaam',
+            categories: ['Ouder 2'],
+        });
+        choices.push({
+            value: 'parents[1].nationalRegisterNumber',
+            label: 'Rijksregisternummer',
             categories: ['Ouder 2'],
         });
     }
@@ -427,31 +476,38 @@ function getLinkedFieldsChoices(field: RecordSettings) {
     return choices;
 }
 
+function getDefaultSupportedIds() {
+    return [
+        'registration.price',
+        'registration.pricePaid',
+        'member.firstName',
+        'member.lastName',
+        'member.address',
+        'member.email',
+        'member.birthDay',
+        'member.nationalRegisterNumber',
+        'debtor.firstName',
+        'debtor.lastName',
+        'debtor.address',
+        'debtor.email',
+        'debtor.nationalRegisterNumber',
+        'parents[0].firstName',
+        'parents[0].lastName',
+        'parents[0].address',
+        'parents[0].email',
+        'parents[0].nationalRegisterNumber',
+        'parents[1].firstName',
+        'parents[1].lastName',
+        'parents[1].address',
+        'parents[1].email',
+        'parents[1].nationalRegisterNumber',
+    ];
+}
+
 function getAutoLinkingSuggestions(id: string) {
     // Force a mapping of certain fields to multiple or other fields
     const map: Record<string, string[]> = {
-        'member.address': [
-            'member.address',
-            'parents[0].address',
-            'parents[1].address',
-        ],
-        'member.email': [
-            'member.email',
-            'parents[0].email',
-            'parents[1].email',
-        ],
-        'debtor.firstName': [
-            'parents[0].firstName',
-            'parents[1].firstName',
-        ],
-        'debtor.lastName': [
-            'parents[0].lastName',
-            'parents[1].lastName',
-        ],
-        'debtor.address': [
-            'parents[0].address',
-            'parents[1].address',
-        ],
+
     };
     if (map[id]) {
         return map[id];
@@ -467,20 +523,28 @@ function autoLink() {
     const linkedInside: Set<string> = new Set();
     const globalData = getDefaultGlobalData();
     for (const field of patchedDocument.value.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
-        if (editingAnswers.value.has(field.id) && !linkedInside.has(field.id)) {
+        if (recordAnswers.value.has(field.id) && !linkedInside.has(field.id)) {
             continue;
         }
         const d = globalData[field.id];
         if (d && d instanceof RecordAnswerDecoder.getClassForType(field.type)) {
             // add answer
             d.settings = field;
-            editingAnswers.value.set(field.id, d);
             linkedInside.add(field.id);
+
+            patchAnswers(new PatchMap([[field.id, d]]));
         }
     }
 
+    const supportedFields = getDefaultSupportedIds();
+
     for (const category of patchedDocument.value.privateSettings.templateDefinition.documentFieldCategories) {
         for (const field of category.getAllRecords()) {
+            // Check supported
+            if (supportedFields.includes(field.id)) {
+                continue;
+            }
+
             const existing = getLinkedFields(field);
             if (existing.length && !linkedInside.has(field.id)) {
                 // Already linked
@@ -543,7 +607,7 @@ function getDefaultGlobalData(): Record<string, RecordAnswer> {
         }),
         'organization.companyNumber': RecordTextAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
-            value: organization.value.meta.companyNumber,
+            value: organization.value.meta.companies[0]?.companyNumber ?? '',
         }),
         'organization.address': RecordAddressAnswer.create({
             settings: RecordSettings.create({}), // settings will be overwritten
@@ -661,7 +725,7 @@ async function gotoGroupRecordCategory(group: DocumentTemplateGroup, actions: Na
                 },
             }),
         ],
-    })
+    });
 }
 
 async function addGroup() {
@@ -677,7 +741,7 @@ async function addGroup() {
             }),
         ],
         modalDisplayStyle: 'popup',
-    })
+    });
 }
 
 function updateGroupAnswers(group: DocumentTemplateGroup) {
@@ -768,9 +832,6 @@ async function save() {
     errors.errorBox = null;
 
     try {
-        // Make sure answers are updated
-        patchAnswers(editingAnswers.value);
-
         if (!await errors.validator.validate()) {
             saving.value = false;
             return;
@@ -798,7 +859,6 @@ async function save() {
         });
         const updatedDocument = response.data[0];
         if (updatedDocument) {
-            editingAnswers.value = cloneMap(props.document.settings.fieldAnswers);
             patchDocument.value = DocumentTemplatePrivate.patch({});
             props.document.set(updatedDocument);
         }
