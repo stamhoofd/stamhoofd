@@ -71,7 +71,7 @@
                 </div>
 
                 <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
-                    <NRRInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay" />
                     <p class="style-description-small">
                         Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken.
                     </p>
@@ -104,7 +104,7 @@ import BirthDayInput from '../../../inputs/BirthDayInput.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
-import NRRInput from '../../../inputs/NRRInput.vue';
+import NRNInput from '../../../inputs/NRNInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';

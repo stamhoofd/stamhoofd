@@ -184,7 +184,7 @@
                     />
 
                     <AccessRightPermissionRow
-                        :access-right="AccessRight.MemberManageNRR"
+                        :access-right="AccessRight.MemberManageNRN"
                         :inherited-roles="inheritedRoles"
                         :role="patched"
                         @patch:role="addPatch"

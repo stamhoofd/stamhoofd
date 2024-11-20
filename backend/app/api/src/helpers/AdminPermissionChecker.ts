@@ -935,7 +935,7 @@ export class AdminPermissionChecker {
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async hasNRRAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async hasNRNAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager) {
@@ -970,7 +970,7 @@ export class AdminPermissionChecker {
                 continue;
             }
 
-            if (permissions.hasAccessRight(AccessRight.MemberManageNRR)) {
+            if (permissions.hasAccessRight(AccessRight.MemberManageNRN)) {
                 return true;
             }
         }
@@ -978,7 +978,7 @@ export class AdminPermissionChecker {
         // Platform data
         const platformPermissions = this.platformPermissions;
         if (platformPermissions) {
-            if (platformPermissions.hasAccessRight(AccessRight.MemberManageNRR)) {
+            if (platformPermissions.hasAccessRight(AccessRight.MemberManageNRN)) {
                 return true;
             }
         }
@@ -1060,7 +1060,7 @@ export class AdminPermissionChecker {
             cloned.details.securityCode = null;
         }
 
-        if (!await this.hasNRRAccess(member, PermissionLevel.Read)) {
+        if (!await this.hasNRNAccess(member, PermissionLevel.Read)) {
             cloned.details.nationalRegisterNumber = null;
 
             for (const parent of cloned.details.parents) {
@@ -1225,7 +1225,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (!await this.hasNRRAccess(member, PermissionLevel.Write)) {
+        if (!await this.hasNRNAccess(member, PermissionLevel.Write)) {
             if (data.details.nationalRegisterNumber) {
                 throw new SimpleError({
                     code: 'permission_denied',

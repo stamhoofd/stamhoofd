@@ -73,7 +73,7 @@
                 </p>
 
                 <template v-if="((isPropertyEnabled('nationalRegisterNumber') && patched.address?.country === Country.Belgium) || nationalRegisterNumber)">
-                    <NRRInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer'" :required="isNRRRequiredForThisParent" :nullable="true" :validator="errors.validator" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer'" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
                     <p class="style-description-small">
                         Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. <template v-if="isPropertyRequired('nationalRegisterNumber')">
                             Vul het bij minstens één ouder in, deze ouder zal vermeld worden op de attesten.
@@ -99,7 +99,7 @@ import { useErrors } from '../../../errors/useErrors';
 import { usePatch } from '../../../hooks';
 import Dropdown from '../../../inputs/Dropdown.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
-import NRRInput from '../../../inputs/NRRInput.vue';
+import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
@@ -143,9 +143,9 @@ const isPropertyEnabled = useIsPropertyEnabled(relatedMembers, true);
 const isAllOptional = useIsAllOptional(relatedMembers);
 
 /**
- * If NRR is required, it is only required for one parent of each member
+ * If NRN is required, it is only required for one parent of each member
  */
-const isNRRRequiredForThisParent = computed(() => {
+const isNRNRequiredForThisParent = computed(() => {
     if (isAllOptional.value) {
         return false;
     }

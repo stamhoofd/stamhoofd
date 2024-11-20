@@ -549,7 +549,7 @@ export class PlatformMember implements ObjectWithRecords {
                 // Need permission to view financial support
                 let foundPermissions = false;
                 for (const organization of this.filterOrganizations({ currentPeriod: true })) {
-                    if (options.checkPermissions.user.permissions?.forOrganization(organization, Platform.shared)?.hasAccessRight(AccessRight.MemberManageNRR)) {
+                    if (options.checkPermissions.user.permissions?.forOrganization(organization, Platform.shared)?.hasAccessRight(AccessRight.MemberManageNRN)) {
                         foundPermissions = true;
                         break;
                     }

@@ -89,7 +89,7 @@ export { default as ProgressRing } from './src/icons/ProgressRing.vue';
 
 // Inputs (last, because they use other components from this library)
 export { default as AddressInput } from './src/inputs/AddressInput.vue';
-export { default as NRRInput } from './src/inputs/NRRInput.vue';
+export { default as NRNInput } from './src/inputs/NRNInput.vue';
 export { default as AgeInput } from './src/inputs/AgeInput.vue';
 export { default as BirthDayInput } from './src/inputs/BirthDayInput.vue';
 export { default as Checkbox } from './src/inputs/Checkbox.vue';

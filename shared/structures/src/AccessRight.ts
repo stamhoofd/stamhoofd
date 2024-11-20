@@ -25,7 +25,7 @@ export enum AccessRight {
     /**
      * Edit/view national registration number
      */
-    MemberManageNRR = 'MemberManageNRR',
+    MemberManageNRN = 'MemberManageNRN',
 
     // Webshop level permissions
     WebshopScanTickets = 'WebshopScanTickets',
@@ -48,7 +48,7 @@ export class AccessRightHelper {
             case AccessRight.MemberReadFinancialData: return 'Bekijk rekening leden';
             case AccessRight.MemberWriteFinancialData: return 'Bewerk rekening leden';
 
-            case AccessRight.MemberManageNRR: return 'Rijksregisternummers';
+            case AccessRight.MemberManageNRN: return 'Rijksregisternummers';
         }
     }
 
@@ -65,7 +65,7 @@ export class AccessRightHelper {
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Lidgeld bekijken';
             case AccessRight.MemberWriteFinancialData: return 'Lidgeld bewerken';
-            case AccessRight.MemberManageNRR: return 'Rijksregisternummers';
+            case AccessRight.MemberManageNRN: return 'Rijksregisternummers';
         }
     }
 
@@ -82,7 +82,7 @@ export class AccessRightHelper {
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Openstaande bedragen bekijken';
             case AccessRight.MemberWriteFinancialData: return 'Openstaande bedragen bewerken';
-            case AccessRight.MemberManageNRR: return 'Rijksregisternummers bekijken of bewerken van leden';
+            case AccessRight.MemberManageNRN: return 'Rijksregisternummers bekijken of bewerken van leden';
         }
     }
 
@@ -95,7 +95,7 @@ export class AccessRightHelper {
             case AccessRight.MemberReadFinancialData: return 'Bekijk hoeveel een lid precies heeft betaald of nog moet betalen, en bekijk of het lid recht heeft op een verlaagd tarief.';
             case AccessRight.MemberWriteFinancialData: return 'Voeg openstaande bedragen toe of verwijder ze, en pas de betaalstatus van een lid aan.';
             case AccessRight.EventWrite: return 'Maak nieuwe activiteiten aan, verwijder ze en wijzig ze.';
-            case AccessRight.MemberManageNRR: return 'Rijksregisternummers bekijken of bewerken van leden.';
+            case AccessRight.MemberManageNRN: return 'Rijksregisternummers bekijken of bewerken van leden.';
         }
         return null;
     }

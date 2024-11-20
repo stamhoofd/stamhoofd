@@ -203,14 +203,14 @@ export class DocumentTemplate extends Model {
         const hasDebtor = allRecords.find(s => s.id.startsWith('debtor.'));
 
         if (hasDebtor) {
-            const parentsWithNRR = registration.member.details.parents.filter(p => p.nationalRegisterNumber);
-            let debtor: Parent | undefined = parentsWithNRR[0] ?? registration.member.details.parents[0];
-            if (parentsWithNRR.length > 1) {
+            const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber);
+            let debtor: Parent | undefined = parentsWithNRN[0] ?? registration.member.details.parents[0];
+            if (parentsWithNRN.length > 1) {
                 for (const balanceItem of balanceItems) {
                     if (balanceItem && balanceItem.userId && balanceItem.status === BalanceItemStatus.Paid) {
                         const user = await User.getByID(balanceItem.userId);
                         if (user) {
-                            const parent = parentsWithNRR.find(p => p.hasEmail(user.email));
+                            const parent = parentsWithNRN.find(p => p.hasEmail(user.email));
 
                             if (parent) {
                                 debtor = parent;
