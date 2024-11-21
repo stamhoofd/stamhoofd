@@ -1,8 +1,7 @@
 import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
-import { BalanceItemStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { BalanceItem, Organization, Payment } from './';
+import { BalanceItem, Payment } from './';
 
 /**
  * Keeps track of all the created payments of a balance item, which contains the (tries) to pay a balance item.
@@ -57,42 +56,4 @@ export class BalanceItemPayment extends Model {
 
     static balanceItem = new ManyToOneRelation(BalanceItem, 'balanceItem');
     static payment = new ManyToOneRelation(Payment, 'payment');
-
-    async markPaid(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
-        // Update cached amountPaid of the balance item (this will get overwritten later, but we need it to calculate the status)
-        this.balanceItem.pricePaid += this.price;
-
-        // Update status
-        const old = this.balanceItem.status;
-        this.balanceItem.updateStatus();
-        await this.balanceItem.save();
-
-        // Do logic of balance item
-        if (this.balanceItem.status === BalanceItemStatus.Paid && old !== BalanceItemStatus.Paid) {
-            // Only call markPaid once (if it wasn't (partially) paid before)
-            await this.balanceItem.markPaid(this.payment, organization);
-        }
-        else {
-            await this.balanceItem.markUpdated(this.payment, organization);
-        }
-    }
-
-    /**
-     * Call this once a earlier succeeded payment is no longer succeeded
-     */
-    async undoPaid(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
-        await this.balanceItem.undoPaid(this.payment, organization);
-    }
-
-    async markFailed(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
-        // Do logic of balance item
-        await this.balanceItem.markFailed(this.payment, organization);
-    }
-
-    async undoFailed(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
-        // Reactivate deleted items
-        await this.balanceItem.undoFailed(this.payment, organization);
-    }
 }
-
-type Loaded<T> = (T) extends ManyToOneRelation<infer Key, infer Model> ? Record<Key, Model> : never;

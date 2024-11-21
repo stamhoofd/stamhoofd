@@ -199,38 +199,6 @@ export class Registration extends Model {
         await Member.updateMembershipsForId(this.memberId);
     }
 
-    async markValid(this: Registration, options?: { skipEmail?: boolean }) {
-        if (this.registeredAt !== null && this.deactivatedAt === null) {
-            await this.save();
-            return false;
-        }
-
-        this.reservedUntil = null;
-        this.registeredAt = this.registeredAt ?? new Date();
-        this.deactivatedAt = null;
-        this.canRegister = false;
-        await this.save();
-        this.scheduleStockUpdate();
-
-        const { Member } = await import('./Member');
-        await Member.updateMembershipsForId(this.memberId);
-
-        if (options?.skipEmail !== true) {
-            await this.sendEmailTemplate({
-                type: EmailTemplateType.RegistrationConfirmation,
-            });
-        }
-
-        const member = await Member.getByID(this.memberId);
-        if (member) {
-            const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
-            registrationMemberRelation.foreignKey = Member.registrations.foreignKey;
-            await Document.updateForRegistration(this.setRelation(registrationMemberRelation, member));
-        }
-
-        return true;
-    }
-
     async getRecipients(organization: Organization, group: import('./').Group) {
         const { Member } = await import('./Member');
 

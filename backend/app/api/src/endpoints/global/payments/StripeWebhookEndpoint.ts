@@ -6,6 +6,7 @@ import { isDebouncedError, QueueHandler } from '@stamhoofd/queues';
 
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../../organization/shared/ExchangePaymentEndpoint';
+import { PaymentService } from '../../../services/PaymentService';
 
 type Params = Record<string, never>;
 class Body extends AutoEncoder {
@@ -159,7 +160,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
             await QueueHandler.debounce('stripe-webhook/payment-' + paymentId, async () => {
                 const organization = await Organization.getByID(organizationId);
                 if (organization) {
-                    await ExchangePaymentEndpoint.pollStatus(paymentId, organization);
+                    await PaymentService.pollStatus(paymentId, organization);
                 }
                 else {
                     console.warn('Could not find organization with id', organizationId);

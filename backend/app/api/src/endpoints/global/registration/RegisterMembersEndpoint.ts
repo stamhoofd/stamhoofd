@@ -12,6 +12,7 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
+import { BalanceItemService } from '../../../services/BalanceItemService';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout;
@@ -584,8 +585,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         async function markValidIfNeeded() {
             if (shouldMarkValid) {
                 for (const balanceItem of [...createdBalanceItems, ...unrelatedCreatedBalanceItems]) {
-                    // Mark vlaid
-                    await balanceItem.markPaid(payment, organization);
+                    // Mark valid
+                    await BalanceItemService.markPaid(balanceItem, payment, organization);
                 }
             }
         }

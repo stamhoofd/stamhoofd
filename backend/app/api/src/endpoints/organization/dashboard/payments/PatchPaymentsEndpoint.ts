@@ -8,6 +8,7 @@ import { Payment as PaymentStruct, PaymentGeneral, PaymentMethod, PaymentStatus,
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { ExchangePaymentEndpoint } from '../../shared/ExchangePaymentEndpoint';
+import { PaymentService } from '../../../../services/PaymentService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -143,7 +144,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
             // Mark paid or failed
             if (put.status !== PaymentStatus.Created && put.status !== PaymentStatus.Pending) {
-                await ExchangePaymentEndpoint.handlePaymentStatusUpdate(payment, organization, put.status);
+                await PaymentService.handlePaymentStatusUpdate(payment, organization, put.status);
 
                 if (put.status === PaymentStatus.Succeeded) {
                     payment.paidAt = put.paidAt;
@@ -222,7 +223,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 await payment.save();
 
                 if (patch.status) {
-                    await ExchangePaymentEndpoint.handlePaymentStatusUpdate(payment, organization, patch.status);
+                    await PaymentService.handlePaymentStatusUpdate(payment, organization, patch.status);
                 }
 
                 changedPayments.push(

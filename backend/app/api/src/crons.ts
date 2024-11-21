@@ -13,6 +13,7 @@ import { endFunctionsOfUsersWithoutRegistration } from './crons/endFunctionsOfUs
 import { ExchangePaymentEndpoint } from './endpoints/organization/shared/ExchangePaymentEndpoint';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
+import { PaymentService } from './services/PaymentService';
 
 // Importing postmark returns undefined (this is a bug, so we need to use require)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -469,7 +470,7 @@ async function checkPayments() {
             if (payment.organizationId) {
                 const organization = await Organization.getByID(payment.organizationId);
                 if (organization) {
-                    await ExchangePaymentEndpoint.pollStatus(payment.id, organization);
+                    await PaymentService.pollStatus(payment.id, organization);
                     continue;
                 }
             }
@@ -478,7 +479,7 @@ async function checkPayments() {
             }
 
             // Check expired
-            if (ExchangePaymentEndpoint.isManualExpired(payment.status, payment)) {
+            if (PaymentService.isManualExpired(payment.status, payment)) {
                 console.error('[DELAYED PAYMENTS] Could not resolve handler for expired payment, marking as failed', payment.id);
                 payment.status = PaymentStatus.Failed;
                 await payment.save();
@@ -542,7 +543,7 @@ async function checkFailedBuckarooPayments() {
             if (payment.organizationId) {
                 const organization = await Organization.getByID(payment.organizationId);
                 if (organization) {
-                    await ExchangePaymentEndpoint.pollStatus(payment.id, organization);
+                    await PaymentService.pollStatus(payment.id, organization);
                     continue;
                 }
             }
