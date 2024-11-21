@@ -185,20 +185,6 @@ export class Registration extends Model {
         }
     }
 
-    async deactivate() {
-        if (this.deactivatedAt !== null) {
-            return;
-        }
-
-        // Clear the registration
-        this.deactivatedAt = new Date();
-        await this.save();
-        this.scheduleStockUpdate();
-
-        const { Member } = await import('./Member');
-        await Member.updateMembershipsForId(this.memberId);
-    }
-
     async getRecipients(organization: Organization, group: import('./').Group) {
         const { Member } = await import('./Member');
 

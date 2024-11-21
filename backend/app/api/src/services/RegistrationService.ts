@@ -1,5 +1,5 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
-import { Document, Member, Registration } from '@stamhoofd/models';
+import { Document, Group, Member, Registration } from '@stamhoofd/models';
 import { AuditLogType, EmailTemplateType } from '@stamhoofd/structures';
 import { GroupService } from './GroupService';
 import { AuditLogService } from './AuditLogService';
@@ -49,5 +49,30 @@ export const RegistrationService = {
         }
 
         return true;
+    },
+
+    async deactivate(registration: Registration, group?: Group, member?: Member) {
+        if (registration.deactivatedAt !== null) {
+            return;
+        }
+
+        // Clear the registration
+        registration.deactivatedAt = new Date();
+        await registration.save();
+        registration.scheduleStockUpdate();
+
+        await Member.updateMembershipsForId(registration.memberId);
+
+        const fetchedMember = member ?? await Member.getByID(registration.memberId);
+        const fetchedGroup = group ?? await Group.getByID(registration.groupId);
+
+        if (fetchedMember && fetchedGroup) {
+            await AuditLogService.log({
+                type: AuditLogType.MemberUnregistered,
+                member: fetchedMember,
+                group: fetchedGroup,
+                registration,
+            });
+        }
     },
 };

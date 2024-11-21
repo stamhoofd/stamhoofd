@@ -12,7 +12,7 @@ export type MemberEditedAuditOptions = {
 };
 
 export type MemberRegisteredAuditOptions = {
-    type: AuditLogType.MemberRegistered;
+    type: AuditLogType.MemberRegistered | AuditLogType.MemberUnregistered;
     member: Member;
     group: Group;
     registration: Registration;
@@ -31,6 +31,9 @@ export const AuditLogService = {
         model.organizationId = organizationId;
 
         if (options.type === AuditLogType.MemberRegistered) {
+            this.fillForMemberRegistered(model, options);
+        }
+        else if (options.type === AuditLogType.MemberUnregistered) {
             this.fillForMemberRegistered(model, options);
         }
         else if (options.type === AuditLogType.MemberEdited) {

@@ -13,6 +13,7 @@ import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { BalanceItemService } from '../../../services/BalanceItemService';
+import { RegistrationService } from '../../../services/RegistrationService';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout;
@@ -355,16 +356,17 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await BalanceItem.deleteForDeletedRegistration(existingRegistration.id);
 
             // Clear the registration
-            await existingRegistration.deactivate();
-            deactivatedRegistrationGroupIds.push(existingRegistration.groupId);
-
-            const group = groups.find(g => g.id === existingRegistration.groupId);
+            let group = groups.find(g => g.id === existingRegistration.groupId);
             if (!group) {
-                const g = await Group.getByID(existingRegistration.groupId);
-                if (g) {
-                    groups.push(g);
+                group = await Group.getByID(existingRegistration.groupId);
+                if (group) {
+                    groups.push(group);
                 }
             }
+            const member = members.find(m => m.id === existingRegistration.memberId);
+
+            await RegistrationService.deactivate(existingRegistration, group, member);
+            deactivatedRegistrationGroupIds.push(existingRegistration.groupId);
         }
 
         async function createBalanceItem({ registration, amount, unitPrice, description, type, relations }: { amount?: number; registration: RegistrationWithMemberAndGroup; unitPrice: number; description: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
