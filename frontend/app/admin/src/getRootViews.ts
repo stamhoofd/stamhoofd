@@ -1,5 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, AuthenticatedView, ManageEventsView, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AsyncComponent, AuditLogsView, AuthenticatedView, ManageEventsView, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
 import { computed } from 'vue';
@@ -86,6 +86,14 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
         }),
     });
 
+    const auditLogsTab = new TabBarItem({
+        icon: 'clock',
+        name: 'Logboek',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: new ComponentWithProperties(AuditLogsView, {}),
+        }),
+    });
+
     const settingsTab = new TabBarItem({
         icon: 'settings',
         name: 'Instellingen',
@@ -98,6 +106,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
         items: [
             settingsTab,
             financesTab,
+            auditLogsTab,
         ],
     });
 
@@ -113,7 +122,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
                             calendarTab,
                         ];
 
-                        if (reactiveSession.auth.hasFullPlatformAccess()) {
+                        if (reactiveSession.auth.hasPlatformFullAccess()) {
                             tabs.push(moreTab);
                         }
 
