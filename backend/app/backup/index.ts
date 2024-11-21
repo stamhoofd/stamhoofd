@@ -45,6 +45,10 @@ const start = async () => {
         routerServer.server.timeout = 15000;
     }
 
+    if (STAMHOOFD.environment === 'development') {
+        return;
+    }
+
     const shutdown = async () => {
         console.log('Shutting down...');
         // Disable keep alive
