@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { NamedObject } from './Event';
+import { Formatter } from '@stamhoofd/utility';
 
 export enum AuditLogType {
     /**
@@ -81,6 +82,44 @@ export class AuditLogReplacement extends AutoEncoder {
      */
     @field({ field: 't', decoder: new EnumDecoder(AuditLogReplacementType), optional: true })
     type?: AuditLogReplacementType;
+}
+
+export function getAuditLogPatchKeyName(key: string) {
+    switch (key) {
+        case 'parent':
+            return `Ouder`;
+        case 'address':
+            return `Adres`;
+        case 'address.street':
+            return `Straat`;
+        case 'address.number':
+            return `Huisnummer`;
+        case 'address.postalCode':
+            return `Postcode`;
+        case 'address.city':
+            return `Gemeente`;
+        case 'address.country':
+            return `Land`;
+        case 'email':
+            return `E-mailadres`;
+        case 'phone':
+            return `GSM-nummer`;
+        case 'firstName':
+            return `Voornaam`;
+        case 'lastName':
+            return `Achternaam`;
+        case 'nationalRegisterNumber':
+            return `Rijkregisternummer`;
+        case 'birthDay':
+            return `Geboortedatum`;
+        case 'dataPermissions':
+            return `Toestemming gegevensverwerking`;
+        case `notes`:
+            return `Notities`;
+        case 'alternativeEmails':
+            return `Alternatieve e-mailadressen`;
+    }
+    return Formatter.capitalizeFirstLetter(key);
 }
 
 export class AuditLogPatchItem extends AutoEncoder {

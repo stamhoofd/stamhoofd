@@ -1,6 +1,5 @@
 import { AuditLog } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
-import { Formatter } from '@stamhoofd/utility';
 
 export const auditLogSorters: SQLSortDefinitions<AuditLog> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
@@ -24,7 +23,7 @@ export const auditLogSorters: SQLSortDefinitions<AuditLog> = {
     },
     createdAt: {
         getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt);
+            return a.createdAt;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({

@@ -168,7 +168,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
     const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression;
 
     return (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => {
-        if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined) {
+        if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined || filter instanceof Date) {
             filter = {
                 $eq: filter,
             };

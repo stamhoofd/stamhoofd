@@ -3,7 +3,7 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, SetupStepUpdater, User } from '@stamhoofd/models';
-import { GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogType, GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -13,6 +13,7 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
+import { AuditLogService } from '../../../services/AuditLogService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -161,6 +162,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             patch = await Context.auth.filterMemberPatch(member, patch);
+            const originalDetails = member.details.clone();
 
             if (patch.details) {
                 if (patch.details.isPut()) {
@@ -195,6 +197,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             await member.save();
+
+            if (patch.details) {
+                await AuditLogService.log({
+                    type: AuditLogType.MemberEdited,
+                    member: member,
+                    oldMemberDetails: originalDetails,
+                    memberDetailsPatch: patch.details,
+                });
+            }
 
             // Update documents
             await Document.updateForMember(member.id);
@@ -450,14 +461,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             SQL.where('startDate', SQLWhereSign.LessEqual, put.startDate)
                                 .and('endDate', SQLWhereSign.GreaterEqual, put.startDate),
                         )
-                        .or(
-                            SQL.where('startDate', SQLWhereSign.LessEqual, put.endDate)
-                                .and('endDate', SQLWhereSign.GreaterEqual, put.endDate),
-                        )
-                        .or(
-                            SQL.where('startDate', SQLWhereSign.GreaterEqual, put.startDate)
-                                .and('endDate', SQLWhereSign.LessEqual, put.endDate),
-                        )
+                            .or(
+                                SQL.where('startDate', SQLWhereSign.LessEqual, put.endDate)
+                                    .and('endDate', SQLWhereSign.GreaterEqual, put.endDate),
+                            )
+                            .or(
+                                SQL.where('startDate', SQLWhereSign.GreaterEqual, put.startDate)
+                                    .and('endDate', SQLWhereSign.LessEqual, put.endDate),
+                            ),
                     )
                     .first(false);
 

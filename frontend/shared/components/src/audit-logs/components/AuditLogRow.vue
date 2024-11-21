@@ -19,6 +19,8 @@
         </p>
 
         <p v-if="log.description" class="style-description-small pre-wrap" v-text="log.description" />
+
+        <PatchListText v-if="log.patchList" :items="log.patchList" />
     </STListItem>
 </template>
 
@@ -26,6 +28,7 @@
 import { AuditLog } from '@stamhoofd/structures';
 import IconContainer from '../../icons/IconContainer.vue';
 import ProgressIcon from '../../icons/ProgressIcon.vue';
+import PatchListText from './PatchListText.vue';
 
 defineProps<{
     log: AuditLog;

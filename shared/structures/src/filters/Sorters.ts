@@ -1,7 +1,7 @@
 import { PlainObject } from '@simonbackx/simple-encoding';
 import { SortItemDirection, SortList } from './SortList.js';
 
-export type SortDefinition<T, B extends PlainObject = PlainObject> = {
+export type SortDefinition<T, B extends PlainObject | Date = PlainObject | Date> = {
     getValue(a: T): B;
 };
 

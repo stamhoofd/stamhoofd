@@ -359,6 +359,17 @@
     color: $color-primary;
 }
 
+.style-value-old {
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: $font-weight-medium;
+    text-decoration: line-through;
+}
+.style-value-new {
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: $font-weight-medium;
+}
 
 .style-discount-old-price {
     @extend .style-price-base;
