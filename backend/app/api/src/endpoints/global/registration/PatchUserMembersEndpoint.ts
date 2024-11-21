@@ -2,12 +2,13 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
-import { MemberDetails, MembersBlob, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { AuditLogType, MemberDetails, MembersBlob, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
+import { AuditLogService } from '../../../services/AuditLogService';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
@@ -68,6 +69,11 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             await member.save();
             addedMembers.push(member);
+
+            await AuditLogService.log({
+                type: AuditLogType.MemberAdded,
+                member: member,
+            });
         }
 
         // Modify members
@@ -84,6 +90,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
             const securityCode = struct.details?.securityCode; // will get cleared after the filter
             struct = await Context.auth.filterMemberPatch(member, struct);
+            const originalDetails = member.details.clone();
 
             if (struct.details) {
                 if (struct.details.isPut()) {
@@ -121,6 +128,15 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             await member.save();
             await MemberUserSyncer.onChangeMember(member);
+
+            if (struct.details) {
+                await AuditLogService.log({
+                    type: AuditLogType.MemberEdited,
+                    member: member,
+                    oldMemberDetails: originalDetails,
+                    memberDetailsPatch: struct.details,
+                });
+            }
 
             // Update documents
             await Document.updateForMember(member.id);

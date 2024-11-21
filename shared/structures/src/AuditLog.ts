@@ -8,6 +8,7 @@ export enum AuditLogType {
      */
     Unknown = 'Unknown',
     MemberEdited = 'MemberEdited',
+    MemberAdded = 'MemberAdded',
     MemberRegistered = 'MemberRegistered',
     MemberUnregistered = 'MemberUnregistered',
 }
@@ -21,6 +22,8 @@ export function getAuditLogTypeName(type: AuditLogType): string {
     switch (type) {
         case AuditLogType.MemberEdited:
             return `Wijzigingen aan gegevens van leden`;
+        case AuditLogType.MemberAdded:
+            return `Nieuwe leden`;
         case AuditLogType.MemberRegistered:
             return `Inschrijvingen`;
         case AuditLogType.MemberUnregistered:
@@ -34,6 +37,8 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
     switch (type) {
         case AuditLogType.MemberEdited:
             return [`user`, `edit`];
+        case AuditLogType.MemberAdded:
+            return [`user`, 'add'];
         case AuditLogType.MemberRegistered:
             return [`membership-filled`, `success`];
         case AuditLogType.MemberUnregistered:
@@ -45,6 +50,8 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
 
 function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
     switch (type) {
+        case AuditLogType.MemberAdded:
+            return `{{m}} werd aangemaakt`;
         case AuditLogType.MemberEdited:
             return `De gegevens van {{m}} werden gewijzgd`;
         case AuditLogType.MemberRegistered:
@@ -58,6 +65,7 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
 
 function getTypeReplacements(type: AuditLogType): string[] {
     switch (type) {
+        case AuditLogType.MemberAdded:
         case AuditLogType.MemberEdited:
             return ['m'];
         case AuditLogType.MemberRegistered:

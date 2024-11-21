@@ -4,6 +4,11 @@ import { Address, AuditLogPatchItem, AuditLogReplacement, AuditLogReplacementTyp
 import { Context } from '../helpers/Context';
 import { Formatter } from '@stamhoofd/utility';
 
+export type MemberAddedAuditOptions = {
+    type: AuditLogType.MemberAdded;
+    member: Member;
+};
+
 export type MemberEditedAuditOptions = {
     type: AuditLogType.MemberEdited;
     member: Member;
@@ -18,7 +23,7 @@ export type MemberRegisteredAuditOptions = {
     registration: Registration;
 };
 
-export type AuditLogOptions = MemberEditedAuditOptions | MemberRegisteredAuditOptions;
+export type AuditLogOptions = MemberAddedAuditOptions | MemberEditedAuditOptions | MemberRegisteredAuditOptions;
 
 export const AuditLogService = {
     async log(options: AuditLogOptions) {
@@ -38,6 +43,9 @@ export const AuditLogService = {
         }
         else if (options.type === AuditLogType.MemberEdited) {
             this.fillForMemberEdited(model, options);
+        }
+        else if (options.type === AuditLogType.MemberAdded) {
+            this.fillForMemberAdded(model, options);
         }
 
         // In the future we might group these saves together in one query to improve performance
@@ -78,6 +86,21 @@ export const AuditLogService = {
 
         // Generate changes list
         model.patchList = explainPatch(options.oldMemberDetails, options.memberDetailsPatch);
+    },
+
+    fillForMemberAdded(model: AuditLog, options: MemberAddedAuditOptions) {
+        model.objectId = options.member.id;
+
+        model.replacements = new Map([
+            ['m', AuditLogReplacement.create({
+                id: options.member.id,
+                value: options.member.details.name,
+                type: AuditLogReplacementType.Member,
+            })],
+        ]);
+
+        // Generate changes list
+        model.patchList = explainPatch(null, options.member.details);
     },
 };
 

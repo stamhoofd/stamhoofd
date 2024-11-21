@@ -143,6 +143,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Auto link users based on data
             await MemberUserSyncer.onChangeMember(member);
+
+            if (!duplicate) {
+                await AuditLogService.log({
+                    type: AuditLogType.MemberAdded,
+                    member: member,
+                });
+            }
         }
 
         let shouldUpdateSetupSteps = false;
