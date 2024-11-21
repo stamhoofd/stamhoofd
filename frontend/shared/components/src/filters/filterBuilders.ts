@@ -1,9 +1,10 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { SessionContext, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
+import { AppType } from '../context';
 import { useFinancialSupportSettings } from '../groups';
 import { useAuth, usePlatform, useUser } from '../hooks';
 import { DateFilterBuilder } from './DateUIFilter';
@@ -12,7 +13,6 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoice
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from './UIFilter';
-import { AppType } from '../context';
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
@@ -998,6 +998,33 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
 
         all.push(typeFilter);
     }
+
+    all.unshift(
+        new GroupUIFilterBuilder({
+            builders: all,
+        }),
+    );
+
+    return all;
+}
+
+// Events
+export function useAuditLogUIFilterBuilders() {
+    const all: UIFilterBuilder<UIFilter>[] = [];
+
+    const typeFilter = new MultipleChoiceFilterBuilder({
+        name: 'Type',
+        options: [
+            ...Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type)),
+        ],
+        wrapper: {
+            type: {
+                $in: UIFilterWrapperMarker,
+            },
+        },
+    });
+
+    all.push(typeFilter);
 
     all.unshift(
         new GroupUIFilterBuilder({

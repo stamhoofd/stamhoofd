@@ -1,7 +1,8 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Document, Member, Registration } from '@stamhoofd/models';
-import { EmailTemplateType } from '@stamhoofd/structures';
+import { AuditLogType, EmailTemplateType } from '@stamhoofd/structures';
 import { GroupService } from './GroupService';
+import { AuditLogService } from './AuditLogService';
 
 export const RegistrationService = {
     async markValid(registrationId: string) {
@@ -35,9 +36,17 @@ export const RegistrationService = {
         }
 
         // Update group occupancy
-        await GroupService.updateOccupancy(registration.groupId);
+        const group = await GroupService.updateOccupancy(registration.groupId);
 
-        // todo: log audit
+        // Create a log
+        if (member && group) {
+            await AuditLogService.log({
+                type: AuditLogType.MemberRegistered,
+                member,
+                group,
+                registration,
+            });
+        }
 
         return true;
     },

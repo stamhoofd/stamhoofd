@@ -18,6 +18,7 @@ import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFami
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationActionBuilder } from './RegistrationActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { AuditLogsView } from '../../audit-logs';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
     return useMemberActions()(options);
@@ -200,6 +201,38 @@ export class MemberActionBuilder {
         ];
     }
 
+    getAuditLogAction(): TableAction<PlatformMember>[] {
+        if ((this.organizations.length !== 1 || this.organizations[0].id !== this.context.organization?.id) && !this.context.auth.hasPlatformFullAccess()) {
+            return [];
+        }
+
+        if (this.organizations.length === 1 && this.organizations[0].id === this.context.organization?.id && !this.context.auth.hasFullAccess()) {
+            return [];
+        }
+
+        return [
+            new InMemoryTableAction({
+                name: 'Toon geschiedenis',
+                priority: 1,
+                groupIndex: 6,
+                needsSelection: true,
+                singleSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (members: PlatformMember[]) => {
+                    await this.present({
+                        components: [
+                            new ComponentWithProperties(AuditLogsView, {
+                                objectIds: members.map(m => m.id),
+                            }),
+                        ],
+                        modalDisplayStyle: 'popup',
+                    });
+                },
+                icon: 'clock',
+            }),
+        ];
+    }
+
     getEditAction(): TableAction<PlatformMember>[] {
         if (this.organizations.length !== 1 || this.groups.length === 0) {
             return [];
@@ -337,6 +370,7 @@ export class MemberActionBuilder {
             ...this.getEditAction(),
 
             ...this.getUnsubscribeAction(),
+            ...this.getAuditLogAction(),
         ];
 
         if (options?.includeDelete) {

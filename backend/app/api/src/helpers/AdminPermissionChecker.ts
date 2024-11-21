@@ -520,7 +520,18 @@ export class AdminPermissionChecker {
         }
 
         if (!user.organizationId) {
-            return this.hasPlatformFullAccess();
+            if (this.hasPlatformFullAccess()) {
+                return true;
+            }
+
+            // Check if this user has permissions for the current scoped organization
+            if (this.organization && await this.hasFullAccess(this.organization.id)) {
+                if (user.permissions?.forOrganization(this.organization)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         return await this.canManageAdmins(user.organizationId);

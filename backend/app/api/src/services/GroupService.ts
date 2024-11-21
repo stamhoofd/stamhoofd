@@ -8,5 +8,6 @@ export const GroupService = {
             await group.updateOccupancy();
             await group.save();
         }
+        return group;
     },
 };

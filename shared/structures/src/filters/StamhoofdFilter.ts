@@ -1,3 +1,5 @@
+import { Version } from '../Version.js';
+import { StamhoofdFilterDecoder } from './FilteredRequest.js';
 import { AssertSortList, SortItemDirection, SortList } from './SortList.js';
 
 export type StamhoofdAndFilter<T = StamhoofdCompareValue> = {
@@ -89,5 +91,5 @@ export function isEqualFilter(a: StamhoofdFilter | null, b: StamhoofdFilter | nu
         return false;
     }
 
-    return JSON.stringify(a) === JSON.stringify(b);
+    return JSON.stringify(StamhoofdFilterDecoder.encode(a, { version: Version })) === JSON.stringify(StamhoofdFilterDecoder.encode(b, { version: Version }));
 }

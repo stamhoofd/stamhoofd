@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, CachedBalance, Document, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, Document as DocumentStruct, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLog, BalanceItem, CachedBalance, Document, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
+import { AuditLog as AuditLogStruct, Document as DocumentStruct, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -638,5 +638,49 @@ export class AuthenticatedStructures {
         }
 
         return result;
+    }
+
+    static async auditLogs(logs: AuditLog[]): Promise<AuditLogStruct[]> {
+        const structs: AuditLogStruct[] = [];
+
+        const userIds = Formatter.uniqueArray(logs.map(l => l.userId).filter(id => id !== null));
+        const users = await User.getByIDs(...userIds);
+
+        for (const log of logs) {
+            const user = log.userId ? (users.find(u => u.id === log.userId) ?? null) : null;
+            let userStruct: NamedObject | null = null;
+
+            if (user) {
+                if (!await Context.auth.canAccessUser(user)) {
+                    if (user.permissions?.platform !== null) {
+                        userStruct = NamedObject.create({
+                            id: '',
+                            name: 'Beheerder van ' + Platform.shared.config.name,
+                        });
+                    }
+                    else {
+                        userStruct = NamedObject.create({
+                            id: '',
+                            name: 'Onbekend',
+                        });
+                    }
+                }
+                else {
+                    userStruct = NamedObject.create({
+                        id: user.id,
+                        name: (user.firstName || user.lastName) ? (user.firstName + ' ' + user.lastName) : user.email,
+                    });
+                }
+            }
+
+            structs.push(
+                AuditLogStruct.create({
+                    ...log,
+                    user: userStruct,
+                }),
+            );
+        }
+
+        return structs;
     }
 }
