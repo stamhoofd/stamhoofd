@@ -1,5 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, AuditLogsView, AuthenticatedView, ManageEventsView, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AsyncComponent, AuditLogsView, AuthenticatedView, ManageEventsView, manualFeatureFlag, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
 import { computed } from 'vue';
@@ -106,9 +106,9 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
         items: [
             settingsTab,
             financesTab,
-            auditLogsTab,
         ],
     });
+    let added = false;
 
     return wrapContext(reactiveSession, 'admin', wrapWithModalStack(
         new ComponentWithProperties(AuthenticatedView, {
@@ -121,6 +121,12 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
                             groupsTab,
                             calendarTab,
                         ];
+
+                        if (!added && manualFeatureFlag('audit-logs')) {
+                            // Feature is still in development so not visible for everyone
+                            moreTab.items.push(auditLogsTab);
+                            added = true;
+                        }
 
                         if (reactiveSession.auth.hasPlatformFullAccess()) {
                             tabs.push(moreTab);

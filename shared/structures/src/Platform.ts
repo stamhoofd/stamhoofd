@@ -310,6 +310,9 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 326 })
     name = 'Stamhoofd';
 
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    featureFlags: string[] = [];
+
     /**
      * Cotnains the text and settings for when financial support is enabled - not whether it is enabled
      */

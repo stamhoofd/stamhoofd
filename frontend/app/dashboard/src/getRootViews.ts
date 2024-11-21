@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AppType, AsyncComponent, AuditLogsView, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AppType, AsyncComponent, AuditLogsView, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, manualFeatureFlag, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, Country, Organization, PermissionLevel, Webshop } from '@stamhoofd/structures';
@@ -387,7 +387,9 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                         });
 
                         if (reactiveSession.auth.hasFullAccess()) {
-                            moreTab.items.unshift(auditLogsTab);
+                            if (manualFeatureFlag('audit-logs', organization)) {
+                                moreTab.items.unshift(auditLogsTab);
+                            }
                             moreTab.items.unshift(documentsTab);
                             moreTab.items.unshift(financesTab);
                             moreTab.items.unshift(settingsTab);

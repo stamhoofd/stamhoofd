@@ -228,6 +228,26 @@
                     </template>
                 </STListItem>
             </STList>
+
+            <hr>
+            <h2>Geavanceerd</h2>
+
+            <STList class="illustration-list">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Labs)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Experimenten
+                    </h2>
+                    <p class="style-description">
+                        Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
         </main>
     </div>
 </template>
@@ -243,9 +263,10 @@ import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditEventTypesView from './event-types/EditEventTypesView.vue';
 import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
+import LabsView from './LabsView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
-import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 import EditPrivacyView from './privacy/EditPrivacyView.vue';
+import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 
 enum Routes {
     Admins = 'beheerders',
@@ -262,6 +283,7 @@ enum Routes {
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
     Terms = 'voorwaarden',
+    Labs = 'experimenten',
 }
 
 const platform = usePlatform();
@@ -334,6 +356,11 @@ defineRoutes([
         url: Routes.CorporateIdentity,
         present: 'popup',
         component: EditCorporateIdView as ComponentOptions,
+    },
+    {
+        url: Routes.Labs,
+        present: 'popup',
+        component: LabsView as ComponentOptions,
     },
     {
         url: Routes.DefaultAgeGroups,

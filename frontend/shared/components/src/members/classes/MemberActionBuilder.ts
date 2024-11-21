@@ -9,7 +9,7 @@ import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
 import { GlobalEventBus } from '../../EventBus';
 import EmailView, { RecipientChooseOneOption } from '../../email/EmailView.vue';
-import { useContext, useOrganization, usePlatform } from '../../hooks';
+import { manualFeatureFlag, useContext, useOrganization, usePlatform } from '../../hooks';
 import { Toast } from '../../overlays/Toast';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/classes';
 import { NavigationActions } from '../../types/NavigationActions';
@@ -207,6 +207,10 @@ export class MemberActionBuilder {
         }
 
         if (this.organizations.length === 1 && this.organizations[0].id === this.context.organization?.id && !this.context.auth.hasFullAccess()) {
+            return [];
+        }
+
+        if (!manualFeatureFlag('audit-logs', this.context.organization)) {
             return [];
         }
 
