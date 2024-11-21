@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-networking';
-import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter, mergeFilters } from '@stamhoofd/structures';
+import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
 import { onBeforeUnmount, reactive } from 'vue';
 import { useAuth } from '../../hooks';
 import { ObjectFetcher } from './ObjectFetcher';
@@ -158,11 +158,14 @@ export class TableObjectFetcher<O extends { id: string }> {
     }
 
     setFilter(filter: StamhoofdFilter | null) {
-        if (JSON.stringify(this.baseFilter ?? {}) == JSON.stringify(filter ?? {})) {
-            console.log('setFilter unchanged');
+        if (isEqualFilter(filter, this.baseFilter)) {
             return;
         }
-        console.log('setFilter', filter);
+
+        // Debounce when editing filters
+        if (!isEmptyFilter(filter)) {
+            this.delayFetchUntil = new Date(new Date().getTime() + 200);
+        }
 
         this.baseFilter = filter;
         this.reset(false, true);

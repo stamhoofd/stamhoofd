@@ -1,40 +1,39 @@
-import { Request } from "@simonbackx/simple-networking";
-import { LimitedFilteredRequest, SortList, StamhoofdFilter, isEqualFilter, mergeFilters } from "@stamhoofd/structures";
-import { onBeforeUnmount, reactive } from "vue";
-import { ObjectFetcher } from "./ObjectFetcher";
+import { Request } from '@simonbackx/simple-networking';
+import { LimitedFilteredRequest, SortList, StamhoofdFilter, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
+import { onBeforeUnmount, reactive } from 'vue';
+import { ObjectFetcher } from './ObjectFetcher';
 
-export function useInfiniteObjectFetcher<O extends {id: string}, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): InfiniteObjectFetcher<O> {
+export function useInfiniteObjectFetcher<O extends { id: string }, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): InfiniteObjectFetcher<O> {
     const fetcher = reactive(new InfiniteObjectFetcher<O>({
-        objectFetcher
-    })) as any
+        objectFetcher,
+    })) as any;
 
     onBeforeUnmount(() => {
-        fetcher.destroy()
+        fetcher.destroy();
     });
 
     return fetcher;
 }
 
-
 /**
  * Fetch objects in an infinite list
  * -> instead of having a start and end index which can get calculated easily,
  * the external system should only notify the fetcher when it reached (almost) the end of the list
- * 
+ *
  * The list doesn't fetch the total counts
  */
-export class InfiniteObjectFetcher<O extends {id: string}> {
-    objectFetcher: ObjectFetcher<O>
-    
-    objects: O[] = []
-    baseFilter: StamhoofdFilter|null = null
-    searchQuery = ''
-    
-    fetchingData = false;
-    delayFetchUntil: Date|null = null;
+export class InfiniteObjectFetcher<O extends { id: string }> {
+    objectFetcher: ObjectFetcher<O>;
 
-    limit = 20
-    sort: SortList = []
+    objects: O[] = [];
+    baseFilter: StamhoofdFilter | null = null;
+    searchQuery = '';
+
+    fetchingData = false;
+    delayFetchUntil: Date | null = null;
+
+    limit = 20;
+    sort: SortList = [];
 
     /**
      * Whether the end of the list has been reached, and we should fetch more if possible
@@ -46,18 +45,18 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
      */
     hasMoreObjects = true;
 
-    retryTimer: NodeJS.Timeout|null = null;
+    retryTimer: NodeJS.Timeout | null = null;
     retryCount = 0;
 
-    errorState: Error|null = null;
+    errorState: Error | null = null;
 
     // todo: add rate limits if scrolling too fast
     _clearIndex = 0;
 
-    nextRequest: LimitedFilteredRequest|null = null;
+    nextRequest: LimitedFilteredRequest | null = null;
 
-    constructor({objectFetcher}: {objectFetcher: ObjectFetcher<O>}) {
-        this.objectFetcher = objectFetcher
+    constructor({ objectFetcher }: { objectFetcher: ObjectFetcher<O> }) {
+        this.objectFetcher = objectFetcher;
     }
 
     get filter() {
@@ -66,11 +65,11 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
 
     destroy() {
         this._clearIndex += 1;
-        Request.cancelAll(this.objectFetcher)
+        Request.cancelAll(this.objectFetcher);
         if (this.objectFetcher.destroy) {
-            this.objectFetcher.destroy()
+            this.objectFetcher.destroy();
         }
-        this.objects = reactive([]) // Fast memory cleanup
+        this.objects = reactive([]); // Fast memory cleanup
     }
 
     resetRetryCount() {
@@ -79,7 +78,7 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
 
     cancelRetry() {
         if (this.retryTimer) {
-            clearTimeout(this.retryTimer)
+            clearTimeout(this.retryTimer);
             this.retryTimer = null;
         }
     }
@@ -92,43 +91,43 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
         if (!Request.isNetworkError(error)) {
             // Do not retry but display the message and ask a manual retry
             this.errorState = error;
-            return
+            return;
         }
 
         this.retryCount += 1;
 
-        const waitTime = Math.min(this.retryCount * 5 * 1000, 20000)
-        const shorterWaitTime = Math.min(this.retryCount * 200, 20000)
+        const waitTime = Math.min(this.retryCount * 5 * 1000, 20000);
+        const shorterWaitTime = Math.min(this.retryCount * 200, 20000);
 
         // Require mininmum wait time, if a reset happens before the wait time
-        this.delayFetchUntil = new Date(new Date().getTime() + shorterWaitTime)
+        this.delayFetchUntil = new Date(new Date().getTime() + shorterWaitTime);
 
         this.retryTimer = setTimeout(() => {
-            console.info('Retrying fetching after '+waitTime/1000+'s: now')
-            this.fetchIfNeeded().catch(console.error)
-        }, waitTime)
+            console.info('Retrying fetching after ' + waitTime / 1000 + 's: now');
+            this.fetchIfNeeded().catch(console.error);
+        }, waitTime);
     }
 
     reset() {
-        console.info('Reset')
+        console.info('Reset');
 
         this._clearIndex += 1;
-        this.objects = reactive([])
+        this.objects = reactive([]);
         this.hasMoreObjects = true;
         this.fetchingData = false;
         this.errorState = null;
-        this.hasReachedEnd = true
+        this.hasReachedEnd = true;
         this.resetRetryCount();
-        this.cancelRetry()
+        this.cancelRetry();
 
         this.nextRequest = new LimitedFilteredRequest({
             filter: this.filter,
             pageFilter: null,
             sort: this.sort,
             limit: this.limit,
-            search: this.searchQuery
-        })
-        this.fetchIfNeeded().catch(console.error)
+            search: this.searchQuery,
+        });
+        this.fetchIfNeeded().catch(console.error);
     }
 
     setSearchQuery(query: string) {
@@ -138,21 +137,25 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
 
         if (this.searchQuery || query) {
             // force debounce for search queries
-            this.delayFetchUntil = new Date(new Date().getTime() + 500)
-        } else {
+            this.delayFetchUntil = new Date(new Date().getTime() + 500);
+        }
+        else {
             this.delayFetchUntil = null;
         }
 
         this.searchQuery = query;
-        this.reset()
+        this.reset();
     }
-    
-    setFilter(filter: StamhoofdFilter|null) {
+
+    setFilter(filter: StamhoofdFilter | null) {
         if (isEqualFilter(filter, this.baseFilter)) {
-            console.log('setFilter unchanged')
             return;
         }
-        console.log('setFilter', filter)
+
+        // Debounce when editing filters
+        if (!isEmptyFilter(filter)) {
+            this.delayFetchUntil = new Date(new Date().getTime() + 200);
+        }
 
         this.baseFilter = filter;
         this.reset();
@@ -162,7 +165,7 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
         if (JSON.stringify(this.sort) == JSON.stringify(sort)) {
             return;
         }
-        console.log('setSort', this.sort)
+        console.log('setSort', this.sort);
 
         this.sort = sort;
         this.reset();
@@ -172,16 +175,16 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
         if (this.hasReachedEnd === hasReachedEnd) {
             return;
         }
-        console.log('Set hasReachedEnd', hasReachedEnd)
+        console.log('Set hasReachedEnd', hasReachedEnd);
 
         // Load more if needed
-        this.hasReachedEnd = hasReachedEnd
-        this.fetchIfNeeded().catch(console.error)
+        this.hasReachedEnd = hasReachedEnd;
+        this.fetchIfNeeded().catch(console.error);
     }
 
     async fetchIfNeeded() {
         if (this.fetchingData) {
-            console.warn('Already fetching data')
+            console.warn('Already fetching data');
             return;
         }
 
@@ -206,8 +209,8 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
                 if (!this.retryTimer) {
                     this.retryTimer = setTimeout(() => {
                         console.info('Run delayed fetching');
-                        this.fetchIfNeeded().catch(console.error)
-                    }, this.delayFetchUntil.getTime() - Date.now() + 5)
+                        this.fetchIfNeeded().catch(console.error);
+                    }, this.delayFetchUntil.getTime() - Date.now() + 5);
                 }
                 return;
             }
@@ -219,19 +222,19 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
                 pageFilter: null,
                 sort: this.sort,
                 limit: this.limit,
-                search: this.searchQuery
-            })
+                search: this.searchQuery,
+            });
         }
 
-        console.info('Started fetching')
-        this.cancelRetry()
+        console.info('Started fetching');
+        this.cancelRetry();
 
         this.fetchingData = true;
         const currentClearIndex = this._clearIndex;
 
-        try {            
+        try {
             // Fetch next page
-            const limit = this.limit
+            const limit = this.limit;
 
             // Override limit
             this.nextRequest.limit = limit;
@@ -243,11 +246,11 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
 
             // Same for sorting
             this.nextRequest.sort = this.objectFetcher.extendSort ? this.objectFetcher.extendSort([...this.sort]) : this.sort;
-            
-            const data = await this.objectFetcher.fetch(this.nextRequest)
+
+            const data = await this.objectFetcher.fetch(this.nextRequest);
             if (currentClearIndex !== this._clearIndex) {
                 // Discard old requests
-                console.warn('Discarded fetch result')
+                console.warn('Discarded fetch result');
                 return;
             }
 
@@ -260,48 +263,48 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
                 for (const o of this.objects) {
                     for (const oo of objects) {
                         if (oo.id === o.id) {
-                            console.warn('Duplicate objects found. Fetched ' + oo.id)
+                            console.warn('Duplicate objects found. Fetched ' + oo.id);
                             break;
                         }
                     }
                 }
             }
-            this.objects.push(...objects)
+            this.objects.push(...objects);
 
             if (objects.length < limit) {
-                console.warn('Reached end of data')
+                console.warn('Reached end of data');
                 this.hasMoreObjects = false;
-                
-                console.info('Stopped fetching')
+
+                console.info('Stopped fetching');
                 this.fetchingData = false;
                 return;
             }
-            
-            console.info('Stopped fetching')
+
+            console.info('Stopped fetching');
             this.fetchingData = false;
 
             // Fetch more if needed
             // But first wait on UI to render the new objects
             // and wait to notifiy the fetcher again
-            
-            this.fetchIfNeeded().catch(console.error)
 
-            const shorterWaitTime = 150
+            this.fetchIfNeeded().catch(console.error);
+
+            const shorterWaitTime = 150;
 
             // Require mininmum wait time, if a reset happens before the wait time
-            this.delayFetchUntil = new Date(new Date().getTime() + shorterWaitTime)
+            this.delayFetchUntil = new Date(new Date().getTime() + shorterWaitTime);
 
             this.retryTimer = setTimeout(() => {
-                console.info('Retrying fetching after '+shorterWaitTime/1000+'s: now')
-                this.fetchIfNeeded().catch(console.error)
-            }, shorterWaitTime)
-
-        } catch (e) {
+                console.info('Retrying fetching after ' + shorterWaitTime / 1000 + 's: now');
+                this.fetchIfNeeded().catch(console.error);
+            }, shorterWaitTime);
+        }
+        catch (e) {
             if (currentClearIndex === this._clearIndex) {
-                console.error('Stopped fetching due to error')
-                console.error(e)
+                console.error('Stopped fetching due to error');
+                console.error(e);
                 this.fetchingData = false;
-                this.scheduleRetry(e as Error)
+                this.scheduleRetry(e as Error);
             }
             throw e;
         }
