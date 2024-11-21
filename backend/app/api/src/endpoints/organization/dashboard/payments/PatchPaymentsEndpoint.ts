@@ -9,6 +9,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context';
 import { ExchangePaymentEndpoint } from '../../shared/ExchangePaymentEndpoint';
 import { PaymentService } from '../../../../services/PaymentService';
+import { BalanceItemService } from '../../../../services/BalanceItemService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -153,7 +154,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
             else {
                 for (const balanceItem of balanceItems) {
-                    await balanceItem.markUpdated(payment, organization);
+                    await BalanceItemService.markUpdated(balanceItem, payment, organization);
                 }
 
                 await BalanceItem.updateOutstanding(balanceItems);
