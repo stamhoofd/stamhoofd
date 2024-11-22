@@ -4,6 +4,7 @@ export const participation = DocumentTemplateDefinition.create({
     type: 'participation',
     name: 'Deelname of inschrijvingsbewijs',
     allowChangingMinPricePaid: true,
+    defaultMinPricePaid: 1,
     fieldCategories: [
         RecordCategory.create({
             name: 'Vereniging',
