@@ -7,13 +7,13 @@
                 </template>
             </IconContainer>
         </template>
+        <p class="style-title-prefix-list">
+            {{ formatDateTime(log.createdAt, false, true) }}
+        </p>
 
         <h3 class="style-title-list">
             <RenderTextComponent :text="log.renderableTitle" />
         </h3>
-        <p class="style-description">
-            {{ formatDateTime(log.createdAt, false, true) }}
-        </p>
         <p v-if="log.user" class="style-description">
             Door {{ log.user.name }}
         </p>
