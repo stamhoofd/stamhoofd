@@ -34,7 +34,7 @@
         "@bwip-js/node": "^4.5.1",
         "@mollie/api-client": "3.7.0",
         "@simonbackx/simple-database": "1.25.0",
-        "@simonbackx/simple-encoding": "2.16.6",
+        "@simonbackx/simple-encoding": "2.17.0",
         "@simonbackx/simple-endpoints": "1.14.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "@stamhoofd/backend-i18n": "2.56.0",
