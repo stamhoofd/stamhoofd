@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, Field, IntegerDecoder, isPatchableArray, PatchableArray, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, Field, IntegerDecoder, isPatchableArray, PatchableArray, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { AuditLog, Group, Member, Registration } from '@stamhoofd/models';
 import { Address, AuditLogPatchItem, AuditLogReplacement, AuditLogReplacementType, AuditLogType, BooleanStatus, FinancialSupportSettings, MemberDetails, Parent, ParentTypeHelper, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context';
@@ -241,17 +241,20 @@ export type PatchExplainer = {
 
 function createStringChangeHandler(key: string) {
     return (oldValue: unknown, value: unknown) => {
-        if ((typeof oldValue !== 'string' && oldValue !== null) || (typeof value !== 'string' && value !== null)) {
-            return [];
-        }
         if (oldValue === value) {
             return [];
         }
+
+        if (value === undefined) {
+            // Not altered
+            return [];
+        }
+
         return [
             AuditLogPatchItem.create({
                 key: key,
-                oldValue: oldValue ?? undefined,
-                value: value ?? undefined,
+                oldValue: typeof oldValue === 'string' ? oldValue : undefined,
+                value: typeof value === 'string' ? value : undefined,
             }),
         ];
     };
@@ -555,6 +558,12 @@ function createSimpleArrayChangeHandler(key: string) {
 function getExplainerForField(field: Field<any>) {
     if (field.decoder === StringDecoder || field.decoder instanceof EnumDecoder) {
         return createStringChangeHandler(field.property);
+    }
+
+    if (field.decoder instanceof SymbolDecoder) {
+        if (field.decoder.decoder === StringDecoder || field.decoder.decoder instanceof EnumDecoder) {
+            return createStringChangeHandler(field.property);
+        }
     }
 
     if (field.decoder === DateDecoder) {
