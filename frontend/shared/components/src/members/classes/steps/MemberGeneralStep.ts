@@ -1,24 +1,24 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { EditMemberGeneralBox, MemberStepView } from "../..";
-import { NavigationActions } from "../../../types/NavigationActions";
-import { MemberStepManager } from "../MemberStepManager";
-import { EditMemberStep } from "../MemberStepManager";
-import { markRaw } from "vue";
-import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { EditMemberGeneralBox, MemberStepView } from '../..';
+import { NavigationActions } from '../../../types/NavigationActions';
+import { MemberStepManager } from '../MemberStepManager';
+import { EditMemberStep } from '../MemberStepManager';
+import { markRaw } from 'vue';
+import { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberGeneralStep implements EditMemberStep {
-    options: MemberSharedStepOptions
+    options: MemberSharedStepOptions;
 
     constructor(options: MemberSharedStepOptions) {
-        this.options = options
+        this.options = options;
     }
 
     getName(manager: MemberStepManager) {
-        return 'Algemene gegevens'
+        return 'Algemene gegevens';
     }
 
     isEnabled(manager: MemberStepManager) {
-        const member = manager.member
+        const member = manager.member;
         const details = member.patchedMember.details;
 
         // Check missing information
@@ -38,9 +38,13 @@ export class MemberGeneralStep implements EditMemberStep {
             return true;
         }
 
+        if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber')) {
+            return true;
+        }
+
         // Check if it has been a while since this information was reviewed
         if (this.options.outdatedTime) {
-            if (details.reviewTimes.isOutdated("details", this.options.outdatedTime)) {
+            if (details.reviewTimes.isOutdated('details', this.options.outdatedTime)) {
                 return true;
             }
         }
@@ -53,11 +57,11 @@ export class MemberGeneralStep implements EditMemberStep {
             title: 'Algemene gegevens',
             member: manager.member,
             component: markRaw(EditMemberGeneralBox),
-            saveText: "Doorgaan",
+            saveText: 'Doorgaan',
             markReviewed: ['details'],
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate)
-            }
-        })
+                await manager.saveHandler(this, navigate);
+            },
+        });
     }
 }
