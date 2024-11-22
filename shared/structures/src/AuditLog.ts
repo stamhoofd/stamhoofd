@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { NamedObject } from './Event';
+import { NamedObject } from './Event.js';
 import { Formatter } from '@stamhoofd/utility';
-import { RenderContext, renderTemplate } from './AuditLogRenderer';
+import { RenderContext, renderTemplate } from './AuditLogRenderer.js';
 
 export enum AuditLogType {
     /**
