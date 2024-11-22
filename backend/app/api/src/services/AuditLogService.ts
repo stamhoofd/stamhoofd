@@ -33,33 +33,38 @@ export type AuditLogOptions = MemberAddedAuditOptions | MemberEditedAuditOptions
 
 export const AuditLogService = {
     async log(options: AuditLogOptions) {
-        const userId = Context.optionalAuth?.user?.id ?? null;
-        const organizationId = Context.organization?.id ?? null;
+        try {
+            const userId = Context.optionalAuth?.user?.id ?? null;
+            const organizationId = Context.organization?.id ?? null;
 
-        const model = new AuditLog();
+            const model = new AuditLog();
 
-        model.type = options.type;
-        model.userId = userId;
-        model.organizationId = organizationId;
+            model.type = options.type;
+            model.userId = userId;
+            model.organizationId = organizationId;
 
-        if (options.type === AuditLogType.MemberRegistered) {
-            this.fillForMemberRegistered(model, options);
-        }
-        else if (options.type === AuditLogType.MemberUnregistered) {
-            this.fillForMemberRegistered(model, options);
-        }
-        else if (options.type === AuditLogType.MemberEdited) {
-            this.fillForMemberEdited(model, options);
-        }
-        else if (options.type === AuditLogType.MemberAdded) {
-            this.fillForMemberAdded(model, options);
-        }
-        else if (options.type === AuditLogType.PlatformSettingChanged) {
-            this.fillForPlatformConfig(model, options);
-        }
+            if (options.type === AuditLogType.MemberRegistered) {
+                this.fillForMemberRegistered(model, options);
+            }
+            else if (options.type === AuditLogType.MemberUnregistered) {
+                this.fillForMemberRegistered(model, options);
+            }
+            else if (options.type === AuditLogType.MemberEdited) {
+                this.fillForMemberEdited(model, options);
+            }
+            else if (options.type === AuditLogType.MemberAdded) {
+                this.fillForMemberAdded(model, options);
+            }
+            else if (options.type === AuditLogType.PlatformSettingChanged) {
+                this.fillForPlatformConfig(model, options);
+            }
 
-        // In the future we might group these saves together in one query to improve performance
-        await model.save();
+            // In the future we might group these saves together in one query to improve performance
+            await model.save();
+        }
+        catch (e) {
+            console.error('Failed to save log', options, e);
+        }
     },
 
     fillForMemberRegistered(model: AuditLog, options: MemberRegisteredAuditOptions) {
