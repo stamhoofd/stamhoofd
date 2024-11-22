@@ -220,9 +220,12 @@ export class MemberActionBuilder {
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
-                singleSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
+                    if (members.length > 100) {
+                        Toast.error('Te veel leden geselecteerd').show();
+                        return;
+                    }
                     await this.present({
                         components: [
                             new ComponentWithProperties(AuditLogsView, {
