@@ -1,9 +1,10 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../addresses/Address.js';
 import { ParentType } from './ParentType.js';
+import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 
 export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -19,7 +20,13 @@ export class Parent extends AutoEncoder {
     lastName = '';
 
     @field({ decoder: StringDecoder, version: 348, nullable: true })
-    nationalRegisterNumber: string | null = null;
+    @field({
+        decoder: new SymbolDecoder(StringDecoder, NationalRegisterNumberOptOut),
+        version: 349,
+        nullable: true,
+        downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) => n === NationalRegisterNumberOptOut ? null : n,
+    })
+    nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
     phone: string | null = null;

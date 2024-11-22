@@ -1,7 +1,7 @@
 import { column, Model } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, Parent, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, Parent, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -143,7 +143,7 @@ export class DocumentTemplate extends Model {
             }),
             'member.nationalRegisterNumber': RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.nationalRegisterNumber,
+                value: registration.member.details.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.nationalRegisterNumber,
             }),
             'member.address': RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
@@ -167,7 +167,7 @@ export class DocumentTemplate extends Model {
             }),
             'parents[0].nationalRegisterNumber': RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[0]?.nationalRegisterNumber,
+                value: registration.member.details.parents[0]?.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.parents[0]?.nationalRegisterNumber,
             }),
             'parents[0].address': RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
@@ -187,7 +187,7 @@ export class DocumentTemplate extends Model {
             }),
             'parents[1].nationalRegisterNumber': RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[1]?.nationalRegisterNumber,
+                value: registration.member.details.parents[1]?.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.parents[1]?.nationalRegisterNumber,
             }),
             'parents[1].address': RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
@@ -203,7 +203,7 @@ export class DocumentTemplate extends Model {
         const hasDebtor = allRecords.find(s => s.id.startsWith('debtor.'));
 
         if (hasDebtor) {
-            const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber);
+            const parentsWithNRN = registration.member.details.parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
             let debtor: Parent | undefined = parentsWithNRN[0] ?? registration.member.details.parents[0];
             if (parentsWithNRN.length > 1) {
                 for (const balanceItem of balanceItems) {
@@ -239,7 +239,7 @@ export class DocumentTemplate extends Model {
                 }),
                 'debtor.nationalRegisterNumber': RecordTextAnswer.create({
                     settings: RecordSettings.create({}), // settings will be overwritten
-                    value: debtor?.nationalRegisterNumber ?? '',
+                    value: debtor?.nationalRegisterNumber === NationalRegisterNumberOptOut ? '' : debtor?.nationalRegisterNumber,
                 }),
                 'debtor.address': RecordAddressAnswer.create({
                     settings: RecordSettings.create({}), // settings will be overwritten

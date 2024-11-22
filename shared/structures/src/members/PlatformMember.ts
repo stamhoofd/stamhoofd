@@ -26,6 +26,7 @@ import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
 import { Country } from '../addresses/CountryDecoder.js';
+import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -513,6 +514,13 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
+        if (property === 'parents.nationalRegisterNumber') {
+            if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+                return false;
+            }
+            property = 'nationalRegisterNumber';
+        }
+
         const def = this.platform.config.recordsConfiguration[property];
         if (def === null) {
             return false;
@@ -521,6 +529,12 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } }) {
+        if (property === 'parents.nationalRegisterNumber') {
+            if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+                return false;
+            }
+            property = 'nationalRegisterNumber';
+        }
         if ((property === 'financialSupport' || property === 'uitpasNumber')
             && !this.patchedMember.details.dataPermissions?.value) {
             return false;
@@ -597,6 +611,13 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
+        if (property === 'parents.nationalRegisterNumber') {
+            if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+                return false;
+            }
+            property = 'nationalRegisterNumber';
+        }
+
         const def = this.platform.config.recordsConfiguration[property];
 
         if (typeof def === 'boolean') {
@@ -614,7 +635,12 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        if (property === 'nationalRegisterNumber' && !this.patchedMember.details.hasAllCountry(Country.Belgium)) {
+        if (property === 'parents.nationalRegisterNumber') {
+            property = 'nationalRegisterNumber';
+        }
+
+        if (property === 'nationalRegisterNumber' && this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+            // Not required for parents or member itself
             return false;
         }
 

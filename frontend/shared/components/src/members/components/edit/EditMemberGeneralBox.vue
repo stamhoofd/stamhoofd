@@ -72,8 +72,15 @@
 
                 <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
                     <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer' + lidSuffix" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay" />
-                    <p class="style-description-small">
-                        Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken.
+                    <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
+                        Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. Heeft {{ firstName || 'dit lid' }} geen Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                            klik dan hier
+                        </button>.
+                    </p>
+                    <p v-else class="style-description-small">
+                        Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                            klik dan hier
+                        </button>.
                     </p>
                 </div>
             </div>
@@ -93,7 +100,7 @@
 
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Gender, PlatformMember } from '@stamhoofd/structures';
+import { Gender, PlatformMember, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -102,9 +109,9 @@ import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import BirthDayInput from '../../../inputs/BirthDayInput.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
+import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
-import NRNInput from '../../../inputs/NRNInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
@@ -157,7 +164,7 @@ useValidation(errors.validator, () => {
         if (clone.phone === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: `Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van ${props.member.patchedMember.details.firstName}. Vul het GSM-nummer van ${props.member.patchedMember.details.firstName} zelf in.`,
+                message: `Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van ${props.member.patchedMember.details.firstName} of omgekeerd. Vul het GSM-nummer van ${props.member.patchedMember.details.firstName} zelf in.`,
                 field: 'phone',
             }));
         }
@@ -170,7 +177,7 @@ useValidation(errors.validator, () => {
         if (clone.email === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: `Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van ${props.member.patchedMember.details.firstName}. Vul het e-mailadres van ${props.member.patchedMember.details.firstName} zelf in.`,
+                message: `Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van ${props.member.patchedMember.details.firstName} of omgekeerd. Vul het e-mailadres van ${props.member.patchedMember.details.firstName} zelf in.`,
                 field: 'email',
             }));
         }

@@ -27,7 +27,7 @@
                 <p v-if="parent.address" class="style-description-small">
                     {{ parent.address }}
                 </p>
-                <p v-if="parent.nationalRegisterNumber" class="style-description-small">
+                <p v-if="parent.nationalRegisterNumber && parent.nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                     RRN: {{ parent.nationalRegisterNumber }}
                 </p>
 
@@ -76,6 +76,7 @@ import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import EditParentView from './EditParentView.vue';
 import Title from './Title.vue';
 import { useAppContext } from '../../../context';
+import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 
 defineOptions({
     inheritAttrs: false,
@@ -100,12 +101,38 @@ useValidation(errors.validator, () => {
             field: 'parents',
         }));
     }
-    else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('nationalRegisterNumber')) {
+    else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('parents.nationalRegisterNumber')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
             message: 'Voeg bij minstens één ouder een rijksregisternummer toe.',
             field: 'parents',
         }));
+    }
+
+    if (props.member.patchedMember.details.phone) {
+        // Check if duplicate
+        const clone = props.member.patchedMember.details.clone();
+        clone.cleanData();
+        if (clone.phone === null) {
+            se.addError(new SimpleError({
+                code: 'invalid_field',
+                message: `Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van ${props.member.patchedMember.details.firstName} of omgekeerd. Vul het GSM-nummer van ${props.member.patchedMember.details.firstName} zelf in.`,
+                field: 'phone',
+            }));
+        }
+    }
+
+    if (props.member.patchedMember.details.email) {
+        // Check if duplicate
+        const clone = props.member.patchedMember.details.clone();
+        clone.cleanData();
+        if (clone.email === null) {
+            se.addError(new SimpleError({
+                code: 'invalid_field',
+                message: `Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van ${props.member.patchedMember.details.firstName} of omgekeerd. Vul het e-mailadres van ${props.member.patchedMember.details.firstName} zelf in.`,
+                field: 'email',
+            }));
+        }
     }
 
     if (se.errors.length > 0) {

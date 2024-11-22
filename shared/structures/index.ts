@@ -25,6 +25,7 @@ export * from './src/GroupType.js';
 export * from './src/MemberResponsibility.js';
 export * from './src/members/MemberPlatformMembership.js';
 export * from './src/members/MemberResponsibilityRecord.js';
+export * from './src/members/NationalRegisterNumberOptOut.js';
 export * from './src/OldGroupPrices.js';
 export * from './src/OpenID.js';
 export * from './src/Organization.js';

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
@@ -12,6 +12,8 @@ import { Parent } from './Parent.js';
 import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
 import { ReviewTimes } from './ReviewTime.js';
 import { Country } from '../addresses/CountryDecoder.js';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 
 /**
  * Keep track of date nad time of an edited boolean value
@@ -32,7 +34,7 @@ export class BooleanStatus extends AutoEncoder {
     }
 }
 
-export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber';
+export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber';
 
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form.
@@ -49,8 +51,17 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 30, nullable: true })
     memberNumber: string | null = null;
 
+    /**
+     * Note: when this is set to 'NationalRegisterNumberOptOut' it means the user manually opted out - and doesn't have a national register number
+     */
     @field({ decoder: StringDecoder, version: 348, nullable: true })
-    nationalRegisterNumber: string | null = null;
+    @field({
+        decoder: new SymbolDecoder(StringDecoder, NationalRegisterNumberOptOut),
+        version: 349,
+        nullable: true,
+        downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) => n === NationalRegisterNumberOptOut ? null : n,
+    })
+    nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null = null;
 
     /**
      * Code needed to get access to this member when detecting duplicates. It is only visible for admins, otherwise it will be null.

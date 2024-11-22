@@ -62,7 +62,7 @@
                 </dd>
             </template>
 
-            <template v-if="member.patchedMember.details.nationalRegisterNumber">
+            <template v-if="member.patchedMember.details.nationalRegisterNumber && member.patchedMember.details.nationalRegisterNumber !== NationalRegisterNumberOptOut">
                 <dt>Rijksregisternummer</dt>
                 <dd v-copyable>
                     {{ member.patchedMember.details.nationalRegisterNumber }}
@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlatformMember } from '@stamhoofd/structures';
+import { NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
 import { useCountry } from '../../../hooks';
 
 defineOptions({

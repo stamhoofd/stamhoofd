@@ -72,12 +72,19 @@
                     </template>
                 </p>
 
-                <template v-if="((isPropertyEnabled('nationalRegisterNumber') && patched.address?.country === Country.Belgium) || nationalRegisterNumber)">
+                <template v-if="((isPropertyEnabled('parents.nationalRegisterNumber') && patched.address?.country === Country.Belgium) || nationalRegisterNumber)">
                     <NRNInput v-model="nationalRegisterNumber" :title="'Rijksregisternummer'" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
-                    <p class="style-description-small">
-                        Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. <template v-if="isPropertyRequired('nationalRegisterNumber')">
+                    <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
+                        Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken. <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             Vul het bij minstens één ouder in, deze ouder zal vermeld worden op de attesten.
-                        </template>
+                        </template> Heeft {{ firstName || 'deze ouder' }} geen Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
+                            klik dan hier
+                        </button>.
+                    </p>
+                    <p v-else class="style-description-small">
+                        Je ontvangt geen fiscale attesten. Toch een Belgische nationaliteit, <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
+                            klik dan hier
+                        </button>.
                     </p>
                 </template>
             </div>
@@ -90,7 +97,7 @@
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { Address, Country, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { Address, Country, NationalRegisterNumberOptOut, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
@@ -151,7 +158,7 @@ const isNRNRequiredForThisParent = computed(() => {
     }
 
     for (const member of relatedMembers.value) {
-        const required = member.isPropertyRequired('nationalRegisterNumber');
+        const required = member.isPropertyRequired('parents.nationalRegisterNumber');
         if (required && !member.patchedMember.details.parents.find(p => p.id !== props.parent.id && !!p.nationalRegisterNumber)) {
             return true;
         }
@@ -253,7 +260,7 @@ async function save() {
             }));
         }
 
-        if (nationalRegisterNumber.value) {
+        if (nationalRegisterNumber.value && nationalRegisterNumber.value !== NationalRegisterNumberOptOut) {
             const otherParents = family.parents.filter(p => p.id !== props.parent.id && !p.isEqual(patched.value));
 
             if (relatedMembers.value) {

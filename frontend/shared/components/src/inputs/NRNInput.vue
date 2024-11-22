@@ -1,6 +1,7 @@
 <template>
     <STInputBox :title="title" error-fields="nationalRegisterNumber" :error-box="errors.errorBox" :class="class">
-        <input v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="!required ? 'Optioneel' : 'JJ.MM.DD-XXX.XX'" class="email-input-field input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}">
+        <input v-if="value === NationalRegisterNumberOptOut" :disabled="true" :value="'Geen Belgische nationaliteit'" class="input">
+        <input v-else v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="placeholder || (!required ? 'Optioneel' : 'JJ.MM.DD-XXX.XX')" class="input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}">
         <template #right>
             <slot name="right" />
         </template>
@@ -15,6 +16,7 @@ import { DataValidator } from '@stamhoofd/utility';
 import { ErrorBox } from '../errors/ErrorBox';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useValidation } from '../errors/useValidation';
+import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 
 const props = withDefaults(
     defineProps<{
@@ -25,6 +27,7 @@ const props = withDefaults(
         nullable?: boolean;
         disabled?: boolean;
         birthDay?: Date | null;
+        placeholder?: string;
     }>(), {
         title: '',
         validator: null,
@@ -33,18 +36,25 @@ const props = withDefaults(
         nullable: false,
         disabled: false,
         birthDay: null,
+        placeholder: '',
     },
 );
 
 const errors = useErrors({ validator: props.validator });
-const value = defineModel<string | null>();
+const value = defineModel<string | typeof NationalRegisterNumberOptOut | null>();
 
 useValidation(errors.validator, validate);
 
-const nrrRaw = ref(value.value ?? '');
+const nrrRaw = ref(value.value === NationalRegisterNumberOptOut ? '' : (value.value ?? ''));
 
 watch(() => value.value, (val) => {
-    if (val === null || val === undefined) {
+    if (val === null || val === undefined || val === NationalRegisterNumberOptOut) {
+        if (!val) {
+            if (props.birthDay && !nrrRaw.value) {
+                // Autofill
+                nrrRaw.value = suggestion.value ?? '';
+            }
+        }
         return;
     }
     nrrRaw.value = val;
@@ -62,7 +72,7 @@ const isSuggestion = computed(() => {
 });
 
 watch(() => props.birthDay, (val) => {
-    if (val && !value.value) {
+    if (val && !value.value && !nrrRaw.value) {
         // Autofill
         nrrRaw.value = suggestion.value ?? '';
     }
@@ -74,6 +84,13 @@ function onTyping() {
 }
 
 function validate(final = true, silent = false) {
+    if (value.value === NationalRegisterNumberOptOut) {
+        if (!silent) {
+            errors.errorBox = null;
+        }
+        return true;
+    }
+
     nrrRaw.value = nrrRaw.value.trim();
 
     if (!props.required && (nrrRaw.value.length === 0 || nrrRaw.value === suggestion.value)) {

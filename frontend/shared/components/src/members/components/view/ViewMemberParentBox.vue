@@ -43,7 +43,7 @@
                 </dd>
             </template>
 
-            <template v-if="parent.nationalRegisterNumber">
+            <template v-if="parent.nationalRegisterNumber && parent.nationalRegisterNumber !== NationalRegisterNumberOptOut">
                 <dt>Rijksregisternummer</dt>
                 <dd v-copyable>
                     {{ parent.nationalRegisterNumber }}
@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { Parent, PlatformMember, ParentTypeHelper } from '@stamhoofd/structures';
+import { Parent, PlatformMember, ParentTypeHelper, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { useCountry } from '../../../hooks';
 
 defineOptions({
