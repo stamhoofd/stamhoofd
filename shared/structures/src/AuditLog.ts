@@ -1,6 +1,7 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { NamedObject } from './Event';
 import { Formatter } from '@stamhoofd/utility';
+import { RenderContext, renderTemplate } from './AuditLogRenderer';
 
 export enum AuditLogType {
     /**
@@ -11,6 +12,8 @@ export enum AuditLogType {
     MemberAdded = 'MemberAdded',
     MemberRegistered = 'MemberRegistered',
     MemberUnregistered = 'MemberUnregistered',
+    PlatformSettingChanged = 'PlatformSettingChanged',
+
 }
 
 export enum AuditLogReplacementType {
@@ -30,6 +33,8 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Uitschrijvingen`;
         case AuditLogType.Unknown:
             return `Onbekende actie`;
+        case AuditLogType.PlatformSettingChanged:
+            return `Wijzigingen aan platforminstellingen`;
     }
 }
 
@@ -38,14 +43,17 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
         case AuditLogType.MemberEdited:
             return [`user`, `edit`];
         case AuditLogType.MemberAdded:
-            return [`user`, 'add'];
+            return [`user`, 'add green'];
         case AuditLogType.MemberRegistered:
             return [`membership-filled`, `success`];
         case AuditLogType.MemberUnregistered:
-            return [`membership-filled`, `canceled`];
+            return [`membership-filled`, `canceled red`];
+        case AuditLogType.PlatformSettingChanged:
+            return [`home`, `edit`];
         case AuditLogType.Unknown:
             return [`help`];
     }
+    return [`help`];
 }
 
 function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
@@ -60,6 +68,8 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `{{m}} werd uitgeschreven voor {{g}}`;
         case AuditLogType.Unknown:
             return `Onbekende actie`;
+        case AuditLogType.PlatformSettingChanged:
+            return `{{o}} {{plural o "werd" "werden"}} aangepast`;
     }
 }
 
@@ -73,14 +83,9 @@ function getTypeReplacements(type: AuditLogType): string[] {
             return ['m', 'g'];
         case AuditLogType.Unknown:
             return [];
+        default:
+            return [];
     }
-}
-
-function renderTemplate(template: string, replacements: Map<string, AuditLogReplacement>) {
-    for (const [key, value] of replacements.entries()) {
-        template = template.replace(new RegExp(`{{${key}}}`, 'g'), value.value);
-    }
-    return template;
 }
 
 export class AuditLogReplacement extends AutoEncoder {
@@ -98,6 +103,16 @@ export class AuditLogReplacement extends AutoEncoder {
      */
     @field({ field: 't', decoder: new EnumDecoder(AuditLogReplacementType), optional: true })
     type?: AuditLogReplacementType;
+
+    /**
+     * Helps to determine if this object is plural or not
+     */
+    @field({ field: 'c', decoder: NumberDecoder, optional: true })
+    count?: number;
+
+    toString() {
+        return this.value;
+    }
 }
 
 export function getAuditLogPatchKeyName(key: string) {
@@ -134,6 +149,20 @@ export function getAuditLogPatchKeyName(key: string) {
             return `Notities`;
         case 'alternativeEmails':
             return `Alternatieve e-mailadressen`;
+        case 'name':
+            return `Naam`;
+        case 'description':
+            return `Beschrijving`;
+        case 'isLocationRequired':
+            return `Locatie verplicht`;
+        case '_order':
+            return `Volgorde`;
+        case 'membershipType':
+            return `Aansluitingstype`;
+        case 'period':
+            return `Werkjaar`;
+        case 'responsibility':
+            return `Functie`;
     }
     return Formatter.capitalizeFirstLetter(key);
 }
@@ -197,8 +226,23 @@ export class AuditLog extends AutoEncoder {
     @field({ decoder: DateDecoder })
     createdAt: Date;
 
+    get renderableTitle() {
+        return renderTemplate(getAuditLogTypeTitleTemplate(this.type), {
+            type: 'text',
+            context: Object.fromEntries(this.replacements.entries()),
+            helpers: {
+                plural: (context: RenderContext, object: any, singular: string, plural: string) => {
+                    if (object instanceof AuditLogReplacement) {
+                        return object.count === 1 ? [singular] : [plural];
+                    }
+                    return [object === 1 ? singular : plural];
+                },
+            },
+        });
+    }
+
     get title() {
-        return renderTemplate(getAuditLogTypeTitleTemplate(this.type), this.replacements);
+        return this.renderableTitle.map(v => v.toString()).join('');
     }
 
     get icon() {

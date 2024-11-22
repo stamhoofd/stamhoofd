@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, isPatchableArray, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Organization, Platform, RegistrationPeriod, SetupStepUpdater } from '@stamhoofd/models';
-import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { AuditLogType, MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -10,6 +10,7 @@ import { MembershipCharger } from '../../../helpers/MembershipCharger';
 import { MembershipHelper } from '../../../helpers/MembershipHelper';
 import { PeriodHelper } from '../../../helpers/PeriodHelper';
 import { TagHelper } from '../../../helpers/TagHelper';
+import { AuditLogService } from '../../../services/AuditLogService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -90,9 +91,9 @@ export class PatchPlatformEndpoint extends Endpoint<
 
             // Update config
             if (newConfig) {
+                const oldConfig: PlatformConfig = platform.config.clone();
                 const shouldCheckSteps = newConfig.premiseTypes || newConfig.responsibilities;
                 if (shouldCheckSteps) {
-                    const oldConfig: PlatformConfig = platform.config.clone();
                     platform.config = patchObject(platform.config, newConfig);
                     const currentConfig: PlatformConfig = platform.config;
 
@@ -107,6 +108,12 @@ export class PatchPlatformEndpoint extends Endpoint<
                 else {
                     platform.config = patchObject(platform.config, newConfig);
                 }
+
+                await AuditLogService.log({
+                    type: AuditLogType.PlatformSettingChanged,
+                    oldConfig,
+                    patch: newConfig,
+                });
             }
 
             if (newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0) {

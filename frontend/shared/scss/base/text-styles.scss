@@ -1224,6 +1224,16 @@
     text-decoration: underline;
 }
 
+.style-subtle-link {
+    font-weight: $font-weight-default;
+    text-decoration: underline;
+    text-decoration-color: $color-border;
+
+    &:hover {
+        text-decoration-color: $color-gray-text;
+    }
+}
+
 .style-code {
     @extend .style-input-box;
     display: block;

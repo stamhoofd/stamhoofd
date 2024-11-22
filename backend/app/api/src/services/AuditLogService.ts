@@ -1,6 +1,6 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, DateDecoder, EnumDecoder, Field, isPatchableArray, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, Field, IntegerDecoder, isPatchableArray, PatchableArray, StringDecoder } from '@simonbackx/simple-encoding';
 import { AuditLog, Group, Member, Registration } from '@stamhoofd/models';
-import { Address, AuditLogPatchItem, AuditLogReplacement, AuditLogReplacementType, AuditLogType, BooleanStatus, MemberDetails, Parent, ParentTypeHelper } from '@stamhoofd/structures';
+import { Address, AuditLogPatchItem, AuditLogReplacement, AuditLogReplacementType, AuditLogType, BooleanStatus, FinancialSupportSettings, MemberDetails, Parent, ParentTypeHelper, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -23,7 +23,13 @@ export type MemberRegisteredAuditOptions = {
     registration: Registration;
 };
 
-export type AuditLogOptions = MemberAddedAuditOptions | MemberEditedAuditOptions | MemberRegisteredAuditOptions;
+export type PlatformConfigChangeAuditOptions = {
+    type: AuditLogType.PlatformSettingChanged;
+    oldConfig: PlatformConfig;
+    patch: PlatformConfig | AutoEncoderPatchType<PlatformConfig>;
+};
+
+export type AuditLogOptions = MemberAddedAuditOptions | MemberEditedAuditOptions | MemberRegisteredAuditOptions | PlatformConfigChangeAuditOptions;
 
 export const AuditLogService = {
     async log(options: AuditLogOptions) {
@@ -31,6 +37,7 @@ export const AuditLogService = {
         const organizationId = Context.organization?.id ?? null;
 
         const model = new AuditLog();
+
         model.type = options.type;
         model.userId = userId;
         model.organizationId = organizationId;
@@ -46,6 +53,9 @@ export const AuditLogService = {
         }
         else if (options.type === AuditLogType.MemberAdded) {
             this.fillForMemberAdded(model, options);
+        }
+        else if (options.type === AuditLogType.PlatformSettingChanged) {
+            this.fillForPlatformConfig(model, options);
         }
 
         // In the future we might group these saves together in one query to improve performance
@@ -102,6 +112,126 @@ export const AuditLogService = {
         // Generate changes list
         model.patchList = explainPatch(null, options.member.details);
     },
+
+    fillForPlatformConfig(model: AuditLog, options: PlatformConfigChangeAuditOptions) {
+        model.objectId = null;
+
+        let word = 'Platforminstellingen';
+        let c = 2;
+        let id: string | null = null;
+
+        const changedProps = Object.keys(options.patch).filter((prop) => {
+            return !prop.startsWith('_') && options.patch[prop] && (!(options.patch[prop] instanceof PatchableArray) || options.patch[prop].changes.length > 0);
+        });
+
+        if (changedProps.length === 1) {
+            const prop = changedProps[0] as keyof PlatformConfig;
+            id = prop;
+
+            switch (prop) {
+                case 'financialSupport':
+                    word = options.oldConfig.financialSupport?.title || FinancialSupportSettings.defaultTitle;
+                    c = 2;
+                    break;
+
+                case 'dataPermission':
+                    word = 'De instellingen voor toestemming gegevensverzameling';
+                    c = 2;
+                    break;
+
+                case 'tags':
+                    word = 'De hierarchie';
+                    c = 1;
+                    break;
+
+                case 'premiseTypes':
+                    word = 'De soorten lokalen';
+                    c = 2;
+                    break;
+
+                case 'recordsConfiguration':
+                    word = 'De persoonsgegevens van leden';
+                    c = 2;
+                    break;
+
+                case 'defaultAgeGroups':
+                    word = 'De standaard leeftijdsgroepen';
+                    c = 2;
+                    break;
+
+                case 'responsibilities':
+                    word = 'De functies van leden';
+                    c = 2;
+                    break;
+
+                case 'membershipTypes':
+                    word = 'De aansluitingen en verzekeringen';
+                    c = 2;
+                    break;
+
+                case 'eventTypes':
+                    word = 'De soorten activiteiten';
+                    c = 2;
+                    break;
+
+                case 'featureFlags':
+                    word = 'Feature flags';
+                    c = 2;
+                    break;
+
+                case 'coverPhoto':
+                    word = 'De omslagfoto';
+                    c = 2;
+                    break;
+
+                case 'expandLogo':
+                case 'squareLogo':
+                case 'horizontalLogo':
+                    word = 'Het logo';
+                    c = 1;
+                    break;
+
+                case 'squareLogoDark':
+                case 'horizontalLogoDark':
+                    word = 'Het logo in donkere modus';
+                    c = 1;
+                    break;
+
+                case 'logoDocuments':
+                    word = 'Het logo op documenten';
+                    c = 1;
+                    break;
+
+                case 'privacy':
+                    word = 'Privacyinstellingen';
+                    c = 2;
+                    break;
+
+                case 'color':
+                    word = 'De huisstijkleur';
+                    c = 1;
+                    break;
+
+                case 'name':
+                    word = 'De naam van het platform';
+                    c = 1;
+                    break;
+            }
+        }
+
+        console.log('changedProps', changedProps, options.patch);
+
+        model.replacements = new Map([
+            ['o', AuditLogReplacement.create({
+                id: id ?? undefined,
+                value: word,
+                count: c,
+            })],
+        ]);
+
+        // Generate changes list
+        model.patchList = explainPatch(options.oldConfig, options.patch);
+    },
 };
 
 export type PatchExplainer = {
@@ -127,6 +257,24 @@ function createStringChangeHandler(key: string) {
     };
 }
 
+function createIntegerChangeHandler(key: string) {
+    return (oldValue: unknown, value: unknown) => {
+        if ((typeof oldValue !== 'number' && oldValue !== null) || (typeof value !== 'number' && value !== null)) {
+            return [];
+        }
+        if (oldValue === value) {
+            return [];
+        }
+        return [
+            AuditLogPatchItem.create({
+                key: key,
+                oldValue: oldValue !== null ? Formatter.integer(oldValue) : undefined,
+                value: value !== null ? Formatter.integer(value) : undefined,
+            }),
+        ];
+    };
+}
+
 function createDateChangeHandler(key: string) {
     return (oldValue: unknown, value: unknown) => {
         if ((!(oldValue instanceof Date) && oldValue !== null) || (!(value instanceof Date)) && value !== null) {
@@ -146,6 +294,30 @@ function createDateChangeHandler(key: string) {
     };
 }
 
+function createBooleanChangeHandler(key: string) {
+    return (oldValue: unknown, value: unknown) => {
+        if (typeof oldValue !== 'boolean' && oldValue !== null) {
+            return [];
+        }
+
+        if (typeof value !== 'boolean' && value !== null) {
+            return [];
+        }
+
+        if (oldValue === value) {
+            return [];
+        }
+
+        return [
+            AuditLogPatchItem.create({
+                key: key,
+                oldValue: oldValue === true ? 'Aangevinkt' : (oldValue === false ? 'Uitgevinkt' : undefined),
+                value: value === true ? 'Aangevinkt' : (value === false ? 'Uitgevinkt' : undefined),
+            }),
+        ];
+    };
+}
+
 function getAutoEncoderName(autoEncoder: unknown) {
     if (typeof autoEncoder === 'string') {
         return autoEncoder;
@@ -157,6 +329,10 @@ function getAutoEncoderName(autoEncoder: unknown) {
 
     if (autoEncoder instanceof Address) {
         return autoEncoder.shortString();
+    }
+
+    if (typeof autoEncoder === 'object' && autoEncoder !== null && 'name' in autoEncoder && typeof autoEncoder.name === 'string') {
+        return autoEncoder.name;
     }
     return null;
 }
@@ -175,6 +351,8 @@ function createArrayChangeHandler(key: string) {
         const items: AuditLogPatchItem[] = [];
         const createdIdSet = new Set<string>();
 
+        const keySingular = key.replace(/ies$/, 'y').replace(/s$/, '');
+
         for (const { put } of value.getPuts()) {
             if (!(put instanceof AutoEncoder)) {
                 // Not supported
@@ -192,8 +370,8 @@ function createArrayChangeHandler(key: string) {
             if (!original) {
                 items.push(
                     AuditLogPatchItem.create({
-                        key,
-                        value: getAutoEncoderName(put) || key,
+                        key: keySingular,
+                        value: getAutoEncoderName(put) || keySingular,
                     }),
                 );
             }
@@ -207,13 +385,13 @@ function createArrayChangeHandler(key: string) {
                     original ?? null,
                     put,
                 ).map((i) => {
-                    i.name = getAutoEncoderName(put) || key;
+                    i.name = getAutoEncoderName(put) || keySingular;
                     return i;
                 }),
             );
         }
 
-        for (const { patch } of value.getPatches()) {
+        for (const patch of value.getPatches()) {
             const original = oldValue.find(v => v.id === patch.id);
             if (!original) {
                 // Not supported
@@ -229,7 +407,7 @@ function createArrayChangeHandler(key: string) {
                     original,
                     patch,
                 ).map((i) => {
-                    i.name = getAutoEncoderName(original) || key;
+                    i.name = getAutoEncoderName(original) || keySingular;
                     return i;
                 }),
             );
@@ -256,9 +434,17 @@ function createArrayChangeHandler(key: string) {
 
             items.push(
                 AuditLogPatchItem.create({
-                    key,
+                    key: keySingular,
                     value: undefined,
-                    oldValue: getAutoEncoderName(original) || key,
+                    oldValue: getAutoEncoderName(original) || keySingular,
+                }),
+            );
+        }
+
+        if (value.getMoves().length > 0) {
+            items.push(
+                AuditLogPatchItem.create({
+                    key: '_order',
                 }),
             );
         }
@@ -272,6 +458,7 @@ function createSimpleArrayChangeHandler(key: string) {
             // Not supported
             return [];
         }
+        const keySingular = key.replace(/ies$/, 'y').replace(/s$/, '');
 
         if (Array.isArray(value)) {
             if (!value.every(v => typeof v === 'string')) {
@@ -293,7 +480,7 @@ function createSimpleArrayChangeHandler(key: string) {
 
             return [
                 AuditLogPatchItem.create({
-                    key,
+                    key: keySingular,
                     oldValue: oldValue.length ? oldValueStr : undefined,
                     value: value.length ? valueStr : undefined,
                 }),
@@ -321,7 +508,7 @@ function createSimpleArrayChangeHandler(key: string) {
             if (!original) {
                 items.push(
                     AuditLogPatchItem.create({
-                        key,
+                        key: keySingular,
                         value: put,
                     }),
                 );
@@ -347,9 +534,17 @@ function createSimpleArrayChangeHandler(key: string) {
 
             items.push(
                 AuditLogPatchItem.create({
-                    key,
+                    key: keySingular,
                     value: undefined,
                     oldValue: original,
+                }),
+            );
+        }
+
+        if (value.getMoves().length > 0) {
+            items.push(
+                AuditLogPatchItem.create({
+                    key: '_order',
                 }),
             );
         }
@@ -364,6 +559,14 @@ function getExplainerForField(field: Field<any>) {
 
     if (field.decoder === DateDecoder) {
         return createDateChangeHandler(field.property);
+    }
+
+    if (field.decoder === BooleanDecoder) {
+        return createBooleanChangeHandler(field.property);
+    }
+
+    if (field.decoder === IntegerDecoder) {
+        return createIntegerChangeHandler(field.property);
     }
 
     if (field.decoder instanceof ArrayDecoder && field.decoder.decoder === StringDecoder) {
@@ -432,6 +635,23 @@ function getExplainerForField(field: Field<any>) {
             });
         };
     }
+
+    // Simple addition/delete/change detection
+    return (oldValue: unknown, value: unknown) => {
+        if (value === undefined) {
+            return [];
+        }
+
+        if (oldValue === value) {
+            return [];
+        }
+
+        return [
+            AuditLogPatchItem.create({
+                key: field.property,
+            }),
+        ];
+    };
 }
 
 function explainPatch<T extends AutoEncoder>(original: T | null, patch: AutoEncoderPatchType<T> | T): AuditLogPatchItem[] {
@@ -445,6 +665,10 @@ function explainPatch<T extends AutoEncoder>(original: T | null, patch: AutoEnco
 
         const oldValue = original?.[key] ?? null;
         const value = patch[key];
+
+        if (patch.isPut() && key === 'id') {
+            continue;
+        }
 
         const handler = getExplainerForField(field);
         if (!handler) {
