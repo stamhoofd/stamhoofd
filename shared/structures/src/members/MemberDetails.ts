@@ -49,7 +49,7 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 30, nullable: true })
     memberNumber: string | null = null;
 
-    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    @field({ decoder: StringDecoder, version: 348, nullable: true })
     nationalRegisterNumber: string | null = null;
 
     /**

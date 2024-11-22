@@ -310,7 +310,7 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 326 })
     name = 'Stamhoofd';
 
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 348 })
     featureFlags: string[] = [];
 
     /**
@@ -376,7 +376,7 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: Image, nullable: true, version: 310 })
     squareLogo: Image | null = null;
 
-    @field({ decoder: Image, nullable: true, ...NextVersion })
+    @field({ decoder: Image, nullable: true, version: 348 })
     logoDocuments: Image | null = null;
 
     @field({ decoder: BooleanDecoder, optional: true, version: 310 })

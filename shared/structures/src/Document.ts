@@ -45,7 +45,7 @@ export class DocumentSettings extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     minPrice: number | null = null;
 
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 348 })
     minPricePaid: number | null = null;
 
     /**
@@ -100,7 +100,7 @@ export class DocumentTemplateDefinition extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     defaultMinPrice: number | null = null;
 
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 348 })
     defaultMinPricePaid: number | null = null;
 
     @field({ decoder: BooleanDecoder, version: 347 })
@@ -109,7 +109,7 @@ export class DocumentTemplateDefinition extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 347 })
     allowChangingMinPrice = false;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 348 })
     allowChangingMinPricePaid = false;
 
     @field({ decoder: new ArrayDecoder(RecordCategory), version: 179 })
