@@ -55,10 +55,10 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { DateSelection } from '@stamhoofd/components';
+import { DateSelection, useVisibilityChange } from '@stamhoofd/components';
 import { AuditLog, isEmptyFilter, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref, watch } from 'vue';
+import { computed, onActivated, ref, Ref, watch } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { useAuditLogsObjectFetcher } from '../fetchers';
 import { useAuditLogUIFilterBuilders } from '../filters/filterBuilders';
@@ -92,6 +92,14 @@ const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
 
 const groupedLogs = computed(() => {
     return groupLogs(fetcher.objects);
+});
+
+useVisibilityChange(() => {
+    fetcher.reset();
+});
+
+onActivated(() => {
+    fetcher.reset();
 });
 
 watch(() => {
