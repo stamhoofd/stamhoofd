@@ -51,6 +51,8 @@ export class PatchPlatformEndpoint extends Endpoint<
         const platform = await Platform.getShared();
 
         if (request.body.privateConfig) {
+            const oldConfig = platform.privateConfig.clone();
+
             // Did we patch roles?
             if (request.body.privateConfig.roles) {
                 if (!Context.auth.canManagePlatformAdmins()) {
@@ -75,6 +77,12 @@ export class PatchPlatformEndpoint extends Endpoint<
                     request.body.privateConfig.emails,
                 );
             }
+
+            await AuditLogService.log({
+                type: AuditLogType.PlatformSettingsChanged,
+                oldConfig,
+                patch: request.body.privateConfig,
+            });
         }
 
         let shouldUpdateSetupSteps = false;
@@ -110,7 +118,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                 }
 
                 await AuditLogService.log({
-                    type: AuditLogType.PlatformSettingChanged,
+                    type: AuditLogType.PlatformSettingsChanged,
                     oldConfig,
                     patch: newConfig,
                 });

@@ -1,11 +1,12 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { AuditLogType, GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, SetupStepUpdater } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
+import { AuditLogService } from '../../../../services/AuditLogService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -281,6 +282,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.deletedAt = new Date();
         await model.save();
         Member.updateMembershipsForGroupId(id);
+
+        await AuditLogService.log({
+            type: AuditLogType.GroupDeleted,
+            group: model,
+        });
     }
 
     static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null) {
@@ -289,6 +295,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
             throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen');
         }
+        const originalStruct = (await AuthenticatedStructures.group(model)).clone(); // Clone is required for deep changes
 
         const previousProperties = {
             deletedAt: model.deletedAt,
@@ -417,6 +424,13 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (struct.deletedAt !== undefined || struct.defaultAgeGroupId !== undefined) {
             Member.updateMembershipsForGroupId(model.id);
         }
+
+        await AuditLogService.log({
+            type: AuditLogType.GroupEdited,
+            group: model,
+            oldData: originalStruct,
+            patch,
+        });
     }
 
     static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
@@ -497,6 +511,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         await model.save();
         await model.updateOccupancy({ isNew: true }); // Force update steps
+
+        await AuditLogService.log({
+            type: AuditLogType.GroupAdded,
+            group: model,
+        });
+
         return model;
     }
 }

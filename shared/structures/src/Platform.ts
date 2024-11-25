@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Colors } from '@stamhoofd/utility';
+import { Colors, Formatter } from '@stamhoofd/utility';
 import { DefaultAgeGroup } from './DefaultAgeGroup.js';
 import { Replacement } from './endpoints/EmailRequest.js';
 import { Image } from './files/Image.js';
@@ -164,6 +164,13 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
         const basePrice = this.getBasePrice(tagIds, shouldApplyReducedPrice);
         return this.pricePerDay * days + basePrice;
     }
+
+    get name() {
+        if (this.startDate) {
+            return 'prijzen vanaf ' + Formatter.date(this.startDate);
+        }
+        return 'standaardprijzen';
+    }
 }
 
 export class PlatformMembershipTypeConfig extends AutoEncoder {
@@ -200,6 +207,10 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
 
     getPrice(date: Date, tagIds: string[], shouldApplyReducedPrice: boolean): number {
         return this.getPriceConfigForDate(date).getBasePrice(tagIds, shouldApplyReducedPrice);
+    }
+
+    get name() {
+        return Formatter.dateRange(this.startDate, this.endDate);
     }
 }
 

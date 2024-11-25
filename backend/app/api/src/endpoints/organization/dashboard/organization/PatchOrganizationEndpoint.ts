@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder, isPatchableArray, ObjectData, PatchableA
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, SetupStepUpdater, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PlatformConfig } from '@stamhoofd/structures';
+import { AuditLogType, BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PlatformConfig } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -10,6 +10,7 @@ import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
 import { Context } from '../../../../helpers/Context';
 import { TagHelper } from '../../../../helpers/TagHelper';
 import { ViesHelper } from '../../../../helpers/ViesHelper';
+import { AuditLogService } from '../../../../services/AuditLogService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -213,6 +214,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     await this.validateCompanies(organization, request.body.meta.companies);
                     shouldUpdateSetupSteps = true;
                 }
+                const oldMeta = organization.meta.clone();
 
                 const savedPackages = organization.meta.packages;
                 organization.meta.patchOrPut(request.body.meta);
@@ -281,6 +283,13 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     updateTags = true;
                 }
+
+                await AuditLogService.log({
+                    type: AuditLogType.OrganizationSettingsChanged,
+                    organization,
+                    oldMeta,
+                    patch: request.body.meta,
+                });
             }
 
             if (request.body.active !== undefined) {
