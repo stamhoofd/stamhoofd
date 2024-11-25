@@ -106,30 +106,32 @@
                 </Checkbox>
             </template>
 
-            <hr>
-            <h2>Geavanceerd</h2>
+            <template v-if="auth.hasPlatformFullAccess()">
+                <hr>
+                <h2>Geavanceerd</h2>
 
-            <STList>
-                <CheckboxListItem v-model="useCustomHtml" label="Eigen HTML gebruiken voor document" description="Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit.">
-                    <div v-if="useCustomHtml" class="style-button-bar">
-                        <button class="button text" type="button" @click="downloadHtml">
-                            <span class="icon download" />
-                            <span>
-                                Download huidige HTML
-                            </span>
-                        </button>
+                <STList>
+                    <CheckboxListItem v-model="useCustomHtml" label="Eigen HTML gebruiken voor document" description="Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit.">
+                        <div v-if="useCustomHtml" class="style-button-bar">
+                            <button class="button text" type="button" @click="downloadHtml">
+                                <span class="icon download" />
+                                <span>
+                                    Download huidige HTML
+                                </span>
+                            </button>
 
-                        <label class="button text">
-                            <span class="icon sync" />
-                            <span>
-                                Vervangen
-                            </span>
+                            <label class="button text">
+                                <span class="icon sync" />
+                                <span>
+                                    Vervangen
+                                </span>
 
-                            <input type="file" multiple="true" style="display: none;" accept=".html, text/html" @change="(event) => changedFile(event as any)">
-                        </label>
-                    </div>
-                </CheckboxListItem>
-            </STList>
+                                <input type="file" multiple="true" style="display: none;" accept=".html, text/html" @change="(event) => changedFile(event as any)">
+                            </label>
+                        </div>
+                    </CheckboxListItem>
+                </STList>
+            </template>
         </template>
     </SaveView>
 </template>
@@ -138,7 +140,7 @@
 import { ArrayDecoder, AutoEncoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useAuth, useContext, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
@@ -163,6 +165,7 @@ const loadingHtml = ref(false);
 const loadingXml = ref(false);
 const fieldCategories = computed(() => RecordCategory.flattenCategories(patchedDocument.value.privateSettings.templateDefinition.fieldCategories, patchedDocument.value));
 const documentFieldCategories = computed(() => patchedDocument.value.privateSettings.templateDefinition.documentFieldCategories.filter(c => c.getAllRecords().filter(r => isDocumentFieldEditable(r)).length > 0));
+const auth = useAuth();
 
 function isDocumentFieldEditable(field: RecordSettings) {
     const supportedFields = getDefaultSupportedIds();
