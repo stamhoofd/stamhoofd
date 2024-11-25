@@ -30,13 +30,13 @@
             </STInputBox>
 
             <!-- Depending on the selected definition, we'll display all the required fields here -->
-            <div v-for="category of fieldCategories" :key="category.id" class="container">
+            <div v-for="category of fieldCategories.filter(c => c.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record)).length > 0)" :key="category.id" class="container">
                 <hr>
                 <h2>{{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
                 <RecordAnswerInput
-                    v-for="record of category.filterRecords(patchedDocument)"
+                    v-for="record of category.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record))"
                     :key="record.id"
                     :record="record"
                     :answers="recordAnswers"
@@ -478,6 +478,9 @@ function getLinkedFieldsChoices(field: RecordSettings) {
 
 function getDefaultSupportedIds() {
     return [
+        'organization.name',
+        'organization.companyNumber',
+        'organization.address',
         'registration.price',
         'registration.pricePaid',
         'member.firstName',
