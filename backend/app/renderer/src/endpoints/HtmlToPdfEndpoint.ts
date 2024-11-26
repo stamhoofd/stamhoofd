@@ -12,7 +12,7 @@ import { FileCache } from '../helpers/FileCache';
 type Params = Record<string, never>;
 type Body = undefined;
 type Query = undefined;
-type ResponseBody = Buffer;
+type ResponseBody = Uint8Array;
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -121,7 +121,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             });
         }
 
-        let pdf: Buffer | null = null;
+        let pdf: Uint8Array | null = null;
         try {
             pdf = await this.htmlToPdf(html, { retryCount: 2, startDate: new Date() });
         }
@@ -145,23 +145,24 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     nextBrowserIndex = 0;
 
     async useBrowser<T>(callback: (browser: Browser) => Promise<T>): Promise<T> {
+        console.log('Requesting browser');
         this.nextBrowserIndex++;
         if (this.nextBrowserIndex >= this.browsers.length) {
             this.nextBrowserIndex = 0;
         }
         return await QueueHandler.schedule('getBrowser' + this.nextBrowserIndex, async () => {
             if (!this.browsers[this.nextBrowserIndex]) {
-                this.browsers[this.nextBrowserIndex] = { browser: await puppeteer.launch({ pipe: true }), count: 0 };
+                this.browsers[this.nextBrowserIndex] = { browser: await puppeteer.launch({}), count: 0 };
             }
             const browser = this.browsers[this.nextBrowserIndex]!;
-            if (browser.count > 50 || !browser.browser.isConnected()) {
+            if (browser.count > 50 || !browser.browser.connected) {
                 try {
                     await browser.browser.close();
                 }
                 catch (e) {
                     console.error(e);
                 }
-                this.browsers[this.nextBrowserIndex] = { browser: await puppeteer.launch({ pipe: true }), count: 0 };
+                this.browsers[this.nextBrowserIndex] = { browser: await puppeteer.launch({}), count: 0 };
             }
 
             return await callback(browser.browser);
@@ -184,7 +185,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     /**
      * This will move to a different external service
      */
-    async htmlToPdf(html: string, options: { retryCount: number; startDate: Date }): Promise<Buffer | null> {
+    async htmlToPdf(html: string, options: { retryCount: number; startDate: Date }): Promise<Uint8Array | null> {
         const response = await this.useBrowser(async (browser) => {
             try {
                 // Create a new page
@@ -203,6 +204,8 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     displayHeaderFooter: false,
                 });
                 await page.close();
+
+                console.log('Rendered document pdf');
                 return pdf;
             }
             catch (e) {

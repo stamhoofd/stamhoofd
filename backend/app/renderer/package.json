@@ -23,13 +23,13 @@
         "@types/node": "^20.12"
     },
     "dependencies": {
-        "@simonbackx/simple-endpoints": "1.14.0",
+        "@simonbackx/simple-endpoints": "1.15.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "formidable": "3.5.1",
         "luxon": "3.4.4",
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",
-        "puppeteer": "22.12.0"
+        "puppeteer": "^23.9.0"
     },
     "publishConfig": {
         "access": "public"

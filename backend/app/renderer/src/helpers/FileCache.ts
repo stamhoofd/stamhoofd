@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { promises as fs } from 'fs';
 
 export class FileCache {
-    static async write(cacheId: string, timestamp: Date, data: Buffer) {
+    static async write(cacheId: string, timestamp: Date, data: Uint8Array | Buffer) {
         if (cacheId.includes('/')) {
             throw new SimpleError({
                 code: 'invalid_field',
