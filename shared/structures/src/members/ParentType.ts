@@ -4,6 +4,7 @@ export enum ParentType {
 
     Stepfather = 'Stepfather',
     Stepmother = 'Stepmother',
+    FosterParent = 'Pleegouder',
 
     Parent1 = 'Parent1',
     Parent2 = 'Parent2',
@@ -27,10 +28,12 @@ export class ParentTypeHelper {
                 return 'Ouder 2';
             case ParentType.Other:
                 return 'Voogd';
+            case ParentType.FosterParent:
+                return 'Pleegouder';
         }
     }
 
     static getPublicTypes(): ParentType[] {
-        return [ParentType.Mother, ParentType.Father, ParentType.Stepmother, ParentType.Stepfather, ParentType.Other];
+        return [ParentType.Mother, ParentType.Father, ParentType.Stepmother, ParentType.Stepfather, ParentType.FosterParent, ParentType.Other];
     }
 }

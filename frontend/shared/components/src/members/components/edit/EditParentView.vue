@@ -131,10 +131,10 @@ const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
 const saveText = ref('Opslaan');
-const parentTypes = Object.values(ParentType);
+const app = useAppContext();
+const parentTypes = ParentTypeHelper.getPublicTypes();
 const title = computed(() => !props.isNew ? `${patched.value.firstName || 'Ouder'} bewerken` : 'Ouder toevoegen');
 const navigate = useNavigationActions();
-const app = useAppContext();
 
 const relatedMembers = computed(() => {
     const base = family.getMembersForParent(props.parent);
