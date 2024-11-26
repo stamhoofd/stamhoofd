@@ -122,7 +122,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
                             calendarTab,
                         ];
 
-                        if (!added && manualFeatureFlag('audit-logs')) {
+                        if (!added && manualFeatureFlag('audit-logs', reactiveSession)) {
                             // Feature is still in development so not visible for everyone
                             moreTab.items.push(auditLogsTab);
                             added = true;

@@ -387,7 +387,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                         });
 
                         if (reactiveSession.auth.hasFullAccess()) {
-                            if (manualFeatureFlag('audit-logs', organization)) {
+                            if (manualFeatureFlag('audit-logs', reactiveSession)) {
                                 moreTab.items.unshift(auditLogsTab);
                             }
                             moreTab.items.unshift(documentsTab);

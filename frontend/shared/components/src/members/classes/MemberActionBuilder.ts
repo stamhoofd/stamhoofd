@@ -210,7 +210,7 @@ export class MemberActionBuilder {
             return [];
         }
 
-        if (!manualFeatureFlag('audit-logs', this.context.organization)) {
+        if (!manualFeatureFlag('audit-logs', this.context)) {
             return [];
         }
 
