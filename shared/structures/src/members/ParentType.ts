@@ -4,7 +4,7 @@ export enum ParentType {
 
     Stepfather = 'Stepfather',
     Stepmother = 'Stepmother',
-    FosterParent = 'Pleegouder',
+    FosterParent = 'FosterParent',
 
     Parent1 = 'Parent1',
     Parent2 = 'Parent2',
