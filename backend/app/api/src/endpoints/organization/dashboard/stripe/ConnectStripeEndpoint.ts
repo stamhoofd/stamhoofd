@@ -1,11 +1,12 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount } from '@stamhoofd/models';
-import { PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { AuditLogType, PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import Stripe from 'stripe';
 
 import { Context } from '../../../../helpers/Context';
 import { StripeHelper } from '../../../../helpers/StripeHelper';
+import { AuditLogService } from '../../../../services/AuditLogService';
 type Params = Record<string, never>;
 type Body = undefined;
 type Query = undefined;
@@ -90,6 +91,12 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         model.accountId = account.id;
         model.setMetaFromStripeAccount(account);
         await model.save();
+
+        // Track audit log
+        await AuditLogService.log({
+            type: AuditLogType.StripeAccountAdded,
+            stripeAccount: model,
+        });
 
         // Return information about the Stripe Account
 

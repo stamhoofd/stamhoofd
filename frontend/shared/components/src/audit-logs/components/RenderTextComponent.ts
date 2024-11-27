@@ -1,12 +1,13 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AuditLogReplacement, AuditLogReplacementType, LimitedFilteredRequest } from '@stamhoofd/structures';
-import { h } from 'vue';
+import { h, withDirectives } from 'vue';
 import { PromiseView } from '../../containers';
 import { useAppContext } from '../../context';
 import { EventOverview } from '../../events';
 import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher } from '../../fetchers';
 import { MemberSegmentedView } from '../../members';
 import { Toast } from '../../overlays/Toast';
+import CopyableDirective from '../../directives/Copyable';
 
 export interface Renderable {
     render(context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
@@ -16,6 +17,9 @@ function isRenderable(obj: unknown): obj is Renderable {
     return (obj as Renderable).render !== undefined;
 }
 
+function copyable(vnode: ReturnType<typeof h>): ReturnType<typeof h> {
+    return withDirectives(vnode, [[CopyableDirective]]);
+}
 export function renderAny(obj: unknown, context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[] {
     if (typeof obj === 'string') {
         return obj;
@@ -33,6 +37,11 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
                 onClick: () => showMember(obj.id!, context),
                 type: 'button',
             }, obj.value);
+        }
+
+        if (obj.type === AuditLogReplacementType.StripeAccount) {
+            // Render as code
+            return copyable(h('span', { class: 'style-inline-code style-copyable' }, obj.value));
         }
 
         if (obj.type === AuditLogReplacementType.Event && obj.id) {
@@ -83,6 +92,9 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
             const a = obj.values.flatMap((part) => {
                 const q = renderAny(part, context);
                 if (Array.isArray(q)) {
+                    if (q.length === 0) {
+                        return [];
+                    }
                     return [...q, ' → '];
                 }
                 return [q, ' → '];
@@ -103,6 +115,10 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
                 }),
                 ' ' + str,
             ];
+        }
+
+        if (!str) {
+            return [];
         }
 
         return str;

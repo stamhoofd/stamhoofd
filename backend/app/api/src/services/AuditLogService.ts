@@ -1,5 +1,5 @@
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { AuditLog, Group, Member, Organization, Registration, Event, RegistrationPeriod } from '@stamhoofd/models';
+import { AuditLog, Group, Member, Organization, Registration, Event, RegistrationPeriod, StripeAccount } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, GroupType, MemberDetails, OrganizationMetaData, OrganizationPrivateMetaData, PlatformConfig, PlatformPrivateConfig } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context';
 import { explainPatch } from './explainPatch';
@@ -58,7 +58,14 @@ export type PeriodAuditOptions = {
     patch?: AutoEncoder | AutoEncoderPatchType<AutoEncoder>;
 };
 
-export type AuditLogOptions = PeriodAuditOptions | GroupAuditOptions | EventAuditOptions | MemberAddedAuditOptions | MemberEditedAuditOptions | MemberRegisteredAuditOptions | PlatformConfigChangeAuditOptions | OrganizationConfigChangeAuditOptions;
+export type StripeAccountAuditOptions = {
+    type: AuditLogType.StripeAccountAdded | AuditLogType.StripeAccountEdited | AuditLogType.StripeAccountDeleted;
+    stripeAccount: StripeAccount;
+    oldData?: AutoEncoder;
+    patch?: AutoEncoder | AutoEncoderPatchType<AutoEncoder>;
+};
+
+export type AuditLogOptions = StripeAccountAuditOptions | PeriodAuditOptions | GroupAuditOptions | EventAuditOptions | MemberAddedAuditOptions | MemberEditedAuditOptions | MemberRegisteredAuditOptions | PlatformConfigChangeAuditOptions | OrganizationConfigChangeAuditOptions;
 
 export const AuditLogService = {
     disableLocalStore: new AsyncLocalStorage<boolean>(),
@@ -119,6 +126,12 @@ export const AuditLogService = {
             }
             else if (options.type === AuditLogType.RegistrationPeriodAdded || options.type === AuditLogType.RegistrationPeriodEdited || options.type === AuditLogType.RegistrationPeriodDeleted) {
                 this.fillForPeriod(model, options);
+            }
+            else if (options.type === AuditLogType.StripeAccountAdded || options.type === AuditLogType.StripeAccountEdited || options.type === AuditLogType.StripeAccountDeleted) {
+                if (this.fillForStripeAccount(model, options) === false) {
+                    // do not save
+                    return;
+                }
             }
 
             // In the future we might group these saves together in one query to improve performance
@@ -271,6 +284,33 @@ export const AuditLogService = {
                 id: options.period.id,
                 value: options.period.getStructure().nameShort,
                 type: AuditLogReplacementType.RegistrationPeriod,
+            })],
+        ]);
+    },
+
+    fillForStripeAccount(model: AuditLog, options: StripeAccountAuditOptions) {
+        model.objectId = options.stripeAccount.id;
+
+        if (options.patch) {
+            // Generate changes list
+            model.patchList = explainPatch(options.oldData ?? null, options.patch);
+
+            if (model.patchList.length === 0) {
+                // No changes, ignore (only for stripe)
+                return false;
+            }
+        }
+
+        if (options.type === AuditLogType.StripeAccountEdited) {
+            // Never caused by a user
+            model.userId = null;
+        }
+
+        model.replacements = new Map([
+            ['a', AuditLogReplacement.create({
+                id: options.stripeAccount.id,
+                value: options.stripeAccount.accountId,
+                type: AuditLogReplacementType.StripeAccount,
             })],
         ]);
     },

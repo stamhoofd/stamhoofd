@@ -717,9 +717,9 @@ function getExplainerForField(field: Field<any>) {
             return [
                 AuditLogPatchItem.create({
                     key: getAutoEncoderKey(field.property),
-                    oldValue: wasTrueOld === true ? AuditLogReplacement.string('Aangevinkt') : (wasTrueOld === false ? AuditLogReplacement.string('Uitgevinkt') : undefined),
-                    value: isTrue === true ? AuditLogReplacement.string('Aangevinkt') : (isTrue === false ? AuditLogReplacement.string('Uitgevinkt') : undefined),
-                }),
+                    oldValue: wasTrueOld === true ? AuditLogReplacement.key('checked') : (wasTrueOld === false ? AuditLogReplacement.key('unchecked') : undefined),
+                    value: isTrue === true ? AuditLogReplacement.key('checked') : (isTrue === false ? AuditLogReplacement.key('unchecked') : undefined),
+                }).autoType(),
             ];
         };
     }

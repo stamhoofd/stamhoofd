@@ -1275,6 +1275,9 @@
     border-radius: $border-radius;
     margin: -2px 2px;
     display: inline-block;
+
+    // Shrink font size
+    font-size: 90%;
 }
 
 .style-discount-code {

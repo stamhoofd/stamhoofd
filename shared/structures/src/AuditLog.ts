@@ -46,6 +46,11 @@ export enum AuditLogType {
     RegistrationPeriodEdited = 'RegistrationPeriodEdited',
     RegistrationPeriodAdded = 'RegistrationPeriodAdded',
     RegistrationPeriodDeleted = 'RegistrationPeriodDeleted',
+
+    // Stripe
+    StripeAccountAdded = 'StripeAccountAdded',
+    StripeAccountDeleted = 'StripeAccountDeleted',
+    StripeAccountEdited = 'StripeAccountEdited',
 }
 
 export enum AuditLogReplacementType {
@@ -59,6 +64,7 @@ export enum AuditLogReplacementType {
     Array = 'Array',
     RegistrationPeriod = 'RegistrationPeriod',
     Uuid = 'Uuid',
+    StripeAccount = 'StripeAccount',
 }
 
 export function getAuditLogTypeName(type: AuditLogType): string {
@@ -101,6 +107,12 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Nieuwe werkjaren`;
         case AuditLogType.RegistrationPeriodDeleted:
             return `Verwijderde werkjaren`;
+        case AuditLogType.StripeAccountAdded:
+            return `Stripe account aangemaakt`;
+        case AuditLogType.StripeAccountDeleted:
+            return `Stripe account verwijderd`;
+        case AuditLogType.StripeAccountEdited:
+            return `Stripe account gewijzigd`;
     }
 
     return type;
@@ -150,6 +162,13 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`period`, `add green`];
         case AuditLogType.RegistrationPeriodDeleted:
             return [`period`, `canceled red`];
+
+        case AuditLogType.StripeAccountAdded:
+            return [`stripe`, `add green`];
+        case AuditLogType.StripeAccountDeleted:
+            return [`stripe`, `canceled red`];
+        case AuditLogType.StripeAccountEdited:
+            return [`stripe`, `edit`];
     }
     return [`help`];
 }
@@ -206,6 +225,13 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
 
         case AuditLogType.RegistrationPeriodDeleted:
             return `Het werkjaar {{p}} werd verwijderd`;
+
+        case AuditLogType.StripeAccountAdded:
+            return `Stripe account {{a}} aangemaakt`;
+        case AuditLogType.StripeAccountDeleted:
+            return `Stripe account {{a}} verwijderd`;
+        case AuditLogType.StripeAccountEdited:
+            return `Stripe account {{a}} gewijzigd`;
     }
 }
 
@@ -237,6 +263,11 @@ function getTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.RegistrationPeriodAdded:
         case AuditLogType.RegistrationPeriodDeleted:
             return ['p'];
+
+        case AuditLogType.StripeAccountAdded:
+        case AuditLogType.StripeAccountDeleted:
+        case AuditLogType.StripeAccountEdited:
+            return ['a'];
         default:
             return [];
     }
@@ -339,12 +370,12 @@ export class AuditLogReplacement extends AutoEncoder {
                 if (name) {
                     return name;
                 }
-                return this.id;
+                return '';
             }
         }
 
         if (this.type === AuditLogReplacementType.Array) {
-            return this.values.map(v => v.toString()).join(' → ');
+            return this.values.map(v => v.toString()).filter(v => !!v).join(' → ');
         }
         return this.value;
     }
@@ -428,6 +459,9 @@ export function getAuditLogPatchKeyName(key: string) {
 
     // Replace camel case with spaces
     key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+    // Replace _ case with spaces
+    key = key.replace(/_+/g, ' ').trim();
     return key;
 }
 export enum AuditLogPatchItemType {

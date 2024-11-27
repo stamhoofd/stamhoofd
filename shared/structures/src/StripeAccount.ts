@@ -37,8 +37,8 @@ export class StripeCompany extends AutoEncoder {
 }
 
 export class StripeMetaAccountDashboardSettings extends AutoEncoder {
-    @field({ decoder: StringDecoder, optional: true })
-    display_name = '';
+    @field({ decoder: StringDecoder, optional: true, nullable: true })
+    display_name: string | null = '';
 }
 
 export class StripeMetaAccountSettings extends AutoEncoder {

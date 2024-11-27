@@ -114,5 +114,7 @@
     "allowAmount": "meerdere stuks",
     "recordAnswers": "gegevens",
     "recordAnswer": "gegeven",
-    "nationalRegisterNumberOptOut": "geen Belgische nationaliteit"
+    "nationalRegisterNumberOptOut": "geen Belgische nationaliteit",
+    "unchecked": "niet aangevinkt",
+    "checked": "aangevinkt"
 }

@@ -1,10 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { StripeAccount } from '@stamhoofd/models';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogType, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 import { StripeHelper } from '../../../../helpers/StripeHelper';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { AuditLogService } from '../../../../services/AuditLogService';
 
 type Params = { id: string };
 type Body = undefined;
@@ -62,6 +63,12 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         // If that succeeded
         model.status = 'deleted';
         await model.save();
+
+        // Track audit log
+        await AuditLogService.log({
+            type: AuditLogType.StripeAccountDeleted,
+            stripeAccount: model,
+        });
 
         return new Response(undefined);
     }
