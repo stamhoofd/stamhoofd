@@ -27,6 +27,10 @@ export class ResourcePermissions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AccessRight)), field: 'r' })
     accessRights: AccessRight[] = [];
 
+    getPatchName() {
+        return this.resourceName;
+    }
+
     hasAccess(level: PermissionLevel): boolean {
         return getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level);
     }

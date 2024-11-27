@@ -4,7 +4,6 @@ export { Version } from './src/Version.js';
 export * from './src/PriceBreakdown.js';
 
 // General
-export * from './src/AuditLog.js';
 export * from './src/AccessRight.js';
 export * from './src/addresses/Address.js';
 export * from './src/addresses/City.js';
@@ -193,3 +192,6 @@ export * from './src/SponsorConfig.js';
 export * from './src/filters/ExcelExportRequest.js';
 export * from './src/helpers/index.js';
 export * from './src/filters/SearchFilterFactory.js';
+
+// Last
+export * from './src/AuditLog.js';

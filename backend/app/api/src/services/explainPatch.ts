@@ -1,6 +1,7 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, Field, IntegerDecoder, isPatchable, isPatchableArray, isPatchMap, MapDecoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
-import { Address, AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, BooleanStatus, Image, Parent, ParentTypeHelper, RichText } from '@stamhoofd/structures';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, Field, getOptionalId, IntegerDecoder, isPatchableArray, isPatchMap, MapDecoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, BooleanStatus, Image, isEmptyFilter, isUuid, PropertyFilter, RichText, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { get } from 'http';
 
 export type PatchExplainer = {
     key: string;
@@ -20,14 +21,34 @@ function createStringChangeHandler(key: string) {
 
         return [
             AuditLogPatchItem.create({
-                key: AuditLogReplacement.key(key),
-                oldValue: typeof oldValue === 'string' ? AuditLogReplacement.string(oldValue) : undefined,
-                value: typeof value === 'string' ? AuditLogReplacement.string(value) : undefined,
+                key: getAutoEncoderKey(key),
+                oldValue: getAutoEncoderValue(oldValue) || getAutoEncoderName(oldValue) || undefined,
+                value: getAutoEncoderValue(value) || getAutoEncoderName(value) || undefined,
             }).autoType(),
         ];
     };
 }
 
+function createEnumChangeHandler(key: string) {
+    return (oldValue: unknown, value: unknown) => {
+        if (oldValue === value) {
+            return [];
+        }
+
+        if (value === undefined) {
+            // Not altered
+            return [];
+        }
+
+        return [
+            AuditLogPatchItem.create({
+                key: getAutoEncoderKey(key),
+                oldValue: typeof oldValue === 'string' ? AuditLogReplacement.key(oldValue) : undefined,
+                value: typeof value === 'string' ? AuditLogReplacement.key(value) : undefined,
+            }).autoType(),
+        ];
+    };
+}
 function createIntegerChangeHandler(key: string) {
     return (oldValue: unknown, value: unknown) => {
         if ((typeof oldValue !== 'number' && oldValue !== null) || (typeof value !== 'number' && value !== null)) {
@@ -40,7 +61,7 @@ function createIntegerChangeHandler(key: string) {
         const formatter: (typeof Formatter.price | typeof Formatter.integer) = key.toLowerCase().includes('price') ? Formatter.price.bind(Formatter) : Formatter.integer.bind(Formatter);
         return [
             AuditLogPatchItem.create({
-                key: AuditLogReplacement.key(key),
+                key: getAutoEncoderKey(key),
                 oldValue: oldValue !== null ? AuditLogReplacement.string(formatter(oldValue)) : undefined,
                 value: value !== null ? AuditLogReplacement.string(formatter(value)) : undefined,
             }).autoType(),
@@ -50,7 +71,11 @@ function createIntegerChangeHandler(key: string) {
 
 function createDateChangeHandler(key: string) {
     return (oldValue: unknown, value: unknown) => {
-        if ((!(oldValue instanceof Date) && oldValue !== null) || (!(value instanceof Date)) && value !== null) {
+        if (!(oldValue instanceof Date) && oldValue !== null) {
+            return [];
+        }
+
+        if ((!(value instanceof Date)) && value !== null) {
             return [];
         }
 
@@ -68,7 +93,7 @@ function createDateChangeHandler(key: string) {
 
         return [
             AuditLogPatchItem.create({
-                key: AuditLogReplacement.key(key),
+                key: getAutoEncoderKey(key),
                 oldValue: dno ? AuditLogReplacement.string(dno) : undefined,
                 value: dn ? AuditLogReplacement.string(dn) : undefined,
             }).autoType(),
@@ -92,48 +117,91 @@ function createBooleanChangeHandler(key: string) {
 
         return [
             AuditLogPatchItem.create({
-                key: AuditLogReplacement.key(key),
-                oldValue: oldValue === true ? AuditLogReplacement.string('Aan') : (oldValue === false ? AuditLogReplacement.string('Uit') : undefined),
-                value: value === true ? AuditLogReplacement.string('Aan') : (value === false ? AuditLogReplacement.string('Uit') : undefined),
+                key: getAutoEncoderKey(key),
+                oldValue: oldValue === true ? AuditLogReplacement.key('on') : (oldValue === false ? AuditLogReplacement.key('off') : undefined),
+                value: value === true ? AuditLogReplacement.key('on') : (value === false ? AuditLogReplacement.key('off') : undefined),
             }).autoType(),
         ];
     };
 }
 
-function getAutoEncoderName(autoEncoder: unknown) {
+function getAutoEncoderKey(autoEncoder: string): AuditLogReplacement;
+function getAutoEncoderKey(autoEncoder: unknown): AuditLogReplacement | null;
+function getAutoEncoderKey(autoEncoder: unknown): AuditLogReplacement | null {
     if (typeof autoEncoder === 'string') {
-        return autoEncoder;
-    }
-
-    if (autoEncoder instanceof Parent) {
-        return autoEncoder.name + ` (${ParentTypeHelper.getName(autoEncoder.type)})`;
-    }
-
-    if (autoEncoder instanceof Address) {
-        return autoEncoder.shortString();
-    }
-
-    if (typeof autoEncoder === 'object' && autoEncoder !== null && 'name' in autoEncoder && typeof autoEncoder.name === 'string') {
-        return autoEncoder.name;
+        if (isUuid(autoEncoder)) {
+            return AuditLogReplacement.uuid(autoEncoder);
+        }
+        return AuditLogReplacement.key(autoEncoder);
     }
     return null;
 }
 
-function getAutoEncoderValue(autoEncoder: unknown): AuditLogReplacement | null {
+function getAutoEncoderName(autoEncoder: unknown): AuditLogReplacement | null {
     if (typeof autoEncoder === 'string') {
+        if (isUuid(autoEncoder)) {
+            return AuditLogReplacement.uuid(autoEncoder);
+        }
         return AuditLogReplacement.string(autoEncoder);
     }
 
-    if (autoEncoder instanceof Parent) {
-        return AuditLogReplacement.string(autoEncoder.name + ` (${ParentTypeHelper.getName(autoEncoder.type)})`);
-    }
-
-    if (autoEncoder instanceof Address) {
-        return AuditLogReplacement.string(autoEncoder.shortString());
+    if (typeof autoEncoder === 'object' && autoEncoder !== null && 'getPatchName' in autoEncoder && typeof autoEncoder.getPatchName === 'function') {
+        const name = autoEncoder.getPatchName();
+        if (typeof name === 'string') {
+            return name ? AuditLogReplacement.string(name) : AuditLogReplacement.key('untitled');
+        }
     }
 
     if (typeof autoEncoder === 'object' && autoEncoder !== null && 'name' in autoEncoder && typeof autoEncoder.name === 'string') {
-        return AuditLogReplacement.string(autoEncoder.name);
+        return autoEncoder.name ? AuditLogReplacement.string(autoEncoder.name) : AuditLogReplacement.key('untitled');
+    }
+    return null;
+}
+function getAutoEncoderPutValue(autoEncoder: unknown): AuditLogReplacement | null {
+    if (typeof autoEncoder === 'object' && autoEncoder !== null && 'getPutValue' in autoEncoder && typeof autoEncoder.getPutValue === 'function') {
+        const name = autoEncoder.getPutValue();
+        if (typeof name === 'string') {
+            return AuditLogReplacement.string(name);
+        }
+        if (name instanceof AuditLogReplacement) {
+            return name;
+        }
+    }
+    return getAutoEncoderValue(autoEncoder);
+}
+
+function getAutoEncoderValue(autoEncoder: unknown): AuditLogReplacement | null {
+    if (typeof autoEncoder === 'string') {
+        if (isUuid(autoEncoder)) {
+            return AuditLogReplacement.uuid(autoEncoder);
+        }
+        return AuditLogReplacement.string(autoEncoder);
+    }
+
+    if (typeof autoEncoder === 'symbol') {
+        const name = Symbol.keyFor(autoEncoder);
+        if (name) {
+            return AuditLogReplacement.key(name);
+        }
+        return AuditLogReplacement.key('unknown');
+    }
+
+    if (typeof autoEncoder === 'number') {
+        return AuditLogReplacement.string(Formatter.integer(autoEncoder));
+    }
+
+    if (autoEncoder instanceof Date) {
+        return AuditLogReplacement.string(Formatter.dateTime(autoEncoder, true, true));
+    }
+
+    if (typeof autoEncoder === 'object' && autoEncoder !== null && 'getPatchValue' in autoEncoder && typeof autoEncoder.getPatchValue === 'function') {
+        const name = autoEncoder.getPatchValue();
+        if (typeof name === 'string') {
+            return AuditLogReplacement.string(name);
+        }
+        if (name instanceof AuditLogReplacement) {
+            return name;
+        }
     }
 
     if (autoEncoder instanceof Image) {
@@ -147,144 +215,239 @@ function getAutoEncoderValue(autoEncoder: unknown): AuditLogReplacement | null {
     if (autoEncoder instanceof RichText) {
         return AuditLogReplacement.string(autoEncoder.text);
     }
+
+    if (autoEncoder instanceof PropertyFilter) {
+        if (autoEncoder.isAlwaysEnabledAndRequired) {
+            return AuditLogReplacement.key('alwaysEnabledAndRequired');
+        }
+        if (autoEncoder.enabledWhen === null && autoEncoder.requiredWhen === null) {
+            return AuditLogReplacement.key('alwaysEnabledAndOptional');
+        }
+        if (autoEncoder.enabledWhen !== null && autoEncoder.requiredWhen === null) {
+            return AuditLogReplacement.key('sometimesEnabledAndOptional');
+        }
+        if (autoEncoder.enabledWhen === null && autoEncoder.requiredWhen !== null) {
+            return AuditLogReplacement.key('alwaysEnabledAndSometimesRequired');
+        }
+        if (autoEncoder.enabledWhen !== null && isEmptyFilter(autoEncoder.requiredWhen)) {
+            return AuditLogReplacement.key('sometimesEnabledAndRequired');
+        }
+        return AuditLogReplacement.key('sometimesEnabledAndSometimesRequired');
+    }
+
     return null;
+}
+
+function getKeySingular(key: string) {
+    return key.replace(/ies$/, 'y').replace(/s$/, '');
+}
+
+function findOriginalById(id: unknown, oldArray: unknown[]): unknown | null {
+    return id ? oldArray.find(v => getId(v) === id) : null;
+}
+
+function getId(object: unknown): string | number | null {
+    const id = getOptionalId(object);
+    if (typeof id !== 'string' && typeof id !== 'number') {
+        if (object instanceof AutoEncoder) {
+            const encoded = object.encode({ version: Version });
+            return JSON.stringify(encoded);
+        }
+        return JSON.stringify(object);
+    }
+    return id;
+}
+
+function findOriginal(put: unknown, oldArray: unknown[]): unknown | null {
+    return findOriginalById(getId(put), oldArray);
+}
+
+function processPut(key: string, put: unknown, original: unknown | null, createdIdSet?: Set<string>): AuditLogPatchItem[] {
+    const items: AuditLogPatchItem[] = [];
+    const keySingular = getKeySingular(key);
+    const v = getAutoEncoderPutValue(put);
+
+    // Added a new parent
+    if (!original) {
+        items.push(
+            AuditLogPatchItem.create({
+                key: AuditLogReplacement.key(keySingular).append(getAutoEncoderName(put)),
+                value: v || undefined,
+                type: AuditLogPatchItemType.Added,
+            }),
+        );
+    }
+
+    // Little hack: detect PUT/DELETE behaviour:
+    if (createdIdSet) {
+        const id = getId(put);
+        if (id && typeof id === 'string') {
+            createdIdSet.add(id);
+        }
+    }
+
+    if (!original && (v || getAutoEncoderName(put))) {
+        // Simplify addition: don't show all added properties
+        return items;
+    }
+
+    items.push(
+        ...explainPatch(
+            original ?? null,
+            put,
+        ).map((i) => {
+            i.key = i.key.prepend(getAutoEncoderName(original) || getAutoEncoderName(put) || AuditLogReplacement.key('item'));
+            i.key = i.key.prepend(getAutoEncoderKey(key));
+            return i;
+        }),
+    );
+    return items;
+}
+
+function processPatch(key: string, patch: unknown, original: unknown | null): AuditLogPatchItem[] {
+    if (!original) {
+        // Not supported
+        return [];
+    }
+
+    if (patch === original) {
+        return [];
+    }
+
+    const items: AuditLogPatchItem[] = [];
+    const keySingular = getKeySingular(key);
+
+    const l = explainPatch(
+        original,
+        patch,
+    ).map((i) => {
+        i.key = i.key.prepend(getAutoEncoderName(original) || getAutoEncoderName(patch) || AuditLogReplacement.key('item'));
+        i.key = i.key.prepend(getAutoEncoderKey(key));
+        return i;
+    });
+    let ov = getAutoEncoderValue(original);
+    let v = getAutoEncoderValue(patch);
+
+    if (l.length === 0 && patch instanceof AutoEncoder && patch.isPatch()) {
+        items.push(
+            AuditLogPatchItem.create({
+                key: getAutoEncoderKey(keySingular).append(getAutoEncoderName(original) || getAutoEncoderName(patch) || AuditLogReplacement.key('item')),
+                oldValue: ov || undefined,
+                value: v || undefined,
+                type: AuditLogPatchItemType.Changed,
+            }),
+        );
+        return items;
+    }
+
+    if (ov && v) {
+        if (ov.toString() === v.toString()) {
+            ov = null;
+            v = null;
+
+            if (l.length === 0) {
+                // Probably no change
+                return [];
+            }
+        }
+
+        // Simplify changes by providing one change instead of for all keys
+        items.push(
+            AuditLogPatchItem.create({
+                key: getAutoEncoderKey(keySingular).append(getAutoEncoderName(original) || getAutoEncoderName(v) || AuditLogReplacement.key('item')),
+                oldValue: ov || undefined,
+                value: v || undefined,
+                type: AuditLogPatchItemType.Changed,
+            }),
+        );
+        return items;
+    }
+
+    items.push(
+        ...l,
+    );
+
+    return items;
+}
+
+function processDelete(key: string, deletedItem: unknown, createdIdSet?: Set<string>): AuditLogPatchItem[] {
+    if (createdIdSet) {
+        const id = getId(deletedItem);
+        if (id && typeof id === 'string' && createdIdSet.has(id)) {
+            // DELETE + PUT happened
+            return [];
+        }
+    }
+
+    const v = getAutoEncoderPutValue(deletedItem);
+
+    const keySingular = getKeySingular(key);
+    const k = AuditLogReplacement.key(keySingular).append(getAutoEncoderName(deletedItem));
+
+    return [
+        AuditLogPatchItem.create({
+            key: k,
+            type: AuditLogPatchItemType.Removed,
+            oldValue: v ?? undefined,
+        }),
+    ];
 }
 
 function createArrayChangeHandler(key: string) {
     return (oldValue: unknown, value: unknown) => {
-        if (!isPatchableArray(value)) {
-            // Not supported
-            return [];
-        }
         if (!Array.isArray(oldValue)) {
             // Not supported
             return [];
         }
-
         const items: AuditLogPatchItem[] = [];
+
+        if (!isPatchableArray(value)) {
+            if (Array.isArray(value)) {
+                // Search for puts
+                for (const newItem of value) {
+                    const original = findOriginal(newItem, oldValue);
+
+                    if (!original) {
+                        // Has been added
+                        items.push(...processPut(key, newItem, original));
+                    }
+                    else {
+                        // Has been overwritten
+                        items.push(...processPatch(key, newItem, original));
+                    }
+                }
+
+                // Search for deletes
+                for (const original of oldValue) {
+                    const newItem = findOriginal(original, value);
+                    if (!newItem) {
+                        // Has been deleted
+                        items.push(...processDelete(key, original));
+                    }
+                }
+            }
+            // Not supported
+            return items;
+        }
+
         const createdIdSet = new Set<string>();
 
-        const keySingular = key.replace(/ies$/, 'y').replace(/s$/, '');
-
         for (const { put } of value.getPuts()) {
-            if (!(put instanceof AutoEncoder)) {
-                // Not supported
-                continue;
-            }
-
-            // Little hack: detect PUT/DELETE behaviour:
-            let original = 'id' in put ? oldValue.find(v => v.id === put.id) : null;
-            if (original && !(original instanceof AutoEncoder)) {
-                // Not supported
-                original = null;
-            }
-
-            // Added a new parent
-            if (!original) {
-                items.push(
-                    AuditLogPatchItem.create({
-                        key: AuditLogReplacement.key(keySingular),
-                        value: getAutoEncoderValue(put) || AuditLogReplacement.string(keySingular),
-                        type: AuditLogPatchItemType.Added,
-                    }),
-                );
-            }
-
-            if ('id' in put && typeof put.id === 'string') {
-                createdIdSet.add(put.id);
-            }
-
-            items.push(
-                ...explainPatch(
-                    original ?? null,
-                    put,
-                ).map((i) => {
-                    const name = getAutoEncoderName(put);
-                    if (name) {
-                        i.key = i.key.prepend(AuditLogReplacement.string(name));
-                    }
-                    i.key = i.key.prepend(AuditLogReplacement.key(key));
-                    return i;
-                }),
-            );
+            items.push(...processPut(key, put, findOriginal(put, oldValue), createdIdSet));
         }
 
         for (const patch of value.getPatches()) {
-            const original = oldValue.find(v => v.id === patch.id);
-            if (!original) {
-                // Not supported
-                continue;
-            }
-            if (!(original instanceof AutoEncoder)) {
-                // Not supported
-                continue;
-            }
-
-            const l = explainPatch(
-                original,
-                patch,
-            ).map((i) => {
-                const name = getAutoEncoderName(original);
-                if (name) {
-                    i.key = i.key.prepend(AuditLogReplacement.string(name));
-                }
-                i.key = i.key.prepend(AuditLogReplacement.key(key));
-                return i;
-            });
-
-            if (l.length === 0) {
-                items.push(
-                    AuditLogPatchItem.create({
-                        key: AuditLogReplacement.key(keySingular),
-                        value: getAutoEncoderValue(original) || undefined,
-                        type: AuditLogPatchItemType.Changed,
-                    }),
-                );
-            }
-
-            items.push(
-                ...l,
-            );
+            items.push(...processPatch(key, patch, findOriginal(patch, oldValue)));
         }
 
         for (const id of value.getDeletes()) {
-            if (typeof id !== 'string') {
-                continue;
-            }
-            const original = oldValue.find(v => v.id === id);
-            if (!original) {
-                // Not supported
-                continue;
-            }
-            if (!(original instanceof AutoEncoder)) {
-                // Not supported
-                continue;
-            }
-
-            if (createdIdSet.has(id)) {
-                // DELETE + PUT happened
-                continue;
-            }
-
-            let k = AuditLogReplacement.key(keySingular);
-
-            const name = getAutoEncoderName(original);
-            if (name) {
-                k = k.prepend(AuditLogReplacement.string(name));
-            }
-
-            items.push(
-                AuditLogPatchItem.create({
-                    key: k,
-                    type: AuditLogPatchItemType.Removed,
-                }),
-            );
+            items.push(...processDelete(key, findOriginalById(id, oldValue), createdIdSet));
         }
 
         if (value.getMoves().length > 0) {
             items.push(
                 AuditLogPatchItem.create({
-                    key: AuditLogReplacement.key(key),
+                    key: getAutoEncoderKey(key),
                     type: AuditLogPatchItemType.Reordered,
                 }),
             );
@@ -293,9 +456,9 @@ function createArrayChangeHandler(key: string) {
     };
 }
 
-function createMapChangeHandler(key: string) {
+function createMapChangeHandler(key?: string) {
     return (oldValue: unknown, value: unknown) => {
-        if (!isPatchMap(value)) {
+        if (!(value instanceof Map)) {
             // Not supported
             return [];
         }
@@ -305,22 +468,27 @@ function createMapChangeHandler(key: string) {
         }
 
         const items: AuditLogPatchItem[] = [];
-        const keySingular = key.replace(/ies$/, 'y').replace(/s$/, '');
+        const keySingular = key ? key.replace(/ies$/, 'y').replace(/s$/, '') : key;
+        const isPatch = isPatchMap(value);
 
         for (const [k, v] of value.entries()) {
             if (typeof k !== 'string') {
                 // Not supported
                 continue;
             }
-            const original = oldValue.get(k);
+            let original = oldValue.get(k);
 
-            if (v === null) {
+            if (v instanceof Map && !original) {
+                original = new Map();
+            }
+
+            if (v === null && isPatch) {
                 // Delete
                 if (original) {
                     items.push(
                         AuditLogPatchItem.create({
-                            key: AuditLogReplacement.key(keySingular),
-                            oldValue: getAutoEncoderValue(original as AutoEncoder) || AuditLogReplacement.key(k),
+                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(original)),
+                            oldValue: getAutoEncoderPutValue(original) || undefined,
                             type: AuditLogPatchItemType.Removed,
                         }),
                     );
@@ -332,30 +500,55 @@ function createMapChangeHandler(key: string) {
                 // added
                 items.push(
                     AuditLogPatchItem.create({
-                        key: AuditLogReplacement.key(keySingular),
-                        value: getAutoEncoderValue(v as AutoEncoder) || AuditLogReplacement.key(k),
+                        key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(v)),
+                        value: getAutoEncoderPutValue(v) || undefined,
                         type: AuditLogPatchItemType.Added,
                     }),
                 );
             }
             else {
+                let ov = getAutoEncoderValue(original);
+                let nv = getAutoEncoderValue(v);
+
                 const c = explainPatch(
                     original,
-                    v as AutoEncoder,
+                    v,
                 ).map((i) => {
-                    const name = getAutoEncoderValue(original as AutoEncoder);
-                    if (name) {
-                        i.key = i.key.prepend(name);
-                    }
+                    i.key = i.key.prepend(getAutoEncoderName(original) || getAutoEncoderName(v) || getAutoEncoderKey(k));
                     i.key = i.key.prepend(AuditLogReplacement.key(keySingular));
                     return i;
                 });
 
-                if (c.length === 0) {
+                if (ov && nv) {
+                    if (ov.toString() === nv.toString()) {
+                        ov = null;
+                        nv = null;
+
+                        if (c.length === 0) {
+                            // Probably no change
+                            continue;
+                        }
+                    }
+
+                    // Simplify change
+                    items.push(
+                        AuditLogPatchItem.create({
+                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(original) || getAutoEncoderName(v)),
+                            oldValue: ov || undefined,
+                            value: nv || undefined,
+                            type: AuditLogPatchItemType.Changed,
+                        }),
+                    );
+                    continue;
+                }
+
+                if (c.length === 0 && v instanceof AutoEncoder && v.isPatch()) {
                     // Manual log
                     items.push(
                         AuditLogPatchItem.create({
-                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderValue(original as AutoEncoder) || AuditLogReplacement.key(k)),
+                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(original) || getAutoEncoderName(v)),
+                            oldValue: getAutoEncoderValue(original) || undefined,
+                            value: getAutoEncoderValue(v) || undefined,
                             type: AuditLogPatchItemType.Changed,
                         }),
                     );
@@ -368,120 +561,123 @@ function createMapChangeHandler(key: string) {
             }
         }
 
+        if (!isPatch) {
+            // Loop old values
+            for (const [k, v] of oldValue.entries()) {
+                if (typeof k !== 'string') {
+                    // Not supported
+                    continue;
+                }
+
+                if (value.has(k)) {
+                    continue;
+                }
+
+                items.push(
+                    AuditLogPatchItem.create({
+                        key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(v)),
+                        oldValue: getAutoEncoderPutValue(v) || undefined,
+                        type: AuditLogPatchItemType.Removed,
+                    }),
+                );
+            }
+        }
+
         return items;
     };
 }
 
-function createSimpleArrayChangeHandler(key: string) {
+function createUnknownChangeHandler(key: string) {
     return (oldValue: unknown, value: unknown) => {
-        if (!Array.isArray(oldValue)) {
-            // Not supported
+        if (typeof value !== 'object' && value !== null) {
             return [];
         }
-        const keySingular = key.replace(/ies$/, 'y').replace(/s$/, '');
 
-        if (Array.isArray(value)) {
-            if (!value.every(v => typeof v === 'string')) {
-                // Not supported
-                return [];
-            }
-            if (!oldValue.every(v => typeof v === 'string')) {
-                // Not supported
-                return [];
-            }
+        if (oldValue === value) {
+            return [];
+        }
 
-            // Simple change
-            const valueStr = (value as string[]).join(', ');
-            const oldValueStr = (oldValue as string[]).join(', ');
+        if (!oldValue && getAutoEncoderValue(value)) {
+        // Simplify addition
+            return [
+                AuditLogPatchItem.create({
+                    key: getAutoEncoderKey(key),
+                    value: getAutoEncoderPutValue(value) || undefined,
+                    type: AuditLogPatchItemType.Added,
+                }),
+            ];
+        }
 
-            if (valueStr === oldValueStr) {
-                return [];
+        if (oldValue && value === null) {
+            return [
+                AuditLogPatchItem.create({
+                    key: getAutoEncoderKey(key),
+                    oldValue: getAutoEncoderPutValue(oldValue) || undefined,
+                    type: AuditLogPatchItemType.Removed,
+                }),
+            ];
+        }
+
+        const items = explainPatch(oldValue, value).map((i) => {
+            i.key = i.key.prepend(getAutoEncoderKey(key));
+            return i;
+        });
+
+        let v = getAutoEncoderValue(value);
+        let ov = getAutoEncoderValue(oldValue);
+
+        if (oldValue && value && getAutoEncoderValue(value) && items.length === 0 && value instanceof AutoEncoder && value.isPatch()) {
+            return [
+                AuditLogPatchItem.create({
+                    key: getAutoEncoderKey(key),
+                    value: v || undefined,
+                    oldValue: ov || undefined,
+                    type: AuditLogPatchItemType.Changed,
+                }),
+            ];
+        }
+
+        if (v && ov) {
+        // Simplify change
+            if (v.toString() === ov.toString()) {
+                v = null;
+                ov = null;
+
+                if (items.length === 0) {
+                    // Probably no change
+                    return [];
+                }
             }
 
             return [
                 AuditLogPatchItem.create({
-                    key: AuditLogReplacement.key(keySingular),
-                    oldValue: oldValue.length ? AuditLogReplacement.string(oldValueStr) : undefined,
-                    value: value.length ? AuditLogReplacement.string(valueStr) : undefined,
-                }).autoType(),
+                    key: getAutoEncoderKey(key),
+                    value: v || undefined,
+                    oldValue: ov || undefined,
+                    type: AuditLogPatchItemType.Changed,
+                }),
             ];
-        }
-
-        if (!isPatchableArray(value)) {
-            // Not supported
-            return [];
-        }
-
-        const items: AuditLogPatchItem[] = [];
-        const createdIdSet = new Set<string>();
-
-        for (const { put } of value.getPuts()) {
-            if (typeof put !== 'string') {
-                // Not supported
-                continue;
-            }
-
-            // Little hack: detect PUT/DELETE behaviour:
-            const original = oldValue.find(v => v === put);
-
-            // Added a new parent
-            if (!original) {
-                items.push(
-                    AuditLogPatchItem.create({
-                        key: AuditLogReplacement.key(keySingular),
-                        value: AuditLogReplacement.string(put),
-                        type: AuditLogPatchItemType.Added,
-                    }),
-                );
-            }
-            createdIdSet.add(put);
-        }
-
-        for (const id of value.getDeletes()) {
-            if (typeof id !== 'string') {
-                continue;
-            }
-
-            if (createdIdSet.has(id)) {
-                // DELETE + PUT happened
-                continue;
-            }
-
-            const original = oldValue.find(v => v === id);
-            if (!original || typeof original !== 'string') {
-                // Not supported
-                continue;
-            }
-
-            items.push(
-                AuditLogPatchItem.create({
-                    key: AuditLogReplacement.key(keySingular),
-                    oldValue: AuditLogReplacement.string(original),
-                    type: AuditLogPatchItemType.Removed,
-                }),
-            );
-        }
-
-        if (value.getMoves().length > 0) {
-            items.push(
-                AuditLogPatchItem.create({
-                    key: AuditLogReplacement.key(key),
-                    type: AuditLogPatchItemType.Reordered,
-                }),
-            );
         }
         return items;
     };
 }
 
 function getExplainerForField(field: Field<any>) {
-    if (field.decoder === StringDecoder || field.decoder instanceof EnumDecoder) {
+    if (field.decoder === StringDecoder) {
         return createStringChangeHandler(field.property);
     }
 
+    if (field.decoder instanceof EnumDecoder) {
+        return createEnumChangeHandler(field.property);
+    }
+
     if (field.decoder instanceof SymbolDecoder) {
-        if (field.decoder.decoder === StringDecoder || field.decoder.decoder instanceof EnumDecoder) {
+        if (field.decoder.decoder === StringDecoder) {
             return createStringChangeHandler(field.property);
+        }
+
+        if (field.decoder.decoder instanceof EnumDecoder) {
+            return createEnumChangeHandler(field.property);
         }
     }
 
@@ -495,10 +691,6 @@ function getExplainerForField(field: Field<any>) {
 
     if (field.decoder === IntegerDecoder) {
         return createIntegerChangeHandler(field.property);
-    }
-
-    if (field.decoder instanceof ArrayDecoder && field.decoder.decoder === StringDecoder) {
-        return createSimpleArrayChangeHandler(field.property);
     }
 
     if (field.decoder instanceof ArrayDecoder) {
@@ -524,7 +716,7 @@ function getExplainerForField(field: Field<any>) {
 
             return [
                 AuditLogPatchItem.create({
-                    key: AuditLogReplacement.key(field.property),
+                    key: getAutoEncoderKey(field.property),
                     oldValue: wasTrueOld === true ? AuditLogReplacement.string('Aangevinkt') : (wasTrueOld === false ? AuditLogReplacement.string('Uitgevinkt') : undefined),
                     value: isTrue === true ? AuditLogReplacement.string('Aangevinkt') : (isTrue === false ? AuditLogReplacement.string('Uitgevinkt') : undefined),
                 }),
@@ -532,97 +724,48 @@ function getExplainerForField(field: Field<any>) {
         };
     }
 
-    if ((field.decoder as any).prototype instanceof AutoEncoder || field.decoder === AutoEncoder) {
-        return (oldValue: unknown, value: unknown) => {
-            if (!(value instanceof AutoEncoder) && value !== null) {
-                return [];
-            }
-
-            if (oldValue === value) {
-                return [];
-            }
-
-            if (oldValue && value && getAutoEncoderValue(value as AutoEncoder)) {
-                // Simplify addition
-                return [
-                    AuditLogPatchItem.create({
-                        key: AuditLogReplacement.key(field.property),
-                        value: getAutoEncoderValue(value as AutoEncoder) || AuditLogReplacement.key(field.property),
-                        oldValue: getAutoEncoderValue(oldValue as AutoEncoder) || AuditLogReplacement.key(field.property),
-                        type: AuditLogPatchItemType.Changed,
-                    }),
-                ];
-            }
-
-            if (!oldValue && getAutoEncoderValue(value as AutoEncoder)) {
-                // Simplify addition
-                return [
-                    AuditLogPatchItem.create({
-                        key: AuditLogReplacement.key(field.property),
-                        value: getAutoEncoderValue(value as AutoEncoder) || AuditLogReplacement.key(field.property),
-                        type: AuditLogPatchItemType.Added,
-                    }),
-                ];
-            }
-
-            if (value === null) {
-                return [
-                    AuditLogPatchItem.create({
-                        key: AuditLogReplacement.key(field.property),
-                        oldValue: getAutoEncoderValue(oldValue as AutoEncoder) || AuditLogReplacement.key(field.property),
-                        type: AuditLogPatchItemType.Removed,
-                    }),
-                ];
-            }
-
-            return explainPatch(oldValue as AutoEncoder | null, value).map((i) => {
-                i.key = i.key.prepend(AuditLogReplacement.key(field.property));
-                return i;
-            });
-        };
-    }
-
-    // Simple addition/delete/change detection
-    return (oldValue: unknown, value: unknown) => {
-        if (value === undefined) {
-            return [];
-        }
-
-        if (oldValue === value) {
-            return [];
-        }
-
-        return [
-            AuditLogPatchItem.create({
-                key: AuditLogReplacement.key(field.property),
-                type: AuditLogPatchItemType.Changed,
-            }),
-        ];
-    };
+    return createUnknownChangeHandler(field.property);
 }
 
-export function explainPatch<T extends AutoEncoder>(original: T | null, patch: AutoEncoderPatchType<T> | T): AuditLogPatchItem[] {
+export function explainPatch(original: unknown | null, patch: unknown): AuditLogPatchItem[] {
     if (isPatchableArray(patch)) {
         const b = createArrayChangeHandler('items');
         return b(original, patch);
     }
-    if (!(patch instanceof AutoEncoder)) {
+
+    if (original instanceof Map) {
+        const b = createMapChangeHandler();
+        return b(original, patch);
+    }
+
+    if (typeof patch !== 'object' || patch === null) {
+        if (patch === null) {
+            // todo
+        }
         return [];
     }
-    if (original && !(original instanceof AutoEncoder)) {
+    if (original && typeof original !== 'object') {
         return [];
     }
 
     const items: AuditLogPatchItem[] = [];
 
     for (const key in patch) {
-        const field = original ? original.static.fields.find(f => f.property === key) : patch.static.fields.find(f => f.property === key);
-        if (!field) {
-            continue;
-        }
-
+        const field = original instanceof AutoEncoder
+            ? original.static.latestFields.find(f => f.property === key)
+            : (
+                    patch instanceof AutoEncoder
+                        ? patch.static.latestFields.find(f => f.property === key)
+                        : null
+                );
         const oldValue = original?.[key] ?? null;
         const value = patch[key];
+
+        if (!(patch instanceof AutoEncoder) || !field) {
+            // try manual without type information
+            items.push(...createUnknownChangeHandler(key)(oldValue, value));
+            continue;
+        }
 
         if (patch.isPut() && key === 'id') {
             continue;

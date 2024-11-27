@@ -1,6 +1,5 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { sleep } from '@stamhoofd/utility';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 class Queue {
     name: string;

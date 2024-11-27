@@ -35,6 +35,10 @@ export class Address extends AutoEncoder {
         return this.street + ' ' + this.number + ', ' + this.city;
     }
 
+    getPatchName() {
+        return this.shortString();
+    }
+
     anonymousString(currentCountry: Country): string {
         if (this.country == currentCountry) {
             return this.street + ', ' + this.city;

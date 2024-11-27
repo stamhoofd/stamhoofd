@@ -1,4 +1,4 @@
-import { AutoEncoderPatchType, Decoder, isPatchableArray, ObjectData, PatchableArrayAutoEncoder, patchObject } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, ObjectData, PatchableArrayAutoEncoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, SetupStepUpdater, StripeAccount, Webshop } from '@stamhoofd/models';
@@ -62,6 +62,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 statusCode: 403,
             });
         }
+
+        const initialStruct = (await AuthenticatedStructures.organization(organization)).clone();
 
         const errors = new SimpleErrors();
         let shouldUpdateSetupSteps = false;
@@ -136,7 +138,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 // Apply payconiq patch
                 if (request.body.privateMeta.payconiqAccounts !== undefined) {
-                    organization.privateMeta.payconiqAccounts = patchObject(organization.privateMeta.payconiqAccounts, request.body.privateMeta.payconiqAccounts);
+                    organization.privateMeta.payconiqAccounts = patchObject(organization.privateMeta.payconiqAccounts, cloneObject(request.body.privateMeta.payconiqAccounts as any));
 
                     for (const account of organization.privateMeta.payconiqAccounts) {
                         if (account.merchantId === null) {
@@ -214,8 +216,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     await this.validateCompanies(organization, request.body.meta.companies);
                     shouldUpdateSetupSteps = true;
                 }
-                const oldMeta = organization.meta.clone();
-
                 const savedPackages = organization.meta.packages;
                 organization.meta.patchOrPut(request.body.meta);
                 organization.meta.packages = savedPackages;
@@ -283,13 +283,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     updateTags = true;
                 }
-
-                await AuditLogService.log({
-                    type: AuditLogType.OrganizationSettingsChanged,
-                    organization,
-                    oldMeta,
-                    patch: request.body.meta,
-                });
             }
 
             if (request.body.active !== undefined) {
@@ -393,8 +386,16 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         if (updateTags) {
             await TagHelper.updateOrganizations();
         }
+        const struct = await AuthenticatedStructures.organization(organization);
 
-        return new Response(await AuthenticatedStructures.organization(organization));
+        await AuditLogService.log({
+            type: AuditLogType.OrganizationSettingsChanged,
+            organization,
+            oldData: initialStruct,
+            patch: struct,
+        });
+
+        return new Response(struct);
     }
 
     async validateCompanies(organization: Organization, companies: PatchableArrayAutoEncoder<Company> | Company[]) {

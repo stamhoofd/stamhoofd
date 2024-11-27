@@ -123,11 +123,13 @@ const permissionLevel = computed({
 
         if (resourcePermissions.value) {
             subPatch.set(props.resource.id, ResourcePermissions.patch({
+                resourceName: props.resource.name,
                 level,
             }));
         }
         else {
             subPatch.set(props.resource.id, ResourcePermissions.create({
+                resourceName: props.resource.name,
                 level,
             }));
         }
@@ -150,7 +152,9 @@ for (const accessRight of props.configurableAccessRights) {
             const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions> | ResourcePermissions | null>();
 
             if (resourcePermissions.value) {
-                const p = ResourcePermissions.patch({});
+                const p = ResourcePermissions.patch({
+                    resourceName: props.resource.name,
+                });
                 if (enable) {
                     p.accessRights.addDelete(accessRight); // prevent creating duplicates
                     p.accessRights.addPut(accessRight);
@@ -163,6 +167,7 @@ for (const accessRight of props.configurableAccessRights) {
             }
             else {
                 subPatch.set(props.resource.id, ResourcePermissions.create({
+                    resourceName: props.resource.name,
                     level: PermissionLevel.None,
                     accessRights: [accessRight],
                 }));

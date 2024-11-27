@@ -71,6 +71,10 @@ export class Group extends AutoEncoder {
     @field({ decoder: new EnumDecoder(GroupStatus), version: 192 })
     status = GroupStatus.Open;
 
+    getPatchName() {
+        return this.settings.name;
+    }
+
     static defaultSort(this: unknown, a: Group, b: Group) {
         if (a.settings.maxAge && !b.settings.maxAge) {
             return -1;

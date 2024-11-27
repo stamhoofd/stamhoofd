@@ -5,14 +5,17 @@ import { Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
 import { AuthenticatedStructures } from './AuthenticatedStructures';
 import { MemberUserSyncer } from './MemberUserSyncer';
+import { AuditLogService } from '../services/AuditLogService';
 
 export class PeriodHelper {
     static async moveOrganizationToPeriod(organization: Organization, period: RegistrationPeriod) {
-        console.log('moveOrganizationToPeriod', organization.id, period.id);
+        await AuditLogService.disable(async () => {
+            console.log('moveOrganizationToPeriod', organization.id, period.id);
 
-        await this.createOrganizationPeriodForPeriod(organization, period);
-        organization.periodId = period.id;
-        await organization.save();
+            await this.createOrganizationPeriodForPeriod(organization, period);
+            organization.periodId = period.id;
+            await organization.save();
+        });
     }
 
     static async stopAllResponsibilities() {
@@ -169,29 +172,31 @@ export class PeriodHelper {
 
         const batchSize = 100;
         await QueueHandler.schedule(tag, async () => {
-            let lastId = '';
+            await AuditLogService.disable(async () => {
+                let lastId = '';
 
-            while (true) {
-                const groups = await Group.where(
-                    {
-                        id: { sign: '>', value: lastId },
-                        periodId: period.id,
-                    },
-                    {
-                        limit: batchSize,
-                        sort: ['id'],
-                    },
-                );
+                while (true) {
+                    const groups = await Group.where(
+                        {
+                            id: { sign: '>', value: lastId },
+                            periodId: period.id,
+                        },
+                        {
+                            limit: batchSize,
+                            sort: ['id'],
+                        },
+                    );
 
-                for (const group of groups) {
-                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: group.id }), period);
-                    lastId = group.id;
+                    for (const group of groups) {
+                        await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: group.id }), period);
+                        lastId = group.id;
+                    }
+
+                    if (groups.length < batchSize) {
+                        break;
+                    }
                 }
-
-                if (groups.length < batchSize) {
-                    break;
-                }
-            }
+            });
         });
     }
 }

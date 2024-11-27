@@ -1,8 +1,9 @@
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { AuditLog, Group, Member, Organization, Registration, Event } from '@stamhoofd/models';
+import { AuditLog, Group, Member, Organization, Registration, Event, RegistrationPeriod } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, GroupType, MemberDetails, OrganizationMetaData, OrganizationPrivateMetaData, PlatformConfig, PlatformPrivateConfig } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context';
 import { explainPatch } from './explainPatch';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 export type MemberAddedAuditOptions = {
     type: AuditLogType.MemberAdded;
@@ -25,24 +26,16 @@ export type MemberRegisteredAuditOptions = {
 
 export type PlatformConfigChangeAuditOptions = {
     type: AuditLogType.PlatformSettingsChanged;
-} & ({
-    oldConfig: PlatformPrivateConfig;
-    patch: PlatformPrivateConfig | AutoEncoderPatchType<PlatformPrivateConfig>;
-} | {
-    oldConfig: PlatformConfig;
-    patch: PlatformConfig | AutoEncoderPatchType<PlatformConfig>;
-});
+    oldData?: AutoEncoder;
+    patch?: AutoEncoder | AutoEncoderPatchType<AutoEncoder>;
+};
 
 export type OrganizationConfigChangeAuditOptions = {
     type: AuditLogType.OrganizationSettingsChanged;
     organization: Organization;
-} & ({
-    oldMeta: OrganizationMetaData;
-    patch: OrganizationMetaData | AutoEncoderPatchType<OrganizationMetaData>;
-} | {
-    oldMeta: OrganizationPrivateMetaData;
-    patch: OrganizationPrivateMetaData | AutoEncoderPatchType<OrganizationPrivateMetaData>;
-});
+    oldData?: AutoEncoder;
+    patch?: AutoEncoder | AutoEncoderPatchType<AutoEncoder>;
+};
 
 export type EventAuditOptions = {
     type: AuditLogType.EventAdded | AuditLogType.EventEdited | AuditLogType.EventDeleted;
@@ -58,11 +51,39 @@ export type GroupAuditOptions = {
     patch?: AutoEncoder | AutoEncoderPatchType<AutoEncoder>;
 };
 
-export type AuditLogOptions = GroupAuditOptions | EventAuditOptions | MemberAddedAuditOptions | MemberEditedAuditOptions | MemberRegisteredAuditOptions | PlatformConfigChangeAuditOptions | OrganizationConfigChangeAuditOptions;
+export type PeriodAuditOptions = {
+    type: AuditLogType.RegistrationPeriodAdded | AuditLogType.RegistrationPeriodEdited | AuditLogType.RegistrationPeriodDeleted;
+    period: RegistrationPeriod;
+    oldData?: AutoEncoder;
+    patch?: AutoEncoder | AutoEncoderPatchType<AutoEncoder>;
+};
+
+export type AuditLogOptions = PeriodAuditOptions | GroupAuditOptions | EventAuditOptions | MemberAddedAuditOptions | MemberEditedAuditOptions | MemberRegisteredAuditOptions | PlatformConfigChangeAuditOptions | OrganizationConfigChangeAuditOptions;
 
 export const AuditLogService = {
+    disableLocalStore: new AsyncLocalStorage<boolean>(),
+
+    disable<T extends Promise<void> | void>(run: () => T): T {
+        return this.disableLocalStore.run(true, () => {
+            return run();
+        });
+    },
+
+    isDisabled(): boolean {
+        const c = this.disableLocalStore.getStore();
+
+        if (!c) {
+            return false;
+        }
+
+        return true;
+    },
+
     async log(options: AuditLogOptions) {
         try {
+            if (this.isDisabled()) {
+                return;
+            }
             const userId = Context.optionalAuth?.user?.id ?? null;
             const organizationId = Context.organization?.id ?? null;
 
@@ -96,11 +117,12 @@ export const AuditLogService = {
             else if (options.type === AuditLogType.GroupAdded || options.type === AuditLogType.GroupEdited || options.type === AuditLogType.GroupDeleted) {
                 this.fillForGroup(model, options);
             }
+            else if (options.type === AuditLogType.RegistrationPeriodAdded || options.type === AuditLogType.RegistrationPeriodEdited || options.type === AuditLogType.RegistrationPeriodDeleted) {
+                this.fillForPeriod(model, options);
+            }
 
             // In the future we might group these saves together in one query to improve performance
             await model.save();
-
-            console.log('Audit log', model.id, options);
         }
         catch (e) {
             console.error('Failed to save log', options, e);
@@ -162,7 +184,10 @@ export const AuditLogService = {
         model.objectId = null;
 
         // Generate changes list
-        model.patchList = explainPatch(options.oldConfig, options.patch);
+        if (options.patch) {
+            // Generate changes list
+            model.patchList = explainPatch(options.oldData ?? null, options.patch);
+        }
     },
 
     fillForOrganizationConfig(model: AuditLog, options: OrganizationConfigChangeAuditOptions) {
@@ -178,7 +203,10 @@ export const AuditLogService = {
         ]);
 
         // Generate changes list
-        model.patchList = explainPatch(options.oldMeta, options.patch);
+        if (options.patch) {
+            // Generate changes list
+            model.patchList = explainPatch(options.oldData ?? null, options.patch);
+        }
     },
 
     fillForEvent(model: AuditLog, options: EventAuditOptions) {
@@ -226,6 +254,23 @@ export const AuditLogService = {
                 id: options.group.id,
                 value: options.group.settings.name,
                 type: AuditLogReplacementType.Group,
+            })],
+        ]);
+    },
+
+    fillForPeriod(model: AuditLog, options: PeriodAuditOptions) {
+        model.objectId = options.period.id;
+
+        if (options.patch) {
+            // Generate changes list
+            model.patchList = explainPatch(options.oldData ?? null, options.patch);
+        }
+
+        model.replacements = new Map([
+            ['p', AuditLogReplacement.create({
+                id: options.period.id,
+                value: options.period.getStructure().nameShort,
+                type: AuditLogReplacementType.RegistrationPeriod,
             })],
         ]);
     },

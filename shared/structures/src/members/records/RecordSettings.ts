@@ -48,6 +48,48 @@ export enum RecordType {
     Integer = 'Integer',
 }
 
+export function getRecordTypeName(type: RecordType) {
+    const all = [
+        {
+            value: RecordType.Text,
+            name: 'Tekstveld (één lijn)',
+        },
+        {
+            value: RecordType.Textarea,
+            name: 'Tekstveld (meerdere lijnen)',
+        },
+        {
+            value: RecordType.Address,
+            name: 'Adres',
+        },
+        {
+            value: RecordType.Email,
+            name: 'E-mailadres',
+        },
+        {
+            value: RecordType.Phone,
+            name: 'Telefoonnummer',
+        },
+        {
+            value: RecordType.Date,
+            name: 'Datum',
+        },
+        {
+            value: RecordType.Checkbox,
+            name: 'Aankruisvakje',
+        },
+        {
+            value: RecordType.ChooseOne,
+            name: 'Keuzemenu (kies één)',
+        },
+        {
+            value: RecordType.MultipleChoice,
+            name: 'Keuzemenu (kies meerdere)',
+        },
+    ];
+    return all.find(t => t.value === type)?.name ?? 'Onbekend';
+}
+
 export enum RecordWarningType {
     Info = 'Info',
     Warning = 'Warning',
@@ -199,6 +241,14 @@ export class RecordSettings extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[];
+
+    getPatchValue() {
+        const type = getRecordTypeName(this.type);
+        if (this.required) {
+            return 'Verplicht ' + type;
+        }
+        return type;
+    }
 
     validate(answers: Map<string, RecordAnswer>, requiredCategory = true) {
         const answer = answers.get(this.id);

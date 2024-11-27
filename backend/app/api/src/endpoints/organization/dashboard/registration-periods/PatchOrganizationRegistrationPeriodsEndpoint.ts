@@ -425,6 +425,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             Member.updateMembershipsForGroupId(model.id);
         }
 
+        if (Object.keys(struct).length === 1 && struct.id) {
+            // Nothing changed
+            return;
+        }
+
         await AuditLogService.log({
             type: AuditLogType.GroupEdited,
             group: model,

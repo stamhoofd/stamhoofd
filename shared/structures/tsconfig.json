@@ -13,6 +13,7 @@
         "declaration": true,
         "declarationMap": true,
         "outDir": "dist",
+        "resolveJsonModule": true,
         "lib": [
             "es2019",
             "dom"

@@ -20,7 +20,7 @@
         "markdown": false,
         "plaintext": false,
         "yaml": false,
-        "json": false
+        "json": true
     },
     "editor.codeLens": true,
     "editor.formatOnPaste": false,

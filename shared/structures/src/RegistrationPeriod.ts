@@ -49,6 +49,14 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     @field({ decoder: SetupSteps, version: 324 })
     setupSteps = SetupSteps.create({});
 
+    getPatchName() {
+        return this.period.name;
+    }
+
+    getPatchValue() {
+        return this.period.name;
+    }
+
     /**
      * Get all groups that are in a category
      */

@@ -1,11 +1,12 @@
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
+import { AuditLogType, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Context } from '../../../helpers/Context';
 import { PeriodHelper } from '../../../helpers/PeriodHelper';
+import { AuditLogService } from '../../../services/AuditLogService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -62,6 +63,11 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             await period.save();
             periods.push(period);
+
+            await AuditLogService.log({
+                type: AuditLogType.RegistrationPeriodAdded,
+                period,
+            });
         }
 
         for (const patch of request.body.getPatches()) {
@@ -74,6 +80,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     message: 'Registration period not found',
                 });
             }
+            const initialStructure = model.getStructure().clone();
 
             if (patch.startDate !== undefined) {
                 model.startDate = patch.startDate;
@@ -95,6 +102,13 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             // Schedule patch of all groups in this period
             PeriodHelper.updateGroupsInPeriod(model).catch(console.error);
+
+            await AuditLogService.log({
+                type: AuditLogType.RegistrationPeriodEdited,
+                period: model,
+                patch,
+                oldData: initialStructure,
+            });
         }
 
         for (const id of request.body.getDeletes()) {
@@ -109,6 +123,11 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             }
 
             await model.delete();
+
+            await AuditLogService.log({
+                type: AuditLogType.RegistrationPeriodDeleted,
+                period: model,
+            });
         }
 
         // Clear platform cache

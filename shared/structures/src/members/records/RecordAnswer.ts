@@ -128,6 +128,14 @@ export class RecordAnswer extends AutoEncoder {
             settings,
         });
     }
+
+    getPatchName() {
+        return this.settings.name;
+    }
+
+    getPatchValue() {
+        return this.stringValue;
+    }
 }
 
 export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {

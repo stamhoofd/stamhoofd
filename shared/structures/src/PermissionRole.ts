@@ -64,6 +64,10 @@ export class PermissionRoleDetailed extends PermissionRole {
     @field({ decoder: BooleanDecoder, field: 'createWebshops', optional: true })
     legacyCreateWebshops = false;
 
+    getPatchValue() {
+        return this.getDescription();
+    }
+
     getDescription() {
         const stack: string[] = [];
         if (this.level === PermissionLevel.Read) {

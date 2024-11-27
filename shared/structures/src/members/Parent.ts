@@ -3,7 +3,7 @@ import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../addresses/Address.js';
-import { ParentType } from './ParentType.js';
+import { ParentType, ParentTypeHelper } from './ParentType.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 
 export class Parent extends AutoEncoder {
@@ -49,6 +49,10 @@ export class Parent extends AutoEncoder {
             return this.firstName;
         }
         return this.firstName + ' ' + this.lastName;
+    }
+
+    getPatchName() {
+        return this.name + ` (${ParentTypeHelper.getName(this.type)})`;
     }
 
     matchQuery(query: string): boolean {

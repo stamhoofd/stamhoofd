@@ -136,6 +136,10 @@ export class GroupCategory extends AutoEncoder {
         }
         return false;
     }
+
+    getPatchName() {
+        return this.settings.name;
+    }
 }
 
 export class GroupCategoryTree extends GroupCategory {

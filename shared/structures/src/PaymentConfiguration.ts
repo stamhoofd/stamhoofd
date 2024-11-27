@@ -29,6 +29,27 @@ export class PayconiqAccount extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true })
     callbackUrl: string | null = null;
+
+    getPatchName() {
+        if (this.name && this.iban) {
+            return `${this.name} (${this.iban})`;
+        }
+
+        if (this.name) {
+            return this.name + ' (Payconiq)';
+        }
+
+        if (this.iban) {
+            return this.iban + ' (Payconiq)';
+        }
+
+        return `Payconiq Account (${this.merchantId ?? this.id})`;
+    }
+
+    getPatchValue() {
+        // Don't list properties
+        return '';
+    }
 }
 
 /**

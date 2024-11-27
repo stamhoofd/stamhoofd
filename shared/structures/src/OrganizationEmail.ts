@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 export class OrganizationEmail extends AutoEncoder {
@@ -25,4 +25,12 @@ export class OrganizationEmail extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder })
     restricted = false;
+
+    getPatchName() {
+        if (this.name) {
+            return this.name + ' <' + this.email + '>';
+        }
+
+        return this.email;
+    }
 }

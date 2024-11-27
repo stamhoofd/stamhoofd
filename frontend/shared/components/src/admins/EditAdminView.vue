@@ -32,7 +32,7 @@
 
         <p v-if="getPermissions(user) && !user.memberId" class="info-box">
             Deze beheerder is niet gekoppeld aan een ingeschreven lid, en is daarom extern. Zorg dat het e-mailadres overeen komt met het e-mailadres van een lid zelf.
-        </p> 
+        </p>
 
         <STErrorsDefault :error-box="$errors.errorBox" />
         <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="$errors.errorBox">
@@ -63,14 +63,14 @@
                 <p>Beheerders kunnen automatisch toegang krijgen tot een onderdeel als ze het zelf hebben aangemaakt maar anders niet automatisch toegang zouden hebben (bv. aanmaken van nieuwe webshops). Sowieso is het aan te raden om dit om te zetten in beheerdersrollen, aangezien die eenvoudiger te beheren zijn.</p>
 
                 <STList>
-                    <ResourcePermissionRow 
-                        v-for="resource in resources" 
-                        :key="resource.id" 
-                        :role="permissions.unloadedPermissions" 
-                        :resource="resource" 
+                    <ResourcePermissionRow
+                        v-for="resource in resources"
+                        :key="resource.id"
+                        :role="permissions.unloadedPermissions"
+                        :resource="resource"
                         :configurable-access-rights="[]"
-                        type="resource" 
-                        @patch:role="addPermissionPatch" 
+                        type="resource"
+                        @patch:role="addPermissionPatch"
                     />
                 </STList>
             </div>
@@ -99,7 +99,7 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, EditUserPermissionsBox, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, useUninheritedPermissions } from '@stamhoofd/components';
-import { PermissionRoleForResponsibility, Permissions, PermissionsResourceType, User, UserWithMembers } from '@stamhoofd/structures';
+import { Permissions, PermissionsResourceType, User, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
@@ -110,7 +110,7 @@ const saving = ref(false);
 const deleting = ref(false);
 const didSendInvite = ref(false);
 const sendingInvite = ref(false);
-const $context = useContext()
+const $context = useContext();
 const pop = usePop();
 
 const props = defineProps<{
@@ -118,71 +118,72 @@ const props = defineProps<{
     isNew: boolean;
 }>();
 
-const {patch, patched, addPatch, hasChanges} = usePatch(props.user)
-const {pushInMemory, dropFromMemory, getPermissionsPatch, getPermissions} = useAdmins()
-const permissions = useUninheritedPermissions({patchedUser: patched})
+const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
+const { pushInMemory, dropFromMemory, getPermissionsPatch, getPermissions } = useAdmins();
+const permissions = useUninheritedPermissions({ patchedUser: patched });
 const resources = computed(() => {
     const raw = permissions.unloadedPermissions;
     if (!raw) {
         return [];
     }
-    const list: {id: string, name: string, type: PermissionsResourceType}[] = [];
+    const list: { id: string; name: string; type: PermissionsResourceType }[] = [];
     for (const [type, p] of raw.resources.entries()) {
         for (const [id, resource] of p.entries()) {
-            list.push({id, name: resource.resourceName, type})
+            list.push({ id, name: resource.resourceName, type });
         }
     }
     return list;
-})
+});
 
 const canEditDetails = computed(() => {
-    return !patched.value?.permissions?.globalPermissions || $context.value.auth.hasFullPlatformAccess() || (patched.value.id === $context.value?.user?.id)
+    return !patched.value?.permissions?.globalPermissions || $context.value.auth.hasFullPlatformAccess() || (patched.value.id === $context.value?.user?.id);
 });
 
 const addPermissionPatch = (patch: AutoEncoderPatchType<Permissions>) => {
     addPatch(User.patch({
-        permissions: getPermissionsPatch(patched.value, patch)
-    }))
-}
+        permissions: getPermissionsPatch(patched.value, patch),
+    }));
+};
 
 const save = async () => {
     if (deleting.value || saving.value) {
         return;
     }
 
-    saving.value = true
+    saving.value = true;
 
-    const errors = new SimpleErrors()
+    const errors = new SimpleErrors();
 
     if ((firstName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Vul de voornaam in",
-            field: "firstName"
-        }))
+            code: 'invalid_field',
+            message: 'Vul de voornaam in',
+            field: 'firstName',
+        }));
     }
     if ((lastName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Vul de achternaam in",
-            field: "lastName"
-        }))
+            code: 'invalid_field',
+            message: 'Vul de achternaam in',
+            field: 'lastName',
+        }));
     }
-    
-    let valid = false
+
+    let valid = false;
 
     if (errors.errors.length > 0) {
-        $errors.errorBox = new ErrorBox(errors)
-    } else {
-        $errors.errorBox = null
-        valid = true
+        $errors.errorBox = new ErrorBox(errors);
     }
-    valid = valid && await $errors.validator.validate()
+    else {
+        $errors.errorBox = null;
+        valid = true;
+    }
+    valid = valid && await $errors.validator.validate();
 
     // TODO: validate if at least email or name is filled in
 
     if (!valid) {
-        saving.value = false
+        saving.value = false;
         return;
     }
 
@@ -190,22 +191,23 @@ const save = async () => {
         let user: User;
         if (props.isNew) {
             const response = await $context.value.authenticatedServer.request({
-                method: "POST",
-                path: "/user",
+                method: 'POST',
+                path: '/user',
                 body: patched.value,
-                decoder: UserWithMembers as Decoder<UserWithMembers>
-            })
+                decoder: UserWithMembers as Decoder<UserWithMembers>,
+            });
             user = response.data;
-            new Toast("Beheerder "+user.firstName+" is toegevoegd en heeft een uitnodiging via email ontvangen.", "success").setHide(5000).show()
-        } else {
+            new Toast('Beheerder ' + user.firstName + ' is toegevoegd en heeft een uitnodiging via email ontvangen.', 'success').setHide(5000).show();
+        }
+        else {
             const response = await $context.value.authenticatedServer.request({
-                method: "PATCH",
-                path: "/user/"+patched.value.id,
+                method: 'PATCH',
+                path: '/user/' + patched.value.id,
                 body: patch.value,
-                decoder: UserWithMembers as Decoder<UserWithMembers>
-            })
+                decoder: UserWithMembers as Decoder<UserWithMembers>,
+            });
             user = response.data;
-            new Toast("Beheerder "+user.firstName+" is aangepast", "success").setHide(2000).show()
+            new Toast('Beheerder ' + user.firstName + ' is aangepast', 'success').setHide(2000).show();
         }
 
         // Copy all data
@@ -213,26 +215,27 @@ const save = async () => {
 
         // Push user to admins
         if (props.isNew) {
-            pushInMemory(props.user)
+            pushInMemory(props.user);
         }
 
-        await pop({ force: true })
-    } catch (e) {
-        console.error(e)
-        $errors.errorBox = new ErrorBox(e)
-        saving.value = false
+        await pop({ force: true });
     }
-}
+    catch (e) {
+        console.error(e);
+        $errors.errorBox = new ErrorBox(e);
+        saving.value = false;
+    }
+};
 const doDelete = async () => {
     if (deleting.value || saving.value) {
         return false;
     }
-    
+
     if (props.isNew) {
         return false;
     }
 
-    if (!await CenteredMessage.confirm("Ben je zeker dat je deze beheerder wilt verwijderen?", "Verwijderen")) {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je deze beheerder wilt verwijderen?', 'Verwijderen')) {
         return false;
     }
 
@@ -241,25 +244,26 @@ const doDelete = async () => {
     try {
         // Patch the user
         const response = await $context.value.authenticatedServer.request({
-            method: "PATCH",
-            path: "/user/"+props.user.id,
+            method: 'PATCH',
+            path: '/user/' + props.user.id,
             body: User.patch({
                 id: props.user.id,
-                permissions: getPermissionsPatch(props.user, null)
+                permissions: getPermissionsPatch(props.user, null),
             }),
-            decoder: User as Decoder<User>
-        })
+            decoder: User as Decoder<User>,
+        });
 
         // Copy all data
         props.user.deepSet(response.data);
-        dropFromMemory(props.user)
+        dropFromMemory(props.user);
 
-        await pop({ force: true })
+        await pop({ force: true });
 
-        new Toast("Beheerder "+props.user.firstName+" is verwijderd", "success").setHide(2000).show()
-    } catch (e) {
-        console.error(e)
-        $errors.errorBox = new ErrorBox(e)
+        new Toast('Beheerder ' + props.user.firstName + ' is verwijderd', 'success').setHide(2000).show();
+    }
+    catch (e) {
+        console.error(e);
+        $errors.errorBox = new ErrorBox(e);
         deleting.value = false;
     }
     return false;
@@ -267,60 +271,59 @@ const doDelete = async () => {
 const resendInvite = async () => {
     // We can send a new invite by just recreating the admin (the API will merge with existing admins)
     if (hasChanges.value || props.isNew) {
-        new CenteredMessage('Wijzigingen niet opgeslagen', 'Voor je een uitnodiging opnieuw kan versturen moet je alle wijzigingen opslaan of annuleren.').addCloseButton().show()
-        return
+        new CenteredMessage('Wijzigingen niet opgeslagen', 'Voor je een uitnodiging opnieuw kan versturen moet je alle wijzigingen opslaan of annuleren.').addCloseButton().show();
+        return;
     }
     if (sendingInvite.value) {
         return;
     }
-    sendingInvite.value = true
+    sendingInvite.value = true;
 
     try {
-
         // Note: we don't use the patchedUser, because that would save any changes too
         const response = await $context.value.authenticatedServer.request({
-            method: "POST",
-            path: "/user",
+            method: 'POST',
+            path: '/user',
             body: props.user,
-            decoder: User as Decoder<User>
-        })
-        
+            decoder: User as Decoder<User>,
+        });
+
         // Copy all data
         props.user.set(response.data);
-        didSendInvite.value = true
+        didSendInvite.value = true;
 
-        new Toast("Uitnodiging verzonden naar "+props.user.email, "success").setHide(2000).show()
-    } catch (e) {
-        console.error(e)
-        $errors.errorBox = new ErrorBox(e)
-        
+        new Toast('Uitnodiging verzonden naar ' + props.user.email, 'success').setHide(2000).show();
     }
-    sendingInvite.value = false
+    catch (e) {
+        console.error(e);
+        $errors.errorBox = new ErrorBox(e);
+    }
+    sendingInvite.value = false;
 };
 
 const firstName = computed({
     get: () => patched.value.firstName,
-    set: (value: string|null) => addPatch({firstName: value}),
+    set: (value: string | null) => addPatch({ firstName: value }),
 });
 
 const lastName = computed({
     get: () => patched.value.lastName,
-    set: (value: string|null) => addPatch({lastName: value}),
+    set: (value: string | null) => addPatch({ lastName: value }),
 });
 
 const email = computed({
     get: () => patched.value.email,
-    set: (value: string) => addPatch({email: value}),
+    set: (value: string) => addPatch({ email: value }),
 });
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

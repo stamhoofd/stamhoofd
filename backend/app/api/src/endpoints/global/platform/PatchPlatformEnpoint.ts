@@ -49,10 +49,9 @@ export class PatchPlatformEndpoint extends Endpoint<
         }
 
         const platform = await Platform.getShared();
+        const initialStruct = (await Platform.getSharedPrivateStruct()).clone();
 
         if (request.body.privateConfig) {
-            const oldConfig = platform.privateConfig.clone();
-
             // Did we patch roles?
             if (request.body.privateConfig.roles) {
                 if (!Context.auth.canManagePlatformAdmins()) {
@@ -77,12 +76,6 @@ export class PatchPlatformEndpoint extends Endpoint<
                     request.body.privateConfig.emails,
                 );
             }
-
-            await AuditLogService.log({
-                type: AuditLogType.PlatformSettingsChanged,
-                oldConfig,
-                patch: request.body.privateConfig,
-            });
         }
 
         let shouldUpdateSetupSteps = false;
@@ -116,12 +109,6 @@ export class PatchPlatformEndpoint extends Endpoint<
                 else {
                     platform.config = patchObject(platform.config, newConfig);
                 }
-
-                await AuditLogService.log({
-                    type: AuditLogType.PlatformSettingsChanged,
-                    oldConfig,
-                    patch: newConfig,
-                });
             }
 
             if (newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0) {
@@ -235,6 +222,12 @@ export class PatchPlatformEndpoint extends Endpoint<
             // Do not call this right away when moving to a period, because this needs to happen AFTER moving to the period
             SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod().catch(console.error);
         }
+
+        await AuditLogService.log({
+            type: AuditLogType.PlatformSettingsChanged,
+            oldData: initialStruct,
+            patch: request.body,
+        });
 
         return new Response(await Platform.getSharedPrivateStruct());
     }

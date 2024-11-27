@@ -1,4 +1,4 @@
-import { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
+import { cloneObject, Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 
 import { Filterable } from '../members/records/RecordCategory.js';
 import { StamhoofdFilterDecoder } from './FilteredRequest.js';
@@ -35,7 +35,7 @@ export class PropertyFilter implements Encodeable {
     }
 
     get isAlwaysEnabledAndRequired() {
-        return this.enabledWhen === null && isEmptyFilter(this.requiredWhen);
+        return this.enabledWhen === null && isEmptyFilter(this.requiredWhen) && this.requiredWhen !== null;
     }
 
     isRequired(object: Filterable): boolean {
@@ -61,6 +61,13 @@ export class PropertyFilter implements Encodeable {
         return new PropertyFilter(
             data.field('enabledWhen').nullable(StamhoofdFilterDecoder),
             data.field('requiredWhen').nullable(StamhoofdFilterDecoder),
+        );
+    }
+
+    clone() {
+        return new PropertyFilter(
+            cloneObject(this.enabledWhen),
+            cloneObject(this.requiredWhen),
         );
     }
 }

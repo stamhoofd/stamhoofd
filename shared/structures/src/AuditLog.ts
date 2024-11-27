@@ -1,6 +1,19 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { RenderContext, renderTemplate } from './AuditLogRenderer.js';
 import { NamedObject } from './Event.js';
+import wordDictionary from './data/audit-log-words.json';
+import { Platform } from './Platform.js';
+import { PaymentMethodHelper } from './PaymentMethod.js';
+import { ParentTypeHelper } from './members/ParentType.js';
+import { OrderStatusHelper } from './webshops/Order.js';
+import { DocumentStatusHelper } from './Document.js';
+import { AccessRightHelper } from './AccessRight.js';
+import { CheckoutMethodTypeHelper } from './webshops/WebshopMetaData.js';
+import { CountryHelper } from './addresses/CountryDecoder.js';
+import { OrganizationTypeHelper } from './OrganizationType.js';
+import { PaymentStatusHelper } from './PaymentStatus.js';
+import { UmbrellaOrganizationHelper } from './UmbrellaOrganization.js';
+import { STPackageTypeHelper } from './billing/STPackage.js';
 
 export enum AuditLogType {
     /**
@@ -28,6 +41,11 @@ export enum AuditLogType {
     WaitingListEdited = 'WaitingListEdited',
     WaitingListAdded = 'WaitingListAdded',
     WaitingListDeleted = 'WaitingListDeleted',
+
+    // Periods
+    RegistrationPeriodEdited = 'RegistrationPeriodEdited',
+    RegistrationPeriodAdded = 'RegistrationPeriodAdded',
+    RegistrationPeriodDeleted = 'RegistrationPeriodDeleted',
 }
 
 export enum AuditLogReplacementType {
@@ -39,6 +57,8 @@ export enum AuditLogReplacementType {
     Image = 'Image', // id is the source url
     Key = 'Key', // translatable key
     Array = 'Array',
+    RegistrationPeriod = 'RegistrationPeriod',
+    Uuid = 'Uuid',
 }
 
 export function getAuditLogTypeName(type: AuditLogType): string {
@@ -75,6 +95,12 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Nieuwe wachtlijsten`;
         case AuditLogType.WaitingListDeleted:
             return `Verwijderde wachtlijsten`;
+        case AuditLogType.RegistrationPeriodEdited:
+            return `Wijzigingen aan werkjaren`;
+        case AuditLogType.RegistrationPeriodAdded:
+            return `Nieuwe werkjaren`;
+        case AuditLogType.RegistrationPeriodDeleted:
+            return `Verwijderde werkjaren`;
     }
 
     return type;
@@ -117,6 +143,13 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`clock`, `add green`];
         case AuditLogType.WaitingListDeleted:
             return [`clock`, `canceled red`];
+
+        case AuditLogType.RegistrationPeriodEdited:
+            return [`period`, `edit`];
+        case AuditLogType.RegistrationPeriodAdded:
+            return [`period`, `add green`];
+        case AuditLogType.RegistrationPeriodDeleted:
+            return [`period`, `canceled red`];
     }
     return [`help`];
 }
@@ -164,6 +197,15 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
 
         case AuditLogType.WaitingListDeleted:
             return `De wachtlijst {{g}} werd verwijderd`;
+
+        case AuditLogType.RegistrationPeriodEdited:
+            return `Het werkjaar {{p}} werd gewijzigd`;
+
+        case AuditLogType.RegistrationPeriodAdded:
+            return `Het werkjaar {{p}} werd aangemaakt`;
+
+        case AuditLogType.RegistrationPeriodDeleted:
+            return `Het werkjaar {{p}} werd verwijderd`;
     }
 }
 
@@ -190,6 +232,11 @@ function getTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.WaitingListAdded:
         case AuditLogType.WaitingListDeleted:
             return ['g'];
+
+        case AuditLogType.RegistrationPeriodEdited:
+        case AuditLogType.RegistrationPeriodAdded:
+        case AuditLogType.RegistrationPeriodDeleted:
+            return ['p'];
         default:
             return [];
     }
@@ -222,28 +269,60 @@ export class AuditLogReplacement extends AutoEncoder {
 
     flatten() {
         if (this.type === AuditLogReplacementType.Array) {
-            if (this.values.every(t => t.type === AuditLogReplacementType.Key)) {
-                return [AuditLogReplacement.key(this.values.map(v => v.value).join('.'))];
+            const cleanedValues: AuditLogReplacement[] = [];
+            for (const v of this.values.flatMap(v => v.flatten())) {
+                if (v.type === AuditLogReplacementType.Key) {
+                    const last = cleanedValues[cleanedValues.length - 1];
+                    if (last && last.type === AuditLogReplacementType.Key) {
+                        if (last.value) {
+                            last.value += '.';
+                        }
+                        last.value += v.value;
+                        continue;
+                    }
+                }
+                cleanedValues.push(v);
             }
-            return this.values;
+            return cleanedValues;
         }
         return [this];
     }
 
-    prepend(add: AuditLogReplacement) {
-        return AuditLogReplacement.array([add, this]);
+    prepend(add?: AuditLogReplacement | null) {
+        if (!add) {
+            return this;
+        }
+        return AuditLogReplacement.array([...add.flatten(), this]);
     }
 
-    append(add: AuditLogReplacement) {
-        return AuditLogReplacement.array([this, add]);
+    append(add?: AuditLogReplacement | null) {
+        if (!add) {
+            return this;
+        }
+        return AuditLogReplacement.array([this, ...add.flatten()]);
     }
 
     static array(values: AuditLogReplacement[]) {
-        return AuditLogReplacement.create({ values: values.flatMap(v => v.flatten()), type: AuditLogReplacementType.Array });
+        const v = AuditLogReplacement.create({ values: values.flatMap(v => v.flatten()), type: AuditLogReplacementType.Array }).flatten();
+        if (v.length === 1) {
+            return v[0];
+        }
+        return AuditLogReplacement.create({ values: v, type: AuditLogReplacementType.Array });
     }
 
-    static key(str: string) {
+    static key(str: string | undefined | null) {
+        if (!str) {
+            return AuditLogReplacement.array([]);
+        }
         return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.Key });
+    }
+
+    static uuid(id: string) {
+        return AuditLogReplacement.create({
+            id,
+            value: uuidToName(id) || '',
+            type: AuditLogReplacementType.Uuid,
+        });
     }
 
     static string(str: string) {
@@ -254,90 +333,89 @@ export class AuditLogReplacement extends AutoEncoder {
         if (this.type === AuditLogReplacementType.Key) {
             return getAuditLogPatchKeyName(this.value);
         }
+        if (this.type === AuditLogReplacementType.Uuid) {
+            if (this.id && !this.value) {
+                const name = uuidToName(this.id);
+                if (name) {
+                    return name;
+                }
+                return this.id;
+            }
+        }
+
+        if (this.type === AuditLogReplacementType.Array) {
+            return this.values.map(v => v.toString()).join(' → ');
+        }
         return this.value;
     }
 }
 
+export function isUuid(value: unknown) {
+    if (typeof value !== 'string') {
+        return false;
+    }
+    return value.length === 36 && value[8] === '-' && value[13] === '-' && value[18] === '-' && value[23] === '-';
+}
+
+export function uuidToName(uuid: string) {
+    // Look up in UUID library list
+    const objectLists
+     = [
+         Platform.shared.config.premiseTypes,
+         Platform.shared.config.eventTypes,
+         Platform.shared.config.defaultAgeGroups,
+         Platform.shared.config.tags,
+         Platform.shared.config.recordsConfiguration.recordCategories,
+     ];
+
+    for (const list of objectLists) {
+        for (const object of list) {
+            if (object.id === uuid) {
+                return object.name;
+            }
+        }
+    }
+    return null;
+}
+
 export function getAuditLogPatchKeyName(key: string) {
-    switch (key) {
-        case 'parent':
-            return `ouder`;
-        case 'address':
-            return `adres`;
-        case 'address.street':
-            return `straat`;
-        case 'address.number':
-            return `huisnummer`;
-        case 'address.postalCode':
-            return `postcode`;
-        case 'address.city':
-            return `gemeente`;
-        case 'address.country':
-            return `land`;
-        case 'email':
-            return `e-mailadres`;
-        case 'phone':
-            return `GSM-nummer`;
-        case 'firstName':
-            return `voornaam`;
-        case 'lastName':
-            return `achternaam`;
-        case 'nationalRegisterNumber':
-            return `rijkregisternummer`;
-        case 'birthDay':
-            return `geboortedatum`;
-        case 'dataPermissions':
-            return `toestemming gegevensverwerking`;
-        case `notes`:
-            return `Notities`;
-        case 'alternativeEmails':
-            return `alternatieve e-mailadressen`;
-        case 'name':
-            return `naam`;
-        case 'description':
-            return `beschrijving`;
-        case 'isLocationRequired':
-            return `locatie verplicht`;
-        case '_order':
-            return `volgorde`;
-        case 'membershipType':
-            return `aansluitingstype`;
-        case 'membershipTypes':
-            return `aansluitingen en verzekeringen`;
-        case 'period':
-            return `werkjaar`;
-        case 'responsibility':
-            return `functie`;
-        case 'recordsConfiguration':
-            return `persoonsgegevens`;
-        case 'defaultAgeGroups':
-            return `standaard leeftijdsgroepen`;
-        case 'defaultAgeGroup':
-            return `standaard leeftijdsgroep`;
-        case 'eventTypes':
-            return `soorten activiteiten`;
-        case 'eventType':
-            return `soort activiteit`;
-        case 'horizontalLogo':
-            return `horizontaal logo`;
-        case 'squareLogo':
-            return `vierkant logo`;
-        case 'logoDocuments':
-            return `logo op documenten`;
-        case 'color':
-            return `huisstijlkleur`;
-        case 'price':
-            return `prijs`;
-        case 'price.price':
-            return `prijs`;
-        case 'price.reducedPrice':
-            return `verlaagd tarief`;
-        case 'prices':
-            return `prijzen`;
-        case 'responsibilities':
-            return `functies`;
-        case 'minimumMembers':
-            return `minimum aantal`;
+    // Strip prefixes
+    const stripPrefixes = ['settings.', 'meta.', 'privateMeta.', 'privateConfig.', 'config.', 'privateSettings.'];
+    for (const prefix of stripPrefixes) {
+        if (key.startsWith(prefix)) {
+            key = key.substring(prefix.length);
+        }
+    }
+
+    if (wordDictionary[key]) {
+        return wordDictionary[key];
+    }
+
+    const enumHelpers: ((key: string) => string)[] = [
+        PaymentMethodHelper.getPluralName,
+        ParentTypeHelper.getName,
+        OrderStatusHelper.getName,
+        DocumentStatusHelper.getName,
+        AccessRightHelper.getName,
+        CheckoutMethodTypeHelper.getName,
+        CountryHelper.getName,
+        OrganizationTypeHelper.getName,
+        PaymentStatusHelper.getName,
+        UmbrellaOrganizationHelper.getName,
+        STPackageTypeHelper.getName,
+        ParentTypeHelper.getName,
+    ];
+
+    for (const helper of enumHelpers) {
+        try {
+            const result = helper(key);
+            if (result) {
+                return result;
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
     }
 
     if (key.includes('.')) {
@@ -345,8 +423,11 @@ export function getAuditLogPatchKeyName(key: string) {
         const firstWord = splitted[0];
         const remaining = splitted.slice(1).join('.');
 
-        return `${getAuditLogPatchKeyName(firstWord)} ${getAuditLogPatchKeyName(remaining)}`;
+        return `${getAuditLogPatchKeyName(firstWord)} → ${getAuditLogPatchKeyName(remaining)}`;
     }
+
+    // Replace camel case with spaces
+    key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
     return key;
 }
 export enum AuditLogPatchItemType {
@@ -373,7 +454,7 @@ export class AuditLogPatchItem extends AutoEncoder {
         if (!this.oldValue && this.value) {
             this.type = AuditLogPatchItemType.Added;
         }
-        else if (!this.value) {
+        else if (!this.value && this.oldValue) {
             this.type = AuditLogPatchItemType.Removed;
         }
         else {

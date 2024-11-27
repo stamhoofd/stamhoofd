@@ -1,18 +1,30 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher } from '../../fetchers';
 import { AuditLogReplacement, AuditLogReplacementType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { h } from 'vue';
 import { PromiseView } from '../../containers';
+import { useAppContext } from '../../context';
+import { EventOverview } from '../../events';
+import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher } from '../../fetchers';
 import { MemberSegmentedView } from '../../members';
 import { Toast } from '../../overlays/Toast';
-import { EventOverview } from '../../events';
-import { useAppContext } from '../../context';
-import ImageComponent from '../../views/ImageComponent.vue';
 
-function renderAny(obj: unknown, context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[] {
+export interface Renderable {
+    render(context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
+}
+
+function isRenderable(obj: unknown): obj is Renderable {
+    return (obj as Renderable).render !== undefined;
+}
+
+export function renderAny(obj: unknown, context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[] {
     if (typeof obj === 'string') {
         return obj;
     }
+
+    if (isRenderable(obj)) {
+        return obj.render(context);
+    }
+
     if (obj instanceof AuditLogReplacement) {
         if (obj.type === AuditLogReplacementType.Member && obj.id) {
             // Open member button
@@ -71,9 +83,9 @@ function renderAny(obj: unknown, context: Context): string | ReturnType<typeof h
             const a = obj.values.flatMap((part) => {
                 const q = renderAny(part, context);
                 if (Array.isArray(q)) {
-                    return [...q, ' > '];
+                    return [...q, ' → '];
                 }
-                return [q, ' > '];
+                return [q, ' → '];
             });
             a.pop();
             return a;
@@ -123,7 +135,7 @@ export const RenderTextComponent = {
     },
 };
 
-type Context = {
+export type Context = {
     app: ReturnType<typeof useAppContext>;
     present: ReturnType<typeof usePresent>;
     memberFetcher: ReturnType<typeof useMembersObjectFetcher>;
