@@ -147,6 +147,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             if (OrganizationManager.organization.privateMeta && !externalGroupNumber) {
                 await OrganizationManager.patch(
                     Organization.patch({
+                        id: OrganizationManager.organization.id,
                         privateMeta: OrganizationPrivateMetaData.patch({
                             externalGroupNumber: this.groupNumber
                         })
