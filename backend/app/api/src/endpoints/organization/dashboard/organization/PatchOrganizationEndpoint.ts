@@ -105,6 +105,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey
                 organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
                 organization.privateMeta.externalSyncData = patchObject(organization.privateMeta.externalSyncData, request.body.privateMeta.externalSyncData);
+                organization.privateMeta.externalGroupNumber = patchObject(organization.privateMeta.externalGroupNumber, request.body.privateMeta.externalGroupNumber);
 
                 if (request.body.privateMeta.mollieProfile !== undefined) {
                     organization.privateMeta.mollieProfile = patchObject(organization.privateMeta.mollieProfile, request.body.privateMeta.mollieProfile)
