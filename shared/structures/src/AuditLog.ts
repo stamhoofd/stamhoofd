@@ -136,11 +136,11 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`help`];
 
         case AuditLogType.EventEdited:
-            return [`calendar`, `edit`];
+            return [`calendar-filled`, `edit`];
         case AuditLogType.EventAdded:
-            return [`calendar`, `add green`];
+            return [`calendar-filled`, `add green`];
         case AuditLogType.EventDeleted:
-            return [`calendar`, `canceled red`];
+            return [`calendar-filled`, `canceled red`];
 
         case AuditLogType.GroupEdited:
             return [`group`, `edit`];
@@ -150,18 +150,18 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`group`, `canceled red`];
 
         case AuditLogType.WaitingListEdited:
-            return [`clock`, `edit`];
+            return [`hourglass`, `edit`];
         case AuditLogType.WaitingListAdded:
-            return [`clock`, `add green`];
+            return [`hourglass`, `add green`];
         case AuditLogType.WaitingListDeleted:
-            return [`clock`, `canceled red`];
+            return [`hourglass`, `canceled red`];
 
         case AuditLogType.RegistrationPeriodEdited:
-            return [`period`, `edit`];
+            return [`history`, `edit`];
         case AuditLogType.RegistrationPeriodAdded:
-            return [`period`, `add green`];
+            return [`history`, `add green`];
         case AuditLogType.RegistrationPeriodDeleted:
-            return [`period`, `canceled red`];
+            return [`history`, `canceled red`];
 
         case AuditLogType.StripeAccountAdded:
             return [`stripe`, `add green`];

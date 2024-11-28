@@ -235,7 +235,7 @@ export class MemberActionBuilder {
                         modalDisplayStyle: 'popup',
                     });
                 },
-                icon: 'clock',
+                icon: 'history',
             }),
         ];
     }

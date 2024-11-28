@@ -71,7 +71,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
     });
 
     const calendarTab = new TabBarItem({
-        icon: 'calendar',
+        icon: 'calendar-filled',
         name: 'Activiteiten',
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ManageEventsView, {}),
@@ -87,7 +87,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
     });
 
     const auditLogsTab = new TabBarItem({
-        icon: 'clock',
+        icon: 'history',
         name: 'Logboek',
         component: new ComponentWithProperties(SplitViewController, {
             root: new ComponentWithProperties(AuditLogsView, {}),
