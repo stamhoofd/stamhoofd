@@ -4,7 +4,7 @@ import { Request, RequestMiddleware, RequestResult, Server } from '@simonbackx/s
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
-import { getDefaultGroepFuncties, getPatch, GroepFunctie, isManaged, MemberWithRegistrations, schrappen, SGVFoutenDecoder, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVSyncReport, SGVZoekenResponse, SGVZoekLid } from '@stamhoofd/structures';
+import { getDefaultGroepFuncties, getPatch, GroepFunctie, isManaged, MemberWithRegistrations, Organization, OrganizationPrivateMetaData, schrappen, SGVFoutenDecoder, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVSyncReport, SGVZoekenResponse, SGVZoekLid } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
@@ -120,20 +120,51 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     async setGroupIfNeeded() {
         if (!this.groupNumber) {
-            const group = await this.getGroup()
-            if (!group) {
+            const groups = await this.getGroup()
+            if (groups.length === 0) {
                 throw new SimpleError({
                     code: "",
                     message: "We konden jouw scoutsgroep niet vinden in dit groepsadministratie account. Controleer het adres en de naam die je in Stamhoofd hebt ingesteld en zorg dat deze overeen komt met de naam in de groepsadministratie."
                 })
             }
-            this.group = group
-            this.groupNumber = group.groepsnummer
+            if (groups.length > 1) {
+                throw new SimpleError({
+                    code: "",
+                    message: "We vonden meerdere scoutsgroepen die verbonden zijn met dit groepsadministratie account én waarmee de naam of adres overeenkomt met die van jouw groep in Stamhoofd. Daardoor konden we niet automatisch de juiste groep selecteren. Neem contact op via hallo@stamhoofd.be om dit op te lossen."
+                })
+            }
+            this.group = groups[0]
+            this.groupNumber = this.group.groepsnummer
+
+            if (!this.groupNumber) {
+                throw new SimpleError({
+                    code: "missing_group_number",
+                    message: "We konden het groepsnummer niet achterhalen van jouw scoutsgroep. Mogelijks is er een tijdelijk probleem met de connectie met de groepsadministratie. Herlaad eventueel de pagina. Neem contact op met hallo@stamhoofd.be als het probleem blijft aanhouden."
+                })
+            }
+
+            const externalGroupNumber = OrganizationManager.organization.privateMeta?.externalGroupNumber
+            if (OrganizationManager.organization.privateMeta && !externalGroupNumber) {
+                await OrganizationManager.patch(
+                    Organization.patch({
+                        privateMeta: OrganizationPrivateMetaData.patch({
+                            externalGroupNumber: this.groupNumber
+                        })
+                    })
+                )
+            } else {
+                if (externalGroupNumber !== this.groupNumber) {
+                    throw new SimpleError({
+                        code: "wrong_group_number",
+                        message: `Het groepsnummer dat we hebben gevonden in de groepsadministratie van dit S&GV account komt niet overeen met het groepsnummer van de scoutsgroep waarmee Stamhoofd het laatst heeft gesynchroniseerd. Kijk na of wel bent ingelogd op het juiste account in de groepsadministratie en probeer opnieuw. Welke van de twee groepsnummers is juist? Laatst gebruikt: ${externalGroupNumber} of groepsnummer huidige account: ${this.groupNumber}? Geef het door aan hallo@stamhoofd.be om het te corrigeren.`
+                    })
+                }
+            }
         }
     }
 
     // Search the group
-    async getGroup(): Promise<SGVGroep | null> {
+    async getGroup(): Promise<SGVGroep[]> {
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/groep",
@@ -142,18 +173,22 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
         const organization = OrganizationManager.organization
 
+        const possibleGroups: SGVGroep[] = []
+
         // Search for the group
         for (const group of response.data.groepen) {
             if (Formatter.slug(group.naam) == Formatter.slug(organization.name)) {
-                return group
+                possibleGroups.push(group)
+                continue;
             }
             for (const adres of group.adressen) {
                 if (Formatter.slug(adres.straat) == Formatter.slug(organization.address.street) && Formatter.slug(adres.postcode) == Formatter.slug(organization.address.postalCode)) {
-                    return group;
+                    possibleGroups.push(group)
+                    continue;
                 }
             }
         }
-        return null
+        return possibleGroups
     }
 
     async getFuncties() {
@@ -770,7 +805,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     })
 
                     // Do a patch for the remaining functies
-                    await this.syncLid({
+                    lid = await this.syncLid({
                         stamhoofd: member,
                         sgvId: updateResponse.data.id
                     }, report);
@@ -795,6 +830,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
 
         await sleep(100);
+        return lid;
     }
 
     checkUrl(): boolean | null {

@@ -712,7 +712,9 @@ async function checkSGV() {
     const wsData: RowValue[][] = [
         [
             "Naam",
+            "Groepsnummer",
             "Gemeente",
+            "Willekeurig lidnummer",
             "Laatst volledig gesynchroniseerd",
             "Laatst gedeeltelijk gesynchroniseerd",
             "Laatst lid geschrapt",
@@ -744,6 +746,7 @@ async function checkSGV() {
         };
 
         const groupStructures = groups.map(g => g.getStructure())
+        let memberNumber: string|null = null
         
         for (const group of groups) {
             const members = await group.getMembersWithRegistration(false, 0)
@@ -772,6 +775,10 @@ async function checkSGV() {
 
                 if (status === 'ok' || (structure.details.lastExternalSync && structure.details.lastExternalSync > last30Days)) {
                     counts.syncedLast30Days++
+
+                    if (member.details.memberNumber && !memberNumber) {
+                        memberNumber = member.details.memberNumber
+                    }
                 }
 
                 switch (status) {
@@ -807,7 +814,9 @@ async function checkSGV() {
 
         wsData.push([
             organization.name,
+            organization.privateMeta.externalGroupNumber ?? "Onbekend",
             organization.address.city,
+            memberNumber ?? "Geen",
             organization.privateMeta.externalSyncData?.lastExternalSync ? Formatter.dateTime(organization.privateMeta.externalSyncData.lastExternalSync) : "Nooit",
             lastPartialSync ? Formatter.dateTime(lastPartialSync) : "Nooit",
             organization.privateMeta.externalSyncData?.lastDeleted ? Formatter.dateTime(organization.privateMeta.externalSyncData.lastDeleted) : "Nooit",

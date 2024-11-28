@@ -135,6 +135,9 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: ExternalSyncData, nullable: true, optional: true })
     externalSyncData: ExternalSyncData|null = null;
 
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    externalGroupNumber: string|null = null;
+
     /**
      * Mail domain that is awaiting validation
      */
