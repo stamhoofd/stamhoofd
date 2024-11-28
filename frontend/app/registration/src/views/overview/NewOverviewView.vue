@@ -42,7 +42,7 @@
                             <span>Schrijf een lid in</span>
                         </button>
                     </template>
-                    <template v-if="cart.count || notYetPaidBalance > 0 || suggestedRegistrations.length || membersWithMissingData.length">
+                    <template v-if="cart.count || notYetPaidBalance != 0 || suggestedRegistrations.length || membersWithMissingData.length">
                         <hr>
                         <h2>
                             Snelle acties
