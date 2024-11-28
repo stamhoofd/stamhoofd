@@ -267,6 +267,14 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 human: 'Nog even geduld. Bestellen kan vanaf ' + Formatter.dateTime(webshop.meta.openAt) + '.',
             });
         }
+
+        if (!asAdmin && webshop.isClosed()) {
+            throw new SimpleError({
+                code: "closed",
+                message: "Orders are closed",
+                human: "De webshop is gesloten. Je kan niet langer bestellen.",
+            })
+        }
     }
 
     validateCheckoutMethod(webshop: Webshop, organizationMeta: OrganizationMetaData) {
