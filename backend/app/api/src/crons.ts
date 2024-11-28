@@ -666,17 +666,13 @@ async function checkSGV() {
         return
     }
 
-    // Check today is a monday
-    //if (new Date().getDay() !== 1) {
-    //    console.log("[S&GV] Not a Monday, skipping.")
-    //    return
-    //}
-    //
-    //// Check if between 2 - 3 AM
-    //if (new Date().getHours() < 2 || new Date().getHours() >= 3) {
-    //    console.log("[S&GV] Not between 2 and 3 AM, skipping.")
-    //    return
-    //}
+  
+    
+    // Check if between 2 - 3 AM
+    if (new Date().getHours() < 2 || new Date().getHours() >= 3) {
+        console.log("[S&GV] Not between 2 and 3 AM, skipping.")
+        return
+    }
     
     lastSGVCheck = new Date()
 
@@ -849,14 +845,15 @@ async function checkSGV() {
     );
     const data = XLSX.write(wb, { type: 'buffer' });
 
+    const isMonday = (new Date().getDay() !== 1)
+
     // Send to S&GV
     Email.sendInternal({
-        //to: 'groepsadministratie@scoutsengidsenvlaanderen.be',
-        to: 'hallo@stamhoofd.be',
+        to: isMonday ?'groepsadministratie@scoutsengidsenvlaanderen.be' : 'hallo@stamhoofd.be',
         bcc: 'hallo@stamhoofd.be',
-        subject: 'Stamhoofd: synchronisatieoverzicht',
+        subject: 'Stamhoofd: synchronisatieoverzicht '+Formatter.dateNumber(new Date(), true),
         replyTo: 'hallo@stamhoofd.be',
-        text: 'Beste,\n\nIn bijlage kan je het overzicht van de laatste synchronisaties tussen Stamhoofd en de groepsadministratie terugvinden voor alle aangesloten groepen. Synchronisaties voor 27 september 2024 zijn hierop nog niet inbegrepen.',
+        text: 'Beste,\n\nIn bijlage kan je het overzicht van de laatste synchronisaties tussen Stamhoofd en de groepsadministratie terugvinden voor alle aangesloten groepen.',
         attachments: [
             {
                 filename: 'rapport-'+Formatter.dateIso(new Date())+'.xlsx',
