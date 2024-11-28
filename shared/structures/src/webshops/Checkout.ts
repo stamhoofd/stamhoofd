@@ -270,10 +270,10 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
 
         if (!asAdmin && webshop.isClosed()) {
             throw new SimpleError({
-                code: "closed",
-                message: "Orders are closed",
-                human: "De webshop is gesloten. Je kan niet langer bestellen.",
-            })
+                code: 'closed',
+                message: 'Orders are closed',
+                human: 'De webshop is gesloten. Je kan niet langer bestellen.',
+            });
         }
     }
 
