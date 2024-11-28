@@ -363,7 +363,7 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
             achternaam: details.lastName,
             beperking: lid.vgagegevens && lid.vgagegevens.beperking ? true : false,
             geboortedatum: Formatter.dateNumber(details.birthDay).split("/").reverse().join("-"),
-            individueleSteekkaartdatumaangepast: lid.vgagegevens && lid.vgagegevens.individueleSteekkaartdatumaangepast ? lid.vgagegevens.individueleSteekkaartdatumaangepast : undefined,
+            //individueleSteekkaartdatumaangepast: lid.vgagegevens && lid.vgagegevens.individueleSteekkaartdatumaangepast ? lid.vgagegevens.individueleSteekkaartdatumaangepast : undefined,
             verminderdlidgeld: details.requiresFinancialSupport?.value ?? false,
         }
     }
