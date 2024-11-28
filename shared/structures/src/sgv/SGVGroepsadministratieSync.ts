@@ -328,7 +328,7 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         // End this function
         newFunctions.push({
             ...lidFunctie,
-            einde: Formatter.dateIso(new Date())
+            einde: new Date().toISOString()
         });
         report?.addInfo(details.name + ': functie verwijderd ' + managedFunctie.beschrijving)
     }
@@ -338,7 +338,7 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         newFunctions.push({
             groep: groepNummer,
             functie: lidManagedFunctie.id,
-            begin: Formatter.dateIso(new Date()),
+            begin: new Date().toISOString(),
         })
         report?.addInfo(details.name + ': functie toegekend ' + lidManagedFunctie.beschrijving)
     }
