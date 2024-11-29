@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { RenderContext, renderTemplate } from './AuditLogRenderer.js';
 import { NamedObject } from './Event.js';
-import wordDictionary from './data/audit-log-words.json';
+import wordDictionary from './data/audit-log-words.js';
 import { Platform } from './Platform.js';
 import { PaymentMethodHelper } from './PaymentMethod.js';
 import { ParentTypeHelper } from './members/ParentType.js';
