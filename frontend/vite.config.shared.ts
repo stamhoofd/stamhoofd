@@ -7,77 +7,84 @@ import { UserConfig } from 'vite';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
 
-const use_env: Record<string, string> = {}
+const use_env: Record<string, string> = {};
 
 // This is a debug config as a replacement for process.env.NODE_ENV which seems to break webpack 5
 // process.env.BUILD_FOR_PRODUCTION
 
-if (process.env.NODE_ENV === "production") {
-    console.log("Building for production...")
+if (process.env.NODE_ENV === 'production') {
+    console.log('Building for production...');
 }
 
-let loadedEnv: FrontendEnvironment | undefined = undefined
+let loadedEnv: FrontendEnvironment | undefined = undefined;
 
 if (process.env.LOAD_ENV) {
     // Load this in the environment
     const decode = JSON.parse(process.env.LOAD_ENV);
 
     if (!decode.userMode || !decode.translationNamespace) {
-        throw new Error('Invalid env file: missing some variables')
+        throw new Error('Invalid env file: missing some variables');
     }
 
     // We restringify to make sure encoding is minified
-    loadedEnv = decode
-    use_env["STAMHOOFD"] = JSON.stringify(decode);
-    use_env["process.env.NODE_ENV"] = JSON.stringify(decode.environment === "production" ? "production" : "development")
-} else if (process.env.ENV_FILE) {
+    loadedEnv = decode;
+    use_env['STAMHOOFD'] = JSON.stringify(decode);
+    use_env['process.env.NODE_ENV'] = JSON.stringify(decode.environment === 'production' ? 'production' : 'development');
+}
+else if (process.env.ENV_FILE) {
     // Reading environment from a JSON env file (JSON is needed)
-    const file = path.resolve(process.env.ENV_FILE)
+    const file = path.resolve(process.env.ENV_FILE);
 
     // Load this in the environment
-    const contents = fs.readFileSync(file)
+    const contents = fs.readFileSync(file);
     const decode = JSON.parse(contents);
-    const node_env = JSON.stringify(decode.environment === "production" ? "production" : "development")
+    const node_env = JSON.stringify(decode.environment === 'production' ? 'production' : 'development');
 
     if (!decode.userMode || !decode.translationNamespace) {
-        throw new Error('Invalid env file: missing some variables')
+        throw new Error('Invalid env file: missing some variables');
     }
 
-    console.log("Using environment file: "+file)
+    console.log('Using environment file: ' + file);
 
-    loadedEnv = decode
-    const stamhoofdEnv = JSON.stringify(decode)
+    loadedEnv = decode;
+    const stamhoofdEnv = JSON.stringify(decode);
 
     // use runtimeValue, because cache can be optimized if webpack knows which cache to get
-    use_env["STAMHOOFD"] = stamhoofdEnv
-    
-    // use runtimeValue, because cache can be optimized if webpack knows which cache to get
-    use_env["process.env.NODE_ENV"] = node_env
+    use_env['STAMHOOFD'] = stamhoofdEnv;
 
-} else {
-    throw new Error("ENV_FILE or LOAD_ENV environment variables are missing")
+    // use runtimeValue, because cache can be optimized if webpack knows which cache to get
+    use_env['process.env.NODE_ENV'] = node_env;
+}
+else {
+    throw new Error('ENV_FILE or LOAD_ENV environment variables are missing');
 }
 
 // https://vitejs.dev/config/
-export function buildConfig(options: {port: number, clientFiles?: string[]}): UserConfig {
+export function buildConfig(options: { port: number; clientFiles?: string[] }): UserConfig {
     return {
         mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
         resolve: {
             alias: {
-                '@stamhoofd/components': resolve(__dirname, './shared/components')
-            }
+                '@stamhoofd/components': resolve(__dirname, './shared/components'),
+            },
+            dedupe: [
+                // When yarn linking packages - the issue is that dependencies are resolved to the local node_modules folder in the linked package
+                // this can cause type issues because multiple versions of the same package are loaded
+                '@simonbackx/simple-encoding',
+                '@simonbackx/simple-database',
+            ],
         },
         plugins: [
             svgNamespacePlugin({
                 namespace: loadedEnv?.ILLUSTRATIONS_NAMESPACE ?? '',
-                colors: loadedEnv?.ILLUSTRATIONS_COLORS
+                colors: loadedEnv?.ILLUSTRATIONS_COLORS,
             }),
             vue({
                 template: {
                     compilerOptions: {
-                        comments: false
-                    }
-                }
+                        comments: false,
+                    },
+                },
             }),
             viteSvgToWebfont({
                 ...iconConfig,
@@ -86,29 +93,31 @@ export function buildConfig(options: {port: number, clientFiles?: string[]}): Us
             }),
         ],
         define: use_env,
-        server: process.env.NODE_ENV !== 'production' ? {
-            host: '127.0.0.1',
-            port: options.port,
-            strictPort: true,
-            warmup: {
-                clientFiles: [
-                    ...(options?.clientFiles ?? []),
-                    resolve(__dirname, './shared') + '/**/*.vue',
-                    resolve(__dirname, './shared') + '/**/*.ts'
-                ]
-            }
-        } : undefined,
+        server: process.env.NODE_ENV !== 'production'
+            ? {
+                    host: '127.0.0.1',
+                    port: options.port,
+                    strictPort: true,
+                    warmup: {
+                        clientFiles: [
+                            ...(options?.clientFiles ?? []),
+                            resolve(__dirname, './shared') + '/**/*.vue',
+                            resolve(__dirname, './shared') + '/**/*.ts',
+                        ],
+                    },
+                }
+            : undefined,
         build: process.env.NODE_ENV !== 'production' ? {
             sourcemap: 'inline',
             rollupOptions: {
                 treeshake: false, // Increases performance
             },
             watch: {
-                buildDelay: 1000
-            }
+                buildDelay: 1000,
+            },
         } : {
-            sourcemap: true
+            sourcemap: true,
         },
-        publicDir: resolve(__dirname, './public')
-    }
+        publicDir: resolve(__dirname, './public'),
+    };
 }

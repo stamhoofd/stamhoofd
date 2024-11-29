@@ -10,5 +10,13 @@
     ],
     "publishConfig": {
         "access": "public"
+    },
+    "dependencies": {
+        "eslint": "^9.11.1",
+        "eslint-plugin-jest": "^28.8.3",
+        "eslint-plugin-vue": "^9.28.0",
+        "@eslint/js": "^9.11.1",
+        "@stylistic/eslint-plugin": "^2.8.0",
+        "typescript-eslint": "^8.7.0"
     }
 }
