@@ -1,6 +1,6 @@
 {
     "name": "eslint-plugin-stamhoofd",
-    "version": "2.57.1",
+    "version": "2.58.0",
     "main": "./src/index.js",
     "license": "UNLICENCED",
     "sideEffects": false,
@@ -12,11 +12,11 @@
         "access": "public"
     },
     "dependencies": {
+        "@eslint/js": "^9.11.1",
+        "@stylistic/eslint-plugin": "^2.8.0",
         "eslint": "^9.11.1",
         "eslint-plugin-jest": "^28.8.3",
         "eslint-plugin-vue": "^9.28.0",
-        "@eslint/js": "^9.11.1",
-        "@stylistic/eslint-plugin": "^2.8.0",
         "typescript-eslint": "^8.7.0"
     }
 }
