@@ -845,7 +845,7 @@ async function checkSGV() {
     );
     const data = XLSX.write(wb, { type: 'buffer' });
 
-    const isMonday = (new Date().getDay() !== 1)
+    const isMonday = (new Date().getDay() === 1)
 
     // Send to S&GV
     Email.sendInternal({
