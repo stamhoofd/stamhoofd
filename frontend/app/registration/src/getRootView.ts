@@ -77,7 +77,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     });
 
     const calendarTab = new TabBarItem({
-        icon: 'calendar-filled',
+        icon: 'calendar',
         name: 'Activiteiten',
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EventsOverview, {}),

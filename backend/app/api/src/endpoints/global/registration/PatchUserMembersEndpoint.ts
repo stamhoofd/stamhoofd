@@ -69,11 +69,6 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             await member.save();
             addedMembers.push(member);
-
-            await AuditLogService.log({
-                type: AuditLogType.MemberAdded,
-                member: member,
-            });
         }
 
         // Modify members
@@ -90,7 +85,6 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
             const securityCode = struct.details?.securityCode; // will get cleared after the filter
             struct = await Context.auth.filterMemberPatch(member, struct);
-            const originalDetails = member.details.clone();
 
             if (struct.details) {
                 if (struct.details.isPut()) {
@@ -128,15 +122,6 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             await member.save();
             await MemberUserSyncer.onChangeMember(member);
-
-            if (struct.details) {
-                await AuditLogService.log({
-                    type: AuditLogType.MemberEdited,
-                    member: member,
-                    oldMemberDetails: originalDetails,
-                    memberDetailsPatch: struct.details,
-                });
-            }
 
             // Update documents
             await Document.updateForMember(member.id);

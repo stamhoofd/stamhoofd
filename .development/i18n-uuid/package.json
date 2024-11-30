@@ -9,7 +9,7 @@
         "start": "yarn build && node ./dist/index.js"
     },
     "dependencies": {
-        "uuid": "^9.0.0",
+        "uuid": "11.0.3",
         "dotenv": "^16.4.5"
     },
     "devDependencies": {

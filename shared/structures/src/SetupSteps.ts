@@ -1,27 +1,8 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
-
-export enum SetupStepType {
-    Responsibilities = 'Functions',
-    Companies = 'Companies',
-    Groups = 'Groups',
-    Premises = 'Premises',
-    Emails = 'Emails',
-    Payment = 'Payment',
-    Registrations = 'Registrations',
-}
+import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, field } from '@simonbackx/simple-encoding';
+import { SetupStepType } from './SetupStepType.js';
+import { SetupStepReview } from './SetupStepReview.js';
 
 export const minimumRegistrationCount: number = 1;
-
-export class SetupStepReview extends AutoEncoder {
-    @field({ decoder: DateDecoder })
-    date: Date;
-
-    @field({ decoder: StringDecoder })
-    userName: string;
-
-    @field({ decoder: StringDecoder })
-    userId: string;
-}
 
 export class SetupStep extends AutoEncoder {
     /**

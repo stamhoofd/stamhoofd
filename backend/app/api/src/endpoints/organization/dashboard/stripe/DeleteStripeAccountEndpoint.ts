@@ -64,12 +64,6 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         model.status = 'deleted';
         await model.save();
 
-        // Track audit log
-        await AuditLogService.log({
-            type: AuditLogType.StripeAccountDeleted,
-            stripeAccount: model,
-        });
-
         return new Response(undefined);
     }
 }

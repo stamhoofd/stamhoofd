@@ -36,22 +36,12 @@ export const RegistrationService = {
         }
 
         // Update group occupancy
-        const group = await GroupService.updateOccupancy(registration.groupId);
-
-        // Create a log
-        if (member && group) {
-            await AuditLogService.log({
-                type: AuditLogType.MemberRegistered,
-                member,
-                group,
-                registration,
-            });
-        }
+        await GroupService.updateOccupancy(registration.groupId);
 
         return true;
     },
 
-    async deactivate(registration: Registration, group?: Group, member?: Member) {
+    async deactivate(registration: Registration, _group?: Group, _member?: Member) {
         if (registration.deactivatedAt !== null) {
             return;
         }
@@ -62,17 +52,5 @@ export const RegistrationService = {
         registration.scheduleStockUpdate();
 
         await Member.updateMembershipsForId(registration.memberId);
-
-        const fetchedMember = member ?? await Member.getByID(registration.memberId);
-        const fetchedGroup = group ?? await Group.getByID(registration.groupId);
-
-        if (fetchedMember && fetchedGroup) {
-            await AuditLogService.log({
-                type: AuditLogType.MemberUnregistered,
-                member: fetchedMember,
-                group: fetchedGroup,
-                registration,
-            });
-        }
     },
 };

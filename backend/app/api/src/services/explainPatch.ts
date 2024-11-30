@@ -85,7 +85,7 @@ function createDateChangeHandler(key: string) {
         let dno = oldValue ? Formatter.dateNumber(oldValue, true) : undefined;
         let dn = value ? Formatter.dateNumber(value, true) : undefined;
 
-        if (dno && dn && (dno === dn || (Formatter.time(oldValue!) !== Formatter.time(value!)))) {
+        if (dno && dn && (dno === dn || (Formatter.time(oldValue!) !== Formatter.time(value!))) && key !== 'birthDay') {
             // Add time
             dno += ' ' + Formatter.time(oldValue!);
             dn += ' ' + Formatter.time(value!);
@@ -246,6 +246,10 @@ function findOriginalById(id: unknown, oldArray: unknown[]): unknown | null {
     return id ? oldArray.find(v => getId(v) === id) : null;
 }
 
+function findOriginalIndexById(id: unknown, oldArray: unknown[]): number {
+    return id ? oldArray.findIndex(v => getId(v) === id) : -1;
+}
+
 function getId(object: unknown): string | number | null {
     const id = getOptionalId(object);
     if (typeof id !== 'string' && typeof id !== 'number') {
@@ -260,6 +264,10 @@ function getId(object: unknown): string | number | null {
 
 function findOriginal(put: unknown, oldArray: unknown[]): unknown | null {
     return findOriginalById(getId(put), oldArray);
+}
+
+function findIndex(put: unknown, oldArray: unknown[]): number {
+    return findOriginalIndexById(getId(put), oldArray);
 }
 
 function processPut(key: string, put: unknown, original: unknown | null, createdIdSet?: Set<string>): AuditLogPatchItem[] {
@@ -404,16 +412,25 @@ function createArrayChangeHandler(key: string) {
         if (!isPatchableArray(value)) {
             if (Array.isArray(value)) {
                 // Search for puts
-                for (const newItem of value) {
-                    const original = findOriginal(newItem, oldValue);
+                let orderChanged = false;
+                let added = 0;
+                for (const [index, newItem] of value.entries()) {
+                    const originalIndex = findIndex(newItem, oldValue);
 
-                    if (!original) {
+                    if (originalIndex === -1) {
                         // Has been added
-                        items.push(...processPut(key, newItem, original));
+                        items.push(...processPut(key, newItem, null));
+                        added++;
                     }
                     else {
                         // Has been overwritten
+                        const original = oldValue[originalIndex];
                         items.push(...processPatch(key, newItem, original));
+
+                        if ((index - added) !== originalIndex) {
+                            // Order has changed
+                            orderChanged = true;
+                        }
                     }
                 }
 
@@ -424,6 +441,16 @@ function createArrayChangeHandler(key: string) {
                         // Has been deleted
                         items.push(...processDelete(key, original));
                     }
+                }
+
+                if (orderChanged) {
+                    // Check if order has changed
+                    items.push(
+                        AuditLogPatchItem.create({
+                            key: getAutoEncoderKey(key),
+                            type: AuditLogPatchItemType.Reordered,
+                        }),
+                    );
                 }
             }
             // Not supported
@@ -587,12 +614,8 @@ function createMapChangeHandler(key?: string) {
     };
 }
 
-function createUnknownChangeHandler(key: string) {
+export function createUnknownChangeHandler(key: string) {
     return (oldValue: unknown, value: unknown) => {
-        if (typeof value !== 'object' && value !== null) {
-            return [];
-        }
-
         if (oldValue === value) {
             return [];
         }

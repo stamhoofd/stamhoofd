@@ -1,7 +1,7 @@
 import { column, Model } from '@simonbackx/simple-database';
 import { ArrayDecoder, Decoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { AuditLogPatchItem, AuditLogReplacement, AuditLogType } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from 'uuid';
+import { v7 as uuidv7 } from 'uuid';
 
 export class AuditLog extends Model {
     static table = 'audit_logs';
@@ -9,7 +9,8 @@ export class AuditLog extends Model {
     // Columns
     @column({
         primary: true, type: 'string', beforeSave(value) {
-            return value ?? uuidv4();
+            // We use uuidv7 to keep the order of the logs
+            return value ?? uuidv7();
         },
     })
     id!: string;

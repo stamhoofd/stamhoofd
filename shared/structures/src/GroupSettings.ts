@@ -288,6 +288,9 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = '';
 
+    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    eventId: string | null = null;
+
     /**
      * Cached value so we know what period this group is in, to calculate the age requirements,
      * and to display the time period in the UI

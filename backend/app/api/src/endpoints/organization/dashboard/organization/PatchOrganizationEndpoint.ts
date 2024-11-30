@@ -63,8 +63,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
-        const initialStruct = (await AuthenticatedStructures.organization(organization)).clone();
-
         const errors = new SimpleErrors();
         let shouldUpdateSetupSteps = false;
         let updateTags = false;
@@ -387,14 +385,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             await TagHelper.updateOrganizations();
         }
         const struct = await AuthenticatedStructures.organization(organization);
-
-        await AuditLogService.log({
-            type: AuditLogType.OrganizationSettingsChanged,
-            organization,
-            oldData: initialStruct,
-            patch: struct,
-        });
-
         return new Response(struct);
     }
 

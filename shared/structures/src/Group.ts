@@ -22,6 +22,17 @@ export enum GroupStatus {
     Archived = 'Archived',
 }
 
+export function getGroupStatusName(status: GroupStatus) {
+    switch (status) {
+        case GroupStatus.Open:
+            return 'Geopend';
+        case GroupStatus.Closed:
+            return 'Gesloten';
+        case GroupStatus.Archived:
+            return 'Gearhiveerd';
+    }
+}
+
 export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;

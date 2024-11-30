@@ -14,23 +14,32 @@ import { OrganizationTypeHelper } from './OrganizationType.js';
 import { PaymentStatusHelper } from './PaymentStatus.js';
 import { UmbrellaOrganizationHelper } from './UmbrellaOrganization.js';
 import { STPackageTypeHelper } from './billing/STPackage.js';
+import { getGroupStatusName } from './Group.js';
+import { getGenderName } from './members/Gender.js';
+import { getSetupStepName } from './SetupStepType.js';
 
 export enum AuditLogType {
     /**
      * Used for legacy logs
      */
     Unknown = 'Unknown',
-    MemberEdited = 'MemberEdited',
-    MemberAdded = 'MemberAdded',
     MemberRegistered = 'MemberRegistered',
     MemberUnregistered = 'MemberUnregistered',
     PlatformSettingsChanged = 'PlatformSettingsChanged',
-    OrganizationSettingsChanged = 'OrganizationSettingsChanged',
+
+    OrganizationAdded = 'OrganizationAdded',
+    OrganizationDeleted = 'OrganizationDeleted',
+    OrganizationEdited = 'OrganizationEdited',
 
     // Events
     EventEdited = 'EventEdited',
     EventAdded = 'EventAdded',
     EventDeleted = 'EventDeleted',
+
+    // Members
+    MemberEdited = 'MemberEdited',
+    MemberAdded = 'MemberAdded',
+    MemberDeleted = 'MemberDeleted',
 
     // Groups
     GroupEdited = 'GroupEdited',
@@ -55,6 +64,7 @@ export enum AuditLogType {
 
 export enum AuditLogReplacementType {
     Member = 'Member',
+    User = 'User',
     Organization = 'Organization',
     Group = 'Group',
     Event = 'Event',
@@ -73,6 +83,8 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Wijzigingen aan gegevens van leden`;
         case AuditLogType.MemberAdded:
             return `Nieuwe leden`;
+        case AuditLogType.MemberDeleted:
+            return `Verwijderde leden`;
         case AuditLogType.MemberRegistered:
             return `Inschrijvingen`;
         case AuditLogType.MemberUnregistered:
@@ -81,8 +93,12 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Onbekende actie`;
         case AuditLogType.PlatformSettingsChanged:
             return `Wijzigingen aan platforminstellingen`;
-        case AuditLogType.OrganizationSettingsChanged:
+        case AuditLogType.OrganizationEdited:
             return `Wijzigingen aan instellingen van een groep`;
+        case AuditLogType.OrganizationAdded:
+            return `Nieuwe lokale groepen`;
+        case AuditLogType.OrganizationDeleted:
+            return `Verwijderde lokale groepen`;
         case AuditLogType.EventEdited:
             return `Wijzigingen aan activiteiten`;
         case AuditLogType.EventAdded:
@@ -124,23 +140,31 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`user`, `edit`];
         case AuditLogType.MemberAdded:
             return [`user`, 'add green'];
+        case AuditLogType.MemberDeleted:
+            return [`user`, `canceled red`];
         case AuditLogType.MemberRegistered:
             return [`membership-filled`, `success`];
         case AuditLogType.MemberUnregistered:
             return [`membership-filled`, `canceled red`];
         case AuditLogType.PlatformSettingsChanged:
             return [`flag`, `settings`];
-        case AuditLogType.OrganizationSettingsChanged:
-            return [`settings`];
+
+        case AuditLogType.OrganizationEdited:
+            return [`flag`];
+        case AuditLogType.OrganizationAdded:
+            return [`flag`, `add green`];
+        case AuditLogType.OrganizationDeleted:
+            return [`flag`, `canceled red`];
+
         case AuditLogType.Unknown:
             return [`help`];
 
         case AuditLogType.EventEdited:
-            return [`calendar-filled`, `edit`];
+            return [`calendar`, `edit`];
         case AuditLogType.EventAdded:
-            return [`calendar-filled`, `add green`];
+            return [`calendar`, `add green`];
         case AuditLogType.EventDeleted:
-            return [`calendar-filled`, `canceled red`];
+            return [`calendar`, `canceled red`];
 
         case AuditLogType.GroupEdited:
             return [`group`, `edit`];
@@ -177,6 +201,8 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
     switch (type) {
         case AuditLogType.MemberAdded:
             return `{{m}} werd aangemaakt`;
+        case AuditLogType.MemberDeleted:
+            return `{{m}} werd verwijderd`;
         case AuditLogType.MemberEdited:
             return `De gegevens van {{m}} werden gewijzigd`;
         case AuditLogType.MemberRegistered:
@@ -187,8 +213,15 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `Onbekende actie`;
         case AuditLogType.PlatformSettingsChanged:
             return `De platforminstellingen werden gewijzigd`;
-        case AuditLogType.OrganizationSettingsChanged:
+
+        case AuditLogType.OrganizationEdited:
             return `De instellingen van {{o}} werden gewijzigd`;
+
+        case AuditLogType.OrganizationAdded:
+            return `De lokale groep {{o}} werd aangemaakt`;
+
+        case AuditLogType.OrganizationDeleted:
+            return `De lokale groep {{o}} werd verwijderd`;
 
         case AuditLogType.EventEdited:
             return `De activiteit {{e}} werd gewijzigd`;
@@ -239,11 +272,14 @@ function getTypeReplacements(type: AuditLogType): string[] {
     switch (type) {
         case AuditLogType.MemberAdded:
         case AuditLogType.MemberEdited:
+        case AuditLogType.MemberDeleted:
             return ['m'];
         case AuditLogType.MemberRegistered:
         case AuditLogType.MemberUnregistered:
             return ['m', 'g'];
-        case AuditLogType.OrganizationSettingsChanged:
+        case AuditLogType.OrganizationEdited:
+        case AuditLogType.OrganizationAdded:
+        case AuditLogType.OrganizationDeleted:
             return ['o'];
         case AuditLogType.Unknown:
             return [];
@@ -379,6 +415,13 @@ export class AuditLogReplacement extends AutoEncoder {
         }
         return this.value;
     }
+
+    toKey(): string {
+        if (this.type === AuditLogReplacementType.Array) {
+            return this.values.map(v => v.toKey()).filter(v => !!v).join('.');
+        }
+        return this.value;
+    }
 }
 
 export function isUuid(value: unknown) {
@@ -411,7 +454,7 @@ export function uuidToName(uuid: string) {
 
 export function getAuditLogPatchKeyName(key: string) {
     // Strip prefixes
-    const stripPrefixes = ['settings.', 'meta.', 'privateMeta.', 'privateConfig.', 'config.', 'privateSettings.'];
+    const stripPrefixes = ['settings.', 'meta.', 'privateMeta.', 'privateConfig.', 'config.', 'privateSettings.', 'details.'];
     for (const prefix of stripPrefixes) {
         if (key.startsWith(prefix)) {
             key = key.substring(prefix.length);
@@ -422,39 +465,58 @@ export function getAuditLogPatchKeyName(key: string) {
         return wordDictionary[key];
     }
 
-    const enumHelpers: ((key: string) => string)[] = [
-        PaymentMethodHelper.getPluralName,
-        ParentTypeHelper.getName,
-        OrderStatusHelper.getName,
-        DocumentStatusHelper.getName,
-        AccessRightHelper.getName,
-        CheckoutMethodTypeHelper.getName,
-        CountryHelper.getName,
-        OrganizationTypeHelper.getName,
-        PaymentStatusHelper.getName,
-        UmbrellaOrganizationHelper.getName,
-        STPackageTypeHelper.getName,
-        ParentTypeHelper.getName,
-    ];
+    // Check first letter is a capital letter
+    if (key.length > 1 && key[0] === key[0].toUpperCase()) {
+        const enumHelpers: ((key: string) => string)[] = [
+            PaymentMethodHelper.getPluralName,
+            ParentTypeHelper.getName,
+            OrderStatusHelper.getName,
+            DocumentStatusHelper.getName,
+            AccessRightHelper.getName,
+            CheckoutMethodTypeHelper.getName,
+            CountryHelper.getName,
+            OrganizationTypeHelper.getName,
+            PaymentStatusHelper.getName,
+            UmbrellaOrganizationHelper.getName,
+            STPackageTypeHelper.getName,
+            ParentTypeHelper.getName,
+            getGroupStatusName,
+            getGenderName,
+            getSetupStepName,
+        ];
 
-    for (const helper of enumHelpers) {
-        try {
-            const result = helper(key);
-            if (result) {
-                return result;
+        for (const helper of enumHelpers) {
+            try {
+                const result = helper(key);
+                if (result) {
+                    return result;
+                }
             }
-        }
-        catch (e) {
-            console.error(e);
+            catch (e) {
+                console.error(e);
+            }
         }
     }
 
     if (key.includes('.')) {
         const splitted = key.split('.');
+
+        if (splitted.length > 2) {
+            const firstTwoWords = splitted.slice(0, 2).join('.');
+            if (firstTwoWords !== getAuditLogPatchKeyName(firstTwoWords)) {
+                return `${getAuditLogPatchKeyName(firstTwoWords)} → ${getAuditLogPatchKeyName(splitted.slice(2).join('.'))}`;
+            }
+        }
+
         const firstWord = splitted[0];
         const remaining = splitted.slice(1).join('.');
 
         return `${getAuditLogPatchKeyName(firstWord)} → ${getAuditLogPatchKeyName(remaining)}`;
+    }
+
+    if (key.length > 2 && key.endsWith('Id')) {
+        // Strip id and try again
+        return getAuditLogPatchKeyName(key.substring(0, key.length - 2));
     }
 
     // Replace camel case with spaces

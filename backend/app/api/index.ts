@@ -1,7 +1,7 @@
 import backendEnv from '@stamhoofd/backend-env';
 backendEnv.load();
 
-import { Column, Database, Migration } from '@simonbackx/simple-database';
+import { Column, Database, Migration, Model } from '@simonbackx/simple-database';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
@@ -14,6 +14,7 @@ import { stopCrons, startCrons, waitForCrons } from '@stamhoofd/crons';
 import { resumeEmails } from './src/helpers/EmailResumer';
 import { ContextMiddleware } from './src/middleware/ContextMiddleware';
 import { Platform } from '@stamhoofd/models';
+import { AuditLogService } from './src/services/AuditLogService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -184,6 +185,8 @@ const start = async () => {
     await import('./src/crons');
     startCrons();
     seeds().catch(console.error);
+
+    AuditLogService.listen();
 };
 
 start().catch((error) => {

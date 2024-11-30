@@ -242,7 +242,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
     });
 
     const calendarTab = new TabBarItem({
-        icon: 'calendar-filled',
+        icon: 'calendar',
         name: 'Activiteiten',
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ManageEventsView, {}),

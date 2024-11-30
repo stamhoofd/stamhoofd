@@ -53,6 +53,8 @@ export * from './src/ResourcePermissions.js';
 export * from './src/RichText.js';
 export * from './src/SeatingPlan.js';
 export * from './src/SetupSteps.js';
+export * from './src/SetupStepType.js';
+export * from './src/SetupStepReview.js';
 export * from './src/StockReservation.js';
 export * from './src/StripeAccount.js';
 export * from './src/Token.js';

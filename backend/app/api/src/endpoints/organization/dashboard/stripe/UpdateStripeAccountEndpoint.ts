@@ -45,19 +45,9 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         // Get account
         const stripe = StripeHelper.getInstance();
         const account = await stripe.accounts.retrieve(model.accountId);
-        const beforeMeta = model.meta;
         model.setMetaFromStripeAccount(account);
 
-        if (await model.save()) {
-            // Track audit log
-            await AuditLogService.log({
-                type: AuditLogType.StripeAccountEdited,
-                stripeAccount: model,
-                oldData: beforeMeta,
-                patch: model.meta,
-            });
-        }
-
+        await model.save();
         return new Response(StripeAccountStruct.create(model));
     }
 }

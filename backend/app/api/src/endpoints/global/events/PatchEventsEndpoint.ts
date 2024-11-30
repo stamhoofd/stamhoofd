@@ -107,15 +107,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await event.save();
 
             events.push(event);
-
-            await AuditLogService.log({
-                type: AuditLogType.EventAdded,
-                event,
-            });
         }
 
         const patchingEvents = await Event.getByIDs(...request.body.getPatches().map(p => p.id));
-        const initialStructs = (await AuthenticatedStructures.events(patchingEvents)).map(e => e.clone()); // Clone is required for audit log (otherwise references might change)
 
         for (const patch of request.body.getPatches()) {
             const event = patchingEvents.find(e => e.id === patch.id);
@@ -251,15 +245,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             events.push(event);
-
-            const struct = initialStructs.find(e => e.id === patch.id);
-
-            await AuditLogService.log({
-                type: AuditLogType.EventEdited,
-                event,
-                oldData: struct,
-                patch,
-            });
         }
 
         for (const id of request.body.getDeletes()) {
@@ -276,11 +261,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             await event.delete();
-
-            await AuditLogService.log({
-                type: AuditLogType.EventDeleted,
-                event,
-            });
         }
 
         const structures = await AuthenticatedStructures.events(events);

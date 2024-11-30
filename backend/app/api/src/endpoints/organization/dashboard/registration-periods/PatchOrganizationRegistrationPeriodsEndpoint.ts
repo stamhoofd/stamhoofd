@@ -282,11 +282,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.deletedAt = new Date();
         await model.save();
         Member.updateMembershipsForGroupId(id);
-
-        await AuditLogService.log({
-            type: AuditLogType.GroupDeleted,
-            group: model,
-        });
     }
 
     static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null) {
@@ -429,13 +424,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             // Nothing changed
             return;
         }
-
-        await AuditLogService.log({
-            type: AuditLogType.GroupEdited,
-            group: model,
-            oldData: originalStruct,
-            patch,
-        });
     }
 
     static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
@@ -516,11 +504,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         await model.save();
         await model.updateOccupancy({ isNew: true }); // Force update steps
-
-        await AuditLogService.log({
-            type: AuditLogType.GroupAdded,
-            group: model,
-        });
 
         return model;
     }

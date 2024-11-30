@@ -87,17 +87,8 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     const id = account.id as string;
                     const [model] = await StripeAccount.where({ accountId: id }, { limit: 1 });
                     if (model) {
-                        const beforeMeta = model.meta.clone();
                         model.setMetaFromStripeAccount(account);
-                        if (await model.save()) {
-                            // Track audit log
-                            await AuditLogService.log({
-                                type: AuditLogType.StripeAccountEdited,
-                                stripeAccount: model,
-                                oldData: beforeMeta,
-                                patch: model.meta,
-                            });
-                        }
+                        await model.save();
                     }
                     else {
                         console.warn('Could not find stripe account with id', id);

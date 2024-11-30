@@ -71,7 +71,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
     });
 
     const calendarTab = new TabBarItem({
-        icon: 'calendar-filled',
+        icon: 'calendar',
         name: 'Activiteiten',
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ManageEventsView, {}),

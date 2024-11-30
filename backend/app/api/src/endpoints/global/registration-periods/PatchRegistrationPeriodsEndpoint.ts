@@ -63,11 +63,6 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             await period.save();
             periods.push(period);
-
-            await AuditLogService.log({
-                type: AuditLogType.RegistrationPeriodAdded,
-                period,
-            });
         }
 
         for (const patch of request.body.getPatches()) {
@@ -80,8 +75,6 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     message: 'Registration period not found',
                 });
             }
-            const initialStructure = model.getStructure().clone();
-
             if (patch.startDate !== undefined) {
                 model.startDate = patch.startDate;
             }
@@ -102,13 +95,6 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             // Schedule patch of all groups in this period
             PeriodHelper.updateGroupsInPeriod(model).catch(console.error);
-
-            await AuditLogService.log({
-                type: AuditLogType.RegistrationPeriodEdited,
-                period: model,
-                patch,
-                oldData: initialStructure,
-            });
         }
 
         for (const id of request.body.getDeletes()) {
@@ -123,11 +109,6 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             }
 
             await model.delete();
-
-            await AuditLogService.log({
-                type: AuditLogType.RegistrationPeriodDeleted,
-                period: model,
-            });
         }
 
         // Clear platform cache

@@ -87,6 +87,7 @@ export class Event extends Model {
         if (group.type === GroupType.EventRegistration) {
             // Don't change the name of the waiting list
             group.settings.name = this.name;
+            group.settings.eventId = this.id;
         }
 
         if (this.organizationId) {

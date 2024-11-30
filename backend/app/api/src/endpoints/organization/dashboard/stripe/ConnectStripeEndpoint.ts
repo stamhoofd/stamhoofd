@@ -92,12 +92,6 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         model.setMetaFromStripeAccount(account);
         await model.save();
 
-        // Track audit log
-        await AuditLogService.log({
-            type: AuditLogType.StripeAccountAdded,
-            stripeAccount: model,
-        });
-
         // Return information about the Stripe Account
 
         return new Response(StripeAccountStruct.create(model));
