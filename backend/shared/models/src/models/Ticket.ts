@@ -41,9 +41,7 @@ export class Ticket extends Model {
     /**
      * Unique per webshop. Used for lookups
      */
-    @column({ type: 'string', async beforeSave(value) {
-        return value ?? bs58.encode(await randomBytes(10));
-    } })
+    @column({ type: 'string' })
     secret!: string;
 
     @column({ foreignKey: Ticket.organization, type: 'string' })
@@ -140,5 +138,12 @@ export class Ticket extends Model {
         }
         this.deletedAt = new Date();
         await this.save();
+    }
+
+    async save() {
+        if (!this.secret) {
+            this.secret = bs58.encode(await randomBytes(10));
+        }
+        return super.save();
     }
 }

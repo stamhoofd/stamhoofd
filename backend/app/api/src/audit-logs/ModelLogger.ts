@@ -1,6 +1,5 @@
 import { Model, ModelEvent } from '@simonbackx/simple-database';
 import { Context } from '../helpers/Context';
-import { AuditLogService } from '../services/AuditLogService';
 import { createUnknownChangeHandler } from '../services/explainPatch';
 import { AuditLog } from '@stamhoofd/models';
 import { AuditLogType, AuditLogReplacement } from '@stamhoofd/structures';
@@ -95,9 +94,6 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
     async logEvent(event: ModelEvent<M>) {
         try {
-            if (AuditLogService.isDisabled()) {
-                return false;
-            }
             const userId = Context.optionalAuth?.user?.id ?? null;
             const organizationId = Context.organization?.id ?? null;
 

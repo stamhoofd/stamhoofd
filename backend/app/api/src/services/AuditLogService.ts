@@ -9,12 +9,14 @@ import { RegistrationPeriodLogger } from '../audit-logs/RegistrationPeriodLogger
 import { OrganizationRegistrationPeriodLogger } from '../audit-logs/OrganizationRegistrationPeriodLogger';
 import { StripeAccountLogger } from '../audit-logs/StripeAccountLogger';
 import { MemberLogger } from '../audit-logs/MemberLogger';
+import { WebshopLogger } from '../audit-logs/WebshopLogger';
+import { OrderLogger } from '../audit-logs/OrderLogger';
 
 export class AuditLogService {
     private constructor() { }
     static disableLocalStore = new AsyncLocalStorage<boolean>();
 
-    static disable<T extends Promise<void> | void>(run: () => T): T {
+    static disable<T>(run: () => T): T {
         return this.disableLocalStore.run(true, () => {
             return run();
         });
@@ -50,6 +52,11 @@ export class AuditLogService {
                 model: event.model.static.name,
             });
 
+            if (this.isDisabled()) {
+                console.log('Audit log disabled');
+                return;
+            }
+
             await definition.logEvent(event);
         });
     }
@@ -66,3 +73,5 @@ modelLogDefinitions.set(RegistrationPeriodLogger.model, RegistrationPeriodLogger
 modelLogDefinitions.set(OrganizationRegistrationPeriodLogger.model, OrganizationRegistrationPeriodLogger);
 modelLogDefinitions.set(StripeAccountLogger.model, StripeAccountLogger);
 modelLogDefinitions.set(MemberLogger.model, MemberLogger);
+modelLogDefinitions.set(WebshopLogger.model, WebshopLogger);
+modelLogDefinitions.set(OrderLogger.model, OrderLogger);

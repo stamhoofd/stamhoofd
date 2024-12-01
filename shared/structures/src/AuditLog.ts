@@ -17,6 +17,7 @@ import { STPackageTypeHelper } from './billing/STPackage.js';
 import { getGroupStatusName } from './Group.js';
 import { getGenderName } from './members/Gender.js';
 import { getSetupStepName } from './SetupStepType.js';
+import { Formatter } from '@stamhoofd/utility';
 
 export enum AuditLogType {
     /**
@@ -46,6 +47,11 @@ export enum AuditLogType {
     GroupAdded = 'GroupAdded',
     GroupDeleted = 'GroupDeleted',
 
+    // Webshops
+    WebshopEdited = 'WebshopEdited',
+    WebshopAdded = 'WebshopAdded',
+    WebshopDeleted = 'WebshopDeleted',
+
     // Waiting lists
     WaitingListEdited = 'WaitingListEdited',
     WaitingListAdded = 'WaitingListAdded',
@@ -60,6 +66,11 @@ export enum AuditLogType {
     StripeAccountAdded = 'StripeAccountAdded',
     StripeAccountDeleted = 'StripeAccountDeleted',
     StripeAccountEdited = 'StripeAccountEdited',
+
+    // Orders
+    OrderAdded = 'OrderAdded',
+    OrderEdited = 'OrderEdited',
+    OrderDeleted = 'OrderDeleted',
 }
 
 export enum AuditLogReplacementType {
@@ -75,6 +86,8 @@ export enum AuditLogReplacementType {
     RegistrationPeriod = 'RegistrationPeriod',
     Uuid = 'Uuid',
     StripeAccount = 'StripeAccount',
+    Webshop = 'Webshop',
+    Order = 'Order',
 }
 
 export function getAuditLogTypeName(type: AuditLogType): string {
@@ -129,6 +142,18 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Stripe account verwijderd`;
         case AuditLogType.StripeAccountEdited:
             return `Stripe account gewijzigd`;
+        case AuditLogType.WebshopEdited:
+            return `Wijzigingen aan webshops`;
+        case AuditLogType.WebshopAdded:
+            return `Nieuwe webshops`;
+        case AuditLogType.WebshopDeleted:
+            return `Verwijderde webshops`;
+        case AuditLogType.OrderAdded:
+            return `Nieuwe bestellingen`;
+        case AuditLogType.OrderEdited:
+            return `Wijzigingen aan bestellingen`;
+        case AuditLogType.OrderDeleted:
+            return `Verwijderde bestellingen`;
     }
 
     return type;
@@ -193,6 +218,19 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`stripe`, `canceled red`];
         case AuditLogType.StripeAccountEdited:
             return [`stripe`, `edit`];
+
+        case AuditLogType.WebshopEdited:
+            return [`basket`, `edit`];
+        case AuditLogType.WebshopAdded:
+            return [`basket`, `add green`];
+        case AuditLogType.WebshopDeleted:
+            return [`basket`, `canceled red`];
+        case AuditLogType.OrderAdded:
+            return [`basket`, `add green`];
+        case AuditLogType.OrderEdited:
+            return [`basket`, `edit`];
+        case AuditLogType.OrderDeleted:
+            return [`basket`, `canceled red`];
     }
     return [`help`];
 }
@@ -265,6 +303,20 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `Stripe account {{a}} verwijderd`;
         case AuditLogType.StripeAccountEdited:
             return `Stripe account {{a}} gewijzigd`;
+
+        case AuditLogType.WebshopEdited:
+            return `De webshop {{w}} werd gewijzigd`;
+        case AuditLogType.WebshopAdded:
+            return `De webshop {{w}} werd aangemaakt`;
+        case AuditLogType.WebshopDeleted:
+            return `De webshop {{w}} werd verwijderd`;
+
+        case AuditLogType.OrderAdded:
+            return `{{capitalizeFirstLetter o}} werd toegevoegd ({{w}})`;
+        case AuditLogType.OrderEdited:
+            return `{{capitalizeFirstLetter o}} werd gewijzigd ({{w}})`;
+        case AuditLogType.OrderDeleted:
+            return `{{capitalizeFirstLetter o}} werd verwijderd ({{w}})`;
     }
 }
 
@@ -304,6 +356,16 @@ function getTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.StripeAccountDeleted:
         case AuditLogType.StripeAccountEdited:
             return ['a'];
+
+        case AuditLogType.WebshopEdited:
+        case AuditLogType.WebshopAdded:
+        case AuditLogType.WebshopDeleted:
+            return ['w'];
+
+        case AuditLogType.OrderAdded:
+        case AuditLogType.OrderEdited:
+        case AuditLogType.OrderDeleted:
+            return ['o', 'w'];
         default:
             return [];
     }
@@ -312,6 +374,9 @@ function getTypeReplacements(type: AuditLogType): string[] {
 export class AuditLogReplacement extends AutoEncoder {
     @field({ field: 'v', decoder: StringDecoder, optional: true })
     value: string = '';
+
+    @field({ field: 'd', decoder: StringDecoder, optional: true })
+    description: string = '';
 
     @field({ field: 'a', decoder: new ArrayDecoder(AuditLogReplacement), optional: true })
     values: AuditLogReplacement[] = [];
@@ -451,10 +516,27 @@ export function uuidToName(uuid: string) {
     }
     return null;
 }
+const enumHelpers: ((key: string) => string)[] = [
+    PaymentMethodHelper.getPluralName,
+    ParentTypeHelper.getName,
+    OrderStatusHelper.getName,
+    DocumentStatusHelper.getName,
+    AccessRightHelper.getName,
+    CheckoutMethodTypeHelper.getName,
+    CountryHelper.getName,
+    OrganizationTypeHelper.getName.bind(OrganizationTypeHelper),
+    PaymentStatusHelper.getName.bind(PaymentStatusHelper),
+    UmbrellaOrganizationHelper.getName.bind(UmbrellaOrganizationHelper),
+    STPackageTypeHelper.getName.bind(STPackageTypeHelper),
+    ParentTypeHelper.getName.bind(ParentTypeHelper),
+    getGroupStatusName,
+    getGenderName,
+    getSetupStepName,
+];
 
 export function getAuditLogPatchKeyName(key: string) {
     // Strip prefixes
-    const stripPrefixes = ['settings.', 'meta.', 'privateMeta.', 'privateConfig.', 'config.', 'privateSettings.', 'details.'];
+    const stripPrefixes = ['settings.', 'meta.', 'privateMeta.', 'privateConfig.', 'config.', 'privateSettings.', 'details.', 'data.'];
     for (const prefix of stripPrefixes) {
         if (key.startsWith(prefix)) {
             key = key.substring(prefix.length);
@@ -467,24 +549,6 @@ export function getAuditLogPatchKeyName(key: string) {
 
     // Check first letter is a capital letter
     if (key.length > 1 && key[0] === key[0].toUpperCase()) {
-        const enumHelpers: ((key: string) => string)[] = [
-            PaymentMethodHelper.getPluralName,
-            ParentTypeHelper.getName,
-            OrderStatusHelper.getName,
-            DocumentStatusHelper.getName,
-            AccessRightHelper.getName,
-            CheckoutMethodTypeHelper.getName,
-            CountryHelper.getName,
-            OrganizationTypeHelper.getName,
-            PaymentStatusHelper.getName,
-            UmbrellaOrganizationHelper.getName,
-            STPackageTypeHelper.getName,
-            ParentTypeHelper.getName,
-            getGroupStatusName,
-            getGenderName,
-            getSetupStepName,
-        ];
-
         for (const helper of enumHelpers) {
             try {
                 const result = helper(key);
@@ -608,6 +672,14 @@ export class AuditLog extends AutoEncoder {
                             return object.count === 1 ? [singular] : [plural];
                         }
                         return [object === 1 ? singular : plural];
+                    },
+                    capitalizeFirstLetter: (context: RenderContext, object: any) => {
+                        if (object instanceof AuditLogReplacement) {
+                            const clone = object.clone();
+                            clone.value = Formatter.capitalizeFirstLetter(clone.value);
+                            return [clone];
+                        }
+                        return [object];
                     },
                 },
             });

@@ -99,6 +99,57 @@ export class Formatter {
         return datetime.day + ' ' + this.month(datetime.month) + (currentYear !== year || withYear === true ? (' ' + year) : '');
     }
 
+    static relativeTime(date: Date, options?: { days?: boolean; hours?: boolean }) {
+        const now = Date.now();
+        let diff = now - date.getTime();
+
+        const days = Math.floor(diff / (60 * 1000 * 60 * 24));
+
+        diff = diff % (60 * 1000 * 60 * 24);
+        const hours = Math.floor(diff / (60 * 1000 * 60));
+        diff = diff % (60 * 1000 * 60);
+
+        const minutes = Math.floor(diff / (60 * 1000));
+
+        if (days > 0) {
+            if (options?.days === false || options?.hours === false) {
+                return this.dateTime(date, true, true);
+            }
+            if (days === 1) {
+                return 'één dag geleden';
+            }
+            return days + ' dagen geleden';
+        }
+
+        if (hours > 0) {
+            if (options?.hours === false) {
+                return this.dateTime(date, true, true);
+            }
+
+            if (hours === 1) {
+                return 'één uur geleden';
+            }
+            return hours + ' uur geleden';
+        }
+
+        if (minutes > 0) {
+            if (minutes === 1) {
+                return 'één minuut geleden';
+            }
+            return minutes + ' minuten geleden';
+        }
+
+        const seconds = Math.floor(diff / 1000);
+        if (seconds > 0) {
+            if (seconds === 1) {
+                return 'één seconde geleden';
+            }
+            return seconds + ' seconden geleden';
+        }
+
+        return 'zojuist';
+    }
+
     /**
      * januari 2020
      */

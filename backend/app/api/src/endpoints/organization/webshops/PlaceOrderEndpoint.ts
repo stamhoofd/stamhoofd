@@ -12,6 +12,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
+import { AuditLogService } from '../../../services/AuditLogService';
 
 type Params = { id: string };
 type Query = undefined;
@@ -140,7 +141,12 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.userId = Context.user?.id ?? null;
 
             // Always reserve the stock
-            await order.updateStock();
+            await AuditLogService.disable(async () => {
+                await order.updateStock(null, true);
+            });
+
+            await order.save();
+
             return { webshop, order, organization };
         });
 

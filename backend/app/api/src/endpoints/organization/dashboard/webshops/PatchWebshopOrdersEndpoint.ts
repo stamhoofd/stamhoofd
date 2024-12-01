@@ -6,6 +6,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
+import { AuditLogService } from '../../../../services/AuditLogService';
 
 type Params = { id: string };
 type Query = undefined;
@@ -131,7 +132,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 order.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
 
                 try {
-                    await order.updateStock();
+                    await order.updateStock(null, true);
                     const totalPrice = order.data.totalPrice;
 
                     if (totalPrice == 0) {
@@ -286,9 +287,11 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     }
                 }
 
+                await AuditLogService.disable(async () => {
+                    await model.setRelation(Order.webshop, webshop).updateStock(previousData, true);
+                    await model.setRelation(Order.webshop, webshop).updateTickets();
+                });
                 await model.save();
-                await model.setRelation(Order.webshop, webshop).updateStock(previousData);
-                await model.setRelation(Order.webshop, webshop).updateTickets();
             }
 
             const mapped = orders.map(order => order.setRelation(Order.webshop, webshop));

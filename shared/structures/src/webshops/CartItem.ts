@@ -381,6 +381,14 @@ export class CartItem extends AutoEncoder {
         return this.priceCombinationToString(priceCombinations);
     }
 
+    getPatchName() {
+        return this.product.name;
+    }
+
+    getPatchValue() {
+        return this.formattedAmount + 'x ' + this.description;
+    }
+
     private priceCombinationToString(priceCombinations: Map<number, number>) {
         // Sort by price
         const sorted = [...priceCombinations.entries()].map(([price, amount]) => ({ price, amount })).sort((a, b) => b.price - a.price);

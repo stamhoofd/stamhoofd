@@ -179,7 +179,6 @@ export class Order extends Model {
         console.log('Undoing payment failed for order ' + this.id);
         this.markUpdated();
         this.status = OrderStatus.Created;
-        await this.save();
 
         const webshop = await QueueHandler.schedule('webshop-stock/' + this.webshopId, async () => {
             // Fetch webshop inside queue to make sure the stock is up to date
@@ -190,9 +189,10 @@ export class Order extends Model {
                 return;
             }
 
-            await this.setRelation(Order.webshop, webshop).updateStock(); // readd reserved stock
+            await this.setRelation(Order.webshop, webshop).updateStock(null, true); // readd reserved stock
             return webshop;
         });
+        await this.save();
 
         if (webshop) {
             await this.setRelation(Order.webshop, webshop).updateTickets();
@@ -281,7 +281,7 @@ export class Order extends Model {
      * Should always happen in the webshop-stock queue to prevent multiple webshop writes at the same time
      * + in combination with validation and reading the webshop
      */
-    async updateStock(this: Order & { webshop: Webshop }, previousData: OrderData | null = null) {
+    async updateStock(this: Order & { webshop: Webshop }, previousData: OrderData | null = null, skipOrderSave = false) {
         // Previous data?
 
         // Add or delete this order from the stock?
@@ -493,9 +493,14 @@ export class Order extends Model {
         }
 
         if (changed) {
+            // Do not log the webshop stock changes - but do log the order changes
             await this.webshop.save();
-            await this.save();
+
+            if (!skipOrderSave) {
+                await this.save();
+            }
         }
+        return changed;
     }
 
     private static updateTimeSlotStock(timeSlot: WebshopTimeSlot, data: OrderData, add: boolean) {

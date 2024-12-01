@@ -8,7 +8,7 @@
             </IconContainer>
         </template>
         <p class="style-title-prefix-list">
-            {{ formatDateTime(log.createdAt, false, true) }}
+            {{ Formatter.relativeTime(log.createdAt, {hours: false}) }}
         </p>
 
         <h3 class="style-title-list">
@@ -30,6 +30,7 @@ import IconContainer from '../../icons/IconContainer.vue';
 import ProgressIcon from '../../icons/ProgressIcon.vue';
 import PatchListText from './PatchListText.vue';
 import { RenderTextComponent } from './RenderTextComponent';
+import { Formatter } from '@stamhoofd/utility';
 
 defineProps<{
     log: AuditLog;

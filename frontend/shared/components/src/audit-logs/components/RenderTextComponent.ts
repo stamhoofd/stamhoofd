@@ -8,6 +8,7 @@ import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObject
 import { MemberSegmentedView } from '../../members';
 import { Toast } from '../../overlays/Toast';
 import CopyableDirective from '../../directives/Copyable';
+import TooltipDirective from '../../directives/Tooltip';
 
 export interface Renderable {
     render(context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
@@ -20,6 +21,11 @@ function isRenderable(obj: unknown): obj is Renderable {
 function copyable(vnode: ReturnType<typeof h>): ReturnType<typeof h> {
     return withDirectives(vnode, [[CopyableDirective]]);
 }
+
+function tooltip(vnode: ReturnType<typeof h>, text: string): ReturnType<typeof h> {
+    return withDirectives(vnode, [[TooltipDirective, text]]);
+}
+
 export function renderAny(obj: unknown, context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[] {
     if (typeof obj === 'string') {
         return obj;
@@ -101,6 +107,9 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
             });
             a.pop();
             return a;
+        }
+        if (obj.description) {
+            return tooltip(h('span', { class: 'style-tooltip' }, obj.toString()), obj.description);
         }
         const str = obj.toString();
 
