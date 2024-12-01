@@ -493,9 +493,9 @@ async function save() {
         new Toast('Wijzigingen opgeslagen', 'success').setHide(1000).show();
 
         // Move all data to original order
-        for (const order of orders) {
-            if (order.id === order.id) {
-                order.deepSet(order);
+        for (const receivedOrder of orders) {
+            if (receivedOrder.id === order.id) {
+                order.deepSet(receivedOrder);
             }
         }
         patchOrder.value = PrivateOrder.patch({});
@@ -558,7 +558,7 @@ async function editCartItem(cartItem: CartItem) {
                     cartItem: newCartItem,
                     oldItem: cartItem,
                     checkout: clone,
-                    webshop: webshop,
+                    webshop: w,
                     saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component: any) => {
                         component.dismiss({ force: true });
 
