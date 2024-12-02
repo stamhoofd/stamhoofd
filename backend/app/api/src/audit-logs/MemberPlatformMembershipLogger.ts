@@ -1,7 +1,7 @@
-import { Member, MemberPlatformMembership, Organization } from '@stamhoofd/models';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
+import { Member, MemberPlatformMembership } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, uuidToName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger';
 
 const defaultGenerator = getDefaultGenerator({
     created: AuditLogType.MemberPlatformMembershipAdded,
@@ -19,7 +19,6 @@ export const MemberPlatformMembershipLogger = new ModelLogger(MemberPlatformMemb
         }
 
         const member = await Member.getByID(event.model.memberId);
-        const organization = event.model.organizationId ? (await Organization.getByID(event.model.organizationId)) : null;
 
         if (!member) {
             console.log('No member found for MemberPlatformMembership', event.model.id);
@@ -30,7 +29,6 @@ export const MemberPlatformMembershipLogger = new ModelLogger(MemberPlatformMemb
             ...result,
             data: {
                 member,
-                organization,
             },
             objectId: event.model.memberId,
         };
@@ -54,18 +52,6 @@ export const MemberPlatformMembershipLogger = new ModelLogger(MemberPlatformMemb
             })],
         ]);
 
-        if (options.data.organization) {
-            map.set('o', AuditLogReplacement.create({
-                id: options.data.organization.id,
-                value: options.data.organization.name,
-                type: AuditLogReplacementType.Organization,
-            }));
-        }
-
         return map;
-    },
-
-    postProcess(event, options, log) {
-        log.organizationId = options.data.organization?.id ?? null;
     },
 });

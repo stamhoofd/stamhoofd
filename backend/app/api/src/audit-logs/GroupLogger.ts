@@ -1,6 +1,6 @@
-import { Group, Member, Registration } from '@stamhoofd/models';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
+import { Group } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, GroupType } from '@stamhoofd/structures';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger';
 
 const defaultGenerator = getDefaultGenerator({
     created: AuditLogType.GroupAdded,
@@ -55,7 +55,7 @@ export const GroupLogger = new ModelLogger(Group, {
         return result;
     },
 
-    postProcess(_event, _options, log) {
+    postProcess(event, _options, log) {
         if (log.type === AuditLogType.EventEdited) {
             // Prefix changes
             for (const item of log.patchList) {

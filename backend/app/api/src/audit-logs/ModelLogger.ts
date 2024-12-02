@@ -112,7 +112,8 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
             log.organizationId = context?.organization?.id ?? settings?.fallbackOrganizationId ?? null;
 
-            if (!log.organizationId && 'organizationId' in event.model && typeof event.model['organizationId'] === 'string') {
+            if ('organizationId' in event.model && typeof event.model['organizationId'] === 'string') {
+                // Always override
                 log.organizationId = event.model.organizationId;
             }
 

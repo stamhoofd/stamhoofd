@@ -46,7 +46,7 @@ export const OrderLogger = new ModelLogger(Order, {
                 value: options.data.webshop.meta.name,
                 type: AuditLogReplacementType.Webshop,
             })],
-            ['o', AuditLogReplacement.create({
+            ['org', AuditLogReplacement.create({
                 id: model.id,
                 value: model.number ? `bestelling #${model.number}` : `bestelling van ${model.data.customer.name}`,
                 type: AuditLogReplacementType.Order,

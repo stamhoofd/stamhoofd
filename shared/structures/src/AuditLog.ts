@@ -362,13 +362,13 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `De platforminstellingen werden gewijzigd`;
 
         case AuditLogType.OrganizationEdited:
-            return `De instellingen van {{o}} werden gewijzigd`;
+            return `{{if org 'De instellingen van ' org ' werden gewijzigd'}}{{unless org 'De instellingen werden gewijzigd'}}`;
 
         case AuditLogType.OrganizationAdded:
-            return `De lokale groep {{o}} werd aangemaakt`;
+            return `De lokale groep {{org}} werd aangemaakt`;
 
         case AuditLogType.OrganizationDeleted:
-            return `De lokale groep {{o}} werd verwijderd`;
+            return `De lokale groep {{org}} werd verwijderd`;
 
         case AuditLogType.EventEdited:
             return `De activiteit {{e}} werd gewijzigd`;
@@ -449,18 +449,18 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `Account {{u}} werd verwijderd`;
 
         case AuditLogType.MemberResponsibilityRecordAdded:
-            return `Functie {{r}}{{if g " van " g}}{{if o " (" o ")"}} werd toegekend aan {{m}}`;
+            return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}`;
         case AuditLogType.MemberResponsibilityRecordEdited:
-            return `Functie {{r}}{{if g " van " g}}{{if o " (" o ")"}} werd gewijzigd bij {{m}}`;
+            return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd gewijzigd bij {{m}}`;
         case AuditLogType.MemberResponsibilityRecordDeleted:
-            return `Functie {{r}}{{if g " van " g}}{{if o " (" o ")"}} werd verwijderd van {{m}}`;
+            return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd verwijderd van {{m}}`;
 
         case AuditLogType.MemberPlatformMembershipAdded:
-            return `Aansluiting {{pm}}{{if o " (" o ")"}} werd toegevoegd bij {{m}}{{if o " via " o}}`;
+            return `Aansluiting {{pm}} werd toegevoegd bij {{m}}{{if org " via " org}}`;
         case AuditLogType.MemberPlatformMembershipEdited:
-            return `Aansluiting {{pm}}{{if o " (" o ")"}} werd gewijzigd bij {{m}}{{if o " via " o}}`;
+            return `Aansluiting {{pm}} werd gewijzigd bij {{m}}{{if org " via " org}}`;
         case AuditLogType.MemberPlatformMembershipDeleted:
-            return `Aansluiting {{pm}}{{if o " (" o ")"}} werd verwijderd bij {{m}}{{if o " via " o}}`;
+            return `Aansluiting {{pm}} werd verwijderd bij {{m}}{{if org " via " org}}`;
     }
 }
 

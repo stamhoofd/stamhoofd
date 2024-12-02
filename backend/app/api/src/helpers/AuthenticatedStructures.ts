@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLog as AuditLogStruct, Document as DocumentStruct, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, Document as DocumentStruct, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -645,6 +645,8 @@ export class AuthenticatedStructures {
 
         const userIds = Formatter.uniqueArray(logs.map(l => l.userId).filter(id => id !== null));
         const users = await User.getByIDs(...userIds);
+        const organizationsIds = Formatter.uniqueArray(logs.map(l => l.organizationId).filter(id => id !== null));
+        const organizations = await Organization.getByIDs(...organizationsIds);
 
         for (const log of logs) {
             const user = log.userId ? (users.find(u => u.id === log.userId) ?? null) : null;
@@ -675,10 +677,14 @@ export class AuthenticatedStructures {
 
             let replacements = log.replacements;
 
-            // Remove 'o' (organization) replacement if it is the current organization (so it wont get written)
-            if (Context.organization && log.replacements.get('o')?.id === Context.organization.id) {
+            if (log.organizationId && log.organizationId !== Context.organization?.id) {
                 replacements = new Map(log.replacements);
-                replacements.delete('o');
+                const org = organizations.find(o => o.id === log.organizationId);
+                replacements.set('org', AuditLogReplacement.create({
+                    id: log.organizationId,
+                    value: org?.name ?? 'verwijderde vereniging',
+                    type: AuditLogReplacementType.Organization,
+                }));
             }
 
             structs.push(

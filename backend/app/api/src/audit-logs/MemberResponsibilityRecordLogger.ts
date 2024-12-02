@@ -19,7 +19,6 @@ export const MemberResponsibilityRecordLogger = new ModelLogger(MemberResponsibi
 
         const member = await Member.getByID(event.model.memberId);
         const group = event.model.groupId ? (await Group.getByID(event.model.groupId)) : null;
-        const organization = event.model.organizationId ? (await Organization.getByID(event.model.organizationId)) : null;
 
         if (!member) {
             console.log('No member found for MemberResponsibilityRecord', event.model.id);
@@ -37,7 +36,6 @@ export const MemberResponsibilityRecordLogger = new ModelLogger(MemberResponsibi
                 member,
                 group,
                 platform: await Platform.getSharedStruct(),
-                organization,
             },
             objectId: event.model.memberId,
         };
@@ -58,14 +56,6 @@ export const MemberResponsibilityRecordLogger = new ModelLogger(MemberResponsibi
             })],
         ]);
 
-        if (options.data.organization) {
-            map.set('o', AuditLogReplacement.create({
-                id: options.data.organization.id,
-                value: options.data.organization.name,
-                type: AuditLogReplacementType.Organization,
-            }));
-        }
-
         if (options.data.group) {
             map.set('g', AuditLogReplacement.create({
                 id: options.data.group.id,
@@ -75,9 +65,5 @@ export const MemberResponsibilityRecordLogger = new ModelLogger(MemberResponsibi
         }
 
         return map;
-    },
-
-    postProcess(event, options, log) {
-        log.organizationId = options.data.organization?.id ?? null;
     },
 });
