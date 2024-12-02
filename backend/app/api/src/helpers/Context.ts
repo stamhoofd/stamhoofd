@@ -46,8 +46,14 @@ export class ContextInstance {
 
     static asyncLocalStorage = new AsyncLocalStorage<ContextInstance>();
 
-    static get current(): ContextInstance {
+    static get optional(): ContextInstance | null {
         const c = this.asyncLocalStorage.getStore();
+
+        return c ?? null;
+    }
+
+    static get current(): ContextInstance {
+        const c = this.optional;
 
         if (!c) {
             throw new SimpleError({
@@ -220,7 +226,7 @@ export class ContextInstance {
 export const Context = new Proxy(ContextInstance, {
     get(target, prop, receiver) {
         const c = target.current[prop];
-        if (c && typeof c == 'function') {
+        if (c && typeof c === 'function') {
             return c.bind(target.current);
         }
         return c;

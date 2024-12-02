@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, SetupStepUpdater } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogSource, Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
 import { AuthenticatedStructures } from './AuthenticatedStructures';
 import { MemberUserSyncer } from './MemberUserSyncer';
@@ -9,9 +9,8 @@ import { AuditLogService } from '../services/AuditLogService';
 
 export class PeriodHelper {
     static async moveOrganizationToPeriod(organization: Organization, period: RegistrationPeriod) {
-        await AuditLogService.disable(async () => {
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
             console.log('moveOrganizationToPeriod', organization.id, period.id);
-
             await this.createOrganizationPeriodForPeriod(organization, period);
             organization.periodId = period.id;
             await organization.save();
@@ -172,7 +171,7 @@ export class PeriodHelper {
 
         const batchSize = 100;
         await QueueHandler.schedule(tag, async () => {
-            await AuditLogService.disable(async () => {
+            await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                 let lastId = '';
 
                 while (true) {

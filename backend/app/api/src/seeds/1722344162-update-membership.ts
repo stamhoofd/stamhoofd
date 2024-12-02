@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { MembershipHelper } from '../helpers/MembershipHelper';
+import { PlatformMembershipService } from '../services/PlatformMembershipService';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == 'test') {
@@ -13,5 +13,5 @@ export default new Migration(async () => {
     }
 
     process.stdout.write('\n');
-    await MembershipHelper.updateAll();
+    await PlatformMembershipService.updateAll();
 });

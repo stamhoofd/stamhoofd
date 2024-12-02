@@ -1,5 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Registration } from '@stamhoofd/models';
+import { RegistrationService } from '../services/RegistrationService';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == 'test') {
@@ -27,7 +28,7 @@ export default new Migration(async () => {
         const registrations = await Registration.getByIDs(...rawRegistrations.map(g => g.id));
 
         for (const registration of registrations) {
-            registration.scheduleStockUpdate();
+            RegistrationService.scheduleStockUpdate(registration.id);
 
             c++;
 

@@ -1,6 +1,6 @@
 import { Order, Webshop } from '@stamhoofd/models';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, OrderStatus } from '@stamhoofd/structures';
 
 const defaultGenerator = getDefaultGenerator({
     created: AuditLogType.OrderAdded,
@@ -9,7 +9,7 @@ const defaultGenerator = getDefaultGenerator({
 });
 
 export const OrderLogger = new ModelLogger(Order, {
-    skipKeys: ['amount', 'timeSlotTime'],
+    skipKeys: ['amount', 'timeSlotTime', 'validAt', 'paymentId'],
     async optionsGenerator(event) {
         const result = await defaultGenerator(event);
 
@@ -24,6 +24,11 @@ export const OrderLogger = new ModelLogger(Order, {
         if (!webshop) {
             console.log('No webshop found for order', event.model.id);
             return;
+        }
+
+        if (event.type === 'updated' && event.changedFields.status === OrderStatus.Deleted) {
+            result.type = AuditLogType.OrderDeleted;
+            result.generatePatchList = false;
         }
 
         return {
@@ -45,7 +50,7 @@ export const OrderLogger = new ModelLogger(Order, {
                 id: model.id,
                 value: model.number ? `bestelling #${model.number}` : `bestelling van ${model.data.customer.name}`,
                 type: AuditLogReplacementType.Order,
-                description: model.data.customer.name,
+                description: model.number ? model.data.customer.name : 'Deze bestelling heeft nog geen nummer',
             })],
         ]);
     },

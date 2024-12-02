@@ -1,13 +1,16 @@
 import { Model, ModelEvent } from '@simonbackx/simple-database';
-import { Context } from '../helpers/Context';
-import { createUnknownChangeHandler } from '../services/explainPatch';
 import { AuditLog } from '@stamhoofd/models';
-import { AuditLogType, AuditLogReplacement } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import { ContextInstance } from '../helpers/Context';
+import { AuditLogService } from '../services/AuditLogService';
+import { createUnknownChangeHandler } from '../services/explainPatch';
 
 export type ModelEventLogOptions<D> = {
     type: AuditLogType;
     generatePatchList?: boolean;
     data: D;
+    mergeInto?: AuditLog;
+    objectId?: string;
 };
 
 type DefaultLogOptionsType = {
@@ -26,8 +29,10 @@ export type ModelLoggerOptions<M extends Model, D = undefined> = {
     postProcess?(event: ModelEvent<M>, options: ModelEventLogOptions<D>, log: AuditLog): Promise<void> | void;
 };
 
-export function getDefaultGenerator(types: DefaultLogOptionsType): EventOptionsGenerator<any, undefined> {
-    return (event: ModelEvent<any>) => {
+const ModelEventsMap = new WeakMap<Model, { events: AuditLog[] }>();
+
+export function getDefaultGenerator(types: DefaultLogOptionsType): EventOptionsGenerator<Model, undefined> {
+    return (event: ModelEvent<Model>) => {
         if (event.type === 'created') {
             if (types.created) {
                 return { type: types.created, data: undefined };
@@ -35,9 +40,11 @@ export function getDefaultGenerator(types: DefaultLogOptionsType): EventOptionsG
             return;
         }
 
+        let mergeInto: AuditLog | undefined = undefined;
+
         if (event.type === 'updated') {
             // Generate changes list
-            if ('deletedAt' in event.changedFields && event.model.deletedAt) {
+            if ('deletedAt' in event.changedFields && ((event.model as any).deletedAt)) {
                 if (!('deletedAt' in event.originalFields) || !event.originalFields.deletedAt) {
                     event = {
                         ...event,
@@ -55,12 +62,15 @@ export function getDefaultGenerator(types: DefaultLogOptionsType): EventOptionsG
                     // Ignore quick model changes after insertion: these are often side effects of code that should not be logged
                     // (the created event normally doesn't contain what has been added - so no need to log what has been changed since creation)
                     if (types.created && types.created !== types.updated) {
-                        console.log('Ignoring quick model changes after insertion');
-                        return;
+                        // Merge into create event
+                        const events = ModelEventsMap.get(event.model)?.events;
+                        if (events && events.length > 0) {
+                            mergeInto = events[0];
+                        }
                     }
                 }
 
-                return { type: types.updated, generatePatchList: true, data: undefined };
+                return { type: types.updated, generatePatchList: true, data: undefined, mergeInto };
             }
             return;
         }
@@ -94,13 +104,26 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
     async logEvent(event: ModelEvent<M>) {
         try {
-            const userId = Context.optionalAuth?.user?.id ?? null;
-            const organizationId = Context.organization?.id ?? null;
-
+            const context = ContextInstance.optional;
             const log = new AuditLog();
-
+            const settings = AuditLogService.getContext();
+            const userId = settings?.userId ?? context?.optionalAuth?.user?.id ?? settings?.fallbackUserId ?? null;
             log.userId = userId;
+
+            const organizationId = context?.organization?.id ?? settings?.fallbackOrganizationId ?? null;
             log.organizationId = organizationId;
+
+            if (settings?.source) {
+                log.source = settings.source;
+            }
+            else if (context) {
+                log.source = userId ? AuditLogSource.User : AuditLogSource.Anonymous;
+            }
+            else {
+                log.source = AuditLogSource.System;
+            }
+
+            // Override source
 
             const options = await this.optionsGenerator(event);
 
@@ -109,7 +132,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
             }
 
             log.type = options.type;
-            log.objectId = event.model.getPrimaryKey()?.toString() ?? null;
+            log.objectId = options.objectId ?? event.model.getPrimaryKey()?.toString() ?? null;
             log.replacements = this.createReplacements ? this.createReplacements(event.model as M, options) : new Map();
             log.description = (this.generateDescription ? this.generateDescription(event, options) : '') ?? '';
 
@@ -121,6 +144,10 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
                 if (changedProperties.length > 0) {
                     for (const key of changedProperties) {
+                        if (changedProperties[key] instanceof Model) {
+                            // Ignore relations
+                            continue;
+                        }
                         log.patchList.push(...createUnknownChangeHandler(key)(
                             key in oldModel ? oldModel[key] : undefined,
                             key in event.model ? event.model[key] : undefined,
@@ -146,7 +173,40 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                 await this.postProcess(event, options, log);
             }
 
-            return await log.save();
+            if (options.mergeInto) {
+                // Merge into
+                console.log('Merging new audit log into existing log', options.mergeInto.id);
+
+                if (!options.mergeInto.description) {
+                    options.mergeInto.description = log.description;
+                }
+
+                if (log.replacements.size) {
+                    options.mergeInto.replacements = log.replacements;
+                }
+
+                if (!options.mergeInto.patchList.length) {
+                    options.mergeInto.patchList = log.patchList;
+                }
+
+                if (options.mergeInto.userId === null) {
+                    options.mergeInto.userId = log.userId;
+                }
+
+                if (options.mergeInto.organizationId === null) {
+                    options.mergeInto.organizationId = log.organizationId;
+                }
+
+                return await options.mergeInto.save();
+            }
+
+            const saved = await log.save();
+
+            // Assign to map
+            ModelEventsMap.set(event.model, {
+                events: [...(ModelEventsMap.get(event.model)?.events ?? []), log],
+            });
+            return saved;
         }
         catch (e) {
             console.error('Failed to save log', e);

@@ -11,25 +11,48 @@ import { StripeAccountLogger } from '../audit-logs/StripeAccountLogger';
 import { MemberLogger } from '../audit-logs/MemberLogger';
 import { WebshopLogger } from '../audit-logs/WebshopLogger';
 import { OrderLogger } from '../audit-logs/OrderLogger';
+import { AuditLogSource } from '@stamhoofd/structures';
+import { PaymentLogger } from '../audit-logs/PaymentLogger';
+
+export type AuditLogContextSettings = {
+    disable?: boolean;
+    source?: AuditLogSource;
+    userId?: string | null;
+
+    // If no userId is known, fallback to this userId
+    // this is useful e.g. for side effects of webhooks where the webhook calls but we don't have the userid in the request, still the action is tied to a user
+    fallbackUserId?: string | null;
+    fallbackOrganizationId?: string | null;
+};
 
 export class AuditLogService {
     private constructor() { }
-    static disableLocalStore = new AsyncLocalStorage<boolean>();
+    static disableLocalStore = new AsyncLocalStorage<AuditLogContextSettings>();
 
     static disable<T>(run: () => T): T {
-        return this.disableLocalStore.run(true, () => {
+        return this.setContext({ disable: true }, run);
+    }
+
+    static setContext<T>(context: AuditLogContextSettings, run: () => T): T {
+        const currentContext = this.getContext() ?? {};
+        return this.disableLocalStore.run({ ...currentContext, ...context }, () => {
             return run();
         });
     }
 
     static isDisabled(): boolean {
-        const c = this.disableLocalStore.getStore();
+        const c = this.getContext();
 
-        if (!c) {
-            return false;
+        if (c && c.disable === true) {
+            return true;
         }
 
-        return true;
+        return false;
+    }
+
+    static getContext(): AuditLogContextSettings | null {
+        const c = this.disableLocalStore.getStore();
+        return c ?? null;
     }
 
     static listening = false;
@@ -75,3 +98,4 @@ modelLogDefinitions.set(StripeAccountLogger.model, StripeAccountLogger);
 modelLogDefinitions.set(MemberLogger.model, MemberLogger);
 modelLogDefinitions.set(WebshopLogger.model, WebshopLogger);
 modelLogDefinitions.set(OrderLogger.model, OrderLogger);
+modelLogDefinitions.set(PaymentLogger.model, PaymentLogger);

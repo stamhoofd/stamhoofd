@@ -1,6 +1,6 @@
 import { column, Model } from '@simonbackx/simple-database';
 import { ArrayDecoder, Decoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { AuditLogPatchItem, AuditLogReplacement, AuditLogType } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { v7 as uuidv7 } from 'uuid';
 
 export class AuditLog extends Model {
@@ -14,6 +14,9 @@ export class AuditLog extends Model {
         },
     })
     id!: string;
+
+    @column({ type: 'string' })
+    source: AuditLogSource = AuditLogSource.System;
 
     @column({ type: 'string' })
     type: AuditLogType = AuditLogType.Unknown;

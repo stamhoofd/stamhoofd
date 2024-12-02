@@ -26,6 +26,7 @@ export const RegistrationLogger = new ModelLogger(Registration, {
             type: wasActive ? AuditLogType.MemberUnregistered : AuditLogType.MemberRegistered,
             generatePatchList: false,
             data: { member, group },
+            objectId: member.id,
         };
     },
 

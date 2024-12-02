@@ -1,10 +1,11 @@
 import createMollieClient, { PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { AuditLogSource, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { BuckarooHelper } from '../helpers/BuckarooHelper';
 import { StripeHelper } from '../helpers/StripeHelper';
 import { BalanceItemPaymentService } from './BalanceItemPaymentService';
+import { AuditLogService } from './AuditLogService';
 
 export const PaymentService = {
     async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
@@ -12,79 +13,81 @@ export const PaymentService = {
             return;
         }
 
-        if (status === PaymentStatus.Succeeded) {
-            payment.status = PaymentStatus.Succeeded;
-            payment.paidAt = new Date();
+        await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
+            if (status === PaymentStatus.Succeeded) {
+                payment.status = PaymentStatus.Succeeded;
+                payment.paidAt = new Date();
+                await payment.save();
+
+                // Prevent concurrency issues
+                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
+                    const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
+                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                        unloaded,
+                    );
+
+                    for (const balanceItemPayment of balanceItemPayments) {
+                        await BalanceItemPaymentService.markPaid(balanceItemPayment, organization);
+                    }
+
+                    await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
+                });
+                return;
+            }
+
+            const oldStatus = payment.status;
+
+            // Save before updating balance items
+            payment.status = status;
+            payment.paidAt = null;
             await payment.save();
 
-            // Prevent concurrency issues
-            await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
-                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                    unloaded,
-                );
-
-                for (const balanceItemPayment of balanceItemPayments) {
-                    await BalanceItemPaymentService.markPaid(balanceItemPayment, organization);
-                }
-
-                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
-            });
-            return;
-        }
-
-        const oldStatus = payment.status;
-
-        // Save before updating balance items
-        payment.status = status;
-        payment.paidAt = null;
-        await payment.save();
-
-        // If OLD status was succeeded, we need to revert the actions
-        if (oldStatus === PaymentStatus.Succeeded) {
+            // If OLD status was succeeded, we need to revert the actions
+            if (oldStatus === PaymentStatus.Succeeded) {
             // No longer succeeded
-            await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                    (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
-                );
+                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
+                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
+                    );
 
-                for (const balanceItemPayment of balanceItemPayments) {
-                    await BalanceItemPaymentService.undoPaid(balanceItemPayment, organization);
-                }
+                    for (const balanceItemPayment of balanceItemPayments) {
+                        await BalanceItemPaymentService.undoPaid(balanceItemPayment, organization);
+                    }
 
-                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
-            });
-        }
+                    await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
+                });
+            }
 
-        // Moved to failed
-        if (status == PaymentStatus.Failed) {
-            await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                    (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
-                );
+            // Moved to failed
+            if (status == PaymentStatus.Failed) {
+                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
+                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
+                    );
 
-                for (const balanceItemPayment of balanceItemPayments) {
-                    await BalanceItemPaymentService.markFailed(balanceItemPayment, organization);
-                }
+                    for (const balanceItemPayment of balanceItemPayments) {
+                        await BalanceItemPaymentService.markFailed(balanceItemPayment, organization);
+                    }
 
-                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
-            });
-        }
+                    await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
+                });
+            }
 
-        // If OLD status was FAILED, we need to revert the actions
-        if (oldStatus === PaymentStatus.Failed) { // OLD FAILED!! -> NOW PENDING
-            await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                    (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
-                );
+            // If OLD status was FAILED, we need to revert the actions
+            if (oldStatus === PaymentStatus.Failed) { // OLD FAILED!! -> NOW PENDING
+                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
+                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
+                    );
 
-                for (const balanceItemPayment of balanceItemPayments) {
-                    await BalanceItemPaymentService.undoFailed(balanceItemPayment, organization);
-                }
+                    for (const balanceItemPayment of balanceItemPayments) {
+                        await BalanceItemPaymentService.undoFailed(balanceItemPayment, organization);
+                    }
 
-                await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
-            });
-        }
+                    await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
+                });
+            }
+        });
     },
 
     /**

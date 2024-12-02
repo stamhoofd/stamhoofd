@@ -1,13 +1,13 @@
 import { column, Database, ManyToOneRelation, Model, OneToManyRelation, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { DefaultAgeGroup, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, minimumRegistrationCount, StockReservation } from '@stamhoofd/structures';
+import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
+import { SQL, SQLSelect } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { SetupStepUpdater } from '../helpers/SetupStepsUpdater';
 import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Platform, Registration, User } from './';
-import { SQL, SQLSelect } from '@stamhoofd/sql';
 
 if (Member === undefined) {
     throw new Error('Import Member is undefined');
@@ -314,8 +314,6 @@ export class Group extends Model {
                 console.log('Deleting unreachable group ' + group.id + ' from organization ' + organizationId + ' org period ' + period.id);
                 group.deletedAt = new Date();
                 await group.save();
-
-                Member.updateMembershipsForGroupId(group.id);
             }
         }
     }

@@ -14,6 +14,8 @@ import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { AuditLogService } from '../../../services/AuditLogService';
+import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
+import { RegistrationService } from '../../../services/RegistrationService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -537,7 +539,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         for (const member of members) {
             if (updateMembershipMemberIds.has(member.id)) {
-                await member.updateMemberships();
+                await PlatformMembershipService.updateMembershipsForId(member.id);
             }
         }
 
@@ -584,7 +586,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         for (const registration of updateRegistrations.values()) {
-            registration.scheduleStockUpdate();
+            RegistrationService.scheduleStockUpdate(registration.id);
         }
 
         const groups = await Group.getByIDs(...Array.from(updateGroups));

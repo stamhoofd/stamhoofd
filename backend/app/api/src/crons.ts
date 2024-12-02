@@ -14,6 +14,7 @@ import { ExchangePaymentEndpoint } from './endpoints/organization/shared/Exchang
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
 import { PaymentService } from './services/PaymentService';
+import { RegistrationService } from './services/RegistrationService';
 
 // Importing postmark returns undefined (this is a bug, so we need to use require)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -595,7 +596,7 @@ async function checkReservedUntil() {
     });
 
     for (const registration of registrations) {
-        registration.scheduleStockUpdate();
+        RegistrationService.scheduleStockUpdate(registration.id);
     }
 
     // Update occupancy

@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 import { AuditLogService } from '../../../../services/AuditLogService';
@@ -287,7 +287,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     }
                 }
 
-                await AuditLogService.disable(async () => {
+                await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                     await model.setRelation(Order.webshop, webshop).updateStock(previousData, true);
                     await model.setRelation(Order.webshop, webshop).updateTickets();
                 });

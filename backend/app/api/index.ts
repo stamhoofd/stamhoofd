@@ -15,6 +15,7 @@ import { resumeEmails } from './src/helpers/EmailResumer';
 import { ContextMiddleware } from './src/middleware/ContextMiddleware';
 import { Platform } from '@stamhoofd/models';
 import { AuditLogService } from './src/services/AuditLogService';
+import { PlatformMembershipService } from './src/services/PlatformMembershipService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -187,6 +188,7 @@ const start = async () => {
     seeds().catch(console.error);
 
     AuditLogService.listen();
+    PlatformMembershipService.listen();
 };
 
 start().catch((error) => {

@@ -142,8 +142,11 @@ export default {
     'phoneEnabled': 'GSM-nummer vragen',
     'notificationEmail': 'Meldingen naar e-mailadres',
     'cart.items': 'bestelde artikels',
+    'cart.item': 'besteld artikel',
     'cart': 'winkelmandje',
     'administrationFee': 'administratiekost',
     'totalPrice': 'totaalprijs',
     'customer': 'besteller',
+    'memberNumber': 'lidnummer',
+    'number': 'nummer',
 };

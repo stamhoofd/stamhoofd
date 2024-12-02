@@ -19,6 +19,21 @@ import { getGenderName } from './members/Gender.js';
 import { getSetupStepName } from './SetupStepType.js';
 import { Formatter } from '@stamhoofd/utility';
 
+export enum AuditLogSource {
+    User = 'User',
+    System = 'System',
+
+    /**
+     * Caused by a change in payment status
+     */
+    Payment = 'Payment',
+
+    /**
+     * E.g. orders placed via a webshop.
+     */
+    Anonymous = 'Anonymous',
+}
+
 export enum AuditLogType {
     /**
      * Used for legacy logs
@@ -71,6 +86,31 @@ export enum AuditLogType {
     OrderAdded = 'OrderAdded',
     OrderEdited = 'OrderEdited',
     OrderDeleted = 'OrderDeleted',
+
+    // Payment
+    PaymentAdded = 'PaymentAdded',
+    PaymentEdited = 'PaymentEdited',
+    PaymentDeleted = 'PaymentDeleted',
+
+    // Document templates
+    DocumentTemplateAdded = 'DocumentTemplateAdded',
+    DocumentTemplateEdited = 'DocumentTemplateEdited',
+    DocumentTemplateDeleted = 'DocumentTemplateDeleted',
+
+    // Users
+    UserAdded = 'UserAdded',
+    UserEdited = 'UserEdited',
+    UserDeleted = 'UserDeleted',
+
+    // MemberResponsibilityRecord
+    MemberResponsibilityRecordAdded = 'MemberResponsibilityRecordAdded',
+    MemberResponsibilityRecordEdited = 'MemberResponsibilityRecordEdited',
+    MemberResponsibilityRecordDeleted = 'MemberResponsibilityRecordDeleted',
+
+    // MemberPlatformMembership
+    MemberPlatformMembershipAdded = 'MemberPlatformMembershipAdded',
+    MemberPlatformMembershipEdited = 'MemberPlatformMembershipEdited',
+    MemberPlatformMembershipDeleted = 'MemberPlatformMembershipDeleted',
 }
 
 export enum AuditLogReplacementType {
@@ -154,6 +194,37 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Wijzigingen aan bestellingen`;
         case AuditLogType.OrderDeleted:
             return `Verwijderde bestellingen`;
+        case AuditLogType.PaymentAdded:
+            return `Nieuwe betalingen`;
+        case AuditLogType.PaymentEdited:
+            return `Wijzigingen aan betalingen`;
+        case AuditLogType.PaymentDeleted:
+            return `Verwijderde betalingen`;
+        case AuditLogType.DocumentTemplateAdded:
+            return `Nieuwe document`;
+        case AuditLogType.DocumentTemplateEdited:
+            return `Wijzigingen aan documenten`;
+        case AuditLogType.DocumentTemplateDeleted:
+            return `Verwijderde documenten`;
+        case AuditLogType.UserAdded:
+            return `Nieuwe accounts`;
+        case AuditLogType.UserEdited:
+            return `Wijzigingen aan accounts`;
+        case AuditLogType.UserDeleted:
+            return `Verwijderde accounts`;
+        case AuditLogType.MemberResponsibilityRecordAdded:
+            return `Nieuwe toegekende functies`;
+        case AuditLogType.MemberResponsibilityRecordEdited:
+            return `Wijzigingen aan toegekende functies`;
+        case AuditLogType.MemberResponsibilityRecordDeleted:
+            return `Verwijderde functies`;
+
+        case AuditLogType.MemberPlatformMembershipAdded:
+            return `Nieuwe aansluitingen`;
+        case AuditLogType.MemberPlatformMembershipEdited:
+            return `Wijzigingen aan aansluitingen`;
+        case AuditLogType.MemberPlatformMembershipDeleted:
+            return `Verwijderde aansluitingen`;
     }
 
     return type;
@@ -231,6 +302,41 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`basket`, `edit`];
         case AuditLogType.OrderDeleted:
             return [`basket`, `canceled red`];
+
+        case AuditLogType.PaymentAdded:
+            return [`card`, `add green`];
+        case AuditLogType.PaymentEdited:
+            return [`card`, `edit`];
+        case AuditLogType.PaymentDeleted:
+            return [`card`, `canceled red`];
+
+        case AuditLogType.DocumentTemplateAdded:
+            return [`file`, `add green`];
+        case AuditLogType.DocumentTemplateEdited:
+            return [`file`, `edit`];
+        case AuditLogType.DocumentTemplateDeleted:
+            return [`file`, `canceled red`];
+
+        case AuditLogType.UserAdded:
+            return [`user`, `add green`];
+        case AuditLogType.UserEdited:
+            return [`user`, `edit`];
+        case AuditLogType.UserDeleted:
+            return [`user`, `canceled red`];
+
+        case AuditLogType.MemberResponsibilityRecordAdded:
+            return [`star`, `add green`];
+        case AuditLogType.MemberResponsibilityRecordEdited:
+            return [`star`, `edit`];
+        case AuditLogType.MemberResponsibilityRecordDeleted:
+            return [`star`, `canceled red`];
+
+        case AuditLogType.MemberPlatformMembershipAdded:
+            return [`membership-filled`, `add green`];
+        case AuditLogType.MemberPlatformMembershipEdited:
+            return [`membership-filled`, `edit`];
+        case AuditLogType.MemberPlatformMembershipDeleted:
+            return [`membership-filled`, `canceled red`];
     }
     return [`help`];
 }
@@ -312,11 +418,46 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `De webshop {{w}} werd verwijderd`;
 
         case AuditLogType.OrderAdded:
-            return `{{capitalizeFirstLetter o}} werd toegevoegd ({{w}})`;
+            return `{{capitalizeFirstLetter o}} werd geplaatst (voor {{w}})`;
         case AuditLogType.OrderEdited:
             return `{{capitalizeFirstLetter o}} werd gewijzigd ({{w}})`;
         case AuditLogType.OrderDeleted:
             return `{{capitalizeFirstLetter o}} werd verwijderd ({{w}})`;
+
+        case AuditLogType.PaymentAdded:
+            return `Betaling {{p}} werd aangemaakt`;
+        case AuditLogType.PaymentEdited:
+            return `Betaling {{p}} werd gewijzigd`;
+        case AuditLogType.PaymentDeleted:
+            return `Betaling {{p}} werd verwijderd`;
+
+        case AuditLogType.DocumentTemplateAdded:
+            return `Document {{d}} werd aangemaakt`;
+        case AuditLogType.DocumentTemplateEdited:
+            return `Document {{d}} werd gewijzigd`;
+        case AuditLogType.DocumentTemplateDeleted:
+            return `Document {{d}} werd verwijderd`;
+
+        case AuditLogType.UserAdded:
+            return `Account {{u}} werd aangemaakt`;
+        case AuditLogType.UserEdited:
+            return `Account {{u}} werd gewijzigd`;
+        case AuditLogType.UserDeleted:
+            return `Account {{u}} werd verwijderd`;
+
+        case AuditLogType.MemberResponsibilityRecordAdded:
+            return `Functie {{r}} werd toegekend aan {{m}}`;
+        case AuditLogType.MemberResponsibilityRecordEdited:
+            return `Functie {{r}} werd gewijzigd bij {{m}}`;
+        case AuditLogType.MemberResponsibilityRecordDeleted:
+            return `Functie {{r}} werd verwijderd van {{m}}`;
+
+        case AuditLogType.MemberPlatformMembershipAdded:
+            return `Aansluiting {{pm}} werd toegevoegd bij {{m}}`;
+        case AuditLogType.MemberPlatformMembershipEdited:
+            return `Aansluiting {{pm}} werd gewijzigd bij {{m}}`;
+        case AuditLogType.MemberPlatformMembershipDeleted:
+            return `Aansluiting {{pm}} werd verwijderd bij {{m}}`;
     }
 }
 
@@ -627,6 +768,9 @@ export class AuditLogPatchItem extends AutoEncoder {
 export class AuditLog extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
+
+    @field({ decoder: new EnumDecoder(AuditLogSource), ...NextVersion })
+    source: AuditLogSource;
 
     @field({ decoder: new EnumDecoder(AuditLogType) })
     type: AuditLogType;
