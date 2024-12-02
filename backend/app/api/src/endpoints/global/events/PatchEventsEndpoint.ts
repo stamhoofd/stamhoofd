@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Event, Group, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { Event as EventStruct, GroupType, NamedObject, Group as GroupStruct, AuditLogType } from '@stamhoofd/structures';
+import { Event as EventStruct, GroupType, NamedObject, Group as GroupStruct, AuditLogType, AuditLogSource } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -96,7 +96,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     put.group.organizationId,
                     period,
                 );
-                await event.syncGroupRequirements(group);
+                await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+                    await event.syncGroupRequirements(group);
+                });
                 event.groupId = group.id;
             }
 
@@ -226,7 +228,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     // Correct period id if needed
                     const period = await RegistrationPeriod.getByDate(event.startDate);
                     if (event.groupId) {
-                        await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: event.groupId }), period);
+                        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+                            if (event.groupId) {
+                                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: event.groupId }), period);
+                            }
+                        });
                     }
                 }
             }
@@ -240,7 +246,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (event.groupId) {
                 const group = await Group.getByID(event.groupId);
                 if (group) {
-                    await event.syncGroupRequirements(group);
+                    await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+                        await event.syncGroupRequirements(group);
+                    });
                 }
             }
 

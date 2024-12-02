@@ -41,6 +41,10 @@ export const GroupLogger = new ModelLogger(Group, {
                     return;
                 case AuditLogType.GroupEdited:
                     result.type = AuditLogType.EventEdited;
+
+                    if (model.settings.eventId) {
+                        result.objectId = model.settings.eventId;
+                    }
                     break;
                 case AuditLogType.GroupDeleted:
                     // do not log

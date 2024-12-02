@@ -4,7 +4,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { QueueHandler } from '@stamhoofd/queues';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { Document, Group, Organization, User } from './';
 

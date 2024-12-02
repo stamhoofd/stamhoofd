@@ -149,4 +149,8 @@ export default {
     'customer': 'besteller',
     'memberNumber': 'lidnummer',
     'number': 'nummer',
+    'paidAt': 'betaald op',
+    'startDate': 'startdatum',
+    'endDate': 'einddatum',
+    'ibanName': 'naam op bankkaart',
 };

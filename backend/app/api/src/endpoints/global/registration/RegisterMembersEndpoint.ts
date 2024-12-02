@@ -583,10 +583,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         let paymentUrl: string | null = null;
         let payment: Payment | null = null;
 
-        // Delaying markign as valid as late as possible so any errors will prevent creating valid balance items
+        // Delay marking as valid as late as possible so any errors will prevent creating valid balance items
+        // Keep a copy because createdBalanceItems will be altered - and we don't want to mark added items as valid
+        const markValidList = [...createdBalanceItems, ...unrelatedCreatedBalanceItems];
+
         async function markValidIfNeeded() {
             if (shouldMarkValid) {
-                for (const balanceItem of [...createdBalanceItems, ...unrelatedCreatedBalanceItems]) {
+                for (const balanceItem of markValidList) {
                     // Mark valid
                     await BalanceItemService.markPaid(balanceItem, payment, organization);
                 }

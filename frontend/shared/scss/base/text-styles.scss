@@ -746,10 +746,9 @@
     }
 }
 
-.style-tooltip {
+.style-hover-area {
     position: relative;
     width: max-content;
-    cursor: help;
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     user-select: none;
@@ -789,6 +788,12 @@
         }
     }
 }
+
+.style-tooltip {
+    cursor: help;
+    @extend .style-hover-area;
+}
+
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -1286,6 +1291,23 @@
     height: 8px;
     border-radius: 2px;
     vertical-align: middle;
+}
+
+.style-inline-resource {
+    font-weight: $font-weight-default;
+
+    &:is(button), &:is(a), &:is(.style-tooltip) {
+        font-weight: $font-weight-default;
+        text-decoration: underline;
+        text-decoration-color: $color-border;
+
+        &:link, &:visited, &:hover, &:active {
+            font-weight: $font-weight-default;
+            text-decoration: underline;
+            text-decoration-color: $color-border;
+        }
+        @extend .style-hover-area;
+    }
 }
 
 .style-subtle-link {

@@ -102,181 +102,184 @@ export const PaymentService = {
                 return;
             }
 
-            if (!payment.organizationId) {
-                console.error('Payment without organization not supported', payment.id);
-                return;
-            }
-
-            const organization = org ?? await Organization.getByID(payment.organizationId);
-            if (!organization) {
-                console.error('Organization not found for payment', payment.id);
-                return;
-            }
-
-            const testMode = organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production';
-
-            if (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status === PaymentStatus.Failed)) {
-                if (payment.provider === PaymentProvider.Stripe) {
-                    try {
-                        let status = await StripeHelper.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment), testMode);
-
-                        if (this.isManualExpired(status, payment)) {
-                            console.error('Manually marking Stripe payment as expired', payment.id);
-                            status = PaymentStatus.Failed;
-                        }
-
-                        await this.handlePaymentStatusUpdate(payment, organization, status);
-                    }
-                    catch (e) {
-                        console.error('Payment check failed Stripe', payment.id, e);
-                        if (this.isManualExpired(payment.status, payment)) {
-                            console.error('Manually marking Stripe payment as expired', payment.id);
-                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                        }
-                    }
+            // Explicitly set userId to null, because all actions caused by a poll are not caused by the currently signed in user, but the paying user id
+            return await AuditLogService.setContext({ userId: payment.payingUserId ?? null, source: AuditLogSource.Payment }, async () => {
+                if (!payment.organizationId) {
+                    console.error('Payment without organization not supported', payment.id);
+                    return;
                 }
-                else if (payment.provider === PaymentProvider.Mollie) {
-                    // check status via mollie
-                    const molliePayments = await MolliePayment.where({ paymentId: payment.id }, { limit: 1 });
-                    if (molliePayments.length == 1) {
-                        const molliePayment = molliePayments[0];
-                        // check status
-                        const token = await MollieToken.getTokenFor(organization.id);
 
-                        if (token) {
-                            try {
-                                const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                                const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
-                                    testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
-                                });
+                const organization = org ?? await Organization.getByID(payment.organizationId);
+                if (!organization) {
+                    console.error('Organization not found for payment', payment.id);
+                    return;
+                }
 
-                                console.log(mollieData); // log to log files to check issues
+                const testMode = organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production';
 
-                                const details = mollieData.details as any;
-                                if (details?.consumerName) {
-                                    payment.ibanName = details.consumerName;
-                                }
-                                if (details?.consumerAccount) {
-                                    payment.iban = details.consumerAccount;
-                                }
-                                if (details?.cardHolder) {
-                                    payment.ibanName = details.cardHolder;
-                                }
-                                if (details?.cardNumber) {
-                                    payment.iban = 'xxxx xxxx xxxx ' + details.cardNumber;
-                                }
+                if (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status === PaymentStatus.Failed)) {
+                    if (payment.provider === PaymentProvider.Stripe) {
+                        try {
+                            let status = await StripeHelper.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment), testMode);
 
-                                if (mollieData.status === MolliePaymentStatus.paid) {
-                                    await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
+                            if (this.isManualExpired(status, payment)) {
+                                console.error('Manually marking Stripe payment as expired', payment.id);
+                                status = PaymentStatus.Failed;
+                            }
+
+                            await this.handlePaymentStatusUpdate(payment, organization, status);
+                        }
+                        catch (e) {
+                            console.error('Payment check failed Stripe', payment.id, e);
+                            if (this.isManualExpired(payment.status, payment)) {
+                                console.error('Manually marking Stripe payment as expired', payment.id);
+                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                            }
+                        }
+                    }
+                    else if (payment.provider === PaymentProvider.Mollie) {
+                        // check status via mollie
+                        const molliePayments = await MolliePayment.where({ paymentId: payment.id }, { limit: 1 });
+                        if (molliePayments.length == 1) {
+                            const molliePayment = molliePayments[0];
+                            // check status
+                            const token = await MollieToken.getTokenFor(organization.id);
+
+                            if (token) {
+                                try {
+                                    const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                                    const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
+                                        testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
+                                    });
+
+                                    console.log(mollieData); // log to log files to check issues
+
+                                    const details = mollieData.details as any;
+                                    if (details?.consumerName) {
+                                        payment.ibanName = details.consumerName;
+                                    }
+                                    if (details?.consumerAccount) {
+                                        payment.iban = details.consumerAccount;
+                                    }
+                                    if (details?.cardHolder) {
+                                        payment.ibanName = details.cardHolder;
+                                    }
+                                    if (details?.cardNumber) {
+                                        payment.iban = 'xxxx xxxx xxxx ' + details.cardNumber;
+                                    }
+
+                                    if (mollieData.status === MolliePaymentStatus.paid) {
+                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
+                                    }
+                                    else if (mollieData.status === MolliePaymentStatus.failed || mollieData.status === MolliePaymentStatus.expired || mollieData.status === MolliePaymentStatus.canceled) {
+                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                    }
+                                    else if (this.isManualExpired(payment.status, payment)) {
+                                        // Mollie still returning pending after 1 day: mark as failed
+                                        console.error('Manually marking Mollie payment as expired', payment.id);
+                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                    }
                                 }
-                                else if (mollieData.status === MolliePaymentStatus.failed || mollieData.status === MolliePaymentStatus.expired || mollieData.status === MolliePaymentStatus.canceled) {
-                                    await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                                }
-                                else if (this.isManualExpired(payment.status, payment)) {
-                                    // Mollie still returning pending after 1 day: mark as failed
-                                    console.error('Manually marking Mollie payment as expired', payment.id);
-                                    await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                catch (e) {
+                                    console.error('Payment check failed Mollie', payment.id, e);
+                                    if (this.isManualExpired(payment.status, payment)) {
+                                        console.error('Manually marking Mollie payment as expired', payment.id);
+                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                    }
                                 }
                             }
-                            catch (e) {
-                                console.error('Payment check failed Mollie', payment.id, e);
+                            else {
+                                console.warn('Mollie payment is missing for organization ' + organization.id + ' while checking payment status...');
+
                                 if (this.isManualExpired(payment.status, payment)) {
-                                    console.error('Manually marking Mollie payment as expired', payment.id);
+                                    console.error('Manually marking payment without mollie token as expired', payment.id);
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                                 }
                             }
                         }
                         else {
-                            console.warn('Mollie payment is missing for organization ' + organization.id + ' while checking payment status...');
+                            if (this.isManualExpired(payment.status, payment)) {
+                                console.error('Manually marking payment without mollie payments as expired', payment.id);
+                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                            }
+                        }
+                    }
+                    else if (payment.provider == PaymentProvider.Buckaroo) {
+                        const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? '', organization.privateMeta.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+                        try {
+                            let status = await helper.getStatus(payment);
+
+                            if (this.isManualExpired(status, payment)) {
+                                console.error('Manually marking Buckaroo payment as expired', payment.id);
+                                status = PaymentStatus.Failed;
+                            }
+
+                            await this.handlePaymentStatusUpdate(payment, organization, status);
+                        }
+                        catch (e) {
+                            console.error('Payment check failed Buckaroo', payment.id, e);
+                            if (this.isManualExpired(payment.status, payment)) {
+                                console.error('Manually marking Buckaroo payment as expired', payment.id);
+                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                            }
+                        }
+                    }
+                    else if (payment.provider == PaymentProvider.Payconiq) {
+                        // Check status
+
+                        const payconiqPayments = await PayconiqPayment.where({ paymentId: payment.id }, { limit: 1 });
+                        if (payconiqPayments.length == 1) {
+                            const payconiqPayment = payconiqPayments[0];
+
+                            if (cancel) {
+                                console.error('Cancelling Payconiq payment on request', payment.id);
+                                await payconiqPayment.cancel(organization);
+                            }
+
+                            let status = await payconiqPayment.getStatus(organization);
+
+                            if (!cancel && this.shouldTryToCancel(status, payment)) {
+                                console.error('Manually cancelling Payconiq payment', payment.id);
+                                if (await payconiqPayment.cancel(organization)) {
+                                    status = PaymentStatus.Failed;
+                                }
+                            }
+
+                            if (this.isManualExpired(status, payment)) {
+                                console.error('Manually marking Payconiq payment as expired', payment.id);
+                                status = PaymentStatus.Failed;
+                            }
+
+                            await this.handlePaymentStatusUpdate(payment, organization, status);
+                        }
+                        else {
+                            console.warn('Payconiq payment is missing for organization ' + organization.id + ' while checking payment status...');
 
                             if (this.isManualExpired(payment.status, payment)) {
-                                console.error('Manually marking payment without mollie token as expired', payment.id);
+                                console.error('Manually marking Payconiq payment as expired because not found', payment.id);
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                             }
                         }
                     }
                     else {
+                        console.error('Invalid payment provider', payment.provider, 'for payment', payment.id);
                         if (this.isManualExpired(payment.status, payment)) {
-                            console.error('Manually marking payment without mollie payments as expired', payment.id);
-                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                        }
-                    }
-                }
-                else if (payment.provider == PaymentProvider.Buckaroo) {
-                    const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? '', organization.privateMeta.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
-                    try {
-                        let status = await helper.getStatus(payment);
-
-                        if (this.isManualExpired(status, payment)) {
-                            console.error('Manually marking Buckaroo payment as expired', payment.id);
-                            status = PaymentStatus.Failed;
-                        }
-
-                        await this.handlePaymentStatusUpdate(payment, organization, status);
-                    }
-                    catch (e) {
-                        console.error('Payment check failed Buckaroo', payment.id, e);
-                        if (this.isManualExpired(payment.status, payment)) {
-                            console.error('Manually marking Buckaroo payment as expired', payment.id);
-                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                        }
-                    }
-                }
-                else if (payment.provider == PaymentProvider.Payconiq) {
-                    // Check status
-
-                    const payconiqPayments = await PayconiqPayment.where({ paymentId: payment.id }, { limit: 1 });
-                    if (payconiqPayments.length == 1) {
-                        const payconiqPayment = payconiqPayments[0];
-
-                        if (cancel) {
-                            console.error('Cancelling Payconiq payment on request', payment.id);
-                            await payconiqPayment.cancel(organization);
-                        }
-
-                        let status = await payconiqPayment.getStatus(organization);
-
-                        if (!cancel && this.shouldTryToCancel(status, payment)) {
-                            console.error('Manually cancelling Payconiq payment', payment.id);
-                            if (await payconiqPayment.cancel(organization)) {
-                                status = PaymentStatus.Failed;
-                            }
-                        }
-
-                        if (this.isManualExpired(status, payment)) {
-                            console.error('Manually marking Payconiq payment as expired', payment.id);
-                            status = PaymentStatus.Failed;
-                        }
-
-                        await this.handlePaymentStatusUpdate(payment, organization, status);
-                    }
-                    else {
-                        console.warn('Payconiq payment is missing for organization ' + organization.id + ' while checking payment status...');
-
-                        if (this.isManualExpired(payment.status, payment)) {
-                            console.error('Manually marking Payconiq payment as expired because not found', payment.id);
+                            console.error('Manually marking unknown payment as expired', payment.id);
                             await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                         }
                     }
                 }
                 else {
-                    console.error('Invalid payment provider', payment.provider, 'for payment', payment.id);
-                    if (this.isManualExpired(payment.status, payment)) {
-                        console.error('Manually marking unknown payment as expired', payment.id);
-                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                    // Do a manual update if needed
+                    if (payment.status === PaymentStatus.Succeeded) {
+                        if (payment.provider === PaymentProvider.Stripe) {
+                            // Update the status
+                            await StripeHelper.getStatus(payment, false, testMode);
+                        }
                     }
                 }
-            }
-            else {
-                // Do a manual update if needed
-                if (payment.status === PaymentStatus.Succeeded) {
-                    if (payment.provider === PaymentProvider.Stripe) {
-                        // Update the status
-                        await StripeHelper.getStatus(payment, false, testMode);
-                    }
-                }
-            }
-            return payment;
+                return payment;
+            });
         });
     },
 

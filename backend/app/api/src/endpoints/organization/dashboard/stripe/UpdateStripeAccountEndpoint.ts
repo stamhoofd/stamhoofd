@@ -1,11 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { StripeAccount } from '@stamhoofd/models';
-import { AuditLogType, PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { AuditLogSource, PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 import { StripeHelper } from '../../../../helpers/StripeHelper';
 import { AuditLogService } from '../../../../services/AuditLogService';
-import { Model } from '@simonbackx/simple-database';
 
 type Params = { id: string };
 type Body = undefined;
@@ -45,9 +44,11 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         // Get account
         const stripe = StripeHelper.getInstance();
         const account = await stripe.accounts.retrieve(model.accountId);
-        model.setMetaFromStripeAccount(account);
 
-        await model.save();
+        await AuditLogService.setContext({ userId: null, source: AuditLogSource.System }, async () => {
+            model.setMetaFromStripeAccount(account);
+            await model.save();
+        });
         return new Response(StripeAccountStruct.create(model));
     }
 }

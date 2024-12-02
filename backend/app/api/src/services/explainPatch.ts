@@ -174,6 +174,10 @@ function getAutoEncoderValue(autoEncoder: unknown, key?: string): AuditLogReplac
         if (isUuid(autoEncoder)) {
             return AuditLogReplacement.uuid(autoEncoder);
         }
+        if (key && key === 'status') {
+            // Will be an enum
+            return AuditLogReplacement.key(autoEncoder);
+        }
         return AuditLogReplacement.string(autoEncoder);
     }
 

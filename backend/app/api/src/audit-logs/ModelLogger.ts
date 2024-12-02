@@ -107,11 +107,14 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
             const context = ContextInstance.optional;
             const log = new AuditLog();
             const settings = AuditLogService.getContext();
-            const userId = settings?.userId ?? context?.optionalAuth?.user?.id ?? settings?.fallbackUserId ?? null;
+            const userId = settings?.userId !== undefined ? settings?.userId : (context?.optionalAuth?.user?.id ?? settings?.fallbackUserId ?? null);
             log.userId = userId;
 
-            const organizationId = context?.organization?.id ?? settings?.fallbackOrganizationId ?? null;
-            log.organizationId = organizationId;
+            log.organizationId = context?.organization?.id ?? settings?.fallbackOrganizationId ?? null;
+
+            if (!log.organizationId && 'organizationId' in event.model && typeof event.model['organizationId'] === 'string') {
+                log.organizationId = event.model.organizationId;
+            }
 
             if (settings?.source) {
                 log.source = settings.source;
@@ -122,8 +125,6 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
             else {
                 log.source = AuditLogSource.System;
             }
-
-            // Override source
 
             const options = await this.optionsGenerator(event);
 

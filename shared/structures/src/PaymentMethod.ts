@@ -54,6 +54,21 @@ export class PaymentMethodHelper {
         }
     }
 
+    static getPaymentName(method: PaymentMethod): string {
+        switch (method) {
+            case PaymentMethod.Unknown: return 'onbekende betaling';
+            case PaymentMethod.PointOfSale: {
+                return 'betaling ter plaatse';
+            }
+            case PaymentMethod.Transfer: return 'overschrijving';
+            case PaymentMethod.DirectDebit: return 'domiciliëring';
+            case PaymentMethod.Bancontact: return 'Bancontact betaling';
+            case PaymentMethod.iDEAL: return 'iDEAL betaling';
+            case PaymentMethod.CreditCard: return 'kredietkaart betaling';
+            case PaymentMethod.Payconiq: return 'Payconiq betaling';
+        }
+    }
+
     static getPluralName(method: PaymentMethod): string {
         switch (method) {
             case PaymentMethod.Unknown: return 'onbekende betaalmethodes';

@@ -4,11 +4,12 @@ import { h, withDirectives } from 'vue';
 import { PromiseView } from '../../containers';
 import { useAppContext } from '../../context';
 import { EventOverview } from '../../events';
-import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher } from '../../fetchers';
+import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
 import { MemberSegmentedView } from '../../members';
 import { Toast } from '../../overlays/Toast';
 import CopyableDirective from '../../directives/Copyable';
 import TooltipDirective from '../../directives/Tooltip';
+import { PaymentView } from '../../payments';
 
 export interface Renderable {
     render(context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
@@ -18,8 +19,8 @@ function isRenderable(obj: unknown): obj is Renderable {
     return (obj as Renderable).render !== undefined;
 }
 
-function copyable(vnode: ReturnType<typeof h>): ReturnType<typeof h> {
-    return withDirectives(vnode, [[CopyableDirective]]);
+function copyable(vnode: ReturnType<typeof h>, text?: string): ReturnType<typeof h> {
+    return withDirectives(vnode, [[CopyableDirective, text]]);
 }
 
 function tooltip(vnode: ReturnType<typeof h>, text: string): ReturnType<typeof h> {
@@ -39,8 +40,17 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         if (obj.type === AuditLogReplacementType.Member && obj.id) {
             // Open member button
             return h('button', {
-                class: 'style-subtle-link button simple',
+                class: 'style-inline-resource button simple',
                 onClick: () => showMember(obj.id!, context),
+                type: 'button',
+            }, obj.value);
+        }
+
+        if (obj.type === AuditLogReplacementType.Payment && obj.id) {
+            // Open payment button
+            return h('button', {
+                class: 'style-inline-resource button simple',
+                onClick: () => showPayment(obj.id!, context),
                 type: 'button',
             }, obj.value);
         }
@@ -53,7 +63,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         if (obj.type === AuditLogReplacementType.Event && obj.id) {
             // Open member button
             return h('button', {
-                class: 'style-subtle-link button simple',
+                class: 'style-inline-resource button simple',
                 onClick: () => showEvent(obj.id!, context),
                 type: 'button',
             }, obj.value);
@@ -62,7 +72,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         if (obj.type === AuditLogReplacementType.Image && obj.id) {
             // Open member button
             return h('a', {
-                class: 'style-subtle-link simple',
+                class: 'style-inline-resource simple',
                 href: obj.id,
                 target: '_blank',
             }, [
@@ -87,7 +97,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
             if (context.app === 'admin') {
             // Open member button
                 return h('button', {
-                    class: 'style-subtle-link button simple',
+                    class: 'style-inline-resource button simple',
                     onClick: () => showOrganization(obj.id!, context),
                     type: 'button',
                 }, obj.value);
@@ -108,8 +118,13 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
             a.pop();
             return a;
         }
+
         if (obj.description) {
-            return tooltip(h('span', { class: 'style-tooltip' }, obj.toString()), obj.description);
+            return tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString()), obj.description);
+        }
+
+        if (obj.id) {
+            return copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString()), 'ID: ' + obj.id), obj.id);
         }
         const str = obj.toString();
 
@@ -147,6 +162,7 @@ export const RenderTextComponent = {
         const memberFetcher = useMembersObjectFetcher();
         const eventFetcher = useEventsObjectFetcher();
         const organizationFetcher = useOrganizationsObjectFetcher();
+        const paymentFetcher = usePaymentsObjectFetcher();
         const app = useAppContext();
 
         const context: Context = {
@@ -155,6 +171,7 @@ export const RenderTextComponent = {
             memberFetcher,
             eventFetcher,
             organizationFetcher,
+            paymentFetcher,
         };
         return () => props.text.map(part => renderAny(part, context));
     },
@@ -166,7 +183,35 @@ export type Context = {
     memberFetcher: ReturnType<typeof useMembersObjectFetcher>;
     eventFetcher: ReturnType<typeof useEventsObjectFetcher>;
     organizationFetcher: ReturnType<typeof useOrganizationsObjectFetcher>;
+    paymentFetcher: ReturnType<typeof usePaymentsObjectFetcher>;
 };
+
+async function showPayment(paymentId: string, context: Context) {
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                const payments = await context.paymentFetcher.fetch(new LimitedFilteredRequest({
+                    filter: {
+                        id: paymentId,
+                    },
+                    limit: 1,
+                }));
+                if (payments.results.length === 0) {
+                    Toast.error('Betaling niet (meer) gevonden').show();
+                    throw new Error('Payment not found');
+                }
+                return new ComponentWithProperties(PaymentView, {
+                    payment: payments.results[0],
+                });
+            },
+        }),
+    });
+
+    await context.present({
+        components: [component],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 async function showMember(memberId: string, context: Context) {
     const component = new ComponentWithProperties(NavigationController, {

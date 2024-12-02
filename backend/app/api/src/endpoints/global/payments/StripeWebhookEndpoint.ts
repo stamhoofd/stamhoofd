@@ -5,10 +5,9 @@ import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent
 import { isDebouncedError, QueueHandler } from '@stamhoofd/queues';
 
 import { StripeHelper } from '../../../helpers/StripeHelper';
-import { ExchangePaymentEndpoint } from '../../organization/shared/ExchangePaymentEndpoint';
 import { PaymentService } from '../../../services/PaymentService';
+import { AuditLog, AuditLogSource } from '@stamhoofd/structures';
 import { AuditLogService } from '../../../services/AuditLogService';
-import { AuditLogType } from '@stamhoofd/structures';
 
 type Params = Record<string, never>;
 class Body extends AutoEncoder {
@@ -87,8 +86,10 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     const id = account.id as string;
                     const [model] = await StripeAccount.where({ accountId: id }, { limit: 1 });
                     if (model) {
-                        model.setMetaFromStripeAccount(account);
-                        await model.save();
+                        await AuditLogService.setContext({ userId: null, source: AuditLogSource.System }, async () => {
+                            model.setMetaFromStripeAccount(account);
+                            await model.save();
+                        });
                     }
                     else {
                         console.warn('Could not find stripe account with id', id);

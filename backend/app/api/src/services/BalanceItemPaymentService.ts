@@ -16,7 +16,7 @@ export const BalanceItemPaymentService = {
         await balanceItemPayment.balanceItem.save();
 
         // Do logic of balance item
-        if (balanceItemPayment.balanceItem.status === BalanceItemStatus.Paid && old !== BalanceItemStatus.Paid) {
+        if (balanceItemPayment.balanceItem.status === BalanceItemStatus.Paid && old !== BalanceItemStatus.Paid && balanceItemPayment.price >= 0) {
             // Only call markPaid once (if it wasn't (partially) paid before)
             await BalanceItemService.markPaid(balanceItemPayment.balanceItem, balanceItemPayment.payment, organization);
         }

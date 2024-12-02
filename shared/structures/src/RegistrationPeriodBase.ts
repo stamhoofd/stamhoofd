@@ -22,4 +22,8 @@ export class RegistrationPeriodBase extends AutoEncoder {
     get nameShort() {
         return Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }
+
+    getPatchValue() {
+        return this.name;
+    }
 }

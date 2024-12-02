@@ -128,6 +128,9 @@ export enum AuditLogReplacementType {
     StripeAccount = 'StripeAccount',
     Webshop = 'Webshop',
     Order = 'Order',
+    Payment = 'Payment',
+    PlatformMembershipType = 'PlatformMembershipType',
+    MemberResponsibility = 'MemberResponsibility',
 }
 
 export function getAuditLogTypeName(type: AuditLogType): string {
@@ -425,11 +428,11 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `{{capitalizeFirstLetter o}} werd verwijderd ({{w}})`;
 
         case AuditLogType.PaymentAdded:
-            return `Betaling {{p}} werd aangemaakt`;
+            return `{{capitalizeFirstLetter p}} werd aangemaakt`;
         case AuditLogType.PaymentEdited:
-            return `Betaling {{p}} werd gewijzigd`;
+            return `{{capitalizeFirstLetter p}} werd gewijzigd`;
         case AuditLogType.PaymentDeleted:
-            return `Betaling {{p}} werd verwijderd`;
+            return `{{capitalizeFirstLetter p}} werd verwijderd`;
 
         case AuditLogType.DocumentTemplateAdded:
             return `Document {{d}} werd aangemaakt`;
@@ -446,18 +449,18 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `Account {{u}} werd verwijderd`;
 
         case AuditLogType.MemberResponsibilityRecordAdded:
-            return `Functie {{r}} werd toegekend aan {{m}}`;
+            return `Functie {{r}}{{if g " van " g}}{{if o " (" o ")"}} werd toegekend aan {{m}}`;
         case AuditLogType.MemberResponsibilityRecordEdited:
-            return `Functie {{r}} werd gewijzigd bij {{m}}`;
+            return `Functie {{r}}{{if g " van " g}}{{if o " (" o ")"}} werd gewijzigd bij {{m}}`;
         case AuditLogType.MemberResponsibilityRecordDeleted:
-            return `Functie {{r}} werd verwijderd van {{m}}`;
+            return `Functie {{r}}{{if g " van " g}}{{if o " (" o ")"}} werd verwijderd van {{m}}`;
 
         case AuditLogType.MemberPlatformMembershipAdded:
-            return `Aansluiting {{pm}} werd toegevoegd bij {{m}}`;
+            return `Aansluiting {{pm}}{{if o " (" o ")"}} werd toegevoegd bij {{m}}{{if o " via " o}}`;
         case AuditLogType.MemberPlatformMembershipEdited:
-            return `Aansluiting {{pm}} werd gewijzigd bij {{m}}`;
+            return `Aansluiting {{pm}}{{if o " (" o ")"}} werd gewijzigd bij {{m}}{{if o " via " o}}`;
         case AuditLogType.MemberPlatformMembershipDeleted:
-            return `Aansluiting {{pm}} werd verwijderd bij {{m}}`;
+            return `Aansluiting {{pm}}{{if o " (" o ")"}} werd verwijderd bij {{m}}{{if o " via " o}}`;
     }
 }
 
@@ -606,7 +609,7 @@ export class AuditLogReplacement extends AutoEncoder {
         if (this.type === AuditLogReplacementType.Key) {
             return getAuditLogPatchKeyName(this.value);
         }
-        if (this.type === AuditLogReplacementType.Uuid) {
+        if (this.type === AuditLogReplacementType.Uuid || (this.id && !this.value && isUuid(this.id))) {
             if (this.id && !this.value) {
                 const name = uuidToName(this.id);
                 if (name) {
@@ -646,6 +649,7 @@ export function uuidToName(uuid: string) {
          Platform.shared.config.defaultAgeGroups,
          Platform.shared.config.tags,
          Platform.shared.config.recordsConfiguration.recordCategories,
+         Platform.shared.config.membershipTypes,
      ];
 
     for (const list of objectLists) {
@@ -693,7 +697,7 @@ export function getAuditLogPatchKeyName(key: string) {
         for (const helper of enumHelpers) {
             try {
                 const result = helper(key);
-                if (result) {
+                if (result && result !== key) {
                     return result;
                 }
             }
@@ -824,6 +828,18 @@ export class AuditLog extends AutoEncoder {
                             return [clone];
                         }
                         return [object];
+                    },
+                    if: (context: RenderContext, object: any, ...prefixes) => {
+                        if (object) {
+                            return [...prefixes];
+                        }
+                        return [];
+                    },
+                    unless: (context: RenderContext, object: any, ...prefixes) => {
+                        if (!object) {
+                            return [...prefixes];
+                        }
+                        return [];
                     },
                 },
             });

@@ -49,6 +49,9 @@ if (props.log.user) {
     if (props.log.source === AuditLogSource.User) {
         userDescription.push('Door ');
     }
+    else if (props.log.source === AuditLogSource.Payment) {
+        userDescription.push('Indirect veroorzaakt door betaalstatuswijziging door ');
+    }
     else {
         userDescription.push('Automatische actie veroorzaakt door ');
     }
@@ -69,7 +72,7 @@ else if (props.log.source === AuditLogSource.System) {
     userDescription.push('Automatische systeemactie');
 }
 else if (props.log.source === AuditLogSource.Payment) {
-    userDescription.push('Automatisch door betaalstatuswijziging');
+    userDescription.push('Indirect veroorzaakt door betaalstatuswijziging');
 }
 
 const present = usePresent();

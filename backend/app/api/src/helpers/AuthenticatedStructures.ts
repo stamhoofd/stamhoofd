@@ -673,9 +673,18 @@ export class AuthenticatedStructures {
                 }
             }
 
+            let replacements = log.replacements;
+
+            // Remove 'o' (organization) replacement if it is the current organization (so it wont get written)
+            if (Context.organization && log.replacements.get('o')?.id === Context.organization.id) {
+                replacements = new Map(log.replacements);
+                replacements.delete('o');
+            }
+
             structs.push(
                 AuditLogStruct.create({
                     ...log,
+                    replacements,
                     user: userStruct,
                 }),
             );

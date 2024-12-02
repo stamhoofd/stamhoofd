@@ -13,6 +13,8 @@ import { WebshopLogger } from '../audit-logs/WebshopLogger';
 import { OrderLogger } from '../audit-logs/OrderLogger';
 import { AuditLogSource } from '@stamhoofd/structures';
 import { PaymentLogger } from '../audit-logs/PaymentLogger';
+import { MemberPlatformMembershipLogger } from '../audit-logs/MemberPlatformMembershipLogger';
+import { MemberResponsibilityRecordLogger } from '../audit-logs/MemberResponsibilityRecordLogger';
 
 export type AuditLogContextSettings = {
     disable?: boolean;
@@ -99,3 +101,5 @@ modelLogDefinitions.set(MemberLogger.model, MemberLogger);
 modelLogDefinitions.set(WebshopLogger.model, WebshopLogger);
 modelLogDefinitions.set(OrderLogger.model, OrderLogger);
 modelLogDefinitions.set(PaymentLogger.model, PaymentLogger);
+modelLogDefinitions.set(MemberPlatformMembershipLogger.model, MemberPlatformMembershipLogger);
+modelLogDefinitions.set(MemberResponsibilityRecordLogger.model, MemberResponsibilityRecordLogger);

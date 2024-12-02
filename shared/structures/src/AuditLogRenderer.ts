@@ -15,6 +15,7 @@ class RendersState {
 
     pendingString = '';
     output: any[] = [];
+    quoteChar: '"' | "'" | null = null;
 
     currentHelper: Helper | null = null;
     currentHelperArgs: unknown[] = [];
@@ -25,13 +26,13 @@ class RendersState {
 
     endCurlyWord() {
         // Check helper
-        const helperName = this.pendingString.trim();
+        const helperName = this.quoteChar ? this.pendingString : this.pendingString.trim();
 
-        if (helperName.length === 0) {
+        if (helperName.length === 0 && !this.quoteChar) {
             return;
         }
 
-        if (this.currentHelper === null && this.context.helpers[helperName]) {
+        if (!this.quoteChar && this.currentHelper === null && this.context.helpers[helperName]) {
             this.currentHelper = this.context.helpers[helperName];
         }
         else {
@@ -40,20 +41,14 @@ class RendersState {
                 this.currentHelper = (_c, ...v: unknown[]) => v;
             }
 
-            if (helperName.startsWith('"')) {
-                const parseString = JSON.parse(helperName);
-                if (typeof parseString === 'string') {
-                    this.currentHelperArgs.push(parseString);
-                }
-                else {
-                    throw new Error(`Invalid string ${helperName} at ${this.pos - this.pendingString.length}`);
-                }
+            if (this.quoteChar) {
+                this.currentHelperArgs.push(this.pendingString);
             }
             else if (this.context.context[helperName]) {
                 this.currentHelperArgs.push(this.context.context[helperName]);
             }
             else {
-                throw new Error(`Unknown helper or variable: ${helperName} at ${this.pos - this.pendingString.length}`);
+                this.currentHelperArgs.push(undefined);
             }
         }
         this.pendingString = '';
@@ -86,7 +81,16 @@ class RendersState {
                 this.previousBackslash = false;
                 this.previousIsEndCurly = false;
             }
-            else if (char === ' ') {
+            else if ((char === '"' || char === "'") && !this.quoteChar) {
+                this.quoteChar = char;
+                this.previousIsEndCurly = false;
+            }
+            else if (char === this.quoteChar) {
+                this.previousIsEndCurly = false;
+                this.endCurlyWord();
+                this.quoteChar = null;
+            }
+            else if (char === ' ' && !this.quoteChar) {
                 this.previousIsEndCurly = false;
                 this.endCurlyWord();
             }

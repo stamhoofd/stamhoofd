@@ -1,6 +1,6 @@
 import { StripeAccount } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
 
 const defaultGenerator = getDefaultGenerator({
     created: AuditLogType.StripeAccountAdded,
@@ -38,6 +38,10 @@ export const StripeAccountLogger = new ModelLogger(StripeAccount, {
         if (log.type === AuditLogType.StripeAccountEdited) {
             // Never caused by a user
             log.userId = null;
+
+            if (log.source === AuditLogSource.User) {
+                log.source = AuditLogSource.System;
+            }
         }
     },
 });

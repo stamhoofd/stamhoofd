@@ -17,6 +17,10 @@ export const BalanceItemService = {
             }
         }
 
+        // It is possible this balance item was earlier paid
+        // and later the regigstration / order has been canceled and it became a negative balance item - which as some point has been reembursed and marked as 'paid'
+        // in that case, we should be careful not to mark the registration as valid again
+
         // If registration
         if (balanceItem.registrationId) {
             await RegistrationService.markValid(balanceItem.registrationId);
