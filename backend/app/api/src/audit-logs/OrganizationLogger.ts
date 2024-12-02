@@ -18,4 +18,8 @@ export const OrganizationLogger = new ModelLogger(Organization, {
             })],
         ]);
     },
+
+    postProcess(event, options, log) {
+        log.organizationId = event.model.id;
+    },
 });
