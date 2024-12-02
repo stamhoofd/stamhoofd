@@ -148,7 +148,7 @@ export class StripePayoutChecker {
 
         const applicationFee = balanceItem.source.application_fee_amount;
         const otherFees = balanceItem.fee
-        const totalFees = otherFees + (applicationFee ?? 0);
+        const totalFees = Math.max(otherFees, (applicationFee ?? 0));
 
         // Cool, we can store this in the database now.
 
