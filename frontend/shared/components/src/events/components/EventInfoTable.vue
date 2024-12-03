@@ -2,7 +2,7 @@
     <STList>
         <STListItem>
             <template #left>
-                <span class="icon calendar" />
+                <span class="icon calendar-grid" />
             </template>
 
             <h2 class="style-title-list">
@@ -63,7 +63,6 @@
     </STList>
 </template>
 
-
 <script setup lang="ts">
 import { useAppContext, useChooseFamilyMembersForGroup, useOrganization, usePlatform } from '@stamhoofd/components';
 import { Event, PlatformFamily } from '@stamhoofd/structures';
@@ -73,11 +72,11 @@ import { computed } from 'vue';
 const props = withDefaults(
     defineProps<{
         event: Event;
-        family?: PlatformFamily|null
+        family?: PlatformFamily | null;
     }>(),
     {
-        family: null
-    }
+        family: null,
+    },
 );
 
 const platform = usePlatform();
@@ -90,30 +89,30 @@ const googleMapsUrl = computed(() => {
     }
     return null;
 });
-const differentOrganization = computed(() => props.event.group && (!props.family || (props.family.checkout.cart.isEmpty && props.family.checkout.singleOrganization?.id !== props.event.group.organizationId)))
+const differentOrganization = computed(() => props.event.group && (!props.family || (props.family.checkout.cart.isEmpty && props.family.checkout.singleOrganization?.id !== props.event.group.organizationId)));
 
 const ageGroups = computed(() => {
-    const prefixes: string[] = []
+    const prefixes: string[] = [];
 
     if (props.event.meta.defaultAgeGroupIds !== null) {
         for (const ageGroupId of props.event.meta.defaultAgeGroupIds) {
-            const ageGroup = platform.value?.config.defaultAgeGroups.find(g => g.id === ageGroupId)
+            const ageGroup = platform.value?.config.defaultAgeGroups.find(g => g.id === ageGroupId);
             if (ageGroup) {
-                prefixes.push(ageGroup.name)
+                prefixes.push(ageGroup.name);
             }
         }
     }
 
     if (props.event.meta.groups !== null) {
         for (const group of props.event.meta.groups) {
-            prefixes.push(group.name)
+            prefixes.push(group.name);
         }
     }
 
     return Formatter.joinLast(prefixes, ', ', ' of ');
 });
 
-const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup()
+const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup();
 
 async function openGroup() {
     if (!props.event.group || !props.family) {
@@ -125,9 +124,9 @@ async function openGroup() {
         family: props.family,
         displayOptions: {
             action: 'present',
-            modalDisplayStyle: 'popup'
-        }
-    })
+            modalDisplayStyle: 'popup',
+        },
+    });
 }
 
 </script>
