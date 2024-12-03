@@ -7,6 +7,7 @@ export const fiscal = DocumentTemplateDefinition.create({
     defaultMinPrice: 1,
     fieldCategories: [
         RecordCategory.create({
+            id: 'organization',
             name: 'Vereniging',
             description: 'Gegevens van de vereniging of persoon die instaat voor de opvang.',
             records: [
@@ -65,6 +66,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'certification',
             name: 'Certificeringsautoriteit',
             description: 'De instantie die de opvangsinstantie heeft vergund, erkend, gesubsidieerd, er een kwaliteitslabel heeft aan toegekend of die deze controleert of er toezicht op houdt of die is verbonden met de opvanginstantie in het geval van scholen of hun inrichtende machten.',
             records: [
@@ -96,6 +98,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             }, null),
         }),
         RecordCategory.create({
+            id: 'signature',
             name: 'Ondertekening',
             description: 'Persoon die de documenten ondertekent.',
             records: [
@@ -130,6 +133,7 @@ export const fiscal = DocumentTemplateDefinition.create({
     groupFieldCategories: [],
     documentFieldCategories: [
         RecordCategory.create({
+            id: 'debtor',
             name: 'Schuldenaar',
             description: 'Persoon die heeft betaald, bij voorkeur de ouder die het kind fiscaal ten laste heeft (beide ouders hebben meestal het kind fiscaal ten laste, tenzij men niet getrouwd of niet wettelijk samenwonend is).',
             records: [
@@ -166,6 +170,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'member',
             name: 'Gegevens lid',
             description: 'Deze gegevens zijn allemaal standaard beschikbaar in Stamhoofd, met uitzondering van het rijksregisternummer.',
             records: [
@@ -208,6 +213,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'price',
             name: 'Prijs',
             description: 'Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit het systeem gehaald worden, waarbij ook rekening gehouden wordt met kortingen. De dagprijs wordt berekend op basis van de begin en einddatum. Gratis inschrijvingen komen niet in aanmerking voor een fiscale aftrek en daarvoor wordt dus geen document aangemaakt.',
             records: [
@@ -228,6 +234,7 @@ export const fiscal = DocumentTemplateDefinition.create({
     ],
     exportFieldCategories: [
         RecordCategory.create({
+            id: 'confirmation',
             name: 'Exporteren naar XML voor Belcotax',
             description: 'De XML-export is complex, en je moet zorvuldig de documentatie doorlezen voor je hier aan begint.',
             records: [
@@ -241,6 +248,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'additional-belcotax',
             name: 'Bijkomende informatie',
             description: 'We hebben nog enkele gegevens nodig die we moeten opnemen in de XML. Vul deze accuraat in.',
             records: [

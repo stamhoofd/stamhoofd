@@ -7,6 +7,7 @@ export const participation = DocumentTemplateDefinition.create({
     defaultMinPricePaid: 1,
     fieldCategories: [
         RecordCategory.create({
+            id: 'organization',
             name: 'Vereniging',
             description: 'Gegevens van de vereniging',
             records: [
@@ -31,6 +32,7 @@ export const participation = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'extra-info',
             name: 'Extra informatie',
             description: 'Afhankelijk van de noodzaak van het deelnameattest moet je soms nog extra zaken vermelden voor bijvoorbeeld de mutualiteit. Dat kan je hier ingeven.',
             records: [
@@ -52,6 +54,7 @@ export const participation = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'signature',
             name: 'Ondertekening',
             description: 'Persoon die de documenten ondertekent of stempel.',
             records: [
@@ -77,6 +80,7 @@ export const participation = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'visible-data',
             name: 'Zichtbare gegevens',
             description: 'Kies welke gegevens je wilt vermelden op de documenten. Afhankelijk van waarvoor het document gebruikt moet worden, zijn bepaalde gegevens vereist. Sommige mutualiteiten vereisen bijvoorbeeld een rijksregisternummer.',
             records: [
@@ -134,6 +138,7 @@ export const participation = DocumentTemplateDefinition.create({
     groupFieldCategories: [],
     documentFieldCategories: [
         RecordCategory.create({
+            id: 'member',
             name: 'Gegevens lid',
             records: [
                 RecordSettings.create({
@@ -175,6 +180,7 @@ export const participation = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'price',
             name: 'Prijs',
             records: [
                 RecordSettings.create({
