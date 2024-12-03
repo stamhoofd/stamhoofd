@@ -109,7 +109,7 @@ function getDiffValue(autoEncoder: unknown, key?: AuditLogReplacement): AuditLog
         if (DataValidator.isUuid(autoEncoder)) {
             return AuditLogReplacement.uuid(autoEncoder);
         }
-        if (key && key?.toKey() === 'status') {
+        if (key && key?.lastValue() === 'status') {
             // Will be an enum
             return AuditLogReplacement.key(autoEncoder);
         }
@@ -125,7 +125,7 @@ function getDiffValue(autoEncoder: unknown, key?: AuditLogReplacement): AuditLog
     }
 
     if (typeof autoEncoder === 'number') {
-        const k = key?.toKey();
+        const k = key?.lastValue();
         if (k && (k.toLowerCase().includes('price') || k.toLowerCase().includes('fee'))) {
             return AuditLogReplacement.string(Formatter.price(autoEncoder));
         }

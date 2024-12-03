@@ -159,6 +159,16 @@ export class AuditLogReplacement extends AutoEncoder {
         }
         return this.value;
     }
+
+    lastValue(): string {
+        if (this.type === AuditLogReplacementType.Array && this.values.length > 0) {
+            return this.values[this.values.length - 1].lastValue();
+        }
+        if (this.type === AuditLogReplacementType.Key) {
+            return this.value.split('.').pop() || '';
+        }
+        return this.value;
+    }
 }
 
 export function getAuditLogPatchKeyName(key: string) {
