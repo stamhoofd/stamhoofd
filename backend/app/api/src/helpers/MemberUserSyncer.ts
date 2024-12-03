@@ -1,8 +1,9 @@
 import { Member, MemberResponsibilityRecord, MemberWithRegistrations, User } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { MemberDetails, Permissions, UserPermissions } from '@stamhoofd/structures';
+import { AuditLogSource, MemberDetails, Permissions, UserPermissions } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import basex from 'base-x';
+import { AuditLogService } from '../services/AuditLogService';
 
 const ALPHABET = '123456789ABCDEFGHJKMNPQRSTUVWXYZ'; // Note: we removed 0, O, I and l to make it easier for humans
 const customBase = basex(ALPHABET);
@@ -26,61 +27,63 @@ export class MemberUserSyncerStatic {
      * - email addresses have changed
      */
     async onChangeMember(member: MemberWithRegistrations, unlinkUsers: boolean = false) {
-        const { userEmails, parentAndUnverifiedEmails } = this.getMemberAccessEmails(member.details);
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+            const { userEmails, parentAndUnverifiedEmails } = this.getMemberAccessEmails(member.details);
 
-        // Make sure all these users have access to the member
-        for (const email of userEmails) {
+            // Make sure all these users have access to the member
+            for (const email of userEmails) {
             // Link users that are found with these email addresses.
-            await this.linkUser(email, member, false, true);
-        }
-
-        for (const email of parentAndUnverifiedEmails) {
-            if (userEmails.includes(email)) {
-                continue;
+                await this.linkUser(email, member, false, true);
             }
 
-            // Link parents and unverified emails
-            // Now we add the responsibility permissions to the parent if there are no userEmails
-            const asParent = userEmails.length > 0 || !member.details.unverifiedEmails.includes(email) || member.details.defaultAge < 16;
-            await this.linkUser(email, member, asParent, true);
-        }
+            for (const email of parentAndUnverifiedEmails) {
+                if (userEmails.includes(email)) {
+                    continue;
+                }
 
-        if (unlinkUsers && !member.details.parentsHaveAccess) {
+                // Link parents and unverified emails
+                // Now we add the responsibility permissions to the parent if there are no userEmails
+                const asParent = userEmails.length > 0 || !member.details.unverifiedEmails.includes(email) || member.details.defaultAge < 16;
+                await this.linkUser(email, member, asParent, true);
+            }
+
+            if (unlinkUsers && !member.details.parentsHaveAccess) {
             // Remove access of users that are not in this list
             // NOTE: we should only do this once a year (preferably on the birthday of the member)
             // only once because otherwise users loose the access to a member during the creation of the member, or when they have changed their email address
             // users can regain access to a member after they have lost control by using the normal verification flow when detecting duplicate members
 
-            for (const user of member.users) {
-                if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
-                    await this.unlinkUser(user, member);
-                }
-            }
-        }
-        else {
-            // Only auto unlink users that do not have an account
-            for (const user of member.users) {
-                if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
-                    if (!user.hasAccount()) {
+                for (const user of member.users) {
+                    if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
                         await this.unlinkUser(user, member);
                     }
-                    else {
+                }
+            }
+            else {
+            // Only auto unlink users that do not have an account
+                for (const user of member.users) {
+                    if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
+                        if (!user.hasAccount()) {
+                            await this.unlinkUser(user, member);
+                        }
+                        else {
                         // Make sure only linked as a parent, not as user self
                         // This makes sure we don't inherit permissions and aren't counted as 'being' the member
-                        await this.linkUser(user.email, member, true);
+                            await this.linkUser(user.email, member, true);
+                        }
                     }
                 }
             }
-        }
 
-        if (member.details.securityCode === null) {
-            console.log('Generating security code for member ' + member.id);
+            if (member.details.securityCode === null) {
+                console.log('Generating security code for member ' + member.id);
 
-            const length = 16;
-            const code = customBase.encode(await randomBytes(100)).toUpperCase().substring(0, length);
-            member.details.securityCode = code;
-            await member.save();
-        }
+                const length = 16;
+                const code = customBase.encode(await randomBytes(100)).toUpperCase().substring(0, length);
+                member.details.securityCode = code;
+                await member.save();
+            }
+        });
     }
 
     getMemberAccessEmails(details: MemberDetails) {
@@ -106,10 +109,12 @@ export class MemberUserSyncerStatic {
     }
 
     async onDeleteMember(member: MemberWithRegistrations) {
-        for (const u of member.users) {
-            console.log('Unlinking user ' + u.email + ' from deleted member ' + member.id);
-            await this.unlinkUser(u, member);
-        }
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+            for (const u of member.users) {
+                console.log('Unlinking user ' + u.email + ' from deleted member ' + member.id);
+                await this.unlinkUser(u, member);
+            }
+        });
     }
 
     async getResponsibilitiesForMembers(memberIds: string[]) {

@@ -153,4 +153,5 @@ export default {
     'startDate': 'startdatum',
     'endDate': 'einddatum',
     'ibanName': 'naam op bankkaart',
+    'organizationCount': 'aantal groepen',
 };

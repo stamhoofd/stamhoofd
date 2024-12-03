@@ -6,4 +6,8 @@ export const PlatformLogger = new ModelLogger(Platform, {
     optionsGenerator: getDefaultGenerator({
         updated: AuditLogType.PlatformSettingsChanged,
     }),
+
+    postProcess(event, options, log) {
+        log.organizationId = null;
+    },
 });

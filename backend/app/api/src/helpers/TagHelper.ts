@@ -1,38 +1,41 @@
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { OrganizationTag, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
+import { AuditLogSource, OrganizationTag, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
 import { ModelHelper } from './ModelHelper';
+import { AuditLogService } from '../services/AuditLogService';
 
 export class TagHelper extends SharedTagHelper {
     static async updateOrganizations() {
         const queueId = 'update-tags-on-organizations';
         QueueHandler.cancel(queueId);
 
-        await QueueHandler.schedule(queueId, async () => {
-            let platform = await Platform.getShared();
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+            await QueueHandler.schedule(queueId, async () => {
+                let platform = await Platform.getShared();
 
-            const tagCounts = new Map<string, number>();
-            await this.loopOrganizations(async (organizations) => {
-                for (const organization of organizations) {
-                    organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platform.config.tags);
+                const tagCounts = new Map<string, number>();
+                await this.loopOrganizations(async (organizations) => {
+                    for (const organization of organizations) {
+                        organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platform.config.tags);
 
-                    for (const tag of organization.meta.tags) {
-                        tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+                        for (const tag of organization.meta.tags) {
+                            tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+                        }
+                    }
+
+                    await Promise.all(organizations.map(organization => organization.save()));
+                });
+
+                // Reload platform to avoid race conditions
+                platform = await Platform.getShared();
+                for (const [tag, count] of tagCounts.entries()) {
+                    const tagObject = platform.config.tags.find(t => t.id === tag);
+                    if (tagObject) {
+                        tagObject.organizationCount = count;
                     }
                 }
-
-                await Promise.all(organizations.map(organization => organization.save()));
+                await platform.save();
             });
-
-            // Reload platform to avoid race conditions
-            platform = await Platform.getShared();
-            for (const [tag, count] of tagCounts.entries()) {
-                const tagObject = platform.config.tags.find(t => t.id === tag);
-                if (tagObject) {
-                    tagObject.organizationCount = count;
-                }
-            }
-            await platform.save();
         });
     }
 
