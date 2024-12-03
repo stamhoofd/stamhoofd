@@ -1,10 +1,10 @@
 import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from './InMemoryFilter.js';
-import { StamhoofdFilter } from './StamhoofdFilter.js';
 
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     age: createInMemoryFilterCompiler('details.defaultAge'),
     gender: createInMemoryFilterCompiler('details.gender'),
+    birthDay: createInMemoryFilterCompiler('details.birthDay'),
 };
 
 export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
