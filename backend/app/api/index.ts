@@ -16,6 +16,7 @@ import { ContextMiddleware } from './src/middleware/ContextMiddleware';
 import { Platform } from '@stamhoofd/models';
 import { AuditLogService } from './src/services/AuditLogService';
 import { PlatformMembershipService } from './src/services/PlatformMembershipService';
+import { DocumentService } from './src/services/DocumentService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -189,6 +190,7 @@ const start = async () => {
 
     AuditLogService.listen();
     PlatformMembershipService.listen();
+    DocumentService.listen();
 };
 
 start().catch((error) => {

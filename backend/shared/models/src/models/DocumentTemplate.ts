@@ -263,7 +263,6 @@ export class DocumentTemplate extends Model {
             if (linkedToMemberAnswerSettingsIds.length === 0) {
                 linkedToMemberAnswerSettingsIds = [field.id];
             }
-            console.log('Checking', field.id);
 
             // Check if this field has been manually disabled by a global checkbox
             const enableField = this.settings.fieldAnswers.get('enable[' + field.id + ']');

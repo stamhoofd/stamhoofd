@@ -193,6 +193,29 @@ export class Document extends Model {
         }
     }
 
+    static async updateForGroup(groupId: string, organizationId: string) {
+        try {
+            console.log('Updating documents for group', groupId);
+
+            const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
+            const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId });
+
+            if (templates.length) {
+                const Member = (await import('./Member')).Member;
+                const registrations = await Member.getRegistrationWithMembersForGroup(groupId);
+
+                for (const template of templates) {
+                    for (const registration of registrations) {
+                        await template.createForRegistrationIfNeeded(registration);
+                    }
+                }
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+
     // Rander handlebars template
     async getRenderedHtml(organization: Organization): Promise<string | null> {
         const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
