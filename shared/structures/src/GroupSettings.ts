@@ -288,7 +288,7 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = '';
 
-    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    @field({ decoder: StringDecoder, version: 350, nullable: true })
     eventId: string | null = null;
 
     /**

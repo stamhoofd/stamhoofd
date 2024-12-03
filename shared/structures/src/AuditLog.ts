@@ -773,7 +773,7 @@ export class AuditLog extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
 
-    @field({ decoder: new EnumDecoder(AuditLogSource), ...NextVersion })
+    @field({ decoder: new EnumDecoder(AuditLogSource), version: 350 })
     source: AuditLogSource;
 
     @field({ decoder: new EnumDecoder(AuditLogType) })
