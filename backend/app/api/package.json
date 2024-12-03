@@ -33,8 +33,8 @@
     "dependencies": {
         "@bwip-js/node": "^4.5.1",
         "@mollie/api-client": "3.7.0",
-        "@simonbackx/simple-database": "1.25.0",
-        "@simonbackx/simple-encoding": "2.17.0",
+        "@simonbackx/simple-database": "1.27.0",
+        "@simonbackx/simple-encoding": "2.18.0",
         "@simonbackx/simple-endpoints": "1.15.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "@stamhoofd/backend-i18n": "2.58.0",

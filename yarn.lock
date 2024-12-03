@@ -3172,19 +3172,19 @@
     "@sigstore/core" "^1.1.0"
     "@sigstore/protobuf-specs" "^0.3.1"
 
-"@simonbackx/simple-database@1.25.0":
-  version "1.25.0"
-  resolved "https://registry.npmjs.org/@simonbackx/simple-database/-/simple-database-1.25.0.tgz"
-  integrity sha512-IF8wtPf7qsEWwsWH545Rqj9HcK8HJ9EmRpfiBJdblme8pn4gjqDSrZf0T8Mrxv/h6+2l4KqyKaxM5+FWfFinxA==
+"@simonbackx/simple-database@1.27.0":
+  version "1.27.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.27.0.tgz#524bd09cf92fd85862dfd429b430a628567fd64a"
+  integrity sha512-v2jasHUC3YrZOHQtwFBVwIcR7r5zujs+2rgKonyasLgEnGRbPtxEVfYtZQ86FxRoBAgD6Qe1T16Ma2+O578WJQ==
   dependencies:
     "@simonbackx/simple-logging" "^1.0.0"
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@2.17.0":
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.17.0.tgz#0a263736c5a8f951ff6f8b45608820a2d5615508"
-  integrity sha512-uHw7dATGbwUbdFjl76YseY5HCHr0hwINsfcSJ2xnP5A05woqeo8dSAsAKVdCptJt9QeOmOGJpj+EOWk2OEaI0Q==
+"@simonbackx/simple-encoding@2.18.0":
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.18.0.tgz#6c574a10d258ae886584f56190a61db060c7fd13"
+  integrity sha512-tdokKVGCuR54GsSleY4qLpqP+iwGbxNN3Z/G0LdSuyRGtwrEELRHKndzPQdyrkqDhPOcct/QqKHRpp5c+KwJnQ==
 
 "@simonbackx/simple-endpoints@1.15.0":
   version "1.15.0"
