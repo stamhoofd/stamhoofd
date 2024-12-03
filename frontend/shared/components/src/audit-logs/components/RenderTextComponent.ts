@@ -16,7 +16,7 @@ export interface Renderable {
 }
 
 function isRenderable(obj: unknown): obj is Renderable {
-    return (obj as Renderable).render !== undefined;
+    return typeof obj === 'object' && obj !== null && (obj as Renderable).render !== undefined;
 }
 
 function copyable(vnode: ReturnType<typeof h>, text?: string): ReturnType<typeof h> {
