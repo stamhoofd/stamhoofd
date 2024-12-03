@@ -524,7 +524,7 @@ function createMapChangeHandler(key?: string) {
                 if (original) {
                     items.push(
                         AuditLogPatchItem.create({
-                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(original)),
+                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderName(original) || getAutoEncoderKey(k)),
                             oldValue: getAutoEncoderPutValue(original) || undefined,
                             type: AuditLogPatchItemType.Removed,
                         }),
@@ -537,7 +537,7 @@ function createMapChangeHandler(key?: string) {
                 // added
                 items.push(
                     AuditLogPatchItem.create({
-                        key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(v)),
+                        key: AuditLogReplacement.key(keySingular).append(getAutoEncoderName(v) || getAutoEncoderKey(k)),
                         value: getAutoEncoderPutValue(v) || undefined,
                         type: AuditLogPatchItemType.Added,
                     }),
@@ -570,7 +570,7 @@ function createMapChangeHandler(key?: string) {
                     // Simplify change
                     items.push(
                         AuditLogPatchItem.create({
-                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(original) || getAutoEncoderName(v)),
+                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderName(original) || getAutoEncoderName(v) || getAutoEncoderKey(k)),
                             oldValue: ov || undefined,
                             value: nv || undefined,
                             type: AuditLogPatchItemType.Changed,
@@ -583,7 +583,7 @@ function createMapChangeHandler(key?: string) {
                     // Manual log
                     items.push(
                         AuditLogPatchItem.create({
-                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderKey(k)).append(getAutoEncoderName(original) || getAutoEncoderName(v)),
+                            key: AuditLogReplacement.key(keySingular).append(getAutoEncoderName(original) || getAutoEncoderName(v) || getAutoEncoderKey(k)),
                             oldValue: getAutoEncoderValue(original) || undefined,
                             value: getAutoEncoderValue(v) || undefined,
                             type: AuditLogPatchItemType.Changed,
