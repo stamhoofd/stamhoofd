@@ -10,7 +10,7 @@ export class SetupStepReview extends AutoEncoder {
     @field({ decoder: StringDecoder })
     userId: string;
 
-    getPatchValue() {
+    getDiffValue() {
         return this.userName;
     }
 }

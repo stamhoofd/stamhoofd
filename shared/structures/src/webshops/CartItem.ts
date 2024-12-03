@@ -381,11 +381,11 @@ export class CartItem extends AutoEncoder {
         return this.priceCombinationToString(priceCombinations);
     }
 
-    getPatchName() {
+    getDiffName() {
         return this.product.name;
     }
 
-    getPatchValue() {
+    getDiffValue() {
         return this.formattedAmount + 'x ' + this.description;
     }
 

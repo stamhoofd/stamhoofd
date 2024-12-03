@@ -27,7 +27,7 @@ export class ResourcePermissions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AccessRight)), field: 'r' })
     accessRights: AccessRight[] = [];
 
-    getPatchName() {
+    getDiffName() {
         return this.resourceName;
     }
 

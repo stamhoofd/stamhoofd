@@ -46,21 +46,21 @@ export * from './src/PermissionsByRole.js';
 export * from './src/PermissionsResourceType.js';
 export * from './src/Platform.js';
 export * from './src/Policy.js';
+export * from './src/ReceivableBalance.js';
 export * from './src/RegisterCodeStatus.js';
 export * from './src/RegistrationPeriod.js';
 export * from './src/RegistrationPeriodBase.js';
 export * from './src/ResourcePermissions.js';
 export * from './src/RichText.js';
 export * from './src/SeatingPlan.js';
+export * from './src/SetupStepReview.js';
 export * from './src/SetupSteps.js';
 export * from './src/SetupStepType.js';
-export * from './src/SetupStepReview.js';
 export * from './src/StockReservation.js';
 export * from './src/StripeAccount.js';
 export * from './src/Token.js';
 export * from './src/UmbrellaOrganization.js';
 export * from './src/User.js';
-export * from './src/ReceivableBalance.js';
 
 export * from './src/LoadedPermissions.js';
 
@@ -71,14 +71,15 @@ export * from './src/UserWithMembers.js';
 // Endpoints
 export * from './src/DNSRecord.js';
 export * from './src/endpoints/ChargeMembershipsSummary.js';
+export * from './src/endpoints/ChargeOrganizationsRequest.js';
 export * from './src/endpoints/CheckMollieResponse.js';
 export * from './src/endpoints/CreateOrganization.js';
 export * from './src/endpoints/EmailRequest.js';
 export * from './src/endpoints/ForgotPasswordRequest.js';
 export * from './src/endpoints/GroupsWithOrganizations.js';
 export * from './src/endpoints/OrganizationAdmins.js';
-export * from './src/endpoints/PayableBalanceCollection.js';
 export * from './src/endpoints/OrganizationDomains.js';
+export * from './src/endpoints/PayableBalanceCollection.js';
 export * from './src/endpoints/RegisterMember.js';
 export * from './src/endpoints/RegisterResponse.js';
 export * from './src/endpoints/SignupResponse.js';
@@ -90,7 +91,6 @@ export * from './src/endpoints/tokens/RefreshTokenGrantStruct.js';
 export * from './src/endpoints/tokens/RequestChallengeGrantStruct.js';
 export * from './src/endpoints/VerifyEmailRequest.js';
 export * from './src/endpoints/WebshopUriAvailabilityResponse.js';
-export * from './src/endpoints/ChargeOrganizationsRequest.js';
 
 // email
 export * from './src/email/EditorSmartButton.js';
@@ -178,13 +178,13 @@ export * from './src/email/EmailTemplate.js';
 // Filters
 export * from './src/filters/FilteredRequest.js';
 export * from './src/filters/InMemoryFilter.js';
+export * from './src/filters/inMemoryFilterDefinitions.js';
 export * from './src/filters/InMemorySorter.js';
 export * from './src/filters/PropertyFilter.js';
+export * from './src/filters/searchFilterFactories.js';
 export * from './src/filters/Sorters.js';
 export * from './src/filters/SortList.js';
 export * from './src/filters/StamhoofdFilter.js';
-export * from './src/filters/searchFilterFactories.js';
-export * from './src/filters/inMemoryFilterDefinitions.js';
 
 // Balance
 export * from './src/BalanceItem.js';
@@ -192,8 +192,12 @@ export * from './src/BalanceItemDetailed.js';
 export * from './src/SponsorConfig.js';
 
 export * from './src/filters/ExcelExportRequest.js';
-export * from './src/helpers/index.js';
 export * from './src/filters/SearchFilterFactory.js';
+export * from './src/helpers/index.js';
 
 // Last
 export * from './src/AuditLog.js';
+export * from './src/AuditLogReplacement.js';
+
+// Wire up circular dependencies
+import './src/circular-dependencies/AuditLogReplacementDependencies.js';

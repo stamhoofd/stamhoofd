@@ -23,7 +23,7 @@ export class RegistrationPeriodBase extends AutoEncoder {
         return Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }
 
-    getPatchValue() {
+    getDiffValue() {
         return this.name;
     }
 }

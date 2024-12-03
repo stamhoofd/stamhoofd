@@ -82,7 +82,7 @@ export class Group extends AutoEncoder {
     @field({ decoder: new EnumDecoder(GroupStatus), version: 192 })
     status = GroupStatus.Open;
 
-    getPatchName() {
+    getDiffName() {
         return this.settings.name;
     }
 

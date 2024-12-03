@@ -120,6 +120,11 @@ export class DocumentTemplateDefinition extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 179 })
     xmlExportDescription: string | null = null;
+
+    transformForDiff() {
+        // Exclude from all diffs
+        return null;
+    }
 }
 
 export class DocumentTemplateGroup extends AutoEncoder {
@@ -149,6 +154,10 @@ export class DocumentTemplateGroup extends AutoEncoder {
         },
     })
     fieldAnswers: Map<string, RecordAnswer> = new Map();
+
+    getDiffName() {
+        return this.group.name;
+    }
 }
 
 export class DocumentPrivateSettings extends AutoEncoder {

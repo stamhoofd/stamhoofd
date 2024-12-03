@@ -1,6 +1,7 @@
-import { ArrayDecoder, AutoEncoder, Data, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { AuditLogReplacement, AuditLogReplacementType } from '../AuditLogReplacement.js';
 import { File } from './File.js';
 import { Resolution } from './Resolution.js';
 
@@ -13,6 +14,14 @@ export class Image extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Resolution) })
     resolutions: Resolution[] = [];
+
+    getDiffValue() {
+        return AuditLogReplacement.create({
+            id: this.getPathForSize(undefined, undefined),
+            value: this.source.name ?? undefined,
+            type: AuditLogReplacementType.Image,
+        });
+    }
 
     getPublicPath(): string {
         if (this.resolutions.length > 0) {

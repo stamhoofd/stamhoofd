@@ -242,7 +242,7 @@ export class RecordSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[];
 
-    getPatchValue() {
+    getDiffValue() {
         const type = getRecordTypeName(this.type);
         if (this.required) {
             return 'Verplicht ' + type;

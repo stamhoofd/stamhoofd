@@ -18,6 +18,7 @@ import { getGroupStatusName } from './Group.js';
 import { getGenderName } from './members/Gender.js';
 import { getSetupStepName } from './SetupStepType.js';
 import { Formatter } from '@stamhoofd/utility';
+import { AuditLogReplacement } from './AuditLogReplacement.js';
 
 export enum AuditLogSource {
     User = 'User',
@@ -111,26 +112,6 @@ export enum AuditLogType {
     MemberPlatformMembershipAdded = 'MemberPlatformMembershipAdded',
     MemberPlatformMembershipEdited = 'MemberPlatformMembershipEdited',
     MemberPlatformMembershipDeleted = 'MemberPlatformMembershipDeleted',
-}
-
-export enum AuditLogReplacementType {
-    Member = 'Member',
-    User = 'User',
-    Organization = 'Organization',
-    Group = 'Group',
-    Event = 'Event',
-    Color = 'Color', // id is the color
-    Image = 'Image', // id is the source url
-    Key = 'Key', // translatable key
-    Array = 'Array',
-    RegistrationPeriod = 'RegistrationPeriod',
-    Uuid = 'Uuid',
-    StripeAccount = 'StripeAccount',
-    Webshop = 'Webshop',
-    Order = 'Order',
-    Payment = 'Payment',
-    PlatformMembershipType = 'PlatformMembershipType',
-    MemberResponsibility = 'MemberResponsibility',
 }
 
 export function getAuditLogTypeName(type: AuditLogType): string {
@@ -371,31 +352,31 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `De lokale groep {{org}} werd verwijderd`;
 
         case AuditLogType.EventEdited:
-            return `De activiteit {{e}} werd gewijzigd`;
+            return `De activiteit {{e}}{{if org " (" org ")"}} werd gewijzigd`;
 
         case AuditLogType.EventAdded:
-            return `De activiteit {{e}} werd aangemaakt`;
+            return `De activiteit {{e}}{{if org " (" org ")"}} werd aangemaakt`;
 
         case AuditLogType.EventDeleted:
-            return `De activiteit {{e}} werd verwijderd`;
+            return `De activiteit {{e}}{{if org " (" org ")"}} werd verwijderd`;
 
         case AuditLogType.GroupEdited:
-            return `De groep {{g}} werd gewijzigd`;
+            return `De groep {{g}}{{if org " (" org ")"}} werd gewijzigd`;
 
         case AuditLogType.GroupAdded:
-            return `De groep {{g}} werd aangemaakt`;
+            return `De groep {{g}}{{if org " (" org ")"}} werd aangemaakt`;
 
         case AuditLogType.GroupDeleted:
-            return `De groep {{g}} werd verwijderd`;
+            return `De groep {{g}}{{if org " (" org ")"}} werd verwijderd`;
 
         case AuditLogType.WaitingListEdited:
-            return `De wachtlijst {{g}} werd gewijzigd`;
+            return `De wachtlijst {{g}}{{if org " (" org ")"}} werd gewijzigd`;
 
         case AuditLogType.WaitingListAdded:
-            return `De wachtlijst {{g}} werd aangemaakt`;
+            return `De wachtlijst {{g}}{{if org " (" org ")"}} werd aangemaakt`;
 
         case AuditLogType.WaitingListDeleted:
-            return `De wachtlijst {{g}} werd verwijderd`;
+            return `De wachtlijst {{g}}{{if org " (" org ")"}} werd verwijderd`;
 
         case AuditLogType.RegistrationPeriodEdited:
             return `Het werkjaar {{p}} werd gewijzigd`;
@@ -407,18 +388,18 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `Het werkjaar {{p}} werd verwijderd`;
 
         case AuditLogType.StripeAccountAdded:
-            return `Stripe account {{a}} aangemaakt`;
+            return `Stripe account {{a}}{{if org " (" org ")"}} aangemaakt`;
         case AuditLogType.StripeAccountDeleted:
-            return `Stripe account {{a}} verwijderd`;
+            return `Stripe account {{a}}{{if org " (" org ")"}} verwijderd`;
         case AuditLogType.StripeAccountEdited:
-            return `Stripe account {{a}} gewijzigd`;
+            return `Stripe account {{a}}{{if org " (" org ")"}} gewijzigd`;
 
         case AuditLogType.WebshopEdited:
-            return `De webshop {{w}} werd gewijzigd`;
+            return `De webshop {{w}}{{if org " (" org ")"}} werd gewijzigd`;
         case AuditLogType.WebshopAdded:
-            return `De webshop {{w}} werd aangemaakt`;
+            return `De webshop {{w}}{{if org " (" org ")"}} werd aangemaakt`;
         case AuditLogType.WebshopDeleted:
-            return `De webshop {{w}} werd verwijderd`;
+            return `De webshop {{w}}{{if org " (" org ")"}} werd verwijderd`;
 
         case AuditLogType.OrderAdded:
             return `{{capitalizeFirstLetter o}} werd geplaatst (voor {{w}})`;
@@ -435,11 +416,11 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `{{capitalizeFirstLetter p}} werd verwijderd`;
 
         case AuditLogType.DocumentTemplateAdded:
-            return `Document {{d}} werd aangemaakt`;
+            return `Document {{d}}{{if org " (" org ")"}} werd aangemaakt`;
         case AuditLogType.DocumentTemplateEdited:
-            return `Document {{d}} werd gewijzigd`;
+            return `Document {{d}}{{if org " (" org ")"}} werd gewijzigd`;
         case AuditLogType.DocumentTemplateDeleted:
-            return `Document {{d}} werd verwijderd`;
+            return `Document {{d}}{{if org " (" org ")"}} werd verwijderd`;
 
         case AuditLogType.UserAdded:
             return `Account {{u}} werd aangemaakt`;
@@ -515,226 +496,6 @@ function getTypeReplacements(type: AuditLogType): string[] {
     }
 }
 
-export class AuditLogReplacement extends AutoEncoder {
-    @field({ field: 'v', decoder: StringDecoder, optional: true })
-    value: string = '';
-
-    @field({ field: 'd', decoder: StringDecoder, optional: true })
-    description: string = '';
-
-    @field({ field: 'a', decoder: new ArrayDecoder(AuditLogReplacement), optional: true })
-    values: AuditLogReplacement[] = [];
-
-    /**
-     * Helps to make an object clickable
-     */
-    @field({ field: 'i', decoder: StringDecoder, optional: true })
-    id?: string;
-
-    /**
-     * Helps to make an object clickable
-     */
-    @field({ field: 't', decoder: new EnumDecoder(AuditLogReplacementType), optional: true })
-    type?: AuditLogReplacementType;
-
-    /**
-     * Helps to determine if this object is plural or not
-     */
-    @field({ field: 'c', decoder: NumberDecoder, optional: true })
-    count?: number;
-
-    flatten() {
-        if (this.type === AuditLogReplacementType.Array) {
-            const cleanedValues: AuditLogReplacement[] = [];
-            for (const v of this.values.flatMap(v => v.flatten())) {
-                if (v.type === AuditLogReplacementType.Key) {
-                    const last = cleanedValues[cleanedValues.length - 1];
-                    if (last && last.type === AuditLogReplacementType.Key) {
-                        if (last.value) {
-                            last.value += '.';
-                        }
-                        last.value += v.value;
-                        continue;
-                    }
-                }
-                cleanedValues.push(v);
-            }
-            return cleanedValues;
-        }
-        return [this];
-    }
-
-    prepend(add?: AuditLogReplacement | null) {
-        if (!add) {
-            return this;
-        }
-        return AuditLogReplacement.array([...add.flatten(), this]);
-    }
-
-    append(add?: AuditLogReplacement | null) {
-        if (!add) {
-            return this;
-        }
-        return AuditLogReplacement.array([this, ...add.flatten()]);
-    }
-
-    static array(values: AuditLogReplacement[]) {
-        const v = AuditLogReplacement.create({ values: values.flatMap(v => v.flatten()), type: AuditLogReplacementType.Array }).flatten();
-        if (v.length === 1) {
-            return v[0];
-        }
-        return AuditLogReplacement.create({ values: v, type: AuditLogReplacementType.Array });
-    }
-
-    static key(str: string | undefined | null) {
-        if (!str) {
-            return AuditLogReplacement.array([]);
-        }
-        return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.Key });
-    }
-
-    static uuid(id: string) {
-        return AuditLogReplacement.create({
-            id,
-            value: uuidToName(id) || '',
-            type: AuditLogReplacementType.Uuid,
-        });
-    }
-
-    static string(str: string) {
-        return AuditLogReplacement.create({ value: str });
-    }
-
-    toString() {
-        if (this.type === AuditLogReplacementType.Key) {
-            return getAuditLogPatchKeyName(this.value);
-        }
-        if (this.type === AuditLogReplacementType.Uuid || (this.id && !this.value && isUuid(this.id))) {
-            if (this.id && !this.value) {
-                const name = uuidToName(this.id);
-                if (name) {
-                    return name;
-                }
-                return '';
-            }
-        }
-
-        if (this.type === AuditLogReplacementType.Array) {
-            return this.values.map(v => v.toString()).filter(v => !!v).join(' → ');
-        }
-        return this.value;
-    }
-
-    toKey(): string {
-        if (this.type === AuditLogReplacementType.Array) {
-            return this.values.map(v => v.toKey()).filter(v => !!v).join('.');
-        }
-        return this.value;
-    }
-}
-
-export function isUuid(value: unknown) {
-    if (typeof value !== 'string') {
-        return false;
-    }
-    return value.length === 36 && value[8] === '-' && value[13] === '-' && value[18] === '-' && value[23] === '-';
-}
-
-export function uuidToName(uuid: string) {
-    // Look up in UUID library list
-    const objectLists
-     = [
-         Platform.shared.config.premiseTypes,
-         Platform.shared.config.eventTypes,
-         Platform.shared.config.defaultAgeGroups,
-         Platform.shared.config.tags,
-         Platform.shared.config.recordsConfiguration.recordCategories,
-         Platform.shared.config.membershipTypes,
-     ];
-
-    for (const list of objectLists) {
-        for (const object of list) {
-            if (object.id === uuid) {
-                return object.name;
-            }
-        }
-    }
-    return null;
-}
-const enumHelpers: ((key: string) => string)[] = [
-    PaymentMethodHelper.getPluralName,
-    ParentTypeHelper.getName,
-    OrderStatusHelper.getName,
-    DocumentStatusHelper.getName,
-    AccessRightHelper.getName,
-    CheckoutMethodTypeHelper.getName,
-    CountryHelper.getName,
-    OrganizationTypeHelper.getName.bind(OrganizationTypeHelper),
-    PaymentStatusHelper.getName.bind(PaymentStatusHelper),
-    UmbrellaOrganizationHelper.getName.bind(UmbrellaOrganizationHelper),
-    STPackageTypeHelper.getName.bind(STPackageTypeHelper),
-    ParentTypeHelper.getName.bind(ParentTypeHelper),
-    getGroupStatusName,
-    getGenderName,
-    getSetupStepName,
-];
-
-export function getAuditLogPatchKeyName(key: string) {
-    // Strip prefixes
-    const stripPrefixes = ['settings.', 'meta.', 'privateMeta.', 'privateConfig.', 'config.', 'privateSettings.', 'details.', 'data.'];
-    for (const prefix of stripPrefixes) {
-        if (key.startsWith(prefix)) {
-            key = key.substring(prefix.length);
-        }
-    }
-
-    if (wordDictionary[key]) {
-        return wordDictionary[key];
-    }
-
-    // Check first letter is a capital letter
-    if (key.length > 1 && key[0] === key[0].toUpperCase()) {
-        for (const helper of enumHelpers) {
-            try {
-                const result = helper(key);
-                if (result && result !== key) {
-                    return result;
-                }
-            }
-            catch (e) {
-                console.error(e);
-            }
-        }
-    }
-
-    if (key.includes('.')) {
-        const splitted = key.split('.');
-
-        if (splitted.length > 2) {
-            const firstTwoWords = splitted.slice(0, 2).join('.');
-            if (firstTwoWords !== getAuditLogPatchKeyName(firstTwoWords)) {
-                return `${getAuditLogPatchKeyName(firstTwoWords)} → ${getAuditLogPatchKeyName(splitted.slice(2).join('.'))}`;
-            }
-        }
-
-        const firstWord = splitted[0];
-        const remaining = splitted.slice(1).join('.');
-
-        return `${getAuditLogPatchKeyName(firstWord)} → ${getAuditLogPatchKeyName(remaining)}`;
-    }
-
-    if (key.length > 2 && key.endsWith('Id')) {
-        // Strip id and try again
-        return getAuditLogPatchKeyName(key.substring(0, key.length - 2));
-    }
-
-    // Replace camel case with spaces
-    key = key.replace(/([a-z])([A-Z])/g, '$1 $2');
-
-    // Replace _ case with spaces
-    key = key.replace(/_+/g, ' ').trim();
-    return key;
-}
 export enum AuditLogPatchItemType {
     Added = 'Added',
     Removed = 'Removed',
@@ -744,7 +505,7 @@ export enum AuditLogPatchItemType {
 
 export class AuditLogPatchItem extends AutoEncoder {
     @field({ field: 'k', decoder: AuditLogReplacement })
-    key: AuditLogReplacement;
+    key: AuditLogReplacement = AuditLogReplacement.empty();
 
     @field({ field: 'o', decoder: AuditLogReplacement, optional: true })
     oldValue?: AuditLogReplacement;

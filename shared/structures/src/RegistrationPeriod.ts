@@ -49,11 +49,11 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     @field({ decoder: SetupSteps, version: 324 })
     setupSteps = SetupSteps.create({});
 
-    getPatchName() {
+    getDiffName() {
         return this.period.name;
     }
 
-    getPatchValue() {
+    getDiffValue() {
         return this.period.name;
     }
 

@@ -26,7 +26,7 @@ export class OrganizationEmail extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     restricted = false;
 
-    getPatchName() {
+    getDiffName() {
         if (this.name) {
             return this.name + ' <' + this.email + '>';
         }

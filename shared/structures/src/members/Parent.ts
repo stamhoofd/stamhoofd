@@ -51,7 +51,7 @@ export class Parent extends AutoEncoder {
         return this.firstName + ' ' + this.lastName;
     }
 
-    getPatchName() {
+    getDiffName() {
         return this.name + ` (${ParentTypeHelper.getName(this.type)})`;
     }
 

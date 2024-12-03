@@ -1,5 +1,6 @@
 import { cloneObject, Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 
+import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { Filterable } from '../members/records/RecordCategory.js';
 import { StamhoofdFilterDecoder } from './FilteredRequest.js';
 import { isEmptyFilter, StamhoofdFilter } from './StamhoofdFilter.js';
@@ -69,5 +70,24 @@ export class PropertyFilter implements Encodeable {
             cloneObject(this.enabledWhen),
             cloneObject(this.requiredWhen),
         );
+    }
+
+    getDiffValue() {
+        if (this.isAlwaysEnabledAndRequired) {
+            return AuditLogReplacement.key('alwaysEnabledAndRequired');
+        }
+        if (this.enabledWhen === null && this.requiredWhen === null) {
+            return AuditLogReplacement.key('alwaysEnabledAndOptional');
+        }
+        if (this.enabledWhen !== null && this.requiredWhen === null) {
+            return AuditLogReplacement.key('sometimesEnabledAndOptional');
+        }
+        if (this.enabledWhen === null && this.requiredWhen !== null) {
+            return AuditLogReplacement.key('alwaysEnabledAndSometimesRequired');
+        }
+        if (this.enabledWhen !== null && isEmptyFilter(this.requiredWhen)) {
+            return AuditLogReplacement.key('sometimesEnabledAndRequired');
+        }
+        return AuditLogReplacement.key('sometimesEnabledAndSometimesRequired');
     }
 }

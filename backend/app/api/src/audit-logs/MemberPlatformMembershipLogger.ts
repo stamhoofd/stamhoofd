@@ -1,5 +1,5 @@
-import { Member, MemberPlatformMembership } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, uuidToName } from '@stamhoofd/structures';
+import { Member, MemberPlatformMembership, Platform } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger';
 
@@ -29,6 +29,7 @@ export const MemberPlatformMembershipLogger = new ModelLogger(MemberPlatformMemb
             ...result,
             data: {
                 member,
+                platform: await Platform.getSharedStruct(),
             },
             objectId: event.model.memberId,
         };
@@ -39,10 +40,12 @@ export const MemberPlatformMembershipLogger = new ModelLogger(MemberPlatformMemb
     },
 
     createReplacements(model, options) {
+        const name = options.data.platform.config.membershipTypes.find(r => r.id === model.membershipTypeId)?.name;
+
         const map = new Map([
             ['pm', AuditLogReplacement.create({
                 id: model.membershipTypeId,
-                value: uuidToName(model.membershipTypeId) || undefined,
+                value: name,
                 type: AuditLogReplacementType.PlatformMembershipType,
             })],
             ['m', AuditLogReplacement.create({

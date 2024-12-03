@@ -3,7 +3,7 @@ import { AuditLog } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context';
 import { AuditLogService } from '../services/AuditLogService';
-import { createUnknownChangeHandler } from '../services/explainPatch';
+import { diffUnknown } from '../services/diff';
 
 export type ModelEventLogOptions<D> = {
     type: AuditLogType;
@@ -150,9 +150,10 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                             // Ignore relations
                             continue;
                         }
-                        log.patchList.push(...createUnknownChangeHandler(key)(
+                        log.patchList.push(...diffUnknown(
                             key in oldModel ? oldModel[key] : undefined,
                             key in event.model ? event.model[key] : undefined,
+                            AuditLogReplacement.key(key),
                         ));
                     }
 

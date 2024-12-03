@@ -51,7 +51,7 @@ function getRenderText(item: AuditLogPatchItem): any[] {
         text.push(' volgorde gewijzigd');
     }
 
-    if ((item.oldValue && item.oldValue.toString()) || (item.value && item.value.toString())) {
+    if ((item.oldValue && (item.oldValue.toString() || item.oldValue.type)) || (item.value && (item.value.toString() || item.value.type))) {
         text.push(': ');
 
         const hasOld = item.oldValue && (item.oldValue.type || item.oldValue.value);

@@ -154,4 +154,7 @@ export default {
     'endDate': 'einddatum',
     'ibanName': 'naam op bankkaart',
     'organizationCount': 'aantal groepen',
+    'fieldAnswers': 'antwoorden',
+    'fieldAnswer': 'antwoord',
+    'updatesEnabled': 'automatisch wijzigen',
 };

@@ -24,6 +24,13 @@ export class DataValidator {
         return this.UITPAS_NUMBER_REGEX.test(str);
     }
 
+    static isUuid(value: unknown) {
+        if (typeof value !== 'string') {
+            return false;
+        }
+        return value.length === 36 && value[8] === '-' && value[13] === '-' && value[18] === '-' && value[23] === '-';
+    }
+
     static isUitpasNumberKansenTarief(str: string) {
         const isValid = this.isUitpasNumberValid(str);
         if (!isValid) {

@@ -30,7 +30,7 @@ export class PayconiqAccount extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     callbackUrl: string | null = null;
 
-    getPatchName() {
+    getDiffName() {
         if (this.name && this.iban) {
             return `${this.name} (${this.iban})`;
         }
@@ -46,7 +46,7 @@ export class PayconiqAccount extends AutoEncoder {
         return `Payconiq Account (${this.merchantId ?? this.id})`;
     }
 
-    getPatchValue() {
+    getDiffValue() {
         // Don't list properties
         return '';
     }

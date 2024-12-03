@@ -137,7 +137,7 @@ export class GroupCategory extends AutoEncoder {
         return false;
     }
 
-    getPatchName() {
+    getDiffName() {
         return this.settings.name;
     }
 }

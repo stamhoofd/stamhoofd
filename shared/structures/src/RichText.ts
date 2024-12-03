@@ -10,4 +10,8 @@ export class RichText extends AutoEncoder {
     toString() {
         return this.text;
     }
+
+    getDiffValue() {
+        return this.text;
+    }
 }

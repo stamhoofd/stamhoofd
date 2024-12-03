@@ -64,7 +64,7 @@ export class PermissionRoleDetailed extends PermissionRole {
     @field({ decoder: BooleanDecoder, field: 'createWebshops', optional: true })
     legacyCreateWebshops = false;
 
-    getPatchValue() {
+    getDiffValue() {
         return this.getDescription();
     }
 

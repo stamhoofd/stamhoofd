@@ -129,11 +129,15 @@ export class RecordAnswer extends AutoEncoder {
         });
     }
 
-    getPatchName() {
+    getDiffName() {
         return this.settings.name;
     }
 
-    getPatchValue() {
+    getDiffValue(): unknown {
+        return this.stringValue;
+    }
+
+    transformForDiff(): unknown {
         return this.stringValue;
     }
 }
@@ -515,5 +519,9 @@ export class RecordImageAnswer extends RecordAnswer {
 
     get isEmpty() {
         return this.image === null;
+    }
+
+    transformForDiff() {
+        return this.image;
     }
 }
