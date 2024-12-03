@@ -1,7 +1,8 @@
 import { useFocused } from '@simonbackx/vue-app-navigation';
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, unref } from 'vue';
+import { KeyMatcher } from './useKeyDown';
 
-export function useKeyUpDown(actions: { up: () => unknown | Promise<void>; down: () => unknown | Promise<void> }) {
+export function useKeyUp(keyHandler: KeyMatcher) {
     const isFocused = useFocused();
     const onKey = (event: KeyboardEvent) => {
         if (event.defaultPrevented || event.repeat) {
@@ -12,25 +13,25 @@ export function useKeyUpDown(actions: { up: () => unknown | Promise<void>; down:
             return;
         }
 
-        const key = event.key || event.keyCode;
+        const key = event.key;
 
-        if (key === 'ArrowLeft' || key === 'ArrowUp' || key === 'PageUp') {
+        if (keyHandler(key, {
+            shift: event.shiftKey,
+            ctrl: event.ctrlKey,
+            alt: event.altKey,
+            meta: event.metaKey,
+        }) === true) {
             event.preventDefault();
-            void actions.up();
-        }
-        else if (key === 'ArrowRight' || key === 'ArrowDown' || key === 'PageDown') {
-            event.preventDefault();
-            void actions.down();
         }
     };
 
     const remove = () => {
-        document.removeEventListener('keydown', onKey);
+        document.removeEventListener('keyup', onKey);
     };
 
     const add = () => {
         remove();
-        document.addEventListener('keydown', onKey);
+        document.addEventListener('keyup', onKey);
     };
 
     onActivated(() => {

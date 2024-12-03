@@ -192,7 +192,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useContext, useArrowUpDown, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
@@ -214,7 +214,7 @@ const pop = usePop();
 const platform = usePlatform();
 const present = usePresent();
 
-useKeyUpDown({
+useArrowUpDown({
     up: goBack,
     down: goNext,
 });

@@ -1,12 +1,12 @@
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import { computed, getCurrentInstance, Ref } from 'vue';
-import { useKeyUpDown } from './useKeyUpDown';
+import { useArrowUpDown } from './useArrowUpDown';
 
 export function useBackForward<T, Name extends string, Props>(name: Name, props: Props & {
     getPrevious: ((current: T) => T | null) | null;
     getNext: ((current: T) => T | null) | null;
 } & Record<Name, T>, otherProps?: Ref<Partial<Props>>) {
-    useKeyUpDown({
+    useArrowUpDown({
         up: goBack,
         down: goForward,
     });

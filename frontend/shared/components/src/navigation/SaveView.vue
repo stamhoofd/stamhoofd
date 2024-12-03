@@ -42,7 +42,7 @@
                             <span v-if="saveIcon" class="icon " :class="saveIcon" />
                             <span>{{ saveText }}</span>
                             <span v-if="saveIconRight" class="icon " :class="saveIconRight" />
-                            <span v-if="saveBadge" v-text="saveBadge" class="bubble" />
+                            <span v-if="saveBadge" class="bubble" v-text="saveBadge" />
                         </button>
                     </LoadingButton>
                 </template>
@@ -55,79 +55,134 @@
     </LoadingViewTransition>
 </template>
 
+<script lang="ts" setup>
+import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { computed, getCurrentInstance } from 'vue';
+import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
+import { ErrorBox } from '../errors/ErrorBox';
+import BackButton from './BackButton.vue';
+import LoadingButton from './LoadingButton.vue';
+import STButtonToolbar from './STButtonToolbar.vue';
+import STNavigationBar from './STNavigationBar.vue';
+import STToolbar from './STToolbar.vue';
+import { useKeyDown } from '../hooks';
 
-<script lang="ts">
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import BackButton from "./BackButton.vue";
-import LoadingButton from "./LoadingButton.vue";
-import STButtonToolbar from "./STButtonToolbar.vue";
-import STNavigationBar from "./STNavigationBar.vue";
-import STToolbar from "./STToolbar.vue";
-import LoadingViewTransition from "../containers/LoadingViewTransition.vue";
-import { ErrorBox } from "../errors/ErrorBox";
-
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        LoadingButton,
-        BackButton,
-        STButtonToolbar,
-        LoadingViewTransition
+withDefaults(
+    defineProps<{
+        loading?: boolean;
+        loadingView?: boolean;
+        errorBox?: ErrorBox | null;
+        deleting?: boolean;
+        disabled?: boolean;
+        title?: string;
+        saveText?: string;
+        saveIcon?: string | null;
+        saveButtonClass?: string | null;
+        saveIconRight?: string | null;
+        saveBadge?: string | null;
+        cancelText?: string | null;
+        preferLargeButton?: boolean;
+        addExtraCancel?: boolean;
+        mainClass?: string;
+    }>(), {
+        loading: false,
+        loadingView: false,
+        errorBox: null,
+        deleting: false,
+        disabled: false,
+        title: '',
+        saveText: 'Opslaan',
+        saveIcon: null,
+        saveButtonClass: 'primary',
+        saveIconRight: null,
+        saveBadge: null,
+        cancelText: 'Annuleren',
+        preferLargeButton: false,
+        addExtraCancel: false,
+        mainClass: '',
     },
-    emit: ["save", "delete"]
-})
-export default class SaveView extends Mixins(NavigationMixin) {
-    @Prop({ default: false })
-        loading!: boolean;
+);
 
-    @Prop({ default: false })
-        loadingView!: boolean;
+const canDelete = computed(() => {
+    // Check has delete listener
+    return !!getCurrentInstance()?.vnode.props?.onDelete;
+});
 
-    @Prop({ default: null })
-        errorBox!: ErrorBox|null;
+const canDismiss = useCanDismiss();
+const canPop = useCanPop();
+const dismiss = useDismiss();
+const pop = usePop();
+const emit = defineEmits(['save', 'delete']);
 
-    @Prop({ default: false })
-        deleting!: boolean;
-
-    @Prop({ default: false })
-        disabled!: boolean;
-
-    @Prop({ default: "" })
-        title!: string;
-
-    @Prop({ default: "Opslaan" })
-        saveText!: string;
-
-    @Prop({ default: null })
-        saveIcon!: string | null;
-
-    @Prop({ default: "primary" })
-        saveButtonClass!: string | null;
-
-    @Prop({ default: null })
-        saveIconRight!: string | null;
-
-    @Prop({ default: null })
-        saveBadge!: string | null;
-
-    @Prop({ default: "Annuleren" })
-        cancelText!: string | null;
-
-    @Prop({ default: false })
-        preferLargeButton!: boolean; // Always use large buttons at the bottom on mobile
-
-    @Prop({ default: false })
-        addExtraCancel!: boolean; // Add a large cancel button at the bottom
-
-    @Prop({ default: '' })
-        mainClass!: string;
-
-    get canDelete() {
-        // Check has delete listener
-        return !!this.$attrs && !!this.$attrs.onDelete
+// CMD + S = Save
+useKeyDown((key, modifiers) => {
+    if (key === 's' && (modifiers.ctrl || modifiers.meta)) {
+        void emit('save');
+        return true;
     }
-}
+    return false;
+});
+
+// @Component({
+//    components: {
+//        STNavigationBar,
+//        STToolbar,
+//        LoadingButton,
+//        BackButton,
+//        STButtonToolbar,
+//        LoadingViewTransition
+//    },
+//    emit: ["save", "delete"]
+// })
+// export default class SaveView extends Mixins(NavigationMixin) {
+//    @Prop({ default: false })
+//        loading!: boolean;
+//
+//    @Prop({ default: false })
+//        loadingView!: boolean;
+//
+//    @Prop({ default: null })
+//        errorBox!: ErrorBox|null;
+//
+//    @Prop({ default: false })
+//        deleting!: boolean;
+//
+//    @Prop({ default: false })
+//        disabled!: boolean;
+//
+//    @Prop({ default: "" })
+//        title!: string;
+//
+//    @Prop({ default: "Opslaan" })
+//        saveText!: string;
+//
+//    @Prop({ default: null })
+//        saveIcon!: string | null;
+//
+//    @Prop({ default: "primary" })
+//        saveButtonClass!: string | null;
+//
+//    @Prop({ default: null })
+//        saveIconRight!: string | null;
+//
+//    @Prop({ default: null })
+//        saveBadge!: string | null;
+//
+//    @Prop({ default: "Annuleren" })
+//        cancelText!: string | null;
+//
+//    @Prop({ default: false })
+//        preferLargeButton!: boolean; // Always use large buttons at the bottom on mobile
+//
+//    @Prop({ default: false })
+//        addExtraCancel!: boolean; // Add a large cancel button at the bottom
+//
+//    @Prop({ default: '' })
+//        mainClass!: string;
+//
+//    get canDelete() {
+//        // Check has delete listener
+//        return !!this.$attrs && !!this.$attrs.onDelete
+//    }
+// }
 </script>

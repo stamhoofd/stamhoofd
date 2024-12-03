@@ -318,7 +318,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { AsyncPaymentView, CartItemRow, EditPaymentView, GlobalEventBus, PriceBreakdownBox, STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, Toast, useAuth, useContext, useKeyUpDown, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { AsyncPaymentView, CartItemRow, EditPaymentView, GlobalEventBus, PriceBreakdownBox, STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, Toast, useAuth, useContext, useArrowUpDown, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { AccessRight, BalanceItemWithPrivatePayments, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import OrderView from './OrderView.vue';
 import { Formatter } from '@stamhoofd/utility';
@@ -345,7 +345,7 @@ const context = useContext();
 const organizationManager = useOrganizationManager();
 const show = useShow();
 
-useKeyUpDown({
+useArrowUpDown({
     down: () => goNext(),
     up: () => goBack(),
 });
