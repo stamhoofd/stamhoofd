@@ -324,7 +324,7 @@ function getResponsibilityFilter(responsibility: MemberResponsibility) {
                 group: {
                     id: props.group.id,
                 },
-                endDate: null
+                endDate: null,
             },
         },
     };
@@ -383,7 +383,7 @@ async function editGeneral(animated = true) {
                     await organizationManager.value.forceUpdate();
                     return new ComponentWithProperties(EditGroupView, {
                         group: props.group,
-                        iswNew: false,
+                        isNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
                             const periodPatch = OrganizationRegistrationPeriod.patch({
                                 id: props.period.id,

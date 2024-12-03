@@ -52,7 +52,7 @@ export class Group extends AutoEncoder {
     @field({ decoder: Group, nullable: true, version: 292 })
     waitingList: Group | null = null;
 
-    @field({ decoder: new ArrayDecoder(StockReservation), nullable: true, version: 298 })
+    @field({ decoder: new ArrayDecoder(StockReservation), version: 298 })
     stockReservations: StockReservation[] = [];
 
     /**

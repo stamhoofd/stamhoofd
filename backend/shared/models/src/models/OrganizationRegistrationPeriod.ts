@@ -64,7 +64,7 @@ export class OrganizationRegistrationPeriod extends Model {
         });
     }
 
-    async cleanCategories(groups: { id: string }[]) {
+    async cleanCategories(groups: { id: string }[], options?: { disableSave?: boolean }) {
         const reachable = new Map<string, boolean>();
         const queue = [this.settings.rootCategoryId];
         reachable.set(this.settings.rootCategoryId, true);
@@ -81,6 +81,15 @@ export class OrganizationRegistrationPeriod extends Model {
             const category = this.settings.categories.find(c => c.id === id);
             if (!category) {
                 continue;
+            }
+
+            // Filter own categoryIds on existing categories
+            const before = category.categoryIds.length;
+            category.categoryIds = Formatter.uniqueArray(category.categoryIds.filter(childId => !!this.settings.categories.find(c => c.id === childId)));
+
+            if (before !== category.categoryIds.length) {
+                shouldSave = true;
+                console.log('Deleted ' + (before - category.categoryIds.length) + ' category ids from category ' + category.id + ', in organization period ' + this.id);
             }
 
             for (const i of category.categoryIds) {
@@ -113,13 +122,15 @@ export class OrganizationRegistrationPeriod extends Model {
         const beforeCount = this.settings.categories.length;
         this.settings.categories = this.settings.categories.filter(c => reachableCategoryIds.includes(c.id));
 
-        if (this.settings.categories.length !== beforeCount) {
-            console.log('Deleted ' + (beforeCount - this.settings.categories.length) + ' categories from organizaton period ' + this.id);
-            await this.save();
-        }
-        else {
-            if (shouldSave) {
+        if (!options?.disableSave) {
+            if (this.settings.categories.length !== beforeCount) {
+                console.log('Deleted ' + (beforeCount - this.settings.categories.length) + ' categories from organizaton period ' + this.id);
                 await this.save();
+            }
+            else {
+                if (shouldSave) {
+                    await this.save();
+                }
             }
         }
     }

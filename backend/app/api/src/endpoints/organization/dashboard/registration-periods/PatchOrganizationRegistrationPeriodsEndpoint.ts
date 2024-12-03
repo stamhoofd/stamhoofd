@@ -80,6 +80,20 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
             let deleteUnreachable = false;
             const allowedIds: string[] = [];
+            let wasInvalid = false;
+
+            // Check if have an initial invalid state
+            if (patch.settings) {
+                // Already clean up the categories (not yet delete the groups)
+                const groups = await Group.getAll(organization.id, organizationPeriod.periodId);
+                await organizationPeriod.cleanCategories(groups);
+
+                for (const category of organizationPeriod.settings.categories) {
+                    if (category.groupIds.length && category.categoryIds.length) {
+                        wasInvalid = true;
+                    }
+                }
+            }
 
             // #region prevent patch category lock if no full platform access
             const originalCategories = organizationPeriod.settings.categories;
@@ -89,7 +103,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     if (patch.settings.categories) {
                         deleteUnreachable = true;
                     }
-                    organizationPeriod.settings.patchOrPut(patch.settings);
+                    organizationPeriod.settings = organizationPeriod.settings.patch(patch.settings);
                 }
             }
             else {
@@ -122,7 +136,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
 
             // Check if we have a category with groups and categories combined
-            if (patch.settings) {
+            if (patch.settings && !wasInvalid) {
                 for (const category of organizationPeriod.settings.categories) {
                     if (category.groupIds.length && category.categoryIds.length) {
                         throw new SimpleError({
