@@ -42,6 +42,9 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, version: 250 })
     organizationId: string;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    payingOrganizationId: string | null = null;
+
     @field({ decoder: StringDecoder, version: 300 })
     memberId = '';
 

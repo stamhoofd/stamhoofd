@@ -209,6 +209,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             });
         }
 
+        // Who is going to pay?
+        let whoWillPayNow: 'member' | 'organization' | 'nobody' = 'member'; // if this is set to 'organization', there will also be created separate balance items so the member can pay back the paying organization
+
+        if (request.body.asOrganizationId && request.body.asOrganizationId === organization.id) {
+            // Will get added to the outstanding amount of the member / already paying organization
+            whoWillPayNow = 'nobody';
+        }
+        else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
+            // The organization will pay to the organizing organization, and it will get added to the outstanding amount of the member towards the paying organization
+            whoWillPayNow = 'organization';
+        }
+
         const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
         registrationMemberRelation.foreignKey = 'memberId';
 
@@ -264,24 +276,25 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.options = item.options;
             registration.recordAnswers = item.recordAnswers;
 
+            if (whoWillPayNow === 'organization' && request.body.asOrganizationId) {
+                registration.payingOrganizationId = request.body.asOrganizationId;
+            }
+
+            if (whoWillPayNow === 'nobody' && item.replaceRegistrations.length > 0) {
+                // If the replace registration was paid by an organization
+                // Make sure this updated registration will also be paid by the organization, not the member
+                const paidAsOrganization = item.replaceRegistrations[0].payingOrganizationId;
+                if (paidAsOrganization) {
+                    registration.payingOrganizationId = paidAsOrganization;
+                }
+            }
+
             payRegistrations.push({
                 registration,
                 item,
             });
 
             registrations.push(registration);
-        }
-
-        // Who is going to pay?
-        let whoWillPayNow: 'member' | 'organization' | 'nobody' = 'member'; // if this is set to 'organization', there will also be created separate balance items so the member can pay back the paying organization
-
-        if (request.body.asOrganizationId && request.body.asOrganizationId === organization.id) {
-            // Will get added to the outstanding amount of the member
-            whoWillPayNow = 'nobody';
-        }
-        else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
-            // The organization will pay to the organizing organization, and it will get added to the outstanding amount of the member towards the paying organization
-            whoWillPayNow = 'organization';
         }
 
         // Validate payment method
@@ -369,8 +382,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             deactivatedRegistrationGroupIds.push(existingRegistration.groupId);
         }
 
-        async function createBalanceItem({ registration, amount, unitPrice, description, type, relations }: { amount?: number; registration: RegistrationWithMemberAndGroup; unitPrice: number; description: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
+        async function createBalanceItem({ registration, skipZero, amount, unitPrice, description, type, relations }: { amount?: number; skipZero?: boolean; registration: RegistrationWithMemberAndGroup; unitPrice: number; description: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
             // NOTE: We also need to save zero-price balance items because for online payments, we need to know which registrations to activate after payment
+            if (skipZero === true) {
+                if (unitPrice === 0 || amount === 0) {
+                    return;
+                }
+            }
 
             // Create balance item
             const balanceItem = new BalanceItem();
@@ -386,11 +404,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Who is responsible for payment?
             let balanceItem2: BalanceItem | null = null;
-            if (whoWillPayNow === 'organization' && request.body.asOrganizationId) {
+            if (registration.payingOrganizationId) {
                 // Create a separate balance item for this meber to pay back the paying organization
                 // this is not yet associated with a payment but will be added to the outstanding balance of the member
 
-                balanceItem.payingOrganizationId = request.body.asOrganizationId;
+                balanceItem.payingOrganizationId = registration.payingOrganizationId;
 
                 balanceItem2 = new BalanceItem();
 
@@ -405,7 +423,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 balanceItem2.type = type;
 
                 // Who needs to receive this money?
-                balanceItem2.organizationId = request.body.asOrganizationId;
+                balanceItem2.organizationId = registration.payingOrganizationId;
 
                 // Who is responsible for payment?
                 balanceItem2.memberId = registration.memberId;
@@ -437,25 +455,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const { item, registration } = bundle;
             registration.reservedUntil = null;
 
-            /* if (shouldMarkValid) {
-                await registration.markValid({ skipEmail: bundle.item.replaceRegistrations.length > 0 });
-            }
-            else { */
             // Reserve registration for 30 minutes (if needed)
             const group = groups.find(g => g.id === registration.groupId);
 
             if (group && group.settings.maxMembers !== null) {
                 registration.reservedUntil = new Date(new Date().getTime() + 1000 * 60 * 30);
             }
+
+            // Only now save the registration
             await registration.save();
-            // }
 
             // Note: we should always create the balance items: even when the price is zero
             // Otherwise we don't know which registrations to activate after payment
-
-            if (shouldMarkValid && item.calculatedPrice === 0) {
-                // continue;
-            }
 
             // Create balance items
             const sharedRelations: [BalanceItemRelationType, BalanceItemRelation][] = [
@@ -490,6 +501,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 registration,
                 unitPrice: item.groupPrice.price.forMember(item.member),
                 type: BalanceItemType.Registration,
+                skipZero: false, // Always create at least one balance item for each registration - even when the price is zero
                 description: `${item.member.patchedMember.name} bij ${item.group.settings.name}`,
                 relations: new Map([
                     ...sharedRelations,
@@ -502,6 +514,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     registration,
                     amount: option.amount,
                     unitPrice: option.option.price.forMember(item.member),
+                    skipZero: true, // Do not create for zero option prices
                     type: BalanceItemType.Registration,
                     description: `${option.optionMenu.name}: ${option.option.name}`,
                     relations: new Map([

@@ -23,6 +23,9 @@ export class Registration extends Model {
     @column({ type: 'string' })
     organizationId: string;
 
+    @column({ type: 'string', nullable: true })
+    payingOrganizationId: string | null = null;
+
     @column({ type: 'string' })
     periodId: string;
 

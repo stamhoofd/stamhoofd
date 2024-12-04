@@ -24,6 +24,10 @@
             Uitgenodigd om in te schrijven
         </p>
 
+        <p v-if="registration.payingOrganizationId" class="style-description-small">
+            Via groepsinschrijving
+        </p>
+
         <template v-if="isEditable" #right>
             <span class="icon arrow-down-small gray" />
         </template>
@@ -39,32 +43,32 @@ import GroupIconWithWaitingList from '../group/GroupIconWithWaitingList.vue';
 
 const props = defineProps<{
     registration: Registration;
-    member: PlatformMember
+    member: PlatformMember;
 }>();
-const emit = defineEmits(["edit"]);
+const emit = defineEmits(['edit']);
 
 const instance = getCurrentInstance();
 const organization = useOrganization();
-const platform = usePlatform()
-const app = useAppContext()
+const platform = usePlatform();
+const app = useAppContext();
 const isEditable = computed(() => {
-    return !!instance?.vnode.props?.onEdit
-})
+    return !!instance?.vnode.props?.onEdit;
+});
 const group = computed(() => {
-    return props.registration.group
-})
+    return props.registration.group;
+});
 const registrationOrganization = computed(() => {
-    return props.member.organizations.find(o => o.id === group.value.organizationId)
-})
+    return props.member.organizations.find(o => o.id === group.value.organizationId);
+});
 
 const defaultAgeGroup = computed(() => {
     if (!group.value.defaultAgeGroupId) {
         return 'Geen standaard leeftijdsgroep';
     }
-    return platform.value.config.defaultAgeGroups.find(ag => ag.id === group.value.defaultAgeGroupId)?.name
-})
+    return platform.value.config.defaultAgeGroups.find(ag => ag.id === group.value.defaultAgeGroupId)?.name;
+});
 
 function editRegistration(event: any) {
-    emit("edit", event)
+    emit('edit', event);
 }
 </script>
