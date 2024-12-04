@@ -1,11 +1,12 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, SetupStepUpdater } from '@stamhoofd/models';
+import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
 import { AuthenticatedStructures } from './AuthenticatedStructures';
 import { MemberUserSyncer } from './MemberUserSyncer';
 import { AuditLogService } from '../services/AuditLogService';
+import { SetupStepUpdater } from './SetupStepUpdater';
 
 export class PeriodHelper {
     static async moveOrganizationToPeriod(organization: Organization, period: RegistrationPeriod) {

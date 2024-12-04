@@ -73,11 +73,6 @@ export class AuditLogService {
                 return;
             }
 
-            console.log('Model event', {
-                ...event,
-                model: event.model.static.name,
-            });
-
             if (this.isDisabled()) {
                 console.log('Audit log disabled');
                 return;

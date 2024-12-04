@@ -1,4 +1,4 @@
-import { SetupStepUpdater } from '@stamhoofd/models';
+import { SetupStepUpdater } from '../helpers/SetupStepUpdater.js';
 
 export async function updateSetupSteps() {
     if (STAMHOOFD.userMode !== 'platform') {

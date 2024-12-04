@@ -6,8 +6,7 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { SetupStepUpdater } from '../helpers/SetupStepsUpdater';
-import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Platform, Registration, User } from './';
+import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
 
 if (Member === undefined) {
     throw new Error('Import Member is undefined');
@@ -221,54 +220,16 @@ export class Group extends Model {
         return null;
     }
 
-    async updateOccupancy(options?: { isNew?: boolean; previousProperties?: { defaultAgeGroupId: string | null; deletedAt: Date | null } }) {
-        const registeredMembersBefore = this.settings.registeredMembers ?? 0;
-
-        const registeredMembersAfter = await Group.getCount(
+    async updateOccupancy() {
+        this.settings.registeredMembers = await Group.getCount(
             'groupId = ? and registeredAt is not null AND deactivatedAt is null',
             [this.id],
         );
-
-        this.settings.registeredMembers = registeredMembersAfter;
 
         this.settings.reservedMembers = await Group.getCount(
             'groupId = ? and registeredAt is null AND (canRegister = 1 OR reservedUntil >= ?)',
             [this.id, new Date()],
         );
-
-        let updateSteps = false;
-
-        const currentDefaultAgeGroupId = this.defaultAgeGroupId;
-        const oldDefaultAgeGroupId = (options?.previousProperties?.defaultAgeGroupId ?? this.defaultAgeGroupId);
-
-        const platform = await Platform.getSharedStruct();
-
-        const currentDefaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === currentDefaultAgeGroupId);
-        const oldDefaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === oldDefaultAgeGroupId);
-
-        const includedInMiniumSteps = !!currentDefaultAgeGroup && currentDefaultAgeGroup.minimumRequiredMembers > 0 && !this.deletedAt;
-        const wasIncludedInMinimumSteps = options?.isNew ? false : (!!oldDefaultAgeGroup && oldDefaultAgeGroup.minimumRequiredMembers > 0 && !(options?.previousProperties?.deletedAt ?? this.deletedAt));
-
-        if (includedInMiniumSteps !== wasIncludedInMinimumSteps) {
-            // Total steps have changed
-            updateSteps = true;
-        }
-        else {
-            // Check if members have changed beyond threshold
-            const membersBefore = (wasIncludedInMinimumSteps ? registeredMembersBefore : 0);
-            const memberAfter = (includedInMiniumSteps ? (registeredMembersAfter ?? 0) : 0);
-
-            if (membersBefore !== memberAfter) {
-                if (currentDefaultAgeGroup?.minimumRequiredMembers && (membersBefore < currentDefaultAgeGroup.minimumRequiredMembers || memberAfter < currentDefaultAgeGroup.minimumRequiredMembers)) {
-                    updateSteps = true;
-                }
-            }
-        }
-
-        if (updateSteps) {
-            SetupStepUpdater.updateForOrganizationId(this.organizationId)
-                .catch(console.error);
-        }
     }
 
     static async deleteUnreachable(organizationId: string, period: OrganizationRegistrationPeriod, allGroups: Group[]) {

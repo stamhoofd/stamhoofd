@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, ObjectData, PatchableArrayAutoEncoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, SetupStepUpdater, StripeAccount, Webshop } from '@stamhoofd/models';
+import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
 import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PlatformConfig } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -10,6 +10,7 @@ import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
 import { Context } from '../../../../helpers/Context';
 import { TagHelper } from '../../../../helpers/TagHelper';
 import { ViesHelper } from '../../../../helpers/ViesHelper';
+import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
 
 type Params = Record<string, never>;
 type Query = undefined;

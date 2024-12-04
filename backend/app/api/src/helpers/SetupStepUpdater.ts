@@ -1,4 +1,13 @@
+import { Model } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
+import {
+    Group,
+    Member,
+    MemberResponsibilityRecord,
+    Organization,
+    OrganizationRegistrationPeriod,
+    Platform,
+} from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import {
@@ -9,18 +18,73 @@ import {
     SetupSteps,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import {
-    Group,
-    Member,
-    MemberResponsibilityRecord,
-    Organization,
-    OrganizationRegistrationPeriod,
-    Platform,
-} from '../models';
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
+/**
+ * Helper function to detect whether we should update the setup steps if a group is changed
+ */
+async function getGroupMemberCompletion(group: Group) {
+    const defaultAgeGroupId = group.defaultAgeGroupId;
+
+    if (!defaultAgeGroupId) {
+        // Not included = no step
+        return null;
+    }
+
+    if (group.deletedAt) {
+        // Not included = no step
+        return null;
+    }
+
+    const platform = await Platform.getSharedStruct();
+
+    if (group.periodId !== platform.period.id) {
+        // Not included = no step
+        return null;
+    }
+
+    const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId);
+
+    if (!defaultAgeGroup) {
+        // Not included = no step
+        return null;
+    }
+
+    const required = defaultAgeGroup.minimumRequiredMembers;
+    if (required === 0) {
+        // Not included = no step
+        return null;
+    }
+
+    return Math.min(required, group.settings.registeredMembers ?? 0);
+}
+
 export class SetupStepUpdater {
+    static isListening = false;
+
+    static listen() {
+        if (this.isListening) {
+            return;
+        }
+        this.isListening = true;
+        Model.modelEventBus.addListener({}, async (event) => {
+            if (!(event.model instanceof Group)) {
+                return;
+            }
+
+            const before = (event.type === 'updated' ? await getGroupMemberCompletion(event.getOldModel() as Group) : (event.type === 'deleted' ? await getGroupMemberCompletion(event.model) : null));
+            const after = (event.type === 'updated' ? await getGroupMemberCompletion(event.model) : (event.type === 'created' ? await getGroupMemberCompletion(event.model) : null));
+
+            if (before !== after) {
+                console.log('Updating setups steps for organization', event.model.organizationId, 'because of change in members in group', event.model.id, 'from', before, 'to', after, '(limited)');
+                // We need to do a recalculation
+                SetupStepUpdater.updateForOrganizationId(event.model.organizationId)
+                    .catch(console.error);
+            }
+        });
+    }
+
     private static readonly STEP_TYPE_OPERATIONS: Record<
         SetupStepType,
         SetupStepOperation
@@ -164,6 +228,7 @@ export class SetupStepUpdater {
         platform: PlatformStruct,
         organization: Organization,
     ) {
+        console.log('Updating setup steps for organization', organization.id);
         const setupSteps = organizationRegistrationPeriod.setupSteps;
 
         for (const stepType of Object.values(SetupStepType)) {
@@ -387,7 +452,7 @@ export class SetupStepUpdater {
         const groupsWithDefaultAgeGroups = defaultAgeGroupIds.length > 0
             ? await Group.select()
                 .where('organizationId', organization.id)
-                .where('periodId', organization.periodId)
+                .where('periodId', platform.period.id)
                 .where('defaultAgeGroupId', defaultAgeGroupIds)
                 .where('deletedAt', null)
                 .fetch()
@@ -419,11 +484,10 @@ export class SetupStepUpdater {
 
         const finishedSteps = Array.from(processedDefaultAgeGroupIds.values()).reduce((a, b) => a + b, 0);
 
-        if (finishedSteps)
-            setupSteps.update(SetupStepType.Registrations, {
-                totalSteps,
-                finishedSteps,
-            });
+        setupSteps.update(SetupStepType.Registrations, {
+            totalSteps,
+            finishedSteps,
+        });
 
         if (finishedSteps >= totalSteps) {
             setupSteps.markReviewed(SetupStepType.Registrations, { userId: 'backend', userName: 'backend' });

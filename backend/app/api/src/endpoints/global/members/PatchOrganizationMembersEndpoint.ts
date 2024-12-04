@@ -2,8 +2,8 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, SetupStepUpdater, User } from '@stamhoofd/models';
-import { AuditLogType, GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
+import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
+import { GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -13,9 +13,9 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
-import { AuditLogService } from '../../../services/AuditLogService';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
 import { RegistrationService } from '../../../services/RegistrationService';
+import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 
 type Params = Record<string, never>;
 type Query = undefined;

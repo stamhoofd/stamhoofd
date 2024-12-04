@@ -3,9 +3,10 @@ import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegi
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, SetupStepUpdater } from '@stamhoofd/models';
+import { Group, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
+import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -303,11 +304,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             throw Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen');
         }
 
-        const previousProperties = {
-            deletedAt: model.deletedAt,
-            defaultAgeGroupId: model.defaultAgeGroupId,
-        };
-
         if (struct.settings) {
             struct.settings.period = undefined; // Not allowed to patch manually
             model.settings.patchOrPut(struct.settings);
@@ -422,9 +418,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
         }
 
-        await model.updateOccupancy({
-            previousProperties,
-        });
+        await model.updateOccupancy();
         await model.save();
     }
 
@@ -505,8 +499,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         await model.save();
-        await model.updateOccupancy({ isNew: true }); // Force update steps
-
         return model;
     }
 }

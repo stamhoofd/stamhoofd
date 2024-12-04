@@ -30,6 +30,13 @@ export class SetupStep extends AutoEncoder {
     @field({ decoder: NumberDecoder })
     totalSteps: number = 1;
 
+    transformForDiff() {
+        return {
+            reviewedAt: this.review?.date,
+            steps: this.finishedSteps + '/' + this.totalSteps,
+        };
+    }
+
     get isDone() {
         return this.finishedSteps >= this.totalSteps;
     }
@@ -93,11 +100,9 @@ export class SetupStep extends AutoEncoder {
             totalSteps = 1;
         }
 
-        if (this.updatedAt === null || (now.getTime() > this.updatedAt.getTime())) {
-            this.finishedSteps = finishedSteps;
-            this.totalSteps = totalSteps;
-            this.updatedAt = now;
-        }
+        this.finishedSteps = finishedSteps;
+        this.totalSteps = totalSteps;
+        this.updatedAt = now;
     }
 }
 
@@ -176,7 +181,12 @@ export class SetupSteps extends AutoEncoder {
             step.update(finishedSteps, totalSteps);
         }
         else {
-            this.steps.set(stepType, SetupStep.create({ finishedSteps, totalSteps }));
+            if (totalSteps === 0) {
+                this.steps.set(stepType, SetupStep.create({ finishedSteps: 1, totalSteps: 1 }));
+            }
+            else {
+                this.steps.set(stepType, SetupStep.create({ finishedSteps, totalSteps }));
+            }
         }
     }
 }

@@ -17,6 +17,7 @@ import { Platform } from '@stamhoofd/models';
 import { AuditLogService } from './src/services/AuditLogService';
 import { PlatformMembershipService } from './src/services/PlatformMembershipService';
 import { DocumentService } from './src/services/DocumentService';
+import { SetupStepUpdater } from './src/helpers/SetupStepUpdater';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -191,6 +192,7 @@ const start = async () => {
     AuditLogService.listen();
     PlatformMembershipService.listen();
     DocumentService.listen();
+    SetupStepUpdater.listen();
 };
 
 start().catch((error) => {
