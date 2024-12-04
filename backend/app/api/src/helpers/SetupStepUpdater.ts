@@ -11,6 +11,7 @@ import {
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import {
+    AuditLogSource,
     GroupType,
     MemberResponsibility,
     Platform as PlatformStruct,
@@ -18,6 +19,7 @@ import {
     SetupSteps,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { AuditLogService } from '../services/AuditLogService';
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
@@ -231,12 +233,14 @@ export class SetupStepUpdater {
         console.log('Updating setup steps for organization', organization.id);
         const setupSteps = organizationRegistrationPeriod.setupSteps;
 
-        for (const stepType of Object.values(SetupStepType)) {
-            const operation = this.STEP_TYPE_OPERATIONS[stepType];
-            await operation(setupSteps, organization, platform);
-        }
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+            for (const stepType of Object.values(SetupStepType)) {
+                const operation = this.STEP_TYPE_OPERATIONS[stepType];
+                await operation(setupSteps, organization, platform);
+            }
 
-        await organizationRegistrationPeriod.save();
+            await organizationRegistrationPeriod.save();
+        });
     }
 
     private static updateStepPremises(
