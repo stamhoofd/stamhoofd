@@ -475,6 +475,19 @@ export function diffObject(original: unknown | null, patch: unknown, rootKey?: A
     const items: AuditLogPatchItem[] = [];
 
     for (const key in patch) {
+        if (key === 'id') {
+            continue;
+        }
+
+        const oldValue = original?.[key] ?? null;
+        const value = patch[key];
+
+        if (!(patch instanceof AutoEncoder) && !(oldValue instanceof AutoEncoder)) {
+            // try manual without type information
+            items.push(...diffUnknown(oldValue, value, getDiffKey(key).prepend(rootKey)));
+            continue;
+        }
+
         const field = original instanceof AutoEncoder
             ? original.static.latestFields.find(f => f.property === key)
             : (
@@ -482,16 +495,9 @@ export function diffObject(original: unknown | null, patch: unknown, rootKey?: A
                         ? patch.static.latestFields.find(f => f.property === key)
                         : null
                 );
-        const oldValue = original?.[key] ?? null;
-        const value = patch[key];
 
-        if (!(patch instanceof AutoEncoder) || !field) {
-            // try manual without type information
-            items.push(...diffUnknown(oldValue, value, getDiffKey(key).prepend(rootKey)));
-            continue;
-        }
-
-        if (patch.isPut() && key === 'id') {
+        if (!field) {
+            // Ignore: probably an internal field
             continue;
         }
 
