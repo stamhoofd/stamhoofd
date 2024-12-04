@@ -342,6 +342,11 @@ export function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogRep
         return [];
     }
 
+    if ((oldValue === null || oldValue === undefined) && (value === null || value === undefined)) {
+        // Both removed
+        return [];
+    }
+
     if (Array.isArray(oldValue) && Array.isArray(value)) {
         return diffArray(oldValue, value, key);
     }
@@ -354,7 +359,7 @@ export function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogRep
         return diffDate(oldValue, value, key);
     }
 
-    if (!oldValue && oldValue !== 0 && getDiffValue(value, key)) {
+    if ((oldValue === null || oldValue === undefined) && (value !== null && value !== undefined)) {
         // Simplify addition
         return [
             AuditLogPatchItem.create({
@@ -365,7 +370,7 @@ export function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogRep
         ];
     }
 
-    if ((oldValue || oldValue === 0) && (value === null || value === undefined)) {
+    if ((oldValue !== null && oldValue !== undefined) && (value === null || value === undefined)) {
         return [
             AuditLogPatchItem.create({
                 key,
