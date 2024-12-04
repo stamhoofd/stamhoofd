@@ -51,7 +51,7 @@ import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-a
 import { ErrorBox, ExternalOrganizationContainer, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useErrors, useInfiniteObjectFetcher, usePositionableSheet, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '@stamhoofd/components';
 import { assertSort, Group, isEmptyFilter, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { computed, Ref, ref, watchEffect } from 'vue';
-import { useContext, useOrganization, usePlatform } from '../hooks';
+import { useAuth, useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
 
@@ -77,9 +77,10 @@ const { presentPositionableSheet } = usePositionableSheet();
 const navigate = useNavigationActions();
 const errors = useErrors();
 const saving = ref(false);
+const auth = useAuth();
 
 const { filterBuilders, loading } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
-const selectedUIFilter = ref(filterBuilders.value[0].fromFilter(props.group.getRecommendedFilter(contextOrganization.value?.id ?? null))) as Ref<null | UIFilter>;
+const selectedUIFilter = ref(filterBuilders.value[0].fromFilter(props.group.getRecommendedFilter(auth.hasSomePlatformAccess() ? (contextOrganization.value?.id ?? null) : null))) as Ref<null | UIFilter>;
 
 async function editFilter(event: MouseEvent) {
     if (!filterBuilders) {
