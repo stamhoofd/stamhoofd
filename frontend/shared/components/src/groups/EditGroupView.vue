@@ -1003,7 +1003,21 @@ async function addGroupPrice() {
             name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
             price: patched.value.settings.prices[0]?.price?.clone(),
         });
-        addPricePut(price);
+
+        await present({
+            components: [
+                new ComponentWithProperties(GroupPriceView, {
+                    price,
+                    group: patched,
+                    isNew: true,
+                    defaultMembershipTypeId,
+                    saveHandler: async (patch: AutoEncoderPatchType<GroupPrice>) => {
+                        addPricePut(price.patch(patch));
+                    },
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
     }
 }
 
