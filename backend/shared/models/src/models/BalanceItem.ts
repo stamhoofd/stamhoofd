@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
-import { Organization, Payment, Webshop } from './';
+import { Document, Organization, Payment, Webshop } from './';
 import { CachedBalance } from './CachedBalance';
 
 /**
@@ -128,6 +128,15 @@ export class BalanceItem extends Model {
     }
 
     static async deleteItems(items: BalanceItem[]) {
+        // Find depending items
+        const dependingItemIds = Formatter.uniqueArray(items.filter(i => !!i.dependingBalanceItemId).map(i => i.dependingBalanceItemId!)).filter(id => !items.some(item => item.id === id));
+
+        if (dependingItemIds.length) {
+            // Remove depending items too
+            const dependingItems = await BalanceItem.getByIDs(...dependingItemIds);
+            items = [...items, ...dependingItems];
+        }
+
         const { balanceItemPayments } = await BalanceItem.loadPayments(items);
 
         // todo: in the future we could automatically delete payments that are not needed anymore and weren't paid yet -> to prevent leaving ghost payments
@@ -140,7 +149,7 @@ export class BalanceItem extends Model {
 
             // Don't change status of items that are already paid or are partially paid
             // Not using item.paidPrice, since this is cached
-            const bip = balanceItemPayments.filter(p => p.balanceItemId == item.id);
+            const bip = balanceItemPayments.filter(p => p.balanceItemId === item.id);
 
             if (bip.length === 0) {
                 // No payments associated with this item
@@ -208,6 +217,10 @@ export class BalanceItem extends Model {
         };
     }
 
+    /**
+     * Update how many every object in the system owes or needs to be reimbursed
+     * and also updates the pricePaid/pricePending cached values in Balance items and members
+     */
     static async updateOutstanding(items: BalanceItem[]) {
         console.log('Update outstanding balance for', items.length, 'items');
 
@@ -236,9 +249,14 @@ export class BalanceItem extends Model {
             const organizationIds = Formatter.uniqueArray(filteredItems.map(p => p.payingOrganizationId).filter(id => id !== null));
             await CachedBalance.updateForOrganizations(organizationId, organizationIds);
 
-            // Deprecated: we'll need to move the outstanding balance of registrations to CachedBalance
             const registrationIds: string[] = Formatter.uniqueArray(filteredItems.map(p => p.registrationId).filter(id => id !== null));
+
+            // Deprecated: we'll need to move the outstanding balance of registrations to CachedBalance
             await Registration.updateOutstandingBalance(registrationIds, organizationId);
+
+            if (registrationIds.length) {
+                await Document.updateForRegistrations(registrationIds, organizationId);
+            }
         }
     }
 
