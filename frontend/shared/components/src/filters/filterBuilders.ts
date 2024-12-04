@@ -110,53 +110,66 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
         filterBuilders: computed(() => {
             const platform = $platform.value;
             const user = $user.value;
+            const hasPlatformPermissions = (user?.permissions?.platform !== null);
 
             const all = [];
+            all.push(
+                new StringFilterBuilder({
+                    name: $t('GroepsID'),
+                    key: 'organizationId',
+                    allowCreation: false,
+                    wrapper: UIFilterWrapperMarker,
+                }),
+            );
 
-            if (user?.permissions?.platform !== null) {
-                all.push(
-                    new MultipleChoiceFilterBuilder({
-                        name: $t('322dd34f-a4ec-4065-be53-040725915e20'),
-                        options: (platform.periods ?? []).map((period) => {
-                            return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
-                        }),
-                        wrapper: {
-                            periodId: { $in: UIFilterWrapperMarker },
-                        },
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('322dd34f-a4ec-4065-be53-040725915e20'),
+                    options: (platform.periods ?? []).map((period) => {
+                        return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
                     }),
-                );
+                    allowCreation: hasPlatformPermissions,
+                    wrapper: {
+                        periodId: { $in: UIFilterWrapperMarker },
+                    },
+                    additionalUnwrappers: [
+                        {
+                            periodId: UIFilterWrapperMarker,
+                        },
+                    ],
+                }),
+            );
 
-                if (user?.permissions?.platform !== null) {
-                    all.push(
-                        new StringFilterBuilder({
-                            name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
-                            key: 'uri',
-                            wrapper: {
-                                organization: UIFilterWrapperMarker,
-                            },
-                        }),
-                    );
+            all.push(
+                new StringFilterBuilder({
+                    name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
+                    key: 'uri',
+                    allowCreation: hasPlatformPermissions,
+                    wrapper: {
+                        organization: UIFilterWrapperMarker,
+                    },
+                }),
+            );
 
-                    all.push(
-                        new MultipleChoiceFilterBuilder({
-                            name: $t('ec2de613-f06f-4d9a-888a-40f98b6b3727'),
-                            multipleChoiceConfiguration: {
-                                isSubjectPlural: true,
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: $t('ec2de613-f06f-4d9a-888a-40f98b6b3727'),
+                    multipleChoiceConfiguration: {
+                        isSubjectPlural: true,
+                    },
+                    options: platform.config.tags.map((tag) => {
+                        return new MultipleChoiceUIFilterOption(tag.name, tag.id);
+                    }),
+                    allowCreation: hasPlatformPermissions,
+                    wrapper: {
+                        organization: {
+                            tags: {
+                                $in: UIFilterWrapperMarker,
                             },
-                            options: platform.config.tags.map((tag) => {
-                                return new MultipleChoiceUIFilterOption(tag.name, tag.id);
-                            }),
-                            wrapper: {
-                                organization: {
-                                    tags: {
-                                        $in: UIFilterWrapperMarker,
-                                    },
-                                },
-                            },
-                        }),
-                    );
-                }
-            }
+                        },
+                    },
+                }),
+            );
 
             all.push(
                 new MultipleChoiceFilterBuilder({

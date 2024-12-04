@@ -1,9 +1,9 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-import MultipleChoiceUIFilterView from "./MultipleChoiceUIFilterView.vue";
-import { StyledDescription, UIFilter, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
+import MultipleChoiceUIFilterView from './MultipleChoiceUIFilterView.vue';
+import { StyledDescription, UIFilter, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from './UIFilter';
 
 export class MultipleChoiceUIFilterOption {
     name: string;
@@ -17,12 +17,12 @@ export class MultipleChoiceUIFilterOption {
 
 export enum MultipleChoiceUIFilterMode {
     And = 'And',
-    Or = 'Or'
+    Or = 'Or',
 }
 
 export class MultipleChoiceUIFilter extends UIFilter {
-    builder: MultipleChoiceFilterBuilder
-    selectedOptions: MultipleChoiceUIFilterOption[] = []
+    builder: MultipleChoiceFilterBuilder;
+    selectedOptions: MultipleChoiceUIFilterOption[] = [];
     configuration: MultipleChoiceUiFilterConfiguration;
 
     constructor(data: Partial<UIFilter>, options: UiFilterOptions, multipleChoiceConfiguration: MultipleChoiceUiFilterConfiguration) {
@@ -32,7 +32,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
     }
 
     doBuild(): StamhoofdFilter {
-        return this.selectedOptions.map(o => o.value)
+        return this.selectedOptions.map(o => o.value);
     }
 
     flatten() {
@@ -40,23 +40,23 @@ export class MultipleChoiceUIFilter extends UIFilter {
             return null;
         }
 
-        return super.flatten()
+        return super.flatten();
     }
 
     getComponent(): ComponentWithProperties {
         return new ComponentWithProperties(MultipleChoiceUIFilterView, {
-            filter: this
-        })
+            filter: this,
+        });
     }
 
-    override get styledDescription(): StyledDescription  {
-        const {mode, isSubjectPlural} = this.configuration;
+    override get styledDescription(): StyledDescription {
+        const { mode, isSubjectPlural } = this.configuration;
         const lastJoinWord = mode === MultipleChoiceUIFilterMode.Or ? 'of' : 'en';
 
         return [
             {
                 text: this.builder.name,
-                style: ''
+                style: '',
             },
             {
                 text: '',
@@ -68,7 +68,7 @@ export class MultipleChoiceUIFilter extends UIFilter {
                         action: () => {
                             this.isInverted = false;
                         },
-                        isSelected: () => !this.isInverted
+                        isSelected: () => !this.isInverted,
                     },
                     {
                         id: 'is not',
@@ -76,94 +76,110 @@ export class MultipleChoiceUIFilter extends UIFilter {
                         action: () => {
                             this.isInverted = true;
                         },
-                        isSelected: () => this.isInverted
-                    }
-                ]
+                        isSelected: () => this.isInverted,
+                    },
+                ],
             },
             {
                 text: Formatter.joinLast(this.selectedOptions.map(o => o.name), ', ', ` ${lastJoinWord} `),
-                style: ''
-            }
-        ]
+                style: '',
+            },
+        ];
     }
 }
 
 export type MultipleChoiceUiFilterConfiguration = {
-    mode: MultipleChoiceUIFilterMode,
-    isSubjectPlural: boolean,
-    showOptionSelectAll: boolean
+    mode: MultipleChoiceUIFilterMode;
+    isSubjectPlural: boolean;
+    showOptionSelectAll: boolean;
 };
 
 export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoiceUIFilter> {
-    name = ""
+    name = '';
     wrapper?: WrapperFilter;
+    additionalUnwrappers?: WrapperFilter[];
     wrapFilter?: UIFilterWrapper | null | undefined;
     unwrapFilter?: UIFilterUnwrapper | null | undefined;
+    allowCreation?: boolean | undefined;
 
-    multipleChoiceOptions: MultipleChoiceUIFilterOption[] = []
+    multipleChoiceOptions: MultipleChoiceUIFilterOption[] = [];
     multipleChoiceConfiguration: MultipleChoiceUiFilterConfiguration = {
         mode: MultipleChoiceUIFilterMode.Or,
         isSubjectPlural: false,
-        showOptionSelectAll: false
-    }
+        showOptionSelectAll: false,
+    };
 
     constructor(data: {
-        name: string, 
-        options: MultipleChoiceUIFilterOption[], 
-        wrapper?: WrapperFilter,
-        wrapFilter?: UIFilterWrapper | null | undefined,
-        unwrapFilter?: UIFilterUnwrapper | null | undefined,
-        multipleChoiceConfiguration?: Partial<MultipleChoiceUiFilterConfiguration>
+        name: string;
+        options: MultipleChoiceUIFilterOption[];
+        wrapper?: WrapperFilter;
+        additionalUnwrappers?: WrapperFilter[];
+        wrapFilter?: UIFilterWrapper | null | undefined;
+        unwrapFilter?: UIFilterUnwrapper | null | undefined;
+        multipleChoiceConfiguration?: Partial<MultipleChoiceUiFilterConfiguration>;
+        allowCreation?: boolean;
     }) {
         this.name = data.name;
         this.multipleChoiceOptions = data.options;
         this.wrapper = data.wrapper;
-        this.wrapFilter = data.wrapFilter
-        this.unwrapFilter = data.unwrapFilter
+        this.wrapFilter = data.wrapFilter;
+        this.unwrapFilter = data.unwrapFilter;
+        this.additionalUnwrappers = data.additionalUnwrappers;
+        this.allowCreation = data.allowCreation;
 
         const multipleChoiceConfiguration = data.multipleChoiceConfiguration;
-        if(multipleChoiceConfiguration) {
-            const {mode, isSubjectPlural, showOptionSelectAll} = multipleChoiceConfiguration;
+        if (multipleChoiceConfiguration) {
+            const { mode, isSubjectPlural, showOptionSelectAll } = multipleChoiceConfiguration;
 
-            if(mode !== undefined) {
+            if (mode !== undefined) {
                 this.multipleChoiceConfiguration.mode = mode;
             }
-            if(isSubjectPlural !== undefined) {
+            if (isSubjectPlural !== undefined) {
                 this.multipleChoiceConfiguration.isSubjectPlural = isSubjectPlural;
             }
-            if(showOptionSelectAll !== undefined) {
+            if (showOptionSelectAll !== undefined) {
                 this.multipleChoiceConfiguration.showOptionSelectAll = showOptionSelectAll;
             }
         }
     }
-    
+
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const match = unwrapFilterForBuilder(this, filter)
+        const match = unwrapFilterForBuilder(this, filter);
         if (!match.match || match.markerValue === undefined) {
             return null;
         }
-        const response = match.markerValue
-        
+        const response = match.markerValue;
+
         if (Array.isArray(response)) {
             // Check if all the options are valid
             const options = this.multipleChoiceOptions.filter(o => response.includes(o.value));
-            
+
             if (options.length === response.length) {
                 const uiFilter = new MultipleChoiceUIFilter({
-                    builder: this
-                }, {isInverted: match.isInverted}, this.multipleChoiceConfiguration)
+                    builder: this,
+                }, { isInverted: match.isInverted }, this.multipleChoiceConfiguration);
                 uiFilter.selectedOptions = options;
 
                 return uiFilter;
             }
         }
 
+        const option = this.multipleChoiceOptions.find(o => o.value === response);
+        if (option) {
+            const uiFilter = new MultipleChoiceUIFilter({
+                builder: this,
+            }, { isInverted: match.isInverted }, this.multipleChoiceConfiguration);
+            uiFilter.selectedOptions = [option];
+
+            return uiFilter;
+        }
+
         return null;
     }
-    
-    create(options: {isInverted?: boolean} = {}): MultipleChoiceUIFilter {
+
+    create(options: { isInverted?: boolean } = {}): MultipleChoiceUIFilter {
         return new MultipleChoiceUIFilter({
-            builder: this
-        }, options, this.multipleChoiceConfiguration)
+            builder: this,
+        }, options, this.multipleChoiceConfiguration);
     }
 }

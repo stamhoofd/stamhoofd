@@ -246,7 +246,7 @@ export class Group extends AutoEncoder {
         return this.settings.squarePhoto ?? this.settings.coverPhoto;
     }
 
-    getRecommendedFilter(): StamhoofdFilter {
+    getRecommendedFilter(recommendOrganizationId?: string|null): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
 
         if (this.settings.minAge !== null) {
@@ -310,6 +310,9 @@ export class Group extends AutoEncoder {
                 filter.push({
                     platformMemberships: {
                         $elemMatch: {
+                            startDate: {
+                                $lte: requirePlatformMembershipOn,
+                            },
                             endDate: {
                                 $gt: requirePlatformMembershipOn,
                             },
@@ -319,7 +322,17 @@ export class Group extends AutoEncoder {
             }
         }
 
-        if (this.settings.requireOrganizationIds.length) {
+        if (recommendOrganizationId && (!this.settings.requireOrganizationIds.length || this.settings.requireOrganizationIds.includes(recommendOrganizationId))) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        periodId: this.periodId,
+                        organizationId: recommendOrganizationId,
+                    },
+                },
+            });
+        }
+        else if (this.settings.requireOrganizationIds.length) {
             filter.push({
                 registrations: {
                     $elemMatch: {

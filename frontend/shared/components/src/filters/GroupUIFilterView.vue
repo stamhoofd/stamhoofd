@@ -48,12 +48,17 @@ const show = useShow();
 const canPop = useCanPop();
 
 const filters = computed(() => props.filter.filters);
+
+function filterBuilders(builders: UIFilterBuilder[]) {
+    return builders.filter(b => b.allowCreation === undefined || b.allowCreation === true);
+}
+
 const builders = computed(() => {
     if (props.filter.builders.length > 1 && props.filter.builders[0] instanceof GroupUIFilterBuilder && !props.filter.builders[0].wrapper) {
         // Remove first
-        return props.filter.builders.slice(1);
+        return filterBuilders(props.filter.builders.slice(1));
     }
-    return props.filter.builders;
+    return filterBuilders(props.filter.builders);
 });
 
 async function addFilter(builder: UIFilterBuilder) {

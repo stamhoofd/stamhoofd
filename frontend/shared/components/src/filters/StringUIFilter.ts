@@ -1,25 +1,25 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { StamhoofdFilter } from "@stamhoofd/structures";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { StamhoofdFilter } from '@stamhoofd/structures';
 
-import StringUIFilterView from "./StringUIFilterView.vue";
-import { StyledDescriptionChoice, UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
+import StringUIFilterView from './StringUIFilterView.vue';
+import { StyledDescriptionChoice, UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, UIFilterWrapperMarker, unwrapFilter, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from './UIFilter';
 
 export enum StringFilterMode {
-    Contains = "Contains",
-    Equals = "Equals",
-    NotContains = "NotContains",
-    NotEquals = "NotEquals",
-    NotEmpty = "NotEmpty",
-    Empty = "Empty"
+    Contains = 'Contains',
+    Equals = 'Equals',
+    NotContains = 'NotContains',
+    NotEquals = 'NotEquals',
+    NotEmpty = 'NotEmpty',
+    Empty = 'Empty',
 }
 
 export class StringUIFilter extends UIFilter {
-    builder!: StringFilterBuilder
-    value = ""
-    mode: StringFilterMode = StringFilterMode.Equals
+    builder!: StringFilterBuilder;
+    value = '';
+    mode: StringFilterMode = StringFilterMode.Equals;
 
-    constructor(data: Partial<StringUIFilter>, options: {isInverted?: boolean} = {}) {
-        super(data, options)
+    constructor(data: Partial<StringUIFilter>, options: { isInverted?: boolean } = {}) {
+        super(data, options);
         Object.assign(this, data);
     }
 
@@ -27,45 +27,45 @@ export class StringUIFilter extends UIFilter {
         switch (this.mode) {
             case StringFilterMode.Contains: return {
                 [this.builder.key]: {
-                    "$contains": this.value
-                }
+                    $contains: this.value,
+                },
             };
 
             case StringFilterMode.NotContains: return {
                 $not: {
                     [this.builder.key]: {
-                        "$contains": this.value
-                    }
-                }
+                        $contains: this.value,
+                    },
+                },
             };
 
             case StringFilterMode.Equals: return {
                 [this.builder.key]: {
-                    "$eq": this.value
-                }
+                    $eq: this.value,
+                },
             };
 
             case StringFilterMode.NotEquals: return {
                 $not: {
                     [this.builder.key]: {
-                        "$eq": this.value
-                    }
-                }
+                        $eq: this.value,
+                    },
+                },
             };
 
             case StringFilterMode.Empty: return {
                 $or: [
                     {
                         [this.builder.key]: {
-                            "$eq": ''
-                        }
+                            $eq: '',
+                        },
                     },
                     {
                         [this.builder.key]: {
-                            "$eq": null
-                        }
-                    }
-                ]
+                            $eq: null,
+                        },
+                    },
+                ],
             };
 
             case StringFilterMode.NotEmpty: return {
@@ -73,35 +73,35 @@ export class StringUIFilter extends UIFilter {
                     $or: [
                         {
                             [this.builder.key]: {
-                                "$eq": ''
-                            }
+                                $eq: '',
+                            },
                         },
                         {
                             [this.builder.key]: {
-                                "$eq": null
-                            }
-                        }
-                    ]
-                }
+                                $eq: null,
+                            },
+                        },
+                    ],
+                },
             };
         }
     }
 
     flatten() {
         if (this.mode === StringFilterMode.Equals && this.value === '') {
-            this.mode = StringFilterMode.Empty
+            this.mode = StringFilterMode.Empty;
         }
         if (this.mode === StringFilterMode.NotEquals && this.value === '') {
-            this.mode = StringFilterMode.NotEmpty
+            this.mode = StringFilterMode.NotEmpty;
         }
 
-        return super.flatten()
+        return super.flatten();
     }
 
     getComponent(): ComponentWithProperties {
         return new ComponentWithProperties(StringUIFilterView, {
-            filter: this
-        })
+            filter: this,
+        });
     }
 
     get combinationWord(): string {
@@ -118,44 +118,44 @@ export class StringUIFilter extends UIFilter {
 
     get styledDescription() {
         const choices: StyledDescriptionChoice[] = Object.values(StringFilterMode)
-            .map(mode => {
+            .map((mode) => {
                 return {
                     id: mode,
                     text: this.createCominationWord(mode),
                     action: () => this.mode = mode,
-                    isSelected: () => this.mode === mode
-                }
+                    isSelected: () => this.mode === mode,
+                };
             });
 
         if (this.ignoreValue) {
             return [
                 {
                     text: this.builder.name,
-                    style: ''
+                    style: '',
                 },
                 {
-                    text: ' '+ this.combinationWord,
+                    text: ' ' + this.combinationWord,
                     style: 'gray',
-                    choices
-                }
-            ]
+                    choices,
+                },
+            ];
         }
 
         return [
             {
                 text: this.builder.name,
-                style: ''
+                style: '',
             },
             {
-                text: ' '+ this.combinationWord +' ',
+                text: ' ' + this.combinationWord + ' ',
                 style: 'gray',
-                choices
+                choices,
             },
             {
                 text: this.value,
-                style: ''
-            }
-        ]
+                style: '',
+            },
+        ];
     }
 
     private createCominationWord(mode: StringFilterMode) {
@@ -171,25 +171,47 @@ export class StringUIFilter extends UIFilter {
 }
 
 export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
-    key = ""
-    name = ""
-    wrapFilter?: UIFilterWrapper | null
+    key = '';
+    name = '';
+    wrapFilter?: UIFilterWrapper | null;
     unwrapFilter?: UIFilterUnwrapper | null;
     wrapper?: WrapperFilter;
+    allowCreation?: boolean;
 
-    constructor(data: {key: string, name: string, wrapFilter?: UIFilterWrapper, unwrapFilter?: UIFilterUnwrapper, wrapper?: WrapperFilter}) {
+    constructor(data: { key: string; name: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean }) {
         this.key = data.key;
         this.wrapFilter = data.wrapFilter;
-        this.unwrapFilter = data.unwrapFilter
+        this.unwrapFilter = data.unwrapFilter;
         this.wrapper = data.wrapper;
         this.name = data.name;
+        this.allowCreation = data.allowCreation;
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const {markerValue: unwrapped, isInverted} = unwrapFilterForBuilder(this, filter)
-        
-        if (unwrapped === null || unwrapped === undefined) {
+        const { markerValue: unwrapped, isInverted, match } = unwrapFilterForBuilder(this, filter);
+
+        if (!match || !unwrapped) {
             return null;
+        }
+
+        const direcltyEqual = unwrapFilter(unwrapped, {
+            [this.key]: UIFilterWrapperMarker,
+        });
+
+        if (direcltyEqual.match && typeof direcltyEqual.markerValue === 'string') {
+            return new StringUIFilter({
+                builder: this,
+                value: direcltyEqual.markerValue,
+                mode: StringFilterMode.Equals,
+            }, { isInverted });
+        }
+
+        if (typeof unwrapped === 'string') {
+            return new StringUIFilter({
+                builder: this,
+                value: unwrapped,
+                mode: StringFilterMode.Equals,
+            }, { isInverted });
         }
 
         if (!(typeof unwrapped === 'object')) {
@@ -202,8 +224,8 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             return new StringUIFilter({
                 builder: this,
                 value: contains,
-                mode: StringFilterMode.Contains
-            }, {isInverted})
+                mode: StringFilterMode.Contains,
+            }, { isInverted });
         }
 
         const notContains = unwrapFilterByPath(unwrapped, ['$not', this.key, '$contains']);
@@ -212,8 +234,8 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             return new StringUIFilter({
                 builder: this,
                 value: notContains,
-                mode: StringFilterMode.NotContains
-            }, {isInverted})
+                mode: StringFilterMode.NotContains,
+            }, { isInverted });
         }
 
         const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']);
@@ -222,8 +244,8 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             return new StringUIFilter({
                 builder: this,
                 value: equals,
-                mode: StringFilterMode.Equals
-            }, {isInverted})
+                mode: StringFilterMode.Equals,
+            }, { isInverted });
         }
 
         const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']);
@@ -232,8 +254,8 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             return new StringUIFilter({
                 builder: this,
                 value: notEquals,
-                mode: StringFilterMode.NotEquals
-            }, {isInverted})
+                mode: StringFilterMode.NotEquals,
+            }, { isInverted });
         }
 
         const empty = unwrapFilterByPath(unwrapped, ['$or', 0, this.key, '$eq']);
@@ -242,8 +264,8 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             return new StringUIFilter({
                 builder: this,
                 value: '',
-                mode: StringFilterMode.Empty
-            }, {isInverted})
+                mode: StringFilterMode.Empty,
+            }, { isInverted });
         }
 
         const notEmpty = unwrapFilterByPath(unwrapped, ['$not', '$or', 0, this.key, '$eq']);
@@ -252,17 +274,17 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             return new StringUIFilter({
                 builder: this,
                 value: '',
-                mode: StringFilterMode.NotEmpty
-            }, {isInverted})
+                mode: StringFilterMode.NotEmpty,
+            }, { isInverted });
         }
 
         return null;
     }
-    
-    create(options: {isInverted?: boolean} = {}): StringUIFilter {
+
+    create(options: { isInverted?: boolean } = {}): StringUIFilter {
         return new StringUIFilter({
             builder: this,
-            value: ''
-        }, options)
+            value: '',
+        }, options);
     }
 }

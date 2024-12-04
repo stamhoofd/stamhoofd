@@ -13,7 +13,14 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
      */
     create(options?: { isInverted?: boolean }): F;
     name: string;
+
+    /**
+     * Hide in creation
+     */
+    allowCreation?: boolean;
+
     wrapper?: WrapperFilter;
+    additionalUnwrappers?: WrapperFilter[];
 
     // More complicated wrapper support:
     wrapFilter?: UIFilterWrapper | null | undefined;
@@ -23,14 +30,14 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
 }
 
 export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter; isInverted?: boolean } {
-    if (builder.wrapper) {
-        const result = unwrapFilter(filter, builder.wrapper);
+    for (const wrapper of [builder.wrapper!, ...(builder.additionalUnwrappers ?? [])].filter(w => !!w) as WrapperFilter[]) {
+        const result = unwrapFilter(filter, wrapper);
 
         if (!result.match) {
             const invertedFilter = UIFilter.invertFilter(filter);
 
             if (invertedFilter) {
-                const invertedResult = unwrapFilter(invertedFilter, builder.wrapper);
+                const invertedResult = unwrapFilter(invertedFilter, wrapper);
 
                 if (invertedResult.match) {
                     return {
@@ -41,7 +48,9 @@ export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: Stamhoo
             }
         }
 
-        return result;
+        if (result.match) {
+            return result;
+        }
     }
 
     if (builder.unwrapFilter) {
@@ -61,15 +70,16 @@ export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: Stamhoo
                 }
             }
         }
-
-        return {
-            match: true,
-            markerValue: r,
-        };
+        else {
+            return {
+                match: true,
+                markerValue: r,
+            };
+        }
     }
 
     return {
-        match: true,
+        match: builder.wrapper === undefined && !builder.unwrapFilter,
         markerValue: filter,
     };
 }
