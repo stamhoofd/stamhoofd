@@ -12,6 +12,7 @@ import { Group } from './Group';
 import { Member, RegistrationWithMember } from './Member';
 import { Organization } from './Organization';
 import { User } from './User';
+import { Registration } from './Registration';
 
 export class DocumentTemplate extends Model {
     static table = 'document_templates';
@@ -368,29 +369,37 @@ export class DocumentTemplate extends Model {
         };
     }
 
-    async createForRegistrationIfNeeded(registration: RegistrationWithMember) {
-        // Check group and cycle
-        for (const groupDefinition of this.privateSettings.groups) {
-            if (groupDefinition.group.id === registration.groupId) {
-                const document = await this.generateForRegistration(registration);
-                if (document) {
-                    await document.save();
-                }
-            }
+    async updateForRegistrations(registrations: RegistrationWithMember[]): Promise<Document[]> {
+        if (registrations.length === 0) {
+            return [];
         }
+        const existingDocuments = await Document.where({ templateId: this.id, registrationId: { sign: 'IN', value: registrations.map(r => r.id) } });
+        const documents: Document[] = [];
+
+        for (const registration of registrations) {
+            documents.push(...await this.updateForRegistration(registration, existingDocuments.filter(d => d.registrationId === registration.id)));
+        }
+        return documents;
     }
 
-    private async generateForRegistration(registration: RegistrationWithMember) {
-        const { fieldAnswers, missingData } = await this.buildAnswers(registration);
-        const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id }, { limit: 1 });
+    async updateForRegistration(registration: RegistrationWithMember, existingDocuments?: Document[]): Promise<Document[]> {
+        existingDocuments = existingDocuments !== undefined ? existingDocuments : await Document.where({ templateId: this.id, registrationId: registration.id }, { limit: 5 });
 
-        if (!this.checkIncluded(registration, fieldAnswers)) {
-            if (existingDocuments.length > 0) {
-                for (const document of existingDocuments) {
-                    await document.delete();
-                }
+        if (!this.checkRegistrationIncluded(registration)) {
+            // Fast fail without building answers
+            for (const document of existingDocuments) {
+                await document.delete();
             }
-            return null;
+            return [];
+        }
+
+        const { fieldAnswers, missingData } = await this.buildAnswers(registration);
+
+        if (!this.checkAnswersIncluded(registration, fieldAnswers)) {
+            for (const document of existingDocuments) {
+                await document.delete();
+            }
+            return [];
         }
 
         const group = await Group.getByID(registration.groupId);
@@ -405,27 +414,47 @@ export class DocumentTemplate extends Model {
                     document.status = this.status;
                 }
                 await document.save();
-                return document;
             }
+            return existingDocuments;
         }
-        else {
-            const document = new Document();
-            document.organizationId = this.organizationId;
-            document.templateId = this.id;
-            document.status = missingData ? DocumentStatus.MissingData : this.status;
-            document.data = DocumentData.create({
-                name: this.settings.name,
-                description,
-                fieldAnswers,
-            });
-            document.memberId = registration.member.id;
-            document.registrationId = registration.id;
-            await document.save();
-            return document;
-        }
+
+        const document = new Document();
+        document.organizationId = this.organizationId;
+        document.templateId = this.id;
+        document.status = missingData ? DocumentStatus.MissingData : this.status;
+        document.data = DocumentData.create({
+            name: this.settings.name,
+            description,
+            fieldAnswers,
+        });
+        document.memberId = registration.member.id;
+        document.registrationId = registration.id;
+        await document.save();
+        return [document];
     }
 
-    checkIncluded(registration: RegistrationWithMember, fieldAnswers: Map<string, RecordAnswer>) {
+    checkRegistrationIncluded(registration: Registration) {
+        if (registration.organizationId !== this.organizationId) {
+            return false;
+        }
+
+        if (registration.deactivatedAt) {
+            return false;
+        }
+
+        if (!registration.registeredAt) {
+            return false;
+        }
+
+        for (const groupDefinition of this.privateSettings.groups) {
+            if (groupDefinition.group.id === registration.groupId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    checkAnswersIncluded(registration: RegistrationWithMember, fieldAnswers: Map<string, RecordAnswer>) {
         if (this.settings.maxAge !== null) {
             const fieldId = 'registration.startDate';
             let startDate: null | Date = null;
@@ -506,15 +535,14 @@ export class DocumentTemplate extends Model {
 
                 // Get the registrations for this group with this cycle
                 const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.group.id);
-
-                for (const registration of registrations) {
-                    abort.throwIfAborted();
-                    const document = await this.generateForRegistration(registration);
-                    if (document) {
-                        documentSet.set(document.id, document);
-                    }
+                const documents = await this.updateForRegistrations(registrations);
+                for (const document of documents) {
+                    documentSet.set(document.id, document);
                 }
             }
+
+            console.log('Built all documents for template', this.id, documentSet.size);
+            abort.throwIfAborted();
 
             // Delete documents that no longer match and don't have a number yet
             const documents = await Document.where({ templateId: this.id });

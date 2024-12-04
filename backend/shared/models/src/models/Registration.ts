@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { Document, Group, Organization, User } from './';
+import { Group, Organization, User } from './';
 
 export class Registration extends Model {
     static table = 'registrations';
@@ -126,7 +126,7 @@ export class Registration extends Model {
      * Update the outstanding balance of multiple members in one go (or all members)
      */
     static async updateOutstandingBalance(registrationIds: string[] | 'all', organizationId?: string) {
-        if (registrationIds !== 'all' && registrationIds.length == 0) {
+        if (registrationIds !== 'all' && registrationIds.length === 0) {
             return;
         }
 
@@ -159,10 +159,6 @@ export class Registration extends Model {
         ${secondWhere}`;
 
         await Database.update(query, params);
-
-        if (registrationIds !== 'all' && organizationId) {
-            await Document.updateForRegistrations(registrationIds, organizationId);
-        }
     }
 
     /**

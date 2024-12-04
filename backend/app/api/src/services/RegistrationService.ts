@@ -55,6 +55,8 @@ export const RegistrationService = {
         RegistrationService.scheduleStockUpdate(registration.id);
 
         await PlatformMembershipService.updateMembershipsForId(registration.memberId);
+
+        await Document.deleteForRegistrations([registration]);
     },
 
     /**

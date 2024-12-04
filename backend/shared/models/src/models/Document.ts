@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { render } from '../helpers/Handlebars';
 import { RegistrationWithMember } from './Member';
 import { Organization } from './Organization';
+import { Registration } from './Registration';
 
 export class Document extends Model {
     static table = 'documents';
@@ -159,10 +160,10 @@ export class Document extends Model {
             console.log('Updating documents for registration', registration.id);
 
             const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
-            const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId: registration.member.organizationId });
+            const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId: registration.organizationId });
 
             for (const template of templates) {
-                await template.createForRegistrationIfNeeded(registration);
+                await template.updateForRegistration(registration);
             }
         }
         catch (e) {
@@ -170,7 +171,23 @@ export class Document extends Model {
         }
     }
 
+    static async deleteForRegistrations(registrations: Registration[]) {
+        if (registrations.length === 0) {
+            return [];
+        }
+
+        const existingDocuments = await Document.where({ registrationId: { sign: 'IN', value: registrations.map(r => r.id) } });
+
+        for (const document of existingDocuments) {
+            console.log('Deleting document for registration', document.registrationId);
+            await document.delete();
+        }
+    }
+
     static async updateForRegistrations(registrationIds: string[], organizationId: string) {
+        if (!registrationIds.length) {
+            return;
+        }
         try {
             console.log('Updating documents for updateForRegistrations', registrationIds);
 
@@ -182,9 +199,7 @@ export class Document extends Model {
                 const registrations = await Member.getRegistrationWithMembersByIDs(registrationIds);
 
                 for (const template of templates) {
-                    for (const registration of registrations) {
-                        await template.createForRegistrationIfNeeded(registration);
-                    }
+                    await template.updateForRegistrations(registrations);
                 }
             }
         }
@@ -205,9 +220,7 @@ export class Document extends Model {
                 const registrations = await Member.getRegistrationWithMembersForGroup(groupId);
 
                 for (const template of templates) {
-                    for (const registration of registrations) {
-                        await template.createForRegistrationIfNeeded(registration);
-                    }
+                    await template.updateForRegistrations(registrations);
                 }
             }
         }
