@@ -1,23 +1,22 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { RegisterCheckout } from "@stamhoofd/structures";
-import { NavigationActions } from "../../../types/NavigationActions";
-import FreeContributionView from "../FreeContributionView.vue";
-import { ViewStep, ViewStepsManager } from "../../classes/ViewStepsManager";
-
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { RegisterCheckout } from '@stamhoofd/structures';
+import { NavigationActions } from '../../../types/NavigationActions';
+import FreeContributionView from '../FreeContributionView.vue';
+import { ViewStep, ViewStepsManager } from '../../classes/ViewStepsManager';
 
 export class FreeContributionStep implements ViewStep {
-    checkout: RegisterCheckout
+    checkout: RegisterCheckout;
 
     constructor(checkout: RegisterCheckout) {
-        this.checkout = checkout
+        this.checkout = checkout;
     }
 
     isEnabled(_manager: ViewStepsManager) {
         if (!this.checkout.singleOrganization?.meta.recordsConfiguration.freeContribution) {
-            return false
+            return false;
         }
 
-        if (this.checkout.isAdminFromSameOrganization) {
+        if (this.checkout.asOrganizationId) {
             return false;
         }
 
@@ -28,8 +27,8 @@ export class FreeContributionStep implements ViewStep {
         return new ComponentWithProperties(FreeContributionView, {
             checkout: this.checkout,
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate)
-            }
-        })
+                await manager.saveHandler(this, navigate);
+            },
+        });
     }
 }
