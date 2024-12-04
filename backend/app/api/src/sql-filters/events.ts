@@ -1,4 +1,4 @@
-import { SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, SQL, SQLValueType } from '@stamhoofd/sql';
+import { SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, SQL, SQLValueType, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
 
 export const eventFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -24,5 +24,17 @@ export const eventFilterCompilers: SQLFilterDefinitions = {
     'meta.visible': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('meta'), '$.value.visible'),
         { isJSONValue: true, type: SQLValueType.JSONBoolean },
+    ),
+    'group': createSQLRelationFilterCompiler(
+        SQL.select()
+            .from(SQL.table('groups'))
+            .where(
+                SQL.column('id'),
+                SQL.column('events', 'groupId'),
+            ),
+        {
+            ...baseSQLFilterCompilers,
+            organizationId: createSQLColumnFilterCompiler('organizationId'),
+        },
     ),
 };

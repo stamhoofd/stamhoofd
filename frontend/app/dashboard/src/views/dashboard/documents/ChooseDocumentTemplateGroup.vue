@@ -200,7 +200,11 @@ function getRequiredFilter(): StamhoofdFilter | null {
 
     // filter on organization tag ids, if organization lvl
     if (org) {
-        filters['organizationId'] = org.id;
+        filters['group'] = {
+            $elemMatch: {
+                organizationId: org.id,
+            },
+        };
     }
 
     return filters;
