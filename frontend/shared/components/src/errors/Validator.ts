@@ -74,8 +74,8 @@ export class Validator {
     async validateByKey(key: string): Promise<boolean> {
         const validationKeys = this.keyMap.get(key);
         if (!validationKeys) {
-            console.error(`Key ${key} not found.`);
-            return false;
+            // No validators for this key, which means it is valid
+            return true;
         }
 
         let isValid = true;
