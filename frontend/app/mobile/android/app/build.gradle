@@ -7,8 +7,8 @@ android {
         applicationId "be.ksa.ravot"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 194
-        versionName "2.59.0"
+        versionCode 196
+        versionName "2.60.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
