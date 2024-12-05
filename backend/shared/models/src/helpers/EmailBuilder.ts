@@ -225,8 +225,36 @@ export async function getEmailBuilder(organization: Organization | null, email: 
     const cleaned: Recipient[] = [];
     for (const recipient of email.recipients) {
         try {
-            const unsubscribe = await EmailAddress.getOrCreate(recipient.email, email.fromStamhoofd || !organization ? null : organization.id);
+            const unsubscribeGlobal = await EmailAddress.getWhereHardBounceOrSpam(recipient.email);
+            if ((unsubscribeGlobal && (unsubscribeGlobal.hardBounce))) {
+                // Ignore
+                if (email.callback) {
+                    email.callback(
+                        new SimpleError({
+                            code: 'email_hard_bounce',
+                            message: 'Recipient has hard bounced',
+                            human: 'Dit e-mailadres is waarschijnlijk ongeldig. We konden eerder geen e-mails naar dit adres sturen.',
+                        }),
+                    );
+                }
+                continue;
+            }
 
+            if (unsubscribeGlobal && (unsubscribeGlobal.markedAsSpam)) {
+                // Ignore
+                if (email.callback) {
+                    email.callback(
+                        new SimpleError({
+                            code: 'email_spam',
+                            message: 'Recipient has marked as spam',
+                            human: 'Dit e-mailadres heeft eerder een e-mail als spam gemarkeerd. We kunnen geen e-mails naar dit adres sturen.',
+                        }),
+                    );
+                }
+                continue;
+            }
+
+            const unsubscribe = await EmailAddress.getOrCreate(recipient.email, email.fromStamhoofd || !organization ? null : organization.id);
             if (unsubscribe.unsubscribedAll || unsubscribe.hardBounce || unsubscribe.markedAsSpam || !unsubscribe.token || (unsubscribe.unsubscribedMarketing && email.unsubscribeType === 'marketing')) {
                 // Ignore
                 if (email.callback) {
