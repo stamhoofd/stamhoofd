@@ -112,6 +112,20 @@ export enum AuditLogType {
     MemberPlatformMembershipAdded = 'MemberPlatformMembershipAdded',
     MemberPlatformMembershipEdited = 'MemberPlatformMembershipEdited',
     MemberPlatformMembershipDeleted = 'MemberPlatformMembershipDeleted',
+
+    // Email
+    EmailSent = 'EmailSent',
+    EmailSending = 'EmailSending',
+
+    // Marked as spam events
+    EmailAddressMarkedAsSpam = 'EmailAddressMarkedAsSpam',
+    EmailAddressHardBounced = 'EmailAddressHardBounced',
+    EmailAddressSoftBounced = 'EmailAddressSoftBounced',
+    EmailAddressUnsubscribed = 'EmailAddressUnsubscribed',
+
+    EmailTemplateAdded = 'EmailTemplateAdded',
+    EmailTemplateEdited = 'EmailTemplateEdited',
+    EmailTemplateDeleted = 'EmailTemplateDeleted',
 }
 
 export function getAuditLogTypeName(type: AuditLogType): string {
@@ -209,6 +223,26 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Wijzigingen aan aansluitingen`;
         case AuditLogType.MemberPlatformMembershipDeleted:
             return `Verwijderde aansluitingen`;
+
+        case AuditLogType.EmailSent:
+            return `Succesvol verzonden e-mails`;
+        case AuditLogType.EmailSending:
+            return `E-mails gestart met verzenden`;
+        case AuditLogType.EmailAddressMarkedAsSpam:
+            return `E-mailadressen gemarkeerd als spam`;
+        case AuditLogType.EmailAddressHardBounced:
+            return `E-mailadressen die hard gebounced zijn`;
+        case AuditLogType.EmailAddressSoftBounced:
+            return `E-mailadressen die soft gebounced zijn`;
+        case AuditLogType.EmailAddressUnsubscribed:
+            return `E-mailadressen die zich hebben uitgeschreven`;
+
+        case AuditLogType.EmailTemplateAdded:
+            return `Nieuwe e-mailtemplates`;
+        case AuditLogType.EmailTemplateEdited:
+            return `Wijzigingen aan e-mailtemplates`;
+        case AuditLogType.EmailTemplateDeleted:
+            return `Verwijderde e-mailtemplates`;
     }
 
     return type;
@@ -321,6 +355,26 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`membership-filled`, `edit`];
         case AuditLogType.MemberPlatformMembershipDeleted:
             return [`membership-filled`, `canceled red`];
+
+        case AuditLogType.EmailSent:
+            return [`email`, `success primary`];
+        case AuditLogType.EmailSending:
+            return [`email`, `clock`];
+        case AuditLogType.EmailAddressMarkedAsSpam:
+            return [`email`, `error red`];
+        case AuditLogType.EmailAddressHardBounced:
+            return [`email`, `error red`];
+        case AuditLogType.EmailAddressSoftBounced:
+            return [`email`, `warning`];
+        case AuditLogType.EmailAddressUnsubscribed:
+            return [`email`, `disabled red`];
+
+        case AuditLogType.EmailTemplateAdded:
+            return [`email-template`, `add green`];
+        case AuditLogType.EmailTemplateEdited:
+            return [`email-template`, `edit`];
+        case AuditLogType.EmailTemplateDeleted:
+            return [`email-template`, `canceled red`];
     }
     return [`help`];
 }
@@ -442,6 +496,33 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `Aansluiting {{pm}} werd gewijzigd bij {{m}}{{if org " via " org}}`;
         case AuditLogType.MemberPlatformMembershipDeleted:
             return `Aansluiting {{pm}} werd verwijderd bij {{m}}{{if org " via " org}}`;
+
+        case AuditLogType.EmailSent:
+            return `E-mail {{e}} werd succesvol verzonden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
+
+        case AuditLogType.EmailSending:
+            return `E-mail {{e}} werd ingepland om te verzenden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
+
+        case AuditLogType.EmailAddressMarkedAsSpam:
+            return `{{e}} heeft een e-mail als spam gemarkeerd`;
+
+        case AuditLogType.EmailAddressHardBounced:
+            return `Een e-mail naar {{e}} is permanent mislukt`;
+
+        case AuditLogType.EmailAddressSoftBounced:
+            return `Een e-mail naar {{e}} is mislukt. Wellicht gaat het om een tijdelijk probleem (bv. volle inbox).`;
+
+        case AuditLogType.EmailAddressUnsubscribed:
+            return `{{e}} heeft zich uitgeschreven voor e-mails`;
+
+        case AuditLogType.EmailTemplateAdded:
+            return `E-mailtemplate {{e}} werd aangemaakt {{if org " voor " org}}`;
+
+        case AuditLogType.EmailTemplateEdited:
+            return `E-mailtemplate {{e}} werd gewijzigd {{if org " voor " org}}`;
+
+        case AuditLogType.EmailTemplateDeleted:
+            return `E-mailtemplate {{e}} werd verwijderd {{if org " voor " org}}`;
     }
 }
 
@@ -491,6 +572,47 @@ function getTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.OrderEdited:
         case AuditLogType.OrderDeleted:
             return ['o', 'w'];
+
+        case AuditLogType.PaymentAdded:
+        case AuditLogType.PaymentEdited:
+        case AuditLogType.PaymentDeleted:
+            return ['p'];
+
+        case AuditLogType.DocumentTemplateAdded:
+        case AuditLogType.DocumentTemplateEdited:
+        case AuditLogType.DocumentTemplateDeleted:
+            return ['d'];
+
+        case AuditLogType.UserAdded:
+        case AuditLogType.UserEdited:
+        case AuditLogType.UserDeleted:
+            return ['u'];
+
+        case AuditLogType.MemberResponsibilityRecordAdded:
+        case AuditLogType.MemberResponsibilityRecordEdited:
+        case AuditLogType.MemberResponsibilityRecordDeleted:
+            return ['r', 'm'];
+
+        case AuditLogType.MemberPlatformMembershipAdded:
+        case AuditLogType.MemberPlatformMembershipEdited:
+        case AuditLogType.MemberPlatformMembershipDeleted:
+            return ['pm', 'm'];
+
+        case AuditLogType.EmailSent:
+        case AuditLogType.EmailSending:
+            return ['e'];
+
+        case AuditLogType.EmailAddressMarkedAsSpam:
+        case AuditLogType.EmailAddressHardBounced:
+        case AuditLogType.EmailAddressSoftBounced:
+        case AuditLogType.EmailAddressUnsubscribed:
+            return ['e'];
+
+        case AuditLogType.EmailTemplateAdded:
+        case AuditLogType.EmailTemplateEdited:
+        case AuditLogType.EmailTemplateDeleted:
+            return ['e'];
+
         default:
             return [];
     }
@@ -578,9 +700,12 @@ export class AuditLog extends AutoEncoder {
                 helpers: {
                     plural: (context: RenderContext, object: any, singular: string, plural: string) => {
                         if (object instanceof AuditLogReplacement) {
+                            if (object.count === undefined) {
+                                return object.value === '1' ? [singular] : [plural];
+                            }
                             return object.count === 1 ? [singular] : [plural];
                         }
-                        return [object === 1 ? singular : plural];
+                        return [object === 1 || object === '1' ? singular : plural];
                     },
                     capitalizeFirstLetter: (context: RenderContext, object: any) => {
                         if (object instanceof AuditLogReplacement) {

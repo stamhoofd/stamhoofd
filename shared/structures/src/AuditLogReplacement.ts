@@ -33,6 +33,9 @@ export enum AuditLogReplacementType {
     PlatformMembershipType = 'PlatformMembershipType',
     MemberResponsibility = 'MemberResponsibility',
     DocumentTemplate = 'DocumentTemplate',
+    Email = 'Email',
+    EmailAddress = 'EmailAddress',
+    EmailTemplate = 'EmailTemplate',
 }
 
 export class AuditLogReplacement extends AutoEncoder {
