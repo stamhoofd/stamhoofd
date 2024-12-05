@@ -50,7 +50,7 @@ async function saveLog({ email, organization, type, subType, id, response, subje
 
 async function checkPostmarkBounces() {
     if (STAMHOOFD.environment !== 'production') {
-        // return;
+        return;
     }
 
     const token = STAMHOOFD.POSTMARK_SERVER_TOKEN;
