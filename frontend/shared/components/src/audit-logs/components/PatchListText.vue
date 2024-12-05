@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { AuditLogPatchItem, AuditLogPatchItemType, isUuid } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacementType, isUuid } from '@stamhoofd/structures';
 import { Context, Renderable, renderAny, RenderTextComponent } from './RenderTextComponent';
 import { h } from 'vue';
 
@@ -51,7 +51,7 @@ function getRenderText(item: AuditLogPatchItem): any[] {
         text.push(' volgorde gewijzigd');
     }
 
-    if ((item.oldValue && (item.oldValue.toString() || item.oldValue.type)) || (item.value && (item.value.toString() || item.value.type))) {
+    if ((item.oldValue && (item.oldValue.toString() || item.oldValue.type !== AuditLogReplacementType.Uuid)) || (item.value && (item.value.toString() || item.value.type !== AuditLogReplacementType.Uuid))) {
         text.push(': ');
 
         const hasOld = item.oldValue && (item.oldValue.type || item.oldValue.value);

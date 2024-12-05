@@ -142,7 +142,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         }
 
         if (obj.id) {
-            return copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString()), 'ID: ' + obj.id), obj.id);
+            return copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString() || 'onbekend'), 'ID: ' + obj.id), obj.id);
         }
         const str = obj.toString();
 

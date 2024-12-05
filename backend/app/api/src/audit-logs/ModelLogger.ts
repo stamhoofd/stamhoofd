@@ -1,6 +1,6 @@
 import { Model, ModelEvent } from '@simonbackx/simple-database';
 import { AuditLog } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context';
 import { AuditLogService } from '../services/AuditLogService';
 import { diffUnknown } from '../services/diff';
@@ -24,6 +24,8 @@ type EventOptionsGenerator<M extends Model, D> = (event: ModelEvent<M>) => Model
 export type ModelLoggerOptions<M extends Model, D = undefined> = {
     optionsGenerator: EventOptionsGenerator<M, D>;
     skipKeys?: string[];
+    sensitiveKeys?: string[];
+    renamedKeys?: Record<string, string>;
     generateDescription?(event: ModelEvent<M>, options: ModelEventLogOptions<D>): string | null | undefined;
     createReplacements?(model: M, options: ModelEventLogOptions<D>): Map<string, AuditLogReplacement>;
     postProcess?(event: ModelEvent<M>, options: ModelEventLogOptions<D>, log: AuditLog): Promise<void> | void;
@@ -88,10 +90,13 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
     model: ModelType;
     optionsGenerator: EventOptionsGenerator<M, D>;
     skipKeys: string[] = [];
+    sensitiveKeys: string[] = [];
+    renamedKeys: Record<string, string> = {};
     generateDescription?: (event: ModelEvent<M>, options: ModelEventLogOptions<D>) => string | null | undefined;
     createReplacements?: (model: M, options: ModelEventLogOptions<D>) => Map<string, AuditLogReplacement>;
     postProcess?: (event: ModelEvent<M>, options: ModelEventLogOptions<D>, log: AuditLog) => Promise<void> | void;
     static sharedSkipKeys = ['id', 'createdAt', 'updatedAt', 'deletedAt'];
+    static sharedSensitiveKeys = ['password'];
 
     constructor(model: ModelType, options: ModelLoggerOptions<M, D>) {
         this.model = model;
@@ -100,6 +105,8 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
         this.generateDescription = options.generateDescription;
         this.createReplacements = options.createReplacements;
         this.postProcess = options.postProcess;
+        this.sensitiveKeys = options.sensitiveKeys ?? [];
+        this.renamedKeys = options.renamedKeys ?? {};
     }
 
     async logEvent(event: ModelEvent<M>) {
@@ -150,11 +157,20 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                             // Ignore relations
                             continue;
                         }
-                        log.patchList.push(...diffUnknown(
-                            key in oldModel ? oldModel[key] : undefined,
-                            key in event.model ? event.model[key] : undefined,
-                            AuditLogReplacement.key(key),
-                        ));
+                        const renamedKey = this.renamedKeys?.[key] ?? key;
+                        if (ModelLogger.sharedSensitiveKeys.includes(key) || (this.skipKeys && this.skipKeys.includes(key))) {
+                            log.patchList.push(AuditLogPatchItem.create({
+                                key: AuditLogReplacement.key(renamedKey),
+                                type: AuditLogPatchItemType.Changed,
+                            }));
+                        }
+                        else {
+                            log.patchList.push(...diffUnknown(
+                                key in oldModel ? oldModel[key] : undefined,
+                                key in event.model ? event.model[key] : undefined,
+                                AuditLogReplacement.key(renamedKey),
+                            ));
+                        }
                     }
 
                     // Remove skipped keys

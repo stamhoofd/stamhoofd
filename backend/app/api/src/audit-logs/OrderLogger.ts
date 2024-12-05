@@ -1,6 +1,6 @@
 import { Order, Webshop } from '@stamhoofd/models';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, OrderStatus } from '@stamhoofd/structures';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger';
 
 const defaultGenerator = getDefaultGenerator({
     created: AuditLogType.OrderAdded,

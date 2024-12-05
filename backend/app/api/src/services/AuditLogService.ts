@@ -19,6 +19,7 @@ import { WebshopLogger } from '../audit-logs/WebshopLogger';
 import { EmailLogger } from '../audit-logs/EmailLogger';
 import { EmailTemplateLogger } from '../audit-logs/EmailTemplateLogger';
 import { EmailAddressLogger } from '../audit-logs/EmailAddressLogger';
+import { UserLogger } from '../audit-logs/UserLogger';
 
 export type AuditLogContextSettings = {
     disable?: boolean;
@@ -106,3 +107,4 @@ modelLogDefinitions.set(DocumentTemplateLogger.model, DocumentTemplateLogger);
 modelLogDefinitions.set(EmailLogger.model, EmailLogger);
 modelLogDefinitions.set(EmailTemplateLogger.model, EmailTemplateLogger);
 modelLogDefinitions.set(EmailAddressLogger.model, EmailAddressLogger);
+modelLogDefinitions.set(UserLogger.model, UserLogger);

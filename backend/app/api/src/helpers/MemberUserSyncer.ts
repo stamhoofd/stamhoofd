@@ -187,7 +187,6 @@ export class MemberUserSyncerStatic {
 
         if (user.memberId === member.id) {
             user.memberId = null;
-            await user.save();
         }
 
         // Update model relation to correct response
@@ -239,11 +238,7 @@ export class MemberUserSyncerStatic {
                 await this.updateInheritedPermissions(user);
             }
             else {
-                if (user.memberId === member.id) {
-                    // Unlink: parents are never 'equal' to the member
-                    user.memberId = null;
-                    await this.updateInheritedPermissions(user);
-                }
+                let shouldSave = false;
 
                 if (!user.firstName && !user.lastName) {
                     const parents = member.details.parents.filter(p => p.email === email);
@@ -252,13 +247,22 @@ export class MemberUserSyncerStatic {
                             user.firstName = parents[0].firstName;
                             user.lastName = parents[0].lastName;
                         }
-                        await user.save();
+                        shouldSave = true;
                     }
                 }
 
                 if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
                     user.firstName = null;
                     user.lastName = null;
+                    shouldSave = true;
+                }
+
+                if (user.memberId === member.id) {
+                    // Unlink: parents are never 'equal' to the member
+                    user.memberId = null;
+                    await this.updateInheritedPermissions(user);
+                }
+                if (shouldSave) {
                     await user.save();
                 }
             }

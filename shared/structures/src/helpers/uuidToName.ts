@@ -10,6 +10,9 @@ export function uuidToName(uuid: string) {
          Platform.shared.config.tags,
          Platform.shared.config.recordsConfiguration.recordCategories,
          Platform.shared.config.membershipTypes,
+         Platform.shared.config.responsibilities,
+         Platform.shared.privateConfig?.roles ?? [],
+
      ];
 
     for (const list of objectLists) {

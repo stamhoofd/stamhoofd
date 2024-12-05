@@ -84,6 +84,9 @@ function getDiffName(autoEncoder: unknown): AuditLogReplacement | null {
         if (typeof name === 'string') {
             return name ? AuditLogReplacement.string(name) : AuditLogReplacement.key('untitled');
         }
+        if (name instanceof AuditLogReplacement) {
+            return name;
+        }
     }
 
     if (typeof autoEncoder === 'object' && autoEncoder !== null && 'name' in autoEncoder && typeof autoEncoder.name === 'string') {

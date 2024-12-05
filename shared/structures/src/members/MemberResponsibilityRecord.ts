@@ -2,6 +2,7 @@ import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simp
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from '../Group.js';
 import { type PlatformMember } from './PlatformMember.js';
+import { AuditLogReplacement } from '../AuditLogReplacement.js';
 
 export class MemberResponsibilityRecordBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -27,6 +28,10 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
 
     get isActive() {
         return this.startDate < new Date() && (this.endDate === null || this.endDate > new Date());
+    }
+
+    getDiffName() {
+        return AuditLogReplacement.uuid(this.responsibilityId);
     }
 }
 
