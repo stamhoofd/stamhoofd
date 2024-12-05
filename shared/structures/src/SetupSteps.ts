@@ -1,6 +1,7 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, field } from '@simonbackx/simple-encoding';
 import { SetupStepType } from './SetupStepType.js';
 import { SetupStepReview } from './SetupStepReview.js';
+import { Formatter } from '@stamhoofd/utility';
 
 export const minimumRegistrationCount: number = 1;
 
@@ -31,10 +32,14 @@ export class SetupStep extends AutoEncoder {
     totalSteps: number = 1;
 
     transformForDiff() {
-        return {
-            reviewedAt: this.review?.date,
-            steps: this.finishedSteps + '/' + this.totalSteps,
-        };
+        if (this.isDone) {
+            if (this.review) {
+                return 'Voltooid en nagekeken op ' + Formatter.dateNumber(this.review.date);
+            }
+            return 'Voltooid';
+        }
+
+        return this.finishedSteps + '/' + this.totalSteps;
     }
 
     get isDone() {
@@ -103,6 +108,10 @@ export class SetupStep extends AutoEncoder {
         this.finishedSteps = finishedSteps;
         this.totalSteps = totalSteps;
         this.updatedAt = now;
+
+        if (this.finishedSteps < this.totalSteps && this.review) {
+            this.resetReviewed();
+        }
     }
 }
 
