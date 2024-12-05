@@ -1,7 +1,10 @@
+import { registerCron } from '@stamhoofd/crons';
 import fs from 'fs/promises';
 
 const msIn22Hours = 79200000;
 let lastExcelClear: number | null = null;
+
+registerCron('clearExcelCache', clearExcelCache);
 
 export async function clearExcelCache() {
     const now = new Date();
