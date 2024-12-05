@@ -7,8 +7,7 @@ type ObjectType = AuditLog;
 
 function extendSort(list: SortList): SortList {
     return assertSort(list, [
-        { key: 'createdAt', order: SortItemDirection.DESC },
-        { key: 'id' },
+        { key: 'id', order: SortItemDirection.DESC },
     ]);
 }
 
