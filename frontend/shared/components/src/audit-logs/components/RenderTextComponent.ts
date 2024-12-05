@@ -10,6 +10,8 @@ import { Toast } from '../../overlays/Toast';
 import CopyableDirective from '../../directives/Copyable';
 import TooltipDirective from '../../directives/Tooltip';
 import { PaymentView } from '../../payments';
+import SafeHtmlView from '../SafeHtmlView.vue';
+import { Formatter } from '@stamhoofd/utility';
 
 export interface Renderable {
     render(context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
@@ -104,6 +106,22 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
             }
         }
 
+        if (obj.type === AuditLogReplacementType.Html && obj.value) {
+            return h('button', {
+                class: 'style-inline-resource button simple',
+                onClick: () => showHtml(obj.value!, context),
+                type: 'button',
+            }, obj.toString() as string);
+        }
+
+        if (obj.type === AuditLogReplacementType.LongText && obj.value) {
+            return h('button', {
+                class: 'style-inline-resource button simple',
+                onClick: () => showHtml('<p>' + Formatter.escapeHtml(obj.value!) + '</p>', context),
+                type: 'button',
+            }, obj.toString() as string);
+        }
+
         if (obj.type === AuditLogReplacementType.Array) {
             const a = obj.values.flatMap((part) => {
                 const q = renderAny(part, context);
@@ -185,6 +203,20 @@ export type Context = {
     organizationFetcher: ReturnType<typeof useOrganizationsObjectFetcher>;
     paymentFetcher: ReturnType<typeof usePaymentsObjectFetcher>;
 };
+
+async function showHtml(html: string, context: Context) {
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(SafeHtmlView, {
+            html,
+            title: 'Tekst met opmaak',
+        }),
+    });
+
+    await context.present({
+        components: [component],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 async function showPayment(paymentId: string, context: Context) {
     const component = new ComponentWithProperties(NavigationController, {

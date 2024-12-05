@@ -18,6 +18,8 @@ export enum AuditLogReplacementType {
     Uuid = 'Uuid',
     Color = 'Color', // id is the color
     Image = 'Image', // id is the source url
+    Html = 'Html',
+    LongText = 'LongText', // Expandable text
 
     // Objects
     Member = 'Member',
@@ -136,8 +138,16 @@ export class AuditLogReplacement extends AutoEncoder {
         return AuditLogReplacement.create({ value: str });
     }
 
+    static html(str: string, title?: string) {
+        return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.Html, description: title });
+    }
+
+    static longText(str: string, title?: string) {
+        return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.LongText, description: title });
+    }
+
     toString() {
-        if (this.type === AuditLogReplacementType.Key) {
+        if (this.type === AuditLogReplacementType.Key || this.type === AuditLogReplacementType.EmailTemplate) {
             return getAuditLogPatchKeyName(this.value);
         }
         if (this.type === AuditLogReplacementType.Uuid || (this.id && !this.value && DataValidator.isUuid(this.id))) {
@@ -152,6 +162,18 @@ export class AuditLogReplacement extends AutoEncoder {
 
         if (this.type === AuditLogReplacementType.Array) {
             return this.values.map(v => v.toString()).filter(v => !!v).join(' → ');
+        }
+
+        if (this.type === AuditLogReplacementType.Html) {
+            return this.description || 'Bekijk inhoud';
+        }
+
+        if (this.type === AuditLogReplacementType.LongText) {
+            return this.description || 'Bekijk inhoud';
+        }
+
+        if (this.type === AuditLogReplacementType.Image) {
+            return 'Afbeelding';
         }
         return this.value;
     }

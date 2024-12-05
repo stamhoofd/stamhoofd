@@ -17,6 +17,8 @@ import { RegistrationPeriodLogger } from '../audit-logs/RegistrationPeriodLogger
 import { StripeAccountLogger } from '../audit-logs/StripeAccountLogger';
 import { WebshopLogger } from '../audit-logs/WebshopLogger';
 import { EmailLogger } from '../audit-logs/EmailLogger';
+import { EmailTemplateLogger } from '../audit-logs/EmailTemplateLogger';
+import { EmailAddressLogger } from '../audit-logs/EmailAddressLogger';
 
 export type AuditLogContextSettings = {
     disable?: boolean;
@@ -102,3 +104,5 @@ modelLogDefinitions.set(MemberPlatformMembershipLogger.model, MemberPlatformMemb
 modelLogDefinitions.set(MemberResponsibilityRecordLogger.model, MemberResponsibilityRecordLogger);
 modelLogDefinitions.set(DocumentTemplateLogger.model, DocumentTemplateLogger);
 modelLogDefinitions.set(EmailLogger.model, EmailLogger);
+modelLogDefinitions.set(EmailTemplateLogger.model, EmailTemplateLogger);
+modelLogDefinitions.set(EmailAddressLogger.model, EmailAddressLogger);

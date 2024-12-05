@@ -14,8 +14,11 @@
         <h3 class="style-title-list">
             <RenderTextComponent :text="log.renderableTitle" />
         </h3>
-        <p v-if="userDescription.length" class="style-description">
+        <p v-if="userDescription.length" class="style-description pre-wrap">
             <RenderTextComponent :text="userDescription" />
+        </p>
+        <p v-if="log.renderableDescription.length" class="style-description pre-wrap">
+            <RenderTextComponent :text="log.renderableDescription" />
         </p>
 
         <p v-if="log.description" class="style-description-small pre-wrap" v-text="log.description" />

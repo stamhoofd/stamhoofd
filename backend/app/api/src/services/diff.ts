@@ -109,6 +109,12 @@ function getDiffValue(autoEncoder: unknown, key?: AuditLogReplacement): AuditLog
         if (DataValidator.isUuid(autoEncoder)) {
             return AuditLogReplacement.uuid(autoEncoder);
         }
+
+        // Is html
+        if (autoEncoder.startsWith('<!DOCTYPE html>')) {
+            return AuditLogReplacement.html(autoEncoder);
+        }
+
         if (key && key?.lastValue() === 'status') {
             // Will be an enum
             return AuditLogReplacement.key(autoEncoder);
@@ -155,13 +161,6 @@ function getDiffValue(autoEncoder: unknown, key?: AuditLogReplacement): AuditLog
     }
 
     return null;
-}
-
-function getKeySingular(key?: string) {
-    if (key === undefined) {
-        return undefined;
-    }
-    return key.replace(/ies$/, 'y').replace(/s$/, '');
 }
 
 function findOriginalById(id: unknown, oldArray: unknown[]): unknown | null {
@@ -397,7 +396,7 @@ export function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogRep
 
     if (v && ov) {
         // Simplify change
-        if (v.toString() === ov.toString()) {
+        if (v.toKey() === ov.toKey()) {
             v = null;
             ov = null;
 

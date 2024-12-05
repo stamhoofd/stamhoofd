@@ -157,4 +157,5 @@ export default {
     'fieldAnswers': 'antwoorden',
     'fieldAnswer': 'antwoord',
     'updatesEnabled': 'automatisch wijzigen',
+    'html': 'inhoud',
 };

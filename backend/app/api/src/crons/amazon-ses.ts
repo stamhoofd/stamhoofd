@@ -1,13 +1,48 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { registerCron } from '@stamhoofd/crons';
 import { Email, EmailAddress } from '@stamhoofd/email';
-import { Organization } from '@stamhoofd/models';
+import { AuditLog, Organization } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import AWS from 'aws-sdk';
 import { ForwardHandler } from '../helpers/ForwardHandler';
-import { registerCron } from '@stamhoofd/crons';
 
 registerCron('checkComplaints', checkComplaints);
 registerCron('checkReplies', checkReplies);
 registerCron('checkBounces', checkBounces);
+
+async function saveLog({ email, organization, type, subType, subject, response, sender, id }: { id: string; email: string; organization: Organization | undefined; type: AuditLogType; subType?: string; subject: string; response: string; sender: string }) {
+    if (!id || typeof id !== 'string') {
+        throw new Error('Invalid AWS SES id received');
+    }
+
+    const log = new AuditLog();
+    log.organizationId = organization?.id ?? null;
+    log.externalId = 'aws-ses-message-' + id.toString();
+    log.type = type;
+    log.source = AuditLogSource.System;
+    log.objectId = email;
+    log.replacements = new Map([
+        ['e', AuditLogReplacement.create({
+            value: email || '',
+            type: AuditLogReplacementType.EmailAddress,
+        })],
+        ['subType', AuditLogReplacement.key(subType || 'unknown')],
+        ['response', AuditLogReplacement.longText(response)],
+        ['subject', AuditLogReplacement.string(subject)],
+        ['sender', AuditLogReplacement.create({
+            value: sender,
+            type: AuditLogReplacementType.EmailAddress,
+        })],
+    ]);
+    // Check if we already logged this bounce
+    const existing = await AuditLog.select().where('externalId', log.externalId).first(false);
+    if (existing) {
+        console.log('Already logged this bounce, skipping');
+        return;
+    }
+
+    await log.save();
+}
 
 async function checkBounces() {
     if (STAMHOOFD.environment !== 'production' || !STAMHOOFD.AWS_ACCESS_KEY_ID) {
@@ -44,6 +79,7 @@ async function checkBounces() {
                             const b = message.bounce;
                             // Block all receivers that generate a permanent bounce
                             const type = b.bounceType;
+                            const subtype = b.bounceSubType;
 
                             const source = message.mail.source;
 
@@ -70,6 +106,32 @@ async function checkBounces() {
                                     else {
                                         console.error('[AWS BOUNCES] Unknown organization for email address ' + source);
                                     }
+
+                                    await saveLog({
+                                        id: b.feedbackId,
+                                        email,
+                                        organization,
+                                        type: AuditLogType.EmailAddressHardBounced,
+                                        subType: subtype || 'unknown',
+                                        sender: source,
+                                        response: b.diagnosticCode || '',
+                                        subject: message.mail.commonHeaders?.subject || '',
+                                    });
+                                }
+                                else if (
+                                    type === 'Transient'
+                                ) {
+                                    const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
+                                    await saveLog({
+                                        id: b.feedbackId,
+                                        email,
+                                        organization,
+                                        type: AuditLogType.EmailAddressSoftBounced,
+                                        subType: subtype || 'unknown',
+                                        sender: source,
+                                        response: b.diagnosticCode || '',
+                                        subject: message.mail.commonHeaders?.subject || '',
+                                    });
                                 }
                             }
                             console.log('[AWS BOUNCES] For domain ' + source);
@@ -199,13 +261,40 @@ async function checkComplaints() {
                                     const emailAddress = await EmailAddress.getOrCreate(email, organization.id);
                                     emailAddress.markedAsSpam = type !== 'not-spam';
                                     await emailAddress.save();
+
+                                    if (type !== 'not-spam') {
+                                        if (type === 'virus' || type === 'fraud') {
+                                            await saveLog({
+                                                id: b.feedbackId,
+                                                email: source,
+                                                organization,
+                                                type: AuditLogType.EmailAddressFraudComplaint,
+                                                subType: type || 'unknown',
+                                                sender: source,
+                                                response: b.diagnosticCode || '',
+                                                subject: message.mail.commonHeaders?.subject || '',
+                                            });
+                                        }
+                                        else {
+                                            await saveLog({
+                                                id: b.feedbackId,
+                                                email: source,
+                                                organization,
+                                                type: AuditLogType.EmailAddressMarkedAsSpam,
+                                                subType: type || 'unknown',
+                                                sender: source,
+                                                response: b.diagnosticCode || '',
+                                                subject: message.mail.commonHeaders?.subject || '',
+                                            });
+                                        }
+                                    }
                                 }
                             }
                             else {
                                 console.error('[AWS COMPLAINTS] Unknown organization for email address ' + source);
                             }
 
-                            if (type == 'virus' || type == 'fraud') {
+                            if (type === 'virus' || type === 'fraud') {
                                 console.error('[AWS COMPLAINTS] Received virus / fraud complaint!');
                                 console.error('[AWS COMPLAINTS]', complaint);
                                 if (STAMHOOFD.environment === 'production') {

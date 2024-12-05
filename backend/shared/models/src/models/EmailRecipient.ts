@@ -1,8 +1,9 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { EmailRecipient as EmailRecipientStruct, Replacement } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { SQL, SQLSelect } from '@stamhoofd/sql';
 
 export class EmailRecipient extends Model {
     static table = 'email_recipients';
@@ -77,5 +78,23 @@ export class EmailRecipient extends Model {
 
     getStructure() {
         return EmailRecipientStruct.create(this);
+    }
+
+    /**
+     * Experimental: needs to move to library
+     */
+    static select() {
+        const transformer = (row: SQLResultNamespacedRow): EmailRecipient => {
+            const d = (this as typeof EmailRecipient & typeof Model).fromRow(row[this.table] as any) as EmailRecipient | undefined;
+
+            if (!d) {
+                throw new Error('EmailTemplate not found');
+            }
+
+            return d;
+        };
+
+        const select = new SQLSelect(transformer, SQL.wildcard());
+        return select.from(SQL.table(this.table));
     }
 }

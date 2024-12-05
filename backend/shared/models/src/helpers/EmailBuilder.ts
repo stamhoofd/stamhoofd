@@ -216,6 +216,24 @@ export type EmailBuilderOptions = {
     callback?: (error: Error | null) => void; // for each email
 };
 
+export function replaceHtml(html: string, replacements: Replacement[]) {
+    let replacedHtml = html;
+
+    for (const replacement of replacements) {
+        replacedHtml = replacedHtml.replaceAll('{{' + replacement.token + '}}', replacement.html || Formatter.escapeHtml(replacement.value));
+    }
+    return replacedHtml;
+}
+
+export function replaceText(text: string, replacements: Replacement[]) {
+    let replacedText = text;
+
+    for (const replacement of replacements) {
+        replacedText = replacedText.replaceAll('{{' + replacement.token + '}}', replacement.value);
+    }
+    return replacedText;
+}
+
 /**
  * @param organization defines replacements and unsubsribe behaviour
  */
@@ -336,13 +354,8 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             return undefined;
         }
 
-        let replacedHtml = email.html;
-        let replacedSubject = email.subject;
-
-        for (const replacement of recipient.replacements) {
-            replacedHtml = replacedHtml.replaceAll('{{' + replacement.token + '}}', replacement.html ?? Formatter.escapeHtml(replacement.value));
-            replacedSubject = replacedSubject.replaceAll('{{' + replacement.token + '}}', replacement.value);
-        }
+        const replacedHtml = replaceHtml(email.html, recipient.replacements);
+        const replacedSubject = replaceText(email.subject, recipient.replacements);
 
         emailIndex += 1;
 

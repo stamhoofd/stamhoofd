@@ -1,4 +1,4 @@
-import { Email } from '@stamhoofd/models';
+import { Email, EmailRecipient, replaceHtml } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, EmailStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ModelLogger } from './ModelLogger';
@@ -19,26 +19,33 @@ export const EmailLogger = new ModelLogger(Email, {
             return;
         }
 
+        if (newStatus !== EmailStatus.Sent && newStatus !== EmailStatus.Sending) {
+            return;
+        }
+
         if (newStatus === EmailStatus.Sent) {
+            const recipient = await EmailRecipient.select().where('emailId', event.model.id).whereNot('sentAt', null).first(false);
+            // Get first recipient
             return {
                 type: AuditLogType.EmailSent,
-                data: {},
+                data: {
+                    recipient,
+                },
                 generatePatchList: false,
             };
         }
 
-        if (newStatus === EmailStatus.Sending) {
-            return {
-                type: AuditLogType.EmailSending,
-                data: {},
-                generatePatchList: false,
-            };
-        }
-        return;
+        return {
+            type: AuditLogType.EmailSending,
+            data: {
+                recipient: null,
+            },
+            generatePatchList: false,
+        };
     },
 
-    createReplacements(model) {
-        return new Map([
+    createReplacements(model, options) {
+        const map = new Map([
             ['e', AuditLogReplacement.create({
                 id: model.id,
                 value: model.subject || '',
@@ -49,5 +56,12 @@ export const EmailLogger = new ModelLogger(Email, {
                 count: model.recipientCount ?? 0,
             })],
         ]);
+        if (options.data.recipient) {
+            map.set('html', AuditLogReplacement.html(
+                replaceHtml(model.html ?? '', options.data.recipient?.replacements ?? []),
+            ));
+        }
+        return map;
     },
+
 });

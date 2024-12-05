@@ -345,10 +345,17 @@ export class Email extends Model {
                     });
                     sendingPromises.push(promise);
 
+                    const virtualRecipient = Recipient.create({
+                        ...recipient,
+                    });
+
                     const callback = async (error: Error | null) => {
                         if (error === null) {
                             // Mark saved
                             recipient.sentAt = new Date();
+
+                            // Update repacements that have been generated
+                            recipient.replacements = virtualRecipient.replacements;
                             await recipient.save();
                         }
                         else {
@@ -365,9 +372,7 @@ export class Email extends Model {
                     // Create e-mail builder
                     const builder = await getEmailBuilder(organization ?? null, {
                         recipients: [
-                            Recipient.create({
-                                ...recipient,
-                            }),
+                            virtualRecipient,
                         ],
                         from,
                         replyTo,

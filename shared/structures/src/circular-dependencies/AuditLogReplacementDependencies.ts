@@ -3,6 +3,7 @@ import { CountryHelper } from '../addresses/CountryDecoder.js';
 import { AuditLogReplacementDependencies } from '../AuditLogReplacement.js';
 import { STPackageTypeHelper } from '../billing/STPackage.js';
 import { DocumentStatusHelper } from '../Document.js';
+import { EmailTemplate } from '../email/EmailTemplate.js';
 import { getGroupStatusName } from '../Group.js';
 import { uuidToName } from '../helpers/uuidToName.js';
 import { getGenderName } from '../members/Gender.js';
@@ -36,6 +37,7 @@ AuditLogReplacementDependencies.enumHelpers.push(
     getGroupStatusName,
     getGenderName,
     getSetupStepName,
+    EmailTemplate.getTypeTitle,
 );
 
 AuditLogReplacementDependencies.uuidToName = uuidToName;

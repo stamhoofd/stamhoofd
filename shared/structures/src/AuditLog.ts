@@ -1,24 +1,8 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { RenderContext, renderTemplate } from './AuditLogRenderer.js';
-import { NamedObject } from './Event.js';
-import wordDictionary from './data/audit-log-words.js';
-import { Platform } from './Platform.js';
-import { PaymentMethodHelper } from './PaymentMethod.js';
-import { ParentTypeHelper } from './members/ParentType.js';
-import { OrderStatusHelper } from './webshops/Order.js';
-import { DocumentStatusHelper } from './Document.js';
-import { AccessRightHelper } from './AccessRight.js';
-import { CheckoutMethodTypeHelper } from './webshops/WebshopMetaData.js';
-import { CountryHelper } from './addresses/CountryDecoder.js';
-import { OrganizationTypeHelper } from './OrganizationType.js';
-import { PaymentStatusHelper } from './PaymentStatus.js';
-import { UmbrellaOrganizationHelper } from './UmbrellaOrganization.js';
-import { STPackageTypeHelper } from './billing/STPackage.js';
-import { getGroupStatusName } from './Group.js';
-import { getGenderName } from './members/Gender.js';
-import { getSetupStepName } from './SetupStepType.js';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
+import { RenderContext, renderTemplate } from './AuditLogRenderer.js';
 import { AuditLogReplacement } from './AuditLogReplacement.js';
+import { NamedObject } from './Event.js';
 
 export enum AuditLogSource {
     User = 'User',
@@ -122,6 +106,7 @@ export enum AuditLogType {
     EmailAddressHardBounced = 'EmailAddressHardBounced',
     EmailAddressSoftBounced = 'EmailAddressSoftBounced',
     EmailAddressUnsubscribed = 'EmailAddressUnsubscribed',
+    EmailAddressFraudComplaint = 'EmailAddressFraudComplaint',
 
     EmailTemplateAdded = 'EmailTemplateAdded',
     EmailTemplateEdited = 'EmailTemplateEdited',
@@ -243,6 +228,9 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `Wijzigingen aan e-mailtemplates`;
         case AuditLogType.EmailTemplateDeleted:
             return `Verwijderde e-mailtemplates`;
+
+        case AuditLogType.EmailAddressFraudComplaint:
+            return `E-mailadressen die een fraudeklacht hebben ingediend`;
     }
 
     return type;
@@ -368,6 +356,8 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`email`, `warning`];
         case AuditLogType.EmailAddressUnsubscribed:
             return [`email`, `disabled red`];
+        case AuditLogType.EmailAddressFraudComplaint:
+            return [`email`, `error red`];
 
         case AuditLogType.EmailTemplateAdded:
             return [`email-template`, `add green`];
@@ -504,13 +494,16 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `E-mail {{e}} werd ingepland om te verzenden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
 
         case AuditLogType.EmailAddressMarkedAsSpam:
-            return `{{e}} heeft een e-mail als spam gemarkeerd`;
+            return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} werd door {{e}} als spam gemarkeerd`;
+
+        case AuditLogType.EmailAddressFraudComplaint:
+            return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} werd door {{e}} als fraude, phishing of virus gemarkeerd`;
 
         case AuditLogType.EmailAddressHardBounced:
-            return `Een e-mail naar {{e}} is permanent mislukt`;
+            return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} naar {{e}} is permanent mislukt`;
 
         case AuditLogType.EmailAddressSoftBounced:
-            return `Een e-mail naar {{e}} is mislukt. Wellicht gaat het om een tijdelijk probleem (bv. volle inbox).`;
+            return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} naar {{e}} is mislukt`;
 
         case AuditLogType.EmailAddressUnsubscribed:
             return `{{e}} heeft zich uitgeschreven voor e-mails`;
@@ -523,6 +516,25 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
 
         case AuditLogType.EmailTemplateDeleted:
             return `E-mailtemplate {{e}} werd verwijderd {{if org " voor " org}}`;
+    }
+}
+
+function getAuditLogTypeDescriptionTemplate(type: AuditLogType): string | undefined {
+    switch (type) {
+        case AuditLogType.EmailSent:
+            return `{{html}}`;
+
+        case AuditLogType.EmailAddressMarkedAsSpam:
+            return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Soms doen mensen dit per ongeluk. Vraag hen dan de e-mail terug als 'geen spam' te markeren.`;
+
+        case AuditLogType.EmailAddressHardBounced:
+            return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}De e-mailprovider gaat ervanuit dat dit een permanent probleem is, dus toekomstige e-mails zullen niet meer verzonden worden naar dit adres. Meestal komt dit voor bij een ongeldig e-mailadres.`;
+
+        case AuditLogType.EmailAddressSoftBounced:
+            return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Wellicht gaat het om een tijdelijk probleem (bv. volle inbox).`;
+
+        case AuditLogType.EmailAddressFraudComplaint:
+            return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response}}`;
     }
 }
 
@@ -606,6 +618,7 @@ function getTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.EmailAddressHardBounced:
         case AuditLogType.EmailAddressSoftBounced:
         case AuditLogType.EmailAddressUnsubscribed:
+        case AuditLogType.EmailAddressFraudComplaint:
             return ['e'];
 
         case AuditLogType.EmailTemplateAdded:
@@ -652,6 +665,38 @@ export class AuditLogPatchItem extends AutoEncoder {
     }
 }
 
+const helpers = {
+    plural: (context: RenderContext, object: any, singular: string, plural: string) => {
+        if (object instanceof AuditLogReplacement) {
+            if (object.count === undefined) {
+                return object.value === '1' ? [singular] : [plural];
+            }
+            return object.count === 1 ? [singular] : [plural];
+        }
+        return [object === 1 || object === '1' ? singular : plural];
+    },
+    capitalizeFirstLetter: (context: RenderContext, object: any) => {
+        if (object instanceof AuditLogReplacement) {
+            const clone = object.clone();
+            clone.value = Formatter.capitalizeFirstLetter(clone.value);
+            return [clone];
+        }
+        return [object];
+    },
+    if: (context: RenderContext, object: any, ...prefixes) => {
+        if (object) {
+            return [...prefixes];
+        }
+        return [];
+    },
+    unless: (context: RenderContext, object: any, ...prefixes) => {
+        if (!object) {
+            return [...prefixes];
+        }
+        return [];
+    },
+};
+
 export class AuditLog extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;
@@ -697,37 +742,26 @@ export class AuditLog extends AutoEncoder {
             return renderTemplate(getAuditLogTypeTitleTemplate(this.type), {
                 type: 'text',
                 context: Object.fromEntries(this.replacements.entries()),
-                helpers: {
-                    plural: (context: RenderContext, object: any, singular: string, plural: string) => {
-                        if (object instanceof AuditLogReplacement) {
-                            if (object.count === undefined) {
-                                return object.value === '1' ? [singular] : [plural];
-                            }
-                            return object.count === 1 ? [singular] : [plural];
-                        }
-                        return [object === 1 || object === '1' ? singular : plural];
-                    },
-                    capitalizeFirstLetter: (context: RenderContext, object: any) => {
-                        if (object instanceof AuditLogReplacement) {
-                            const clone = object.clone();
-                            clone.value = Formatter.capitalizeFirstLetter(clone.value);
-                            return [clone];
-                        }
-                        return [object];
-                    },
-                    if: (context: RenderContext, object: any, ...prefixes) => {
-                        if (object) {
-                            return [...prefixes];
-                        }
-                        return [];
-                    },
-                    unless: (context: RenderContext, object: any, ...prefixes) => {
-                        if (!object) {
-                            return [...prefixes];
-                        }
-                        return [];
-                    },
-                },
+                helpers,
+            });
+        }
+        catch (e) {
+            console.error('Invalid render template', e);
+            return ['Onbekende actie'];
+        }
+    }
+
+    get renderableDescription() {
+        const template = getAuditLogTypeDescriptionTemplate(this.type);
+
+        if (!template) {
+            return [];
+        }
+        try {
+            return renderTemplate(template, {
+                type: 'text',
+                context: Object.fromEntries(this.replacements.entries()),
+                helpers,
             });
         }
         catch (e) {

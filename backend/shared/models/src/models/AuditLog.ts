@@ -1,5 +1,6 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { ArrayDecoder, Decoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { SQL, SQLSelect } from '@stamhoofd/sql';
 import { AuditLogPatchItem, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { v7 as uuidv7 } from 'uuid';
 
@@ -14,6 +15,12 @@ export class AuditLog extends Model {
         },
     })
     id!: string;
+
+    @column({
+        type: 'string',
+        nullable: true,
+    })
+    externalId: string | null = null;
 
     @column({ type: 'string' })
     source: AuditLogSource = AuditLogSource.System;
@@ -34,7 +41,8 @@ export class AuditLog extends Model {
     userId: string | null = null;
 
     /**
-     * Main involved object ID - e.g. the member id
+     * Main involved object ID - e.g. the member id.
+     * Or an email address in case it is email related and we don't have a member or user id
      */
     @column({ type: 'string', nullable: true })
     objectId: string | null = null;
@@ -59,4 +67,22 @@ export class AuditLog extends Model {
         },
     })
     createdAt: Date;
+
+    /**
+     * Experimental: needs to move to library
+     */
+    static select() {
+        const transformer = (row: SQLResultNamespacedRow): AuditLog => {
+            const d = (this as typeof AuditLog & typeof Model).fromRow(row[this.table] as any) as AuditLog | undefined;
+
+            if (!d) {
+                throw new Error('EmailTemplate not found');
+            }
+
+            return d;
+        };
+
+        const select = new SQLSelect(transformer, SQL.wildcard());
+        return select.from(SQL.table(this.table));
+    }
 }

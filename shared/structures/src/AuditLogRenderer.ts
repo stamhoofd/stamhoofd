@@ -59,7 +59,7 @@ class RendersState {
             const last = this.output[this.output.length - 1];
             if (typeof last === 'string' && typeof v === 'string') {
                 this.output[this.output.length - 1] = last + v;
-                return;
+                continue;
             }
             this.output.push(v);
         }
@@ -77,7 +77,12 @@ class RendersState {
             this.previousIsOpenCurly = false;
 
             if (this.previousBackslash) {
-                this.pendingString += char;
+                if (char === 'n' || char === 'r' || char === 't') {
+                    this.pendingString += char === 'n' ? '\n' : char === 'r' ? '\r' : '\t';
+                }
+                else {
+                    this.pendingString += char;
+                }
                 this.previousBackslash = false;
                 this.previousIsEndCurly = false;
             }
@@ -125,7 +130,13 @@ class RendersState {
         this.previousIsEndCurly = false;
 
         if (this.previousBackslash) {
-            this.addOutput(char);
+            if (char === 'n' || char === 'r' || char === 't') {
+                this.addOutput(char === 'n' ? '\n' : char === 'r' ? '\r' : '\t');
+            }
+            else {
+                this.addOutput(char);
+            }
+
             this.previousBackslash = false;
             this.previousIsOpenCurly = false;
             return;
