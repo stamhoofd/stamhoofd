@@ -95,7 +95,7 @@ export function startCrons() {
 
     cronInterval = setInterval(() => {
         crons().catch(console.error);
-    }, (STAMHOOFD.environment !== 'development') ? 5 * 60 * 1000 : 5000);
+    }, 5 * 60 * 1000);
     crons().catch(console.error);
 }
 
