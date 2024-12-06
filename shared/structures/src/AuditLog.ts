@@ -378,9 +378,9 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
         case AuditLogType.MemberEdited:
             return `De gegevens van {{m}} werden gewijzigd`;
         case AuditLogType.MemberRegistered:
-            return `{{m}} werd ingeschreven voor {{g}}`;
+            return `{{m}} werd ingeschreven voor {{g}}{{if org " (" org ")"}}`;
         case AuditLogType.MemberUnregistered:
-            return `{{m}} werd uitgeschreven voor {{g}}`;
+            return `{{m}} werd uitgeschreven voor {{g}}{{if org " (" org ")"}}`;
         case AuditLogType.Unknown:
             return `Onbekende actie`;
         case AuditLogType.PlatformSettingsChanged:
