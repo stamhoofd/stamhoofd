@@ -14,6 +14,10 @@
                 Via deze koppeling zet je alle gegevens van Stamhoofd automatisch over naar de groepsadministratie van Scouts & Gidsen Vlaanderen. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/groepsadministratie-scouts-en-gidsen-vlaanderen/'" target="_blank">Lees eerst de documentatie</a> voor je begint.
             </p>
 
+            <p class="error-box">
+                Door dringende aanpassingen aan de groepsadministratie door Scouts en Gidsen Vlaanderen zijn er tijdelijk wat problemen met hun API waardoor we soms vreemde foutmeldingen krijgen tijdens de synchronisatie ('Deez is mega fout' staat er dan wat ongelukkig verwoord). We zijn op de hoogte en ze werken aan een oplossing.
+            </p>
+
             <p v-if="isTemporaryDisabled" class="error-box">
                 Door een aanpassing in de groepsadministratie (waarschijnlijk een klein foutje), is het tijdelijk niet mogelijk om te synchroniseren (lidfuncties zijn onzichtbaar waardoor je ook manueel geen lid meer kan inschrijven).
             </p>
