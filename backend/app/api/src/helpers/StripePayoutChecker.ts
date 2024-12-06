@@ -32,7 +32,7 @@ export class StripePayoutChecker {
         d.setDate(d.getDate() - 17)
 
         if (checkAll) {
-            d.setFullYear(2022, 11, 1)
+            d.setFullYear(2024, 6, 1)
         }
 
         // Loop all payouts
