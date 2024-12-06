@@ -1,4 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
+
 import { checkAllStripePayouts } from '../helpers/CheckSettlements';
 
 export default new Migration(async () => {
@@ -8,4 +9,4 @@ export default new Migration(async () => {
     }
 
     await checkAllStripePayouts(true)
-}
+});
