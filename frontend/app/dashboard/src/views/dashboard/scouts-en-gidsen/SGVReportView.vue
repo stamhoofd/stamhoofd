@@ -103,7 +103,7 @@
                             <h2 class="style-title-list">
                                 {{ member.details.firstName }} {{ member.details.lastName }}
                             </h2>
-                            <p class="style-description-small" v-if="member.details.birthDay">
+                            <p v-if="member.details.birthDay" class="style-description-small">
                                 {{ member.details.birthDay | date }}
                             </p>
                             <p class="style-description-small">
@@ -237,6 +237,7 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
     }
 
     getErrorMessage(error: Error) {
+
         if (error instanceof SGVMemberError) {
             return this.getErrorMessage(error.error)
         }
@@ -246,6 +247,9 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
         }
         if (!isSimpleError(error) || !isSimpleErrors(error)) {
             return error.message
+        }
+        if (error.hasCode('SGVError')) {
+            return 'De groepsadministratie gaf volgende foutmelding terug: ' + error.getHuman()
         }
         return error.getHuman()
     }
