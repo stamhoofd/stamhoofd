@@ -240,7 +240,8 @@ export class STInvoiceMeta extends AutoEncoder {
     }
 
     getVATOnExcludingVATAmount(price: number) {
-        return Math.round(this.itemPrice * this.VATPercentage / 100)
+        // Make sure price result doesn't depend on the sign of the price
+        return Math.round(Math.abs(price) * this.VATPercentage / 100) * Math.sign(price)
     }
 
     get priceWithoutVAT(): number {
