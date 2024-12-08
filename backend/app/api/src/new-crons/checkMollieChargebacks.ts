@@ -128,7 +128,12 @@ export async function checkMollieChargebacksFor(token: string, checkAll = false)
                                 if (payment) {
                                     const invoices = await STInvoice.where({paymentId: payment.id});
                                     if (invoices.length === 1) {
-                                        await handleInvoiceChargeback(invoices[0], chargeback)
+                                        try {
+                                            await handleInvoiceChargeback(invoices[0], chargeback)
+                                        } catch (e) {
+                                            console.error("Failed to handle chargeback for invoice "+invoices[0].id)
+                                            console.error(e)
+                                        }
                                     }
                                 }
                             } else {
