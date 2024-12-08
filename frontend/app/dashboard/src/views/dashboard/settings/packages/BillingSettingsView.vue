@@ -108,7 +108,7 @@
                 <STList v-if="status && status.invoices.length > 0">
                     <STListItem v-for="invoice of status.invoices" :key="invoice.id" :selectable="true" @click="downloadInvoice(invoice)">
                         <h3 class="style-title-list">
-                            Factuur {{ invoice.number }}
+                            {{ invoice.meta.priceWithoutVAT < 0 ? 'Creditnota' : 'Factuur' }} {{ invoice.number }}
                         </h3>
                         <p class="style-description">
                             {{ (invoice.meta.date || invoice.paidAt || invoice.createdAt) | date }}

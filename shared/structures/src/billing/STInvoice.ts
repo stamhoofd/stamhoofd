@@ -296,6 +296,9 @@ export class STInvoice extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true })
     paidAt: Date | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 245})
+    negativeInvoiceId: string | null = null
 }
 
 export class STInvoicePrivate extends STInvoice {
@@ -314,9 +317,9 @@ export class STInvoicePrivate extends STInvoice {
         }
 
         if (
-            StringCompare.typoCount(this.meta.companyName, query) < 2 ||
+            StringCompare.contains(this.meta.companyName, query) ||
             StringCompare.typoCount(this.meta.companyAddress.city, query) < 2 ||
-            StringCompare.typoCount(this.meta.companyContact, query) < 2 ||
+            StringCompare.contains(this.meta.companyContact, query) ||
             (this.meta.companyVATNumber && StringCompare.typoCount(this.meta.companyVATNumber, query) < 2) ||
             StringCompare.typoCount(this.meta.companyAddress.street, query) < 2
         ) {

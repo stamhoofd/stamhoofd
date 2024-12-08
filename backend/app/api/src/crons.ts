@@ -21,6 +21,7 @@ import { ExchangePaymentEndpoint } from './endpoints/organization/shared/Exchang
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ExcelHelper, RowValue } from './helpers/ExcelHelper';
 import { ForwardHandler } from './helpers/ForwardHandler';
+import { checkMollieChargebacks } from './new-crons/checkMollieChargebacks';
 
 // Importing postmark returns undefined (this is a bug, so we need to use require)
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -967,6 +968,12 @@ const registeredCronJobs: CronJobDefinition[] = []
 registeredCronJobs.push({
     name: 'checkSettlements',
     method: checkSettlements,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkMollieChargebacks',
+    method: checkMollieChargebacks,
     running: false
 });
 

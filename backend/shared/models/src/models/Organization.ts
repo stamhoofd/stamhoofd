@@ -899,7 +899,16 @@ export class Organization extends Model {
         const filtered = admins.filter(a => a.permissions && (a.permissions.hasFullAccess(this.privateMeta.roles) || a.permissions.hasFinanceAccess(this.privateMeta.roles)))
 
         if (filtered.length > 0) {
-            return filtered.map(f => f.getEmailTo() ).join(", ")
+            return filtered.flatMap(f => f.getEmailTo() ).map((recipient) => {
+                if (!recipient.name) {
+                    return recipient.email
+                }
+                const cleanedName = Formatter.emailSenderName(recipient.name)
+                if (cleanedName.length < 2) {
+                    return recipient.email
+                }
+                return '"'+cleanedName+'" <'+recipient.email+'>'
+            }).join(", ")
         }
 
         return undefined

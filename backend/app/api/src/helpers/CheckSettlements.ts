@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, StripeAccount } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/structures'
+import { Formatter } from '@stamhoofd/utility';
 import axios from 'axios';
 
 import { StripePayoutChecker } from './StripePayoutChecker';
@@ -13,7 +14,7 @@ type MollieSettlement = {
     settledAt: string;
     status: "open" | "pending" | "paidout" | "failed";
     amount: {
-        currenty: string;
+        currency: string;
         value: string;
     }
 }
@@ -130,7 +131,9 @@ export async function checkMollieSettlementsFor(token: string, checkAll = false)
                         }
 
                         if (checkAll || settledAt > d) {
-                            await updateSettlement(token, settlement)
+                            console.log('Checking settlement', Formatter.date(settledAt, true));
+                            await updateSettlement(token, settlement, null, 'payments')
+                            await updateSettlement(token, settlement, null, 'chargebacks')
                         }
                     }
                 } else {
@@ -151,20 +154,36 @@ export async function checkMollieSettlementsFor(token: string, checkAll = false)
     }
 }
 
-async function updateSettlement(token: string, settlement: MollieSettlement, fromPaymentId?: string) {
+async function updateSettlement(token: string, settlement: MollieSettlement, fromPaymentId: string | null = null, type: 'payments' | 'chargebacks' = 'payments') {
     const limit = 250
 
     // Loop all payments of this settlement
-    const request = await axios.get("https://api.mollie.com/v2/settlements/"+settlement.id+"/payments?limit="+limit+(fromPaymentId ? ("&from="+encodeURIComponent(fromPaymentId)) : ""), {
+    const request = await axios.get("https://api.mollie.com/v2/settlements/"+settlement.id+"/"+type+"?limit="+limit+(fromPaymentId ? ("&from="+encodeURIComponent(fromPaymentId)) : ""), {
         headers: {
             "Authorization": "Bearer "+token
         }
     })
 
     if (request.status === 200) {
-        const molliePayments = request.data._embedded.payments as MolliePaymentJSON[]
+        const molliePayments = request.data._embedded.payments ?? [] as MolliePaymentJSON[]
+        const mollieChargebacks = request.data._embedded.chargebacks ?? [] as MolliePaymentJSON[]
 
-        for (const mollie of molliePayments) {
+        if (molliePayments.length) {
+            console.log("Updating "+molliePayments.length+" payments for settlement "+settlement.id)
+        }
+
+        if (mollieChargebacks.length) {
+            console.log("Updating "+mollieChargebacks.length+" chargebacks for settlement "+settlement.id)
+        }
+
+        if (type === 'chargebacks' && request.data._embedded.chargebacks === undefined) {
+            console.error("No chargebacks found in response", request.data)
+        }
+        if (type === 'chargebacks' && request.data._embedded.chargebacks !== undefined && request.data._embedded.chargebacks.length === 0) {
+            console.error("Empty chargebacks found in response")
+        }
+
+        for (const mollie of [...molliePayments, ...mollieChargebacks]) {
             // Search payment
             const mps = await MolliePayment.where({ mollieId: mollie.id })
             if (mps.length == 1) {
@@ -207,9 +226,14 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
 
         // Check next page
         if (request.data._links.next) {
-            await updateSettlement(token, settlement, molliePayments[molliePayments.length - 1].id)
+            if (type === 'chargebacks') {
+                await updateSettlement(token, settlement, mollieChargebacks[mollieChargebacks.length - 1].id ?? null, type)
+            } else {
+                await updateSettlement(token, settlement, molliePayments[molliePayments.length - 1].id ?? null, type)
+            }
         }
     } else {
+        console.error("Failed to fetch " + type)
         console.error(request.data)
     }
 }

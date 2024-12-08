@@ -127,12 +127,14 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_DARK);
         this.document.font('Metropolis-SemiBold')
 
+        const price = this.invoice.meta.priceWithVAT
+
         if (this.invoice.number) {
-            this.document.text("Factuur", logoX * MM, this.posY * MM, { align: 'left' })
+            this.document.text(price >= 0 ? "Factuur" : "Creditnota", logoX * MM, this.posY * MM, { align: 'left' })
             this.document.fillColor(COLOR_PRIMARY);
             this.document.text(this.invoice.number + "", 43 * MM, this.posY * MM, { align: 'left' })
         } else {
-            this.document.text("Pro-forma factuur", logoX * MM, this.posY * MM, { align: 'left' })
+            this.document.text(price >= 0 ? "Pro-forma factuur" : "Pro-forma creditnota", logoX * MM, this.posY * MM, { align: 'left' })
         }
 
         this.posY = 53
@@ -144,7 +146,7 @@ export class InvoiceBuilder {
         this.document.text("Datum", logoX * MM, this.posY * MM, { align: 'left' })
         this.document.text(Formatter.date(date, true), 43 * MM, this.posY * MM, { align: 'left' })
 
-        if (this.invoice.number) {
+        if (this.invoice.number && price >= 0) {
             this.document.moveDown()
             const savedY = this.document.y
             this.document.text("Vervaldatum", logoX * MM, savedY, { align: 'left' })
@@ -173,7 +175,7 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_DARK);
         this.document.font('Metropolis-SemiBold')
 
-        this.document.text(this.invoice.number ? "Factuur voor" : "Voor", x * MM, this.document.y + 10*MM, { align: 'left' })
+        this.document.text(this.invoice.number && price >= 0 ? "Factuur voor" : "Voor", x * MM, this.document.y + 10*MM, { align: 'left' })
 
         this.document.fontSize(3 * MM);
         this.document.fillColor(COLOR_GRAY_DARK);
@@ -429,11 +431,17 @@ export class InvoiceBuilder {
         if (!this.invoice.number) {
             text = "Druk dit document niet af. Dit is nog geen officiële factuur"
         }
+        if (this.invoice.number && this.invoice.meta.priceWithVAT < 0) {
+            text = "Hou deze creditnota bij voorkeur digitaal bij"
+        }
+
         this.document.translate(-PAGE_MARGIN, -y)
         const hh = this.document.heightOfString(text, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 })
         this.document.text(text, PAGE_MARGIN + 8*MM, y + 12/2 - hh/2, { align: 'left' })
 
-        if (this.payment && this.payment.method) {
+        if (this.invoice.meta.priceWithVAT < 0) {
+            // Don't mention something atm
+        } else if (this.payment && this.payment.method) {
             if (this.payment.status === PaymentStatus.Succeeded) {
                 y -= 10*MM
                 this.document.fillColor(COLOR_PRIMARY)

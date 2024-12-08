@@ -245,7 +245,7 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
         if (Request.isNetworkError(error)) {
             return 'Er was een internetprobleem of de groepsadministratie was tijdelijk onbereikbaar, gaf een interne foutmelding of reageerde niet.'
         }
-        if (!isSimpleError(error) || !isSimpleErrors(error)) {
+        if (!isSimpleError(error) && !isSimpleErrors(error)) {
             return error.message
         }
         if (error.hasCode('SGVError')) {

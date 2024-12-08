@@ -1,4 +1,4 @@
-import { createMollieClient } from '@mollie/api-client';
+import { createMollieClient, PaymentStatus as MolliePaymentStatus} from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
@@ -23,7 +23,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
     queryDecoder = Query as Decoder<Query>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "POST") {
+        if (request.method != "POST" && STAMHOOFD.environment !== "development") {
             return [false];
         }
 
@@ -115,7 +115,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                                 payment.ibanName = details.consumerName
                             }
 
-                            if (mollieData.status == "paid") {
+                            if (mollieData.status === MolliePaymentStatus.paid) {
                                 payment.status = PaymentStatus.Succeeded
                                 payment.paidAt = new Date()
                                 await payment.save();
@@ -131,7 +131,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                                         await organization.save()
                                     }
                                 }
-                            } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
+                            } else if (mollieData.status == MolliePaymentStatus.failed || mollieData.status == MolliePaymentStatus.expired || mollieData.status == MolliePaymentStatus.canceled) {
                                 payment.status = PaymentStatus.Failed
                                 await payment.save();
                                 await invoice.markFailed(payment)

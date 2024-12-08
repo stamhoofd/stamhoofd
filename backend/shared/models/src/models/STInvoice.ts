@@ -1,7 +1,8 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
 import { QueueHandler } from "@stamhoofd/queues";
-import { calculateVATPercentage, Payment as PaymentStruct, PaymentMethod, STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
+import { calculateVATPercentage, Country,Payment as PaymentStruct, PaymentMethod, STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
@@ -51,6 +52,12 @@ export class STInvoice extends Model {
 
     @column({ type: "datetime", nullable: true })
     paidAt: Date | null = null
+
+    /**
+     * If a invoice was refunded because of a cancellation, we store the negative invoice id here
+     */
+    @column({ type: "string", nullable: true })
+    negativeInvoiceId: string | null = null
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -192,7 +199,7 @@ export class STInvoice extends Model {
 
         this.paidAt = new Date()
 
-        if (this.meta.priceWithoutVAT > 0) {
+        if (this.meta.priceWithoutVAT !== 0) {
             // Only assign a number if it was an non empty invoice
             await this.assignNextNumber()
         }
@@ -217,16 +224,23 @@ export class STInvoice extends Model {
                 if (pack) {
                     // Increase paid amount
                     pack.meta.paidPrice += item.price
-                    pack.meta.paidAmount += item.amount
+
+                    if (item.price < 0 && item.amount > 0) {
+                        pack.meta.paidAmount -= item.amount
+                    } else {
+                        pack.meta.paidAmount += item.amount
+                    }
                     await pack.save();
                 }
             }
         }
 
         // Search for all packages and activate them if needed (might be possible that they are already validated)
-        await this.activatePackages(true)
+        if (this.meta.priceWithVAT >= 0) {
+            await this.activatePackages(true)
+        }
 
-        if (packages.length === 0) {
+        if (packages.length === 0 && this.meta.priceWithVAT >= 0) {
             // Mark payments succeeded
             const orgPackages = await this.getOrganizationActivePackages()
             for (const p of orgPackages) {
@@ -250,7 +264,26 @@ export class STInvoice extends Model {
                     if (!found) {
                         newItems.push(item)
                     } else {
-                        console.log("Removed invoice item "+item.id+" from pending invoice "+pendingInvoice.id)
+                        if (found.price !== item.price) {
+                            console.warn("Price mismatch for item "+item.id+" in pending invoice "+pendingInvoice.id)
+
+                            if (found.unitPrice !== item.unitPrice) {
+                                console.warn("Unit price mismatch for item "+item.id+" in pending invoice "+pendingInvoice.id)
+                            } else {
+                                // Update remaining amount
+                                const c = item.clone()
+                                c.amount -= found.amount
+
+                                if (c.amount > 0) {
+                                    newItems.push(c)
+                                    console.log("Updated invoice item "+item.id+" in pending invoice "+pendingInvoice.id + ' with remaining amount of '+c.amount)
+                                } else {
+                                    console.log("Removed invoice item "+item.id+" from pending invoice "+pendingInvoice.id + ' because remaining amount is 0')
+                                }
+                            }
+                        } else {
+                            console.log("Removed invoice item "+item.id+" from pending invoice "+pendingInvoice.id)
+                        }
                     }
                 }
                 pendingInvoice.meta.items = newItems
@@ -270,7 +303,7 @@ export class STInvoice extends Model {
             await this.generatePdf()
         }
 
-        if (this.organizationId && this.meta.pdf && this.number !== null && sendEmail) {
+        if (this.organizationId && this.meta.pdf && this.number !== null && sendEmail && this.meta.priceWithVAT > 0) {
             const organization = await Organization.getByID(this.organizationId)
             if (organization) {
                 const invoicingTo = await organization.getInvoicingToEmails()
@@ -280,7 +313,7 @@ export class STInvoice extends Model {
                     Email.sendInternal({
                         to: invoicingTo,
                         bcc: "simon@stamhoofd.be",
-                        subject: "Stamhoofd Factuur " + this.number + " voor " + organization.name,
+                        subject: "Factuur " + this.number + " voor " + organization.name,
                         text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie factuur "+ this.number +" voor jullie administratie. Deze werd al betaald, je hoeft dus geen actie meer te ondernemen. Neem gerust contact met ons op (via "+organization.i18n.$t("shared.emails.general")+") als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         attachments: [
                             {
@@ -292,6 +325,21 @@ export class STInvoice extends Model {
                     }, organization.i18n)
                 }
             }
+        } else if (this.meta.pdf && this.number !== null && this.meta.priceWithVAT < 0) {
+            // Send the e-mail
+            Email.sendInternal({
+                to: 'hallo@stamhoofd.be',
+                bcc: "simon@stamhoofd.be",
+                subject: "Creditnota " + this.number,
+                text: "Beste, \n\nIn bijlage creditnota "+ this.number +" voor de administratie.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                attachments: [
+                    {
+                        filename: "creditnota-"+this.number+".pdf",
+                        href: this.meta.pdf.getPublicPath(),
+                        contentType: "application/pdf"
+                    }
+                ]
+            }, new I18n("nl", Country.Belgium))
         }
 
         // Reward if we have an open register code
@@ -305,6 +353,134 @@ export class STInvoice extends Model {
                 await code.reward()
             }
         }
+    }
+
+    /**
+     * WARNING: only call this in the correct queue!
+     */
+    async undoMarkPaid({sendEmail} = { sendEmail: true }) {
+        // Schule on the queue because we are modifying pending invoices
+        if (this.paidAt === null || this.negativeInvoiceId) {
+            return
+        }
+        if (this.meta.priceWithVAT <= 0) {
+            return;
+        }
+        if (!this.paymentId) {
+            return;
+        }
+        const payment = await Payment.getByID(this.paymentId)
+        if (!payment) {
+            return;
+        }
+
+        if (!this.organizationId) {
+            return;
+        }
+        await QueueHandler.schedule("billing/invoices-" + this.organizationId, async () => {
+            if (!this.organizationId) {
+                return;
+            }
+            const organization = await Organization.getByID(this.organizationId)
+
+            if (!organization) {
+                throw new Error("Organization not found")
+            }
+
+            // Readd the invoice items to the pending invoice
+            await STPendingInvoice.addItems(organization, this.meta.items)
+
+            await STPackage.updateOrganizationPackages(this.organizationId)
+            
+            if (this.meta.pdf && this.number !== null && sendEmail) {
+                const invoicingTo = await organization.getInvoicingToEmails()
+
+                console.log("Sending failure e-mail to "+invoicingTo)
+
+                // Send the e-mail
+                if (payment.method === PaymentMethod.DirectDebit) {
+                    Email.sendInternal({
+                        to: invoicingTo || 'hallo@stamhoofd.be',
+                        bcc: "simon@stamhoofd.be",
+                        subject: "Betaling mislukt voor factuur " + this.number + " voor " + organization.name,
+                        text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat een betaling voor een eerdere factuur ("+this.number+") is mislukt (in bijlage). Dit kan voorvallen als jullie een betaling terugdraaien via jullie bank of als de domiciliëring is mislukt (bv. onvoldoende saldo). \n\nAls jullie de rekening van automatische betalingen willen wijzigen, kunnen jullie hiervoor deze gids volgen: https://"+organization.marketingDomain+"/docs/bankrekening-domiciliering-wijzigen/\n\nGelieve het openstaande bedrag zo snel mogelijk te betalen door in te loggen op Stamhoofd en in het tabblad 'Boekhouding' eventuele openstaande bedragen in orde te brengen. Bij vragen of bedenkingen over eventuele afrekeningen kan je ons ook steeds contacteren via "+organization.i18n.$t("shared.emails.general")+".\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                        attachments: [
+                            {
+                                filename: "factuur-"+this.number+".pdf",
+                                href: this.meta.pdf.getPublicPath(),
+                                contentType: "application/pdf"
+                            }
+                        ]
+                    }, organization.i18n)
+                } else if (payment.method === PaymentMethod.CreditCard) {
+                    Email.sendInternal({
+                        to: invoicingTo || 'hallo@stamhoofd.be',
+                        bcc: "simon@stamhoofd.be",
+                        subject: "Betaling mislukt voor factuur " + this.number + " voor " + organization.name,
+                        text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat een betaling voor een eerdere factuur ("+this.number+") is mislukt (in bijlage). Dit kan voorvallen als jullie een betaling terugdraaien via jullie bank of als de betaling is mislukt (bv. onvoldoende saldo). \n\nAls jullie de rekening van automatische betalingen willen wijzigen, kunnen jullie hiervoor deze gids volgen: https://"+organization.marketingDomain+"/docs/bankrekening-domiciliering-wijzigen/\n\nGelieve het openstaande bedrag zo snel mogelijk te betalen door in te loggen op Stamhoofd en in het tabblad 'Boekhouding' eventuele openstaande bedragen in orde te brengen. Bij vragen of bedenkingen over eventuele afrekeningen kan je ons ook steeds contacteren via "+organization.i18n.$t("shared.emails.general")+".\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                        attachments: [
+                            {
+                                filename: "factuur-"+this.number+".pdf",
+                                href: this.meta.pdf.getPublicPath(),
+                                contentType: "application/pdf"
+                            }
+                        ]
+                    }, organization.i18n)
+                } else {
+                    Email.sendInternal({
+                        to: invoicingTo || 'hallo@stamhoofd.be',
+                        bcc: "simon@stamhoofd.be",
+                        subject: "Betaling teruggedraaid voor factuur " + this.number + " voor " + organization.name,
+                        text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat een betaling voor een eerdere factuur toch is mislukt.\n\nGelieve dit zo snel mogelijk na te kijken door in te loggen op Stamhoofd en in het tabblad 'Boekhouding' eventuele openstaande bedragen te betalen.\n\nBij vragen of bedenkingen bij eventuele afrekeningen kan je ons ook steeds contacteren via "+organization.i18n.$t("shared.emails.general")+".\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                        attachments: [
+                            {
+                                filename: "factuur-"+this.number+".pdf",
+                                href: this.meta.pdf.getPublicPath(),
+                                contentType: "application/pdf"
+                            }
+                        ]
+                    }, organization.i18n)
+                }
+            } else {
+                console.warn("No invoice pdf found for invoice "+this.id + ", not sending failure e-mail")
+            }
+
+            await this.createRefundInvoice()
+        });
+    }
+
+    async createRefundInvoice() {
+        if (this.negativeInvoiceId) {
+            console.log('Refund invoice already created for '+this.id)
+            return
+        }
+
+        console.log('Creating refund invoice for '+this.id)
+        const invoice = new STInvoice()
+        invoice.organizationId = this.organizationId
+        
+        const date = new Date()
+        invoice.meta = STInvoiceMeta.create({
+            ...this.meta,
+            date,
+            pdf: undefined
+        })
+        invoice.meta.items = this.meta.items.map(i => i.clone())
+
+        // Loop items and set price to negative
+        for (const item of invoice.meta.items) {
+            item.unitPrice = -item.unitPrice
+
+            // Create new item id
+            item.id = uuidv4()
+        }
+        await invoice.save()
+        await invoice.markPaid({ sendEmail: false})
+
+        this.negativeInvoiceId = invoice.id
+        await this.save()
+
+        return invoice
     }
 
     async assignNextNumber() {
@@ -346,6 +522,10 @@ export class STInvoice extends Model {
      * WARNGING: only call this method in the correct queue!
      */
     async markFailed(payment: Payment, markFailed = true) {
+        if (this.negativeInvoiceId) {
+            // Already handled
+            return;
+        }
         console.log("Mark invoice as failed", this.id)
 
         const packages = await this.getPackages()
@@ -400,7 +580,7 @@ export class STInvoice extends Model {
             await STPackage.updateOrganizationPackages(this.organizationId)
         }
 
-        if (this.creditId !== null) {
+        if (this.creditId !== null && !this.paidAt) {
             const credit = await STCredit.getByID(this.creditId)
             if (credit && (credit.expireAt === null || credit.expireAt > new Date())) {
                 // Expire usage (do not delete to keep the relation for debugging and recovery)
@@ -409,38 +589,44 @@ export class STInvoice extends Model {
             }
         }
 
-        if (markFailed && this.organizationId && payment.method === PaymentMethod.DirectDebit) {
-            const organization = await Organization.getByID(this.organizationId)
-            if (organization) {
-                const invoicingTo = await organization.getInvoicingToEmails()
+        if (!this.number) {
+            if (markFailed && this.organizationId && payment.method === PaymentMethod.DirectDebit) {
+                const organization = await Organization.getByID(this.organizationId)
+                if (organization) {
+                    const invoicingTo = await organization.getInvoicingToEmails()
 
-                if (invoicingTo) {
-                    // Send the e-mail
-                    Email.sendInternal({
-                        to: invoicingTo,
-                        bcc: "simon@stamhoofd.be",
-                        subject: "Betaling mislukt voor "+organization.name,
-                        text: "Dag "+organization.name+", \n\nDe automatische betaling via domiciliëring van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
-                    }, organization.i18n)
+                    if (invoicingTo) {
+                        // Send the e-mail
+                        Email.sendInternal({
+                            to: invoicingTo,
+                            bcc: "simon@stamhoofd.be",
+                            subject: "Betaling mislukt voor "+organization.name,
+                            text: "Dag "+organization.name+", \n\nDe automatische betaling via domiciliëring van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                        }, organization.i18n)
+                    } else {
+                        console.warn("No invoicing e-mail found for "+organization.name)
+                    }
                 }
             }
-        }
 
-        if (markFailed && this.organizationId && payment.method === PaymentMethod.Transfer) {
-            const organization = await Organization.getByID(this.organizationId)
-            if (organization) {
-                const invoicingTo = await organization.getInvoicingToEmails()
+            if (markFailed && this.organizationId && payment.method === PaymentMethod.Transfer) {
+                const organization = await Organization.getByID(this.organizationId)
+                if (organization) {
+                    const invoicingTo = await organization.getInvoicingToEmails()
 
-                if (invoicingTo) {
-                    // Send the e-mail
-                    Email.sendInternal({
-                        to: invoicingTo,
-                        bcc: "simon@stamhoofd.be",
-                        subject: "Betaling mislukt voor "+organization.name,
-                        text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat we geen overschrijving hebben ontvangen voor jullie aankoop. Kijk even na wat er fout ging en betaal het openstaande bedrag om te vermijden dat de diensten worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
-                    }, organization.i18n)
+                    if (invoicingTo) {
+                        // Send the e-mail
+                        Email.sendInternal({
+                            to: invoicingTo,
+                            bcc: "simon@stamhoofd.be",
+                            subject: "Betaling mislukt voor "+organization.name,
+                            text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat we geen overschrijving hebben ontvangen voor jullie aankoop. Kijk even na wat er fout ging en betaal het openstaande bedrag om te vermijden dat de diensten worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                        }, organization.i18n)
+                    }
                 }
             }
+        } else {
+            await this.undoMarkPaid({ sendEmail: true })
         }
     }
 

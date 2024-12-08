@@ -74,7 +74,7 @@ export class STPendingInvoice extends Model {
     /**
      * Always run this in the queue!
      */
-    static async addItems(organization: Organization, invoiceItems: STInvoiceItem[]): Promise<STPendingInvoice | undefined> {
+    static async addItems(organization: Organization, invoiceItems: STInvoiceItem[]): Promise<STPendingInvoice | undefined> {        
         // Get the pending invoice if it exists
         const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
         return await this.addItemsTo(pendingInvoice, organization, invoiceItems)
