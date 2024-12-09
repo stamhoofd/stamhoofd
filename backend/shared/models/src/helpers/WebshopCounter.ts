@@ -45,4 +45,8 @@ export class WebshopCounter  {
             return Promise.resolve()
         })
     }
+
+    static clearAll(){
+        this.numberCache.clear()
+    }
 }

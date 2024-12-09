@@ -228,7 +228,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 if (model.status === OrderStatus.Deleted) {
                     model.data.removePersonalData()
-                    model.number = Math.floor(Math.random() * 1000000000000) + 1000000000000
+
+                    if (model.number !== null) {
+                        model.number = Math.floor(Math.random() * 1000000000000) + 1000000000000
+                    }
                     clearNumbers = true;
                 }
 
