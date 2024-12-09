@@ -197,7 +197,7 @@ export class StripeHelper {
             throw new SimpleError({
                 code: "minmum_amount",
                 message: "The minimum amount for an online payment is € 0,50",
-                human: "Het minimale bedrag voor een online betaling is € 0,50",
+                human: "Het minimum bedrag voor een online betaling is € 0,50",
             })
         }
 
