@@ -4,8 +4,8 @@ import { Order, WebshopCounter } from '@stamhoofd/models';
 import { OrderStatus } from '@stamhoofd/structures';
 
 export default new Migration(async () => {
-    if (STAMHOOFD.environment == "test") {
-        console.log("skipped in tests")
+    if (STAMHOOFD.environment == 'test') {
+        console.log('skipped in tests');
         return;
     }
 
@@ -14,52 +14,95 @@ export default new Migration(async () => {
     let pages = 0;
     let id: string = '';
 
-    await logger.setContext({tags: ['silent-seed', 'seed']}, async () => {
-        while(true) {
-            const orders = await Order.where({
-                id: {
-                    value: id,
-                    sign: '>'
-                },
-                status: OrderStatus.Deleted,
-            }, {limit: 100, sort: ['id']});
+    // There is an issue with some deleted orders that can't be stringified anymore
+    let limit = 100;
+    let restoreLimitAt: number | null = null;
 
-            if (orders.length === 0) {
-                break;
-            }
+    await logger.setContext({ tags: ['silent-seed', 'seed'] }, async () => {
+        while (true) {
+            try {
+                const orders = await Order.where({
+                    id: {
+                        value: id,
+                        sign: '>',
+                    },
+                    status: OrderStatus.Deleted,
+                }, { limit, sort: ['id'] });
 
-            pages++;
-            process.stdout.write('.');
-            if (pages%100 === 0) {
-                process.stdout.write('\n');
-            }
-
-            for (const order of orders) {
-                c++;
-
-                if (order.status === OrderStatus.Deleted) {
-                    order.data.removePersonalData()
-
-                    if (order.number !== null) {
-                        order.number = Math.floor(Math.random() * 1000000000000) + 1000000000000
-                    }
-                    await order.save()
+                if (orders.length === 0) {
+                    break;
                 }
-            }
 
-            if (orders.length < 100) {
-                break;
+                pages++;
+                process.stdout.write('.');
+                if (pages % 100 === 0) {
+                    process.stdout.write('\n');
+                }
+
+                if (limit === 1 && restoreLimitAt && pages > restoreLimitAt) {
+                    limit = 100;
+                }
+
+                for (const order of orders) {
+                    c++;
+
+                    if (order.status === OrderStatus.Deleted) {
+                        order.data.removePersonalData();
+
+                        if (order.number !== null) {
+                            order.number = Math.floor(Math.random() * 1000000000000) + 1000000000000;
+                        }
+                        await order.save();
+                    }
+                }
+
+                if (orders.length < limit) {
+                    break;
+                }
+                id = orders[orders.length - 1].id;
             }
-            id = orders[orders.length - 1].id;
+            catch (e) {
+                if (e.message && e.message.includes('RangeError')) {
+                    console.error('Found decoding issue:');
+                    console.error(e);
+                    if (limit === 1) {
+                        // We found the causing order.
+
+                        const _orders = await Order.where({
+                            id: {
+                                value: id,
+                                sign: '>',
+                            },
+                            status: OrderStatus.Deleted,
+                        }, { limit: 1, sort: ['id'], select: 'id' });
+
+                        if (_orders.length === 1) {
+                            console.log('Found broken order: ' + _orders[0].id);
+                            console.log('Deleting order');
+                            // Delete
+                            await _orders[0].delete();
+                        }
+                        else {
+                            console.error('Could not find causing order');
+                            throw e;
+                        }
+                    }
+                    // Something wrong with an order
+                    // continue
+                    limit = 1;
+                    restoreLimitAt = pages + 100;
+                    continue;
+                }
+                throw e;
+            }
         }
-    })
+    });
 
-    console.log("Cleared "+c+" deleted orders")
+    console.log('Cleared ' + c + ' deleted orders');
 
     // Clear all cached order numbers
-    WebshopCounter.clearAll()
+    WebshopCounter.clearAll();
 
     // Do something here
-    return Promise.resolve()
+    return Promise.resolve();
 });
-
