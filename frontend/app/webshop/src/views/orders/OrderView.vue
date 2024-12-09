@@ -130,7 +130,7 @@
                     </p>
 
                     <STList class="info">
-                        <STListItem v-if="order.number" class="right-description">
+                        <STListItem v-if="order.number && !isDeleted" class="right-description">
                             <h3 class="style-definition-label">
                                 Bestelnummer
                             </h3>
@@ -139,7 +139,7 @@
                                 {{ order.number }}
                             </p>
                         </STListItem>
-                        <STListItem class="right-description">
+                        <STListItem v-if="order.data.customer.name" class="right-description">
                             <h3 class="style-definition-label">
                                 Naam
                             </h3>
@@ -148,7 +148,7 @@
                                 {{ order.data.customer.name }}
                             </p>
                         </STListItem>
-                        <STListItem class="right-description">
+                        <STListItem v-if="order.data.customer.email" class="right-description">
                             <h3 class="style-definition-label">
                                 E-mailadres
                             </h3>

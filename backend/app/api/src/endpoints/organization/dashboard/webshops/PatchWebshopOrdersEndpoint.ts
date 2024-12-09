@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Data, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop, WebshopCounter } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment,Webshop as WebshopStruct } from "@stamhoofd/structures";
 
@@ -80,6 +80,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         if (body.changes.length == 0) {
             return new Response([]);
         }
+
+        let clearNumbers = false;
 
         // Need to happen in the queue because we are updating the webshop stock
         const orders = await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
@@ -226,6 +228,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 if (model.status === OrderStatus.Deleted) {
                     model.data.removePersonalData()
+                    model.number = Math.floor(Math.random() * 1000000000000) + 1000000000000
+                    clearNumbers = true;
                 }
 
                 if (model.status === OrderStatus.Deleted || model.status === OrderStatus.Canceled) {
@@ -270,6 +274,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             const mapped = orders.map(order => order.setRelation(Order.webshop, webshop))
             return mapped
         })
+
+        if (clearNumbers) {
+            WebshopCounter.resetNumbers(request.params.id)
+        }
 
         return new Response(
             await Order.getPrivateStructures(orders)

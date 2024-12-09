@@ -85,16 +85,10 @@
         <div class="container">
             <hr>
             <h2>Nummering</h2>
-            <p v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" class="warning-box">
-                Je kan de bestelnummering niet meer wijzigen van willekeurig naar opeenvolgend (dupliceer de webshop als je dat toch nog wilt doen). 
-            </p>
-            <p v-else-if="numberingType == WebshopNumberingType.Random" class="warning-box">
-                Je kan de bestelnummering achteraf niet meer wijzigen van willekeurig naar opeenvolgend. 
-            </p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Continuous" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
+                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Continuous" />
                     <h3 class="style-title-list">
                         Gebruik opeenvolgende bestelnummers
                     </h3>
@@ -103,7 +97,7 @@
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Random" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
+                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Random" />
                     <h3 class="style-title-list">
                         Gebruik willekeurige bestelnummers
                     </h3>
@@ -112,6 +106,13 @@
                     </p>
                 </STListItem>
             </STList>
+
+            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" title="Eerste bestelnummer" error-fields="settings.openAt" :error-box="errorBox">
+                <NumberInput v-model="startNumber" :min="1" />
+            </STInputBox>
+            <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
+                Je kan dit enkel wijzigen als je alle bestellingen verwijdert.
+            </p>
         </div>
 
         <template v-if="isNew">
@@ -181,10 +182,10 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, DateSelection, NumberInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, sleep } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
@@ -204,10 +205,11 @@ import EditWebshopMixin from './EditWebshopMixin';
         Radio,
         SaveView,
         WebshopPermissionRow,
-        EditPaymentMethodsBox
+        EditPaymentMethodsBox,
+        NumberInput
     },
 })
-export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
+export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {    
     mounted() {
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/general")
         
@@ -352,6 +354,15 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
 
     set numberingType(numberingType: WebshopNumberingType) {
         const patch = WebshopPrivateMetaData.patch({ numberingType })
+        this.addPatch(PrivateWebshop.patch({ privateMeta: patch}) )
+    }
+
+    get startNumber() {
+        return this.webshop.privateMeta.startNumber
+    }
+
+    set startNumber(startNumber: number) {
+        const patch = WebshopPrivateMetaData.patch({ startNumber })
         this.addPatch(PrivateWebshop.patch({ privateMeta: patch}) )
     }
 

@@ -117,6 +117,8 @@ export class OrderData extends Checkout {
         for (const item of this.cart.items) {
             item.fieldAnswers = []
         }
+
+        this.recordAnswers = []
     }
 }
 

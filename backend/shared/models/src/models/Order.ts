@@ -926,7 +926,7 @@ export class Order extends Model {
         }
         this.validAt = new Date() // will get flattened AFTER calculations
         this.validAt.setMilliseconds(0)
-        this.number = await WebshopCounter.getNextNumber(this.webshopId, this.webshop.privateMeta.numberingType)
+        this.number = await WebshopCounter.getNextNumber(this.webshop)
 
         if (payment && !Order.payment.isLoaded(this)) {
             this.setRelation(Order.payment, payment)

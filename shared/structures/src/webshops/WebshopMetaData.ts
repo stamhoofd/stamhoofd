@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
@@ -575,6 +575,9 @@ export class WebshopPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: PermissionsByRole, version: 202, optional: true })
     scanPermissions = PermissionsByRole.create({})
+
+    @field({ decoder: IntegerDecoder, version: 246 })
+    startNumber = 1
 
     /**
      * DNS records that need to be set in order to activate mail domain and registration domain
