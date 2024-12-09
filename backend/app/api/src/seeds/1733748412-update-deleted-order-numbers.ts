@@ -18,7 +18,7 @@ export default new Migration(async () => {
     let limit = 100;
     let restoreLimitAt: number | null = null;
 
-    await logger.setContext({ tags: ['silent-seed', 'seed'] }, async () => {
+    await logger.setContext({ tags: ['seed'] }, async () => {
         while (true) {
             try {
                 const orders = await Order.where({
@@ -62,8 +62,8 @@ export default new Migration(async () => {
                 id = orders[orders.length - 1].id;
             }
             catch (e) {
-                if (e.message && e.message.includes('RangeError')) {
-                    console.error('Found decoding issue:');
+                if (e.toString() && e.toString().includes('RangeError')) {
+                    console.error('Found decoding issue at ' + id);
                     console.error(e);
                     if (limit === 1) {
                         // We found the causing order.
@@ -93,6 +93,7 @@ export default new Migration(async () => {
                     restoreLimitAt = pages + 100;
                     continue;
                 }
+                console.error('Error at ' + id);
                 throw e;
             }
         }
