@@ -19,6 +19,9 @@
                 Een andere datum/tijdstip
             </STListItem>
         </STList>
+        <p v-if="editingDateRange" class="warning-box">
+            Opgelet, alle tickets die deze datum/tijdstip hadden zullen worden gewijzigd. Kies 'Een andere datum/tijdstip' als je een nieuwe datum wilt invoeren.
+        </p>
         <ProductDateRangeInput v-if="editingDateRange || selectedDateRange === null" v-model="editDateRange" :validator="internalValidator" />
         <STErrorsDefault :error-box="errors.errorBox" />
     </div>
