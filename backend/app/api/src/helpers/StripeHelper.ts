@@ -210,6 +210,14 @@ export class StripeHelper {
 
         const totalPrice = payment.price;
 
+        if (totalPrice < 50) {
+            throw new SimpleError({
+                code: 'minmum_amount',
+                message: 'The minimum amount for an online payment is € 0,50',
+                human: 'Het minimale bedrag voor een online betaling is € 0,50',
+            });
+        }
+
         let fee = 0;
         let directCharge = false;
         const vat = calculateVATPercentage(organization.address, organization.meta.VATNumber);
