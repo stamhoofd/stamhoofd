@@ -56,10 +56,10 @@
                 <div v-if="!member.isNew && (isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
                     <p v-if="member.patchedMember.details.parentsHaveAccess" class="style-description-small">
                         {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
-                            één van de ingevoerde e-mailadressen
+                            één van de ingevoerde e-mailadressen.
                         </template><template v-else>
-                            het ingevoerde e-mailadres
-                        </template>. Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
+                            het ingevoerde e-mailadres.
+                        </template> Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
                     </p>
                     <p v-else class="style-description-small">
                         {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
@@ -100,7 +100,7 @@
 
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Gender, PlatformMember, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
+import { Gender, NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
