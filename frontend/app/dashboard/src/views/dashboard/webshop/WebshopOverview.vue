@@ -406,10 +406,12 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSettingsView, CenteredMessage, EditEmailTemplatesView, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useContext, useOrganization } from '@stamhoofd/components';
-import { AccessRight, EmailTemplate, EmailTemplateType, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { Formatter, sleep } from '@stamhoofd/utility';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';

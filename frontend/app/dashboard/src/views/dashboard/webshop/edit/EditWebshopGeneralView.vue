@@ -91,17 +91,11 @@
         <div class="container">
             <hr>
             <h2>Nummering</h2>
-            <p v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" class="warning-box">
-                Je kan de bestelnummering niet meer wijzigen van willekeurig naar opeenvolgend (dupliceer de webshop als je dat toch nog wilt doen).
-            </p>
-            <p v-else-if="numberingType === WebshopNumberingType.Random" class="warning-box">
-                Je kan de bestelnummering achteraf niet meer wijzigen van willekeurig naar opeenvolgend.
-            </p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Radio v-model="numberingType" :value="WebshopNumberingType.Continuous" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
+                        <Radio v-model="numberingType" :value="WebshopNumberingType.Continuous" />
                     </template>
                     <h3 class="style-title-list">
                         Gebruik opeenvolgende bestelnummers
@@ -112,7 +106,7 @@
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Radio v-model="numberingType" :value="WebshopNumberingType.Random" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
+                        <Radio v-model="numberingType" :value="WebshopNumberingType.Random" />
                     </template>
                     <h3 class="style-title-list">
                         Gebruik willekeurige bestelnummers
@@ -122,6 +116,13 @@
                     </p>
                 </STListItem>
             </STList>
+
+            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" title="Eerste bestelnummer" error-fields="settings.openAt" :error-box="errors.errorBox">
+                <NumberInput v-model="startNumber" :min="1" />
+            </STInputBox>
+            <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
+                Je kan dit enkel wijzigen als je alle bestellingen verwijdert.
+            </p>
         </div>
 
         <template v-if="isNew">
@@ -288,8 +289,6 @@ const ticketType = computed({
     },
 });
 
-const originalNumberingType = originalWebshop.privateMeta.numberingType;
-
 const numberingType = computed({
     get: () => webshop.value.privateMeta.numberingType,
     set: (numberingType: WebshopNumberingType) => {
@@ -303,6 +302,13 @@ const authType = computed({
     set: (authType: WebshopAuthType) => {
         const patch = WebshopMetaData.patch({ authType });
         addPatch(PrivateWebshop.patch({ meta: patch }));
+    },
+});
+
+const startNumber = computed({
+    get: () => webshop.value.privateMeta.startNumber,
+    set: (startNumber: number) => {
+        addPatch(PrivateWebshop.patch({ privateMeta: WebshopPrivateMetaData.patch({ startNumber }) }));
     },
 });
 

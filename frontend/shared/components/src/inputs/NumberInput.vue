@@ -10,6 +10,7 @@
             <input
                 ref="input"
                 v-model="valueString"
+                :disabled="disabled"
                 type="text"
                 :inputmode="floatingPoint ? 'decimal' : 'numeric'"
                 step="any"
@@ -58,6 +59,9 @@ export default class NumberInput extends VueComponent {
     /** Price in cents */
     @Prop({ default: true })
         required!: boolean
+
+    @Prop({ default: false })
+        disabled!: boolean
 
     /** Price in cents */
     @Prop({ default: 0 })
