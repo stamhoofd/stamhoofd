@@ -131,7 +131,7 @@ export class OrderData extends Checkout {
             item.fieldAnswers = [];
         }
 
-        this.recordAnswers = []
+        this.recordAnswers = new Map();
     }
 }
 
