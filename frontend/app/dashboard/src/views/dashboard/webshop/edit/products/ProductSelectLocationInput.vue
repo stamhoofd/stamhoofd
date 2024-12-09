@@ -16,6 +16,9 @@
                 Een andere locatie
             </STListItem>
         </STList>
+        <p v-if="editingLocation" class="warning-box">
+            Opgelet, alle tickets met deze locatie zullen worden gewijzigd. Kies 'Een andere locatie' als je een nieuwe locatie wilt invoeren.
+        </p>
         <ProductLocationInput v-if="editingLocation || selectedLocation === null" v-model="editLocation" :validator="internalValidator" />
         <STErrorsDefault :error-box="errorBox" />
     </div>
