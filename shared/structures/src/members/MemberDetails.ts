@@ -113,7 +113,7 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date('1970-01-01') })
     birthDay: Date | null = null;
 
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 352 })
     trackingYear: number | null = null;
 
     @field({ decoder: Address, nullable: true })
