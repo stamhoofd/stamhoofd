@@ -15,6 +15,10 @@
         <Checkbox :model-value="getFeatureFlag('audit-logs')" @update:model-value="setFeatureFlag('audit-logs', !!$event)">
             Logboek
         </Checkbox>
+
+        <Checkbox :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
+            Proefperiodes
+        </Checkbox>
     </SaveView>
 </template>
 

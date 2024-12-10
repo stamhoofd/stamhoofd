@@ -456,6 +456,14 @@
                 <GroupIdsInput v-model="requireGroupIds" :default-period-id="patched.periodId" title="Verplichte andere inschrijvingen" />
             </JumpToContainer>
 
+            <template v-if="$feature('member-trials')">
+                <template v-if="patched.type === GroupType.Membership">
+                    <hr>
+                    <h2>Proefperiodes</h2>
+                    <p>Wip</p>
+                </template>
+            </template>
+
             <hr>
             <h2>Persoonsgegevens verzamelen</h2>
             <p>Deze persoonsgegevens zijn verplicht (soms optioneel) in te vullen voor leden die inschrijven. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
@@ -489,7 +497,7 @@ import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useAuth, useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
+import { useAuth, useDraggableArray, useFeatureFlag, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';

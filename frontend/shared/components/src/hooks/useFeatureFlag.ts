@@ -5,7 +5,7 @@ import { useContext } from './useContext';
 import { SessionContext } from '@stamhoofd/networking';
 
 function checkFeatureFlag(flag: string, context: SessionContext, platform: Platform, organization?: Organization | null): boolean {
-    if (context.user && context.user.email.endsWith('@stamhoofd.be')) {
+    if (context.user && context.user.email.endsWith('@stamhoofd.be') && STAMHOOFD.environment === 'production') {
         return true;
     }
     if (platform.config.featureFlags.includes(flag)) {

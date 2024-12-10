@@ -11,7 +11,7 @@ import PromiseView from './containers/PromiseView.vue';
 import { ColorDirective } from './directives/ColorDirective';
 import { FormatInputDirective } from './directives/FormatInputDirective';
 import STErrorsDefault from './errors/STErrorsDefault.vue';
-import { useContext, useOrganization, usePlatform, useUser } from './hooks';
+import { useContext, useFeatureFlag, useOrganization, usePlatform, useUser } from './hooks';
 import STInputBox from './inputs/STInputBox.vue';
 import STListItem from './layout/STListItem.vue';
 import STNavigationBar from './navigation/STNavigationBar.vue';
@@ -204,6 +204,7 @@ export class VueGlobalHelper {
                     $context: useContext(),
                     $platform: usePlatform(),
                     $app: useAppContext(),
+                    $feature: useFeatureFlag(),
                 };
 
                 injectHooks(this, directives);
