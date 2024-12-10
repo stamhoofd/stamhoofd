@@ -294,16 +294,67 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Limiteer maximum aantal inschrijvingen  (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
+                        Limiteer maximum aantal inschrijvingen (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
                     </h3>
 
-                    <div v-if="enableMaxMembers" class="split-inputs option" @click.stop.prevent>
+                    <div v-if="enableMaxMembers" class="option" @click.stop.prevent>
                         <STInputBox title="" error-fields="maxMembers" :error-box="errors.errorBox">
                             <NumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid" />
                         </STInputBox>
+                        <p class="style-description-small">
+                            Als er een wachtlijst is ingesteld kunnen de leden op de wachtlijst inschrijven als de groep volzet is.
+                        </p>
                     </div>
                 </STListItem>
             </STList>
+
+            <div v-if="patched.waitingList || enableMaxMembers" class="container">
+                <hr>
+                <h2>Wachtlijst</h2>
+                <p>Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen. Op die manier kan je de wachtlijst makkelijk meerdere jaren aanhouden. Kies hieronder welke wachtlijst van toepassing is voor deze groep.</p>
+                <p class="style-description-block">
+                    Je kan indien gewenst ook nog vragen stellen aan leden die op de wachtlijst willen inschrijven.
+                </p>
+
+                <STList v-if="availableWaitingLists.length">
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="waitingList" :value="null" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            Geen wachtlijst
+                        </h3>
+                    </STListItem>
+
+                    <STListItem v-for="{list, description: waitingListDescription} of availableWaitingLists" :key="list.id" :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="waitingList" :value="list" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ list.settings.name }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ waitingListDescription }}
+                        </p>
+
+                        <template #right>
+                            <button class="button icon edit gray" type="button" @click="editWaitingList(list)" />
+                        </template>
+                    </STListItem>
+                </STList>
+                <p v-else class="info-box">
+                    Er zijn nog geen wachtlijsten aangemaakt.
+                </p>
+
+                <p class="style-button-bar">
+                    <button type="button" class="button text" @click="addWaitingList">
+                        <span class="icon add" />
+                        <span>Nieuwe wachtlijst maken</span>
+                    </button>
+                </p>
+            </div>
 
             <template v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership)">
                 <hr>
@@ -311,7 +362,7 @@
                 <p>Zorg ervoor dat bestaande leden voorrang krijgen op inschrijvingen (vooral als je met wachtlijsten werkt).</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
-                    Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep.
+                    Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig werkjaar van gelijk welke inschrijvingsgroep.
                 </p>
 
                 <STList>
@@ -400,54 +451,6 @@
                     </STListItem>
                 </STList>
             </template>
-
-            <div v-if="patched.waitingList || enableMaxMembers" class="container">
-                <hr>
-                <h2>Wachtlijst</h2>
-                <p>Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen. Op die manier kan je de wachtlijst makkelijk meerdere jaren aanhouden. Kies hieronder welke wachtlijst van toepassing is voor deze groep.</p>
-                <p class="style-description-block">
-                    Je kan indien gewenst ook nog vragen stellen aan leden die op de wachtlijst willen inschrijven.
-                </p>
-
-                <STList v-if="availableWaitingLists.length">
-                    <STListItem :selectable="true" element-name="label">
-                        <template #left>
-                            <Radio v-model="waitingList" :value="null" />
-                        </template>
-
-                        <h3 class="style-title-list">
-                            Geen wachtlijst
-                        </h3>
-                    </STListItem>
-
-                    <STListItem v-for="{list, description: waitingListDescription} of availableWaitingLists" :key="list.id" :selectable="true" element-name="label">
-                        <template #left>
-                            <Radio v-model="waitingList" :value="list" />
-                        </template>
-
-                        <h3 class="style-title-list">
-                            {{ list.settings.name }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ waitingListDescription }}
-                        </p>
-
-                        <template #right>
-                            <button class="button icon edit gray" type="button" @click="editWaitingList(list)" />
-                        </template>
-                    </STListItem>
-                </STList>
-                <p v-else class="info-box">
-                    Er zijn nog geen wachtlijsten aangemaakt.
-                </p>
-
-                <p class="style-button-bar">
-                    <button type="button" class="button text" @click="addWaitingList">
-                        <span class="icon add" />
-                        <span>Nieuwe wachtlijst maken</span>
-                    </button>
-                </p>
-            </div>
 
             <JumpToContainer v-if="patched.type === GroupType.Membership" class="container" :visible="forceShowRequireGroupIds || !!requireGroupIds.length">
                 <GroupIdsInput v-model="requireGroupIds" :default-period-id="patched.periodId" title="Verplichte andere inschrijvingen" />
