@@ -89,6 +89,7 @@ export default class STInputBox extends VueComponent {
             margin-left: auto;
             flex-shrink: 0;
             align-self: flex-end;
+            height: 24px;
         }
 
         ~ * {
