@@ -112,7 +112,7 @@ const alreadyRegisteredGroups = computed(() => {
         return [];
     }
 
-    return props.member.filterGroups({ organizationId, currentPeriod: true, types: [GroupType.WaitingList, GroupType.Membership] });
+    return props.member.filterGroups({ organizationId, currentPeriod: true, includePending: false, types: [GroupType.WaitingList, GroupType.Membership] });
 });
 
 const alreadyRegisteredMessage = computed(() => {
@@ -155,11 +155,6 @@ const noGroupsMessage = computed(() => {
 
     return `${firstName} kan je op dit moment niet inschrijven bij ${organizationName}. Dit kan het geval zijn als: de inschrijvingen gesloten zijn of als dit lid in geen enkele groep 'past' (bv. leeftijd).`;
 });
-
-function isAlreadyRegistered(group: Group) {
-    const item = RegisterItem.defaultFor(props.member, group, selectedOrganization.value!);
-    return item.isAlreadyRegistered();
-}
 
 function addOrganization(organization: Organization) {
     props.member.insertOrganization(organization);

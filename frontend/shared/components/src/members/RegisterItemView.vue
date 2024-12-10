@@ -26,6 +26,10 @@
             {{ item.cartError.getHuman() }}
         </p>
 
+        <p v-if="validationWarning" class="warning-box small">
+            {{ validationWarning }}
+        </p>
+
         <p v-if="item.group.settings.description" class="style-description-block" v-text="item.group.settings.description" />
         <p v-else class="style-description-block" v-text="'Schrijf ' +item.member.patchedMember.firstName+ ' hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.' " />
 
@@ -111,7 +115,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, Ref, ref, watch } from 'vue';
 import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.vue';
 
 const props = defineProps<{
@@ -127,6 +131,7 @@ const navigationActions = useNavigationActions();
 const isInCart = computed(() => checkout.value.cart.contains(props.item));
 const pop = usePop();
 const admin = computed(() => checkout.value.isAdminFromSameOrganization);
+const validationWarning = ref(null) as Ref<string | null>;
 
 function addRecordAnswersPatch(patch: PatchAnswers) {
     props.item.recordAnswers = patchObject(props.item.recordAnswers, patch);
@@ -136,10 +141,15 @@ const categories = computed(() => {
     return props.item.group.settings.recordCategories;
 });
 
+function validate() {
+    props.item.validate();
+    validationWarning.value = props.item.cartError ? null : props.item.validationWarning;
+}
+
 onMounted(() => {
     errors.errorBox = null;
     try {
-        props.item.validate();
+        validate();
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -157,7 +167,7 @@ async function addToCart() {
             saving.value = false;
             return;
         }
-        await props.item.validate();
+        validate();
         await props.saveHandler(props.item, navigationActions);
     }
     catch (e) {

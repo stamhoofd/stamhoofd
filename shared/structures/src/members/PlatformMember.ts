@@ -315,7 +315,7 @@ export class PlatformFamily {
         const organizationTags = new Set<string>();
 
         for (const member of this.members) {
-            for (const group of member.filterGroups({ types: [GroupType.Membership], currentPeriod: true })) {
+            for (const group of member.filterGroups({ types: [GroupType.Membership], currentPeriod: true, includePending: false })) {
                 groups.add(group.id);
                 if (group.defaultAgeGroupId) {
                     defaultGroupIds.add(group.defaultAgeGroupId);
@@ -737,7 +737,7 @@ export class PlatformMember implements ObjectWithRecords {
         });
     }
 
-    filterGroups(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
+    filterGroups(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; includePending?: boolean; types?: GroupType[]; organizationId?: string }) {
         const registrations = this.filterRegistrations(filters);
         const base: Group[] = [];
 
@@ -750,7 +750,7 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Loop checkout
-        for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
+        for (const item of [...this.family.checkout.cart.items, ...(filters.includePending ? this.family.pendingRegisterItems : [])]) {
             if (item.member.id === this.id) {
                 if (filters.currentPeriod === false) {
                     continue;
@@ -780,7 +780,7 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     filterRecordsConfigurations(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
-        const groups = this.filterGroups(filters);
+        const groups = this.filterGroups({ ...filters, includePending: true });
         const configurations: OrganizationRecordsConfiguration[] = [];
 
         for (const group of groups) {
@@ -856,7 +856,7 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get groups() {
-        return this.filterGroups({ currentPeriod: true });
+        return this.filterGroups({ currentPeriod: true, includePending: false });
     }
 
     insertOrganization(organization: Organization) {

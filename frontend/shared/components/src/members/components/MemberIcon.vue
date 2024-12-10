@@ -25,11 +25,11 @@ const props = withDefaults(
         member: PlatformMember;
         icon?: string;
     }>(), {
-        icon: ''
-    }
+        icon: '',
+    },
 );
 
-const groups = computed(() => props.member.filterGroups({currentPeriod: true, types: [GroupType.Membership]}));
+const groups = computed(() => props.member.filterGroups({ currentPeriod: true, types: [GroupType.Membership], includePending: false }));
 const image = computed(() => groups.value.length === 1 ? (groups.value[0].settings.squarePhoto ?? groups.value[0].settings.coverPhoto) : null);
 
 </script>
