@@ -1,5 +1,5 @@
 <template>
-    <STInputBox :title="title" error-fields="birthDay" :error-box="errorBox">
+    <STInputBox :title="title" error-fields="birthDay" :error-box="errors.errorBox">
         <div class="input birth-day-selection">
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
@@ -35,115 +35,97 @@
                 </select>
             </div>
         </div>
+        <template #right>
+            <slot name="right" />
+        </template>
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { Formatter } from "@stamhoofd/utility"
+import { Formatter } from "@stamhoofd/utility";
 
-import {ErrorBox} from "../errors/ErrorBox";
-import {Validator} from "../errors/Validator";
+import { ref, watch } from 'vue';
+import { ErrorBox } from "../errors/ErrorBox";
+import { useErrors } from '../errors/useErrors';
+import { useValidation } from '../errors/useValidation';
+import { Validator } from "../errors/Validator";
 import STInputBox from "./STInputBox.vue";
 
-@Component({
-    components: {
-        STInputBox
-    },
-    emits: ['update:modelValue']
+const props = withDefaults(defineProps<{
+    title: string,
+    required: boolean,
+    validator: Validator | null
+}>(), {
+    title: '',
+    required: true,
+    validator: null
+});
+
+const model = defineModel<Date | null>({default: null});
+
+const errors = useErrors({ validator: props.validator });
+
+const day = ref(model.value?.getDate() ?? null);
+const month = ref( model.value ? model.value.getMonth() + 1 : null);
+const year = ref(model.value?.getFullYear() ?? null);
+const currentYear = new Date().getFullYear();
+
+useValidation(errors.validator, validate);
+
+watch(() => model.value, (val: Date | null) => {
+    if (val) {
+        day.value = val.getDate()
+        month.value = val.getMonth() + 1
+        year.value = val.getFullYear()
+    } else {
+        day.value = null;
+        month.value = null;
+        year.value = null;
+    }
 })
-export default class BirthDayInput extends VueComponent {
-    @Prop({ default: "" }) 
-        title: string;
 
-    @Prop({ default: true })
-        required!: boolean
+function monthText(month: number) {
+    return Formatter.month(month)
+}
 
-    @Prop({ default: null})
-        modelValue!: Date | null
+function updateDate() {
+    if (year.value && month.value && day.value) {
+        model.value = new Date(year.value, month.value - 1, day.value, 12)
+    } else {
+        model.value = null;
+    }
+}
 
-    /**
-     * Assign a validator if you want to offload the validation to components
-     */
-    @Prop({ default: null }) 
-        validator: Validator | null
-
-    errorBox: ErrorBox | null = null
-
-    day: number | null = this.modelValue?.getDate() ?? null
-    month: number | null  = this.modelValue ? this.modelValue.getMonth() + 1 : null
-    year: number | null  = this.modelValue?.getFullYear() ?? null
-
-    currentYear = new Date().getFullYear()
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate()
-            })
+function validate() {
+    if (year.value && month.value && day.value) {
+        if (!model.value) {
+            model.value =  new Date(year.value, month.value - 1, day.value, 12)
         }
+        errors.errorBox = null;
+        return true
     }
 
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this)
+    if (!props.required) {
+        errors.errorBox = null
+
+        if (model.value !== null) {
+            model.value = null;
         }
+        return true
     }
 
-    monthText(month) {
-        return Formatter.month(month)
+    if (model.value !== null) {
+        model.value = null;
     }
 
-    @Watch('modelValue', { deep: true })
-    onValueChanged(val: Date | null) {
-        if (val) {
-            this.day = val.getDate()
-            this.month = val.getMonth() + 1
-            this.year = val.getFullYear()
-        } else {
-            this.day = null;
-            this.month = null;
-            this.year = null;
-        }
-    }
+    errors.errorBox = new ErrorBox(new SimpleError({
+        code: "empty_field",
+        message: "Vul de geboortedatum in",
+        field: "birthDay"
+    }))
 
-    updateDate() {
-        if (this.year && this.month && this.day) {
-            this.$emit('update:modelValue', new Date(this.year, this.month - 1, this.day, 12))
-        } else {
-            this.$emit('update:modelValue', null)
-        }
-    }
-
-    validate() {
-        if (this.year && this.month && this.day) {
-            if (!this.modelValue) {
-                this.$emit('update:modelValue', new Date(this.year, this.month - 1, this.day, 12))
-            }
-            this.errorBox = null
-            return true
-        }
-
-        if (!this.required) {
-            this.errorBox = null
-
-            if (this.modelValue !== null) {
-                this.$emit('update:modelValue', null)
-            }
-            return true
-        }
-
-        if (this.modelValue !== null) {
-            this.$emit('update:modelValue', null)
-        }
-        this.errorBox = new ErrorBox(new SimpleError({
-            code: "empty_field",
-            message: "Vul de geboortedatum in",
-            field: "birthDay"
-        }))
-        return false
-    }
+    return false
 }
 </script>
 
