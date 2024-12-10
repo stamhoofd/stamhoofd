@@ -303,16 +303,6 @@
                         </STInputBox>
                     </div>
                 </STListItem>
-
-                <STListItem v-if="enableMaxMembers" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="waitingListIfFull" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        Laat leden inschrijven op wachtlijst als maximum is bereikt
-                    </h3>
-                </STListItem>
             </STList>
 
             <template v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership)">
@@ -872,15 +862,6 @@ const priorityForFamily = computed({
     set: priorityForFamily => addPatch({
         settings: GroupSettings.patch({
             priorityForFamily,
-        }),
-    }),
-});
-
-const waitingListIfFull = computed({
-    get: () => patched.value.settings.waitingListIfFull,
-    set: waitingListIfFull => addPatch({
-        settings: GroupSettings.patch({
-            waitingListIfFull,
         }),
     }),
 });

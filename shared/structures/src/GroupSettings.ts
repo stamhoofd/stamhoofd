@@ -378,6 +378,10 @@ export class GroupSettings extends AutoEncoder {
     })
     maxMembers: number | null = null;
 
+    /**
+     * @deprecated
+     * Use waitinglist instead to determine if a waiting list is enabled
+     */
     @field({
         decoder: BooleanDecoder, version: 79,
     })
@@ -456,14 +460,6 @@ export class GroupSettings extends AutoEncoder {
 
     get isFull() {
         return this.maxMembers !== null && this.registeredMembers !== null && (this.registeredMembers + (this.reservedMembers ?? 0)) >= this.maxMembers;
-    }
-
-    get canHaveWaitingList() {
-        return (this.waitingListType !== WaitingListType.None && this.waitingListType !== WaitingListType.PreRegistrations) || (this.waitingListIfFull && this.maxMembers !== null);
-    }
-
-    get canHaveWaitingListWithoutMax() {
-        return (this.waitingListType !== WaitingListType.None && this.waitingListType !== WaitingListType.PreRegistrations);
     }
 
     get availableMembers() {

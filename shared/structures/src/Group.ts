@@ -176,10 +176,6 @@ export class Group extends AutoEncoder {
         return false;
     }
 
-    hasWaitingList(): boolean {
-        return this.settings.canHaveWaitingList || this.waitingList !== null;
-    }
-
     /**
      * Returns all parent and grandparents of this group
      */
@@ -246,7 +242,7 @@ export class Group extends AutoEncoder {
         return this.settings.squarePhoto ?? this.settings.coverPhoto;
     }
 
-    getRecommendedFilter(recommendOrganizationId?: string|null): StamhoofdFilter {
+    getRecommendedFilter(recommendOrganizationId?: string | null): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
 
         if (this.settings.minAge !== null) {
