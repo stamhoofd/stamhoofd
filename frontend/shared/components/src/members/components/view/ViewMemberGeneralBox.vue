@@ -23,6 +23,13 @@
                 </dd>
             </template>
 
+            <template v-if="member.patchedMember.details.trackingYear">
+                <dt>{{ $t('Volgjaar') }}</dt>
+                <dd v-copyable>
+                    {{ member.patchedMember.details.trackingYear }}
+                </dd>
+            </template>
+
             <template v-if="member.patchedMember.details.phone">
                 <dt>{{ $t('90d84282-3274-4d85-81cd-b2ae95429c34') }}</dt>
                 <dd v-copyable>

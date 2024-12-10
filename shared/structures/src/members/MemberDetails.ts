@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, NumberDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
@@ -112,6 +112,9 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date('1970-01-01') })
     birthDay: Date | null = null;
+
+    @field({ decoder: NumberDecoder, nullable: true, ...NextVersion })
+    trackingYear: number | null = null;
 
     @field({ decoder: Address, nullable: true })
     address: Address | null = null;
@@ -347,6 +350,13 @@ export class MemberDetails extends AutoEncoder {
         const hasFinancialSupport = !!this.requiresFinancialSupport?.value;
         if ((hasFinancialSupport === false) && this.uitpasNumber !== null && DataValidator.isUitpasNumberKansenTarief(this.uitpasNumber)) {
             this.requiresFinancialSupport = BooleanStatus.create({ value: true });
+        }
+
+        if (this.trackingYear && this.birthDay) {
+            if (this.trackingYear === this.birthDay.getFullYear()) {
+                // tracking year is not needed
+                this.trackingYear = null;
+            }
         }
     }
 

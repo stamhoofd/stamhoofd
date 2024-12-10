@@ -17,7 +17,22 @@
                     </div>
                 </STInputBox>
 
-                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
+                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')">
+                    <template v-if="!trackingYear && isAdmin" #right>
+                        <button class="button icon more-horizontal small gray" type="button" @click="showBirthDayMenu" />
+                    </template>
+                </BirthDayInput>
+
+                <template v-if="isAdmin && trackingYear">
+                    <TrackingYearInput v-model="trackingYear" :required="false" :validator="validator">
+                        <template #right>
+                            <button v-tooltip="'Volgjaar verwijderen'" class="button icon trash small gray" type="button" @click="deleteTrackingYear" />
+                        </template>
+                    </TrackingYearInput>
+                    <p class="style-description-small">
+                        {{ $t('Een lid met een volgjaar kan inschrijven in een leeftijdsgroep voor een andere leeftijd.') }}
+                    </p>
+                </template>
 
                 <STInputBox v-if="isPropertyEnabled('gender') || gender !== Gender.Other" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
                     <RadioGroup>
@@ -36,7 +51,7 @@
                 <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
                 <EmailInput v-if="(!member.isNew || birthDay) && (isPropertyEnabled('emailAddress') || email)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator">
                     <template #right>
-                        <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add gray" type="button" @click="addEmail" />
+                        <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
                 <EmailInput
@@ -50,7 +65,7 @@
                     @update:model-value="setEmail(n - 1, $event)"
                 >
                     <template #right>
-                        <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
+                        <button class="button icon trash small gray" type="button" @click="deleteEmail(n - 1)" />
                     </template>
                 </EmailInput>
                 <div v-if="!member.isNew && (isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
@@ -113,6 +128,8 @@ import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
+import TrackingYearInput from '../../../inputs/TrackingYearInput.vue';
+import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
 
@@ -225,6 +242,11 @@ const birthDay = computed({
     set: birthDay => props.member.addDetailsPatch({ birthDay }),
 });
 
+const trackingYear = computed({
+    get: () => props.member.patchedMember.details.trackingYear,
+    set: trackingYear => props.member.addDetailsPatch({ trackingYear }),
+});
+
 const gender = computed({
     get: () => props.member.patchedMember.details.gender,
     set: gender => props.member.addDetailsPatch({ gender }),
@@ -279,6 +301,27 @@ function setEmail(index: number, value: string) {
     const newEmails = [...alternativeEmails.value];
     newEmails[index] = value;
     alternativeEmails.value = newEmails;
+}
+
+async function showBirthDayMenu(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [new ContextMenuItem({
+            name: 'Volgjaar toevoegen',
+            action: () => addTrackingYear(),
+        })],
+    ]);
+
+    await menu.show({
+        button: event.currentTarget as HTMLElement,
+    });
+}
+
+function addTrackingYear() {
+    trackingYear.value = (birthDay.value ?? new Date()).getFullYear();
+}
+
+function deleteTrackingYear() {
+    trackingYear.value = null;
 }
 
 const reviewDate = computed(() => {

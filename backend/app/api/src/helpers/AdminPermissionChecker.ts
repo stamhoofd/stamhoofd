@@ -211,7 +211,7 @@ export class AdminPermissionChecker {
     }
 
     async canAccessMember(member: MemberWithRegistrations, permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        if (this.isUserManager(member) && permissionLevel !== PermissionLevel.Full) {
+        if (permissionLevel !== PermissionLevel.Full && this.isUserManager(member)) {
             return true;
         }
 
@@ -1107,13 +1107,22 @@ export class AdminPermissionChecker {
         const isSetFinancialSupportTrue = data.details.shouldApplyReducedPrice;
         const isUserManager = this.isUserManager(member);
 
-        if (data.details.securityCode !== undefined) {
+        if (data.details.securityCode !== undefined || data.details.trackingYear !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
 
-            // can only be set to null, and only if can access member with full access
-            if (!hasFullAccess || data.details.securityCode !== null) {
-                // Unset silently
-                data.details.securityCode = undefined;
+            if (!hasFullAccess) {
+                if (data.details.securityCode !== undefined) {
+                    // can only be set to null, and only if can access member with full access
+                    if (data.details.securityCode !== null) {
+                        // Unset silently
+                        data.details.securityCode = undefined;
+                    }
+                }
+
+                if (data.details.trackingYear !== undefined) {
+                    // Unset silently
+                    data.details.trackingYear = undefined;
+                }
             }
         }
 
