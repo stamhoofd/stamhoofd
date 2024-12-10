@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, NumberDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
@@ -401,8 +401,12 @@ export class MemberDetails extends AutoEncoder {
         return this.firstName + ' ' + this.lastName;
     }
 
-    /// The age this member will become, this year
-    ageForYear(year: number): number | null {
+    /// The age this member will become according to his tracking year or birth year, this year
+    trackedAgeForYear(year: number): number | null {
+        if (this.trackingYear) {
+            return year - this.trackingYear;
+        }
+
         if (!this.birthDay) {
             return null;
         }
@@ -482,7 +486,7 @@ export class MemberDetails extends AutoEncoder {
 
     getMatchingError(group: Group): { message: string; description: string } | null {
         if (group.settings.minAge || group.settings.maxAge) {
-            const age = this.ageForYear(Formatter.luxon(group.settings.period?.startDate ?? new Date()).year);
+            const age = this.trackedAgeForYear(Formatter.luxon(group.settings.period?.startDate ?? new Date()).year);
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {
