@@ -18,12 +18,7 @@
                 {{ formatDate(item.createdAt) }}
             </p>
             <p class="style-description-small">
-                {{ formatPrice(item.price) }}<template v-if="item.pricePaid !== 0">
-                    waarvan {{ formatPrice(item.pricePaid) }} betaald
-                    <template v-if="item.pricePaid > item.price">
-                        (te veel betaald)
-                    </template>
-                </template>
+                {{ formatPrice(item.priceOpen) }}
             </p>
 
             <template #right>
