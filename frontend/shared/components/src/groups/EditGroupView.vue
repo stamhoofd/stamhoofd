@@ -460,7 +460,18 @@
                 <template v-if="patched.type === GroupType.Membership">
                     <hr>
                     <h2>Proefperiodes</h2>
-                    <p>Wip</p>
+                    <p>Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.</p>
+
+                    <STInputBox :title="$t('Aantal dagen op proef')" error-fields="settings.trialDays" :error-box="errors.errorBox">
+                        <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
+                    </STInputBox>
+
+                    <STInputBox :title="$t('Proefperiodes ten vroegste starten op')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="registrationStartDate" :required="false" :placeholder="formatDate(patched.settings.startDate, true)" />
+                    </STInputBox>
+                    <p class="style-description-small">
+                        {{ $t('Als nieuwe leden inschrijven voor deze datum, begint de proefperiode tijd pas te lopen vanaf deze datum. Handig als de activiteiten pas een poos na het begin van de inschrijvingen starten.') }}
+                    </p>
                 </template>
             </template>
 
@@ -881,6 +892,15 @@ const waitingList = computed({
     get: () => patched.value.waitingList,
     set: waitingList => addPatch({
         waitingList,
+    }),
+});
+
+const trialDays = computed({
+    get: () => patched.value.settings.trialDays,
+    set: trialDays => addPatch({
+        settings: GroupSettings.patch({
+            trialDays,
+        }),
     }),
 });
 

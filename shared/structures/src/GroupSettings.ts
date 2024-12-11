@@ -332,6 +332,12 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: new EnumDecoder(GroupGenderType) })
     genderType: GroupGenderType = GroupGenderType.Mixed;
 
+    /**
+     * Number of days on trial for new members
+     */
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    trialDays = 0;
+
     @field({ decoder: IntegerDecoder, nullable: true, field: 'maxBirthYear' })
     @field({ decoder: IntegerDecoder, nullable: true, version: 12, upgrade: (year) => {
         if (year === null) {
