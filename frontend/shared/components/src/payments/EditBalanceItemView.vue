@@ -66,6 +66,16 @@
             </STList>
         </template>
 
+        <template v-if="$feature('member-trials')">
+            <hr>
+            <h2>Uitgesteld betalen</h2>
+            <p>Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf deze datum. Het is eventueel mogelijk om het wel al vroeger te betalen, maar zeker niet verplicht.</p>
+
+            <STInputBox title="Te betalen tegen" error-fields="dueAt" :error-box="errors.errorBox">
+                <DateSelection v-model="dueAt" :required="false" placeholder="Zo snel mogelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
+            </STInputBox>
+        </template>
+
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="!isNew && hasPayments(patchedBalanceItem)">
@@ -113,19 +123,19 @@ import { Ref, computed, ref } from 'vue';
 import PaymentRow from './components/PaymentRow.vue';
 
 const props = defineProps<{
-    balanceItem: BalanceItemWithPayments|BalanceItem,
-    isNew: boolean,
-    saveHandler: ((patch: AutoEncoderPatchType<BalanceItem>) => Promise<void>),
-}>()
+    balanceItem: BalanceItemWithPayments | BalanceItem;
+    isNew: boolean;
+    saveHandler: ((patch: AutoEncoderPatchType<BalanceItem>) => Promise<void>);
+}>();
 
-const {hasChanges, addPatch, patch, patched: patchedBalanceItem} = usePatch(props.balanceItem);
-const family = ref(null) as Ref<PlatformFamily|null>;
-const registration = ref(null) as Ref<Registration|null>;
+const { hasChanges, addPatch, patch, patched: patchedBalanceItem } = usePatch(props.balanceItem);
+const family = ref(null) as Ref<PlatformFamily | null>;
+const registration = ref(null) as Ref<Registration | null>;
 const platformFamilyManager = usePlatformFamilyManager();
 const organization = useOrganization();
 const platform = usePlatform();
 const loading = ref(false);
-const errors = useErrors()
+const errors = useErrors();
 const pop = usePop();
 
 // Load mmeber on load
@@ -133,101 +143,108 @@ loadMember().catch(console.error);
 
 const title = computed(() => {
     return props.isNew ? 'Verschuldigd bedrag toevoegen' : 'Verschuldigd bedrag bewerken';
-})
+});
 
 const description = computed({
     get: () => patchedBalanceItem.value.description,
-    set: (value) => addPatch({description: value})
-})
+    set: value => addPatch({ description: value }),
+});
 
 const unitPrice = computed({
     get: () => patchedBalanceItem.value.unitPrice,
-    set: (value) => addPatch({unitPrice: value})
-})
+    set: value => addPatch({ unitPrice: value }),
+});
 
 const amount = computed({
     get: () => patchedBalanceItem.value.amount,
-    set: (value) => addPatch({amount: value})
-})
+    set: value => addPatch({ amount: value }),
+});
 
 const createdAt = computed({
     get: () => patchedBalanceItem.value.createdAt,
-    set: (value) => addPatch({createdAt: value})
-})
+    set: value => addPatch({ createdAt: value }),
+});
+
+const dueAt = computed({
+    get: () => patchedBalanceItem.value.dueAt,
+    set: value => addPatch({ dueAt: value }),
+});
 
 const memberId = computed({
     get: () => patchedBalanceItem.value.memberId,
-    set: (value) => addPatch({memberId: value})
-})
+    set: value => addPatch({ memberId: value }),
+});
 
 const member = computed(() => {
     if (!family.value || !memberId.value) {
         return null;
     }
-    return family.value.members.find(m => m.id === memberId.value)
-})
+    return family.value.members.find(m => m.id === memberId.value);
+});
 
 const outstanding = computed(() => {
-    const paid = patchedBalanceItem.value.pricePaid
-    const pending = patchedBalanceItem.value.pricePending
-    const remaining = patchedBalanceItem.value.price - paid - pending
+    const paid = patchedBalanceItem.value.pricePaid;
+    const pending = patchedBalanceItem.value.pricePending;
+    const remaining = patchedBalanceItem.value.price - paid - pending;
 
     return {
         paid,
         pending,
-        remaining
-    }
-})
+        remaining,
+    };
+});
 
-function hasPayments(balanceItem: BalanceItemWithPayments|BalanceItem): balanceItem is BalanceItemWithPayments {
-    return (balanceItem instanceof BalanceItemWithPayments)
+function hasPayments(balanceItem: BalanceItemWithPayments | BalanceItem): balanceItem is BalanceItemWithPayments {
+    return (balanceItem instanceof BalanceItemWithPayments);
 }
 
 async function save() {
     if (loading.value) {
-        return
+        return;
     }
     errors.errorBox = null;
-    loading.value = true
+    loading.value = true;
 
     try {
         const valid = await errors.validator.validate();
         if (!valid) {
-            loading.value = false
+            loading.value = false;
             return;
         }
-        await props.saveHandler(patch.value)
-        pop({ force: true })
-    } catch (e) {
+        await props.saveHandler(patch.value);
+        pop({ force: true });
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
-    loading.value = false
+    loading.value = false;
 }
 
 async function doDelete() {
     if (loading.value) {
-        return
+        return;
     }
-    if (!(await CenteredMessage.confirm("Deze aanrekening verwijderen?", "Verwijderen", "Je kan dit niet ongedaan maken."))) {
-        return
+    if (!(await CenteredMessage.confirm('Deze aanrekening verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken.'))) {
+        return;
     }
     if (loading.value) {
-        return
+        return;
     }
 
     errors.errorBox = null;
 
     try {
-        loading.value = true
+        loading.value = true;
         await props.saveHandler(BalanceItemWithPayments.patch({
             status: BalanceItemStatus.Hidden,
-            price: 0
-        }))
-        pop({ force: true })
-    } catch (e) {
+            price: 0,
+        }));
+        pop({ force: true });
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
-    loading.value = false
+    loading.value = false;
 }
 
 async function loadMember() {
@@ -235,12 +252,13 @@ async function loadMember() {
         return;
     }
     try {
-        const familyBlob = await platformFamilyManager.loadFamilyBlob(props.balanceItem.memberId)
+        const familyBlob = await platformFamilyManager.loadFamilyBlob(props.balanceItem.memberId);
         family.value = PlatformFamily.create(familyBlob, {
-            contextOrganization: organization.value, 
-            platform: platform.value
+            contextOrganization: organization.value,
+            platform: platform.value,
         });
-    } catch (e) {
+    }
+    catch (e) {
         console.error(e);
         return;
     }

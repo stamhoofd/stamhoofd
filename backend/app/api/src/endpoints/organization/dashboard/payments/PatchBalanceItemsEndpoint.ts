@@ -58,6 +58,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.amount = put.amount;
                 model.organizationId = organization.id;
                 model.createdAt = put.createdAt;
+                model.dueAt = put.dueAt;
                 model.status = put.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending;
 
                 if (put.userId) {
@@ -126,6 +127,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.description = patch.description ?? model.description;
                 model.unitPrice = patch.unitPrice ?? model.unitPrice;
                 model.amount = patch.amount ?? model.amount;
+                model.dueAt = patch.dueAt === undefined ? model.dueAt : patch.dueAt;
 
                 if (model.orderId) {
                     // Not allowed to change this
@@ -148,7 +150,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 await model.save();
                 returnedModels.push(model);
 
-                if (patch.unitPrice || patch.amount || patch.status) {
+                if (patch.unitPrice || patch.amount || patch.status || patch.dueAt !== undefined) {
                     updateOutstandingBalance.push(model);
                 }
             }

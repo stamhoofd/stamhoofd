@@ -144,6 +144,9 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 335 })
     pricePending = 0;
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    dueAt: Date | null = null;
+
     @field({ decoder: DateDecoder })
     createdAt = new Date();
 

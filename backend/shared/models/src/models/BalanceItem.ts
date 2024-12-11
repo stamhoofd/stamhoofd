@@ -378,7 +378,7 @@ export class BalanceItem extends Model {
     }
 
     static async getStructureWithPayments(items: BalanceItem[]): Promise<BalanceItemWithPayments[]> {
-        if (items.length == 0) {
+        if (items.length === 0) {
             return [];
         }
 

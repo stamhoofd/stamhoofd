@@ -177,7 +177,7 @@ export class CachedBalance extends Model {
                 new SQLMin(
                     SQL.column('dueAt'),
                 ),
-                new SQLAlias('data_dueAt'),
+                new SQLAlias('data__dueAt'),
             ),
         )
             .from(BalanceItem.table)
