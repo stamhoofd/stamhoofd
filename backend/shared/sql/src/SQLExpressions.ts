@@ -117,6 +117,23 @@ export class SQLSum implements SQLExpression {
         ]);
     }
 }
+
+export class SQLMin implements SQLExpression {
+    expression: SQLExpression;
+
+    constructor(expression: SQLExpression) {
+        this.expression = expression;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'MIN(',
+            this.expression.getSQL(options),
+            ')',
+        ]);
+    }
+}
+
 export class SQLSelectAs implements SQLExpression {
     expression: SQLExpression;
     as: SQLAlias;

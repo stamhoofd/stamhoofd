@@ -11,11 +11,13 @@ export enum BalanceItemStatus {
     Hidden = 'Hidden',
 
     /**
+     * @deprecated: try to remove usage and use negative 'Hidden' check for now. Pending and Paid status will get merged
      * The balance is owed by the member, but not yet (fully) paid by the member.
      */
     Pending = 'Pending',
 
     /**
+     * @deprecated: try to remove usage and use negative 'Hidden' check for now. Pending and Paid status will get merged
      * The balance has been paid by the member. All settled.
      */
     Paid = 'Paid',

@@ -90,8 +90,19 @@ export class BalanceItem extends Model {
     @column({ type: 'integer' })
     pricePending = 0;
 
+    /**
+     * todo: deprecate ('pending' and 'paid') + 'hidden' status and replace with 'due' + 'hidden'
+     * -> maybe add 'due' (due if dueAt is null or <= now), 'hidden' (never due), 'future' (= not due until dueAt - but not possible to pay earlier)
+     */
     @column({ type: 'string' })
     status = BalanceItemStatus.Pending;
+
+    /**
+     * In case the balance item doesn't have to be paid immediately, we can set a due date.
+     * When the due date is reached, it is set to null and the cached balance is updated.
+     */
+    @column({ type: 'datetime', nullable: true })
+    dueAt: Date | null = null;
 
     @column({
         type: 'datetime', beforeSave(old?: any) {

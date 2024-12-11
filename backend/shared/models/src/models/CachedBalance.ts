@@ -1,5 +1,5 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQL, SQLAlias, SQLCalculation, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLCalculation, SQLMin, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
@@ -37,6 +37,12 @@ export class CachedBalance extends Model {
 
     @column({ type: 'integer' })
     amountPending = 0;
+
+    /**
+     * This is the minimum `dueAt` that lies in the future of all **unpaid** balance items connected to this object.
+     */
+    @column({ type: 'datetime', nullable: true })
+    recalculateAt: Date | null = null;
 
     @column({
         type: 'datetime', beforeSave(old?: any) {
@@ -101,6 +107,7 @@ export class CachedBalance extends Model {
             .where('organizationId', organizationId)
             .where(columnName, objectIds)
             .whereNot('status', BalanceItemStatus.Hidden)
+            .where(SQL.where('dueAt', null).or('dueAt', SQLWhereSign.LessEqual, new Date()))
             .where(
                 SQL.where(
                     new SQLCalculation(
@@ -124,6 +131,7 @@ export class CachedBalance extends Model {
     }
 
     private static async fetchForObjects(organizationId: string, objectIds: string[], columnName: string, customWhere?: SQLWhere) {
+        const now = new Date();
         const query = SQL.select(
             SQL.column(columnName),
             new SQLSelectAs(
@@ -153,6 +161,7 @@ export class CachedBalance extends Model {
             .where('organizationId', organizationId)
             .where(columnName, objectIds)
             .whereNot('status', BalanceItemStatus.Hidden)
+            .where(SQL.where('dueAt', null).or('dueAt', SQLWhereSign.LessEqual, now))
             .groupBy(SQL.column(columnName));
 
         if (customWhere) {
@@ -161,7 +170,27 @@ export class CachedBalance extends Model {
 
         const result = await query.fetch();
 
-        const results: [string, { amount: number; amountPending: number }][] = [];
+        // Czlculate future due
+        const dueQuery = SQL.select(
+            SQL.column(columnName),
+            new SQLSelectAs(
+                new SQLMin(
+                    SQL.column('dueAt'),
+                ),
+                new SQLAlias('data_dueAt'),
+            ),
+        )
+            .from(BalanceItem.table)
+            .where('organizationId', organizationId)
+            .where(columnName, objectIds)
+            .whereNot('status', BalanceItemStatus.Hidden)
+            .whereNot('dueAt', null)
+            .where('dueAt', SQLWhereSign.Greater, now)
+            .groupBy(SQL.column(columnName));
+
+        const dueResult = await dueQuery.fetch();
+
+        const results: [string, { amount: number; amountPending: number; recalculateAt: Date | null }][] = [];
         for (const row of result) {
             if (!row['data']) {
                 throw new Error('Invalid data namespace');
@@ -187,20 +216,49 @@ export class CachedBalance extends Model {
                 throw new Error('Invalid amountPending');
             }
 
-            results.push([objectId, { amount, amountPending }]);
+            results.push([objectId, { amount, amountPending, recalculateAt: null }]);
+        }
+
+        for (const row of dueResult) {
+            if (!row['data']) {
+                throw new Error('Invalid data namespace');
+            }
+
+            if (!row[BalanceItem.table]) {
+                throw new Error('Invalid ' + BalanceItem.table + ' namespace');
+            }
+
+            const objectId = row[BalanceItem.table][columnName];
+            const dueAt = row['data']['dueAt'];
+
+            if (typeof objectId !== 'string') {
+                throw new Error('Invalid objectId');
+            }
+
+            if (!(dueAt instanceof Date)) {
+                throw new Error('Invalid dueAt');
+            }
+
+            const result = results.find(r => r[0] === objectId);
+            if (result) {
+                result[1].recalculateAt = dueAt;
+            }
+            else {
+                results.push([objectId, { amount: 0, amountPending: 0, recalculateAt: dueAt }]);
+            }
         }
 
         // Add missing object ids (with 0 amount, otherwise we don't reset the amounts back to zero when all the balance items are hidden)
         for (const objectId of objectIds) {
             if (!results.find(([id]) => id === objectId)) {
-                results.push([objectId, { amount: 0, amountPending: 0 }]);
+                results.push([objectId, { amount: 0, amountPending: 0, recalculateAt: null }]);
             }
         }
 
         return results;
     }
 
-    private static async setForResults(organizationId: string, result: [string, { amount: number; amountPending: number }][], objectType: ReceivableBalanceType) {
+    private static async setForResults(organizationId: string, result: [string, { amount: number; amountPending: number; recalculateAt: null | Date }][], objectType: ReceivableBalanceType) {
         if (result.length === 0) {
             return;
         }
@@ -212,10 +270,11 @@ export class CachedBalance extends Model {
                 'objectType',
                 'amount',
                 'amountPending',
+                'recalculateAt',
                 'createdAt',
                 'updatedAt',
             )
-            .values(...result.map(([objectId, { amount, amountPending }]) => {
+            .values(...result.map(([objectId, { amount, amountPending, recalculateAt }]) => {
                 return [
                     uuidv4(),
                     organizationId,
@@ -223,6 +282,7 @@ export class CachedBalance extends Model {
                     objectType,
                     amount,
                     amountPending,
+                    recalculateAt,
                     new Date(),
                     new Date(),
                 ];
@@ -231,6 +291,7 @@ export class CachedBalance extends Model {
             .onDuplicateKeyUpdate(
                 SQL.assignment('amount', SQL.column('v', 'amount')),
                 SQL.assignment('amountPending', SQL.column('v', 'amountPending')),
+                SQL.assignment('recalculateAt', SQL.column('v', 'recalculateAt')),
                 SQL.assignment('updatedAt', SQL.column('v', 'updatedAt')),
             );
 
