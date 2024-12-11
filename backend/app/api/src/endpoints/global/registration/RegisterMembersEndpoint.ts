@@ -5,7 +5,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItem as BalanceItemStruct, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -104,7 +104,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Validate balance items (can only happen serverside)
         const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id);
-        let memberBalanceItemsStructs: BalanceItemWithPayments[] = [];
+        let memberBalanceItemsStructs: BalanceItemStruct[] = [];
         let balanceItemsModels: BalanceItem[] = [];
         if (balanceItemIds.length > 0) {
             balanceItemsModels = await BalanceItem.where({ id: { sign: 'IN', value: balanceItemIds }, organizationId: organization.id });
@@ -114,7 +114,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     message: 'Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast. Herlaad de pagina en probeer opnieuw.',
                 });
             }
-            memberBalanceItemsStructs = await BalanceItem.getStructureWithPayments(balanceItemsModels);
+            memberBalanceItemsStructs = balanceItemsModels.map(i => i.getStructure());
         }
 
         const memberIds = Formatter.uniqueArray(

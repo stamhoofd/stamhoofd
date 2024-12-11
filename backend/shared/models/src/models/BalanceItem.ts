@@ -1,5 +1,5 @@
 import { column, Database, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, OrderStatus, Payment as PaymentStruct, PrivatePayment } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, OrderStatus, Payment as PaymentStruct, PrivatePayment } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -375,6 +375,12 @@ export class BalanceItem extends Model {
         const payments = await Payment.getByIDs(...balanceItemPayments.map(p => p.paymentId));
 
         return { payments, balanceItemPayments };
+    }
+
+    getStructure() {
+        return BalanceItemStruct.create({
+            ...this,
+        });
     }
 
     static async getStructureWithPayments(items: BalanceItem[]): Promise<BalanceItemWithPayments[]> {

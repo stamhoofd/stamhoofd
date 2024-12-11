@@ -32,17 +32,7 @@
         </STListItem>
     </STList>
 
-    <div class="style-pricing-box">
-        <STList>
-            <STListItem>
-                Totaal
-
-                <template #right>
-                    {{ formatPrice(total) }}
-                </template>
-            </STListItem>
-        </STList>
-    </div>
+    <PriceBreakdownBox :price-breakdown="priceBreakdown" />
 </template>
 
 <script setup lang="ts">
@@ -50,6 +40,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import PriceInput from '../inputs/PriceInput.vue';
+import { PriceBreakdownBox } from '@stamhoofd/components';
 
 const props = defineProps<{
     items: BalanceItem[];
@@ -64,6 +55,15 @@ const filteredBalanceItems = computed(() => {
 
 const total = computed(() => {
     return props.list.reduce((total, item) => total + item.price, 0);
+});
+
+const priceBreakdown = computed(() => {
+    return [
+        {
+            name: 'Totaal',
+            price: total.value,
+        },
+    ];
 });
 
 function addPatch(p: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed>) {

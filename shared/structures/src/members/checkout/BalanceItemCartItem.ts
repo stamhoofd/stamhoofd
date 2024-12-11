@@ -1,6 +1,6 @@
 import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItemWithPayments } from '../../BalanceItem.js';
+import { BalanceItem } from '../../BalanceItem.js';
 
 /**
  * Contains an intention to pay for an outstanding balance item
@@ -10,8 +10,8 @@ export class BalanceItemCartItem extends AutoEncoder {
         return this.item.id;
     }
 
-    @field({ decoder: BalanceItemWithPayments })
-    item: BalanceItemWithPayments;
+    @field({ decoder: BalanceItem })
+    item: BalanceItem;
 
     /**
      * Amount you want to pay of that balance item
@@ -19,7 +19,7 @@ export class BalanceItemCartItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     price = 0;
 
-    validate(data: { balanceItems?: BalanceItemWithPayments[] }) {
+    validate(data: { balanceItems?: BalanceItem[] }) {
         if (data.balanceItems !== undefined) {
             const found = data.balanceItems.find(b => b.id === this.item.id);
             if (!found) {

@@ -8,3 +8,4 @@ export { default as PaymentRow } from './components/PaymentRow.vue';
 export { default as PaymentMethodIcon } from './components/PaymentMethodIcon.vue';
 export { default as GroupedBalanceList } from './GroupedBalanceList.vue';
 export { default as BalancePriceBreakdown } from './BalancePriceBreakdown.vue';
+export { default as SelectBalanceItemsView } from './SelectBalanceItemsView.vue';

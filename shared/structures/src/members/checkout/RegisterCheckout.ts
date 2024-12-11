@@ -2,7 +2,7 @@ import { AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDeco
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
-import { BalanceItemWithPayments } from '../../BalanceItem.js';
+import { BalanceItem } from '../../BalanceItem.js';
 import { Group } from '../../Group.js';
 import { Organization } from '../../Organization.js';
 import { PaymentCustomer } from '../../PaymentCustomer.js';
@@ -212,6 +212,14 @@ export class RegisterCheckout {
         }
     }
 
+    removeBalanceItemByBalance(item: BalanceItem, options?: { calculate?: boolean }) {
+        const _item = this.cart.balanceItems.find(i => i.item.id === item.id);
+        if (!_item) {
+            return;
+        }
+        this.removeBalanceItem(_item, options);
+    }
+
     updatePrices() {
         this.cart.calculatePrices();
 
@@ -223,7 +231,7 @@ export class RegisterCheckout {
         }
     }
 
-    validate(data: { memberBalanceItems?: BalanceItemWithPayments[] }) {
+    validate(data: { memberBalanceItems?: BalanceItem[] }) {
         if (!this.isAdminFromSameOrganization && this.cart.deleteRegistrations.length > 0) {
             throw new SimpleError({
                 code: 'forbidden',

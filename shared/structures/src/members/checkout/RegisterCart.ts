@@ -1,11 +1,11 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { BalanceItemWithPayments } from '../../BalanceItem.js';
+import { BalanceItem } from '../../BalanceItem.js';
+import { Platform } from '../../Platform.js';
 import { RegistrationWithMember } from '../RegistrationWithMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
 import { IDRegisterItem, RegisterItem } from './RegisterItem.js';
-import { Platform } from '../../Platform.js';
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -224,7 +224,7 @@ export class RegisterCart {
         return this.items[0].organization;
     }
 
-    validate(checkout: RegisterCheckout, data?: { memberBalanceItems?: BalanceItemWithPayments[] }) {
+    validate(checkout: RegisterCheckout, data?: { memberBalanceItems?: BalanceItem[] }) {
         const newItems: RegisterItem[] = [];
         const errors = new SimpleErrors();
         for (const item of this.items) {
