@@ -43,10 +43,6 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         const returnedModels: BalanceItem[] = [];
         const updateOutstandingBalance: BalanceItem[] = [];
 
-        // Keep track of updates
-        const memberIds: string[] = [];
-        const registrationIds: string[] = [];
-
         await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
             for (const { put } of request.body.getPuts()) {
                 // Create a new balance item
@@ -67,7 +63,23 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 if (put.memberId) {
                     model.memberId = (await this.validateMemberId(put.memberId)).id;
-                    memberIds.push(model.memberId);
+                }
+
+                if (put.payingOrganizationId) {
+                    // Not allowed if not full admin
+                    if (!Context.auth.hasPlatformFullAccess()) {
+                        throw Context.auth.error('Je moet volledige platform beheerder zijn om schulden tussen verenigingen te wijzigen of toe te voegen');
+                    }
+                    if (put.payingOrganizationId === model.organizationId) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'payingOrganizationId cannot be the same as organizationId',
+                            human: 'Dit is een ongeldige situatie. Een schuld moet tussen verschillende verenigingen zijn.',
+                            field: 'payingOrganizationId',
+                        });
+                    }
+
+                    model.payingOrganizationId = put.payingOrganizationId;
                 }
 
                 if (model.dueAt && model.price < 0) {
@@ -111,30 +123,25 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     });
                 }
 
-                if (patch.unitPrice !== undefined) {
-                    // throw new SimpleError({
-                    //    code: 'invalid_field',
-                    //    message: 'You cannot change the unit price of a balance item',
-                    //    human: 'Het is niet mogelijk om de eenheidsprijs van een openstaande schuld te wijzigen. Je kan de openstaande schuld verwijderen en opnieuw aanmaken indien noodzakelijk.',
-                    // });
-                }
+                if (patch.payingOrganizationId !== undefined) {
+                    // Not allowed if not full admin
+                    if (!Context.auth.hasPlatformFullAccess()) {
+                        throw Context.auth.error('Je moet volledige platform beheerder zijn om schulden tussen verenigingen te wijzigen of toe te voegen');
+                    }
+                    if (patch.payingOrganizationId === model.organizationId) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'payingOrganizationId cannot be the same as organizationId',
+                            human: 'Dit is een ongeldige situatie. Een schuld moet tussen verschillende verenigingen zijn.',
+                            field: 'payingOrganizationId',
+                        });
+                    }
 
-                // Check permissions
-                if (model.memberId) {
-                    // Update old
-                    memberIds.push(model.memberId);
+                    model.payingOrganizationId = patch.payingOrganizationId;
                 }
 
                 if (patch.memberId) {
                     model.memberId = (await this.validateMemberId(patch.memberId)).id;
-
-                    // Update new
-                    memberIds.push(model.memberId);
-                }
-
-                if (model.registrationId) {
-                    // Update old
-                    registrationIds.push(model.registrationId);
                 }
 
                 if (patch.createdAt) {
