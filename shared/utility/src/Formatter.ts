@@ -85,7 +85,7 @@ export class Formatter {
     }
 
     /**
-     * 1 januari (2020). Year only in different year if withYear is null (default)
+     * 1 januari (2020). Year only in different year and in the future, if withYear is null (default)
      */
     static date(date: Date, withYear: boolean | null = null): string {
         if (!date) {
@@ -96,7 +96,7 @@ export class Formatter {
 
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         const year = datetime.year;
-        return datetime.day + ' ' + this.month(datetime.month) + (currentYear !== year || withYear === true ? (' ' + year) : '');
+        return datetime.day + ' ' + this.month(datetime.month) + (currentYear !== year || withYear === true || date < new Date() ? (' ' + year) : '');
     }
 
     static relativeTime(date: Date, options?: { days?: boolean; hours?: boolean }) {

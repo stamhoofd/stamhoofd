@@ -17,7 +17,9 @@ const filteredItems = computed(() => {
 });
 
 const priceBreakdown = computed(() => {
-    const balance = BalanceItemWithPayments.getOutstandingBalance(filteredItems.value);
+    const now = new Date();
+    const laterBalance = BalanceItemWithPayments.getOutstandingBalance(filteredItems.value.filter(i => i.dueAt !== null && i.dueAt > now));
+    const balance = BalanceItemWithPayments.getOutstandingBalance(filteredItems.value.filter(i => i.dueAt === null || i.dueAt <= now));
 
     const all = [
         {
@@ -37,10 +39,17 @@ const priceBreakdown = computed(() => {
         });
     }
 
+    if (laterBalance.priceOpen > 0) {
+        all.push({
+            name: 'Later te betalen',
+            price: laterBalance.priceOpen,
+        });
+    }
+
     return [
         ...all,
         {
-            name: balance.priceOpen < 0 ? 'Terug te krijgen' : 'Te betalen',
+            name: balance.priceOpen < 0 ? 'Terug te krijgen' : (laterBalance.priceOpen !== 0 ? 'Nu te betalen' : 'Te betalen'),
             price: Math.abs(balance.priceOpen),
         },
     ];

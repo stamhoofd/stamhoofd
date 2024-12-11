@@ -70,6 +70,27 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     memberIds.push(model.memberId);
                 }
 
+                if (model.dueAt && model.dueAt < new Date()) {
+                    model.dueAt = null;
+                }
+
+                if (model.dueAt && model.price < 0) {
+                    throw new SimpleError({
+                        code: 'invalid_price',
+                        message: 'Cannot create negative balance in the future',
+                        human: 'Het is niet mogelijk om een negatief openstaand bedrag toe te voegen in de toekomst',
+                    });
+                }
+
+                if (model.createdAt > new Date()) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'createdAt cannot be in the future',
+                        human: 'De datum kan niet in de toekomst liggen',
+                        field: 'createdAt',
+                    });
+                }
+
                 if (!model.userId && !model.memberId) {
                     throw new SimpleError({
                         code: 'invalid_field',
@@ -122,12 +143,34 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 if (patch.createdAt) {
                     model.createdAt = patch.createdAt;
+
+                    if (model.createdAt > new Date()) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'createdAt cannot be in the future',
+                            human: 'De datum kan niet in de toekomst liggen',
+                            field: 'createdAt',
+                        });
+                    }
                 }
 
                 model.description = patch.description ?? model.description;
                 model.unitPrice = patch.unitPrice ?? model.unitPrice;
                 model.amount = patch.amount ?? model.amount;
                 model.dueAt = patch.dueAt === undefined ? model.dueAt : patch.dueAt;
+
+                if (model.dueAt && patch.dueAt && model.dueAt < new Date()) {
+                    model.dueAt = null;
+                }
+
+                if ((patch.dueAt !== undefined || patch.unitPrice !== undefined) && model.dueAt && model.price < 0) {
+                    throw new SimpleError({
+                        code: 'invalid_price',
+                        message: 'Cannot create negative balance in the future',
+                        human: 'Het is niet mogelijk om een negatief openstaand bedrag toe te voegen in de toekomst',
+                        field: 'dueAt',
+                    });
+                }
 
                 if (model.orderId) {
                     // Not allowed to change this

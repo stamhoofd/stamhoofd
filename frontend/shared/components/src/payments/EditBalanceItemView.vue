@@ -23,7 +23,7 @@
                 </STInputBox>
             </div>
             <div>
-                <STInputBox title="Datum" error-fields="createdAt" :error-box="errors.errorBox">
+                <STInputBox title="Verschuldigd sinds" error-fields="createdAt" :error-box="errors.errorBox">
                     <DateSelection v-model="createdAt" />
                 </STInputBox>
             </div>
@@ -57,6 +57,15 @@
             </STList>
         </template>
 
+        <template v-if="$feature('member-trials') && (patchedBalanceItem.price > 0 || dueAt !== null)">
+            <STInputBox title="Te betalen tegen*" error-fields="dueAt" :error-box="errors.errorBox">
+                <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
+            </STInputBox>
+            <p class="style-description-small">
+                *Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf deze datum. Het is eventueel mogelijk om het wel al vroeger te betalen, maar zeker niet verplicht.
+            </p>
+        </template>
+
         <template v-if="member && registration">
             <hr>
             <h2>Gekoppelde inschrijving</h2>
@@ -64,16 +73,6 @@
             <STList>
                 <ViewMemberRegistrationRow :member="member" :registration="registration" />
             </STList>
-        </template>
-
-        <template v-if="$feature('member-trials')">
-            <hr>
-            <h2>Uitgesteld betalen</h2>
-            <p>Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf deze datum. Het is eventueel mogelijk om het wel al vroeger te betalen, maar zeker niet verplicht.</p>
-
-            <STInputBox title="Te betalen tegen" error-fields="dueAt" :error-box="errors.errorBox">
-                <DateSelection v-model="dueAt" :required="false" placeholder="Zo snel mogelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
-            </STInputBox>
         </template>
 
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />

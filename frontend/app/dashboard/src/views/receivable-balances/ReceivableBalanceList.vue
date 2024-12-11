@@ -8,7 +8,11 @@
                 <span v-else class="style-amount min-width">{{ formatFloat(item.amount) }}</span>
             </template>
 
-            <p v-if="item.itemPrefix" class="style-title-prefix-list">
+            <p v-if="item.dueAt" class="style-title-prefix-list">
+                {{ item.itemPrefix ? item.itemPrefix + ' - ' : '' }} Te betalen tegen {{ formatDate(item.dueAt) }}
+            </p>
+
+            <p v-else-if="item.itemPrefix" class="style-title-prefix-list">
                 {{ item.itemPrefix }}
             </p>
 
@@ -41,7 +45,10 @@
             </p>
 
             <template #right>
-                <p class="style-price-base">
+                <p v-if="item.dueAt" v-tooltip="'Te betalen tegen ' + formatDate(item.dueAt)" class="style-price-base disabled style-tooltip">
+                    ({{ formatPrice(item.priceOpen) }})
+                </p>
+                <p v-else class="style-price-base">
                     {{ formatPrice(item.priceOpen) }}
                 </p>
             </template>
@@ -54,6 +61,7 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder, PatchableArray, ArrayD
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditBalanceItemView, GlobalEventBus, useContext } from '@stamhoofd/components';
 import { BalanceItemWithPayments, DetailedReceivableBalance } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 const props = withDefaults(
@@ -70,7 +78,11 @@ const present = usePresent();
 const context = useContext();
 
 const filteredItems = computed(() => {
-    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0);
+    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0)
+        .sort((a, b) => Sorter.stack(
+            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+            Sorter.byDateValue(b.createdAt, a.createdAt),
+        ));
 });
 
 async function editBalanceItem(balanceItem: BalanceItemWithPayments) {

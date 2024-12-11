@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Payment, PrivatePayment } from './members/Payment.js';
 import { PriceBreakdown } from './PriceBreakdown.js';
+import { Formatter } from '@stamhoofd/utility';
 
 export enum BalanceItemStatus {
     /**
@@ -245,11 +246,13 @@ export class BalanceItem extends AutoEncoder {
         if (this.type === BalanceItemType.Other) {
             return 'type-' + this.type
                 + '-unit-price-' + this.unitPrice
-                + '-description-' + this.description;
+                + '-description-' + this.description
+                + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null');
         }
 
         return 'type-' + this.type
             + '-unit-price-' + this.unitPrice
+            + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null')
             + '-relations' + Array.from(this.relations.entries())
             .filter(([key]) => !shouldAggregateOnRelationType(key, this.relations))
             .map(([key, value]) => key + '-' + value.id)
@@ -273,7 +276,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.AdministrationFee: return prefix + 'administratiekosten';
             case BalanceItemType.FreeContribution: return prefix + 'vrije bijdrage';
             case BalanceItemType.Order: return prefix + 'bestelling';
-            case BalanceItemType.Other: return prefix + 'andere';
+            case BalanceItemType.Other: return prefix + '';
             case BalanceItemType.PlatformMembership: return prefix + 'aansluiting';
         }
     }

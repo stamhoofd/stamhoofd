@@ -348,6 +348,10 @@
     line-height: 1.4;
     font-weight: $font-weight-medium;
     font-variant-numeric: tabular-nums;
+
+    &.disabled {
+        opacity: 0.6;
+    }
 }
 
 .style-amount {

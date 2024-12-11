@@ -17,7 +17,11 @@
                 </span>
             </template>
 
-            <p v-if="group.prefix" class="style-title-prefix-list">
+            <p v-if="group.dueAt" class="style-title-prefix-list">
+                {{ group.prefix ? group.prefix + ' - ' : '' }} Te betalen tegen {{ formatDate(group.dueAt) }}
+            </p>
+
+            <p v-else-if="group.prefix" class="style-title-prefix-list">
                 {{ group.prefix }}
             </p>
 
@@ -29,12 +33,19 @@
                 {{ group.description }}
             </p>
 
+            <p v-if="group.dueAt" class="style-description-small">
+                Dit is pas te betalen tegen {{ formatDate(group.dueAt) }}. Vroeger betalen is optioneel.
+            </p>
+
             <p class="style-description-small">
                 {{ formatFloat(group.amount) }} x {{ formatPrice(group.unitPrice) }}
             </p>
 
             <template #right>
-                <p class="style-price-base">
+                <p v-if="group.dueAt" v-tooltip="'Te betalen tegen ' + formatDate(group.dueAt)" class="style-price-base disabled style-tooltip">
+                    ({{ formatPrice(group.price) }})
+                </p>
+                <p v-else class="style-price-base">
                     {{ formatPrice(group.price) }}
                 </p>
             </template>
@@ -44,6 +55,7 @@
 
 <script setup lang="ts">
 import { BalanceItemWithPayments, DetailedPayableBalance, DetailedReceivableBalance, getBalanceItemTypeIcon } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -117,10 +129,22 @@ class GroupedItems {
     get unitPrice() {
         return this.items[0].unitPrice;
     }
+
+    get dueAt() {
+        const dueAt = this.items[0].dueAt;
+        if (dueAt && dueAt > new Date()) {
+            return dueAt;
+        }
+        return null;
+    }
 }
 
 const filteredItems = computed(() => {
-    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0);
+    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0)
+        .sort((a, b) => Sorter.stack(
+            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+            Sorter.byDateValue(b.createdAt, a.createdAt),
+        ));
 });
 
 const groupedItems = computed(() => {
