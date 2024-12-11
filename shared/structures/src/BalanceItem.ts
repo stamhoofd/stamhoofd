@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Payment, PrivatePayment } from './members/Payment.js';
 import { PriceBreakdown } from './PriceBreakdown.js';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 
 export enum BalanceItemStatus {
     /**
@@ -172,6 +172,43 @@ export class BalanceItem extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
     payingOrganizationId: string | null = null;
+
+    static getOutstandingBalance(items: BalanceItem[]) {
+        // Get sum of balance payments
+        const totalPending = items.map(p => p.pricePending).reduce((t, total) => total + t, 0);
+        const totalPaid = items.map(p => p.pricePaid).reduce((t, total) => total + t, 0);
+        const totalPrice = items.map(p => p.price).reduce((t, total) => total + t, 0);
+
+        const total = totalPrice - totalPaid;
+        const totalOpen = total - totalPending;
+
+        return {
+            /**
+             * @deprecated
+             */
+            totalPending, // Pending payment
+            /**
+             * @deprecated
+             */
+            totalOpen, // Not yet started
+            /**
+             * @deprecated
+             */
+            total: totalPending + totalOpen, // total not yet paid
+
+            price: totalPrice,
+            pricePending: totalPending,
+            priceOpen: totalOpen,
+            pricePaid: totalPaid,
+        };
+    }
+
+    static filterBalanceItems(items: BalanceItem[]) {
+        return items.filter(i => BalanceItem.getOutstandingBalance([i]).priceOpen !== 0).sort((a, b) => Sorter.stack(
+            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+            Sorter.byDateValue(b.createdAt, a.createdAt),
+        ));
+    }
 
     get paymentShortDescription(): string {
         switch (this.type) {
@@ -378,36 +415,6 @@ export class BalanceItemWithPayments extends BalanceItem {
      */
     get hasPendingPayment() {
         return !!this.payments.find(p => p.payment.isPending);
-    }
-
-    static getOutstandingBalance(items: BalanceItemWithPayments[]) {
-        // Get sum of balance payments
-        const totalPending = items.map(p => p.pricePending).reduce((t, total) => total + t, 0);
-        const totalPaid = items.map(p => p.pricePaid).reduce((t, total) => total + t, 0);
-        const totalPrice = items.map(p => p.price).reduce((t, total) => total + t, 0);
-
-        const total = totalPrice - totalPaid;
-        const totalOpen = total - totalPending;
-
-        return {
-            /**
-             * @deprecated
-             */
-            totalPending, // Pending payment
-            /**
-             * @deprecated
-             */
-            totalOpen, // Not yet started
-            /**
-             * @deprecated
-             */
-            total: totalPending + totalOpen, // total not yet paid
-
-            price: totalPrice,
-            pricePending: totalPending,
-            priceOpen: totalOpen,
-            pricePaid: totalPaid,
-        };
     }
 }
 

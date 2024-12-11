@@ -5,7 +5,7 @@
         </h1>
 
         <p v-if="price >= 0">
-            Kies hieronder wat er precies betaald werd.
+            Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel.
         </p>
         <p v-else>
             {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
@@ -13,52 +13,7 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <STList>
-            <STListItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true">
-                <template #left>
-                    <Checkbox :model-value="isItemSelected(item)" @update:model-value="setItemSelected(item, $event)" />
-                </template>
-
-                <h3 class="style-title-list">
-                    {{ item.description }}
-                </h3>
-                <p class="style-description-small">
-                    {{ formatDate(item.createdAt) }}
-                </p>
-                <p class="style-description-small">
-                    {{ formatPrice(item.price) }}<template v-if="item.pricePaid !== 0">
-                        waarvan {{ formatPrice(item.pricePaid) }} betaald
-                        <template v-if="item.pricePaid > item.price">
-                            (te veel betaald)
-                        </template>
-                    </template>
-                </p>
-
-                <template #right>
-                    <PriceInput v-if="isItemSelected(item)" :model-value="getItemPrice(item)" placeholder="0 euro" :min="null" @update:model-value="setItemPrice(item, $event)" />
-                </template>
-            </STListItem>
-        </STList>
-
-        <div class="style-pricing-box">
-            <STList>
-                <STListItem v-if="price >= 0">
-                    Totaal betaald
-
-                    <template #right>
-                        {{ formatPrice(price) }}
-                    </template>
-                </STListItem>
-
-                <STListItem v-else>
-                    Totaal terugbetaald
-
-                    <template #right>
-                        {{ formatPrice(price) }}
-                    </template>
-                </STListItem>
-            </STList>
-        </div>
+        <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" @patch="addPatch({balanceItemPayments: $event})" />
 
         <hr>
         <h2>Hoe?</h2>
@@ -153,6 +108,7 @@ import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import SaveView from '../navigation/SaveView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 
 @Component({
     components: {
@@ -166,6 +122,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
         DateSelection,
         Dropdown,
         IBANInput,
+        SelectBalanceItemsList,
     },
 })
 export default class EditPaymentView extends Mixins(NavigationMixin) {

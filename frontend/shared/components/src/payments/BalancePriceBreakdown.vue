@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { PriceBreakdownBox } from '@stamhoofd/components';
-import { BalanceItemWithPayments, DetailedPayableBalance, DetailedReceivableBalance } from '@stamhoofd/structures';
+import { BalanceItem, DetailedPayableBalance, DetailedReceivableBalance } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -16,8 +16,8 @@ const filteredItems = items;
 
 const priceBreakdown = computed(() => {
     const now = new Date();
-    const laterBalance = BalanceItemWithPayments.getOutstandingBalance(filteredItems.value.filter(i => i.dueAt !== null && i.dueAt > now));
-    const balance = BalanceItemWithPayments.getOutstandingBalance(filteredItems.value.filter(i => i.dueAt === null || i.dueAt <= now));
+    const laterBalance = BalanceItem.getOutstandingBalance(filteredItems.value.filter(i => i.dueAt !== null && i.dueAt > now));
+    const balance = BalanceItem.getOutstandingBalance(filteredItems.value.filter(i => i.dueAt === null || i.dueAt <= now));
 
     const all = [
         {
