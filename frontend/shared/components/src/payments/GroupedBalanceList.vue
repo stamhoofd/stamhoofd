@@ -33,16 +33,16 @@
                 {{ group.description }}
             </p>
 
-            <p v-if="group.dueAt" class="style-description-small">
-                Dit is pas te betalen tegen {{ formatDate(group.dueAt) }}. Vroeger betalen is optioneel.
-            </p>
-
             <p class="style-description-small">
                 {{ formatFloat(group.amount) }} x {{ formatPrice(group.unitPrice) }}
             </p>
 
+            <p v-if="group.dueAt && group.dueAt <= new Date()" class="error-box small">
+                Dit was te betalen voor {{ formatDate(group.dueAt) }}
+            </p>
+
             <template #right>
-                <p v-if="group.dueAt" v-tooltip="'Te betalen tegen ' + formatDate(group.dueAt)" class="style-price-base disabled style-tooltip">
+                <p v-if="group.dueAt && group.dueAt > new Date()" v-tooltip="'Te betalen tegen ' + formatDate(group.dueAt)" class="style-price-base disabled style-tooltip">
                     ({{ formatPrice(group.price) }})
                 </p>
                 <p v-else class="style-price-base">
@@ -131,11 +131,7 @@ class GroupedItems {
     }
 
     get dueAt() {
-        const dueAt = this.items[0].dueAt;
-        if (dueAt && dueAt > new Date()) {
-            return dueAt;
-        }
-        return null;
+        return this.items[0].dueAt; ;
     }
 }
 

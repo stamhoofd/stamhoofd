@@ -44,8 +44,12 @@
                 {{ formatPrice(item.pricePending) }} in verwerking
             </p>
 
+            <p v-if="item.dueAt && item.dueAt <= new Date()" class="error-box small">
+                Dit was te betalen voor {{ formatDate(item.dueAt) }}
+            </p>
+
             <template #right>
-                <p v-if="item.dueAt" v-tooltip="'Te betalen tegen ' + formatDate(item.dueAt)" class="style-price-base disabled style-tooltip">
+                <p v-if="item.dueAt && item.dueAt > new Date()" v-tooltip="'Te betalen tegen ' + formatDate(item.dueAt)" class="style-price-base disabled style-tooltip">
                     ({{ formatPrice(item.priceOpen) }})
                 </p>
                 <p v-else class="style-price-base">

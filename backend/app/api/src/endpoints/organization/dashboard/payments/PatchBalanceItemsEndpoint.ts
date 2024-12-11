@@ -70,10 +70,6 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     memberIds.push(model.memberId);
                 }
 
-                if (model.dueAt && model.dueAt < new Date()) {
-                    model.dueAt = null;
-                }
-
                 if (model.dueAt && model.price < 0) {
                     throw new SimpleError({
                         code: 'invalid_price',
@@ -158,10 +154,6 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.unitPrice = patch.unitPrice ?? model.unitPrice;
                 model.amount = patch.amount ?? model.amount;
                 model.dueAt = patch.dueAt === undefined ? model.dueAt : patch.dueAt;
-
-                if (model.dueAt && patch.dueAt && model.dueAt < new Date()) {
-                    model.dueAt = null;
-                }
 
                 if ((patch.dueAt !== undefined || patch.unitPrice !== undefined) && model.dueAt && model.price < 0) {
                     throw new SimpleError({
