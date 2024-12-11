@@ -51,6 +51,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             $or: {
                 amount: { $neq: 0 },
                 amountPending: { $neq: 0 },
+                recalculateAt: { $neq: null },
             },
         };
 
