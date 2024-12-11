@@ -1,0 +1,77 @@
+<template>
+    <div class="st-view">
+        <STNavigationBar :title="title">
+            <template #right>
+                <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+            </template>
+        </STNavigationBar>
+
+        <main>
+            <h1 class="style-navigation-title">
+                {{ title }}
+            </h1>
+
+            <STList class="info">
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        {{ $t('4a07f8e5-c16e-4706-9387-9d3ded9e2b3c') }}
+                    </h3>
+                    <p v-copyable class="style-definition-text">
+                        {{ capitalizeFirstLetter(getReceivableBalanceTypeName(item.objectType, $t)) }}
+                    </p>
+                </STListItem>
+
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        {{ $t('f7300ff2-638b-47c2-97b5-e8774aa0b6f5') }}
+                    </h3>
+                    <p v-copyable class="style-definition-text style-copyable">
+                        {{ item.object.name }}
+                    </p>
+                </STListItem>
+
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        {{ $t('28c2bc66-231f-44f3-9249-c1981b871a1f') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatPrice(item.amount) }}
+                    </p>
+                    <p v-if="item.amountPending !== 0" class="style-description-small">
+                        waarvan {{ formatPrice(item.amountPending) }} in verwerking
+                    </p>
+                </STListItem>
+            </STList>
+
+            <hr>
+            <ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="false" />
+        </main>
+    </div>
+</template>
+
+<script lang="ts" setup>
+import { useBackForward } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { getReceivableBalanceTypeName, PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
+import { computed } from 'vue';
+import ReceivableBalanceBox from './ReceivableBalanceBox.vue';
+
+const props = withDefaults(
+    defineProps<{
+        item: ReceivableBalance;
+        getNext: (current: ReceivableBalance) => ReceivableBalance | null;
+        getPrevious: (current: ReceivableBalance) => ReceivableBalance | null;
+        member?: PlatformMember | null;
+    }>(),
+    {
+        member: null,
+    });
+
+const $t = useTranslate();
+const { goBack, goForward, hasNext, hasPrevious } = useBackForward('item', props);
+const title = computed(() => {
+    return $t('28c2bc66-231f-44f3-9249-c1981b871a1f');
+});
+
+</script>

@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from '@simonbackx/si
 import { Organization } from '../Organization.js';
 import { BalanceItemWithPayments } from '../BalanceItem.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
+import { Sorter } from '@stamhoofd/utility';
 
 export class PayableBalance extends AutoEncoder {
     @field({ decoder: Organization })
@@ -31,6 +32,13 @@ export class DetailedPayableBalance extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(PaymentGeneral) })
     payments: PaymentGeneral[] = [];
+
+    get filteredBalanceItems() {
+        return this.balanceItems.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0).sort((a, b) => Sorter.stack(
+            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+            Sorter.byDateValue(b.createdAt, a.createdAt),
+        ));
+    }
 }
 
 export class DetailedPayableBalanceCollection extends AutoEncoder {

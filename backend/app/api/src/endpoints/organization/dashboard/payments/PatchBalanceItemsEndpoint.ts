@@ -99,7 +99,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     });
                 }
 
-                if (!model.userId && !model.memberId) {
+                if (!model.userId && !model.memberId && !model.payingOrganizationId) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'No user or member provided',
@@ -187,6 +187,14 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 }
                 else if (patch.status) {
                     model.status = model.pricePaid >= model.price ? BalanceItemStatus.Paid : BalanceItemStatus.Pending;
+                }
+
+                if (!model.userId && !model.memberId && !model.payingOrganizationId) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'No user or member provided',
+                        field: 'userId',
+                    });
                 }
 
                 await model.save();

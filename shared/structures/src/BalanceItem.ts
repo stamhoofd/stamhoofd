@@ -170,6 +170,9 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     registrationId: string | null = null;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    payingOrganizationId: string | null = null;
+
     get paymentShortDescription(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
@@ -208,6 +211,15 @@ export class BalanceItem extends AutoEncoder {
     }
 
     get groupDescription() {
+        switch (this.type) {
+            case BalanceItemType.Registration: {
+                const option = this.relations.get(BalanceItemRelationType.GroupOption);
+                if (option) {
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
+                    return 'Keuzeoptie ' + group;
+                }
+            }
+        }
         return null;
     }
 
@@ -245,12 +257,14 @@ export class BalanceItem extends AutoEncoder {
     get groupCode() {
         if (this.type === BalanceItemType.Other) {
             return 'type-' + this.type
+                + (this.amount === 0 ? '-canceled' : '')
                 + '-unit-price-' + this.unitPrice
                 + '-description-' + this.description
                 + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null');
         }
 
         return 'type-' + this.type
+            + (this.amount === 0 ? '-canceled' : '')
             + '-unit-price-' + this.unitPrice
             + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null')
             + '-relations' + Array.from(this.relations.entries())
@@ -294,13 +308,13 @@ export class BalanceItem extends AutoEncoder {
                 }
                 const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
                 const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name;
-                return group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
+                return 'Inschrijving voor ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
             }
             case BalanceItemType.AdministrationFee: return 'Administratiekosten';
             case BalanceItemType.FreeContribution: return 'Vrije bijdrage';
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || 'Onbekende webshop';
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name || 'Onbekend aansluitingstype';
+            case BalanceItemType.PlatformMembership: return 'Aansluiting voor ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || 'Onbekend aansluitingstype';
         }
     }
 
@@ -310,11 +324,17 @@ export class BalanceItem extends AutoEncoder {
     get itemDescription() {
         switch (this.type) {
             case BalanceItemType.Registration: {
+                const option = this.relations.get(BalanceItemRelationType.GroupOption);
+                let prefix = '';
+                if (option) {
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
+                    prefix = 'Keuzeoptie ' + group;
+                }
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
-                    return member.name;
+                    return (prefix ? (prefix + '\n') : '') + member.name;
                 }
-                return null;
+                return prefix;
             }
             case BalanceItemType.PlatformMembership: {
                 const member = this.relations.get(BalanceItemRelationType.Member);

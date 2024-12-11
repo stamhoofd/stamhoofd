@@ -44,10 +44,19 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
             case ReceivableBalanceType.organization: {
                 paymentModels = await Payment.select()
                     .where('organizationId', organization.id)
-                    .where('payingOrganizationId', request.params.id)
                     .andWhere(
                         SQL.whereNot('status', PaymentStatus.Failed),
                     )
+                    .join(
+                        SQL.join(BalanceItemPayment.table)
+                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
+                    )
+                    .join(
+                        SQL.join(BalanceItem.table)
+                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
+                    )
+                    .where(SQL.column(BalanceItem.table, 'payingOrganizationId'), request.params.id)
+                    .groupBy(SQL.column(Payment.table, 'id'))
                     .fetch();
                 break;
             }
@@ -64,6 +73,26 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
                             .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
                     )
                     .where(SQL.column(BalanceItem.table, 'memberId'), request.params.id)
+                    .andWhere(
+                        SQL.whereNot('status', PaymentStatus.Failed),
+                    )
+                    .groupBy(SQL.column(Payment.table, 'id'))
+                    .fetch();
+                break;
+            }
+
+            case ReceivableBalanceType.user: {
+                paymentModels = await Payment.select()
+                    .where('organizationId', organization.id)
+                    .join(
+                        SQL.join(BalanceItemPayment.table)
+                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
+                    )
+                    .join(
+                        SQL.join(BalanceItem.table)
+                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
+                    )
+                    .where(SQL.column(BalanceItem.table, 'userId'), request.params.id)
                     .andWhere(
                         SQL.whereNot('status', PaymentStatus.Failed),
                     )

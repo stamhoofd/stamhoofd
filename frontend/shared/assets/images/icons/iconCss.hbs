@@ -10,14 +10,14 @@ font-style: normal;
 font-weight: normal !important;
 }
 
-{{#each codepoints}}
-.icon.{{@key}}:before, .icon-base.{{@key}}:before{
+{{#each box_icons}}
+.{{@key}}-box:before {
 content: "\\{{this}}";
 }
 {{/each}}
 
-{{#each box_icons}}
-.{{@key}}-box:before {
+{{#each codepoints}}
+.icon.{{@key}}:before, .icon-base.{{@key}}:before{
 content: "\\{{this}}";
 }
 {{/each}}

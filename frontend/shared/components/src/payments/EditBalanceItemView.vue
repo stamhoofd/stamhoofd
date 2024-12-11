@@ -19,8 +19,12 @@
                         type="text"
                         placeholder="Bv. Aankoop T-shirt"
                         autocomplete=""
+                        :disabled="!!balanceItem.relations.size"
                     >
                 </STInputBox>
+                <p v-if="balanceItem.relations.size" class="style-description-small">
+                    Dit is een verschuldigd bedrag dat automatisch werd aangemaakt door {{ platform.config.name }}
+                </p>
             </div>
             <div>
                 <STInputBox title="Verschuldigd sinds" error-fields="createdAt" :error-box="errors.errorBox">
@@ -38,6 +42,14 @@
                 <NumberInput v-model="amount" placeholder="1" :min="Math.min(1, balanceItem.amount)" :stepper="true" />
             </STInputBox>
         </div>
+        <template v-if="$feature('member-trials') && (patchedBalanceItem.price >= 0 || dueAt !== null)">
+            <STInputBox title="Te betalen tegen*" error-fields="dueAt" :error-box="errors.errorBox">
+                <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
+            </STInputBox>
+            <p class="style-description-small">
+                *Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf deze datum. Het is eventueel mogelijk om het wel al vroeger te betalen, maar zeker niet verplicht.
+            </p>
+        </template>
 
         <template v-if="family && family.members.length > 1 && member && isNew">
             <hr>
@@ -54,24 +66,6 @@
                         {{ m.patchedMember.name }}
                     </h3>
                 </STListItem>
-            </STList>
-        </template>
-
-        <template v-if="$feature('member-trials') && (patchedBalanceItem.price >= 0 || dueAt !== null)">
-            <STInputBox title="Te betalen tegen*" error-fields="dueAt" :error-box="errors.errorBox">
-                <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
-            </STInputBox>
-            <p class="style-description-small">
-                *Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf deze datum. Het is eventueel mogelijk om het wel al vroeger te betalen, maar zeker niet verplicht.
-            </p>
-        </template>
-
-        <template v-if="member && registration">
-            <hr>
-            <h2>Gekoppelde inschrijving</h2>
-
-            <STList>
-                <ViewMemberRegistrationRow :member="member" :registration="registration" />
             </STList>
         </template>
 
@@ -116,8 +110,8 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, ViewMemberRegistrationRow, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PaymentMethod, PaymentMethodHelper, PlatformFamily, Registration } from '@stamhoofd/structures';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PlatformFamily } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import PaymentRow from './components/PaymentRow.vue';
 
@@ -129,7 +123,6 @@ const props = defineProps<{
 
 const { hasChanges, addPatch, patch, patched: patchedBalanceItem } = usePatch(props.balanceItem);
 const family = ref(null) as Ref<PlatformFamily | null>;
-const registration = ref(null) as Ref<Registration | null>;
 const platformFamilyManager = usePlatformFamilyManager();
 const organization = useOrganization();
 const platform = usePlatform();
@@ -211,7 +204,7 @@ async function save() {
             return;
         }
         await props.saveHandler(patch.value);
-        pop({ force: true });
+        await pop({ force: true });
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -238,7 +231,7 @@ async function doDelete() {
             status: BalanceItemStatus.Hidden,
             price: 0,
         }));
-        pop({ force: true });
+        await pop({ force: true });
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -261,9 +254,5 @@ async function loadMember() {
         console.error(e);
         return;
     }
-}
-
-function getPaymentMethodName(method: PaymentMethod) {
-    return PaymentMethodHelper.getNameCapitalized(method);
 }
 </script>

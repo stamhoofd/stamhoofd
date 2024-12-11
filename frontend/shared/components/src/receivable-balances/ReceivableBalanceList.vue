@@ -2,38 +2,38 @@
     <STList>
         <STListItem v-for="item in filteredItems" :key="item.id" :selectable="hasWrite" @click="editBalanceItem(item)">
             <template #left>
-                <span v-if="item.amount === 0" class="style-amount min-width">
-                    <span class="icon disabled gray" />
+                <span class="style-amount min-width">
+                    <figure class="style-image-with-icon gray">
+                        <figure>
+                            <span class="icon" :class="getBalanceItemTypeIcon(item.type)" />
+                        </figure>
+                        <aside>
+                            <span v-if="item.amount <= 0" class="icon disabled small red" />
+                            <span v-if="item.amount > 1" class="style-bubble primary">
+                                {{ item.amount }}
+                            </span>
+                        </aside>
+                    </figure>
                 </span>
-                <span v-else class="style-amount min-width">{{ formatFloat(item.amount) }}</span>
             </template>
 
-            <p v-if="item.dueAt" class="style-title-prefix-list">
-                {{ item.itemPrefix ? item.itemPrefix + ' - ' : '' }} Te betalen tegen {{ formatDate(item.dueAt) }}
-            </p>
-
-            <p v-else-if="item.itemPrefix" class="style-title-prefix-list">
-                {{ item.itemPrefix }}
+            <p v-if="item.dueAt" class="style-title-prefix-list" :class="{error: item.dueAt && item.dueAt <= now}">
+                <span>Te betalen tegen {{ formatDate(item.dueAt) }}</span>
+                <span v-if="item.dueAt && item.dueAt <= now" class="icon error small" />
             </p>
 
             <h3 class="style-title-list">
                 {{ item.itemTitle }}
             </h3>
 
-            <p v-if="item.itemDescription" class="style-description-small">
-                {{ item.itemDescription }}
-            </p>
-
-            <p class="style-description-small">
-                {{ formatDate(item.createdAt) }}
-            </p>
+            <p v-if="item.itemDescription" class="style-description-small pre-wrap" v-text="item.itemDescription" />
 
             <p v-if="item.amount === 0" class="style-description-small">
-                Deze schuld werd verwijderd maar werd al (deels) betaald
+                Annulatie
             </p>
 
             <p v-else class="style-description-small">
-                {{ formatFloat(item.amount) }} x {{ formatPrice(item.unitPrice) }} te betalen
+                {{ formatFloat(item.amount) }} x {{ formatPrice(item.unitPrice) }}
             </p>
 
             <p v-if="item.pricePaid !== 0" class="style-description-small">
@@ -44,12 +44,12 @@
                 {{ formatPrice(item.pricePending) }} in verwerking
             </p>
 
-            <p v-if="item.dueAt && item.dueAt <= new Date()" class="error-box small">
-                Dit was te betalen voor {{ formatDate(item.dueAt) }}
+            <p class="style-description-small">
+                {{ formatDate(item.createdAt) }}
             </p>
 
             <template #right>
-                <p v-if="item.dueAt && item.dueAt > new Date()" v-tooltip="'Te betalen tegen ' + formatDate(item.dueAt)" class="style-price-base disabled style-tooltip">
+                <p v-if="item.dueAt && item.dueAt > now" v-tooltip="'Te betalen tegen ' + formatDate(item.dueAt)" class="style-price-base disabled style-tooltip">
                     ({{ formatPrice(item.priceOpen) }})
                 </p>
                 <p v-else class="style-price-base">
@@ -61,11 +61,10 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder, PatchableArray, ArrayDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditBalanceItemView, GlobalEventBus, useContext } from '@stamhoofd/components';
-import { BalanceItemWithPayments, DetailedReceivableBalance } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { EditBalanceItemView, GlobalEventBus, useContext, useNow } from '@stamhoofd/components';
+import { BalanceItemWithPayments, DetailedReceivableBalance, getBalanceItemTypeIcon } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(
@@ -77,17 +76,12 @@ const props = withDefaults(
         hasWrite: true,
     },
 );
-const items = computed(() => props.item.balanceItems);
+const items = computed(() => props.item.filteredBalanceItems);
 const present = usePresent();
 const context = useContext();
+const now = useNow();
 
-const filteredItems = computed(() => {
-    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0)
-        .sort((a, b) => Sorter.stack(
-            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
-            Sorter.byDateValue(b.createdAt, a.createdAt),
-        ));
-});
+const filteredItems = items;
 
 async function editBalanceItem(balanceItem: BalanceItemWithPayments) {
     if (!props.hasWrite) {

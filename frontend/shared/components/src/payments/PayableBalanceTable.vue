@@ -29,25 +29,23 @@
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { GlobalEventBus, Toast, useAppContext, useOrganizationCart } from '@stamhoofd/components';
 import { useMemberManager } from '@stamhoofd/networking';
-import { BalanceItemCartItem, BalanceItemWithPayments, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
+import { BalanceItemCartItem, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import GroupedBalanceList from './GroupedBalanceList.vue';
 import BalancePriceBreakdown from './BalancePriceBreakdown.vue';
+import GroupedBalanceList from './GroupedBalanceList.vue';
 
 const props = defineProps<{
     item: DetailedPayableBalance;
     showName: boolean;
 }>();
 
-const items = computed(() => props.item.balanceItems);
+const items = computed(() => props.item.filteredBalanceItems);
 const openCart = useOrganizationCart();
 const app = useAppContext();
 const memberManager = useMemberManager();
 const dismiss = useDismiss();
 
-const filteredItems = computed(() => {
-    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).totalOpen !== 0);
-});
+const filteredItems = items;
 
 async function checkout() {
     let checkout = new RegisterCheckout();

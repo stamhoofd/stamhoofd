@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <div v-if="outstandingBalance"  class="st-view">
+        <div v-if="outstandingBalance" class="st-view">
             <STNavigationBar title="Boekhouding" />
 
             <main class="center">
@@ -123,11 +123,10 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingViewTransition, PayableBalanceCollectionView, useAuth, useContext, useErrors, useFeatureFlag, useOrganization } from '@stamhoofd/components';
+import { ErrorBox, LoadingViewTransition, PayableBalanceCollectionView, useAuth, useContext, useErrors, useFeatureFlag, useOrganization, ReceivableBalancesTableView } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, BalanceItemWithPayments, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions, ref, Ref } from 'vue';
-import ReceivableBalancesTableView from '../../receivable-balances/ReceivableBalancesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 

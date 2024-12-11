@@ -14,16 +14,14 @@
             </figure>
         </template>
 
-        <p v-if="item.item.itemPrefix" class="style-title-prefix-list">
-            {{ item.item.itemPrefix }}
-        </p>
-            
         <h3 class="style-title-list">
             <span>{{ item.item.itemTitle }}</span>
         </h3>
 
-        <p class="style-description-small">
-            <span>{{ item.item.itemDescription }}</span>
+        <p class="style-description-small pre-wrap" v-text="item.item.itemDescription" />
+
+        <p v-if="item.item.amount === 0" class="style-description-small">
+            Annulatie
         </p>
 
         <template #right>
@@ -35,7 +33,6 @@
     </STListItem>
 </template>
 
-
 <script setup lang="ts">
 import { BalanceItemCartItem, getBalanceItemTypeIcon, RegisterCheckout } from '@stamhoofd/structures';
 
@@ -44,11 +41,11 @@ const props = withDefaults(
         item: BalanceItemCartItem;
         checkout: RegisterCheckout;
     }>(),
-    {}
+    {},
 );
 
 async function deleteMe() {
-    props.checkout.removeBalanceItem(props.item)
+    props.checkout.removeBalanceItem(props.item);
 }
 
 </script>

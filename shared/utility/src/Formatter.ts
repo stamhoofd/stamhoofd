@@ -477,7 +477,7 @@ export class Formatter {
             return 'één ' + singular;
         }
 
-        return num + ' ' + plural;
+        return this.float(num) + ' ' + plural;
     }
 
     static groupNamesByFamily(names: { firstName: string; lastName: string }[]): string {

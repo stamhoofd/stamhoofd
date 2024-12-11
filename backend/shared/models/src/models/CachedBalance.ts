@@ -107,7 +107,6 @@ export class CachedBalance extends Model {
             .where('organizationId', organizationId)
             .where(columnName, objectIds)
             .whereNot('status', BalanceItemStatus.Hidden)
-            .where(SQL.where('dueAt', null).or('dueAt', SQLWhereSign.LessEqual, new Date()))
             .where(
                 SQL.where(
                     new SQLCalculation(

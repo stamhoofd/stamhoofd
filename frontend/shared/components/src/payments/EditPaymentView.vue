@@ -65,6 +65,14 @@
 
         <div class="split-inputs">
             <div>
+                <STInputBox title="Betaalmethode" error-fields="method" :error-box="errorBox">
+                    <Dropdown v-model="method">
+                        <option v-for="m in availableMethods" :key="m" :value="m">
+                            {{ getPaymentMethodName(m) }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+
                 <STInputBox title="Status" error-fields="status" :error-box="errorBox">
                     <Dropdown v-model="status">
                         <option v-for="m in availableStatuses" :key="m" :value="m">
@@ -79,14 +87,6 @@
                 </STInputBox>
             </div>
         </div>
-
-        <STInputBox title="Betaalmethode" error-fields="method" :error-box="errorBox">
-            <Dropdown v-model="method">
-                <option v-for="m in availableMethods" :key="m" :value="m">
-                    {{ getPaymentMethodName(m) }}
-                </option>
-            </Dropdown>
-        </STInputBox>
 
         <p v-if="status !== 'Succeeded' && price >= 0" class="info-box">
             We raden aan enkel betalingen aan te maken die je hebt ontvangen. <template v-if="family">

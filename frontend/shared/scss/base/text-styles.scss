@@ -212,6 +212,18 @@
         font-size: 10px;
         margin-bottom: 4px;
     }
+
+    &.error {
+        color: $color-error;
+    }
+
+    > .icon:first-child:not(:last-child) {
+        margin-right: 5px;
+    }
+
+    > .icon:last-child:not(:first-child) {
+        margin-left: 5px;
+    }
 }
 
 .style-capitalize-first-letter {
@@ -937,6 +949,10 @@
         }
 
         .segmented-control + h2 {
+            padding-top: 15px;
+        }
+
+        .segmented-control + .st-list {
             padding-top: 15px;
         }
 

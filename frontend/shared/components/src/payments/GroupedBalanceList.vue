@@ -17,28 +17,22 @@
                 </span>
             </template>
 
-            <p v-if="group.dueAt" class="style-title-prefix-list">
-                {{ group.prefix ? group.prefix + ' - ' : '' }} Te betalen tegen {{ formatDate(group.dueAt) }}
-            </p>
-
-            <p v-else-if="group.prefix" class="style-title-prefix-list">
-                {{ group.prefix }}
+            <p v-if="group.dueAt" class="style-title-prefix-list" :class="{error: group.dueAt && group.dueAt <= now}">
+                <span>Te betalen tegen {{ formatDate(group.dueAt) }}</span>
+                <span v-if="group.dueAt && group.dueAt <= now" class="icon error small" />
             </p>
 
             <h3 class="style-title-list">
                 {{ group.title }}
             </h3>
 
-            <p v-if="group.description" class="style-description-small">
-                {{ group.description }}
-            </p>
+            <p v-if="group.description" class="style-description-small pre-wrap" v-text="group.description" />
 
-            <p class="style-description-small">
+            <p v-if="group.amount >= 0" class="style-description-small">
                 {{ formatFloat(group.amount) }} x {{ formatPrice(group.unitPrice) }}
             </p>
-
-            <p v-if="group.dueAt && group.dueAt <= new Date()" class="error-box small">
-                Dit was te betalen voor {{ formatDate(group.dueAt) }}
+            <p v-else class="style-description-small">
+                {{ capitalizeFirstLetter(pluralText(-group.amount, 'annulatie', 'annulaties')) }} x {{ formatPrice(group.unitPrice) }}
             </p>
 
             <template #right>
@@ -55,14 +49,16 @@
 
 <script setup lang="ts">
 import { BalanceItemWithPayments, DetailedPayableBalance, DetailedReceivableBalance, getBalanceItemTypeIcon } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import { useNow } from '../hooks';
 
 const props = defineProps<{
     item: DetailedPayableBalance | DetailedReceivableBalance;
 }>();
 
-const items = computed(() => props.item.balanceItems);
+const items = computed(() => props.item.filteredBalanceItems);
+const filteredItems = items;
+const now = useNow();
 
 class GroupedItems {
     items: BalanceItemWithPayments[];
@@ -93,6 +89,13 @@ class GroupedItems {
         }
 
         return this.price / this.unitPrice;
+    }
+
+    get cancellations() {
+        if (this.balanceItem.amount === 0) {
+            return this.items.length;
+        }
+        return 0;
     }
 
     /**
@@ -134,14 +137,6 @@ class GroupedItems {
         return this.items[0].dueAt; ;
     }
 }
-
-const filteredItems = computed(() => {
-    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0)
-        .sort((a, b) => Sorter.stack(
-            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
-            Sorter.byDateValue(b.createdAt, a.createdAt),
-        ));
-});
 
 const groupedItems = computed(() => {
     const map = new Map<string, GroupedItems>();

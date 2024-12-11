@@ -11,10 +11,8 @@ const props = defineProps<{
     item: DetailedPayableBalance | DetailedReceivableBalance;
 }>();
 
-const items = computed(() => props.item.balanceItems);
-const filteredItems = computed(() => {
-    return items.value.filter(i => BalanceItemWithPayments.getOutstandingBalance([i]).priceOpen !== 0);
-});
+const items = computed(() => props.item.filteredBalanceItems);
+const filteredItems = items;
 
 const priceBreakdown = computed(() => {
     const now = new Date();

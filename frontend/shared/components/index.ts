@@ -26,6 +26,7 @@ export * from './src/organizations';
 export * from './src/fetchers';
 export * from './src/quick-actions';
 export * from './src/setupSteps';
+export * from './src/receivable-balances';
 
 // Navigation
 export { default as EditorView } from './src/editor/EditorView.vue';
