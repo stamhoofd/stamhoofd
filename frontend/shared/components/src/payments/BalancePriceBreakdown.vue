@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const items = computed(() => props.item.filteredBalanceItems);
 const filteredItems = items;
+const isPayable = props.item instanceof DetailedPayableBalance;
 
 const priceBreakdown = computed(() => {
     const now = new Date();
@@ -47,7 +48,7 @@ const priceBreakdown = computed(() => {
     return [
         ...all,
         {
-            name: balance.priceOpen < 0 ? 'Terug te krijgen' : (laterBalance.priceOpen !== 0 ? 'Nu te betalen' : 'Te betalen'),
+            name: balance.priceOpen < 0 ? (isPayable ? 'Terug te krijgen' : 'Terug te betalen') : (laterBalance.priceOpen !== 0 ? 'Nu te betalen' : 'Te betalen'),
             price: Math.abs(balance.priceOpen),
         },
     ];

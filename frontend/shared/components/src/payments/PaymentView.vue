@@ -290,20 +290,31 @@
                 <STList>
                     <STListItem v-for="item in sortedItems" :key="item.id">
                         <template #left>
-                            <span class="style-amount min-width">{{ formatFloat(item.amount) }}</span>
+                            <span class="style-amount min-width">
+                                <figure class="style-image-with-icon gray">
+                                    <figure>
+                                        <span class="icon" :class="getBalanceItemTypeIcon(item.balanceItem.type)" />
+                                    </figure>
+                                    <aside>
+                                        <span v-if="item.amount <= 0" class="icon disabled small red" />
+                                        <span v-if="item.amount > 1" class="style-bubble primary">
+                                            {{ item.amount }}
+                                        </span>
+                                    </aside>
+                                </figure>
+                            </span>
                         </template>
 
-                        <p v-if="item.itemPrefix" class="style-title-prefix-list">
-                            {{ item.itemPrefix }}
+                        <p v-if="item.price < 0" class="style-title-prefix-list">
+                            <span>Terugbetaling</span>
+                            <span class="icon undo small" />
                         </p>
 
                         <h3 class="style-title-list">
                             {{ item.itemTitle }}
                         </h3>
 
-                        <p v-if="item.itemDescription" class="style-description-small">
-                            {{ item.itemDescription }}
-                        </p>
+                        <p v-if="item.itemDescription" class="style-description-small pre-wrap" v-text="item.itemDescription" />
 
                         <p class="style-description-small">
                             {{ formatDate(item.balanceItem.createdAt) }}
@@ -311,10 +322,6 @@
 
                         <p v-if="item.amount !== 1" class="style-description-small">
                             {{ formatPrice(item.unitPrice) }}
-                        </p>
-
-                        <p v-if="item.price < 0" class="style-tag">
-                            Terugbetaling
                         </p>
 
                         <template #right>
@@ -332,7 +339,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors } from '@stamhoofd/components';
-import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel } from '@stamhoofd/structures';
+import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, getBalanceItemTypeIcon } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Sorter } from '@stamhoofd/utility';

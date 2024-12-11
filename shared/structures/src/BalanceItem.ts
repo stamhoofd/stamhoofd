@@ -282,7 +282,7 @@ export class BalanceItem extends AutoEncoder {
         return [
             ...all,
             {
-                name: this.priceOpen < 0 ? 'Terug te krijgen' : 'Te betalen',
+                name: this.priceOpen < 0 ? 'Terug te betalen' : 'Te betalen',
                 price: Math.abs(this.priceOpen),
             },
         ];

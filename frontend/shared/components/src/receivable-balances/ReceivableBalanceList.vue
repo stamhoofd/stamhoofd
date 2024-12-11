@@ -21,6 +21,10 @@
                 <span>Te betalen tegen {{ formatDate(item.dueAt) }}</span>
                 <span v-if="item.dueAt && item.dueAt <= now" class="icon error small" />
             </p>
+            <p v-if="item.priceOpen < 0" class="style-title-prefix-list">
+                <span>Terug te betalen</span>
+                <span class="icon undo small" />
+            </p>
 
             <h3 class="style-title-list">
                 {{ item.itemTitle }}

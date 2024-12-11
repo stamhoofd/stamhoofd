@@ -21,6 +21,11 @@
                 <span>Te betalen tegen {{ formatDate(group.dueAt) }}</span>
                 <span v-if="group.dueAt && group.dueAt <= now" class="icon error small" />
             </p>
+            <p v-if="group.price < 0" class="style-title-prefix-list">
+                <span v-if="isPayable">Terug te krijgen</span>
+                <span v-else>Terug te betalen</span>
+                <span class="icon undo small" />
+            </p>
 
             <h3 class="style-title-list">
                 {{ group.title }}
@@ -55,6 +60,7 @@ import { useNow } from '../hooks';
 const props = defineProps<{
     item: DetailedPayableBalance | DetailedReceivableBalance;
 }>();
+const isPayable = props.item instanceof DetailedPayableBalance;
 
 const items = computed(() => props.item.filteredBalanceItems);
 const filteredItems = items;
