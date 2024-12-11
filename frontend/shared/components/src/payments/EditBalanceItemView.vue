@@ -57,7 +57,7 @@
             </STList>
         </template>
 
-        <template v-if="$feature('member-trials') && (patchedBalanceItem.price > 0 || dueAt !== null)">
+        <template v-if="$feature('member-trials') && (patchedBalanceItem.price >= 0 || dueAt !== null)">
             <STInputBox title="Te betalen tegen*" error-fields="dueAt" :error-box="errors.errorBox">
                 <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
