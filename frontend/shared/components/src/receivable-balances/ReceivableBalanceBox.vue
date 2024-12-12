@@ -11,15 +11,48 @@
                 Geen openstaand bedrag
             </p>
 
-            <button v-if="hasWrite" type="button" class="button text" @click="createBalanceItem">
-                <span class="icon add" />
-                <span>Bedrag aanrekenen</span>
-            </button>
+            <STList v-if="hasWrite">
+                <STListItem :selectable="true" element-name="button" @click="createBalanceItem">
+                    <template #left>
+                        <IconContainer icon="label">
+                            <template #aside>
+                                <span class="icon add small primary" />
+                            </template>
+                        </IconContainer>
+                    </template>
+                    <h3 class="style-title-list">
+                        Item toevoegen
+                    </h3>
+                    <p class="style-description-small">
+                        De openstaande bedrag is opgemaakt uit één of meerdere items die het openstaande bedrag of tegoed bepalen
+                    </p>
 
-            <button v-if="hasWrite" type="button" class="button text" @click="createPayment">
-                <span class="icon card" />
-                <span>Betaling/terugbetaling registreren</span>
-            </button>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="button" @click="createPayment">
+                    <template #left>
+                        <IconContainer icon="card">
+                            <template #aside>
+                                <span class="icon add small primary" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Betaling of terugbetaling registreren
+                    </h3>
+                    <p class="style-description-small">
+                        Via een betaling kan je één of meerdere items markeren als betaald
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
 
             <template v-if="item.objectType === ReceivableBalanceType.member || item.objectType === ReceivableBalanceType.user">
                 <hr>
@@ -69,7 +102,7 @@
                     </p>
                 </STListItem>
             </STList>
-            <p class="info-box">
+            <p v-else class="info-box">
                 Geen contactpersonen gevonden
             </p>
         </div>
@@ -79,7 +112,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, usePlatformFamilyManager } from '@stamhoofd/components';
+import { IconContainer, BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -130,7 +163,7 @@ async function reload() {
         if (!detailedItem.value) {
             detailedItem.value = response.data;
 
-            if (detailedItem.value.filteredBalanceItems.length > 4) {
+            if (detailedItem.value.filteredBalanceItems.length <= 4) {
                 selectedTab.value = 'Individueel';
             }
         }
