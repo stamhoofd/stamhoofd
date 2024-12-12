@@ -122,6 +122,7 @@ import { LoadingViewTransition } from '../containers';
 
 export type RecipientChooseOneOption = {
     type: 'ChooseOne';
+    name?: string;
     options: {
         id: string;
         name: string;
@@ -131,6 +132,7 @@ export type RecipientChooseOneOption = {
 
 export type RecipientMultipleChoiceOption = {
     type: 'MultipleChoice';
+    name?: string;
     options: {
         name: string;
         id: string;
@@ -550,13 +552,21 @@ async function showToMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         props.recipientFilterOptions.flatMap((option, j) => {
             if (option.type === 'MultipleChoice') {
+                if (option.name) {
+                    return [new ContextMenuItem({
+                        name: option.name,
+                        childMenu: new ContextMenu([
+                            getContextMenuForOption(option, j),
+                        ]),
+                    })];
+                }
                 return getContextMenuForOption(option, j);
             }
             const selectedIds = selectedRecipientOptions.value[j];
             const selectedOption = option.options.find(o => o.id === selectedIds[0]);
 
             return [new ContextMenuItem({
-                name: selectedOption?.name ?? 'Onbekend',
+                name: option.name ?? selectedOption?.name ?? 'Onbekend',
                 childMenu: new ContextMenu([
                     getContextMenuForOption(option, j),
                 ]),
@@ -707,7 +717,7 @@ async function openTemplates() {
                         id: '',
                         ...current,
                         subject: subject.value,
-                        type
+                        type,
                     })
                     : null,
             }),
