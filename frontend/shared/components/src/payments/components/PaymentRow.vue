@@ -7,6 +7,11 @@
             </PaymentMethodIcon>
         </template>
 
+        <p v-if="payment.price < 0" class="style-title-prefix-list">
+            <span>Terugbetaling</span>
+            <span class="icon undo small" />
+        </p>
+
         <h3 class="style-title-list">
             {{ PaymentMethodHelper.getNameCapitalized(payment.method) }}
         </h3>
@@ -28,7 +33,6 @@
     </STListItem>
 </template>
 
-
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { Payment, PaymentGeneral, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
@@ -37,40 +41,40 @@ import PaymentMethodIcon from './PaymentMethodIcon.vue';
 
 const props = withDefaults(
     defineProps<{
-        payment: PaymentGeneral|Payment,
-        payments?: (PaymentGeneral|Payment)[]
+        payment: PaymentGeneral | Payment;
+        payments?: (PaymentGeneral | Payment)[];
     }>(), {
-        payments: () => []
-    }
+        payments: () => [],
+    },
 );
 
-const present = usePresent()
+const present = usePresent();
 
-async function openPayment(payment: PaymentGeneral|Payment) {
+async function openPayment(payment: PaymentGeneral | Payment) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(AsyncPaymentView, {
                     payment,
-                    getNext: (payment: PaymentGeneral|Payment) => {
+                    getNext: (payment: PaymentGeneral | Payment) => {
                         const index = props.payments.findIndex(p => p.id === payment.id);
                         if (index === -1 || index === props.payments.length - 1) {
                             return null;
                         }
                         return props.payments[index + 1];
                     },
-                    getPrevious: (payment: PaymentGeneral|Payment) => {
+                    getPrevious: (payment: PaymentGeneral | Payment) => {
                         const index = props.payments.findIndex(p => p.id === payment.id);
                         if (index === -1 || index === 0) {
                             return null;
                         }
                         return props.payments[index - 1];
-                    }
-                })
-            })
+                    },
+                }),
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 </script>
