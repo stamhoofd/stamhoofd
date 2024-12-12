@@ -219,18 +219,18 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 let paymentUrl: string | null = null;
                 const description = webshop.meta.name + ' - ' + payment.id;
 
-                if (payment.method == PaymentMethod.Transfer) {
+                if (payment.method === PaymentMethod.Transfer) {
                     await order.markValid(payment, []);
 
                     if (order.number) {
                         balanceItem.description = order.generateBalanceDescription(webshop);
                     }
 
-                    balanceItem.status = BalanceItemStatus.Pending;
+                    balanceItem.status = BalanceItemStatus.Due;
                     await balanceItem.save();
                     await payment.save();
                 }
-                else if (payment.method == PaymentMethod.PointOfSale) {
+                else if (payment.method === PaymentMethod.PointOfSale) {
                     // Not really paid, but needed to create the tickets if needed
                     await order.markPaid(payment, organization, webshop);
 
@@ -238,7 +238,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         balanceItem.description = order.generateBalanceDescription(webshop);
                     }
 
-                    balanceItem.status = BalanceItemStatus.Pending;
+                    balanceItem.status = BalanceItemStatus.Due;
                     await balanceItem.save();
                     await payment.save();
                 }

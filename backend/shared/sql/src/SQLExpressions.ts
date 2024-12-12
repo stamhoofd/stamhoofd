@@ -26,6 +26,7 @@ export function readDynamicSQLExpression(s: SQLDynamicExpression): SQLExpression
 
     return new SQLScalar(s);
 }
+
 export class SQLDistinct implements SQLExpression {
     expression: SQLExpression;
 
@@ -87,6 +88,22 @@ export class SQLMultiplicationSign implements SQLExpression {
 export class SQLMinusSign implements SQLExpression {
     getSQL(): SQLQuery {
         return '-';
+    }
+}
+
+export class SQLGreatest implements SQLExpression {
+    expressions: SQLDynamicExpression[];
+
+    constructor(...expressions: SQLDynamicExpression[]) {
+        this.expressions = expressions;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'GREATEST(',
+            joinSQLQuery(this.expressions.map(e => readDynamicSQLExpression(e).getSQL(options)), ', '),
+            ')',
+        ]);
     }
 }
 

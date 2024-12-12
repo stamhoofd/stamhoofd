@@ -55,7 +55,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.organizationId = organization.id;
                 model.createdAt = put.createdAt;
                 model.dueAt = put.dueAt;
-                model.status = put.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending;
+                model.status = put.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Due;
 
                 if (put.userId) {
                     model.userId = (await this.validateUserId(model, put.userId)).id;
@@ -186,7 +186,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     }
                 }
                 else if (patch.status) {
-                    model.status = model.pricePaid >= model.price ? BalanceItemStatus.Paid : BalanceItemStatus.Pending;
+                    model.status = patch.status;
                 }
 
                 if (!model.userId && !model.memberId && !model.payingOrganizationId) {

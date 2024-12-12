@@ -47,9 +47,10 @@
                 <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
             <p class="style-description-small">
-                *Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf deze datum. Het is eventueel mogelijk om het wel al vroeger te betalen, maar zeker niet verplicht.
+                *Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.
             </p>
         </template>
+        <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="family && family.members.length > 1 && member && isNew">
             <hr>
@@ -68,8 +69,6 @@
                 </STListItem>
             </STList>
         </template>
-
-        <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="!isNew && hasPayments(patchedBalanceItem)">
             <hr>
@@ -134,6 +133,9 @@ const pop = usePop();
 loadMember().catch(console.error);
 
 const title = computed(() => {
+    if (patchedBalanceItem.value.price < 0) {
+        return props.isNew ? 'Terug te betalen bedrag toevoegen' : 'Terug te betalen bedrag bewerken';
+    }
     return props.isNew ? 'Verschuldigd bedrag toevoegen' : 'Verschuldigd bedrag bewerken';
 });
 

@@ -157,6 +157,13 @@ export class Order extends Model {
         return false;
     }
 
+    get isDue() {
+        if (this.status === OrderStatus.Canceled || this.status === OrderStatus.Deleted) {
+            return false;
+        }
+        return true;
+    }
+
     get totalToPay() {
         if (this.status === OrderStatus.Canceled || this.status === OrderStatus.Deleted) {
             return 0;

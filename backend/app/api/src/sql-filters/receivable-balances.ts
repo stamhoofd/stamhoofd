@@ -10,5 +10,5 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
     objectType: createSQLColumnFilterCompiler('objectType'),
     amount: createSQLColumnFilterCompiler('amount'),
     amountPending: createSQLColumnFilterCompiler('amountPending'),
-    recalculateAt: createSQLColumnFilterCompiler('recalculateAt'),
+    nextDueAt: createSQLColumnFilterCompiler('nextDueAt'),
 };

@@ -2,7 +2,7 @@
     <STList>
         <STListItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true">
             <template #left>
-                <Checkbox :model-value="isItemSelected(item)" @update:model-value="setItemSelected(item, $event)" />
+                <Checkbox :model-value="isItemSelected(item)" :indeterminate="getItemPrice(item) !== item.priceOpen" @update:model-value="setItemSelected(item, $event)" />
             </template>
 
             <p v-if="item.dueAt" class="style-title-prefix-list" :class="{error: item.dueAt && item.dueAt <= new Date()}">
@@ -17,12 +17,20 @@
             <p class="style-description-small">
                 {{ formatDate(item.createdAt) }}
             </p>
-            <p class="style-description-small">
-                {{ formatPrice(item.priceOpen) }}
-            </p>
+
+            <div v-if="isItemSelected(item)" class="split-inputs option" @click.stop.prevent>
+                <STInputBox title="Gedeeltelijk betalen">
+                    <PriceInput :model-value="getItemPrice(item)" placeholder="0 euro" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" @update:model-value="setItemPrice(item, $event)" />
+                </STInputBox>
+            </div>
 
             <template #right>
-                <PriceInput v-if="isItemSelected(item)" :model-value="getItemPrice(item)" placeholder="0 euro" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" @update:model-value="setItemPrice(item, $event)" />
+                <p v-if="!item.isDue" v-tooltip="item.dueAt ? ('Te betalen tegen ' + formatDate(item.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
+                    ({{ formatPrice(item.priceOpen) }})
+                </p>
+                <p v-else class="style-price-base">
+                    {{ formatPrice(item.priceOpen) }}
+                </p>
             </template>
         </STListItem>
     </STList>

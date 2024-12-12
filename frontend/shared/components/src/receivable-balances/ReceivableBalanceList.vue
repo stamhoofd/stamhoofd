@@ -8,7 +8,6 @@
                             <span class="icon" :class="getBalanceItemTypeIcon(item.type)" />
                         </figure>
                         <aside>
-                            <span v-if="item.amount <= 0" class="icon disabled small red" />
                             <span v-if="item.amount > 1" class="style-bubble primary">
                                 {{ item.amount }}
                             </span>
@@ -21,7 +20,11 @@
                 <span>Te betalen tegen {{ formatDate(item.dueAt) }}</span>
                 <span v-if="item.dueAt && item.dueAt <= now" class="icon error small" />
             </p>
-            <p v-if="item.priceOpen < 0" class="style-title-prefix-list">
+            <p v-if="item.status === BalanceItemStatus.Canceled" class="style-title-prefix-list error">
+                <span>Geannuleerd</span>
+                <span class="icon disabled small" />
+            </p>
+            <p v-else-if="item.priceOpen < 0" class="style-title-prefix-list">
                 <span>Terug te betalen</span>
                 <span class="icon undo small" />
             </p>
@@ -31,10 +34,6 @@
             </h3>
 
             <p v-if="item.itemDescription" class="style-description-small pre-wrap" v-text="item.itemDescription" />
-
-            <p v-if="item.amount === 0" class="style-description-small">
-                Annulatie
-            </p>
 
             <p v-else class="style-description-small">
                 {{ formatFloat(item.amount) }} x {{ formatPrice(item.unitPrice) }}
@@ -53,7 +52,7 @@
             </p>
 
             <template #right>
-                <p v-if="item.dueAt && item.dueAt > now" v-tooltip="'Te betalen tegen ' + formatDate(item.dueAt)" class="style-price-base disabled style-tooltip">
+                <p v-if="!item.isDue" v-tooltip="item.dueAt ? ('Te betalen tegen ' + formatDate(item.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
                     ({{ formatPrice(item.priceOpen) }})
                 </p>
                 <p v-else class="style-price-base">
@@ -68,7 +67,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditBalanceItemView, GlobalEventBus, useContext, useNow } from '@stamhoofd/components';
-import { BalanceItemWithPayments, DetailedReceivableBalance, getBalanceItemTypeIcon } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemWithPayments, DetailedReceivableBalance, getBalanceItemTypeIcon } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(

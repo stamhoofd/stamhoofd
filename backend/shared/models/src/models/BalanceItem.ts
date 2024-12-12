@@ -91,11 +91,22 @@ export class BalanceItem extends Model {
     pricePending = 0;
 
     /**
+     * Cached value, for optimizations
+     */
+    @column({
+        type: 'integer',
+        beforeSave: function () {
+            return this.calculatedPriceOpen;
+        },
+    })
+    priceOpen = 0;
+
+    /**
      * todo: deprecate ('pending' and 'paid') + 'hidden' status and replace with 'due' + 'hidden'
      * -> maybe add 'due' (due if dueAt is null or <= now), 'hidden' (never due), 'future' (= not due until dueAt - but not possible to pay earlier)
      */
     @column({ type: 'string' })
-    status = BalanceItemStatus.Pending;
+    status = BalanceItemStatus.Due;
 
     /**
      * In case the balance item doesn't have to be paid immediately, we can set a due date.
@@ -130,12 +141,11 @@ export class BalanceItem extends Model {
         return this.unitPrice * this.amount;
     }
 
-    get priceOpen() {
+    get calculatedPriceOpen() {
+        if (this.status !== BalanceItemStatus.Due) {
+            return -this.pricePaid - this.pricePending;
+        }
         return this.price - this.pricePaid - this.pricePending;
-    }
-
-    updateStatus() {
-        this.status = (this.pricePaid !== 0 || this.price === 0) && this.pricePaid >= this.price ? BalanceItemStatus.Paid : (this.pricePaid !== 0 ? BalanceItemStatus.Pending : (this.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending));
     }
 
     static async deleteItems(items: BalanceItem[]) {
@@ -148,30 +158,19 @@ export class BalanceItem extends Model {
             items = [...items, ...dependingItems];
         }
 
-        const { balanceItemPayments } = await BalanceItem.loadPayments(items);
-
         // todo: in the future we could automatically delete payments that are not needed anymore and weren't paid yet -> to prevent leaving ghost payments
         // for now, an admin can manually cancel those payments
         let needsUpdate = false;
 
         // Set other items to zero (the balance item payments keep the real price)
         for (const item of items) {
+            if (item.status !== BalanceItemStatus.Due) {
+                continue;
+            }
+
             needsUpdate = true;
-
-            // Don't change status of items that are already paid or are partially paid
-            // Not using item.paidPrice, since this is cached
-            const bip = balanceItemPayments.filter(p => p.balanceItemId === item.id);
-
-            if (bip.length === 0) {
-                // No payments associated with this item
-                item.status = BalanceItemStatus.Hidden;
-                item.amount = 0;
-                await item.save();
-            }
-            else {
-                item.amount = 0;
-                await item.save();
-            }
+            item.status = BalanceItemStatus.Canceled;
+            await item.save();
         }
 
         if (needsUpdate) {
@@ -183,7 +182,7 @@ export class BalanceItem extends Model {
         let needsUpdate = false;
         for (const item of items) {
             if (item.status === BalanceItemStatus.Hidden) {
-                item.status = BalanceItemStatus.Pending;
+                item.status = BalanceItemStatus.Due;
                 needsUpdate = true;
                 await item.save();
             }
@@ -236,7 +235,6 @@ export class BalanceItem extends Model {
         console.log('Update outstanding balance for', items.length, 'items');
 
         await BalanceItem.updatePricePaid(items.map(i => i.id));
-        await BalanceItem.updatePricePending(items.map(i => i.id));
 
         // Deprecated: the member balances have moved to CachedBalance
         // Update outstanding amount of related members and registrations
@@ -275,7 +273,7 @@ export class BalanceItem extends Model {
      * Update the outstanding balance of multiple members in one go (or all members)
      */
     static async updatePricePaid(balanceItemIds: string[] | 'all') {
-        if (balanceItemIds !== 'all' && balanceItemIds.length == 0) {
+        if (balanceItemIds !== 'all' && balanceItemIds.length === 0) {
             return;
         }
 
@@ -286,13 +284,13 @@ export class BalanceItem extends Model {
         if (balanceItemIds !== 'all') {
             firstWhere = ` AND balanceItemId IN (?)`;
             params.push(balanceItemIds);
+            params.push(balanceItemIds);
 
             secondWhere = `WHERE balance_items.id IN (?)`;
             params.push(balanceItemIds);
         }
 
-        // Note: we'll never mark a balance item as 'paid' via the database -> because we need to rigger the markPaid function manually, which will call the appropriate functions
-        // this method will set the balance item to paid once, and only call the handlers once
+        // Note: this query only works in MySQL because of the SET assignment behaviour allowing to reference newly set values
         const query = `
         UPDATE
             balance_items
@@ -307,41 +305,7 @@ export class BalanceItem extends Model {
                 payments.status = 'Succeeded'${firstWhere}
             GROUP BY
                 balanceItemId
-            ) i ON i.balanceItemId = balance_items.id 
-        SET balance_items.pricePaid = coalesce(i.price, 0), balance_items.status = (CASE
-            WHEN balance_items.status = '${BalanceItemStatus.Paid}' AND balance_items.pricePaid != 0 AND balance_items.pricePaid >= (balance_items.unitPrice * balance_items.amount) THEN '${BalanceItemStatus.Paid}'
-            WHEN balance_items.pricePaid != 0 THEN '${BalanceItemStatus.Pending}'
-            WHEN balance_items.status = '${BalanceItemStatus.Hidden}' THEN '${BalanceItemStatus.Hidden}'
-            ELSE '${BalanceItemStatus.Pending}'
-        END)
-        ${secondWhere}`;
-
-        await Database.update(query, params);
-    }
-
-    /**
-     * Call this after updating the pricePaid
-     */
-    static async updatePricePending(balanceItemIds: string[] | 'all') {
-        if (balanceItemIds !== 'all' && balanceItemIds.length == 0) {
-            return;
-        }
-
-        const params: any[] = [];
-        let firstWhere = '';
-        let secondWhere = '';
-
-        if (balanceItemIds !== 'all') {
-            firstWhere = ` AND balanceItemId IN (?)`;
-            params.push(balanceItemIds);
-
-            secondWhere = `WHERE balance_items.id IN (?)`;
-            params.push(balanceItemIds);
-        }
-
-        const query = `
-        UPDATE
-            balance_items
+            ) paid ON paid.balanceItemId = balance_items.id
         LEFT JOIN (
             SELECT
                 balanceItemId,
@@ -353,14 +317,23 @@ export class BalanceItem extends Model {
                 payments.status != 'Succeeded' AND payments.status != 'Failed'${firstWhere}
             GROUP BY
                 balanceItemId
-            ) i ON i.balanceItemId = balance_items.id 
-        SET balance_items.pricePending = LEAST(
-            GREATEST(0, balance_items.unitPrice * balance_items.amount - balance_items.pricePaid), 
-            coalesce(i.price, 0)
-        )
+            ) pending ON pending.balanceItemId = balance_items.id 
+        SET balance_items.pricePaid = coalesce(paid.price, 0),
+            balance_items.pricePending = coalesce(pending.price, 0),
+            balance_items.priceOpen = (CASE
+                WHEN balance_items.status = '${BalanceItemStatus.Due}' THEN GREATEST(0, balance_items.unitPrice * balance_items.amount - balance_items.pricePaid - balance_items.pricePending)
+                ELSE (-balance_items.pricePaid - balance_items.pricePending)
+            END)
         ${secondWhere}`;
 
         await Database.update(query, params);
+    }
+
+    /**
+     * @deprecated
+     */
+    static async updatePricePending(balanceItemIds: string[] | 'all') {
+        // deprecated
     }
 
     static async loadPayments(items: BalanceItem[]) {

@@ -18,19 +18,27 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, EmailView, GlobalEventBus, ModernTableView, RecipientMultipleChoiceOption, TableAction, TableActionSelection, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, EmailView, GlobalEventBus, ModernTableView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, getReceivableBalanceTypeName, isEmptyFilter, ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import ReceivableBalanceView from './ReceivableBalanceView.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
 
 type ObjectType = ReceivableBalance;
 const $t = useTranslate();
 const present = usePresent();
 const owner = useRequestOwner();
 const platform = usePlatform();
+const props = withDefaults(
+    defineProps<{
+        objectType?: ReceivableBalanceType | null;
+    }>(),
+    {
+        objectType: null,
+    },
+);
 
 const title = computed(() => {
     return $t('e09c97db-85d7-40b0-8043-65fa24a09a01');
@@ -43,8 +51,12 @@ const configurationId = computed(() => {
 const filterBuilders = cachedOutstandingBalanceUIFilterBuilders;
 
 function getRequiredFilter(): StamhoofdFilter | null {
+    if (!props.objectType) {
+        return null;
+    }
+
     return {
-        objectType: 'organization',
+        objectType: props.objectType,
     };
 }
 
@@ -56,24 +68,6 @@ const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
-        id: 'id',
-        name: 'ID',
-        getValue: object => object.id.substring(0, 8),
-        getStyle: () => 'code',
-        minimumWidth: 50,
-        recommendedWidth: 50,
-    }),
-
-    new Column<ObjectType, string>({
-        id: 'objectType',
-        name: 'Type',
-        getValue: object => Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(object.objectType, $t)),
-        minimumWidth: 100,
-        recommendedWidth: 200,
-        allowSorting: false,
-    }),
-
-    new Column<ObjectType, string>({
         id: 'name',
         name: 'Naam',
         getValue: object => object.object.name,
@@ -84,7 +78,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'amount',
-        name: 'Bedrag',
+        name: 'Openstaand bedrag',
         getValue: object => object.amount,
         format: value => Formatter.price(value),
         getStyle: value => value === 0 ? 'gray' : '',
@@ -102,17 +96,6 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 100,
         recommendedWidth: 200,
         allowSorting: true,
-    }),
-
-    new Column<ObjectType, number>({
-        id: 'amountOpen',
-        name: 'Openstaand bedrag',
-        getValue: object => object.amount - object.amountPending,
-        format: value => Formatter.price(value),
-        getStyle: value => value === 0 ? 'gray' : '',
-        minimumWidth: 100,
-        recommendedWidth: 200,
-        allowSorting: false,
     }),
 
 ];
@@ -144,13 +127,45 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
     const filter = selection.filter.filter;
     const search = selection.filter.search;
 
-    const option: RecipientMultipleChoiceOption = {
+    const memberOptions: RecipientChooseOneOption = {
+        type: 'ChooseOne',
+        name: 'Schuden van leden',
+        options: [
+            {
+                id: 'members',
+                name: 'Alle leden',
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.ReceivableBalances,
+                        filter: mergeFilters([filter, {
+                            objectType: ReceivableBalanceType.member,
+                        }]),
+                        search,
+                    }),
+                ],
+            },
+            {
+                id: 'no-members',
+                name: 'Geen leden',
+                value: [],
+            },
+        ],
+    };
+
+    const organizationOption: RecipientMultipleChoiceOption = {
         type: 'MultipleChoice',
+        name: 'Schulden van groepen',
         options: [],
         build: (selectedIds: string[]) => {
+            if (selectedIds.length === 0) {
+                return [];
+            }
+
             const q = EmailRecipientSubfilter.create({
                 type: EmailRecipientFilterType.ReceivableBalances,
-                filter,
+                filter: mergeFilters([filter, {
+                    objectType: ReceivableBalanceType.organization,
+                }]),
                 search,
                 subfilter: {
                     meta: {
@@ -171,7 +186,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
         if (!responsibility.organizationBased) {
             continue;
         }
-        option.options.push(
+        organizationOption.options.push(
             {
                 id: responsibility.id,
                 name: responsibility.name,
@@ -181,7 +196,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const displayedComponent = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(EmailView, {
-            recipientFilterOptions: [option],
+            recipientFilterOptions: [memberOptions, organizationOption],
         }),
     });
     await present({

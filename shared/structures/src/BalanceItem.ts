@@ -7,7 +7,7 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 
 export enum BalanceItemStatus {
     /**
-     * The balance is not yet owed by the member (payment is optional and not visible). But it is paid, the status will change to 'paid'.
+     * The balance is not yet due, but it can be paid. As soon as it is paid, it will transform into 'Due' and automatic status changes can happen to connected resources.
      */
     Hidden = 'Hidden',
 
@@ -22,6 +22,17 @@ export enum BalanceItemStatus {
      * The balance has been paid by the member. All settled.
      */
     Paid = 'Paid',
+
+    /**
+     * This means payment of the amount is a requirement.
+    */
+    Due = 'Due',
+
+    /**
+     * This means the balance is no longer due. If there is any paid amount, it is refundable.
+     * In case you don't want to refund the amount, you should change the status to 'Due' and change the amount to the amount that is not refundable.
+    */
+    Canceled = 'Canceled',
 }
 
 export enum BalanceItemType {
@@ -132,10 +143,16 @@ export class BalanceItem extends AutoEncoder {
     unitPrice = 0; // unit price
 
     get price() {
+        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+            return 0;
+        }
         return this.unitPrice * this.amount;
     }
 
     get priceOpen() {
+        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+            return -this.pricePaid - this.pricePending;
+        }
         return this.price - this.pricePaid - this.pricePending;
     }
 
@@ -152,10 +169,22 @@ export class BalanceItem extends AutoEncoder {
     createdAt = new Date();
 
     @field({ decoder: new EnumDecoder(BalanceItemStatus) })
-    status: BalanceItemStatus = BalanceItemStatus.Pending;
+    status: BalanceItemStatus = BalanceItemStatus.Due;
 
     get isPaid() {
         return this.pricePaid === this.price;
+    }
+
+    get isDue() {
+        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+            if (this.priceOpen !== 0) {
+                // A paid amount remaining
+                return true;
+            }
+            return false;
+        }
+
+        return this.dueAt === null || this.dueAt.getTime() <= BalanceItem.getDueOffset().getTime();
     }
 
     @field({ decoder: StringDecoder })
@@ -173,14 +202,24 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
     payingOrganizationId: string | null = null;
 
+    static getDueOffset(from: Date = new Date()) {
+        const d = new Date(from.getTime() - 1000 * 60 * 60 * 24 * 7); // 7 days in the past
+
+        // Set time to be between 2 - 5 AM
+        d.setHours(2);
+        d.setMinutes(0);
+        d.setSeconds(0);
+        d.setMilliseconds(0);
+
+        return d;
+    }
+
     static getOutstandingBalance(items: BalanceItem[]) {
         // Get sum of balance payments
         const totalPending = items.map(p => p.pricePending).reduce((t, total) => total + t, 0);
         const totalPaid = items.map(p => p.pricePaid).reduce((t, total) => total + t, 0);
         const totalPrice = items.map(p => p.price).reduce((t, total) => total + t, 0);
-
-        const total = totalPrice - totalPaid;
-        const totalOpen = total - totalPending;
+        const totalOpen = items.map(p => p.priceOpen).reduce((t, total) => total + t, 0);
 
         return {
             /**
@@ -302,14 +341,14 @@ export class BalanceItem extends AutoEncoder {
     get groupCode() {
         if (this.type === BalanceItemType.Other) {
             return 'type-' + this.type
-                + (this.amount === 0 ? '-canceled' : '')
+                + '-' + this.status
                 + '-unit-price-' + this.unitPrice
                 + '-description-' + this.description
                 + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null');
         }
 
         return 'type-' + this.type
-            + (this.amount === 0 ? '-canceled' : '')
+            + '-' + this.status
             + '-unit-price-' + this.unitPrice
             + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null')
             + '-relations' + Array.from(this.relations.entries())

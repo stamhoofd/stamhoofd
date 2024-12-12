@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { CachedBalance } from '@stamhoofd/models';
 import { compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
-import { ReceivableBalance as ReceivableBalanceStruct, CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { ReceivableBalance as ReceivableBalanceStruct, CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter, ReceivableBalanceType } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -51,9 +51,16 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             $or: {
                 amount: { $neq: 0 },
                 amountPending: { $neq: 0 },
-                recalculateAt: { $neq: null },
+                nextDueAt: { $neq: null },
             },
         };
+
+        if (!Context.auth.hasSomePlatformAccess()) {
+            // Cannot see debt between organizations
+            scopeFilter.objectType = {
+                $neq: ReceivableBalanceType.organization,
+            };
+        }
 
         const query = CachedBalance
             .select();

@@ -1,6 +1,6 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQL, SQLAlias, SQLCalculation, SQLMin, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
-import { BalanceItemStatus, ReceivableBalanceType } from '@stamhoofd/structures';
+import { SQL, SQLAlias, SQLCalculation, SQLGreatest, SQLMin, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
+import { BalanceItem as BalanceItemStruct, BalanceItemStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
 
@@ -35,6 +35,9 @@ export class CachedBalance extends Model {
     @column({ type: 'integer' })
     amount = 0;
 
+    /**
+     * The sum of unconfirmed payments
+     */
     @column({ type: 'integer' })
     amountPending = 0;
 
@@ -42,7 +45,7 @@ export class CachedBalance extends Model {
      * This is the minimum `dueAt` that lies in the future of all **unpaid** balance items connected to this object.
      */
     @column({ type: 'datetime', nullable: true })
-    recalculateAt: Date | null = null;
+    nextDueAt: Date | null = null;
 
     @column({
         type: 'datetime', beforeSave(old?: any) {
@@ -108,17 +111,7 @@ export class CachedBalance extends Model {
             .where(columnName, objectIds)
             .whereNot('status', BalanceItemStatus.Hidden)
             .where(
-                SQL.where(
-                    new SQLCalculation(
-                        new SQLCalculation(
-                            SQL.column('unitPrice'),
-                            new SQLMultiplicationSign(),
-                            SQL.column('amount'),
-                        ),
-                        new SQLMinusSign(),
-                        SQL.column('pricePaid'),
-                    )
-                    , SQLWhereSign.NotEqual, 0)
+                SQL.where(SQL.column('priceOpen'), SQLWhereSign.NotEqual, 0)
                     .or('pricePending', SQLWhereSign.NotEqual, 0),
             );
 
@@ -130,22 +123,12 @@ export class CachedBalance extends Model {
     }
 
     private static async fetchForObjects(organizationId: string, objectIds: string[], columnName: string, customWhere?: SQLWhere) {
-        const now = new Date();
+        const dueOffset = BalanceItemStruct.getDueOffset();
         const query = SQL.select(
             SQL.column(columnName),
             new SQLSelectAs(
-                new SQLCalculation(
-                    new SQLSum(
-                        new SQLCalculation(
-                            SQL.column('unitPrice'),
-                            new SQLMultiplicationSign(),
-                            SQL.column('amount'),
-                        ),
-                    ),
-                    new SQLMinusSign(),
-                    new SQLSum(
-                        SQL.column('pricePaid'),
-                    ),
+                new SQLSum(
+                    SQL.column('priceOpen'),
                 ),
                 new SQLAlias('data__amount'),
             ),
@@ -160,7 +143,7 @@ export class CachedBalance extends Model {
             .where('organizationId', organizationId)
             .where(columnName, objectIds)
             .whereNot('status', BalanceItemStatus.Hidden)
-            .where(SQL.where('dueAt', null).or('dueAt', SQLWhereSign.LessEqual, now))
+            .where(SQL.where('dueAt', null).or('dueAt', SQLWhereSign.LessEqual, dueOffset))
             .groupBy(SQL.column(columnName));
 
         if (customWhere) {
@@ -169,7 +152,7 @@ export class CachedBalance extends Model {
 
         const result = await query.fetch();
 
-        // Czlculate future due
+        // Calculate future due
         const dueQuery = SQL.select(
             SQL.column(columnName),
             new SQLSelectAs(
@@ -178,18 +161,31 @@ export class CachedBalance extends Model {
                 ),
                 new SQLAlias('data__dueAt'),
             ),
+            // If the current amount_due is negative, we can ignore that negative part if there is a future due item
+            new SQLSelectAs(
+                new SQLSum(
+                    SQL.column('priceOpen'),
+                ),
+                new SQLAlias('data__amount'),
+            ),
+            new SQLSelectAs(
+                new SQLSum(
+                    SQL.column('pricePending'),
+                ),
+                new SQLAlias('data__amountPending'),
+            ),
         )
             .from(BalanceItem.table)
             .where('organizationId', organizationId)
             .where(columnName, objectIds)
-            .whereNot('status', BalanceItemStatus.Hidden)
+            .where('status', BalanceItemStatus.Due)
             .whereNot('dueAt', null)
-            .where('dueAt', SQLWhereSign.Greater, now)
+            .where('dueAt', SQLWhereSign.Greater, dueOffset)
             .groupBy(SQL.column(columnName));
 
         const dueResult = await dueQuery.fetch();
 
-        const results: [string, { amount: number; amountPending: number; recalculateAt: Date | null }][] = [];
+        const results: [string, { amount: number; amountPending: number; nextDueAt: Date | null }][] = [];
         for (const row of result) {
             if (!row['data']) {
                 throw new Error('Invalid data namespace');
@@ -215,7 +211,7 @@ export class CachedBalance extends Model {
                 throw new Error('Invalid amountPending');
             }
 
-            results.push([objectId, { amount, amountPending, recalculateAt: null }]);
+            results.push([objectId, { amount, amountPending, nextDueAt: null }]);
         }
 
         for (const row of dueResult) {
@@ -229,6 +225,8 @@ export class CachedBalance extends Model {
 
             const objectId = row[BalanceItem.table][columnName];
             const dueAt = row['data']['dueAt'];
+            const amount = row['data']['amount'];
+            const amountPending = row['data']['amountPending'];
 
             if (typeof objectId !== 'string') {
                 throw new Error('Invalid objectId');
@@ -238,26 +236,43 @@ export class CachedBalance extends Model {
                 throw new Error('Invalid dueAt');
             }
 
+            if (typeof amount !== 'number') {
+                throw new Error('Invalid amount');
+            }
+
+            if (typeof amountPending !== 'number') {
+                throw new Error('Invalid amountPending');
+            }
+
             const result = results.find(r => r[0] === objectId);
             if (result) {
-                result[1].recalculateAt = dueAt;
+                result[1].nextDueAt = dueAt;
+
+                if (result[1].amount < 0) {
+                    if (amount > 0) {
+                        // Let the future due amount fill in the gap until maximum 0
+                        result[1].amount = Math.min(0, result[1].amount + amount);
+                    }
+                }
+
+                result[1].amountPending += amountPending;
             }
             else {
-                results.push([objectId, { amount: 0, amountPending: 0, recalculateAt: dueAt }]);
+                results.push([objectId, { amount: 0, amountPending: amountPending, nextDueAt: dueAt }]);
             }
         }
 
         // Add missing object ids (with 0 amount, otherwise we don't reset the amounts back to zero when all the balance items are hidden)
         for (const objectId of objectIds) {
             if (!results.find(([id]) => id === objectId)) {
-                results.push([objectId, { amount: 0, amountPending: 0, recalculateAt: null }]);
+                results.push([objectId, { amount: 0, amountPending: 0, nextDueAt: null }]);
             }
         }
 
         return results;
     }
 
-    private static async setForResults(organizationId: string, result: [string, { amount: number; amountPending: number; recalculateAt: null | Date }][], objectType: ReceivableBalanceType) {
+    private static async setForResults(organizationId: string, result: [string, { amount: number; amountPending: number; nextDueAt: null | Date }][], objectType: ReceivableBalanceType) {
         if (result.length === 0) {
             return;
         }
@@ -269,11 +284,11 @@ export class CachedBalance extends Model {
                 'objectType',
                 'amount',
                 'amountPending',
-                'recalculateAt',
+                'nextDueAt',
                 'createdAt',
                 'updatedAt',
             )
-            .values(...result.map(([objectId, { amount, amountPending, recalculateAt }]) => {
+            .values(...result.map(([objectId, { amount, amountPending, nextDueAt }]) => {
                 return [
                     uuidv4(),
                     organizationId,
@@ -281,7 +296,7 @@ export class CachedBalance extends Model {
                     objectType,
                     amount,
                     amountPending,
-                    recalculateAt,
+                    nextDueAt,
                     new Date(),
                     new Date(),
                 ];
@@ -290,7 +305,7 @@ export class CachedBalance extends Model {
             .onDuplicateKeyUpdate(
                 SQL.assignment('amount', SQL.column('v', 'amount')),
                 SQL.assignment('amountPending', SQL.column('v', 'amountPending')),
-                SQL.assignment('recalculateAt', SQL.column('v', 'recalculateAt')),
+                SQL.assignment('nextDueAt', SQL.column('v', 'nextDueAt')),
                 SQL.assignment('updatedAt', SQL.column('v', 'updatedAt')),
             );
 

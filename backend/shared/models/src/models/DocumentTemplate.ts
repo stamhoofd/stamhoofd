@@ -208,7 +208,7 @@ export class DocumentTemplate extends Model {
             let debtor: Parent | undefined = parentsWithNRN[0] ?? registration.member.details.parents[0];
             if (parentsWithNRN.length > 1) {
                 for (const balanceItem of balanceItems) {
-                    if (balanceItem && balanceItem.userId && balanceItem.status === BalanceItemStatus.Paid) {
+                    if (balanceItem && balanceItem.userId && balanceItem.priceOpen === 0 && balanceItem.status === BalanceItemStatus.Due) {
                         const user = await User.getByID(balanceItem.userId);
                         if (user) {
                             const parent = parentsWithNRN.find(p => p.hasEmail(user.email));

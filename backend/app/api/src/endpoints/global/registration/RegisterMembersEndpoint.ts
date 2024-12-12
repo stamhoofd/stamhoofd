@@ -429,7 +429,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 balanceItem2.memberId = registration.memberId;
 
                 // If the paying organization hasn't paid yet, this should be hidden and move to pending as soon as the paying organization has paid
-                balanceItem2.status = BalanceItemStatus.Hidden; // shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
+                balanceItem2.status = BalanceItemStatus.Hidden;
                 await balanceItem2.save();
 
                 // do not add to createdBalanceItems array because we don't want to add this to the payment if we create a payment
@@ -440,7 +440,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 balanceItem.userId = user.id;
             }
 
-            balanceItem.status = BalanceItemStatus.Hidden; // shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
+            balanceItem.status = BalanceItemStatus.Hidden;
             balanceItem.pricePaid = 0;
 
             // Connect the 'pay back' balance item to this balance item. As soon as this balance item is paid, we'll mark the other one as pending so the outstanding balance for the member increases
@@ -554,7 +554,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (oldestMember) {
                 balanceItem.memberId = oldestMember.id;
             }
-            balanceItem.status = BalanceItemStatus.Hidden; // shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
+            balanceItem.status = BalanceItemStatus.Hidden;
             await balanceItem.save();
             createdBalanceItems.push(balanceItem);
         }
@@ -579,7 +579,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 }
             }
 
-            balanceItem.status = BalanceItemStatus.Hidden; // shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden;
+            balanceItem.status = BalanceItemStatus.Hidden;
             await balanceItem.save();
 
             createdBalanceItems.push(balanceItem);

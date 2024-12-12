@@ -1,15 +1,14 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, Payment, Token } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Payment as PaymentStruct, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel } from '@stamhoofd/structures';
+import { PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
-import { ExchangePaymentEndpoint } from '../../shared/ExchangePaymentEndpoint';
-import { PaymentService } from '../../../../services/PaymentService';
 import { BalanceItemService } from '../../../../services/BalanceItemService';
+import { PaymentService } from '../../../../services/PaymentService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -122,16 +121,6 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
             // Check total price
             const totalPrice = balanceItemPayments.reduce((total, item) => total + item.price, 0);
-
-            if (totalPrice !== put.price) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: "Total price doesn't match",
-                    human: 'De totale prijs komt niet overeen met de som van de afrekeningen',
-                    field: 'price',
-                });
-            }
-
             payment.price = totalPrice;
 
             // Save payment

@@ -8,7 +8,6 @@
                             <span class="icon" :class="getBalanceItemTypeIcon(group.balanceItem.type)" />
                         </figure>
                         <aside>
-                            <span v-if="group.amount <= 0" class="icon disabled small red" />
                             <span v-if="group.amount > 1" class="style-bubble primary">
                                 {{ group.amount }}
                             </span>
@@ -21,7 +20,11 @@
                 <span>Te betalen tegen {{ formatDate(group.dueAt) }}</span>
                 <span v-if="group.dueAt && group.dueAt <= now" class="icon error small" />
             </p>
-            <p v-if="group.price < 0" class="style-title-prefix-list">
+            <p v-if="group.status === BalanceItemStatus.Canceled" class="style-title-prefix-list error">
+                <span>Geannuleerd</span>
+                <span class="icon disabled small" />
+            </p>
+            <p v-else-if="group.price < 0" class="style-title-prefix-list">
                 <span v-if="isPayable">Terug te krijgen</span>
                 <span v-else>Terug te betalen</span>
                 <span class="icon undo small" />
@@ -33,15 +36,16 @@
 
             <p v-if="group.description" class="style-description-small pre-wrap" v-text="group.description" />
 
-            <p v-if="group.amount >= 0" class="style-description-small">
+            <p class="style-description-small">
                 {{ formatFloat(group.amount) }} x {{ formatPrice(group.unitPrice) }}
             </p>
-            <p v-else class="style-description-small">
-                {{ capitalizeFirstLetter(pluralText(-group.amount, 'annulatie', 'annulaties')) }} x {{ formatPrice(group.unitPrice) }}
+
+            <p v-if="group.pricePaid !== 0" class="style-description-small">
+                {{ formatPrice(group.pricePaid) }} betaald
             </p>
 
             <template #right>
-                <p v-if="group.dueAt && group.dueAt > new Date()" v-tooltip="'Te betalen tegen ' + formatDate(group.dueAt)" class="style-price-base disabled style-tooltip">
+                <p v-if="!group.isDue" v-tooltip="group.dueAt ? ('Te betalen tegen ' + formatDate(group.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
                     ({{ formatPrice(group.price) }})
                 </p>
                 <p v-else class="style-price-base">
@@ -53,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { BalanceItemWithPayments, DetailedPayableBalance, DetailedReceivableBalance, getBalanceItemTypeIcon } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, DetailedPayableBalance, DetailedReceivableBalance, getBalanceItemTypeIcon, BalanceItemStatus } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useNow } from '../hooks';
 
@@ -89,19 +93,11 @@ class GroupedItems {
      * Only shows amount open
      */
     get amount() {
-        if (this.unitPrice === 0) {
-            // Not possible to calculate amount
-            return this.balanceItem.amount;
-        }
-
-        return this.price / this.unitPrice;
+        return this.items.reduce((acc, item) => acc + item.amount, 0);
     }
 
-    get cancellations() {
-        if (this.balanceItem.amount === 0) {
-            return this.items.length;
-        }
-        return 0;
+    get status() {
+        return this.balanceItem.status;
     }
 
     /**
@@ -109,6 +105,10 @@ class GroupedItems {
      */
     get price() {
         return this.items.reduce((acc, item) => acc + item.priceOpen, 0);
+    }
+
+    get pricePaid() {
+        return this.items.reduce((acc, item) => acc + item.pricePaid, 0);
     }
 
     get prefix() {
@@ -141,6 +141,10 @@ class GroupedItems {
 
     get dueAt() {
         return this.items[0].dueAt; ;
+    }
+
+    get isDue() {
+        return this.items[0].isDue;
     }
 }
 

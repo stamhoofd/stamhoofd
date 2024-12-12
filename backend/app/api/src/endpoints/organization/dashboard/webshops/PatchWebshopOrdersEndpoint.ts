@@ -169,7 +169,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         balanceItem.description = webshop.meta.name;
                         balanceItem.pricePaid = 0;
                         balanceItem.organizationId = organization.id;
-                        balanceItem.status = BalanceItemStatus.Pending;
+                        balanceItem.status = BalanceItemStatus.Due;
                         balanceItem.relations = new Map([
                             [
                                 BalanceItemRelationType.Webshop,
@@ -271,13 +271,23 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     const items = await BalanceItem.where({ orderId: model.id });
                     if (items.length >= 1) {
                         model.markUpdated();
-                        items[0].unitPrice = model.totalToPay;
-                        items[0].description = model.generateBalanceDescription(webshop);
-                        items[0].updateStatus();
-                        await items[0].save();
+
+                        const paidItem = items.find(i => i.status === BalanceItemStatus.Due && i.pricePaid !== 0) ?? items[0];
+
+                        paidItem.unitPrice = model.data.totalPrice;
+                        paidItem.amount = 1;
+
+                        if (model.isDue) {
+                            paidItem.status = BalanceItemStatus.Due;
+                        }
+                        else {
+                            paidItem.status = BalanceItemStatus.Canceled;
+                        }
+                        paidItem.description = model.generateBalanceDescription(webshop);
+                        await paidItem.save();
 
                         // Zero out the other items
-                        const otherItems = items.slice(1);
+                        const otherItems = items.filter(i => i.id !== paidItem.id);
                         await BalanceItem.deleteItems(otherItems);
                     }
                     else if (items.length === 0
@@ -285,11 +295,12 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         model.markUpdated();
                         const balanceItem = new BalanceItem();
                         balanceItem.orderId = model.id;
-                        balanceItem.unitPrice = model.totalToPay;
+                        balanceItem.unitPrice = model.data.totalPrice;
+                        balanceItem.amount = 1;
+                        balanceItem.status = BalanceItemStatus.Due;
                         balanceItem.description = model.generateBalanceDescription(webshop);
                         balanceItem.pricePaid = 0;
                         balanceItem.organizationId = organization.id;
-                        balanceItem.status = BalanceItemStatus.Pending;
                         await balanceItem.save();
                     }
                 }

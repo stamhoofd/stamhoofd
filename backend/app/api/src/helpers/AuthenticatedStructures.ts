@@ -584,7 +584,7 @@ export class AuthenticatedStructures {
             });
 
             if (balance.objectType === ReceivableBalanceType.organization) {
-                const organization = organizationStructs.find(o => o.id == balance.objectId) ?? null;
+                const organization = organizationStructs.find(o => o.id === balance.objectId) ?? null;
                 if (organization) {
                     const theseResponsibilities = responsibilities.filter(r => r.organizationId === organization.id);
                     const thisMembers = members.flatMap((m) => {
@@ -605,6 +605,7 @@ export class AuthenticatedStructures {
                             lastName: member.lastName ?? '',
                             emails: member.details.getMemberEmails(),
                             meta: {
+                                type: 'organization',
                                 responsibilityIds: responsibilities.map(r => r.responsibilityId),
                                 url: organization.dashboardUrl + '/boekhouding/openstaand/' + (Context.organization?.uri ?? ''),
                             },
@@ -615,15 +616,38 @@ export class AuthenticatedStructures {
             else if (balance.objectType === ReceivableBalanceType.member) {
                 const member = members.find(m => m.id === balance.objectId) ?? null;
                 if (member) {
+                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: member.details.name,
                         contacts: [
-                            ReceivableBalanceObjectContact.create({
-                                firstName: member.details.firstName ?? '',
-                                lastName: member.details.lastName ?? '',
-                                emails: member.details.getMemberEmails(),
-                            }),
+                            ...(member.details.getMemberEmails().length
+                                ? [
+                                        ReceivableBalanceObjectContact.create({
+                                            firstName: member.details.firstName ?? '',
+                                            lastName: member.details.lastName ?? '',
+                                            emails: member.details.getMemberEmails(),
+                                            meta: {
+                                                type: 'member',
+                                                responsibilityIds: [],
+                                                url,
+                                            },
+                                        }),
+                                    ]
+                                : []),
+
+                            ...(member.details.parentsHaveAccess
+                                ? member.details.parents.filter(p => !!p.email).map(p => ReceivableBalanceObjectContact.create({
+                                    firstName: p.firstName ?? '',
+                                    lastName: p.lastName ?? '',
+                                    emails: [p.email!],
+                                    meta: {
+                                        type: 'parent',
+                                        responsibilityIds: [],
+                                        url,
+                                    },
+                                }))
+                                : []),
                         ],
                     });
                 }
