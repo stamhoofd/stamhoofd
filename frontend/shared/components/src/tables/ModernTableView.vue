@@ -28,7 +28,7 @@
                 <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
                     Selecteer
                 </button>
-                <button v-else key="actions" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" v-long-press="(e) => showActions(true, e)" />
+                <button v-else key="actions" v-long-press="(e) => showActions(true, e)" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
         </STNavigationBar>
 
@@ -265,7 +265,7 @@ const instance = getCurrentInstance();
 const hasClickListener = computed(() => !!instance?.vnode.props?.onClick);
 const canLeaveSelectionMode = computed(() => wrapColumns.value || !hasClickListener.value);
 
-const sortBy = ref(props.defaultSortColumn ?? columns.value[0]) as Ref<Column<Value, any>>;
+const sortBy = ref(props.defaultSortColumn ?? columns.value.find(c => c.allowSorting)) as Ref<Column<Value, any>>;
 const sortDirection = ref(props.defaultSortDirection ?? SortItemDirection.ASC) as Ref<SortItemDirection>;
 
 const values = computed(() => props.tableObjectFetcher.objects);
