@@ -18,6 +18,11 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
                     email,
                     replacements: [
                         Replacement.create({
+                            token: 'objectName',
+                            value: balance.object.name,
+                        }),
+                        Replacement.create({
+                            // Deprecated: for backwards compatibility
                             token: 'organizationName',
                             value: balance.object.name,
                         }),

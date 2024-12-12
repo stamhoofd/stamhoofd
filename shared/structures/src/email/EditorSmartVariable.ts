@@ -331,6 +331,12 @@ export class EditorSmartVariable extends AutoEncoder {
         }));
 
         variables.push(EditorSmartVariable.create({
+            id: 'objectName',
+            name: 'Naam schuldenaar',
+            example: 'Jan Jansens',
+        }));
+
+        variables.push(EditorSmartVariable.create({
             id: 'webshopName',
             name: 'Naam webshop',
             example: '',
