@@ -55,7 +55,7 @@ export default class STListItem extends VueComponent {
     }
 
     get hoverable() {
-        return this.elementName === 'button';
+        return this.dynamicElementName === 'button';
     }
 
     onClick(event) {
@@ -94,10 +94,11 @@ button.st-list-item {
 }
 
 .st-list-item {
+    --custom-st-horizontal-padding: max(15px, var(--st-horizontal-padding, 15px));
+    --added-st-horizontal-padding: calc(var(--custom-st-horizontal-padding) - var(--st-horizontal-padding, 15px));
     padding-left: var(--st-horizontal-padding, 15px);
     padding-right: 0;
     padding-right: var(--st-horizontal-padding, 15px);
-
     margin: 0;
     display: flex !important;
     flex-direction: row;
@@ -263,10 +264,11 @@ button.st-list-item {
             background: $color-border;
             border-radius: $border-width-thin/2;
             margin: 0;
-            margin-right: calc(-1 * var(--st-horizontal-padding, 15px));
+            margin-right: calc(-1 * var(--custom-st-horizontal-padding, 15px));
+            z-index: -3;
 
             // Increase width + horizontal padding
-            padding-right: var(--st-horizontal-padding, 15px);
+            padding-right: var(--custom-st-horizontal-padding, 15px);
         }
     }
 
@@ -277,7 +279,7 @@ button.st-list-item {
                 display: block;
 
                 > .middle {
-                padding-right: var(--st-horizontal-padding, 15px);
+                padding-right: var(--custom-st-horizontal-padding, 15px);
                 padding-bottom: 0px;
                 }
 
@@ -326,48 +328,78 @@ button.st-list-item {
     &.selectable:not(.is-dragging) {
         touch-action: manipulation;
         user-select: none;
-        transition: background-color 0.2s 0.1s;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         cursor: pointer;
+        overflow: visible;
+        position: relative;
+        contain: style;
 
-        > .main {
-            > hr {
-                transition: opacity 0.2s 0.1s;
-            }
+        &:after {
+            // This is the hover layer
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: calc(-1 * var(--added-st-horizontal-padding, 0px));
+            right: calc(-1 * var(--added-st-horizontal-padding, 0px));
+            bottom: -2px;
+            background: $color-primary-lighter;
+            z-index: -2;
+            opacity: 0;
+            pointer-events: none;
+            border-radius: min($border-radius, var(--added-st-horizontal-padding, 0px));
+
+            transition: opacity 0.1s;
         }
 
-        &.hoverable:hover {
-            opacity: 0.6;
+        &:before {
+            // This is the click layer
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: calc(-1 * var(--added-st-horizontal-padding, 0px));
+            right: calc(-1 * var(--added-st-horizontal-padding, 0px));
+            bottom: -2px;
+            background: $color-primary-light;
+            z-index: -1;
+            opacity: 0;
+            pointer-events: none;
+            border-radius: min($border-radius, var(--added-st-horizontal-padding, 0px));
 
-            &:has(button:hover), &:has(select:hover), &:has(input:hover) {
-                opacity: 1;
-            }
+            // Slow fade out
+            transition: opacity 0.4s 0.1s;
         }
 
-        &:active {
-            transition: none;
-            background: $color-background-shade;
-            background: var(
-                --color-current-background-shade,
-                $color-background-shade
-            );
-
-            > .main {
-                > hr {
-                transition: none;
-                opacity: 0;
+        @at-root {
+            label#{&} {
+                &:before {
+                    background: $color-primary-lighter;
                 }
             }
         }
 
-        &:active:has(button:active), &:active:has(select:active), &:active:has(label:active), &:active:has(textarea:active), &:active:has(input:not([type=radio]):not([type=checkbox]):active) {
-            transition: background-color 0.2s 0.1s;
-            background: none;
+        &.hoverable:hover {
+            &:after {
+                opacity: 1;
+                transition: none;
+            }
 
-            > .main {
-                > hr {
-                    opacity: 1;
-                    transition: opacity 0.2s 0.1s;
+            &:has(button:hover), &:has(select:hover), &:has(input:hover), &:has(label:hover) {
+                // Skip hover
+                &:after {
+                    opacity: 0;
+                }
+            }
+        }
+
+        &:active, &.hoverable:active {
+            &:before {
+                opacity: 1;
+                transition: none;
+            }
+
+            &:has(button:active), &:has(select:active), &:has(label:active), &:has(textarea:active), &:has(input:not([type=radio]):not([type=checkbox]):active) {
+                &:before {
+                    opacity: 0;
                 }
             }
         }
