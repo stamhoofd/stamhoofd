@@ -211,15 +211,23 @@ export class BalanceItem extends AutoEncoder {
     }
 
     get paymentShortDescription(): string {
+        // This doesn't list individual options
         switch (this.type) {
             case BalanceItemType.Registration: {
-                return this.relations.get(BalanceItemRelationType.Group)?.name ?? 'inschrijving';
+                const option = this.relations.get(BalanceItemRelationType.GroupOption);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
+
+                if (option) {
+                    return 'keuzeoptie voor ' + group;
+                }
+
+                return 'inschrijving voor ' + group;
             }
             case BalanceItemType.AdministrationFee: return 'administratiekosten';
             case BalanceItemType.FreeContribution: return 'vrije bijdrage';
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? 'webshop';
-            case BalanceItemType.Other: return 'andere';
-            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? 'aansluitingen';
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || 'onbekende webshop';
+            case BalanceItemType.Other: return this.description;
+            case BalanceItemType.PlatformMembership: return 'aansluiting voor ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || 'onbekend aansluitingstype';
         }
     }
 

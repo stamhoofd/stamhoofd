@@ -79,7 +79,7 @@ export class PaymentGeneral extends Payment {
     }
 
     getShortDescription() {
-        const shortDescriptions = this.balanceItemPayments.map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
+        const shortDescriptions = this.balanceItemPayments.filter(p => p.price !== 0).map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
 
         // Count the number of times each description occurs and add prefix if more than 1
         const counts: { [key: string]: number } = {};
