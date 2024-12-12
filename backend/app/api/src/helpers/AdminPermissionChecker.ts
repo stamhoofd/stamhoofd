@@ -1310,7 +1310,7 @@ export class AdminPermissionChecker {
     }
 
     hasSomePlatformAccess(): boolean {
-        return !!this.platformPermissions;
+        return !!this.platformPermissions && !this.platformPermissions.isEmpty;
     }
 
     canManagePlatformAdmins() {
