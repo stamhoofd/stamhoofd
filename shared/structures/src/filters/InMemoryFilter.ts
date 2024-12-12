@@ -308,4 +308,9 @@ function compileInMemoryFilter(filter: StamhoofdFilter, definitions: InMemoryFil
     return runners;
 }
 
-export const compileToInMemoryFilter = $andInMemoryFilterCompiler;
+export const compileToInMemoryFilter = (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
+    if (filter === null) {
+        return () => true;
+    }
+    return $andInMemoryFilterCompiler(filter, filters);
+};
