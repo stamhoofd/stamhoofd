@@ -44,9 +44,7 @@
         </div>
 
         <p v-if="status !== 'Succeeded' && price >= 0" class="info-box">
-            We raden aan enkel betalingen aan te maken die je hebt ontvangen. <template v-if="family">
-                Een lid kan zelf namelijk ook altijd het openstaande bedrag betalen via het ledenportaal.
-            </template>
+            We raden aan enkel betalingen aan te maken die je hebt ontvangen. In het andere geval is het beter om de personen via de website te laten betalen - dan kunnen ze een betaalmethode kiezen (dat is ook veiliger tegen Phishing).
         </p>
 
         <p v-if="status !== 'Succeeded' && price < 0" class="info-box">
@@ -89,11 +87,11 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { BalanceItem, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PlatformFamily, TransferSettings, Version } from '@stamhoofd/structures';
+import { BalanceItem, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, TransferSettings, Version } from '@stamhoofd/structures';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
@@ -138,17 +136,14 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     isNew!: boolean;
 
-    @Prop({ default: null })
-    family!: PlatformFamily | null;
-
     patchPayment: AutoEncoderPatchType<PaymentGeneral> = PaymentGeneral.patch({});
 
     @Prop({ required: true })
     saveHandler: ((patch: AutoEncoderPatchType<PaymentGeneral>) => Promise<void>);
 
     availableMethods = [
-        PaymentMethod.PointOfSale,
         PaymentMethod.Transfer,
+        PaymentMethod.PointOfSale,
     ];
 
     availableStatuses = [
@@ -156,10 +151,6 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         PaymentStatus.Succeeded,
         PaymentStatus.Failed,
     ];
-
-    get multipleMembers() {
-        return (this.family?.members.length ?? 0) > 1;
-    }
 
     get organization() {
         return this.$organization;
@@ -275,82 +266,12 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         return this.patchedPayment.balanceItemPayments;
     }
 
-    isItemSelected(item: BalanceItem) {
-        const q = this.balanceItemPayments.find(p => p.balanceItem.id === item.id) !== undefined;
-        return q;
-    }
-
-    setItemSelected(item: BalanceItem, selected: boolean) {
-        if (this.isItemSelected(item) === selected) {
-            return;
-        }
-
-        if (selected) {
-            const add = BalanceItemPaymentDetailed.create({
-                balanceItem: item,
-                price: item.price - item.pricePaid,
-            });
-            const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
-            arr.addPut(add);
-            this.addPatch({
-                balanceItemPayments: arr,
-            });
-        }
-        else {
-            const q = this.balanceItemPayments.find(p => p.balanceItem.id === item.id);
-            const id = q?.id;
-
-            if (id) {
-                const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
-                arr.addDelete(id);
-                this.addPatch({
-                    balanceItemPayments: arr,
-                });
-            }
-            else {
-                console.error('Could not find item to remove', item, q);
-            }
-        }
-        this.recalculateTotal();
-    }
-
-    recalculateTotal() {
-        this.price = this.balanceItemPayments.reduce((total, p) => total + p.price, 0);
-    }
-
-    getItemPrice(item: BalanceItem) {
-        return this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.price ?? 0;
-    }
-
-    setItemPrice(item: BalanceItem, price: number) {
-        this.setItemSelected(item, true);
-        const id = this.balanceItemPayments.find(p => p.balanceItem.id === item.id)?.id;
-
-        if (id) {
-            const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
-            arr.addPatch(BalanceItemPaymentDetailed.patch({
-                id,
-                price,
-            }));
-            this.addPatch({
-                balanceItemPayments: arr,
-            });
-        }
-        this.recalculateTotal();
-    }
-
     getPaymentMethodName(method: PaymentMethod) {
         return PaymentMethodHelper.getNameCapitalized(method);
     }
 
     getStatusName(status: PaymentStatus) {
         return PaymentStatusHelper.getNameCapitalized(status);
-    }
-
-    mounted() {
-        for (const item of this.filteredBalanceItems) {
-            this.setItemSelected(item, true);
-        }
     }
 
     loading = false;
