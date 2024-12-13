@@ -40,8 +40,6 @@ export class AuthenticatedStructures {
 
         const includeSettlements = checkPermissions && !!Context.user && !!Context.user.permissions;
 
-        console.log('includeSettlements', includeSettlements);
-
         const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
 
         return Payment.getGeneralStructureFromRelations({
