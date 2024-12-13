@@ -1,13 +1,22 @@
 <template>
     <STList>
-        <STListItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true">
+        <STListItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true" class="right-stack no-margin">
             <template #left>
-                <Checkbox :model-value="isItemSelected(item)" :indeterminate="getItemPrice(item) !== item.priceOpen" @update:model-value="setItemSelected(item, $event)" />
+                <Checkbox :model-value="isItemSelected(item)" :disabled="isPayable && item.priceOpen < 0" @update:model-value="setItemSelected(item, $event)" />
             </template>
 
-            <p v-if="item.dueAt" class="style-title-prefix-list" :class="{error: item.dueAt && item.dueAt <= new Date()}">
+            <p v-if="item.dueAt" class="style-title-prefix-list" :class="{error: item.isOverDue}">
                 <span>Te betalen tegen {{ formatDate(item.dueAt) }}</span>
-                <span v-if="item.dueAt && item.dueAt <= new Date()" class="icon error small" />
+                <span v-if="item.isOverDue" class="icon error small" />
+            </p>
+            <p v-if="item.status === BalanceItemStatus.Canceled && item.priceOpen < 0" class="style-title-prefix-list error">
+                <span>Tegoed wegens annulatie</span>
+                <span class="icon disabled small" />
+            </p>
+            <p v-else-if="item.priceOpen < 0" class="style-title-prefix-list">
+                <span v-if="!isPayable">Terug te betalen</span>
+                <span v-else>Tegoed</span>
+                <span class="icon undo small" />
             </p>
 
             <h3 class="style-title-list">
@@ -18,19 +27,18 @@
                 {{ formatDate(item.createdAt) }}
             </p>
 
-            <div v-if="isItemSelected(item)" class="split-inputs option" @click.stop.prevent>
-                <STInputBox title="Gedeeltelijk betalen">
-                    <PriceInput :model-value="getItemPrice(item)" placeholder="0 euro" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" @update:model-value="setItemPrice(item, $event)" />
-                </STInputBox>
-            </div>
-
             <template #right>
-                <p v-if="!item.isDue" v-tooltip="item.dueAt ? ('Te betalen tegen ' + formatDate(item.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
-                    ({{ formatPrice(item.priceOpen) }})
-                </p>
-                <p v-else class="style-price-base">
-                    {{ formatPrice(item.priceOpen) }}
-                </p>
+                <div v-if="isItemSelected(item)">
+                    <p v-if="isPayable && getItemPrice(item) < 0" class="style-price-base">
+                        {{ formatPrice(getItemPrice(item)) }}
+                    </p>
+                    <PriceInput v-else :model-value="getItemPrice(item)" placeholder="0 euro" :min="item.priceOpen < 0 ? item.priceOpen : 0" :max="item.priceOpen >= 0 ? item.priceOpen : 0" @update:model-value="setItemPrice(item, $event)" />
+                </div>
+                <template v-else>
+                    <p class="style-discount-old-price disabled">
+                        ({{ formatPrice(item.priceOpen) }})
+                    </p>
+                </template>
             </template>
         </STListItem>
     </STList>
@@ -40,15 +48,42 @@
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
-import { computed } from 'vue';
-import PriceInput from '../inputs/PriceInput.vue';
-import { PriceBreakdownBox } from '@stamhoofd/components';
+import { PriceBreakdownBox, PriceInput } from '@stamhoofd/components';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemStatus } from '@stamhoofd/structures';
+import { computed, nextTick, onMounted } from 'vue';
 
 const props = defineProps<{
     items: BalanceItem[];
     list: BalanceItemPaymentDetailed[];
+    isPayable: boolean;
 }>();
+
+onMounted(async () => {
+    if (props.list.length === 0) {
+        // Default select
+        for (const item of props.items) {
+            if (item.isDue) {
+                setItemSelected(item, true);
+            }
+        }
+
+        await nextTick();
+
+        if (total.value <= 0) {
+            // Try to select due items
+            for (const item of props.items) {
+                if (!item.isDue) {
+                    setItemSelected(item, true);
+                    await nextTick();
+
+                    if (total.value > 0) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+});
 
 const emit = defineEmits<{ (e: 'patch', patch: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed>): void }>();
 

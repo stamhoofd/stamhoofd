@@ -1,43 +1,66 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges && !isNew" class="edit-payment-view" :loading="loading" @save="save">
+    <SaveView :title="title" :disabled="!hasChanges && !isNew" class="edit-payment-view" :loading="saving" @save="save">
         <h1>
             {{ title }}
         </h1>
 
         <p v-if="price >= 0">
-            Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel.
+            Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel. Dit is nodig om de boekhouding correct te houden en elke betaling te koppelen aan een specifieke items.
         </p>
         <p v-else>
             {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
         </p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" @patch="addPatch({balanceItemPayments: $event})" />
+        <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" :is-payable="false" @patch="addPatch({balanceItemPayments: $event})" />
+
+        <STList v-if="createBalanceItem">
+            <STListItem :selectable="true" element-name="button" @click="createBalanceItem">
+                <template #left>
+                    <IconContainer icon="label">
+                        <template #aside>
+                            <span class="icon add small primary" />
+                        </template>
+                    </IconContainer>
+                </template>
+                <h3 class="style-title-list">
+                    Item toevoegen
+                </h3>
+
+                <p class="style-description-small">
+                    Voeg een item toe aan het openstaand bedrag of geef een tegoed
+                </p>
+
+                <template #right>
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+        </STList>
 
         <hr>
         <h2>Hoe?</h2>
 
         <div class="split-inputs">
             <div>
-                <STInputBox title="Betaalmethode" error-fields="method" :error-box="errorBox">
+                <STInputBox title="Betaalmethode" error-fields="method" :error-box="errors.errorBox">
                     <Dropdown v-model="method">
                         <option v-for="m in availableMethods" :key="m" :value="m">
-                            {{ getPaymentMethodName(m) }}
+                            {{ PaymentMethodHelper.getNameCapitalized(m) }}
                         </option>
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox title="Status" error-fields="status" :error-box="errorBox">
+                <STInputBox title="Status" error-fields="status" :error-box="errors.errorBox">
                     <Dropdown v-model="status">
                         <option v-for="m in availableStatuses" :key="m" :value="m">
-                            {{ getStatusName(m) }}
+                            {{ PaymentStatusHelper.getNameCapitalized(m) }}
                         </option>
                     </Dropdown>
                 </STInputBox>
             </div>
             <div>
-                <STInputBox v-if="status === 'Succeeded'" :title="price >= 0 ? 'Ontvangen op' : 'Terugbetaald op'" error-fields="paidAt" :error-box="errorBox">
+                <STInputBox v-if="status === 'Succeeded'" :title="price >= 0 ? 'Ontvangen op' : 'Terugbetaald op'" error-fields="paidAt" :error-box="errors.errorBox">
                     <DateSelection v-model="paidAt" />
                 </STInputBox>
             </div>
@@ -60,7 +83,7 @@
                 Rekening waarmee terugbetaald werd
             </h2>
 
-            <STInputBox :title="price >= 0 ? 'Begunstigde' : 'Naam rekening'" error-fields="transferSettings.creditor" :error-box="errorBox">
+            <STInputBox :title="price >= 0 ? 'Begunstigde' : 'Naam rekening'" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
                 <input
                     v-model="creditor"
                     class="input"
@@ -70,9 +93,9 @@
                 >
             </STInputBox>
 
-            <IBANInput v-model="iban" title="Bankrekeningnummer" placeholder="Op deze rekening schrijft men over" :validator="validator" :required="false" />
+            <IBANInput v-model="iban" title="Bankrekeningnummer" placeholder="Op deze rekening schrijft men over" :validator="errors.validator" :required="false" />
 
-            <STInputBox title="Mededeling" error-fields="transferDescription" :error-box="errorBox">
+            <STInputBox title="Mededeling" error-fields="transferDescription" :error-box="errors.errorBox">
                 <input
                     ref="firstInput"
                     v-model="transferDescription"
@@ -86,226 +109,186 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { BalanceItem, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, TransferSettings, Version } from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
+import { BalanceItem, BalanceItemRelationType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, TransferSettings } from '@stamhoofd/structures';
 
+import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
-import { Validator } from '../errors/Validator';
-import Checkbox from '../inputs/Checkbox.vue';
+import { useErrors } from '../errors/useErrors';
+import { useOrganization, usePatch } from '../hooks';
 import DateSelection from '../inputs/DateSelection.vue';
 import Dropdown from '../inputs/Dropdown.vue';
 import IBANInput from '../inputs/IBANInput.vue';
-import PriceInput from '../inputs/PriceInput.vue';
 import STInputBox from '../inputs/STInputBox.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import SaveView from '../navigation/SaveView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
+import IconContainer from '../icons/IconContainer.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        PriceInput,
-        STListItem,
-        STList,
-        Checkbox,
-        DateSelection,
-        Dropdown,
-        IBANInput,
-        SelectBalanceItemsList,
-    },
-})
-export default class EditPaymentView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
+const props = withDefaults(
+    defineProps<{
+        payment: PaymentGeneral;
+        balanceItems: BalanceItem[];
+        isNew?: boolean;
+        saveHandler: ((patch: AutoEncoderPatchType<PaymentGeneral>) => Promise<void>);
+        createBalanceItem?: null | (() => Promise<void>);
+    }>(), {
+        isNew: false,
+        createBalanceItem: null,
+    });
 
-    @Prop({ required: true })
-    payment: PaymentGeneral;
+const { patched: patchedPayment, addPatch, hasChanges, patch } = usePatch(props.payment);
+const organization = useOrganization();
+const errors = useErrors();
+const saving = ref(false);
+const pop = usePop();
+const $t = useTranslate();
 
-    @Prop({ required: true })
-    balanceItems: BalanceItem[];
+const availableMethods = [
+    PaymentMethod.Transfer,
+    PaymentMethod.PointOfSale,
+];
 
-    @Prop({ required: true })
-    isNew!: boolean;
+const availableStatuses = [
+    PaymentStatus.Pending,
+    PaymentStatus.Succeeded,
+    PaymentStatus.Failed,
+];
 
-    patchPayment: AutoEncoderPatchType<PaymentGeneral> = PaymentGeneral.patch({});
+const title = computed(() => {
+    return props.isNew ? (price.value >= 0 ? 'Betaling registreren' : 'Terugbetaling registreren') : 'Betaling bewerken';
+});
 
-    @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<PaymentGeneral>) => Promise<void>);
+const price = computed(() => patchedPayment.value.balanceItemPayments.reduce((total, item) => total + item.price, 0));
 
-    availableMethods = [
-        PaymentMethod.Transfer,
-        PaymentMethod.PointOfSale,
-    ];
-
-    availableStatuses = [
-        PaymentStatus.Pending,
-        PaymentStatus.Succeeded,
-        PaymentStatus.Failed,
-    ];
-
-    get organization() {
-        return this.$organization;
-    }
-
-    get title() {
-        return this.isNew ? (this.price >= 0 ? 'Betaling registreren' : 'Terugbetaling registreren') : 'Betaling bewerken';
-    }
-
-    get patchedPayment() {
-        return this.payment.patch(this.patchPayment);
-    }
-
-    get filteredBalanceItems() {
-        return this.balanceItems.filter(b => b.price - b.pricePaid !== 0);
-    }
-
-    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<PaymentGeneral>>) {
-        this.patchPayment = this.patchPayment.patch(patch as any);
-    }
-
-    get price() {
-        return this.patchedPayment.price;
-    }
-
-    set price(price: number) {
-        this.addPatch({
-            price,
-        });
-    }
-
-    get method() {
-        return this.patchedPayment.method ?? PaymentMethod.Unknown;
-    }
-
-    set method(method: PaymentMethod) {
-        if (this.method === method) {
+const method = computed({
+    get: () => patchedPayment.value.method ?? PaymentMethod.Unknown,
+    set: (method: PaymentMethod) => {
+        if (method === patchedPayment.value.method) {
             return;
         }
 
-        let transferSettings = this.organization.meta.registrationPaymentConfiguration.transferSettings.fillMissing(TransferSettings.create({ creditor: this.organization.name }));
-        const webshopId = this.balanceItems.find(b => b.order)?.order?.webshopId;
-        if (webshopId) {
-            const webshop = this.organization.webshops.find(w => w.id === webshopId);
-            if (webshop) {
-                transferSettings = webshop.meta.paymentConfiguration.transferSettings.fillMissing(transferSettings);
+        if (method === PaymentMethod.Transfer) {
+            if (props.payment.transferDescription) {
+                addPatch({
+                    method,
+                    transferDescription: props.payment.transferDescription,
+                    transferSettings: props.payment.transferSettings?.clone(),
+                });
+            }
+            else {
+                let transferSettings = organization.value?.meta.registrationPaymentConfiguration.transferSettings.fillMissing(TransferSettings.create({ creditor: organization.value.name })) ?? TransferSettings.create({ creditor: organization.value?.name });
+                const webshopId = props.balanceItems.find(b => b.relations.get(BalanceItemRelationType.Webshop))?.id;
+                if (webshopId) {
+                    const webshop = organization.value?.webshops.find(w => w.id === webshopId);
+                    if (webshop) {
+                        transferSettings = webshop.meta.paymentConfiguration.transferSettings.fillMissing(transferSettings);
+                    }
+                }
+
+                addPatch({
+                    method,
+                    transferDescription: transferSettings.generateDescription('', I18nController.shared.country),
+                    transferSettings: transferSettings,
+                });
             }
         }
+        else {
+            addPatch({
+                method,
+                transferDescription: null,
+                transferSettings: null,
+            });
+        }
+    },
+});
 
-        this.addPatch({
-            method,
-            transferDescription: method === PaymentMethod.Transfer ? transferSettings.generateDescription('', I18nController.shared.country) : undefined,
-            transferSettings: method === PaymentMethod.Transfer ? transferSettings : undefined,
-        });
-    }
-
-    get status() {
-        return this.patchedPayment.status;
-    }
-
-    set status(status: PaymentStatus) {
-        this.addPatch({
+const status = computed({
+    get: () => patchedPayment.value.status,
+    set: (status: PaymentStatus) => {
+        addPatch({
             status,
-            paidAt: status === PaymentStatus.Succeeded ? new Date() : null,
+            paidAt: status === PaymentStatus.Succeeded ? (props.payment.paidAt ?? new Date()) : null,
         });
-    }
+    },
+});
 
-    get paidAt() {
-        return this.patchedPayment.paidAt;
-    }
-
-    set paidAt(paidAt: Date | null) {
-        this.addPatch({
+const paidAt = computed({
+    get: () => patchedPayment.value.paidAt ?? new Date(),
+    set: (paidAt: Date) => {
+        addPatch({
             paidAt,
         });
-    }
+    },
+});
 
-    get transferDescription() {
-        return this.patchedPayment.transferDescription ?? '';
-    }
-
-    set transferDescription(transferDescription: string) {
-        this.addPatch({
+const transferDescription = computed({
+    get: () => patchedPayment.value.transferDescription ?? '',
+    set: (transferDescription: string) => {
+        addPatch({
             transferDescription,
         });
-    }
+    },
+});
 
-    get creditor() {
-        return this.patchedPayment.transferSettings?.creditor ?? '';
-    }
-
-    set creditor(creditor: string) {
-        this.addPatch({
+const creditor = computed({
+    get: () => patchedPayment.value.transferSettings?.creditor ?? '',
+    set: (creditor: string) => {
+        addPatch({
             transferSettings: TransferSettings.patch({
                 creditor,
             }),
         });
-    }
+    },
+});
 
-    get iban() {
-        return this.patchedPayment.transferSettings?.iban ?? '';
-    }
-
-    set iban(iban: string) {
-        this.addPatch({
+const iban = computed({
+    get: () => patchedPayment.value.transferSettings?.iban ?? '',
+    set: (iban: string) => {
+        addPatch({
             transferSettings: TransferSettings.patch({
                 iban,
             }),
         });
+    },
+});
+
+async function save() {
+    if (saving.value) {
+        return;
     }
 
-    get balanceItemPayments() {
-        return this.patchedPayment.balanceItemPayments;
-    }
-
-    getPaymentMethodName(method: PaymentMethod) {
-        return PaymentMethodHelper.getNameCapitalized(method);
-    }
-
-    getStatusName(status: PaymentStatus) {
-        return PaymentStatusHelper.getNameCapitalized(status);
-    }
-
-    loading = false;
-
-    async save() {
-        if (this.loading) {
+    saving.value = true;
+    try {
+        errors.errorBox = null;
+        if (!await errors.validator.validate()) {
+            saving.value = false;
             return;
         }
-        this.errorBox = null;
-
-        try {
-            const valid = await this.validator.validate();
-            if (!valid) {
-                return;
-            }
-            this.loading = true;
-            await this.saveHandler(this.patchPayment);
-            this.pop({ force: true });
-        }
-        catch (e) {
-            this.errorBox = new ErrorBox(e);
-        }
-        this.loading = false;
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
     }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchPayment, this.payment, { version: Version });
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true;
-        }
-        return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    finally {
+        saving.value = false;
     }
 }
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
+defineExpose({
+    shouldNavigateAway,
+});
 </script>

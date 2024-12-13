@@ -2,7 +2,7 @@
     <SaveView :error-box="errors.errorBox" :loading="saving" :title="title" :disabled="total == 0" save-text="Betalen" save-icon-right="arrow-right" @save="save">
         <h1>{{ title }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
-        <SelectBalanceItemsList :items="items" :list="list" @patch="addPatch" />
+        <SelectBalanceItemsList :items="items" :list="list" :is-payable="isPayable" @patch="addPatch" />
     </SaveView>
 </template>
 
@@ -17,6 +17,7 @@ import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 const props = defineProps<{
     title: string;
     items: BalanceItem[];
+    isPayable: boolean;
     saveHandler: (list: BalanceItemPaymentDetailed[]) => void | Promise<void>;
 }>();
 
@@ -27,15 +28,6 @@ const saving = ref(false);
 const total = computed(() => {
     return list.value.reduce((total, item) => total + item.price, 0);
 });
-
-for (const item of props.items) {
-    if (item.dueAt === null || item.dueAt <= new Date()) {
-        list.value.push(BalanceItemPaymentDetailed.create({
-            balanceItem: item,
-            price: item.priceOpen,
-        }));
-    }
-}
 
 function addPatch(p: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed>) {
     list.value = p.applyTo(list.value);

@@ -64,6 +64,7 @@ async function checkout() {
                     {
                         title: 'Kies welke zaken je nu wil betalen',
                         items: items.value,
+                        isPayable: true,
                         saveHandler: async (list: BalanceItemPaymentDetailed[]) => {
                             // First clear
                             for (const g of filteredItems.value) {
