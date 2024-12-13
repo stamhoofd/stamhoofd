@@ -222,8 +222,9 @@ async function createPayment() {
     }
 
     const component = new ComponentWithProperties(EditPaymentView, {
+        createBalanceItem,
         payment,
-        balanceItems: detailedItem.value.filteredBalanceItems,
+        balanceItems: computed(() => detailedItem.value?.filteredBalanceItems ?? []),
         family: props.member?.family ?? null,
         isNew: true,
         saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
