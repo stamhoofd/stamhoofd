@@ -1,6 +1,6 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { Document as DocumentStruct, GroupsWithOrganizations, IDRegisterCheckout, MembersBlob, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
+import { BalanceItem, DetailedPayableBalanceCollection, Document as DocumentStruct, GroupsWithOrganizations, IDRegisterCheckout, MembersBlob, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { inject, reactive, watch } from 'vue';
 
@@ -115,6 +115,35 @@ export class MemberManager {
                     groups: [...knownGroups, ...groupsWithOrganizations.groups],
                     organizations: [...this.family.organizations, ...groupsWithOrganizations.organizations],
                 });
+
+                try {
+                    let balanceItems: BalanceItem[] = [];
+                    if (checkout.cart.balanceItems.length) {
+                        const response = await this.$context.authenticatedServer.request({
+                            method: 'GET',
+                            path: `/user/payable-balance/detailed`,
+                            decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
+                            shouldRetry: true,
+                            owner: this,
+                            timeout: 60 * 1000,
+                        });
+
+                        const payableBalanceCollection = response.data;
+                        balanceItems = payableBalanceCollection.organizations.flatMap(o => o.balanceItems);
+                    }
+                    else {
+                        console.log('No balance items in cart');
+                    }
+
+                    console.log('Validating checkout');
+                    checkout.validate({
+                        memberBalanceItems: balanceItems,
+                    });
+                }
+                catch (e) {
+                    // Invalid cehckout
+                    console.error('Error validating checkout', e);
+                }
 
                 this.family.checkout = checkout;
                 this.watchCheckout();
