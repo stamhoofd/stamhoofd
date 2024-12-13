@@ -6,7 +6,6 @@
                     <span class="icon" :class="getBalanceItemTypeIcon(item.item.type)" />
                 </figure>
                 <aside>
-                    <span v-if="item.item.amount <= 0" class="icon disabled small red" />
                     <span v-if="item.item.amount > 1" class="style-bubble primary">
                         {{ item.item.amount }}
                     </span>
@@ -14,15 +13,19 @@
             </figure>
         </template>
 
+        <p v-if="item.item.status === BalanceItemStatus.Canceled && item.price <= 0" class="style-title-prefix-list error">
+            <span>Tegoed wegens annulatie</span>
+            <span class="icon disabled small" />
+        </p>
+        <p v-else-if="item.price < 0" class="style-title-prefix-list">
+            <span>Tegoed</span>
+            <span class="icon undo small" />
+        </p>
         <h3 class="style-title-list">
             <span>{{ item.item.itemTitle }}</span>
         </h3>
 
         <p class="style-description-small pre-wrap" v-text="item.item.itemDescription" />
-
-        <p v-if="item.item.amount === 0" class="style-description-small">
-            Annulatie
-        </p>
 
         <template #right>
             <p class="style-price-base">
@@ -34,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { BalanceItemCartItem, getBalanceItemTypeIcon, RegisterCheckout } from '@stamhoofd/structures';
+import { BalanceItemCartItem, BalanceItemStatus, getBalanceItemTypeIcon, RegisterCheckout } from '@stamhoofd/structures';
 
 const props = withDefaults(
     defineProps<{
