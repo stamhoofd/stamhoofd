@@ -87,13 +87,13 @@
                                 Breng de betaling van dit bedrag in orde.
                             </p>
 
-                            <p v-if="BalanceItem.getOutstandingBalance(item.balanceItems).totalPending > 0" class="style-description">
-                                Betaling van {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).totalPending) }} gestart, maar nog in verwerking.
+                            <p v-if="BalanceItem.getOutstandingBalance(item.balanceItems).pricePending > 0" class="style-description">
+                                Betaling van {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending) }} gestart, maar nog in verwerking.
                             </p>
 
                             <template #right>
                                 <p class="style-price">
-                                    {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).totalOpen) }}
+                                    {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen) }}
                                 </p>
                                 <span class="icon arrow-right-small gray" />
                             </template>
