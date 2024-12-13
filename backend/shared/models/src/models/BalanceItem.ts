@@ -98,6 +98,7 @@ export class BalanceItem extends Model {
         beforeSave: function () {
             return this.calculatedPriceOpen;
         },
+        skipUpdate: true,
     })
     priceOpen = 0;
 
@@ -321,7 +322,7 @@ export class BalanceItem extends Model {
         SET balance_items.pricePaid = coalesce(paid.price, 0),
             balance_items.pricePending = coalesce(pending.price, 0),
             balance_items.priceOpen = (CASE
-                WHEN balance_items.status = '${BalanceItemStatus.Due}' THEN GREATEST(0, balance_items.unitPrice * balance_items.amount - balance_items.pricePaid - balance_items.pricePending)
+                WHEN balance_items.status = '${BalanceItemStatus.Due}' THEN (balance_items.unitPrice * balance_items.amount - balance_items.pricePaid - balance_items.pricePending)
                 ELSE (-balance_items.pricePaid - balance_items.pricePending)
             END)
         ${secondWhere}`;
