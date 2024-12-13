@@ -33,6 +33,7 @@
                     <PaymentMethodIcon
                         v-if="(!$isMobile || paymentMethod !== 'Payconiq')"
                         :method="paymentMethod"
+                        :type="PaymentType.Payment"
                     />
                 </template>
             </STListItem>
@@ -42,7 +43,7 @@
 
 <script lang="ts" setup>
 import { Radio, STList, STListItem } from '@stamhoofd/components';
-import { Country, Organization, PaymentConfiguration, PaymentCustomer, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
+import { Country, Organization, PaymentConfiguration, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentType } from '@stamhoofd/structures';
 import { computed, onMounted } from 'vue';
 import PaymentMethodIcon from '../payments/components/PaymentMethodIcon.vue';
 

@@ -364,6 +364,10 @@
     &.disabled {
         opacity: 0.6;
     }
+
+    &.negative {
+        color: $color-error;
+    }
 }
 
 .style-amount {
@@ -1010,6 +1014,54 @@
         }
     }
 
+    &.secundary {
+        color: $color-secundary-dark;
+        figure {
+            background: $color-secundary-background;
+            color: $color-secundary-dark;
+        }
+
+        > aside {
+            color: $color-secundary;
+        }
+    }
+
+    &.tertiary {
+        color: $color-tertiary-dark;
+        figure {
+            background: $color-tertiary-background;
+            color: $color-tertiary-dark;
+        }
+
+        > aside {
+            color: $color-tertiary;
+        }
+    }
+
+    &.warning {
+        color: $color-warning-dark;
+        figure {
+            background: $color-warning-background;
+            color: $color-warning-dark;
+        }
+
+        > aside {
+            color: $color-warning;
+        }
+    }
+
+    &.error {
+        color: $color-error-dark;
+        figure {
+            background: $color-error-background;
+            color: $color-error-dark;
+        }
+
+        > aside {
+            color: $color-error;
+        }
+    }
+
     .image-component {
         width: var(--block-width, 40px);
         height: var(--block-width, 40px);
@@ -1028,7 +1080,7 @@
         height: var(--block-width, 40px);
         border-radius: $border-radius;
         text-align: center;
-        background: $color-primary-light;
+        background: $color-primary-background;
         color: $color-primary-dark;
         text-transform: uppercase;
         line-height: var(--block-width, 40px);

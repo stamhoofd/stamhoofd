@@ -5,7 +5,7 @@
                 {{ item.name }}
             </div>
 
-            <div class="right">
+            <div class="right" :class="{negative: item.price < 0}">
                 {{ formatPrice(item.price) }}
             </div>
         </template>
@@ -16,12 +16,13 @@
 import { PriceBreakdown } from '@stamhoofd/structures';
 
 defineProps<{
-    priceBreakdown: PriceBreakdown
+    priceBreakdown: PriceBreakdown;
 }>();
 </script>
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .pricing-box {
     margin-top: auto;
@@ -46,9 +47,8 @@ defineProps<{
         min-width: 100px;
         padding: 12px 0;
         text-align: right;
-        font-size: 15px;
-        font-weight: $font-weight-medium;
-        font-variant-numeric: tabular-nums;
+
+        @extend .style-price-base;
 
         &:last-child {
             font-size: 18px;

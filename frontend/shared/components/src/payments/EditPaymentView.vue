@@ -4,14 +4,85 @@
             {{ title }}
         </h1>
 
-        <p v-if="price >= 0">
+        <STErrorsDefault :error-box="errors.errorBox" />
+
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox">
+                    <Dropdown v-model="type">
+                        <option v-for="m in availableTypes" :key="m" :value="m">
+                            {{ capitalizeFirstLetter(PaymentTypeHelper.getName(m)) }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+
+                <STInputBox :title="type === PaymentType.Payment ? 'Betaalmethode' : 'Terugbetaalmethode'" error-fields="method" :error-box="errors.errorBox">
+                    <Dropdown v-model="method">
+                        <option v-for="m in availableMethods" :key="m" :value="m">
+                            {{ PaymentMethodHelper.getNameCapitalized(m) }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+
+                <STInputBox v-if="!isNew" title="Status" error-fields="status" :error-box="errors.errorBox">
+                    <Dropdown v-model="status">
+                        <option v-for="m in availableStatuses" :key="m" :value="m">
+                            {{ PaymentStatusHelper.getNameCapitalized(m) }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+            </div>
+            <div>
+                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Payment ? 'Ontvangen op' : 'Terugbetaald op'" error-fields="paidAt" :error-box="errors.errorBox">
+                    <DateSelection v-model="paidAt" />
+                </STInputBox>
+            </div>
+        </div>
+
+        <template v-if="method === PaymentMethod.Transfer">
+            <hr>
+            <h2 v-if="type === PaymentType.Payment">
+                Overschrijvingsdetails
+            </h2>
+            <h2 v-else>
+                Vanaf welke rekening werd terugbetaald??
+            </h2>
+
+            <STInputBox :title="type === PaymentType.Payment ? 'Begunstigde' : 'Naam rekening'" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
+                <input
+                    v-model="creditor"
+                    class="input"
+                    type="text"
+                    placeholder="Naam bankrekeningnummer"
+                    autocomplete=""
+                >
+            </STInputBox>
+
+            <IBANInput v-model="iban" title="Bankrekeningnummer" placeholder="Op deze rekening schrijft men over" :validator="errors.validator" :required="false" />
+
+            <STInputBox title="Mededeling" error-fields="transferDescription" :error-box="errors.errorBox">
+                <input
+                    ref="firstInput"
+                    v-model="transferDescription"
+                    class="input"
+                    type="text"
+                    placeholder="Bv. Aankoop x"
+                    autocomplete=""
+                >
+            </STInputBox>
+        </template>
+
+        <hr>
+        <h2>Wat en hoeveel?</h2>
+        <p v-if="patchedPayment.type === PaymentType.Payment">
             Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel. Dit is nodig om de boekhouding correct te houden en elke betaling te koppelen aan een specifieke items.
+        </p>
+        <p v-else-if="patchedPayment.type === PaymentType.Reallocation">
+            Bouw hieronder een balans op zodat het totaalbedrag 0 euro bedraagt.
         </p>
         <p v-else>
             {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
         </p>
-
-        <STErrorsDefault :error-box="errors.errorBox" />
 
         <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" :is-payable="false" @patch="addPatch({balanceItemPayments: $event})" />
 
@@ -37,75 +108,6 @@
                 </template>
             </STListItem>
         </STList>
-
-        <hr>
-        <h2>Hoe?</h2>
-
-        <div class="split-inputs">
-            <div>
-                <STInputBox title="Betaalmethode" error-fields="method" :error-box="errors.errorBox">
-                    <Dropdown v-model="method">
-                        <option v-for="m in availableMethods" :key="m" :value="m">
-                            {{ PaymentMethodHelper.getNameCapitalized(m) }}
-                        </option>
-                    </Dropdown>
-                </STInputBox>
-
-                <STInputBox title="Status" error-fields="status" :error-box="errors.errorBox">
-                    <Dropdown v-model="status">
-                        <option v-for="m in availableStatuses" :key="m" :value="m">
-                            {{ PaymentStatusHelper.getNameCapitalized(m) }}
-                        </option>
-                    </Dropdown>
-                </STInputBox>
-            </div>
-            <div>
-                <STInputBox v-if="status === 'Succeeded'" :title="price >= 0 ? 'Ontvangen op' : 'Terugbetaald op'" error-fields="paidAt" :error-box="errors.errorBox">
-                    <DateSelection v-model="paidAt" />
-                </STInputBox>
-            </div>
-        </div>
-
-        <p v-if="status !== 'Succeeded' && price >= 0" class="info-box">
-            We raden aan enkel betalingen aan te maken die je hebt ontvangen. In het andere geval is het beter om de personen via de website te laten betalen - dan kunnen ze een betaalmethode kiezen (dat is ook veiliger tegen Phishing).
-        </p>
-
-        <p v-if="status !== 'Succeeded' && price < 0" class="info-box">
-            We raden aan enkel terugbetalingen aan te maken die je al hebt terugbetaald.
-        </p>
-
-        <template v-if="method === 'Transfer'">
-            <hr>
-            <h2 v-if="price >= 0">
-                Overschrijvingsdetails
-            </h2>
-            <h2 v-else>
-                Rekening waarmee terugbetaald werd
-            </h2>
-
-            <STInputBox :title="price >= 0 ? 'Begunstigde' : 'Naam rekening'" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
-                <input
-                    v-model="creditor"
-                    class="input"
-                    type="text"
-                    placeholder="Naam bankrekeningnummer"
-                    autocomplete=""
-                >
-            </STInputBox>
-
-            <IBANInput v-model="iban" title="Bankrekeningnummer" placeholder="Op deze rekening schrijft men over" :validator="errors.validator" :required="false" />
-
-            <STInputBox title="Mededeling" error-fields="transferDescription" :error-box="errors.errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="transferDescription"
-                    class="input"
-                    type="text"
-                    placeholder="Bv. Aankoop x"
-                    autocomplete=""
-                >
-            </STInputBox>
-        </template>
     </SaveView>
 </template>
 
@@ -113,9 +115,9 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
-import { BalanceItem, BalanceItemRelationType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, TransferSettings } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemRelationType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
 
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
@@ -130,6 +132,7 @@ import SaveView from '../navigation/SaveView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 import IconContainer from '../icons/IconContainer.vue';
+import { Formatter } from '@stamhoofd/utility';
 
 const props = withDefaults(
     defineProps<{
@@ -155,6 +158,11 @@ const availableMethods = [
     PaymentMethod.PointOfSale,
 ];
 
+const availableTypes = [
+    PaymentType.Payment,
+    PaymentType.Refund,
+];
+
 const availableStatuses = [
     PaymentStatus.Pending,
     PaymentStatus.Succeeded,
@@ -162,10 +170,11 @@ const availableStatuses = [
 ];
 
 const title = computed(() => {
-    return props.isNew ? (price.value >= 0 ? 'Betaling registreren' : 'Terugbetaling registreren') : 'Betaling bewerken';
+    if (props.isNew) {
+        return `${Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(patchedPayment.value.type))} registreren`;
+    }
+    return `${Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(patchedPayment.value.type))} aanpassen`;
 });
-
-const price = computed(() => patchedPayment.value.balanceItemPayments.reduce((total, item) => total + item.price, 0));
 
 const method = computed({
     get: () => patchedPayment.value.method ?? PaymentMethod.Unknown,
@@ -173,41 +182,51 @@ const method = computed({
         if (method === patchedPayment.value.method) {
             return;
         }
-
-        if (method === PaymentMethod.Transfer) {
-            if (props.payment.transferDescription) {
-                addPatch({
-                    method,
-                    transferDescription: props.payment.transferDescription,
-                    transferSettings: props.payment.transferSettings?.clone(),
-                });
-            }
-            else {
-                let transferSettings = organization.value?.meta.registrationPaymentConfiguration.transferSettings.fillMissing(TransferSettings.create({ creditor: organization.value.name })) ?? TransferSettings.create({ creditor: organization.value?.name });
-                const webshopId = props.balanceItems.find(b => b.relations.get(BalanceItemRelationType.Webshop))?.id;
-                if (webshopId) {
-                    const webshop = organization.value?.webshops.find(w => w.id === webshopId);
-                    if (webshop) {
-                        transferSettings = webshop.meta.paymentConfiguration.transferSettings.fillMissing(transferSettings);
-                    }
-                }
-
-                addPatch({
-                    method,
-                    transferDescription: transferSettings.generateDescription('', I18nController.shared.country),
-                    transferSettings: transferSettings,
-                });
-            }
-        }
-        else {
-            addPatch({
-                method,
-                transferDescription: null,
-                transferSettings: null,
-            });
-        }
+        addPatch({
+            method,
+        });
+        updateMethod(method);
     },
 });
+
+onMounted(() => {
+    if (props.isNew) {
+        // Set transfer settings default
+        updateMethod(props.payment.method);
+    }
+});
+
+function updateMethod(method: PaymentMethod) {
+    if (method === PaymentMethod.Transfer) {
+        if (props.payment.transferDescription) {
+            addPatch({
+                transferDescription: props.payment.transferDescription,
+                transferSettings: props.payment.transferSettings?.clone(),
+            });
+        }
+        else {
+            let transferSettings = organization.value?.meta.registrationPaymentConfiguration.transferSettings.fillMissing(TransferSettings.create({ creditor: organization.value.name })) ?? TransferSettings.create({ creditor: organization.value?.name });
+            const webshopId = props.balanceItems.find(b => b.relations.get(BalanceItemRelationType.Webshop))?.id;
+            if (webshopId) {
+                const webshop = organization.value?.webshops.find(w => w.id === webshopId);
+                if (webshop) {
+                    transferSettings = webshop.meta.paymentConfiguration.transferSettings.fillMissing(transferSettings);
+                }
+            }
+
+            addPatch({
+                transferDescription: transferSettings.generateDescription('', I18nController.shared.country),
+                transferSettings: transferSettings,
+            });
+        }
+    }
+    else {
+        addPatch({
+            transferDescription: null,
+            transferSettings: null,
+        });
+    }
+}
 
 const status = computed({
     get: () => patchedPayment.value.status,
@@ -215,6 +234,15 @@ const status = computed({
         addPatch({
             status,
             paidAt: status === PaymentStatus.Succeeded ? (props.payment.paidAt ?? new Date()) : null,
+        });
+    },
+});
+
+const type = computed({
+    get: () => patchedPayment.value.type,
+    set: (type) => {
+        addPatch({
+            type,
         });
     },
 });

@@ -36,6 +36,7 @@ export * from './src/OrganizationSimple.js';
 export * from './src/OrganizationType.js';
 export * from './src/PaymentConfiguration.js';
 export * from './src/PaymentCustomer.js';
+export * from './src/PaymentType.js';
 export * from './src/PaymentMethod.js';
 export * from './src/PaymentProvider.js';
 export * from './src/PaymentStatus.js';

@@ -1,4 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
+import { PaymentType, PaymentTypeHelper } from './PaymentType';
 
 export enum PaymentMethod {
     Unknown = 'Unknown',
@@ -10,6 +11,7 @@ export enum PaymentMethod {
     Payconiq = 'Payconiq',
     CreditCard = 'CreditCard',
 }
+
 export enum PaymentMethodV150 {
     Unknown = 'Unknown',
     Transfer = 'Transfer',
@@ -54,19 +56,31 @@ export class PaymentMethodHelper {
         }
     }
 
-    static getPaymentName(method: PaymentMethod): string {
-        switch (method) {
-            case PaymentMethod.Unknown: return 'onbekende betaling';
-            case PaymentMethod.PointOfSale: {
-                return 'betaling ter plaatse';
+    static getPaymentName(method: PaymentMethod, type: PaymentType): string {
+        if (type === PaymentType.Payment) {
+            switch (method) {
+                case PaymentMethod.Unknown: return 'onbekende betaling';
+                case PaymentMethod.PointOfSale: {
+                    return 'betaling ter plaatse';
+                }
+                case PaymentMethod.Transfer: return 'overschrijving';
+                case PaymentMethod.DirectDebit: return 'domiciliëring';
+                case PaymentMethod.Bancontact: return 'Bancontact betaling';
+                case PaymentMethod.iDEAL: return 'iDEAL betaling';
+                case PaymentMethod.CreditCard: return 'kredietkaart betaling';
+                case PaymentMethod.Payconiq: return 'Payconiq betaling';
             }
-            case PaymentMethod.Transfer: return 'overschrijving';
-            case PaymentMethod.DirectDebit: return 'domiciliëring';
-            case PaymentMethod.Bancontact: return 'Bancontact betaling';
-            case PaymentMethod.iDEAL: return 'iDEAL betaling';
-            case PaymentMethod.CreditCard: return 'kredietkaart betaling';
-            case PaymentMethod.Payconiq: return 'Payconiq betaling';
         }
+
+        if (type === PaymentType.Refund) {
+            return 'terugbetaling via ' + PaymentMethodHelper.getName(method);
+        }
+
+        if (type === PaymentType.Chargeback) {
+            return 'terugvordering van ' + PaymentMethodHelper.getName(method);
+        }
+
+        return PaymentTypeHelper.getName(type);
     }
 
     static getPluralName(method: PaymentMethod): string {

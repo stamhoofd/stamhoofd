@@ -26,7 +26,7 @@ export const PaymentLogger = new ModelLogger(Payment, {
     },
 
     createReplacements(model, options) {
-        let name = `${PaymentMethodHelper.getPaymentName(model.method)}`;
+        let name = `${PaymentMethodHelper.getPaymentName(model.method, model.type)}`;
 
         if (model.customer?.dynamicName) {
             name += ` van ${model.customer.dynamicName}`;

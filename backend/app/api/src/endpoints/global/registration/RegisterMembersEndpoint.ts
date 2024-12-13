@@ -5,7 +5,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItem as BalanceItemStruct, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItem as BalanceItemStruct, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version, PaymentType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -674,6 +674,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Calculate total price to pay
         let totalPrice = 0;
         const payMembers: MemberWithRegistrations[] = [];
+        let hasNegative = false;
 
         for (const [balanceItem, price] of balanceItems) {
             if (organization.id !== balanceItem.organizationId) {
@@ -694,6 +695,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 });
             }
 
+            if (price < 0) {
+                hasNegative = true;
+            }
+
             totalPrice += price;
 
             if (price > 0 && balanceItem.memberId) {
@@ -709,26 +714,32 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         if (totalPrice < 0) {
-            // No payment needed: the outstanding balance will be negative and can be used in the future
-            return;
-            // throw new SimpleError({
-            //     code: "empty_data",
-            //     message: "Oeps! De totaalprijs is negatief."
-            // })
+            // todo: try to make it non-negative by reducing some balance items
+            throw new SimpleError({
+                code: 'empty_data',
+                message: 'Oeps! De totaalprijs is negatief.',
+            });
         }
+        const payment = new Payment();
+        payment.method = checkout.paymentMethod ?? PaymentMethod.Unknown;
 
         if (totalPrice === 0) {
-            return;
-        }
+            if (balanceItems.size === 0) {
+                return;
+            }
+            // Create an egalizing payment
+            payment.method = PaymentMethod.Unknown;
 
-        if (!checkout.paymentMethod || checkout.paymentMethod === PaymentMethod.Unknown) {
+            if (hasNegative) {
+                payment.type = PaymentType.Reallocation;
+            }
+        }
+        else if (payment.method === PaymentMethod.Unknown) {
             throw new SimpleError({
                 code: 'invalid_data',
                 message: 'Oeps, je hebt geen betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw.',
             });
         }
-
-        const payment = new Payment();
 
         // Who will receive this money?
         payment.organizationId = organization.id;
@@ -793,11 +804,16 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        payment.method = checkout.paymentMethod;
         payment.status = PaymentStatus.Created;
+        payment.paidAt = null;
         payment.price = totalPrice;
 
-        if (payment.method == PaymentMethod.Transfer) {
+        if (totalPrice === 0) {
+            payment.status = PaymentStatus.Succeeded;
+            payment.paidAt = new Date();
+        }
+
+        if (payment.method === PaymentMethod.Transfer) {
             // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
             payment.transferSettings = organization.mappedTransferSettings;
 
@@ -821,7 +837,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 },
             );
         }
-        payment.paidAt = null;
 
         // Determine the payment provider
         // Throws if invalid
@@ -861,7 +876,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 console.error(e);
             }
         }
-        else if (payment.method !== PaymentMethod.PointOfSale) {
+        else if (payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) {
             if (!checkout.redirectUrl || !checkout.cancelUrl) {
                 throw new Error('Should have been caught earlier');
             }

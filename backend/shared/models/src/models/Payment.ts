@@ -1,5 +1,5 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings, BaseOrganization } from '@stamhoofd/structures';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings, BaseOrganization, PaymentType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -16,6 +16,18 @@ export class Payment extends Model {
     })
     id!: string;
 
+    /**
+     * Types of payment:
+     * - Payment (default) = positive amount or zero
+     * - Refund = negative amount
+     * - Rebooking = zero payment due to rebooking
+     */
+    @column({ type: 'string' })
+    type = PaymentType.Payment;
+
+    /**
+     * How the payment is paid out or refunded
+     */
     @column({ type: 'string' })
     method: PaymentMethod;
 

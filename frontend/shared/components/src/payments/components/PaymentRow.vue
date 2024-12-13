@@ -1,20 +1,21 @@
 <template>
-    <STListItem :selectable="true" class="right-stack" @click="openPayment(payment)">
+    <STListItem :selectable="true" :class="'right-stack ' +payment.theme" @click="openPayment(payment)">
         <template #left>
-            <PaymentMethodIcon :method="payment.method">
+            <PaymentMethodIcon :method="payment.method" :type="payment.type">
                 <span v-if="payment.status === PaymentStatus.Failed" class="icon disabled small error" />
-                <span v-if="payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created" class="icon clock small gray" />
+                <span v-if="payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created" class="icon hourglass small primary" />
             </PaymentMethodIcon>
         </template>
 
-        <p v-if="payment.price < 0" class="style-title-prefix-list">
-            <span>Terugbetaling</span>
-            <span class="icon undo small" />
+        <p v-if="payment.type !== PaymentType.Payment && payment.method !== PaymentMethod.Unknown" class="style-title-prefix-list">
+            <span>{{ PaymentTypeHelper.getName(payment.type) }}</span>
+            <span :class="'icon small ' + PaymentTypeHelper.getIcon(payment.type)" />
         </p>
 
         <h3 class="style-title-list">
-            {{ PaymentMethodHelper.getNameCapitalized(payment.method) }}
+            {{ payment.title }}
         </h3>
+
         <p v-if="payment instanceof PaymentGeneral && payment.getShortDescription()" class="style-description-small">
             {{ payment.getShortDescription() }}
         </p>
@@ -25,9 +26,12 @@
         <p v-if="payment.paidAt" class="style-description-small">
             Betaald op {{ formatDate(payment.paidAt) }}
         </p>
+        <p v-if="payment.price && price !== null && price !== payment.price" class="style-description-small">
+            Betaling van {{ formatPrice(payment.price) }}
+        </p>
 
         <template #right>
-            <span class="style-price-base">{{ formatPrice(payment.price) }}</span>
+            <span class="style-price-base" :class="{negative: (price ?? payment.price) < 0}">{{ formatPrice(price ?? payment.price) }}</span>
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -35,16 +39,18 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Payment, PaymentGeneral, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
+import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 import AsyncPaymentView from '../AsyncPaymentView.vue';
 import PaymentMethodIcon from './PaymentMethodIcon.vue';
 
 const props = withDefaults(
     defineProps<{
         payment: PaymentGeneral | Payment;
+        price?: number | null;
         payments?: (PaymentGeneral | Payment)[];
     }>(), {
         payments: () => [],
+        price: null,
     },
 );
 

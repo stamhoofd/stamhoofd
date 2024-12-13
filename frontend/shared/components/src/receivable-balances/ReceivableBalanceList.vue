@@ -16,9 +16,9 @@
                 </span>
             </template>
 
-            <p v-if="item.dueAt" class="style-title-prefix-list" :class="{error: item.dueAt && item.dueAt <= now}">
+            <p v-if="item.dueAt" class="style-title-prefix-list" :class="{error: item.isOverDue}">
                 <span>Te betalen tegen {{ formatDate(item.dueAt) }}</span>
-                <span v-if="item.dueAt && item.dueAt <= now" class="icon error small" />
+                <span v-if="item.isOverDue" class="icon error small" />
             </p>
             <p v-if="item.status === BalanceItemStatus.Canceled" class="style-title-prefix-list error">
                 <span>Geannuleerd</span>
@@ -55,7 +55,7 @@
                 <p v-if="!item.isDue" v-tooltip="item.dueAt ? ('Te betalen tegen ' + formatDate(item.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
                     ({{ formatPrice(item.priceOpen) }})
                 </p>
-                <p v-else class="style-price-base">
+                <p v-else class="style-price-base" :class="{negative: item.priceOpen < 0}">
                     {{ formatPrice(item.priceOpen) }}
                 </p>
             </template>

@@ -73,8 +73,11 @@ export class ReceivableBalance extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     amountPending = 0;
 
+    /**
+     * @deprecated
+     */
     get amountOpen() {
-        return this.amount - this.amountPending;
+        return this.amount;
     }
 }
 

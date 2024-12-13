@@ -8,21 +8,39 @@
         </STNavigationBar>
 
         <main>
+            <p v-if="payment.type !== PaymentType.Payment && payment.method !== PaymentMethod.Unknown" :class="'style-title-prefix ' + payment.theme">
+                <span>{{ PaymentTypeHelper.getName(payment.type) }}</span>
+                <span :class="'icon small ' + PaymentTypeHelper.getIcon(payment.type)" />
+            </p>
+
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <span v-if="payment.isPending" class="style-tag warn">Wacht op betaling</span>
-                <span v-if="payment.isFailed" class="style-tag error">Mislukt</span>
+                <span v-if="payment.isPending" v-tooltip="'In verwerking'" class="icon small hourglass primary" />
+                <span v-if="payment.isFailed" v-tooltip="'Mislukt'" class="icon small disabled error" />
             </h1>
 
-            <p v-if="payment && payment.method === 'Transfer' && payment.isFailed" class="error-box">
-                Deze overschrijving werd geannuleerd en is niet langer zichtbaar. Ontvang je toch nog de betaling? Heractiveer de overschrijving dan terug.
-            </p>
+            <template v-if="canWrite">
+                <p v-if="payment.type === PaymentType.Reallocation">
+                    Een saldoverrekening kan manueel of automatisch voorkomen. Stel dat iemand betaalde voor een evenement, maar dat op tijd annuleerde, dan kan dat tegoed gebruikt worden om bijvoorbeeld iets anders volledig of gedeeltelijk te betalen voor hetzelfde bedrag. {{ platform.config.name }} maakt automatische saldoverrekeningen aan voor gelijkaardige items, bv. als je een inschrijving hebt gewijzigd.
+                </p>
+                <p v-if="payment.method === PaymentMethod.Transfer && payment.isFailed" class="error-box">
+                    Deze overschrijving werd geannuleerd en is niet langer zichtbaar. Ontvang je toch nog de betaling? Heractiveer de overschrijving dan terug.
+                </p>
+
+                <p v-if="payment.isPending && payment.method === PaymentMethod.Transfer && payment.isOverDue && payment.type == PaymentType.Payment" class="warning-box">
+                    Annuleer een betaling als je deze nog niet hebt ontvangen. Op die manier weet het systeem dat, en zullen de automatische herinneringssystemen correct werken. Het openstaande bedrag zal dan ook terug worden verhoogd waardoor een nieuwe betaalpoging mogelijk is.
+                </p>
+
+                <p v-if="payment.isPending && payment.type == PaymentType.Refund" class="warning-box">
+                    Je laat een terugbetaling best niet op 'in verwerking' staan. Annuleer de terugbetaling als je deze nog niet hebt uitgevoerd.
+                </p>
+            </template>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <STList class="info">
-                <STListItem>
+                <STListItem v-if="payment.price">
                     <h3 class="style-definition-label">
                         Totaalbedrag
                     </h3>
@@ -65,7 +83,10 @@
                 </STListItem>
 
                 <STListItem v-if="payment.paidAt">
-                    <h3 v-if="payment.price >= 0" class="style-definition-label">
+                    <h3 v-if="payment.price == 0" class="style-definition-label">
+                        Geboekt op
+                    </h3>
+                    <h3 v-else-if="payment.price >= 0" class="style-definition-label">
                         Betaald op
                     </h3>
                     <h3 v-else class="style-definition-label">
@@ -222,12 +243,9 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="payment.isPending" :selectable="true" @click="markPaid">
-                        <h2 v-if="payment.price >= 0" class="style-title-list">
+                    <STListItem v-if="payment.isPending && payment.type === PaymentType.Payment" :selectable="true" @click="markPaid">
+                        <h2 class="style-title-list">
                             Markeer als betaald
-                        </h2>
-                        <h2 v-else class="style-title-list">
-                            Markeer als terugbetaald
                         </h2>
                         <p v-if="payment.webshopIds.length" class="style-description">
                             Stuurt mogelijks een automatische e-mail ter bevestiging.
@@ -235,19 +253,15 @@
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon success" />
-                                <span v-if="payment.price >= 0">Betaald</span>
-                                <span v-else>Terugbetaald</span>
+                                <span>Betaald</span>
                             </button>
                             <button type="button" class="button icon success only-smartphone" />
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="payment.isSucceeded" :selectable="true" @click="markPending">
-                        <h2 v-if="payment.price >= 0" class="style-title-list">
+                    <STListItem v-if="payment.isSucceeded && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
+                        <h2 class="style-title-list">
                             Toch niet betaald
-                        </h2>
-                        <h2 v-else class="style-title-list">
-                            Toch niet terugbetaald
                         </h2>
                         <p v-if="payment.method === 'Transfer'" class="style-description">
                             Overschrijving per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.
@@ -258,18 +272,20 @@
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon undo" />
-                                <span v-if="payment.price >= 0">Niet betaald</span>
-                                <span v-else>Niet terugbetaald</span>
+                                <span>Niet betaald</span>
                             </button><button type="button" class="button icon undo only-smartphone" />
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="payment.isPending" :selectable="true" @click="markFailed">
+                    <STListItem v-if="payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment)" :selectable="true" @click="markFailed">
                         <h2 class="style-title-list">
                             Annuleren
                         </h2>
-                        <p v-if="payment.method === 'Transfer'" class="style-description">
-                            Annuleer de overschrijving als je denkt dat deze niet meer betaald zal worden.
+                        <p v-if="payment.type !== PaymentType.Payment" class="style-description">
+                            Maak deze transactie ongedaan
+                        </p>
+                        <p v-else-if="payment.method === 'Transfer'" class="style-description">
+                            Annuleer de overschrijving als deze niet op tijd betaald werd.
                         </p>
                         <p v-else class="style-description">
                             Annuleer de betaling als je denkt dat deze niet meer betaald zal worden.
@@ -305,11 +321,14 @@
                             </span>
                         </template>
 
-                        <p v-if="item.price < 0" class="style-title-prefix-list">
-                            <span>Terugbetaling</span>
+                        <p v-if="item.balanceItem.status === BalanceItemStatus.Canceled && item.price <= 0" class="style-title-prefix-list error">
+                            <span>Tegoed wegens annulatie</span>
+                            <span class="icon disabled small" />
+                        </p>
+                        <p v-else-if="item.price < 0" class="style-title-prefix-list">
+                            <span>Tegoed</span>
                             <span class="icon undo small" />
                         </p>
-
                         <h3 class="style-title-list">
                             {{ item.itemTitle }}
                         </h3>
@@ -325,7 +344,7 @@
                         </p>
 
                         <template #right>
-                            <span class="style-price-base">{{ item.price === 0 ? 'Gratis' : formatPrice(item.price) }}</span>
+                            <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? 'Gratis' : formatPrice(item.price) }}</span>
                         </template>
                     </STListItem>
                 </STList>
@@ -338,8 +357,8 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors } from '@stamhoofd/components';
-import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, getBalanceItemTypeIcon } from '@stamhoofd/structures';
+import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, usePlatform } from '@stamhoofd/components';
+import { BalanceItemStatus, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel, getBalanceItemTypeIcon } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Sorter } from '@stamhoofd/utility';
@@ -359,7 +378,7 @@ const props = withDefaults(
 
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('payment', props);
 const errors = useErrors();
-const title = PaymentMethodHelper.getNameCapitalized(props.payment.method ?? PaymentMethod.Unknown);
+const title = props.payment.title;
 const isManualMethod = props.payment.method === PaymentMethod.Transfer || props.payment.method === PaymentMethod.PointOfSale || props.payment.method === PaymentMethod.Unknown;
 const auth = useAuth();
 const app = useAppContext();
@@ -368,6 +387,7 @@ const VATPercentage = 21; // todo
 const context = useContext();
 const owner = useRequestOwner();
 const markingPaid = ref(false);
+const platform = usePlatform();
 
 const sortedItems = computed(() => {
     return props.payment.balanceItemPayments.slice().sort((a, b) => {

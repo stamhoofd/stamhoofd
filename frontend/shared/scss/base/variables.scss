@@ -314,6 +314,36 @@ $color-box-shadow: var(--color-box-shadow, $color-box-shadow-original);
 
 $color-current-background: var(--color-current-background, #{$color-background});
 
+.theme-warning {
+    --color-primary: #{$color-warning};
+    --color-primary-background: #{$color-warning-background};
+    --color-primary-dark: #{$color-warning-dark};
+}
+
+.theme-secundary {
+    --color-primary: #{$color-secundary};
+    --color-primary-background: #{$color-secundary-background};
+    --color-primary-dark: #{$color-secundary-dark};
+}
+
+.theme-tertiary {
+    --color-primary: #{$color-tertiary};
+    --color-primary-background: #{$color-tertiary-background};
+    --color-primary-dark: #{$color-tertiary-dark};
+}
+
+.theme-success {
+    --color-primary: #{$color-success};
+    --color-primary-background: #{$color-success-background};
+    --color-primary-dark: #{$color-success-dark};
+}
+
+.theme-error {
+    --color-primary: #{$color-error};
+    --color-primary-background: #{$color-error-background};
+    --color-primary-dark: #{$color-error-dark};
+}
+
 @mixin dark-modus {
     // Reduce color a little bit
     --color-saturation-factor: 0.85;

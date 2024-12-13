@@ -32,9 +32,9 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="button" @click="createPayment">
+                <STListItem v-if="detailedItem.amountOpen >= 0" :selectable="true" element-name="button" @click="createPayment">
                     <template #left>
-                        <IconContainer icon="card">
+                        <IconContainer icon="receive">
                             <template #aside>
                                 <span class="icon add small primary" />
                             </template>
@@ -42,7 +42,28 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        Betaling of terugbetaling registreren
+                        Betaling registreren
+                    </h3>
+                    <p class="style-description-small">
+                        Via een betaling kan je één of meerdere items markeren als betaald
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-else :selectable="true" element-name="button" class="theme-error" @click="createPayment">
+                    <template #left>
+                        <IconContainer icon="undo">
+                            <template #aside>
+                                <span class="icon add small primary" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Terugbetaling registreren
                     </h3>
                     <p class="style-description-small">
                         Via een betaling kan je één of meerdere items markeren als betaald
@@ -114,7 +135,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableA
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { IconContainer, BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, DetailedReceivableBalance, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref } from 'vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
@@ -205,8 +226,9 @@ async function createPayment() {
     }
 
     const payment = PaymentGeneral.create({
-        method: PaymentMethod.PointOfSale,
+        method: PaymentMethod.Transfer,
         status: PaymentStatus.Succeeded,
+        type: detailedItem.value.amountOpen >= 0 ? PaymentType.Payment : PaymentType.Refund,
         paidAt: new Date(),
         customer: detailedItem.value.object.contacts.length > 0
             ? PaymentCustomer.create({

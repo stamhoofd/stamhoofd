@@ -80,7 +80,7 @@
             </p>
 
             <STList v-else>
-                <PaymentRow v-for="payment of sortedPayments" :key="payment.id" :payment="payment.payment" :payments="patchedBalanceItem.payments.map(b => b.payment)" :price="payment.price" />
+                <PaymentRow v-for="payment of sortedPayments" :key="payment.id" :payment="payment.payment" :payments="patchedBalanceItem.payments.map(b => b.payment)" :price="payment.payment.isFailed ? 0 : payment.price" />
             </STList>
 
             <template v-if="outstanding.pending === 0 && outstanding.paid === 0">
@@ -110,7 +110,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PlatformFamily } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PaymentStatus, PlatformFamily } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import PaymentRow from './components/PaymentRow.vue';

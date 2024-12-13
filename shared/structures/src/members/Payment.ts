@@ -1,17 +1,20 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../addresses/Address.js';
+import { PaymentCustomer } from '../PaymentCustomer.js';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
 import { PaymentProvider } from '../PaymentProvider.js';
 import { PaymentStatus } from '../PaymentStatus.js';
+import { PaymentType, PaymentTypeHelper } from '../PaymentType.js';
 import { TransferSettings } from '../webshops/TransferSettings.js';
-import { PaymentCustomer } from '../PaymentCustomer.js';
 
 export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
+
+    @field({ decoder: new EnumDecoder(PaymentType), ...NextVersion })
+    type: PaymentType = PaymentType.Payment;
 
     /// Last selected payment method. Nullable if none has been selected
     @field({ decoder: new EnumDecoder(PaymentMethodV150), nullable: true })
@@ -63,6 +66,11 @@ export class Payment extends AutoEncoder {
         return this.status !== PaymentStatus.Succeeded && this.status !== PaymentStatus.Failed;
     }
 
+    get isOverDue() {
+        const daysToPay = 7;
+        return this.isPending && this.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * daysToPay);
+    }
+
     get isSucceeded() {
         return this.status === PaymentStatus.Succeeded;
     }
@@ -73,6 +81,26 @@ export class Payment extends AutoEncoder {
 
     get canChangeStatus() {
         return this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown;
+    }
+
+    get title() {
+        if (this.method !== PaymentMethod.Unknown) {
+            if (this.type !== PaymentType.Payment) {
+                return 'Via ' + PaymentMethodHelper.getName(this.method);
+            }
+            return PaymentMethodHelper.getNameCapitalized(this.method);
+        }
+
+        return Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(this.type));
+    }
+
+    get theme() {
+        if (this.type === PaymentType.Reallocation) {
+            return 'theme-secundary';
+        }
+        if (this.type === PaymentType.Chargeback || this.type === PaymentType.Refund) {
+            return 'theme-error';
+        }
     }
 
     matchQuery(query: string): boolean {

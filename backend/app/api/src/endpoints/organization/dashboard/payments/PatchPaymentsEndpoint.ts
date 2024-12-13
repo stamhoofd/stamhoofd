@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PermissionLevel } from '@stamhoofd/structures';
+import { PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -48,11 +48,11 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         // Modify payments
         for (const { put } of request.body.getPuts()) {
             // Create a new payment
-            if (put.balanceItemPayments.length == 0) {
+            if (put.balanceItemPayments.length === 0) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'You need to add at least one balance item payment',
-                    human: 'Een betaling moet ten minste één afrekening bevatten voor een openstaande rekening.',
+                    human: 'Een betaling moet ten minste één item bestaan',
                     field: 'balanceItemPayments',
                 });
             }
@@ -71,8 +71,9 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             payment.status = PaymentStatus.Created;
             payment.method = put.method;
             payment.customer = put.customer;
+            payment.type = put.type;
 
-            if (payment.method == PaymentMethod.Transfer) {
+            if (payment.method === PaymentMethod.Transfer) {
                 if (!put.transferSettings) {
                     throw new SimpleError({
                         code: 'invalid_field',
@@ -111,7 +112,11 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 balanceItemPayment.organizationId = organization.id;
                 balanceItemPayment.balanceItemId = balanceItem.id;
                 balanceItemPayment.price = item.price;
-                balanceItemPayments.push(balanceItemPayment);
+
+                if (item.price !== 0) {
+                    // Otherwise skip
+                    balanceItemPayments.push(balanceItemPayment);
+                }
             }
 
             // Check permissions
@@ -122,6 +127,54 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             // Check total price
             const totalPrice = balanceItemPayments.reduce((total, item) => total + item.price, 0);
             payment.price = totalPrice;
+
+            switch (payment.type) {
+                case PaymentType.Payment: {
+                    if (totalPrice <= 0) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'The price should be greater than zero',
+                            human: 'Het totaalbedrag moet groter zijn dan 0 euro',
+                            field: 'price',
+                        });
+                    }
+                    break;
+                }
+
+                case PaymentType.Chargeback:
+                case PaymentType.Refund: {
+                    if (totalPrice >= 0) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'The price should be smaller than zero',
+                            human: 'Het totaalbedrag moet kleiner zijn dan 0 euro',
+                            field: 'price',
+                        });
+                    }
+                    break;
+                }
+
+                case PaymentType.Reallocation:
+                {
+                    if (totalPrice !== 0) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Total price should be zero',
+                            human: 'Het totaalbedrag moet 0 euro zijn',
+                            field: 'price',
+                        });
+                    }
+
+                    if (balanceItemPayments.length < 2) {
+                        throw new SimpleError({
+                            code: 'missing_items',
+                            message: 'At least two items are required for a reallocation',
+                            human: 'Er moeten minstens twee items in een verrekening zitten',
+                        });
+                    }
+                    break;
+                }
+            }
 
             // Save payment
             await payment.save();
