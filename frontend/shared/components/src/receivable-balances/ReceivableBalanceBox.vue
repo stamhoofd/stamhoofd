@@ -143,7 +143,7 @@ const pendingPayments = computed(() => {
 });
 
 const succeededPayments = computed(() => {
-    return detailedItem.value?.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt)) ?? [];
+    return detailedItem.value?.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.paidAt ?? a.createdAt, b.paidAt ?? b.createdAt)) ?? [];
 });
 
 // Load detailed item
