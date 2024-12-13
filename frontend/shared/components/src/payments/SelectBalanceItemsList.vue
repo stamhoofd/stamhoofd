@@ -120,7 +120,7 @@ function setItemSelected(item: BalanceItem, selected: boolean) {
     if (selected) {
         const add = BalanceItemPaymentDetailed.create({
             balanceItem: item,
-            price: item.price - item.pricePaid,
+            price: item.priceOpen,
         });
         const arr: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed> = new PatchableArray();
         arr.addPut(add);
