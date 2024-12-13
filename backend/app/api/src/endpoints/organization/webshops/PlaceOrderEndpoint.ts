@@ -6,7 +6,7 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct, WebshopAuthType, BalanceItemType, BalanceItemRelationType, BalanceItemRelation, AuditLogSource } from '@stamhoofd/structures';
+import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct, WebshopAuthType, BalanceItemType, BalanceItemRelationType, BalanceItemRelation, AuditLogSource, PaymentCustomer } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
@@ -169,6 +169,11 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 payment.status = PaymentStatus.Created;
                 payment.price = totalPrice;
                 payment.paidAt = null;
+                payment.customer = PaymentCustomer.create({
+                    firstName: request.body.customer.firstName,
+                    lastName: request.body.customer.lastName,
+                    email: request.body.customer.email,
+                });
 
                 // Determine the payment provider
                 // Throws if invalid
