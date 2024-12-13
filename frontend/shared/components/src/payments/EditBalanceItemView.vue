@@ -80,7 +80,7 @@
             </p>
 
             <STList v-else>
-                <PaymentRow v-for="payment of patchedBalanceItem.payments" :key="payment.id" :payment="payment.payment" :payments="patchedBalanceItem.payments.map(b => b.payment)" />
+                <PaymentRow v-for="payment of sortedPayments" :key="payment.id" :payment="payment.payment" :payments="patchedBalanceItem.payments.map(b => b.payment)" :price="payment.price" />
             </STList>
 
             <template v-if="outstanding.pending === 0 && outstanding.paid === 0">
@@ -111,6 +111,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PlatformFamily } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import PaymentRow from './components/PaymentRow.vue';
 
@@ -137,6 +138,13 @@ const title = computed(() => {
         return props.isNew ? 'Terug te betalen bedrag toevoegen' : 'Terug te betalen bedrag bewerken';
     }
     return props.isNew ? 'Verschuldigd bedrag toevoegen' : 'Verschuldigd bedrag bewerken';
+});
+
+const sortedPayments = computed(() => {
+    if (!hasPayments(patchedBalanceItem.value)) {
+        return [];
+    }
+    return patchedBalanceItem.value.payments.slice().sort((a, b) => Sorter.byDateValue(a.payment.paidAt ?? a.payment.createdAt, b.payment.paidAt ?? b.payment.createdAt));
 });
 
 const description = computed({
@@ -256,5 +264,9 @@ async function loadMember() {
         console.error(e);
         return;
     }
+}
+
+function useRequestOwner() {
+    throw new Error('Function not implemented.');
 }
 </script>
