@@ -24,7 +24,7 @@
                         Item toevoegen
                     </h3>
                     <p class="style-description-small">
-                        De openstaande bedrag is opgemaakt uit één of meerdere items die het openstaande bedrag of tegoed bepalen
+                        Voeg een item toe aan het openstaand bedrag of geef een tegoed
                     </p>
 
                     <template #right>
