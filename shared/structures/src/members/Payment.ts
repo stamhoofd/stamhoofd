@@ -13,7 +13,7 @@ export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    @field({ decoder: new EnumDecoder(PaymentType), ...NextVersion })
+    @field({ decoder: new EnumDecoder(PaymentType), version: 353 })
     type: PaymentType = PaymentType.Payment;
 
     /// Last selected payment method. Nullable if none has been selected

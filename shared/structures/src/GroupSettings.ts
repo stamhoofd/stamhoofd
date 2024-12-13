@@ -335,7 +335,7 @@ export class GroupSettings extends AutoEncoder {
     /**
      * Number of days on trial for new members
      */
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 353 })
     trialDays = 0;
 
     @field({ decoder: IntegerDecoder, nullable: true, field: 'maxBirthYear' })

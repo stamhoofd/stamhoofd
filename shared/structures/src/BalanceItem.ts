@@ -156,14 +156,14 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 335 })
     pricePending = 0;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 353 })
     dueAt: Date | null = null;
 
     @field({ decoder: DateDecoder })
     createdAt = new Date();
 
     @field({ decoder: new EnumDecoder(BalanceItemStatusV352) })
-    @field({ decoder: new EnumDecoder(BalanceItemStatus), ...NextVersion,
+    @field({ decoder: new EnumDecoder(BalanceItemStatus), version: 353,
         upgrade(old) {
             switch (old) {
                 case BalanceItemStatusV352.Pending: return BalanceItemStatus.Due;
@@ -213,7 +213,7 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     registrationId: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 353 })
     payingOrganizationId: string | null = null;
 
     static getDueOffset(from: Date = new Date()) {
