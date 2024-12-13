@@ -61,7 +61,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.AdministrationFee: return 'calculator';
         case BalanceItemType.FreeContribution: return 'gift';
         case BalanceItemType.Order: return 'basket';
-        case BalanceItemType.Other: return 'card';
+        case BalanceItemType.Other: return 'label';
         case BalanceItemType.PlatformMembership: return 'membership-filled';
     }
     return null;
@@ -290,10 +290,6 @@ export class BalanceItem extends AutoEncoder {
         }
     }
 
-    get groupPrefix(): string {
-        return this.itemPrefix;
-    }
-
     get groupTitle(): string {
         return this.itemTitle;
     }
@@ -359,28 +355,6 @@ export class BalanceItem extends AutoEncoder {
             .filter(([key]) => !shouldAggregateOnRelationType(key, this.relations))
             .map(([key, value]) => key + '-' + value.id)
             .join('-');
-    }
-
-    /**
-     * When displayed as a single item
-     */
-    get itemPrefix(): string {
-        const prefix = this.amount === 0 ? 'Geannuleerde ' : '';
-
-        switch (this.type) {
-            case BalanceItemType.Registration: {
-                if (this.relations.get(BalanceItemRelationType.GroupOption)) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'onbekende inschrijvingsgroep';
-                    return prefix + 'inschrijving voor ' + group;
-                }
-                return prefix + 'inschrijving';
-            }
-            case BalanceItemType.AdministrationFee: return prefix + 'administratiekosten';
-            case BalanceItemType.FreeContribution: return prefix + 'vrije bijdrage';
-            case BalanceItemType.Order: return prefix + 'bestelling';
-            case BalanceItemType.Other: return prefix + '';
-            case BalanceItemType.PlatformMembership: return prefix + 'aansluiting';
-        }
     }
 
     /**
@@ -472,4 +446,105 @@ export class BalanceItemWithPayments extends BalanceItem {
 export class BalanceItemWithPrivatePayments extends BalanceItemWithPayments {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentWithPrivatePayment) })
     payments: BalanceItemPaymentWithPrivatePayment[] = [];
+}
+
+export class GroupedBalanceItems {
+    items: BalanceItem[];
+
+    constructor() {
+        this.items = [];
+    }
+
+    get id() {
+        return this.items[0].groupCode;
+    }
+
+    add(item: BalanceItem) {
+        this.items.push(item);
+    }
+
+    get balanceItem() {
+        return this.items[0];
+    }
+
+    /**
+     * Only shows amount open
+     */
+    get amount() {
+        return this.items.reduce((acc, item) => acc + item.amount, 0);
+    }
+
+    get status() {
+        return this.balanceItem.status;
+    }
+
+    /**
+     * Only shows outstanding price
+     */
+    get priceOpen() {
+        return this.items.reduce((acc, item) => acc + item.priceOpen, 0);
+    }
+
+    get price() {
+        return this.items.reduce((acc, item) => acc + item.price, 0);
+    }
+
+    get pricePending() {
+        return this.items.reduce((acc, item) => acc + item.pricePending, 0);
+    }
+
+    get pricePaid() {
+        return this.items.reduce((acc, item) => acc + item.pricePaid, 0);
+    }
+
+    get itemTitle() {
+        if (this.items.length === 1) {
+            // Return normal prefix
+            return this.items[0].itemTitle;
+        }
+        return this.items[0].groupTitle;
+    }
+
+    get itemDescription() {
+        if (this.items.length === 1) {
+            // Return normal prefix
+            return this.items[0].itemDescription;
+        }
+        return this.items[0].groupDescription;
+    }
+
+    get unitPrice() {
+        return this.items[0].unitPrice;
+    }
+
+    get dueAt() {
+        return this.items[0].dueAt; ;
+    }
+
+    get isDue() {
+        return this.items[0].isDue;
+    }
+
+    get isOverDue() {
+        return this.items[0].isOverDue;
+    }
+
+    get type() {
+        return this.items[0].type;
+    }
+
+    static group(items: BalanceItem[]): GroupedBalanceItems[] {
+        const map = new Map<string, GroupedBalanceItems>();
+
+        for (const item of items) {
+            const code = item.groupCode;
+            if (!map.has(code)) {
+                map.set(code, new GroupedBalanceItems());
+            }
+
+            map.get(code)!.add(item);
+        }
+
+        return Array.from(map.values()).filter(v => v.priceOpen !== 0);
+    }
 }

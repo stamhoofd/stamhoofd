@@ -5,27 +5,7 @@
                 <Checkbox :model-value="isItemSelected(item)" :disabled="isPayable && item.priceOpen < 0" @update:model-value="setItemSelected(item, $event)" />
             </template>
 
-            <p v-if="item.dueAt" class="style-title-prefix-list" :class="{error: item.isOverDue}">
-                <span>Te betalen tegen {{ formatDate(item.dueAt) }}</span>
-                <span v-if="item.isOverDue" class="icon error small" />
-            </p>
-            <p v-if="item.status === BalanceItemStatus.Canceled && item.priceOpen < 0" class="style-title-prefix-list error">
-                <span>Tegoed wegens annulatie</span>
-                <span class="icon disabled small" />
-            </p>
-            <p v-else-if="item.priceOpen < 0" class="style-title-prefix-list">
-                <span v-if="!isPayable">Terug te betalen</span>
-                <span v-else>Tegoed</span>
-                <span class="icon undo small" />
-            </p>
-
-            <h3 class="style-title-list">
-                {{ item.itemTitle }}
-            </h3>
-            <p v-if="item.itemDescription" class="style-description-small pre-wrap" v-text="item.itemDescription" />
-            <p class="style-description-small">
-                {{ formatDate(item.createdAt) }}
-            </p>
+            <BalanceItemTitleBox :item="item" :is-payable="isPayable" />
 
             <template #right>
                 <div v-if="isItemSelected(item)">
@@ -49,8 +29,9 @@
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PriceBreakdownBox, PriceInput } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemStatus } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
 import { computed, nextTick, onMounted } from 'vue';
+import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 
 const props = defineProps<{
     items: BalanceItem[];

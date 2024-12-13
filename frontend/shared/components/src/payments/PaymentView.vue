@@ -306,42 +306,10 @@
                 <STList>
                     <STListItem v-for="item in sortedItems" :key="item.id">
                         <template #left>
-                            <span class="style-amount min-width">
-                                <figure class="style-image-with-icon gray">
-                                    <figure>
-                                        <span class="icon" :class="getBalanceItemTypeIcon(item.balanceItem.type)" />
-                                    </figure>
-                                    <aside>
-                                        <span v-if="item.amount <= 0" class="icon disabled small red" />
-                                        <span v-if="item.amount > 1" class="style-bubble primary">
-                                            {{ item.amount }}
-                                        </span>
-                                    </aside>
-                                </figure>
-                            </span>
+                            <BalanceItemIcon :item="item.balanceItem" :is-payable="false" />
                         </template>
 
-                        <p v-if="item.balanceItem.status === BalanceItemStatus.Canceled && item.price <= 0" class="style-title-prefix-list error">
-                            <span>Tegoed wegens annulatie</span>
-                            <span class="icon disabled small" />
-                        </p>
-                        <p v-else-if="item.price < 0" class="style-title-prefix-list">
-                            <span>Tegoed</span>
-                            <span class="icon undo small" />
-                        </p>
-                        <h3 class="style-title-list">
-                            {{ item.itemTitle }}
-                        </h3>
-
-                        <p v-if="item.itemDescription" class="style-description-small pre-wrap" v-text="item.itemDescription" />
-
-                        <p class="style-description-small">
-                            {{ formatDate(item.balanceItem.createdAt) }}
-                        </p>
-
-                        <p v-if="item.amount !== 1" class="style-description-small">
-                            {{ formatPrice(item.unitPrice) }}
-                        </p>
+                        <BalanceItemTitleBox :item="item.balanceItem" :is-payable="false" :price="item.price" :payment-status="payment.status" />
 
                         <template #right>
                             <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? 'Gratis' : formatPrice(item.price) }}</span>
@@ -358,12 +326,14 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, usePlatform } from '@stamhoofd/components';
-import { BalanceItemStatus, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel, getBalanceItemTypeIcon } from '@stamhoofd/structures';
+import { Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import PriceBreakdownBox from '../views/PriceBreakdownBox.vue';
+import BalanceItemIcon from './BalanceItemIcon.vue';
+import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 
 const props = withDefaults(
     defineProps<{

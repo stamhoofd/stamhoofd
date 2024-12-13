@@ -43,13 +43,6 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
     /**
      * When displayed as a single item
      */
-    get itemPrefix(): string {
-        return this.balanceItem.itemPrefix;
-    }
-
-    /**
-     * When displayed as a single item
-     */
     get itemTitle(): string {
         return this.balanceItem.itemTitle;
     }
