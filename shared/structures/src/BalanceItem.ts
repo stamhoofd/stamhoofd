@@ -184,7 +184,11 @@ export class BalanceItem extends AutoEncoder {
             return false;
         }
 
-        return this.dueAt === null || this.dueAt.getTime() <= BalanceItem.getDueOffset().getTime();
+        return this.dueAt === null || this.dueAt <= BalanceItem.getDueOffset();
+    }
+
+    get isOverDue() {
+        return this.priceOpen > 0 && this.dueAt !== null && this.dueAt <= new Date();
     }
 
     @field({ decoder: StringDecoder })
