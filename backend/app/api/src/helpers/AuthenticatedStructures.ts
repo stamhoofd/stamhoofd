@@ -574,6 +574,11 @@ export class AuthenticatedStructures {
         ]);
         const members = memberIds.length > 0 ? await Member.getByIDs(...memberIds) : [];
 
+        const userIds = Formatter.uniqueArray([
+            ...balances.filter(b => b.objectType === ReceivableBalanceType.user).map(b => b.objectId),
+        ]);
+        const users = userIds.length > 0 ? await User.getByIDs(...userIds) : [];
+
         const result: ReceivableBalanceStruct[] = [];
         for (const balance of balances) {
             let object = ReceivableBalanceObject.create({
@@ -646,6 +651,27 @@ export class AuthenticatedStructures {
                                     },
                                 }))
                                 : []),
+                        ],
+                    });
+                }
+            }
+            else if (balance.objectType === ReceivableBalanceType.user) {
+                const user = users.find(m => m.id === balance.objectId) ?? null;
+                if (user) {
+                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
+                    object = ReceivableBalanceObject.create({
+                        id: balance.objectId,
+                        name: user.name || user.email,
+                        contacts: [
+                            ReceivableBalanceObjectContact.create({
+                                firstName: user.firstName ?? '',
+                                lastName: user.lastName ?? '',
+                                emails: [user.email],
+                                meta: {
+                                    responsibilityIds: [],
+                                    url,
+                                },
+                            }),
                         ],
                     });
                 }
