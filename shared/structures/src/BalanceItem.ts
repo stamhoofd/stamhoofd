@@ -5,23 +5,17 @@ import { Payment, PrivatePayment } from './members/Payment.js';
 import { PriceBreakdown } from './PriceBreakdown.js';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
+export enum BalanceItemStatusV352 {
+    Hidden = 'Hidden',
+    Pending = 'Pending',
+    Paid = 'Paid',
+}
+
 export enum BalanceItemStatus {
     /**
      * The balance is not yet due, but it can be paid. As soon as it is paid, it will transform into 'Due' and automatic status changes can happen to connected resources.
      */
     Hidden = 'Hidden',
-
-    /**
-     * @deprecated: try to remove usage and use negative 'Hidden' check for now. Pending and Paid status will get merged
-     * The balance is owed by the member, but not yet (fully) paid by the member.
-     */
-    Pending = 'Pending',
-
-    /**
-     * @deprecated: try to remove usage and use negative 'Hidden' check for now. Pending and Paid status will get merged
-     * The balance has been paid by the member. All settled.
-     */
-    Paid = 'Paid',
 
     /**
      * This means payment of the amount is a requirement.
@@ -168,7 +162,23 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: DateDecoder })
     createdAt = new Date();
 
-    @field({ decoder: new EnumDecoder(BalanceItemStatus) })
+    @field({ decoder: new EnumDecoder(BalanceItemStatusV352) })
+    @field({ decoder: new EnumDecoder(BalanceItemStatus), ...NextVersion,
+        upgrade(old) {
+            switch (old) {
+                case BalanceItemStatusV352.Pending: return BalanceItemStatus.Due;
+                case BalanceItemStatusV352.Paid: return BalanceItemStatus.Due;
+            }
+            return old as BalanceItemStatus;
+        },
+        downgrade(newer) {
+            switch (newer) {
+                case BalanceItemStatus.Due: return BalanceItemStatusV352.Pending;
+                case BalanceItemStatus.Canceled: return BalanceItemStatusV352.Pending;
+            }
+            return newer as BalanceItemStatusV352;
+        },
+    })
     status: BalanceItemStatus = BalanceItemStatus.Due;
 
     get isPaid() {
