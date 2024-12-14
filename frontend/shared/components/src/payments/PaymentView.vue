@@ -227,7 +227,7 @@
                 <h2>Acties</h2>
 
                 <STList>
-                    <STListItem v-if="payment.isFailed" :selectable="true" @click="markPending">
+                    <STListItem v-if="payment.isFailed && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
                         <h2 class="style-title-list">
                             Heactiveer
                         </h2>
@@ -243,7 +243,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="payment.isPending && payment.type === PaymentType.Payment" :selectable="true" @click="markPaid">
+                    <STListItem v-if="(payment.isPending && payment.type === PaymentType.Payment) || (payment.isFailed && payment.type !== PaymentType.Payment)" :selectable="true" @click="markPaid">
                         <h2 class="style-title-list">
                             Markeer als betaald
                         </h2>
