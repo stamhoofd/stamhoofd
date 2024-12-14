@@ -11,7 +11,7 @@
             :actions="actions"
             :all-columns="allColumns"
             :estimated-rows="estimatedRows"
-            @click="showMember"
+            :Route="Route"
         >
             <template #empty>
                 Geen leden ingeschreven
@@ -478,26 +478,13 @@ else {
     }
 }
 
-async function showMember(member: PlatformMember) {
-    if (!modernTableView.value) {
-        return;
-    }
-
-    const table = modernTableView.value;
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(MemberSegmentedView, {
-            member,
-            getNext: table.getNext,
-            getPrevious: table.getPrevious,
-            group: props.group,
-        }),
-    });
-
-    await present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}
+const Route = {
+    Component: MemberSegmentedView,
+    objectKey: 'member',
+    getProperties: () => ({
+        group: props.group,
+    }),
+};
 
 const actionBuilder = useDirectMemberActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),

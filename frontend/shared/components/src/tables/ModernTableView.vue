@@ -141,13 +141,13 @@
 <script lang="ts" setup generic="Value extends TableListable">
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
 import { Storage } from '@stamhoofd/networking';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from 'vue';
+import { ComponentOptions, computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from 'vue';
 
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from './classes';
@@ -212,12 +212,18 @@ const props = withDefaults(
         tableObjectFetcher: TableObjectFetcher<Value>;
         filterBuilders?: UIFilterBuilders | null;
         columnConfigurationId: string;
+
         // warning: do not use as these are not reactive
         allColumns: Column<Value, any>[];
         prefixColumn?: Column<Value, any> | null;
         defaultSortColumn?: Column<Value, any> | null;
         defaultSortDirection?: SortItemDirection | null;
         defaultFilter?: StamhoofdFilter | null;
+        Route?: {
+            Component: unknown;
+            objectKey: string;
+            getProperties?: (object: Value) => Record<string, any>;
+        } | null;
     }>(), {
         backHint: null,
         estimatedRows: 30,
@@ -227,8 +233,68 @@ const props = withDefaults(
         defaultSortDirection: null,
         actions: () => [],
         defaultFilter: null,
+        Route: null,
     },
 );
+
+enum Routes {
+    Object = 'Object',
+}
+
+function getPropertiesForRoute(object: Value) {
+    return {
+        ...(props.Route!.getProperties?.(object) ?? {}),
+        [props.Route!.objectKey]: object,
+        getNext,
+        getPrevious,
+    }
+}
+
+if (props.Route) {
+    defineRoutes([{
+        name: Routes.Object,
+        url: '@id',
+        component: props.Route.Component as unknown as ComponentOptions,
+        params: {
+            id: String,
+        },
+        present: 'popup',
+        paramsToProps: async (params: { id: string }) => {
+            // Fetch event
+            const objects = await props.tableObjectFetcher.objectFetcher.fetch(
+                new LimitedFilteredRequest({
+                    filter: {
+                        id: params.id,
+                    },
+                    limit: 1,
+                    sort: [],
+                }),
+            );
+
+            if (objects.results.length === 1) {
+                return getPropertiesForRoute(objects.results[0]);
+            }
+            Toast.error('Niet gevonden').show();
+            throw new Error('Not found');
+        },
+
+        propsToParams(routeProps: any) {
+            if (!(props.Route!.objectKey in routeProps) || typeof routeProps[props.Route!.objectKey] !== 'object' || routeProps[props.Route!.objectKey] === null) {
+                throw new Error('Missing object');
+            }
+            const object = routeProps[props.Route!.objectKey];
+
+            return {
+                params: {
+                    id: object.id,
+                },
+            };
+        },
+    }]);
+}
+
+const $navigate = useNavigate();
+
 const reactiveColumns = reactive(props.allColumns) as Column<Value, any>[];
 const showPrefix = computed(() => props.prefixColumn !== null && wrapColumns.value && props.prefixColumn.enabled);
 const columns = computed(() => {
@@ -262,7 +328,7 @@ const titleSuffix = computed(() => {
 });
 
 const instance = getCurrentInstance();
-const hasClickListener = computed(() => !!instance?.vnode.props?.onClick);
+const hasClickListener = computed(() => !!instance?.vnode.props?.onClick || props.Route !== null);
 const canLeaveSelectionMode = computed(() => wrapColumns.value || !hasClickListener.value);
 
 const sortBy = ref(props.defaultSortColumn ?? columns.value.find(c => c.allowSorting)) as Ref<Column<Value, any>>;
@@ -670,7 +736,7 @@ const emit = defineEmits<{
     click: [value: Value];
 }>();
 
-function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
+async function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
     if (event.metaKey || event.ctrlKey) {
         // Multi select rows
         setSelectionValue(row, !getSelectionValue(row));
@@ -680,6 +746,13 @@ function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
     if (!hasClickListener.value || (wrapColumns.value && showSelection.value)) {
         // On mobile, tapping a column means selecting it when we are in editing modus
         setSelectionValue(row, !getSelectionValue(row));
+        return;
+    }
+
+    if (props.Route && row.value) {
+        await $navigate(Routes.Object, {
+            properties: getPropertiesForRoute(row.value)
+        });
         return;
     }
 
