@@ -259,16 +259,6 @@ defineRoutes([
         },
     },
     {
-        url: Routes.Members,
-        component: MembersTableView as ComponentOptions,
-        present: 'popup',
-        paramsToProps: () => {
-            return {
-                group: props.group,
-            };
-        },
-    },
-    {
         url: '/r/@slug',
         name: Routes.Responsibility,
         params: {
