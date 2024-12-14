@@ -45,7 +45,7 @@
                 Overschrijvingsdetails
             </h2>
             <h2 v-else>
-                Vanaf welke rekening werd terugbetaald??
+                Overgeschreven via
             </h2>
 
             <STInputBox :title="type === PaymentType.Payment ? 'Begunstigde' : 'Naam rekening'" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
@@ -75,7 +75,7 @@
         <hr>
         <h2>Wat en hoeveel?</h2>
         <p v-if="patchedPayment.type === PaymentType.Payment">
-            Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel. Dit is nodig om de boekhouding correct te houden en elke betaling te koppelen aan een specifieke items.
+            Kies hieronder wat er precies betaald werd - en pas eventueel aan hoeveel. Dit is nodig om de boekhouding correct te houden en elke betaling te koppelen aan specifieke items.
         </p>
         <p v-else-if="patchedPayment.type === PaymentType.Reallocation">
             Bouw hieronder een balans op zodat het totaalbedrag 0 euro bedraagt.
