@@ -122,6 +122,10 @@ export class CachedBalance extends Model {
         return await query.fetch();
     }
 
+    static whereNeedsUpdate() {
+        return SQL.where('nextDueAt', SQLWhereSign.LessEqual, BalanceItemStruct.getDueOffset());
+    }
+
     private static async fetchForObjects(organizationId: string, objectIds: string[], columnName: string, customWhere?: SQLWhere) {
         const dueOffset = BalanceItemStruct.getDueOffset();
         const query = SQL.select(

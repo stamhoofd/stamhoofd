@@ -217,15 +217,13 @@ export class BalanceItem extends AutoEncoder {
     payingOrganizationId: string | null = null;
 
     static getDueOffset(from: Date = new Date()) {
-        const d = new Date(from.getTime() - 1000 * 60 * 60 * 24 * 7); // 7 days in the past
+        const d = new Date(from.getTime() + 1000 * 60 * 60 * 24 * 7); // Added to outstanding balance 7 days before due date
 
-        // Set time to be between 2 - 5 AM
-        d.setHours(2);
-        d.setMinutes(0);
-        d.setSeconds(0);
-        d.setMilliseconds(0);
+        // Set time to midnight in Brussels timezone
+        const l = Formatter.luxon(d);
+        l.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
 
-        return d;
+        return l.toJSDate();
     }
 
     static getOutstandingBalance(items: BalanceItem[]) {
