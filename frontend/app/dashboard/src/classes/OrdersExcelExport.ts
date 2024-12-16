@@ -563,13 +563,14 @@ export class OrdersExcelExport {
     static export(orders: PrivateOrder[]) {
         const wb = XLSX.utils.book_new();
 
-        let shouldIncludeSettements = false
+        const shouldIncludeSettements = false
 
-        for (const order of orders) {
-            if (((order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.method === PaymentMethod.CreditCard) && (order.payment?.provider === PaymentProvider.Mollie || order.payment?.provider === PaymentProvider.Stripe)) || order.payment?.settlement) {
-                shouldIncludeSettements = true
-            }
-        }
+        // Settlements: use the new finances export method
+        //for (const order of orders) {
+        //    if (((order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.method === PaymentMethod.CreditCard) && (order.payment?.provider === PaymentProvider.Mollie || order.payment?.provider === PaymentProvider.Stripe)) || order.payment?.settlement) {
+        //        shouldIncludeSettements = true
+        //    }
+        //}
         
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, this.createOrderLines(orders), "Artikel per lijn");
