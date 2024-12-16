@@ -4,7 +4,7 @@
             <template #right>
                 <button v-if="hasWrite" v-tooltip="'Bewerken'" class="button icon navigation edit" type="button" @click="editOrganization" />
                 <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige groep'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende groep'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goNext" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende groep'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
             </template>
         </STNavigationBar>
 
@@ -192,11 +192,11 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useContext, useArrowUpDown, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useBackForward, useContext, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { computed, getCurrentInstance, ref } from 'vue';
+import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 
 const props = defineProps<{
@@ -205,7 +205,6 @@ const props = defineProps<{
     getPrevious: (current: Organization) => Organization | null;
 }>();
 
-const show = useShow();
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const $t = useTranslate();
 const context = useContext();
@@ -213,28 +212,10 @@ const owner = useRequestOwner();
 const pop = usePop();
 const platform = usePlatform();
 const present = usePresent();
-
-useArrowUpDown({
-    up: goBack,
-    down: goNext,
-});
+const { goBack, goForward, hasNext, hasPrevious } = useBackForward('organization', props);
 
 const title = computed(() => {
     return props.organization.name;
-});
-
-const hasPrevious = computed(() => {
-    if (!props.getPrevious) {
-        return false;
-    }
-    return !!props.getPrevious(props.organization);
-});
-
-const hasNext = computed(() => {
-    if (!props.getNext) {
-        return false;
-    }
-    return !!props.getNext(props.organization);
 });
 
 const tagStringList = computed(() => {
@@ -242,35 +223,7 @@ const tagStringList = computed(() => {
 });
 
 const setupSteps = computed(() => props.organization.period.setupSteps);
-
-const instance = getCurrentInstance();
 const auth = useAuth();
-
-async function seek(previous = true) {
-    const organization = previous ? props.getPrevious(props.organization) : props.getNext(props.organization);
-    if (!organization) {
-        return;
-    }
-    const component = new ComponentWithProperties(instance!.type, {
-        ...props,
-        organization,
-    });
-
-    await show({
-        components: [component],
-        replace: 1,
-        reverse: previous,
-        animated: false,
-    });
-}
-
-async function goBack() {
-    await seek(true);
-}
-
-async function goNext() {
-    await seek(false);
-}
 
 const deleting = ref(false);
 const hasWrite = computed(() => auth.getPermissionsForOrganization(props.organization)?.hasFullAccess() ?? false);
