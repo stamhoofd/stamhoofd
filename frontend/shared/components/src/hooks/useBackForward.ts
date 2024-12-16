@@ -2,7 +2,7 @@ import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation
 import { computed, getCurrentInstance, Ref } from 'vue';
 import { useArrowUpDown } from './useArrowUpDown';
 
-export function useBackForward<T, Name extends string, Props>(name: Name, props: Props & {
+export function useBackForward<T extends { id: string }, Name extends string, Props>(name: Name, props: Props & {
     getPrevious: ((current: T) => T | null) | null;
     getNext: ((current: T) => T | null) | null;
 } & Record<Name, T>, otherProps?: Ref<Partial<Props>>) {
@@ -42,8 +42,10 @@ export function useBackForward<T, Name extends string, Props>(name: Name, props:
         await show({
             components: [component],
             replace: 1,
+            adjustHistory: false,
             reverse: previous,
             animated: false,
+            url: object.id,
         });
     }
 
