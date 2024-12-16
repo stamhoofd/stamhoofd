@@ -9,7 +9,7 @@
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
-        @click="showPayment"
+        :Route="Route"
     >
         <template #empty>
             Geen betalingen gevonden
@@ -18,10 +18,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { ExcelExportType, LimitedFilteredRequest, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, StamhoofdFilter } from '@stamhoofd/structures';
+import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
@@ -39,58 +39,6 @@ const props = withDefaults(
 
 type ObjectType = PaymentGeneral;
 
-enum Routes {
-    Payment = 'Payment',
-}
-
-defineRoutes([
-    {
-        name: Routes.Payment,
-        url: '@id',
-        component: PaymentView as unknown as ComponentOptions,
-        params: {
-            id: String,
-        },
-        present: 'popup',
-        paramsToProps: async (params: { id: string }) => {
-            // Fetch event
-            const payments = await tableObjectFetcher.objectFetcher.fetch(
-                new LimitedFilteredRequest({
-                    filter: {
-                        id: params.id,
-                    },
-                    limit: 1,
-                    sort: [],
-                }),
-            );
-
-            if (payments.results.length === 1) {
-                const table = modernTableView.value;
-                return {
-                    payment: payments.results[0],
-                    getNext: table?.getNext,
-                    getPrevious: table?.getPrevious,
-                };
-            }
-            Toast.error('Betaling niet gevonden').show();
-            throw new Error('Payment not found');
-        },
-
-        propsToParams(props) {
-            if (!('payment' in props) || typeof props.payment !== 'object' || props.payment === null || !(props.payment instanceof PaymentGeneral)) {
-                throw new Error('Missing payment');
-            }
-            const payment = props.payment;
-
-            return {
-                params: {
-                    id: payment.id,
-                },
-            };
-        },
-    },
-]);
-
 const configurationId = computed(() => {
     return 'payments-' + (props.methods?.join('-') ?? '');
 });
@@ -106,7 +54,6 @@ const title = computed(() => {
     return 'Betalingen';
 });
 
-const $navigate = useNavigate();
 const markPaid = useMarkPaymentsPaid();
 
 function getRequiredFilter(): StamhoofdFilter | null {
@@ -239,13 +186,10 @@ const allColumns: Column<ObjectType, any>[] = [
 
 ];
 
-async function showPayment(payment: PaymentGeneral) {
-    await $navigate(Routes.Payment, { properties: {
-        payment,
-        getNext: modernTableView.value?.getNext,
-        getPrevious: modernTableView.value?.getPrevious,
-    } });
-}
+const Route = {
+    Component: PaymentView as unknown as ComponentOptions,
+    objectKey: 'payment',
+};
 
 const { getSelectableWorkbook } = useSelectableWorkbook();
 
