@@ -9,7 +9,7 @@
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
         :estimated-rows="estimatedRows"
-        @click="showOrganization"
+        :Route="Route"
     >
         <template #empty>
             {{ $t('4fa242b7-c05d-44d4-ada5-fb60e91af818') }}
@@ -189,26 +189,10 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 
-async function showOrganization(organization: Organization) {
-    if (!modernTableView.value) {
-        return;
-    }
-
-    // todo
-    const table = modernTableView.value;
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(OrganizationView, {
-            organization,
-            getNext: table.getNext,
-            getPrevious: table.getPrevious,
-        }),
-    });
-
-    await present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}
+const Route = {
+    Component: OrganizationView,
+    objectKey: 'organization',
+};
 
 const actions: TableAction<Organization>[] = [];
 
