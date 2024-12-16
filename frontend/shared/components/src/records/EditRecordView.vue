@@ -6,12 +6,12 @@
         <p>
             Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vraag kan instellen.
         </p>
-        
-        <STErrorsDefault :error-box="errorBox" />
+
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <STInputBox title="Naam (kort)" error-fields="name" :error-box="errorBox">
+                <STInputBox title="Naam (kort)" error-fields="name" :error-box="errors.errorBox">
                     <input
                         ref="firstInput"
                         v-model="name"
@@ -25,7 +25,7 @@
             </div>
 
             <div>
-                <STInputBox title="Type" error-fields="type" :error-box="errorBox">
+                <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox">
                     <Dropdown v-model="type">
                         <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
                             <option v-for="_type in group.values" :key="_type.value" :value="_type.value">
@@ -43,7 +43,7 @@
         <Checkbox v-if="type === RecordType.Checkbox" v-model="askComments">
             Voeg tekstvak toe indien aangevinkt
         </Checkbox>
-        
+
         <div v-if="type === RecordType.MultipleChoice || type === RecordType.ChooseOne" class="container">
             <hr>
             <h2 class="style-with-button with-list">
@@ -55,13 +55,13 @@
                     </button>
                 </div>
             </h2>
-            
+
             <STList v-if="patchedRecord.choices.length > 0" v-model="choices" :draggable="true">
                 <template #item="{item: choice}">
                     <RecordChoiceRow :choice="choice" :parent-record="patchedRecord" :selectable="true" @patch="addChoicesPatch" />
                 </template>
             </STList>
-                
+
             <p v-else class="info-box">
                 <span>Geen keuzemogelijkheden. Voeg een keuze toe via de <span class="icon add middle" />-knop.</span>
             </p>
@@ -79,7 +79,7 @@
         </h2>
         <p>Bepaal hoe men deze vraag kan beantwoorden door extra verduidelijking te voorzien.</p>
 
-        <STInputBox :title="labelTitle" error-fields="label" :error-box="errorBox" class="max">
+        <STInputBox :title="labelTitle" error-fields="label" :error-box="errors.errorBox" class="max">
             <input
                 v-model="label"
                 class="input"
@@ -90,7 +90,7 @@
             >
         </STInputBox>
 
-        <STInputBox :title="descriptionTitle" error-fields="description" :error-box="errorBox" class="max">
+        <STInputBox :title="descriptionTitle" error-fields="description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
@@ -103,7 +103,7 @@
             Gebruik deze tekst voor een langere uitleg bij het instellen van dit kenmerk, enkel indien dat echt nodig is.
         </p>
 
-        <STInputBox v-if="shouldAskInputPlaceholder" title="Tekst in leeg tekstvak" error-fields="label" :error-box="errorBox" class="max">
+        <STInputBox v-if="shouldAskInputPlaceholder" title="Tekst in leeg tekstvak" error-fields="label" :error-box="errors.errorBox" class="max">
             <input
                 v-model="inputPlaceholder"
                 class="input"
@@ -116,7 +116,7 @@
             Het is netter als je een tekst in lege tekstvakken instelt. Je kan van deze plaats gebruik maken om een voorbeeld te geven, om het duidelijker te maken (zoals we zelf doen hierboven).
         </p>
 
-        <STInputBox v-if="shouldAskCommentsDescription" title="Tekst onder tekstvak" error-fields="label" :error-box="errorBox" class="max">
+        <STInputBox v-if="shouldAskCommentsDescription" title="Tekst onder tekstvak" error-fields="label" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="commentsDescription"
                 class="input"
@@ -163,7 +163,7 @@
                 </STListItem>
             </STList>
 
-            <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
+            <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errors.errorBox" class="max">
                 <input
                     v-model="warningText"
                     class="input"
@@ -242,481 +242,434 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+<script lang="ts" setup generic="T extends ObjectWithRecords">
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, Radio, STErrorsDefault, STInputBox, STList, STListItem, SaveView, Validator } from "@stamhoofd/components";
-import { ObjectWithRecords, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, Radio, STErrorsDefault, STInputBox, STList, STListItem, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { ObjectWithRecords, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 
+import { computed } from 'vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import PreviewRecordView from './components/PreviewRecordView.vue';
-import RecordChoiceRow from "./components/RecordChoiceRow.vue";
+import RecordChoiceRow from './components/RecordChoiceRow.vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        STList,
-        STListItem,
-        Radio,
-        Checkbox,
-        Dropdown,
-        RecordChoiceRow
-    },
-})
-export default class EditRecordView<T extends ObjectWithRecords> extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+const props = withDefaults(defineProps<{
+    record: RecordSettings;
+    category?: RecordCategory | null;
+    isNew: boolean;
+    saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => void;
+    settings: RecordEditorSettings<T>;
+}>(), {
+    category: null,
+});
 
-    @Prop({ required: true })
-        record!: RecordSettings
+const errors = useErrors();
+const pop = usePop();
+const present = usePresent();
 
-    @Prop({ required: false, default: null })
-        category!: RecordCategory | null
+const { patch: patchRecord, patched: patchedRecord, addPatch, hasChanges } = usePatch(props.record);
 
-    @Prop({ required: true })
-        isNew!: boolean
-
-    patchRecord: AutoEncoderPatchType<RecordSettings> = RecordSettings.patch({ id: this.record.id })
-
-    @Prop({ required: true })
-        saveHandler!: (patch: PatchableArrayAutoEncoder<RecordSettings>) => void;
-
-    @Prop({ required: true })
-        settings!: RecordEditorSettings<T>
-
-    get patchedRecord() {
-        return this.record.patch(this.patchRecord)
-    }
-
-    get RecordType() {
-        return RecordType
-    }
-
-    get availableTypes() {
-        return [
+const availableTypes = [
+    {
+        name: 'Tekst',
+        values: [
             {
-                name: "Tekst",
-                values: [
-                    {
-                        value: RecordType.Text,
-                        name: "Tekstveld (één lijn)"
-                    },
-                    {
-                        value: RecordType.Textarea,
-                        name: "Tekstveld (meerdere lijnen)"
-                    },
-                    {
-                        value: RecordType.Address,
-                        name: "Adres"
-                    },
-                    {
-                        value: RecordType.Email,
-                        name: "E-mailadres"
-                    },
-                    {
-                        value: RecordType.Phone,
-                        name: "Telefoonnummer"
-                    },
-                    {
-                        value: RecordType.Date,
-                        name: "Datum"
-                    }
-                ]
+                value: RecordType.Text,
+                name: 'Tekstveld (één lijn)',
             },
             {
-                name: "Aankruisen",
-                values: [
-                    {
-                        value: RecordType.Checkbox,
-                        name: "Aankruisvakje"
-                    },
-                    {
-                        value: RecordType.ChooseOne,
-                        name: "Keuzemenu (kies één)"
-                    },
-                    {
-                        value: RecordType.MultipleChoice,
-                        name: "Keuzemenu (kies meerdere)"
-                    }
-                ]
-            }
-        ]
-    }
+                value: RecordType.Textarea,
+                name: 'Tekstveld (meerdere lijnen)',
+            },
+            {
+                value: RecordType.Address,
+                name: 'Adres',
+            },
+            {
+                value: RecordType.Email,
+                name: 'E-mailadres',
+            },
+            {
+                value: RecordType.Phone,
+                name: 'Telefoonnummer',
+            },
+            {
+                value: RecordType.Date,
+                name: 'Datum',
+            },
+        ],
+    },
+    {
+        name: 'Aankruisen',
+        values: [
+            {
+                value: RecordType.Checkbox,
+                name: 'Aankruisvakje',
+            },
+            {
+                value: RecordType.ChooseOne,
+                name: 'Keuzemenu (kies één)',
+            },
+            {
+                value: RecordType.MultipleChoice,
+                name: 'Keuzemenu (kies meerdere)',
+            },
+        ],
+    },
+];
 
-    get RecordWarningType() {
-        return RecordWarningType
-    }
+const canAddWarning = computed(() => {
+    return patchedRecord.value.type === RecordType.Checkbox || patchedRecord.value.type === RecordType.Text || patchedRecord.value.type === RecordType.Textarea;
+});
 
-    get canAddWarning() {
-        return this.patchedRecord.type === RecordType.Checkbox || this.patchedRecord.type === RecordType.Text || this.patchedRecord.type === RecordType.Textarea
+const warningNonInvertedText = computed(() => {
+    if (patchedRecord.value.type === RecordType.Checkbox) {
+        return 'Waarschuwing als aangevinkt';
     }
+    return 'Waarschuwing als ingevuld';
+});
 
-    get warningNonInvertedText() {
-        if (this.patchedRecord.type === RecordType.Checkbox) {
-            return "Waarschuwing als aangevinkt"
-        }
-        return "Waarschuwing als ingevuld"
+const warningInvertedText = computed(() => {
+    if (patchedRecord.value.type === RecordType.Checkbox) {
+        return 'Waarschuwing als niet aangevinkt';
     }
+    return 'Waarschuwing als niet ingevuld';
+});
 
-    get warningInvertedText() {
-        if (this.patchedRecord.type === RecordType.Checkbox) {
-            return "Waarschuwing als niet aangevinkt"
-        }
-        return "Waarschuwing als niet ingevuld"
+const title = computed(() => {
+    if (props.isNew) {
+        return 'Nieuwe vraag';
     }
+    return 'Vraag bewerken';
+});
 
-    get title(): string {
-        if (this.isNew) {
-            return "Nieuwe vraag"
-        }
-        return "Vraag bewerken"
+const labelTitle = computed(() => {
+    if (type.value === RecordType.Checkbox) {
+        return 'Tekst naast aankruisvakje';
     }
-
-    get labelTitle(): string {
-        if (this.type === RecordType.Checkbox) {
-            return "Tekst naast aankruisvakje"
-        }
-        if (this.type === RecordType.MultipleChoice) {
-            return "Titel boven keuzemenu"
-        }
-        if (this.type === RecordType.ChooseOne) {
-            return "Titel boven keuzemenu"
-        }
-        return "Titel boven tekstvak"
+    if (type.value === RecordType.MultipleChoice) {
+        return 'Titel boven keuzemenu';
     }
-
-    get descriptionTitle(): string {
-        if (this.type === RecordType.Checkbox) {
-            return "Beschrijving naast aankruisvakje"
-        }
-        if (this.type === RecordType.MultipleChoice) {
-            return "Beschrijving onder keuzemenu"
-        }
-        if (this.type === RecordType.ChooseOne) {
-            return "Beschrijving onder keuzemenu"
-        }
-        return "Beschrijving onder tekstvak"
+    if (type.value === RecordType.ChooseOne) {
+        return 'Titel boven keuzemenu';
     }
+    return 'Titel boven tekstvak';
+});
 
-    get name() {
-        return this.patchedRecord.name
+const descriptionTitle = computed(() => {
+    if (type.value === RecordType.Checkbox) {
+        return 'Beschrijving naast aankruisvakje';
     }
-
-    set name(name: string) {
-        this.patchRecord = this.patchRecord.patch({ name })
+    if (type.value === RecordType.MultipleChoice) {
+        return 'Beschrijving onder keuzemenu';
     }
-
-    get label() {
-        return this.patchedRecord.label
+    if (type.value === RecordType.ChooseOne) {
+        return 'Beschrijving onder keuzemenu';
     }
+    return 'Beschrijving onder tekstvak';
+});
 
-    set label(label: string) {
-        this.patchRecord = this.patchRecord.patch({ label })
+const name = computed({
+    get: () => patchedRecord.value.name,
+    set: (name: string) => {
+        addPatch({ name });
+    },
+});
+
+const label = computed({
+    get: () => patchedRecord.value.label,
+    set: (label: string) => {
+        addPatch({ label });
+    },
+});
+
+const required = computed({
+    get: () => patchedRecord.value.required,
+    set: (required: boolean) => {
+        addPatch({ required });
+    },
+});
+
+const choices = computed({
+    get: () => patchedRecord.value.choices,
+    set: (choices: RecordChoice[]) => {
+        addPatch({ choices: choices as any });
+    },
+});
+
+const inputPlaceholder = computed({
+    get: () => patchedRecord.value.inputPlaceholder,
+    set: (inputPlaceholder: string) => {
+        addPatch({ inputPlaceholder });
+    },
+});
+
+const askComments = computed({
+    get: () => patchedRecord.value.askComments,
+    set: (askComments: boolean) => {
+        addPatch({ askComments });
+    },
+});
+
+const shouldAskInput = computed(() => {
+    if (type.value === RecordType.Checkbox) {
+        return askComments.value;
     }
-
-    get required() {
-        return this.patchedRecord.required
+    if (type.value === RecordType.MultipleChoice) {
+        return false;
     }
-
-    set required(required: boolean) {
-        this.patchRecord = this.patchRecord.patch({ required })
+    if (type.value === RecordType.ChooseOne) {
+        return false;
     }
+    return true;
+});
 
-    get choices() {
-        return this.patchedRecord.choices
+const shouldAskInputPlaceholder = computed(() => {
+    if (!shouldAskInput.value) {
+        return false;
     }
-
-    set choices(choices: RecordChoice[]) {
-        this.patchRecord = this.patchRecord.patch({ choices: choices as any })
+    if (type.value === RecordType.Address) {
+        return false;
     }
+    return true;
+});
 
-    get inputPlaceholder() {
-        return this.patchedRecord.inputPlaceholder
+const shouldAskCommentsDescription = computed(() => {
+    if (type.value === RecordType.Checkbox) {
+        return askComments.value;
     }
+    return false;
+});
 
-    set inputPlaceholder(inputPlaceholder: string) {
-        this.patchRecord = this.patchRecord.patch({ inputPlaceholder })
+const requiredText = computed(() => {
+    if (type.value === RecordType.Checkbox) {
+        return 'Verplicht aankruisen';
     }
-
-    get askComments() {
-        return this.patchedRecord.askComments
+    if (type.value === RecordType.MultipleChoice) {
+        return 'Verplicht om minstens één keuze te selecteren';
     }
-
-    set askComments(askComments: boolean) {
-        this.patchRecord = this.patchRecord.patch({ askComments })
+    if (type.value === RecordType.ChooseOne) {
+        return 'Verplicht om een keuze te selecteren';
     }
+    return 'Verplicht in te vullen';
+});
 
-    get shouldAskInput(): boolean {
-        if (this.type === RecordType.Checkbox) {
-            return this.askComments
-        }
-        if (this.type === RecordType.MultipleChoice) {
-            return false
-        }
-        if (this.type === RecordType.ChooseOne) {
-            return false
-        }
-        return true
-    }
-
-    get shouldAskInputPlaceholder(): boolean {
-        if (!this.shouldAskInput) {
-            return false
-        }
-        if (this.type === RecordType.Address) {
-            return false
-        }
-        return true
-    }
-
-    get shouldAskCommentsDescription(): boolean {
-        if (this.type === RecordType.Checkbox) {
-            return this.askComments
-        }
-        return false
-    }
-
-    get requiredText() {
-        if (this.type === RecordType.Checkbox) {
-            return "Verplicht aankruisen"
-        }
-        if (this.type === RecordType.MultipleChoice) {
-            return "Verplicht om minstens één keuze te selecteren"
-        }
-        if (this.type === RecordType.ChooseOne) {
-            return "Verplicht om een keuze te selecteren"
-        }
-        return "Verplicht in te vullen"
-    }
-
-    get type() {
-        return this.patchedRecord.type
-    }
-
-    set type(type: RecordType) {
-        this.patchRecord = this.patchRecord.patch({ 
+const type = computed({
+    get: () => patchedRecord.value.type,
+    set: (type: RecordType) => {
+        patchRecord.value = patchRecord.value.patch({
             type,
             // Set required if not checkbox or multiple choice, and if the type changed
-            required: (type !== RecordType.MultipleChoice && type !== RecordType.Checkbox) && this.record.type !== type ? true : 
-                ((type === RecordType.Checkbox || type === RecordType.MultipleChoice) && this.record.type !== type ? false: undefined)
-        })
+            required: (type !== RecordType.MultipleChoice && type !== RecordType.Checkbox) && props.record.type !== type
+                ? true
+                : ((type === RecordType.Checkbox || type === RecordType.MultipleChoice) && props.record.type !== type ? false : undefined),
+        });
 
         if (type === RecordType.MultipleChoice || type === RecordType.ChooseOne) {
-            if ( this.patchedRecord.choices.length === 0) {
-                if (this.record.choices.length > 0) {
+            if (patchedRecord.value.choices.length === 0) {
+                if (props.record.choices.length > 0) {
                     // Revert to original choices
-                    this.patchRecord = this.patchRecord.patch({ choices: this.record.choices as any })
-                } else {
-                    this.patchRecord = this.patchRecord.patch({
+                    patchRecord.value = patchRecord.value.patch({ choices: props.record.choices as any });
+                }
+                else {
+                    patchRecord.value = patchRecord.value.patch({
                         choices: [
-                            RecordChoice.create({ name: "Keuze 1" }),
-                            RecordChoice.create({ name: "Keuze 2" }),
-                        ] as any
-                    })
+                            RecordChoice.create({ name: 'Keuze 1' }),
+                            RecordChoice.create({ name: 'Keuze 2' }),
+                        ] as any,
+                    });
                 }
             }
-        } else {
+        }
+        else {
             // Delete choices
-            this.patchRecord = this.patchRecord.patch({ choices: [] as any })
+            patchRecord.value = patchRecord.value.patch({ choices: [] as any });
         }
-    }
+    },
+});
 
-    get description() {
-        return this.patchedRecord.description
-    }
+const description = computed({
+    get: () => patchedRecord.value.description,
+    set: (description: string) => {
+        addPatch({ description });
+    },
+});
 
-    set description(description: string) {
-        this.patchRecord = this.patchRecord.patch({ description })
-    }
+const commentsDescription = computed({
+    get: () => patchedRecord.value.commentsDescription,
+    set: (commentsDescription: string) => {
+        addPatch({ commentsDescription });
+    },
+});
 
-    get commentsDescription() {
-        return this.patchedRecord.commentsDescription
-    }
-
-    set commentsDescription(commentsDescription: string) {
-        this.patchRecord = this.patchRecord.patch({ commentsDescription })
-    }
-
-    get warningInverted() {
-        return this.patchedRecord.warning?.inverted ?? null
-    }
-
-    set warningInverted(inverted: boolean | null) {
+const warningInverted = computed({
+    get: () => patchedRecord.value.warning?.inverted ?? null,
+    set: (inverted: boolean | null) => {
         if (inverted === null) {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: null
-            })
-            return
-        }
-        if (this.warningInverted === null) {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: RecordWarning.create({
-                    inverted
-                })
-            })
-        } else {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: RecordWarning.patch({
-                    inverted
-                })
-            })
-        }
-    }
-
-    get warningText() {
-        return this.patchedRecord.warning?.text ?? null
-    }
-
-    set warningText(text: string | null) {
-        if (text === null) {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: null
-            })
-            return
-        }
-        if (this.warningText === null) {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: RecordWarning.create({
-                    text
-                })
-            })
-        } else {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: RecordWarning.patch({
-                    text
-                })
-            })
-        }
-    }
-
-    get warningType() {
-        return this.patchedRecord.warning?.type ?? null
-    }
-
-    set warningType(type: RecordWarningType | null) {
-        if (type === null) {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: null
-            })
-            return
-        }
-        if (this.warningType === null) {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: RecordWarning.create({
-                    type
-                })
-            })
-        } else {
-            this.patchRecord = this.patchRecord.patch({ 
-                warning: RecordWarning.patch({
-                    type
-                })
-            })
-        }
-    }
-
-    get sensitive() {
-        return this.patchedRecord.sensitive
-    }
-
-    set sensitive(sensitive: boolean) {
-        // Always require encryption for sensitive information
-        this.patchRecord = this.patchRecord.patch({ sensitive })
-    }
-
-    addPatch(patch: AutoEncoderPatchType<RecordSettings>) {
-        this.patchRecord = this.patchRecord.patch(patch)
-    }
-
-    addChoicesPatch(patch: PatchableArrayAutoEncoder<RecordChoice>) {
-        const p = RecordSettings.patch({
-            choices: patch
-        })
-        this.addPatch(p)
-    }
-
-    addChoice() {
-        const choice = RecordChoice.create({})
-
-        this.present(new ComponentWithProperties(EditRecordChoiceView, {
-            choice,
-            isNew: true,
-            parentRecord: this.patchedRecord,
-            saveHandler: (patch: PatchableArrayAutoEncoder<RecordChoice>) => {
-                this.addChoicesPatch(patch)
-            }
-        }).setDisplayStyle("popup"))
-    }
-
-    async save() {
-        const isValid = await this.validator.validate()
-        if (!isValid) {
-            return
-        }
-
-        if (this.name.length < 2) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                message: 'Vul een naam in',
-                field: 'name'
-            }))
+            addPatch({
+                warning: null,
+            });
             return;
         }
-
-        const arrayPatch: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray()
-
-        if (this.isNew) {
-            arrayPatch.addPut(this.patchedRecord)
-        } else {
-            arrayPatch.addPatch(this.patchRecord)
+        if (warningInverted.value === null) {
+            addPatch({
+                warning: RecordWarning.create({
+                    inverted,
+                }),
+            });
         }
-
-        this.saveHandler(arrayPatch)
-        this.pop({ force: true })
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je dit kenmerk wilt verwijderen?", "Verwijderen", "Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.")) {
-            return
+        else {
+            addPatch({
+                warning: RecordWarning.patch({
+                    inverted,
+                }),
+            });
         }
+    },
+});
 
-        if (this.isNew) {
-            // do nothing
-            this.pop({ force: true })
-            return
+const warningText = computed({
+    get: () => patchedRecord.value.warning?.text ?? null,
+    set: (text: string | null) => {
+        if (text === null) {
+            patchRecord.value = patchRecord.value.patch({
+                warning: null,
+            });
+            return;
         }
-
-        const arrayPatch: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray()
-        arrayPatch.addDelete(this.record.id)
-
-        this.saveHandler(arrayPatch)
-        this.pop({ force: true })
-    }
-
-    cancel() {
-        this.pop()
-    }
-
-    get hasChanges() {
-        return patchContainsChanges(this.patchRecord, this.record, { version: Version })
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
-            return true
+        if (warningText.value === null) {
+            patchRecord.value = patchRecord.value.patch({
+                warning: RecordWarning.create({
+                    text,
+                }),
+            });
         }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-    }
+        else {
+            patchRecord.value = patchRecord.value.patch({
+                warning: RecordWarning.patch({
+                    text,
+                }),
+            });
+        }
+    },
+});
 
-    openPreview() {
-        this.present(new ComponentWithProperties(PreviewRecordView, {
-            record: this.patchedRecord
-        }).setDisplayStyle("popup"))
-    }
+const warningType = computed({
+    get: () => patchedRecord.value.warning?.type ?? null,
+    set: (type: RecordWarningType | null) => {
+        if (type === null) {
+            patchRecord.value = patchRecord.value.patch({
+                warning: null,
+            });
+            return;
+        }
+        if (warningType.value === null) {
+            patchRecord.value = patchRecord.value.patch({
+                warning: RecordWarning.create({
+                    type,
+                }),
+            });
+        }
+        else {
+            patchRecord.value = patchRecord.value.patch({
+                warning: RecordWarning.patch({
+                    type,
+                }),
+            });
+        }
+    },
+
+});
+
+const sensitive = computed({
+    get: () => patchedRecord.value.sensitive,
+    set: (sensitive: boolean) => {
+        // Always require encryption for sensitive information
+        addPatch({ sensitive });
+    },
+});
+
+function addChoicesPatch(patch: PatchableArrayAutoEncoder<RecordChoice>) {
+    addPatch(RecordSettings.patch({
+        choices: patch,
+    }));
 }
+
+function addChoice() {
+    const choice = RecordChoice.create({});
+
+    present(new ComponentWithProperties(EditRecordChoiceView, {
+        choice,
+        isNew: true,
+        parentRecord: patchedRecord.value,
+        saveHandler: (patch: PatchableArrayAutoEncoder<RecordChoice>) => {
+            addChoicesPatch(patch);
+        },
+    }).setDisplayStyle('popup')).catch(console.error);
+}
+
+async function save() {
+    const isValid = await errors.validator.validate();
+    if (!isValid) {
+        return;
+    }
+
+    if (name.value.length < 2) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            message: 'Vul een naam in',
+            field: 'name',
+        }));
+        return;
+    }
+
+    const arrayPatch: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray();
+
+    if (props.isNew) {
+        arrayPatch.addPut(patchedRecord.value);
+    }
+    else {
+        arrayPatch.addPatch(patchRecord.value);
+    }
+
+    props.saveHandler(arrayPatch);
+    pop({ force: true })?.catch(console.error);
+}
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm('Ben je zeker dat je dit kenmerk wilt verwijderen?', 'Verwijderen', 'Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.')) {
+        return;
+    }
+
+    if (props.isNew) {
+        // do nothing
+        pop({ force: true })?.catch(console.error);
+        return;
+    }
+
+    const arrayPatch: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray();
+    arrayPatch.addDelete(props.record.id);
+
+    props.saveHandler(arrayPatch);
+    pop({ force: true })?.catch(console.error);
+}
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+};
+
+function openPreview() {
+    present(new ComponentWithProperties(PreviewRecordView, {
+        record: patchedRecord,
+    }).setDisplayStyle('popup')).catch(console.error);
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
