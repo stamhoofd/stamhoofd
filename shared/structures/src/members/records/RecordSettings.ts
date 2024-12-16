@@ -200,8 +200,13 @@ export class RecordSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[]
 
-    validate(answers: RecordAnswer[]): RecordAnswer | undefined {
+    validate(answers: RecordAnswer[], requiredCategory = true): RecordAnswer | undefined {
         const answer = answers.find(a => a.settings.id === this.id)
+
+        if (!requiredCategory && (!answer || answer.isEmpty)) {
+            // Okay to skip
+            return;
+        }
 
         if (this.required && !answer) {
             throw new SimpleError({
@@ -209,6 +214,11 @@ export class RecordSettings extends AutoEncoder {
                 message: "Dit veld is verplicht",
                 field: this.id
             })
+        }
+
+        if (answer) {
+            answer.settings = this;
+            answer.validate();
         }
 
         return answer;

@@ -87,6 +87,28 @@ export class RecordCategory extends AutoEncoder {
         return false
     }
 
+    isRequired<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[]) {
+        if (!this.filter) {
+            return false;
+        }
+        if (this.filter.requiredWhen === null) {
+            // Always skippable
+            return false;
+        }
+
+        const decoded = this.filter.requiredWhen?.decode(filterDefinitions)
+
+        if (!decoded) {
+            // Failed to decode
+            return true;
+        }
+
+        if (decoded.doesMatch(filterValue)) {
+            return true;
+        }
+        return false;
+    }
+
     static filterCategories<T>(categories: RecordCategory[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
         return categories.filter(category => {
             return category.isEnabled(filterValue, filterDefinitions, dataPermission)
@@ -362,27 +384,31 @@ export class RecordCategory extends AutoEncoder {
 
     static validate<T>(categories: RecordCategory[], answers: RecordAnswer[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean) {
         const filteredCategories = RecordCategory.filterCategories(categories, filterValue, filterDefinitions, dataPermission)
-        const allRecords = filteredCategories.flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission))
+        const errors = new SimpleErrors();
         const cleanedAnswers: RecordAnswer[] = []
-        const errors = new SimpleErrors()
 
         // Delete all records that are not in the list
-        for (const record of allRecords) {
-            try {
-                const answer = record.validate(answers)
-                if (answer && !cleanedAnswers.includes(answer)) {
-                    cleanedAnswers.push(answer)
+        for (const category of filteredCategories) {
+            const requiredCategory = category.isRequired(filterValue, filterDefinitions);
+
+            for (const record of category.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission)) {
+                try {
+                    const answer = record.validate(answers, requiredCategory)
+                    if (answer && !cleanedAnswers.includes(answer)) {
+                        cleanedAnswers.push(answer)
+                    }
                 }
-            } catch (e) {
-                if (isSimpleErrors(e) || isSimpleError(e)) {
-                    errors.addError(e)
-                } else {
-                    throw e;
+                catch (e) {
+                    if (isSimpleErrors(e) || isSimpleError(e)) {
+                        errors.addError(e);
+                    }
+                    else {
+                        throw e;
+                    }
                 }
             }
         }
-
-        errors.throwIfNotEmpty()
+        errors.throwIfNotEmpty();
         return cleanedAnswers;
     }
 }

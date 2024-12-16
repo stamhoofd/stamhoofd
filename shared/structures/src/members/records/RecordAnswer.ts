@@ -4,9 +4,9 @@ import { Formatter, StringCompare } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
+import { CountryHelper } from "../../addresses/CountryDecoder";
 import { Image } from "../../files/Image";
 import { RecordChoice, RecordSettings,RecordType, RecordWarning, RecordWarningType } from "./RecordSettings"
-import { CountryHelper } from "../../addresses/CountryDecoder";
 
 
 export class RecordAnswer extends AutoEncoder {
@@ -323,6 +323,26 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
                 field: "input"
             })
         }
+
+        // Check selected choices still exist
+        const cleanedChoices: RecordChoice[] = []
+        let error = false;
+        for (const choice of this.selectedChoices) {
+            const c = this.settings.choices.find(c => c.id === choice.id)
+            if (!c) {
+                error = true;
+            } else {
+                cleanedChoices.push(c)
+            }
+        }
+        this.selectedChoices = cleanedChoices
+        if (error) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Een keuze die je hebt gemaakt is niet meer beschikbaar. Kijk na en ga verder.",
+                field: "input"
+            })
+        }
     }
 
     get isEmpty() {
@@ -373,6 +393,21 @@ export class RecordChooseOneAnswer extends RecordAnswer {
                 message: "Duid een keuze aan",
                 field: "input"
             })
+        }
+
+        // Check selected choices still exist
+        if (this.selectedChoice) {
+            const id = this.selectedChoice.id;
+            const c = this.settings.choices.find(c => c.id === id);
+            if (!c) {
+                this.selectedChoice = null;
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Een keuze die je hebt gemaakt is niet meer beschikbaar. Kijk na en ga verder.",
+                    field: "input"
+                })
+            }
+            this.selectedChoice = c;
         }
     }
 
