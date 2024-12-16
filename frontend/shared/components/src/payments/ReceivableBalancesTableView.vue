@@ -8,7 +8,7 @@
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
-        @click="showBalance"
+        :Route="Route"
     >
         <template #empty>
             {{ $t('0637e394-fbd7-42ea-9a1b-5acdcc86419a') }}
@@ -102,26 +102,10 @@ const allColumns: Column<ObjectType, any>[] = [
 
 const actions: TableAction<ObjectType>[] = [];
 
-async function showBalance(item: ReceivableBalance) {
-    if (!modernTableView.value) {
-        return;
-    }
-
-    // todo
-    const table = modernTableView.value;
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(ReceivableBalanceView, {
-            item,
-            getNext: table.getNext,
-            getPrevious: table.getPrevious,
-        }),
-    });
-
-    await present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}
+const Route = {
+    Component: ReceivableBalanceView,
+    objectKey: 'item',
+};
 
 async function openMail(selection: TableActionSelection<ObjectType>) {
     const filter = selection.filter.filter;
