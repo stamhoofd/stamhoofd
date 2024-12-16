@@ -48,6 +48,12 @@ export enum RecordType {
     Integer = 'Integer',
 }
 
+export enum RecordRights {
+    None,
+    Read,
+    Write,
+}
+
 export function getRecordTypeName(type: RecordType) {
     const all = [
         {
@@ -241,6 +247,9 @@ export class RecordSettings extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[];
+
+    @field({ decoder: new EnumDecoder(RecordRights), ...NextVersion })
+    righstForNonAdmins = RecordRights.Write;
 
     getDiffValue() {
         const type = getRecordTypeName(this.type);

@@ -1,12 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../../addresses/Address.js';
+import { CountryHelper } from '../../addresses/CountryDecoder.js';
 import { Image } from '../../files/Image.js';
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
-import { CountryHelper } from '../../addresses/CountryDecoder.js';
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -165,11 +165,6 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
             case RecordType.Image: return RecordImageAnswer;
             case RecordType.Integer: return RecordIntegerAnswer;
         }
-        throw new SimpleError({
-            code: 'not_supported',
-            message: 'A property type is not supported',
-            human: 'Een bepaald kenmerk wordt niet ondersteund. Kijk na of je wel de laatste versie gebruikt en update indien nodig.',
-        });
     }
 }
 export const RecordAnswerDecoder = new RecordAnswerDecoderStatic();
