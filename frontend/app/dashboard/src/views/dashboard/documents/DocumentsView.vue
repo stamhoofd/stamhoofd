@@ -8,7 +8,7 @@
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
-        @click="($event: Document) => openDocument($event)"
+        :Route="Route"
     >
         <template #empty>
             {{ $t('Er zijn nog geen documenten.') }}
@@ -17,8 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { Column, ComponentExposed, getDocumentsUIFilterBuilders, InMemoryTableAction, ModernTableView, UIFilterBuilders, useContext, useIsMobile, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, getDocumentsUIFilterBuilders, ModernTableView, UIFilterBuilders, useContext, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -130,8 +129,6 @@ const allColumns: Column<Document, any>[] = [
 
 const context = useContext();
 const navigationActions = useNavigationActions();
-const { present, show } = navigationActions;
-const isMobile = useIsMobile();
 
 function addDocument(_document: Document) {
     // reset the table
@@ -145,45 +142,16 @@ const actions = computed(() => {
         navigationActions,
         addDocument: (document: Document) => addDocument(document),
     });
-    return [
-        ...builder.getActions(),
-        new InMemoryTableAction({
-            name: 'Openen',
-            icon: 'eye',
-            priority: 0,
-            groupIndex: 1,
-            needsSelection: true,
-            singleSelection: true,
-            handler: (documents: Document[]) => {
-                openDocument(documents[0]);
-            },
-        }),
-
-    ];
+    return builder.getActions();
 });
 
-function openDocument(document: Document) {
-    if (!modernTableView.value) {
-        return;
-    }
+const Route = {
+    Component: DocumentView,
+    objectKey: 'document',
+    getProperties: () => ({
+        template: props.template,
+        addDocument: (document: Document) => addDocument(document),
+    }),
+};
 
-    const table = modernTableView.value;
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(DocumentView, {
-            document,
-            template: props.template,
-            getNext: table.getNext,
-            getPrevious: table.getPrevious,
-            addDocument: (document: Document) => addDocument(document),
-        }),
-    });
-
-    if (isMobile) {
-        show(component).catch(console.error);
-    }
-    else {
-        component.modalDisplayStyle = 'popup';
-        present(component).catch(console.error);
-    }
-}
 </script>

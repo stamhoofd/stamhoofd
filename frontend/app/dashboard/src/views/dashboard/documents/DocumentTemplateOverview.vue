@@ -19,7 +19,7 @@
             </p>
 
             <STList class="illustration-list">
-                <STListItem :selectable="true" class="left-center" @click="openDocuments">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Documents)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
@@ -34,7 +34,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="isDraft || template.updatesEnabled" :selectable="true" class="left-center" @click="editSettings">
+                <STListItem v-if="isDraft || template.updatesEnabled" :selectable="true" class="left-center" @click="$navigate(Routes.Settings)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
@@ -129,11 +129,11 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, FillRecordCategoryView, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
-import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
+import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { ComponentOptions, computed, ref } from 'vue';
 
 import { useRequestOwner } from '@stamhoofd/networking';
 import DocumentsView from './DocumentsView.vue';
@@ -143,35 +143,41 @@ const props = defineProps<{
     template: DocumentTemplatePrivate;
 }>();
 
-const show = useShow();
 const present = usePresent();
 const pop = usePop();
 const requestOwner = useRequestOwner();
 const context = useContext();
 const deleting = ref(false);
 const publishing = ref(false);
+const $navigate = useNavigate();
 
-function openDocuments() {
-    show({
-        components: [
-            new ComponentWithProperties(DocumentsView, {
-                template: props.template,
-            }),
-        ],
-    }).catch(console.error);
+enum Routes {
+    Documents = 'documenten',
+    Settings = 'instellingen',
 }
 
-function editSettings() {
-    present({
-        components: [
-            new ComponentWithProperties(EditDocumentTemplateView, {
+defineRoutes([
+    {
+        url: Routes.Documents,
+        component: DocumentsView as ComponentOptions,
+        paramsToProps() {
+            return {
+                template: props.template,
+            };
+        },
+    },
+    {
+        url: Routes.Settings,
+        present: 'popup',
+        component: EditDocumentTemplateView as ComponentOptions,
+        paramsToProps() {
+            return {
                 isNew: false,
                 document: props.template,
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
-}
+            };
+        },
+    },
+]);
 
 const isDraft = computed(() => props.template.status === DocumentStatus.Draft);
 

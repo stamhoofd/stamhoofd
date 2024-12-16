@@ -16,7 +16,7 @@
                     Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
                 </p>
 
-                <p class="info-box" v-if="!enabled">
+                <p v-if="!enabled" class="info-box">
                     Deze functie komt binnenkort beschikbaar!
                 </p>
 
@@ -36,7 +36,7 @@
                     </STListItem>
                 </STList>
 
-                <p class="style-button-bar" v-if="enabled">
+                <p v-if="enabled" class="style-button-bar">
                     <button type="button" class="button text" @click="addDocument">
                         <span class="icon add" />
                         <span class="text">Nieuw document</span>
@@ -49,14 +49,14 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, useNavigate, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { LoadingViewTransition, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useRequiredOrganization } from '@stamhoofd/components';
 import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { computed, onActivated, onMounted, ref, Ref } from 'vue';
+import { ComponentOptions, computed, onActivated, onMounted, ref, Ref } from 'vue';
 import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 
@@ -66,7 +66,6 @@ const organization = useRequiredOrganization();
 const requestOwner = useRequestOwner();
 const context = useContext();
 const present = usePresent();
-const show = useShow();
 const $t = useTranslate();
 const enabled = useFeatureFlag()('documents');
 
@@ -77,6 +76,46 @@ onMounted(() => {
 onActivated(() => {
     loadTemplates().catch(console.error);
 });
+
+enum Routes {
+    DocumentTemplate = 'DocumentTemplate',
+}
+const $navigate = useNavigate();
+defineRoutes([
+    {
+        name: Routes.DocumentTemplate,
+        url: '@slug',
+        component: DocumentTemplateOverview as ComponentOptions,
+        params: {
+            slug: String,
+        },
+        paramsToProps: async (params: { slug: string }) => {
+            const loadedTemplates = templates.value.length ? templates.value : await loadTemplates();
+            const template = loadedTemplates.find(t => Formatter.slug(t.settings.name) === params.slug);
+            if (!template) {
+                Toast.error('Document niet gevonden').show();
+                throw new Error('Document not found');
+            }
+
+            return {
+                template,
+            };
+        },
+
+        propsToParams(props) {
+            if (!('template' in props) || typeof props.template !== 'object' || props.template === null || !(props.template instanceof DocumentTemplatePrivate)) {
+                throw new Error('Missing event');
+            }
+            const template = props.template;
+
+            return {
+                params: {
+                    slug: Formatter.slug(template.settings.name),
+                },
+            };
+        },
+    },
+]);
 
 function formatDate(date: Date) {
     return Formatter.date(date);
@@ -92,12 +131,16 @@ async function loadTemplates() {
             owner: requestOwner,
         });
         templates.value = response.data;
+
+        loading.value = false;
+        return response.data;
     }
     catch (e) {
         console.error(e);
         Toast.fromError(e).show();
     }
     loading.value = false;
+    return [];
 }
 
 const disableActivities = computed(() => organization.value.meta.packages.disableActivities);
@@ -115,7 +158,7 @@ function addDocument() {
                 document: DocumentTemplatePrivate.create({}),
                 callback: (template: DocumentTemplatePrivate) => {
                     templates.value.push(template);
-                    openTemplate(template);
+                    openTemplate(template).catch(console.error);
                 },
             }),
         ],
@@ -123,13 +166,7 @@ function addDocument() {
     }).catch(console.error);
 }
 
-function openTemplate(template: DocumentTemplatePrivate) {
-    show({
-        components: [
-            new ComponentWithProperties(DocumentTemplateOverview, {
-                template,
-            }),
-        ],
-    }).catch(console.error);
+async function openTemplate(template: DocumentTemplatePrivate) {
+    await $navigate(Routes.DocumentTemplate, { properties: { template } });
 }
 </script>
