@@ -78,11 +78,26 @@ export class Registration extends Model {
     })
     updatedAt: Date;
 
+    /**
+     * The date when the registration was confirmed
+     */
     @column({ type: 'datetime', nullable: true })
     registeredAt: Date | null = null;
 
     @column({ type: 'datetime', nullable: true })
     reservedUntil: Date | null = null;
+
+    /**
+     * Start date of the registration. Defaults to the start date of the related group
+     */
+    @column({ type: 'datetime', nullable: true })
+    startDate: Date | null = null;
+
+    /**
+     * If this registration is under a trial, this is the end date of the trial
+     */
+    @column({ type: 'datetime', nullable: true })
+    trialUntil: Date | null = null;
 
     /**
      * @deprecated - replaced by group type

@@ -58,6 +58,12 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: DateDecoder, nullable: true })
     registeredAt: Date | null = null;
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    startDate: Date | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    trialUntil: Date | null = null;
+
     /// Keep spot for this member temporarily
     @field({ decoder: DateDecoder, nullable: true })
     reservedUntil: Date | null = null;

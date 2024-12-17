@@ -38,6 +38,15 @@ export class MemberPlatformMembership extends Model {
     @column({ type: 'date' })
     endDate: Date;
 
+    /**
+     * This membership won't get charged before this day.
+     * The membership can still get removed before this day.
+     *
+     * If a membership is deleted during trial -> do not set deletedAt, but set price to 0 and set trialUntil and endDate to the current date
+     */
+    @column({ type: 'date', nullable: true })
+    trialUntil: Date | null = null;
+
     @column({ type: 'date', nullable: true })
     expireDate: Date | null = null;
 
