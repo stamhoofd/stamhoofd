@@ -11,11 +11,9 @@ export class Gemeente extends Model {
     static table = 'gemeenten';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
-            return value ?? uuidv4();
-        },
+        primary: true, type: 'integer',
     })
-    id!: string;
+    id!: number;
 
     @column({ type: 'string' })
     postcode: string;
