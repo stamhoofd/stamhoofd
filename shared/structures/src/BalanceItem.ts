@@ -55,7 +55,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.AdministrationFee: return 'calculator';
         case BalanceItemType.FreeContribution: return 'gift';
         case BalanceItemType.Order: return 'basket';
-        case BalanceItemType.Other: return 'label';
+        case BalanceItemType.Other: return 'box';
         case BalanceItemType.PlatformMembership: return 'membership-filled';
     }
     return null;

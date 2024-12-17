@@ -89,7 +89,7 @@
         <STList v-if="createBalanceItem">
             <STListItem :selectable="true" element-name="button" @click="createBalanceItem">
                 <template #left>
-                    <IconContainer icon="label">
+                    <IconContainer icon="box">
                         <template #aside>
                             <span class="icon add small primary" />
                         </template>
