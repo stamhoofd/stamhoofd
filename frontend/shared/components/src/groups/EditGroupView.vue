@@ -358,7 +358,7 @@
 
             <template v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership)">
                 <hr>
-                <h2>Voorrangsregeling</h2>
+                <h2>Voorrangsregeling online inschrijvingen</h2>
                 <p>Zorg ervoor dat bestaande leden voorrang krijgen op inschrijvingen (vooral als je met wachtlijsten werkt).</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
@@ -466,11 +466,11 @@
                         <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
                     </STInputBox>
 
-                    <STInputBox :title="$t('Proefperiodes ten vroegste starten op')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="registrationStartDate" :required="false" :placeholder="formatDate(patched.settings.startDate, true)" />
+                    <STInputBox :title="$t('Datum eerste activiteit of vergadering')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="startDate" :placeholder="formatDate(patched.settings.startDate, true)" :min="period?.startDate" :max="period?.endDate" />
                     </STInputBox>
                     <p class="style-description-small">
-                        {{ $t('Als nieuwe leden inschrijven voor deze datum, begint de proefperiode tijd pas te lopen vanaf deze datum. Handig als de activiteiten pas een poos na het begin van de inschrijvingen starten.') }}
+                        {{ $t('Als nieuwe leden inschrijven voor deze datum, begint de proefperiode tijd pas te lopen vanaf deze datum. Handig als de activiteiten pas een tijd na het begin van de inschrijvingen starten.') }}
                     </p>
                 </template>
             </template>
@@ -767,6 +767,15 @@ const genderType = computed({
     set: genderType => addPatch({
         settings: GroupSettings.patch({
             genderType,
+        }),
+    }),
+});
+
+const startDate = computed({
+    get: () => patched.value.settings.startDate,
+    set: startDate => addPatch({
+        settings: GroupSettings.patch({
+            startDate,
         }),
     }),
 });

@@ -318,14 +318,23 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 338 })
     recordCategories: RecordCategory[] = [];
 
+    /**
+     * Date when the online registrations open automatically (note: the group should be open for this to work)
+     */
     @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function (this: GroupSettings) { return this.startDate; } })
     @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function (this: GroupSettings) { return this.registrationStartDate ?? this.startDate; } })
     registrationStartDate: Date | null = null;
 
+    /**
+     * Date when the online registrations close automatically
+     */
     @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function (this: GroupSettings) { return this.endDate; } })
     @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function (this: GroupSettings) { return this.registrationEndDate ?? this.endDate; } })
     registrationEndDate: Date | null = null;
 
+    /**
+     * Experimental feature to suggest when to create new activities in the calendar.
+     */
     @field({ decoder: GroupDefaultEventTime, nullable: true, version: 283 })
     defaultEventTime: GroupDefaultEventTime | null = null;
 

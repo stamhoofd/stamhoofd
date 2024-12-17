@@ -346,7 +346,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             model.settings.period = period.getBaseStructure();
 
             if (model.type !== GroupType.EventRegistration) {
-                model.settings.startDate = period.startDate;
+                // Note: start date is curomizable, as long as it stays between period start and end
+                if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
+                    model.settings.startDate = period.startDate;
+                }
+
                 model.settings.endDate = period.endDate;
             }
         }
@@ -446,8 +450,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.status = struct.status;
         model.type = struct.type;
         model.settings.period = period.getBaseStructure();
-        model.settings.startDate = period.startDate;
         model.settings.endDate = period.endDate;
+
+        // Note: start date is curomizable, as long as it stays between period start and end
+        if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
+            model.settings.startDate = period.startDate;
+        }
 
         if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
             // Create a temporary permission role for this user
