@@ -374,6 +374,64 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
     );
 }
 else {
+    if (groups.find(g => g.settings.trialDays)) {
+        allColumns.push(
+            new Column<ObjectType, Date | null>({
+                name: 'Proefperiode',
+                allowSorting: false,
+                getValue: (v) => {
+                    const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+
+                    if (registrations.length === 0) {
+                        return null;
+                    }
+
+                    const now = new Date();
+                    const filtered = registrations.filter(r => r.trialUntil && r.trialUntil > now).map(r => r.trialUntil!.getTime());
+
+                    if (filtered.length === 0) {
+                        return null;
+                    }
+                    return new Date(Math.min(...filtered));
+                },
+                format: (v, width) => {
+                    if (!v) {
+                        return 'Geen';
+                    }
+                    return 'Tot ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
+                },
+                getStyle: v => v === null ? 'gray' : 'secundary',
+                minimumWidth: 80,
+                recommendedWidth: 160,
+            }),
+        );
+    }
+
+    allColumns.push(
+        new Column<ObjectType, Date | null>({
+            name: 'Startdatum',
+            allowSorting: false,
+            getValue: (v) => {
+                const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+
+                if (registrations.length === 0) {
+                    return null;
+                }
+
+                const filtered = registrations.filter(r => r.startDate).map(r => r.startDate!.getTime());
+
+                if (filtered.length === 0) {
+                    return null;
+                }
+                return new Date(Math.min(...filtered));
+            },
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
+            getStyle: v => v === null ? 'gray' : '',
+            minimumWidth: 80,
+            recommendedWidth: 200,
+        }),
+    );
+
     allColumns.push(
         new Column<ObjectType, Date | null>({
             name: waitingList.value ? 'Sinds' : 'Inschrijvingsdatum',
@@ -392,10 +450,10 @@ else {
                 }
                 return new Date(Math.min(...filtered));
             },
-            format: (v, width) => v ? (width < 160 ? (width < 120 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
-            recommendedWidth: 160,
+            recommendedWidth: 200,
         }),
     );
 

@@ -2,7 +2,10 @@
     <div class="pricing-box">
         <template v-for="(item, index) of priceBreakdown" :key="index">
             <div class="left">
-                {{ item.name }}
+                <h3>{{ item.name }}</h3>
+                <p v-if="item.description">
+                    {{ item.description }}
+                </p>
             </div>
 
             <div class="right" :class="{negative: item.price < 0}">
@@ -34,12 +37,26 @@ defineProps<{
         text-align: right;
         padding: 12px 0;
         padding-right: 20px;
-        font-size: 15px;
-        font-weight: $font-weight-semibold;
+
+        > h3 {
+            font-size: 15px;
+            font-weight: $font-weight-semibold;
+        }
+
+        > p {
+            @extend .style-description-small;
+            padding-top: 3px;
+        }
 
         &:nth-last-child(2) {
-            font-size: 18px;
-            font-weight: $font-weight-bold;
+            > h3 {
+                font-size: 18px;
+                font-weight: $font-weight-bold;
+            }
+
+            > p {
+                padding-top: 5px;
+            }
         }
     }
 

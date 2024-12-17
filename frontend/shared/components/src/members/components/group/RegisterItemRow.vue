@@ -45,6 +45,14 @@
             </footer>
         </template>
 
+        <template v-if="item.calculatedPriceDueLater >= 0">
+            <footer>
+                <p class="style-price">
+                    {{ formatPrice(item.calculatedPriceDueLater) }} later te betalen
+                </p>
+            </footer>
+        </template>
+
         <p v-if="item.cartError" class="error-box small">
             {{ item.cartError.getHuman() }}
 

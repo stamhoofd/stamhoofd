@@ -99,6 +99,30 @@ export class Formatter {
         return datetime.day + ' ' + this.month(datetime.month) + (currentYear !== year || withYear === true || date < new Date() ? (' ' + year) : '');
     }
 
+    /**
+     * 5 = 5 dagen
+     * 7 = 1 week
+     * 8 = 8 dagen
+     * ...
+     */
+    static days(days: number) {
+        const weeks = days / 7;
+        const dividable = days % 7;
+
+        if (weeks > 0 && dividable === 0) {
+            if (weeks === 1) {
+                return '1 week';
+            }
+            return weeks + ' weken';
+        }
+
+        if (days === 1) {
+            return '1 dag';
+        }
+
+        return `${days} dagen`;
+    }
+
     static relativeTime(date: Date, options?: { days?: boolean; hours?: boolean }) {
         const now = Date.now();
         let diff = now - date.getTime();

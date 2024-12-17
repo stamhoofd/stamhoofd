@@ -209,6 +209,10 @@ export class RegisterCart {
             }, 0);
     }
 
+    get priceDueLater() {
+        return this.items.reduce((total, item) => item.calculatedPriceDueLater + total, 0);
+    }
+
     get refund() {
         return this.items.reduce((total, item) => item.calculatedRefund + total, 0)
             + this.deleteRegistrations.reduce((total, item) => {

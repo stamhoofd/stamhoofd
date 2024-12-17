@@ -35,6 +35,19 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <div v-if="item.canHaveTrial || !skipTrial" class="container">
+            <hr>
+            <h2>
+                <span>Proefperiode</span>
+                <span class="style-tag">{{ Formatter.days(item.group.settings.trialDays) }}</span>
+            </h2>
+            <p>{{ item.member.patchedMember.details.firstName }} komt in aanmerking voor een proefperiode van {{ Formatter.days(item.group.settings.trialDays) }}. Je moet dan pas betalen tegen het einde van de proefperiode (via het ledenportaal). Als je de inschrijving stopzet voor afloop van de proefperiode, hoef je niets te betalen. Als je geen proefperiode wilt, kan je ook onmiddelijk inschrijven als volwaardig lid.</p>
+
+            <STList>
+                <CheckboxListItem v-model="skipTrial" label="De proefperiode overslaan en meteen betalen" description="Als je dit aanvinkt zal je meteen moeten betalen en de proefperiode overslaan." />
+            </STList>
+        </div>
+
         <div v-if="item.getFilteredPrices().length > 1" class="container">
             <STList>
                 <STListItem v-for="price in item.getFilteredPrices()" :key="price.id" :selectable="!price.isSoldOut(item) || admin" :disabled="price.isSoldOut(item) && !admin" element-name="label" class="left-center">
@@ -112,7 +125,7 @@
 <script setup lang="ts">
 import { patchObject } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { CheckboxListItem, ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, STList, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
@@ -154,6 +167,11 @@ onMounted(() => {
     catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
+});
+
+const skipTrial = computed({
+    get: () => !props.item.trial,
+    set: (value: boolean) => props.item.trial = !value,
 });
 
 async function addToCart() {
@@ -226,9 +244,7 @@ async function deleteMe() {
     await pop({ force: true });
 }
 
-watch(() => [props.item.groupPrice, props.item.options], () => {
-    console.log('Recalculating prices');
-
+watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () => {
     // We need to do cart level calculation, because discounts might be applied
     const clonedCart = checkout.value.cart.clone();
     clonedCart.remove(props.item);
@@ -240,8 +256,7 @@ watch(() => [props.item.groupPrice, props.item.options], () => {
 
     props.item.calculatedPrice = clone.calculatedPrice;
     props.item.calculatedRefund = clone.calculatedRefund;
-
-    console.log('Updated price', props.item.calculatedPrice);
+    props.item.calculatedPriceDueLater = clone.calculatedPriceDueLater;
 }, { deep: true });
 
 </script>

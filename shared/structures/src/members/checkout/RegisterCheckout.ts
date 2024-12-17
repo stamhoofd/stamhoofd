@@ -275,6 +275,10 @@ export class RegisterCheckout {
                 name: 'Terugbetaling',
                 price: -this.cart.refund,
             },
+            {
+                name: 'Later te betalen',
+                price: this.cart.priceDueLater,
+            },
         ].filter(a => a.price !== 0);
 
         if (all.length > 0) {
@@ -287,7 +291,7 @@ export class RegisterCheckout {
         return [
             ...all,
             {
-                name: 'Totaal',
+                name: this.cart.priceDueLater ? 'Nu te betalen' : 'Totaal',
                 price: this.totalPrice,
             },
         ];

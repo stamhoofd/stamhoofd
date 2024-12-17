@@ -275,6 +275,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.groupPrice = item.groupPrice;
             registration.options = item.options;
             registration.recordAnswers = item.recordAnswers;
+            registration.startDate = item.calculatedStartDate;
+
+            if (item.trial) {
+                registration.trialUntil = item.calculatedTrialUntil;
+            }
 
             if (whoWillPayNow === 'organization' && request.body.asOrganizationId) {
                 registration.payingOrganizationId = request.body.asOrganizationId;
@@ -428,6 +433,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // Who is responsible for payment?
                 balanceItem2.memberId = registration.memberId;
 
+                if (registration.trialUntil) {
+                    balanceItem2.dueAt = registration.trialUntil;
+                }
+
                 // If the paying organization hasn't paid yet, this should be hidden and move to pending as soon as the paying organization has paid
                 balanceItem2.status = BalanceItemStatus.Hidden;
                 await balanceItem2.save();
@@ -445,6 +454,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Connect the 'pay back' balance item to this balance item. As soon as this balance item is paid, we'll mark the other one as pending so the outstanding balance for the member increases
             balanceItem.dependingBalanceItemId = balanceItem2?.id ?? null;
+
+            if (registration.trialUntil) {
+                balanceItem.dueAt = registration.trialUntil;
+            }
 
             await balanceItem.save();
             createdBalanceItems.push(balanceItem);
@@ -613,7 +626,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const mappedBalanceItems = new Map<BalanceItem, number>();
 
             for (const item of createdBalanceItems) {
-                mappedBalanceItems.set(item, item.price);
+                if (item.dueAt === null) {
+                    mappedBalanceItems.set(item, item.price);
+                }
             }
 
             for (const item of checkout.cart.balanceItems) {

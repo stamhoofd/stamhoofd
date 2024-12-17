@@ -170,6 +170,10 @@
     font-size: 18px;
     line-height: 1.3;
     font-weight: $font-weight-semibold;
+
+    > .style-tag {
+        margin-left: 5px;
+    }
 }
 
 .style-title-3 {

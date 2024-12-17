@@ -65,6 +65,7 @@ export class RegisterItem {
     member: PlatformMember;
     group: Group;
     organization: Organization;
+    trial = false;
 
     groupPrice: GroupPrice;
     options: RegisterItemOption[] = [];
@@ -74,6 +75,11 @@ export class RegisterItem {
      * Price for the new registration
      */
     calculatedPrice = 0;
+
+    /**
+     * Price for the new registration that is due later
+     */
+    calculatedPriceDueLater = 0;
 
     /**
      * Refund for the replaced registrations
@@ -106,6 +112,7 @@ export class RegisterItem {
             groupPrice: registration.groupPrice,
             recordAnswers: registration.recordAnswers,
             options: registration.options,
+            trial: registration.trialUntil !== null,
         });
     }
 
@@ -135,6 +142,8 @@ export class RegisterItem {
         cartError?: SimpleError | SimpleErrors | null;
         calculatedPrice?: number;
         calculatedRefund?: number;
+        calculatedPriceDueLater?: number;
+        trial?: boolean;
     }) {
         this.id = data.id ?? uuidv4();
         this.member = data.member;
@@ -167,6 +176,8 @@ export class RegisterItem {
         this.cartError = data.cartError ?? null;
         this.calculatedPrice = data.calculatedPrice ?? 0;
         this.calculatedRefund = data.calculatedRefund ?? 0;
+        this.calculatedPriceDueLater = data.calculatedPriceDueLater ?? 0;
+        this.trial = data.trial ?? false;
 
         // Select all defaults
         for (const optionMenu of this.group.settings.optionMenus) {
@@ -207,6 +218,10 @@ export class RegisterItem {
                 }
             }
         }
+
+        if (data.trial === undefined) {
+            this.trial = this.canHaveTrial;
+        }
     }
 
     get isInCart() {
@@ -228,6 +243,14 @@ export class RegisterItem {
         for (const registration of this.replaceRegistrations) {
             this.calculatedRefund += registration.price;
         }
+
+        if (this.calculatedTrialUntil) {
+            this.calculatedPriceDueLater = this.calculatedPrice;
+            this.calculatedPrice = 0;
+        }
+        else {
+            this.calculatedPriceDueLater = 0;
+        }
     }
 
     get totalPrice() {
@@ -237,13 +260,19 @@ export class RegisterItem {
     get priceBreakown(): PriceBreakdown {
         let all: PriceBreakdown = [];
 
-        let replacePrice = 0;
         for (const registration of this.replaceRegistrations) {
-            replacePrice += registration.price;
-
             all.push({
                 name: this.checkout.isAdminFromSameOrganization ? 'Reeds aangerekend voor ' + registration.group.settings.name : 'Terugbetaling ' + registration.group.settings.name,
                 price: -registration.price,
+            });
+        }
+
+        if (this.calculatedPriceDueLater !== 0) {
+            const trialUntil = this.calculatedTrialUntil;
+            all.push({
+                name: 'Later te betalen',
+                price: this.calculatedPriceDueLater,
+                description: trialUntil ? `Tegen ${Formatter.date(trialUntil)}` : undefined,
             });
         }
 
@@ -258,7 +287,7 @@ export class RegisterItem {
         return [
             ...all,
             {
-                name: this.checkout.isAdminFromSameOrganization ? (this.totalPrice >= 0 ? 'Openstaand bedrag stijgt met' : 'Openstaand bedrag daalt met') : 'Totaal',
+                name: this.checkout.isAdminFromSameOrganization ? (this.totalPrice >= 0 ? 'Openstaand bedrag stijgt met' : 'Openstaand bedrag daalt met') : (this.calculatedPriceDueLater !== 0 ? 'Nu te betalen' : 'Totaal'),
                 price: this.checkout.isAdminFromSameOrganization ? Math.abs(this.totalPrice) : this.totalPrice,
             },
         ];
@@ -277,6 +306,8 @@ export class RegisterItem {
             cartError: this.cartError,
             calculatedPrice: this.calculatedPrice,
             calculatedRefund: this.calculatedRefund,
+            calculatedPriceDueLater: this.calculatedPriceDueLater,
+            trial: this.trial,
         });
     }
 
@@ -286,6 +317,8 @@ export class RegisterItem {
         this.recordAnswers = new Map([...item.recordAnswers.entries()].map(([k, v]) => [k, v.clone()]));
         this.calculatedPrice = item.calculatedPrice;
         this.calculatedRefund = item.calculatedRefund;
+        this.calculatedPriceDueLater = item.calculatedPriceDueLater;
+        this.trial = item.trial;
     }
 
     getFilteredPrices() {
@@ -659,6 +692,65 @@ export class RegisterItem {
         return this.validationError === null;
     }
 
+    get calculatedStartDate() {
+        return new Date(Math.max(Date.now(), this.group.settings.startDate.getTime()));
+    }
+
+    get calculatedTrialUntil() {
+        if (!this.trial) {
+            return null;
+        }
+
+        return new Date(this.calculatedStartDate.getTime() + this.group.settings.trialDays * 24 * 60 * 60 * 1000);
+    }
+
+    get canHaveTrial() {
+        if (this.group.type !== GroupType.Membership) {
+            return false;
+        }
+
+        if (this.group.settings.trialDays <= 0) {
+            return false;
+        }
+
+        if (this.replaceRegistrations.find(r => r.trialUntil !== null)) {
+            return true;
+        }
+        const start = new Date(this.group.settings.startDate.getTime() - 365 * 24 * 60 * 60 * 1000);
+
+        if (this.group.defaultAgeGroupId) {
+            // Use platform based logic to determine if it is a new member by looking at memberships
+
+            const hasBlockingMemberships = !!this.member.patchedMember.platformMemberships.find((m) => {
+                const days = (m.endDate.getTime() - m.startDate.getTime()) / (24 * 60 * 60 * 1000);
+                if (days < 24) {
+                    // This registration was not long enough to disallow a new trial
+                    return false;
+                }
+
+                if (m.endDate > start) {
+                    // Not allowed
+                    return true;
+                }
+                return false;
+            });
+
+            if (hasBlockingMemberships) {
+                return false;
+            }
+
+            return true;
+        }
+
+        // Look at normal registrations at the same organization
+        // Should not have a regitsration this period or last period
+        const reg = this.member.filterRegistrations({
+            organizationId: this.group.organizationId,
+            types: [GroupType.Membership],
+        });
+        return !reg.find(g => g.group.settings.endDate >= start);
+    }
+
     validatePeriod(group: Group, type: 'move' | 'register', admin = false) {
         if (group.type === GroupType.WaitingList) {
             return;
@@ -703,6 +795,10 @@ export class RegisterItem {
 
         if (this.group.organizationId !== this.organization.id) {
             throw new Error('Group and organization do not match in RegisterItem.validate');
+        }
+
+        if (this.trial && !this.canHaveTrial) {
+            this.trial = false;
         }
 
         if (this.checkout.singleOrganization && this.checkout.singleOrganization.id !== this.organization.id) {
