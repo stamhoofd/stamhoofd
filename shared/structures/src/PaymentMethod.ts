@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import { PaymentType, PaymentTypeHelper } from './PaymentType';
+import { PaymentType, PaymentTypeHelper } from './PaymentType.js';
 
 export enum PaymentMethod {
     Unknown = 'Unknown',
