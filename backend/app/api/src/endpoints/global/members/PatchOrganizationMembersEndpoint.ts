@@ -449,6 +449,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     .where('memberId', member.id)
                     .where('membershipTypeId', put.membershipTypeId)
                     .where('periodId', put.periodId)
+                    .where('deletedAt', null)
                     .where(
                         SQL.where(
                             SQL.where('startDate', SQLWhereSign.LessEqual, put.startDate)
