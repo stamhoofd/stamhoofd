@@ -51,6 +51,12 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     placeholder!: string;
 
     @Prop({ default: null })
+    min!: Date | null;
+
+    @Prop({ default: null })
+    max!: Date | null;
+
+    @Prop({ default: null })
     time!: { hours: number; minutes: number; seconds: number } | null;
 
     hasFocus = false;
@@ -113,7 +119,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         }
 
         if (this.modelValue && this.time) {
-            if (this.modelValue.getHours() !== this.time.hours || this.modelValue.getMinutes() !== this.time.minutes || this.modelValue.getSeconds() !== this.time.seconds || this.modelValue.getMilliseconds() !== 0) {
+            if ((this.min && this.modelValue > this.min) || (this.max && this.modelValue > this.max) || this.modelValue.getHours() !== this.time.hours || this.modelValue.getMinutes() !== this.time.minutes || this.modelValue.getSeconds() !== this.time.seconds || this.modelValue.getMilliseconds() !== 0) {
                 this.emitDate(this.modelValue);
             }
         }
@@ -397,6 +403,14 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         else {
             d.setHours(12, 0, 0, 0);
         }
+
+        if (this.max && d > this.max) {
+            d.setTime(this.max.getTime());
+        }
+
+        if (this.min && d < this.min) {
+            d.setTime(this.min.getTime());
+        }
         this.$emit('update:modelValue', d);
     }
 
@@ -415,6 +429,8 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             // preferredWidth: el.offsetWidth,
             selectedDay: this.modelValue ? new Date(this.modelValue) : new Date(),
             allowClear: !this.required,
+            min: this.min,
+            max: this.max,
             setDate: (value: Date | null) => {
                 this.emitDate(value);
             },

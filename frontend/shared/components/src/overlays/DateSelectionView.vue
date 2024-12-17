@@ -33,7 +33,7 @@
                     <div>Zo</div>
                 </div>
                 <div v-for="(week, index) in weeks" :key="index" class="row">
-                    <button v-for="day in week" :key="day.number" type="button" :class="{selected: day.selected, 'other-month': day.otherMonth}" @click="onSelect(day)">
+                    <button v-for="day in week" :key="day.number" type="button" :class="{selected: day.selected, 'other-month': day.otherMonth}" :disabled="isDisabled(day)" @click="onSelect(day)">
                         {{ day.number }}
                     </button>
                 </div>
@@ -42,7 +42,7 @@
                 <button v-if="allowClear" type="button" class="button text" @click="clear">
                     Leegmaken
                 </button>
-                <button type="button" class="button text" @click="setToday">
+                <button v-if="!isDisabled({value: new Date()})" type="button" class="button text" @click="setToday">
                     Vandaag
                 </button>
             </footer>
@@ -81,6 +81,12 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     selectedDay!: Date;
 
+    @Prop({ default: null })
+    min!: Date | null;
+
+    @Prop({ default: null })
+    max!: Date | null;
+
     currentMonth: Date = new Date((this.selectedDay ?? new Date()).getTime());
     weeks: any = null;
     monthTitle = '';
@@ -104,6 +110,16 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                 e.preventDefault();
             });
         }
+    }
+
+    isDisabled(day: { value: Date }) {
+        if (this.min && day.value.getTime() < this.min.getTime()) {
+            return true;
+        }
+        if (this.max && day.value.getTime() > this.max.getTime()) {
+            return true;
+        }
+        return false;
     }
 
     generateDays() {
@@ -422,9 +438,25 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                     }
                 }
 
+                &:disabled {
+                    opacity: 0.3;
+                    cursor: not-allowed;
+
+                    &:hover {
+                        &::after {
+                            background: var(--color-current-background, #{$color-background});
+                        }
+                    }
+                }
+
                 &.other-month {
                     opacity: 0.3;
+
+                    &:disabled {
+                        opacity: 0.2;
+                    }
                 }
+
             }
         }
     }
