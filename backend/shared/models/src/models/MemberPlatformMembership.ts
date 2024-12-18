@@ -116,8 +116,6 @@ export class MemberPlatformMembership extends Model {
     }
 
     async isElegibleForTrial(member: Member) {
-        const start = new Date(this.startDate.getTime() - 365 * 24 * 60 * 60 * 1000);
-
         const period = await RegistrationPeriod.getByID(this.periodId);
         if (!period) {
             return false;
@@ -145,11 +143,7 @@ export class MemberPlatformMembership extends Model {
                 return false;
             }
 
-            if (m.endDate > start) {
-                // Not allowed
-                return true;
-            }
-            return false;
+            return true;
         });
 
         if (hasBlockingMemberships) {
