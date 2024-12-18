@@ -98,6 +98,10 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: new ArrayDecoder(StockReservation), nullable: true, version: 299 })
     stockReservations: StockReservation[] = [];
 
+    get isTrial() {
+        return this.trialUntil !== null && (this.deactivatedAt ? (this.trialUntil >= this.deactivatedAt) : (this.trialUntil > new Date()));
+    }
+
     get description() {
         const descriptions: string[] = [];
 

@@ -21,6 +21,9 @@ export class Platform extends Model {
     periodId: string;
 
     @column({ type: 'string', nullable: true })
+    previousPeriodId: string | null = null;
+
+    @column({ type: 'string', nullable: true })
     membershipOrganizationId: string | null = null;
 
     @column({ type: 'json', decoder: PlatformPrivateConfig })
@@ -35,6 +38,11 @@ export class Platform extends Model {
         clone.setShared();
 
         return clone;
+    }
+
+    async setPreviousPeriodId() {
+        const period = await RegistrationPeriod.getByID(this.periodId);
+        this.previousPeriodId = period?.id ?? null;
     }
 
     static async getSharedPrivateStruct(): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
@@ -76,8 +84,8 @@ export class Platform extends Model {
     }
 
     async save() {
-        Platform.clearCache();
         const s = await super.save();
+        Platform.clearCache();
 
         // Force update cache immediately
         await Platform.getSharedStruct();

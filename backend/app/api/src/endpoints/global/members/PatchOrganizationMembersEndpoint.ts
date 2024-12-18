@@ -218,7 +218,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                const platform = await Platform.getShared();
                 const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId);
 
                 if (responsibility && !responsibility.organizationBased && !Context.auth.hasPlatformFullAccess()) {
@@ -261,7 +260,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw Context.auth.error('Je hebt niet voldoende rechten om functies van leden aan te passen');
                 }
 
-                const platform = await Platform.getShared();
                 const platformResponsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId);
                 const org = organization ?? (put.organizationId ? await Organization.getByID(put.organizationId) : null);
 
@@ -482,7 +480,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 membership.organizationId = put.organizationId;
                 membership.periodId = put.periodId;
 
-                membership.startDate = put.startDate;
+                membership.startDate = new Date(Math.max(Date.now(), put.startDate.getTime()));
                 membership.endDate = put.endDate;
                 membership.expireDate = put.expireDate;
 

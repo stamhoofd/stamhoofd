@@ -1,6 +1,6 @@
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { AuditLogType, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
+import { AuditLogSource, AuditLogType, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Platform, RegistrationPeriod } from '@stamhoofd/models';
@@ -60,6 +60,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             period.locked = put.locked;
             period.settings = put.settings;
             period.organizationId = organization?.id ?? null;
+            await period.setPreviousPeriodId();
 
             await period.save();
             periods.push(period);
@@ -91,6 +92,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 model.settings = patchObject(model.settings, patch.settings);
             }
 
+            await model.setPreviousPeriodId();
             await model.save();
 
             // Schedule patch of all groups in this period
@@ -108,7 +110,19 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 });
             }
 
+            // Get before deleting the model
+            const updateWhere = await RegistrationPeriod.where({ previousPeriodId: model.id });
+
+            // Now delete the model
             await model.delete();
+
+            // Update all previous period ids
+            await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+                for (const period of updateWhere) {
+                    await period.setPreviousPeriodId();
+                    await period.save();
+                }
+            });
         }
 
         // Clear platform cache

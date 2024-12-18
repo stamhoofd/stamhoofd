@@ -35,7 +35,7 @@
             <button class="button text" type="button" @click="showDeleted = true;">
                 Toon beëindigde inschrijvingen
             </button>
-        </footer>   
+        </footer>
     </article>
 </template>
 
@@ -58,11 +58,11 @@ import { TableActionSelection } from '../../../tables';
 import { useMembersObjectFetcher } from '../../../fetchers/useMembersObjectFetcher';
 
 const props = defineProps<{
-    member: PlatformMember
+    member: PlatformMember;
 }>();
 
 const visibleRegistrationsTitle = computed(() => {
-    return period.value.name
+    return period.value.name;
 });
 
 const auth = useAuth();
@@ -71,12 +71,12 @@ const organization = useOrganization();
 const platform = usePlatform();
 
 // If the organization of this member already moved to the next period, select it by default
-const defaultPeriod = organization.value?.period?.period ?? props.member.filterOrganizations({currentPeriod: true})[0]?.period?.period ?? props.member.filterOrganizations({})[0]?.period?.period ?? platform.value.period
+const defaultPeriod = organization.value?.period?.period ?? props.member.filterOrganizations({ currentPeriod: true })[0]?.period?.period ?? props.member.filterOrganizations({})[0]?.period?.period ?? platform.value.period;
 const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
 const platformManager = usePlatformManager();
 const owner = useRequestOwner();
 const showDeleted = ref(false);
-const app = useAppContext()
+const app = useAppContext();
 const hasDeleted = computed(() => {
     return filteredRegistrations.value.some(r => r.deactivatedAt);
 });
@@ -85,24 +85,24 @@ const dismiss = useDismiss();
 platformManager.value.loadPeriods(false, true, owner).catch(console.error);
 
 const hasWrite = computed(() => {
-    return !period.value.locked && auth.canAccessPlatformMember(props.member, PermissionLevel.Write)
-})
+    return !period.value.locked && auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
+});
 
 const filteredRegistrations = computed(() => {
-    return props.member.patchedMember.registrations.filter(r => {
+    return props.member.patchedMember.registrations.filter((r) => {
         if (organization.value && r.organizationId !== organization.value.id) {
             return false;
         }
         if (r.group.periodId !== period.value.id) {
             return false;
         }
-        return true
-    }).sort((a, b) => 
+        return true;
+    }).sort((a, b) =>
         Sorter.stack(
-            Sorter.byDateValue(b.deactivatedAt ?? new Date(0), a.deactivatedAt ?? new Date(0)),
-            Sorter.byDateValue(b.registeredAt ?? b.createdAt, a.registeredAt ?? a.createdAt)
+            Sorter.byDateValue(a.deactivatedAt ?? new Date(2034522839 * 1000), b.deactivatedAt ?? new Date(2034522839 * 1000)),
+            Sorter.byDateValue(b.registeredAt ?? b.createdAt, a.registeredAt ?? a.createdAt),
 
-        )
+        ),
     );
 });
 const visibleRegistrations = computed(() => {
@@ -112,73 +112,73 @@ const visibleRegistrations = computed(() => {
     return filteredRegistrations.value;
 });
 
-const chooseGroupForMember = useChooseGroupForMember()
+const chooseGroupForMember = useChooseGroupForMember();
 
 async function addRegistration() {
-    await chooseGroupForMember({member: props.member, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}})
+    await chooseGroupForMember({ member: props.member, displayOptions: { action: 'present', modalDisplayStyle: 'popup' } });
 }
 
 async function openCart() {
-    await dismiss({force: true})
-    await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
+    await dismiss({ force: true });
+    await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
 }
 
-const buildActions = useRegistrationActionBuilder()
-const objectFetcher = useMembersObjectFetcher()
+const buildActions = useRegistrationActionBuilder();
+const objectFetcher = useMembersObjectFetcher();
 
 async function editRegistration(registration: Registration, event: MouseEvent) {
     const builder = buildActions({
         registration,
-        member: props.member
-    })
+        member: props.member,
+    });
 
-    const actions = builder.getActions()
+    const actions = builder.getActions();
 
     if (actions.filter(a => a.enabled).length === 0) {
-        Toast.warning('Er zijn geen acties beschikbaar voor deze inschrijving').show()
+        Toast.warning('Er zijn geen acties beschikbaar voor deze inschrijving').show();
         return;
     }
 
     const el = event.currentTarget! as HTMLElement;
-    const bounds = el.getBoundingClientRect()
+    const bounds = el.getBoundingClientRect();
 
     const selection: TableActionSelection<PlatformMember> = {
         filter: new LimitedFilteredRequest({
             filter: {
-                id: props.member.id
+                id: props.member.id,
             },
-            limit: 2
+            limit: 2,
         }),
         fetcher: objectFetcher, // todo
         markedRows: new Map([[props.member.id, props.member]]),
         markedRowsAreSelected: true,
-    }
-    
+    };
+
     const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
         x: bounds.right,
         y: bounds.bottom,
-        xPlacement: "left",
-        yPlacement: "bottom",
+        xPlacement: 'left',
+        yPlacement: 'bottom',
         actions,
-        selection
+        selection,
     });
-    await present(displayedComponent.setDisplayStyle("overlay"));
+    await present(displayedComponent.setDisplayStyle('overlay'));
 }
 
 function switchCycle(event: MouseEvent) {
     const menu = new ContextMenu([
-        (platform.value.periods ?? []).slice(0, 5).map(p => {
+        (platform.value.periods ?? []).slice(0, 5).map((p) => {
             return new ContextMenuItem({
                 name: p.name,
                 selected: p.id === period.value.id,
                 action: () => {
-                    period.value = p
+                    period.value = p;
                     return true;
-                }
+                },
             });
-        })
-    ])
-    menu.show({ button: event.currentTarget as HTMLElement, yOffset: -10 }).catch(console.error)
+        }),
+    ]);
+    menu.show({ button: event.currentTarget as HTMLElement, yOffset: -10 }).catch(console.error);
 }
 
 </script>

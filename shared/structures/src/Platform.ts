@@ -186,6 +186,9 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     amountFree = 0;
 
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    trialDays = 0;
+
     @field({ decoder: new ArrayDecoder(PlatformMembershipTypeConfigPrice) })
     prices: PlatformMembershipTypeConfigPrice[] = [PlatformMembershipTypeConfigPrice.create({})];
 

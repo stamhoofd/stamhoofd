@@ -7,8 +7,8 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Cart, CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
+import { Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -20,7 +20,6 @@ import ProductBox from "./ProductBox.vue"
         STToolbar,
         STList,
         STListItem,
-        LoadingView,
         Checkbox,
         ProductBox
     },

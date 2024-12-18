@@ -214,6 +214,8 @@ const allColumns: Column<ObjectType, any>[] = [
         getValue: member => member.membershipStatus,
         format: (status) => {
             switch (status) {
+                case MembershipStatus.Trial:
+                    return 'Proefperiode';
                 case MembershipStatus.Active:
                     return 'Actief';
                 case MembershipStatus.Expiring:
@@ -226,6 +228,8 @@ const allColumns: Column<ObjectType, any>[] = [
         },
         getStyle: (status) => {
             switch (status) {
+                case MembershipStatus.Trial:
+                    return 'secundary';
                 case MembershipStatus.Active:
                     return 'success';
                 case MembershipStatus.Expiring:
@@ -236,8 +240,8 @@ const allColumns: Column<ObjectType, any>[] = [
                     return 'error';
             }
         },
-        minimumWidth: 100,
-        recommendedWidth: 120,
+        minimumWidth: 120,
+        recommendedWidth: 140,
         allowSorting: false,
     }),
     new Column<ObjectType, string[]>({

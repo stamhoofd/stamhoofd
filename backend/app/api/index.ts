@@ -1,7 +1,7 @@
 import backendEnv from '@stamhoofd/backend-env';
 backendEnv.load();
 
-import { Column, Database, Migration, Model } from '@simonbackx/simple-database';
+import { Column, Database, Migration } from '@simonbackx/simple-database';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
@@ -10,14 +10,14 @@ import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
-import { stopCrons, startCrons, waitForCrons } from '@stamhoofd/crons';
-import { resumeEmails } from './src/helpers/EmailResumer';
-import { ContextMiddleware } from './src/middleware/ContextMiddleware';
+import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
-import { AuditLogService } from './src/services/AuditLogService';
-import { PlatformMembershipService } from './src/services/PlatformMembershipService';
-import { DocumentService } from './src/services/DocumentService';
+import { resumeEmails } from './src/helpers/EmailResumer';
 import { SetupStepUpdater } from './src/helpers/SetupStepUpdater';
+import { ContextMiddleware } from './src/middleware/ContextMiddleware';
+import { AuditLogService } from './src/services/AuditLogService';
+import { DocumentService } from './src/services/DocumentService';
+import { PlatformMembershipService } from './src/services/PlatformMembershipService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -39,7 +39,9 @@ if (new Date().getTimezoneOffset() !== 0) {
 const seeds = async () => {
     try {
         // Internal
-        await Migration.runAll(__dirname + '/src/seeds');
+        await AuditLogService.disable(async () => {
+            await Migration.runAll(__dirname + '/src/seeds');
+        });
     }
     catch (e) {
         console.error('Failed to run seeds:');

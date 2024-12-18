@@ -15,6 +15,9 @@ export class RegistrationPeriodBase extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     locked = false;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    previousPeriodId: string | null = null;
+
     get name() {
         return 'Werkjaar ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }

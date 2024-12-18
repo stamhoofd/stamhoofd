@@ -38,10 +38,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         return false;
     }
 
-    outstandingBalanceFor(organizationId: string) {
-        return this.registrations.filter(r => r.organizationId == organizationId).reduce((sum, r) => sum + (r.price - r.pricePaid), 0);
-    }
-
     hasAccount(email: string) {
         return !!this.users.find(u => u.hasAccount && u.email === email);
     }

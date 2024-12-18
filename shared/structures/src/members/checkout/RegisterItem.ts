@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,6 +17,7 @@ import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilte
 import { RecordSettings } from '../records/RecordSettings.js';
 import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
+import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -54,6 +55,12 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     replaceRegistrationIds: string[] = [];
 
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    trial = false;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    customStartDate: Date | null = null;
+
     hydrate(context: RegisterContext) {
         return RegisterItem.fromId(this, context);
     }
@@ -70,6 +77,7 @@ export class RegisterItem {
     groupPrice: GroupPrice;
     options: RegisterItemOption[] = [];
     recordAnswers: Map<string, RecordAnswer> = new Map();
+    customStartDate: Date | null = null;
 
     /**
      * Price for the new registration
@@ -103,19 +111,6 @@ export class RegisterItem {
         return false;
     }
 
-    static fromRegistration(registration: Registration, member: PlatformMember, organization: Organization) {
-        return new RegisterItem({
-            id: registration.id,
-            member,
-            group: registration.group,
-            organization,
-            groupPrice: registration.groupPrice,
-            recordAnswers: registration.recordAnswers,
-            options: registration.options,
-            trial: registration.trialUntil !== null,
-        });
-    }
-
     static defaultFor(member: PlatformMember, group: Group, organization: Organization) {
         if (group.organizationId !== organization.id) {
             throw new Error('Group and organization do not match in RegisterItem.defaultFor');
@@ -144,6 +139,7 @@ export class RegisterItem {
         calculatedRefund?: number;
         calculatedPriceDueLater?: number;
         trial?: boolean;
+        customStartDate?: Date | null;
     }) {
         this.id = data.id ?? uuidv4();
         this.member = data.member;
@@ -222,6 +218,109 @@ export class RegisterItem {
         if (data.trial === undefined) {
             this.trial = this.canHaveTrial;
         }
+
+        if (data.customStartDate !== undefined) {
+            this.customStartDate = data.customStartDate;
+        }
+    }
+
+    static fromRegistration(registration: Registration, member: PlatformMember, organization: Organization) {
+        return new RegisterItem({
+            id: registration.id,
+            member,
+            group: registration.group,
+            organization,
+            groupPrice: registration.groupPrice,
+            recordAnswers: registration.recordAnswers,
+            options: registration.options,
+            trial: registration.trialUntil !== null,
+            customStartDate: registration.startDate,
+        });
+    }
+
+    clone() {
+        return new RegisterItem({
+            id: this.id,
+            member: this.member,
+            group: this.group,
+            organization: this.organization,
+            groupPrice: this.groupPrice.clone(),
+            options: this.options.map(o => o.clone()),
+            recordAnswers: new Map([...this.recordAnswers.entries()].map(([k, v]) => [k, v.clone()])),
+            replaceRegistrations: this.replaceRegistrations.map(r => r.clone()),
+            cartError: this.cartError,
+            calculatedPrice: this.calculatedPrice,
+            calculatedRefund: this.calculatedRefund,
+            calculatedPriceDueLater: this.calculatedPriceDueLater,
+            trial: this.trial,
+            customStartDate: this.customStartDate,
+        });
+    }
+
+    copyFrom(item: RegisterItem) {
+        this.groupPrice = item.groupPrice.clone();
+        this.options = item.options.map(o => o.clone());
+        this.recordAnswers = new Map([...item.recordAnswers.entries()].map(([k, v]) => [k, v.clone()]));
+        this.calculatedPrice = item.calculatedPrice;
+        this.calculatedRefund = item.calculatedRefund;
+        this.calculatedPriceDueLater = item.calculatedPriceDueLater;
+        this.trial = item.trial;
+        this.customStartDate = item.customStartDate;
+    }
+
+    static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
+        const member = context.members.find(m => m.member.id === idRegisterItem.memberId);
+        if (!member) {
+            throw new Error('Member not found: ' + idRegisterItem.memberId);
+        }
+
+        const organization = context.organizations.find(o => o.id === idRegisterItem.organizationId);
+        if (!organization) {
+            throw new Error('Organization not found: ' + idRegisterItem.organizationId);
+        }
+
+        const group = context.groups.find(g => g.id === idRegisterItem.groupId);
+        if (!group) {
+            throw new Error('Group not found: ' + idRegisterItem.groupId);
+        }
+
+        const replaceRegistrations: Registration[] = [];
+
+        for (const registrationId of idRegisterItem.replaceRegistrationIds) {
+            const registration = member.patchedMember.registrations.find(r => r.id === registrationId);
+            if (!registration) {
+                throw new Error('Registration not found: ' + registrationId);
+            }
+            replaceRegistrations.push(registration);
+        }
+
+        return new RegisterItem({
+            id: idRegisterItem.id,
+            member,
+            group,
+            organization,
+            groupPrice: idRegisterItem.groupPrice,
+            options: idRegisterItem.options,
+            recordAnswers: idRegisterItem.recordAnswers,
+            replaceRegistrations,
+            trial: idRegisterItem.trial,
+            customStartDate: idRegisterItem.customStartDate,
+        });
+    }
+
+    convert(): IDRegisterItem {
+        return IDRegisterItem.create({
+            id: this.id,
+            memberId: this.member.member.id,
+            groupId: this.group.id,
+            organizationId: this.organization.id,
+            groupPrice: this.groupPrice,
+            options: this.options,
+            replaceRegistrationIds: this.replaceRegistrations.map(r => r.id),
+            recordAnswers: this.recordAnswers,
+            trial: this.trial,
+            customStartDate: this.customStartDate,
+        });
     }
 
     get isInCart() {
@@ -293,34 +392,6 @@ export class RegisterItem {
         ];
     }
 
-    clone() {
-        return new RegisterItem({
-            id: this.id,
-            member: this.member,
-            group: this.group,
-            organization: this.organization,
-            groupPrice: this.groupPrice.clone(),
-            options: this.options.map(o => o.clone()),
-            recordAnswers: new Map([...this.recordAnswers.entries()].map(([k, v]) => [k, v.clone()])),
-            replaceRegistrations: this.replaceRegistrations.map(r => r.clone()),
-            cartError: this.cartError,
-            calculatedPrice: this.calculatedPrice,
-            calculatedRefund: this.calculatedRefund,
-            calculatedPriceDueLater: this.calculatedPriceDueLater,
-            trial: this.trial,
-        });
-    }
-
-    copyFrom(item: RegisterItem) {
-        this.groupPrice = item.groupPrice.clone();
-        this.options = item.options.map(o => o.clone());
-        this.recordAnswers = new Map([...item.recordAnswers.entries()].map(([k, v]) => [k, v.clone()]));
-        this.calculatedPrice = item.calculatedPrice;
-        this.calculatedRefund = item.calculatedRefund;
-        this.calculatedPriceDueLater = item.calculatedPriceDueLater;
-        this.trial = item.trial;
-    }
-
     getFilteredPrices() {
         const base = this.group.settings.getFilteredPrices({ admin: this.checkout.isAdminFromSameOrganization });
 
@@ -336,19 +407,6 @@ export class RegisterItem {
 
     getFilteredOptions(menu: GroupOptionMenu) {
         return menu.getFilteredOptions({ admin: this.checkout.isAdminFromSameOrganization });
-    }
-
-    convert(): IDRegisterItem {
-        return IDRegisterItem.create({
-            id: this.id,
-            memberId: this.member.member.id,
-            groupId: this.group.id,
-            organizationId: this.organization.id,
-            groupPrice: this.groupPrice,
-            options: this.options,
-            replaceRegistrationIds: this.replaceRegistrations.map(r => r.id),
-            recordAnswers: this.recordAnswers,
-        });
     }
 
     get memberId() {
@@ -692,8 +750,12 @@ export class RegisterItem {
         return this.validationError === null;
     }
 
-    get calculatedStartDate() {
+    get defaultStartDate() {
         return new Date(Math.max(Date.now(), this.group.settings.startDate.getTime()));
+    }
+
+    get calculatedStartDate() {
+        return this.customStartDate ?? this.defaultStartDate;
     }
 
     get calculatedTrialUntil() {
@@ -716,23 +778,43 @@ export class RegisterItem {
         if (this.replaceRegistrations.find(r => r.trialUntil !== null)) {
             return true;
         }
-        const start = new Date(this.group.settings.startDate.getTime() - 365 * 24 * 60 * 60 * 1000);
+        const currentPeriodId = this.organization.period.period.id;
+        const previousPeriodId = this.organization.period.period.previousPeriodId;
+
+        if (!previousPeriodId) {
+            // We have no data: never give trails to avoid accidental trials
+            return false;
+        }
+
+        if (this.group.periodId !== currentPeriodId) {
+            return false;
+        }
 
         if (this.group.defaultAgeGroupId) {
             // Use platform based logic to determine if it is a new member by looking at memberships
-
+            const types = this.member.platform.config.membershipTypes.filter(m => m.behaviour === PlatformMembershipTypeBehaviour.Period).map(m => m.id);
             const hasBlockingMemberships = !!this.member.patchedMember.platformMemberships.find((m) => {
+                if (!types.includes(m.membershipTypeId)) {
+                    return false;
+                }
+
+                if (m.periodId === currentPeriodId && m.balanceItemId) {
+                    // Already has a membership for the current period - which is not deletable
+                    return true;
+                }
+
+                if (m.periodId !== previousPeriodId) {
+                    // Not previous period
+                    return false;
+                }
+
                 const days = (m.endDate.getTime() - m.startDate.getTime()) / (24 * 60 * 60 * 1000);
-                if (days < 24) {
+                if (days <= 28) {
                     // This registration was not long enough to disallow a new trial
                     return false;
                 }
 
-                if (m.endDate > start) {
-                    // Not allowed
-                    return true;
-                }
-                return false;
+                return true;
             });
 
             if (hasBlockingMemberships) {
@@ -742,13 +824,13 @@ export class RegisterItem {
             return true;
         }
 
-        // Look at normal registrations at the same organization
-        // Should not have a regitsration this period or last period
+        // Should not have a registration last period
         const reg = this.member.filterRegistrations({
             organizationId: this.group.organizationId,
             types: [GroupType.Membership],
+            periodId: previousPeriodId,
         });
-        return !reg.find(g => g.group.settings.endDate >= start);
+        return reg.length === 0;
     }
 
     validatePeriod(group: Group, type: 'move' | 'register', admin = false) {
@@ -801,6 +883,30 @@ export class RegisterItem {
             this.trial = false;
         }
 
+        if (!checkout.isAdminFromSameOrganization && this.customStartDate) {
+            this.customStartDate = null;
+        }
+
+        if (this.customStartDate) {
+            if (this.customStartDate < this.group.settings.startDate) {
+                throw new SimpleError({
+                    code: 'invalid_start_date',
+                    message: 'Invalid start date',
+                    human: 'De startdatum van de inschrijving moet na de startdatum van de groep zelf zijn',
+                    field: 'customStartDate',
+                });
+            }
+
+            if (this.customStartDate > this.group.settings.endDate) {
+                throw new SimpleError({
+                    code: 'invalid_start_date',
+                    message: 'Invalid start date',
+                    human: 'De startdatum van de inschrijving moet voor de einddatum van de groep zijn',
+                    field: 'customStartDate',
+                });
+            }
+        }
+
         if (this.checkout.singleOrganization && this.checkout.singleOrganization.id !== this.organization.id) {
             throw new SimpleError({
                 code: 'multiple_organizations',
@@ -847,7 +953,7 @@ export class RegisterItem {
                 });
             }
 
-            if (!admin) {
+            if (!checkout.isAdminFromSameOrganization) { // we don't use admins because this shouldn't raise a warning
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Not allowed to move registrations',
@@ -1034,44 +1140,6 @@ export class RegisterItem {
                 item.validate({ warnings: options?.warnings });
             }
         }
-    }
-
-    static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
-        const member = context.members.find(m => m.member.id === idRegisterItem.memberId);
-        if (!member) {
-            throw new Error('Member not found: ' + idRegisterItem.memberId);
-        }
-
-        const organization = context.organizations.find(o => o.id === idRegisterItem.organizationId);
-        if (!organization) {
-            throw new Error('Organization not found: ' + idRegisterItem.organizationId);
-        }
-
-        const group = context.groups.find(g => g.id === idRegisterItem.groupId);
-        if (!group) {
-            throw new Error('Group not found: ' + idRegisterItem.groupId);
-        }
-
-        const replaceRegistrations: Registration[] = [];
-
-        for (const registrationId of idRegisterItem.replaceRegistrationIds) {
-            const registration = member.patchedMember.registrations.find(r => r.id === registrationId);
-            if (!registration) {
-                throw new Error('Registration not found: ' + registrationId);
-            }
-            replaceRegistrations.push(registration);
-        }
-
-        return new RegisterItem({
-            id: idRegisterItem.id,
-            member,
-            group,
-            organization,
-            groupPrice: idRegisterItem.groupPrice,
-            options: idRegisterItem.options,
-            recordAnswers: idRegisterItem.recordAnswers,
-            replaceRegistrations,
-        });
     }
 
     /**

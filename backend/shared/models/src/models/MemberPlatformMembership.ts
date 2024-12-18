@@ -4,10 +4,12 @@ import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
 import { PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
+import { BalanceItem } from './BalanceItem';
 import { Member } from './Member';
 import { Organization } from './Organization';
 import { Platform } from './Platform';
-import { BalanceItem } from './BalanceItem';
+import { Registration } from './Registration';
+import { RegistrationPeriod } from './RegistrationPeriod';
 
 export class MemberPlatformMembership extends Model {
     static table = 'member_platform_memberships';
@@ -113,14 +115,58 @@ export class MemberPlatformMembership extends Model {
         throw new Error('Cannot delete a membership. Use the deletedAt column.');
     }
 
-    async calculatePrice(member: Member) {
+    async isElegibleForTrial(member: Member) {
+        const start = new Date(this.startDate.getTime() - 365 * 24 * 60 * 60 * 1000);
+
+        const period = await RegistrationPeriod.getByID(this.periodId);
+        if (!period) {
+            return false;
+        }
+
+        if (!period.previousPeriodId) {
+            // We have no previous period = no data = no trials
+            return false;
+        }
+
+        const platform = await Platform.getSharedStruct();
+        const typeIds = platform.config.membershipTypes.filter(m => m.behaviour === PlatformMembershipTypeBehaviour.Period).map(m => m.id);
+
+        const memberships = await MemberPlatformMembership.select()
+            .where('memberId', member.id)
+            .where('deletedAt', null)
+            .where('periodId', period.previousPeriodId)
+            .where('membershipTypeId', typeIds)
+            .fetch();
+
+        const hasBlockingMemberships = !!memberships.find((m) => {
+            const days = (m.endDate.getTime() - m.startDate.getTime()) / (24 * 60 * 60 * 1000);
+            if (days <= 28) {
+                // This registration was not long enough to disallow a new trial
+                return false;
+            }
+
+            if (m.endDate > start) {
+                // Not allowed
+                return true;
+            }
+            return false;
+        });
+
+        if (hasBlockingMemberships) {
+            return false;
+        }
+
+        return true;
+    }
+
+    async calculatePrice(member: Member, registration?: Registration) {
         const platform = await Platform.getSharedPrivateStruct();
-        const membershipType = platform.config.membershipTypes.find(m => m.id == this.membershipTypeId);
+        const membershipType = platform.config.membershipTypes.find(m => m.id === this.membershipTypeId);
 
         if (!membershipType) {
             throw new SimpleError({
                 code: 'invalid_membership_type',
-                message: 'Uknown membership type',
+                message: 'Unknown membership type',
                 human: 'Deze aansluiting is niet (meer) beschikbaar',
             });
         }
@@ -201,7 +247,6 @@ export class MemberPlatformMembership extends Model {
         else {
             this.priceWithoutDiscount = earliestPriceConfig.getBasePrice(tagIds, false);
             this.price = priceConfig.getBasePrice(tagIds, shouldApplyReducedPrice);
-            this.startDate = periodConfig.startDate;
             this.endDate = periodConfig.endDate;
             this.expireDate = periodConfig.expireDate;
             this.maximumFreeAmount = this.price > 0 ? 1 : 0;
@@ -211,6 +256,53 @@ export class MemberPlatformMembership extends Model {
                 this.price = 0;
                 this.freeAmount = 1;
             }
+
+            // Alter start date
+            if (registration && registration.startDate) {
+                this.startDate = periodConfig.startDate;
+
+                if (registration.startDate > periodConfig.startDate && registration.startDate < periodConfig.endDate) {
+                    let startBrussels = Formatter.luxon(registration.startDate);
+                    startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                    this.startDate = startBrussels.toJSDate();
+                }
+            }
+            else {
+                let startBrussels = Formatter.luxon(this.startDate);
+                startBrussels = startBrussels.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                this.startDate = startBrussels.toJSDate();
+            }
+        }
+
+        if (periodConfig.trialDays) {
+            // Check whether you are elegible for a trial
+            if (await this.isElegibleForTrial(member)) {
+                // Allowed to set trial until, maximum periodConfig.trialDays after startDate
+                let trialUntil = Formatter.luxon(this.startDate).plus({ days: periodConfig.trialDays });
+                trialUntil = trialUntil.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+
+                // Max end date
+                if (trialUntil.toJSDate() > this.endDate) {
+                    trialUntil = Formatter.luxon(this.endDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+                }
+
+                this.trialUntil = trialUntil.toJSDate();
+            }
+            else {
+                this.trialUntil = null;
+            }
+        }
+        else {
+            // No trial
+            this.trialUntil = null;
+        }
+
+        // Never charge itself
+        const chargeVia = platform.membershipOrganizationId;
+        if (this.organizationId === chargeVia) {
+            this.price = 0;
+            this.priceWithoutDiscount = 0;
+            this.freeAmount = 0;
         }
 
         if (this.balanceItemId) {

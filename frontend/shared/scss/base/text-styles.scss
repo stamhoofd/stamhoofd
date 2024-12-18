@@ -1133,6 +1133,11 @@
             display: block;
         }
 
+        &:has(> .icon.stroke) {
+            background: transparent;
+            border-radius: 0;
+        }
+
         .style-bubble {
             margin: 2px;
             min-width: 16px;

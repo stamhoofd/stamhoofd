@@ -68,7 +68,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, LoadingViewTransition } from '@stamhoofd/components';
+import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, LoadingViewTransition } from '@stamhoofd/components';
 import { SessionManager } from '@stamhoofd/networking';
 import { ApiUser, PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

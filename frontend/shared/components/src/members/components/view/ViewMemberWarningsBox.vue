@@ -87,6 +87,13 @@ const warnings = computed(() => {
         }
     }
 
+    if (props.member.membershipStatus === MembershipStatus.Trial) {
+        warnings.push(RecordWarning.create({
+            text: $t('Dit lid heeft een proefaansluiting bij KSA Nationaal'),
+            type: RecordWarningType.Info,
+        }));
+    }
+
     if (props.member.membershipStatus === MembershipStatus.Inactive) {
         warnings.push(RecordWarning.create({
             text: $t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e'),

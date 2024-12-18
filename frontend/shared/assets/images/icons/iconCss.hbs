@@ -4,7 +4,7 @@ font-display: block;
 src: {{{src}}};
 }
 
-.icon:before, .icon-base:before {
+.icon:before, .icon-base:before, .icon.stroke:after {
 font-family: {{fontName}} !important;
 font-style: normal;
 font-weight: normal !important;
@@ -17,7 +17,7 @@ content: "\\{{this}}";
 {{/each}}
 
 {{#each codepoints}}
-.icon.{{@key}}:before, .icon-base.{{@key}}:before{
+.icon.{{@key}}:before, .icon-base.{{@key}}:before, .icon.stroke.{{@key}}:after {
 content: "\\{{this}}";
 }
 {{/each}}

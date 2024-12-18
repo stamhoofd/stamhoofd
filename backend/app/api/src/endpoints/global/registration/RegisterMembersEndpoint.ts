@@ -242,7 +242,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // Check if this member is already registered in this group?
-            const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle });
+            const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle, periodId: group.periodId, registeredAt: { sign: '!=', value: null } });
 
             for (const existingRegistration of existingRegistrations) {
                 if (item.replaceRegistrations.some(r => r.id === existingRegistration.id)) {
@@ -263,7 +263,19 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 }
             }
 
-            const registration = new Registration()
+            let reuseRegistration: Registration | null = null;
+
+            if (item.replaceRegistrations.length === 1) {
+                // Try to reuse this specific one
+                reuseRegistration = (await Registration.getByID(item.replaceRegistrations[0].id)) ?? null;
+            }
+
+            if (!reuseRegistration) {
+                // Otherwise try to reuse a registration in the same period, for the same group that has been deactived
+                reuseRegistration = existingRegistrations.find(r => r.deactivatedAt !== null) ?? null;
+            }
+
+            const registration = (reuseRegistration ?? new Registration())
                 .setRelation(registrationMemberRelation, member as Member)
                 .setRelation(Registration.group, group);
             registration.organizationId = organization.id;
@@ -276,6 +288,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.options = item.options;
             registration.recordAnswers = item.recordAnswers;
             registration.startDate = item.calculatedStartDate;
+
+            // Clear if we are reusing an existing registration
+            registration.deactivatedAt = null;
+            registration.pricePaid = 0;
+            registration.payingOrganizationId = null;
 
             if (item.trial) {
                 registration.trialUntil = item.calculatedTrialUntil;

@@ -360,6 +360,7 @@ export class PlatformFamily {
 
 export enum MembershipStatus {
     Active = 'Active',
+    Trial = 'Trial',
     Expiring = 'Expiring',
     Inactive = 'Inactive',
     Temporary = 'Temporary',
@@ -463,7 +464,13 @@ export class PlatformMember implements ObjectWithRecords {
                     status = MembershipStatus.Temporary;
                 }
                 else {
-                    status = MembershipStatus.Active;
+                    if (t.trialUntil && t.trialUntil > now) {
+                        status = MembershipStatus.Trial;
+                    }
+                    else {
+                        status = MembershipStatus.Active;
+                        break;
+                    }
                 }
             }
         }

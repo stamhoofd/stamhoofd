@@ -67,6 +67,13 @@
                 :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'"
             />
         </STInputBox>
+
+        <template v-if="$feature('member-trials')">
+            <STInputBox :title="$t('Aantal dagen op proef' + '*')" error-fields="trialDays" :error-box="errors.errorBox">
+                <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
+            </STInputBox>
+            <p class="style-description-small">* Enkel voor nieuwe leden</p>
+        </template>
     </SaveView>
 </template>
 
@@ -190,6 +197,11 @@ const prices = computed({
 const amountFree = computed({
     get: () => patched.value.amountFree,
     set: amountFree => addPatch({ amountFree }),
+});
+
+const trialDays = computed({
+    get: () => patched.value.trialDays,
+    set: trialDays => addPatch({ trialDays }),
 });
 
 const shouldNavigateAway = async () => {

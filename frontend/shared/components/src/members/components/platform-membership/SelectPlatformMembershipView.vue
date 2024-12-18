@@ -35,11 +35,21 @@
 
                     <div v-if="selectedMembershipType.id === type.id && type.behaviour === PlatformMembershipTypeBehaviour.Days">
                         <STInputBox :title="$t('3d3a30bb-3628-413e-8d1a-3864b1dae8e1')" :error-box="errors.errorBox" error-fields="startDate">
-                            <DateSelection v-model="customStartDate" class="option" />
+                            <DateSelection v-model="customStartDate" class="option" :min="minimumStartDateForDaysTypes" />
                         </STInputBox>
 
                         <STInputBox :title="$t('f3cc0597-fe12-4cb1-bd41-4c7ce5d59235')" :error-box="errors.errorBox" error-fields="endDate">
-                            <DateSelection v-model="customEndDate" class="option" />
+                            <DateSelection v-model="customEndDate" class="option" :min="minimumStartDateForDaysTypes" />
+                        </STInputBox>
+                    </div>
+                    <div v-else-if="selectedMembershipType.id === type.id">
+                        <STInputBox :title="$t('3d3a30bb-3628-413e-8d1a-3864b1dae8e1')" :error-box="errors.errorBox" error-fields="startDate">
+                            <DateSelection
+                                v-model="customStartDate"
+                                class="option"
+                                :min="selectedMembershipType.periods.get(period.id)?.startDate ?? null"
+                                :max="selectedMembershipType.periods.get(period.id)?.endDate ?? null"
+                            />
                         </STInputBox>
                     </div>
 
@@ -60,9 +70,9 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ScrollableSegmentedControl, Toast, usePlatformFamilyManager } from '@stamhoofd/components';
+import { ScrollableSegmentedControl, STErrorsDefault, Toast, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
+import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType, PlatformMembershipTypeBehaviour, RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -72,6 +82,7 @@ import DateSelection from '../../../inputs/DateSelection.vue';
 
 const props = defineProps<{
     member: PlatformMember;
+    period: RegistrationPeriod;
 }>();
 
 const $t = useTranslate();
@@ -81,10 +92,19 @@ const saveText = 'Toevoegen';
 const organization = useOrganization();
 const platform = usePlatform();
 const now = new Date();
+
 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-const customStartDate = ref(tomorrow);
-const customEndDate = ref(tomorrow);
+const customStartDate = ref(today);
+const customEndDate = ref(today);
+const minimumStartDateForDaysTypes = today;
+
+if (customStartDate.value < props.period.startDate) {
+    customStartDate.value = props.period.startDate;
+}
+if (customEndDate.value > props.period.endDate) {
+    customEndDate.value = props.period.endDate;
+}
+
 const errors = useErrors();
 const platformFamilyManager = usePlatformFamilyManager();
 const pop = usePop();
@@ -112,7 +132,7 @@ async function save() {
     errors.errorBox = null;
 
     try {
-        const periodConfig = selectedMembershipType.value.periods.get(platform.value.period.id);
+        const periodConfig = selectedMembershipType.value.periods.get(props.period.id);
         if (!periodConfig) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -164,6 +184,24 @@ async function save() {
             }
         }
 
+        if (selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Period) {
+            if (customStartDate.value < periodConfig.startDate) {
+                errors.addError(new SimpleError({
+                    code: 'invalid_field',
+                    field: 'startDate',
+                    message: 'De startdatum kan niet voor ' + Formatter.date(periodConfig.startDate) + ' liggen',
+                }));
+            }
+
+            if (customStartDate.value > periodConfig.endDate) {
+                errors.addError(new SimpleError({
+                    code: 'invalid_field',
+                    field: 'startDate',
+                    message: 'De startdatum kan niet na ' + Formatter.date(periodConfig.endDate) + ' liggen',
+                }));
+            }
+        }
+
         errors.throwIfNotEmpty();
 
         // Execute an isolated patch
@@ -173,7 +211,7 @@ async function save() {
                 memberId: props.member.member.id,
                 membershipTypeId: selectedMembershipType.value.id,
                 organizationId: selectedOrganization.value!.id,
-                periodId: platform.value.period.id,
+                periodId: props.period.id,
                 startDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customStartDate.value : periodConfig.startDate,
                 endDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customEndDate.value : periodConfig.endDate,
                 expireDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? null : periodConfig.expireDate,
@@ -199,11 +237,11 @@ async function save() {
 }
 
 function getTypeAvailable(type: PlatformMembershipType) {
-    return type.periods.has(platform.value.period.id);
+    return type.periods.has(props.period.id);
 }
 
 function getTypeDateDescription(type: PlatformMembershipType) {
-    const periodConfig = type.periods.get(platform.value.period.id);
+    const periodConfig = type.periods.get(props.period.id);
     if (!periodConfig) {
         return '';
     }
@@ -224,7 +262,7 @@ function getTypePriceNormalPrice(type: PlatformMembershipType) {
 }
 
 function getPriceForDate(type: PlatformMembershipType, date: Date) {
-    const periodConfig = type.periods.get(platform.value.period.id);
+    const periodConfig = type.periods.get(props.period.id);
     if (!periodConfig) {
         return 'Niet beschikbaar';
     }

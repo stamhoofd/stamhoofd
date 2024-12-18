@@ -26,6 +26,7 @@
     display: inline-flex; // needed for proper vertical alignemnt of icons
     vertical-align: middle;
     align-items: center;
+    position: relative;
 
     &.small {
         width: 20px;
@@ -34,6 +35,17 @@
 
         &:before {
             font-size: 20px;
+        }
+    }
+
+    &.stroke {
+        &:before {
+            position: absolute;
+        }
+        &:after {
+            color: $color-background;
+            -webkit-text-stroke: 5px $color-background;
+            z-index: -1;
         }
     }
 

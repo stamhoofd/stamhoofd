@@ -295,25 +295,29 @@ export class RegisterCart {
                 continue;
             }
 
-            const platform = Platform.shared;
-
-            const periodId = registration.group.periodId;
-            if (periodId !== singleOrganization?.period.period.id && periodId !== platform.period.id) {
-                errors.addError(new SimpleError({
-                    code: 'different_period',
-                    message: 'Different period',
-                    human: `Je kan geen inschrijvingen wijzigen van ${registration.group.settings.name} omdat dat werkjaar niet actief is.`,
-                }));
+            if (!singleOrganization) {
                 continue;
             }
 
-            const period = periodId === platform.period.id ? platform.period : singleOrganization?.period.period;
+            const platform = Platform.shared;
+
+            const periodId = registration.group.periodId;
+            const period = periodId === platform.period.id ? platform.period : (periodId === singleOrganization.period.period.id ? singleOrganization.period.period : registration.group.settings.period);
 
             if (period && period.locked) {
                 errors.addError(new SimpleError({
                     code: 'locked_period',
                     message: 'Locked period',
                     human: `Je kan geen inschrijvingen wijzigen van ${registration.group.settings.name} omdat werkjaar ${period.nameShort} is afgesloten.`,
+                }));
+                continue;
+            }
+
+            if (!period) {
+                errors.addError(new SimpleError({
+                    code: 'locked_period',
+                    message: 'Locked period',
+                    human: `Je kan geen inschrijvingen wijzigen van ${registration.group.settings.name} omdat dat werkjaar is afgesloten.`,
                 }));
                 continue;
             }

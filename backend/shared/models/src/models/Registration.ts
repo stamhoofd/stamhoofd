@@ -53,6 +53,10 @@ export class Registration extends Model {
     @column({ type: 'integer' })
     cycle: number = 0;
 
+    /**
+     * @deprecated
+     * Should move to cached balances
+     */
     @column({ type: 'integer', nullable: true })
     price: number | null = null;
 
@@ -116,6 +120,8 @@ export class Registration extends Model {
     deactivatedAt: Date | null = null;
 
     /**
+     * @deprecated
+     * Should move to cached balances
      * Part of price that is paid
      */
     @column({ type: 'integer' })

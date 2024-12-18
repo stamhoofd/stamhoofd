@@ -1,10 +1,16 @@
 <template>
-    <STListItem v-long-press="editRegistration" v-color="registrationOrganization ? registrationOrganization.meta.color : null" :selectable="isEditable" class="hover-box" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
+    <STListItem v-long-press="editRegistration" v-color="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id) ? registrationOrganization.meta.color : null" :selectable="isEditable" class="hover-box" :class="{'theme-secundary': !registration.deactivatedAt && registration.isTrial, 'theme-error': !!registration.deactivatedAt}" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
         <template #left>
-            <GroupIconWithWaitingList :group="group" :icon="registration.deactivatedAt ? 'canceled' : (registration.trialUntil && registration.trialUntil > now ? 'trial secundary' : '')" :organization="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id) ? registrationOrganization : null" />
+            <GroupIconWithWaitingList :group="group" :icon="registration.deactivatedAt ? 'disabled error' : (registration.isTrial? 'trial secundary' : '')" :organization="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id) ? registrationOrganization : null" />
         </template>
         <p v-if="registrationOrganization && (app !== 'dashboard' || !organization || registrationOrganization.id !== organization.id)" class="style-title-prefix-list">
             {{ registrationOrganization.name }}
+        </p>
+        <p v-else-if="registration.deactivatedAt" class="style-title-prefix-list">
+            {{ $t('Stopgezet') }}
+        </p>
+        <p v-else-if="registration.isTrial" class="style-title-prefix-list">
+            {{ $t('Proefperiode') }}
         </p>
 
         <h3 class="style-title-list">
@@ -15,16 +21,16 @@
         <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description" />
 
         <p v-if="registration.startDate" class="style-description-small">
-            Vanaf {{ formatDate(registration.startDate) }}
+            Gestart op {{ formatDate(registration.startDate) }}
         </p>
 
-        <p v-if="registration.registeredAt" class="style-description-small">
+        <p v-if="registration.registeredAt && !(registration.startDate && formatDate(registration.registeredAt) === formatDate(registration.startDate))" class="style-description-small">
             Ingeschreven op {{ formatDate(registration.registeredAt) }}
         </p>
         <p v-if="registration.deactivatedAt" class="style-description-small">
             Uitgeschreven op {{ formatDate(registration.deactivatedAt) }}
         </p>
-        <p v-if="registration.trialUntil && registration.trialUntil > now" class="style-description-small">
+        <p v-if="registration.isTrial && registration.trialUntil" class="style-description-small">
             Proefperiode tot {{ formatDate(registration.trialUntil) }}
         </p>
         <p v-else-if="registration.startDate && registration.trialUntil" class="style-description-small">

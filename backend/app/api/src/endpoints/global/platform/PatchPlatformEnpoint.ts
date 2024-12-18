@@ -157,6 +157,8 @@ export class PatchPlatformEndpoint extends Endpoint<
             platform.periodId = period.id;
             shouldUpdateSetupSteps = true;
             shouldMoveToPeriod = period;
+
+            await platform.setPreviousPeriodId();
         }
 
         if (request.body.membershipOrganizationId !== undefined) {

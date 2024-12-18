@@ -34,8 +34,16 @@
         <p v-else class="style-description-block" v-text="'Schrijf ' +item.member.patchedMember.firstName+ ' hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.' " />
 
         <STErrorsDefault :error-box="errors.errorBox" />
+        <div v-if="admin" class="container">
+            <STInputBox :title="$t('Startdatum')" error-fields="customStartDate" :error-box="errors.errorBox">
+                <DateSelection v-model="customStartDate" :required="false" :placeholder="formatDate(item.defaultStartDate, true)" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
+            </STInputBox>
+            <p class="style-description-small">
+                Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een proefperiode later te laten beginnen, of een te late inschrijving vroeger te laten starten.
+            </p>
+        </div>
 
-        <div v-if="item.canHaveTrial || !skipTrial" class="container">
+        <div v-if="item.canHaveTrial || trial" class="container">
             <hr>
             <h2>
                 <span>Proefperiode</span>
@@ -44,7 +52,7 @@
             <p>{{ item.member.patchedMember.details.firstName }} komt in aanmerking voor een proefperiode van {{ Formatter.days(item.group.settings.trialDays) }}. Je moet dan pas betalen tegen het einde van de proefperiode (via het ledenportaal). Als je de inschrijving stopzet voor afloop van de proefperiode, hoef je niets te betalen. Als je geen proefperiode wilt, kan je ook onmiddelijk inschrijven als volwaardig lid.</p>
 
             <STList>
-                <CheckboxListItem v-model="skipTrial" label="De proefperiode overslaan en meteen betalen" description="Als je dit aanvinkt zal je meteen moeten betalen en de proefperiode overslaan." />
+                <CheckboxListItem v-model="trial" label="Ik wil gebruik maken van de proefperiode" description="Als je dit aanvinkt zal je nog niet meteen moeten betalen voor de inschrijving, maar pas bij afloop van de proefperiode." />
             </STList>
         </div>
 
@@ -125,7 +133,7 @@
 <script setup lang="ts">
 import { patchObject } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CheckboxListItem, ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, STList, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { CheckboxListItem, DateSelection, ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, STList, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
@@ -169,9 +177,14 @@ onMounted(() => {
     }
 });
 
-const skipTrial = computed({
-    get: () => !props.item.trial,
-    set: (value: boolean) => props.item.trial = !value,
+const trial = computed({
+    get: () => props.item.trial,
+    set: (value: boolean) => props.item.trial = value,
+});
+
+const customStartDate = computed({
+    get: () => props.item.customStartDate,
+    set: (value: Date | null) => props.item.customStartDate = value,
 });
 
 async function addToCart() {

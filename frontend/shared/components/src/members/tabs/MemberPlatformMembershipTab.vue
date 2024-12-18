@@ -1,85 +1,110 @@
 <template>
-    <div class="member-payments-view">
-        <main class="container">
-            <p v-if="hasFull" class="style-description-block">
-                {{ $t('237be7e0-4534-4008-b7bc-3e6db776a72a') }}
-            </p>
+    <LoadingBoxTransition :error-box="errors.errorBox">
+        <div v-if="periods" class="member-payments-view">
+            <main class="container">
+                <p v-if="hasFull" class="style-description-block">
+                    {{ $t('237be7e0-4534-4008-b7bc-3e6db776a72a') }}
+                </p>
 
-            <p v-if="memberships.length === 0" class="warning-box">
-                {{ $t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e') }}
-            </p>
-
-            <STList v-else>
-                <STListItem v-for="membership of memberships" :key="membership.id" class="right-stack">
-                    <template #left>
-                        <span v-if="membership.startDate > now" class="icon clock" />
-                        <span v-else-if="membership.expireDate && membership.expireDate < now" class="icon warning" />
-                        <span v-else class="icon success" />
-                    </template>
-                    <h3 class="style-title-list">
-                        <span>{{ getMembershipType(membership).name }}</span>
-
-                        <span v-if="membership.freeAmount" class="style-tag discount inline-first">
-                            {{ Formatter.pluralText(membership.freeAmount, 'dag', 'dagen') }} gratis
-                        </span>
-                    </h3>
-                    <p class="style-description-small">
-                        {{ formatStartDate(membership.startDate, false, true) }} tot en met {{ formatEndDate(membership.expireDate ?? membership.endDate, false, true) }}
-                    </p>
-                    <p class="style-description-small">
-                        Toegevoegd op {{ formatDate(membership.createdAt, true) }}
-                    </p>
-                    <p class="style-description-small">
-                        Via {{ getOrganizationName(membership) }}
-                    </p>
-                    <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
-                        Verlopen. Verleng de aansluiting om de verzekering te behouden.
+                <div v-for="period of filteredPeriods" :key="period.id" class="container">
+                    <hr>
+                    <h2>{{ period.name }}</h2>
+                    <p v-if="getMembershipsForPeriod(period.id).length === 0" class="warning-box">
+                        {{ $t('Dit lid is niet aangesloten in {werkjaar} bij KSA Nationaal, en is daardoor ook niet verzekerd.', {werkjaar: period.name}) }}
                     </p>
 
-                    <p v-if="membership.balanceItemId && auth.hasPlatformFullAccess()" class="style-description-small">
-                        Deze aansluiting werd al aangerekend.
+                    <STList v-else>
+                        <STListItem v-for="membership of getMembershipsForPeriod(period.id)" :key="membership.id" class="right-stack">
+                            <template #left>
+                                <figure class="style-image-with-icon" :class="{'theme-secundary': membership.isTrial}">
+                                    <figure>
+                                        <span class="icon membership" />
+                                    </figure>
+                                    <aside>
+                                        <span v-if="membership.startDate > now" class="icon small clock" />
+                                        <span v-else-if="membership.expireDate && membership.expireDate < now" class="icon small warning" />
+                                        <span v-else-if="membership.isTrial" class="icon trial stroke small secundary" />
+                                        <span v-else class="icon small success primary" />
+                                    </aside>
+                                </figure>
+                            </template>
+
+                            <p v-if="membership.isTrial" class="style-title-prefix-list theme-secundary">
+                                <span>Proefperiode</span>
+                            </p>
+                            <h3 class="style-title-list">
+                                <span>{{ getMembershipType(membership).name }}</span>
+
+                                <span v-if="membership.freeAmount" class="style-tag discount inline-first">
+                                    {{ Formatter.pluralText(membership.freeAmount, 'dag', 'dagen') }} gratis
+                                </span>
+                            </h3>
+                            <p class="style-description-small">
+                                {{ formatStartDate(membership.startDate, false, true) }} tot en met {{ formatEndDate(membership.expireDate ?? membership.endDate, false, true) }}
+                            </p>
+                            <p v-if="membership.trialUntil" class="style-description-small">
+                                Proefperiode tot {{ formatDate(membership.trialUntil, true) }}
+                            </p>
+
+                            <p class="style-description-small">
+                                Toegevoegd op {{ formatDate(membership.createdAt, true) }}
+                            </p>
+                            <p class="style-description-small">
+                                Via {{ getOrganizationName(membership) }}
+                            </p>
+                            <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
+                                Verlopen. Verleng de aansluiting om de verzekering te behouden.
+                            </p>
+
+                            <p v-if="membership.generated && auth.hasPlatformFullAccess()" class="style-description-small">
+                                {{ $t('Deze aansluiting werd automatisch aangemaakt') }}
+                            </p>
+                            <p v-if="membership.balanceItemId && auth.hasPlatformFullAccess()" class="style-description-small">
+                                {{ $t('Deze aansluiting werd reeds aangerekend') }}
+                            </p>
+
+                            <template v-if="hasFull && !period.locked && (!organization || membership.organizationId === organization.id)" #right>
+                                <span v-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
+                                <template v-else>
+                                    <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>
+                                    <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
+                                </template>
+
+                                <LoadingButton v-if="(!membership.generated || !isRegisteredAt(membership.organizationId)) && membership.periodId === platform.period.id && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
+                                    <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
+                                </LoadingButton>
+                            </template>
+                        </STListItem>
+                    </STList>
+
+                    <p v-if="hasFull && !period.locked">
+                        <button type="button" class="button text" @click="addMembership(period)">
+                            <span class="icon add" />
+                            <span>Aansluiting of verzekering toevoegen in {{ period.name }}</span>
+                        </button>
                     </p>
-
-                    <p v-if="membership.generated && auth.hasPlatformFullAccess()" class="style-description-small">
-                        Deze aansluiting werd automatisch aangemaakt.
-                    </p>
-
-                    <template v-if="hasFull" #right>
-                        <span v-if="membership.price === membership.priceWithoutDiscount || membership.priceWithoutDiscount === 0" class="style-price-base">{{ formatPrice(membership.price) }}</span>
-                        <template v-else>
-                            <span class="style-discount-old-price">{{ formatPrice(membership.priceWithoutDiscount) }}</span>
-                            <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
-                        </template>
-
-                        <LoadingButton v-if="(!membership.generated || !isRegisteredAt(membership.organizationId)) && membership.periodId === platform.period.id && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
-                            <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
-                        </LoadingButton>
-                    </template>
-                </STListItem>
-            </STList>
-
-            <p v-if="hasFull">
-                <button type="button" class="button text" @click="addMembership">
-                    <span class="icon add" />
-                    <span>Aansluiting of verzekering toevoegen</span>
-                </button>
-            </p>
-        </main>
-    </div>
+                </div>
+            </main>
+        </div>
+    </LoadingBoxTransition>
 </template>
 
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { GroupType, MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType } from '@stamhoofd/structures';
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { GroupType, MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import { useAuth, usePlatform } from '../../hooks';
+import { LoadingBoxTransition } from '../../containers';
+import { ErrorBox } from '../../errors/ErrorBox';
+import { useErrors } from '../../errors/useErrors';
+import { useAuth, useOrganization, usePlatform } from '../../hooks';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import SelectPlatformMembershipView from '../components/platform-membership/SelectPlatformMembershipView.vue';
-import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -93,6 +118,12 @@ const platform = usePlatform();
 const now = new Date();
 const auth = useAuth();
 const hasFull = auth.hasFullAccess();
+const platformManager = usePlatformManager();
+const owner = useRequestOwner();
+const errors = useErrors();
+platformManager.value.loadPeriods(false, true, owner).catch(e => errors.errorBox = new ErrorBox(e));
+const periods = computed(() => platformManager.value.$platform.periods);
+const organization = useOrganization();
 
 function isRegisteredAt(organizationId: string) {
     return props.member.filterRegistrations({ types: [GroupType.Membership], currentPeriod: true, organizationId }).length > 0;
@@ -107,15 +138,24 @@ const memberships = computed(() => {
         ));
 });
 
+const filteredPeriods = computed(() => {
+    return periods.value?.filter(p => p.id === organization.value?.period?.period.id || (p.id === platform.value.period.id) || memberships.value.some(m => m.periodId === p.id)) ?? [];
+});
+
+function getMembershipsForPeriod(periodId: string) {
+    return memberships.value.filter(m => m.periodId === periodId);
+}
+
 function getOrganizationName(membership: MemberPlatformMembership) {
     return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? 'Onbekende groep';
 }
 
-async function addMembership() {
+async function addMembership(period: RegistrationPeriod) {
     await present({
         components: [
             new ComponentWithProperties(SelectPlatformMembershipView, {
                 member: props.member,
+                period,
             }),
         ],
         modalDisplayStyle: 'popup',

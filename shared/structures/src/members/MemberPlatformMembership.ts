@@ -53,4 +53,8 @@ export class MemberPlatformMembership extends AutoEncoder {
     isActive(date: Date = new Date()) {
         return this.startDate <= date && this.endDate >= date;
     }
+
+    get isTrial() {
+        return this.trialUntil !== null && (this.trialUntil > new Date() || this.endDate <= this.trialUntil);
+    }
 }

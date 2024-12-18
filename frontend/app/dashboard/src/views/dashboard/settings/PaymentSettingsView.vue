@@ -313,7 +313,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, CenteredMessageButton, Checkbox, ErrorBox, IBANInput, LoadingButton, LoadingView, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageButton, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from '@stamhoofd/components';
 import { AppManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPatch, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -333,7 +333,6 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
         Checkbox,
         EditPaymentMethodsBox,
         Spinner,
-        LoadingView,
     },
     directives: {
         tooltip: TooltipDirective,

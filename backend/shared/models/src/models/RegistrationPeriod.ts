@@ -1,5 +1,5 @@
-import { column, Model } from '@simonbackx/simple-database';
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
 import { RegistrationPeriodBase, RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,6 +12,9 @@ export class RegistrationPeriod extends Model {
         },
     })
     id!: string;
+
+    @column({ type: 'string', nullable: true })
+    previousPeriodId: string | null = null;
 
     @column({ type: 'string', nullable: true })
     organizationId: string | null = null;
@@ -69,5 +72,47 @@ export class RegistrationPeriod extends Model {
         }
 
         return RegistrationPeriod.fromRow(result[this.table]) ?? null;
+    }
+
+    async setPreviousPeriodId() {
+        const allPeriods = await RegistrationPeriod.where({ organizationId: this.organizationId });
+
+        // Include self if not yet in database
+        if (!this.existsInDatabase) {
+            allPeriods.push(this);
+        }
+
+        // Sort by start date
+        allPeriods.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+
+        // Take the one before this.periodId
+        let previousPeriod: RegistrationPeriod | null = null;
+
+        for (const period of allPeriods) {
+            if (period.id === this.id) {
+                break;
+            }
+            previousPeriod = period;
+        }
+
+        this.previousPeriodId = previousPeriod?.id ?? null;
+    }
+
+    /**
+     * Experimental: needs to move to library
+     */
+    static select() {
+        const transformer = (row: SQLResultNamespacedRow): RegistrationPeriod => {
+            const d = (this as typeof RegistrationPeriod & typeof Model).fromRow(row[this.table] as any) as RegistrationPeriod | undefined;
+
+            if (!d) {
+                throw new Error('MemberPlatformMembership not found');
+            }
+
+            return d;
+        };
+
+        const select = new SQLSelect(transformer, SQL.wildcard());
+        return select.from(SQL.table(this.table));
     }
 }
