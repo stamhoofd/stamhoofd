@@ -751,7 +751,9 @@ export class RegisterItem {
     }
 
     get defaultStartDate() {
-        return new Date(Math.max(Date.now(), this.group.settings.startDate.getTime()));
+        let startDate = Formatter.luxon(new Date());
+        startDate = startDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+        return new Date(Math.max(startDate.toJSDate().getTime(), this.group.settings.startDate.getTime()));
     }
 
     get calculatedStartDate() {
@@ -763,7 +765,9 @@ export class RegisterItem {
             return null;
         }
 
-        return new Date(this.calculatedStartDate.getTime() + this.group.settings.trialDays * 24 * 60 * 60 * 1000);
+        let trialUntil = Formatter.luxon(this.calculatedStartDate).plus({ days: this.group.settings.trialDays });
+        trialUntil = trialUntil.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+        return trialUntil.toJSDate();
     }
 
     get canHaveTrial() {
