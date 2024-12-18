@@ -5,7 +5,7 @@
                 <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige lid'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende lid'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
 
-                <button v-if="hasWrite" v-tooltip="'Lid bewerken'" class="button icon navigation edit" type="button" @click="editThisMember" />
+                <button v-if="hasWrite" v-tooltip="$t('Gegevens bewerken')" class="button icon navigation edit" type="button" @click="editThisMember" />
                 <button v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>

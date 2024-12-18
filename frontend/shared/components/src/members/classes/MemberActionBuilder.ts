@@ -317,7 +317,7 @@ export class MemberActionBuilder {
     getActions(options: { includeDelete?: boolean } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
-                name: 'Bewerk lid',
+                name: 'Bewerk gegevens',
                 icon: 'edit',
                 priority: 2,
                 groupIndex: 1,

@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="member.member.details.name">
             <template #right>
-                <button v-tooltip="'Lid bewerken'" class="button icon navigation edit" type="button" @click="doEdit" />
+                <button v-tooltip="$t('Gegevens bewerken')" class="button icon navigation edit" type="button" @click="doEdit" />
             </template>
         </STNavigationBar>
 
@@ -37,14 +37,14 @@ import ViewMemberSecurityCodeBox from '@stamhoofd/components/src/members/compone
 import { Gender, PlatformMember } from '@stamhoofd/structures';
 
 const props = defineProps<{
-    member: PlatformMember
+    member: PlatformMember;
 }>();
 
 const editMember = useEditMember();
 const app = useAppContext();
 
 async function doEdit() {
-    await editMember(props.member, {title: 'Gegevens bewerken'});
+    await editMember(props.member, { title: 'Gegevens bewerken' });
 }
 
 </script>
