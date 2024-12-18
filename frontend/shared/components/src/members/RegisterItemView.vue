@@ -20,7 +20,9 @@
             </template>
         </p>
 
-        <ImageComponent v-if="item.group.settings.coverPhoto" :image="item.group.settings.coverPhoto" :auto-height="true" class="style-cover-photo" />
+        <template v-if="item.replaceRegistrations.length === 0">
+            <ImageComponent v-if="item.group.settings.coverPhoto" :image="item.group.settings.coverPhoto" :auto-height="true" class="style-cover-photo" />
+        </template>
 
         <p v-if="item.cartError" class="error-box small">
             {{ item.cartError.getHuman() }}
@@ -30,8 +32,10 @@
             {{ validationWarning }}
         </p>
 
-        <p v-if="item.group.settings.description" class="style-description-block" v-text="item.group.settings.description" />
-        <p v-else class="style-description-block" v-text="'Schrijf ' +item.member.patchedMember.firstName+ ' hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.' " />
+        <template v-if="item.replaceRegistrations.length === 0">
+            <p v-if="item.group.settings.description" class="style-description-block" v-text="item.group.settings.description" />
+            <p v-else class="style-description-block" v-text="'Schrijf ' +item.member.patchedMember.firstName+ ' hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.' " />
+        </template>
 
         <STErrorsDefault :error-box="errors.errorBox" />
         <div v-if="admin" class="container">
