@@ -116,6 +116,47 @@ export class BalanceItemRelation extends AutoEncoder {
     name = '';
 }
 
+export function doBalanceItemRelationsMatch(a: Map<BalanceItemRelationType, BalanceItemRelation>, b: Map<BalanceItemRelationType, BalanceItemRelation>, allowedDifference = 0) {
+    if (allowedDifference === 0 && a.size !== b.size) {
+        return false;
+    }
+
+    if (a.size === 0 || b.size === 0) {
+        return false;
+    }
+
+    allowedDifference = Math.min(allowedDifference, a.size, b.size);
+
+    let differences = 0;
+
+    for (const [key, value] of a.entries()) {
+        const other = b.get(key);
+        if (!other || other.id !== value.id) {
+            differences++;
+
+            if (differences > allowedDifference) {
+                return false;
+            }
+        }
+    }
+
+    for (const [key] of b.entries()) {
+        const other = a.get(key);
+        if (other) {
+            // Already handled in previous loop
+            continue;
+        }
+
+        differences++;
+
+        if (differences > allowedDifference) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;

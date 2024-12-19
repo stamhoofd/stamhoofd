@@ -1,0 +1,288 @@
+import { BalanceItem, BalanceItemPayment, CachedBalance, Payment } from '@stamhoofd/models';
+import { doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
+
+type BalanceItemWithRemaining = {
+    balanceItem: BalanceItem;
+    remaining: number;
+};
+
+export const PaymentReallocationService = {
+    async reallocate(organizationId: string, objectId: string, type: ReceivableBalanceType) {
+        const balanceItems = await CachedBalance.balanceForObjects(organizationId, [objectId], type);
+
+        // The algorithm:
+        // Search balance items that were paid too much, or have a negative open amount.
+        // Find the best match in the positive list (balances that have an open amount). Try to find either:
+        // - Same type, One with the same relation ids and the same amount -> special case: try to move the balance item payments around since this is safe (no impact on finances or tax)
+        // - Same type, One with the same relation ids
+        // - Same type, tne with one mismatching relation ids (e.g. same group id, different price id; same webshop, same product, different price)
+        // - Same type, One with two mismatching relation ids (e.g. same webshop, different product)
+        // - Same type, same amount
+        // - Same type
+        // - Unrelated balance items
+        // This priority must be given for each balance item, so we start with priority 1 for all items, then priority 2 for all items...
+        // The result should be a list of postive and negative balance items that is maximized (as much paid items should have been resolved) and equals zero.
+
+        const negativeItems = balanceItems.filter(b => b.priceOpen < 0).map(balanceItem => ({ balanceItem, remaining: balanceItem.priceOpen }));
+        const positiveItems = balanceItems.filter(b => b.priceOpen > 0).map(balanceItem => ({ balanceItem, remaining: balanceItem.priceOpen }));
+
+        if (negativeItems.length === 0 || positiveItems.length === 0) {
+            return;
+        }
+
+        // Now we reach the part where we are going to create reallocation payments (we are no longer going to alter existing payments)
+        const pendingPayment = new Map<BalanceItem, number>();
+
+        const matchMethods: { alterPayments: boolean; match: (negativeItem: BalanceItemWithRemaining, positive: BalanceItemWithRemaining) => boolean }[] = [
+            {
+                // Priority 1: same relation ids, same amount
+                alterPayments: true,
+                match: (negativeItem, p) => {
+                    return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
+                },
+            },
+            {
+                // Priority 2: same relation ids, different amount
+                alterPayments: true,
+                match: (negativeItem, p) => {
+                    return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
+                },
+            },
+            {
+                // Priority 3: same type, one mismatching relation id
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 1);
+                },
+            },
+            {
+                // Priority 4: same type, two mismatching relation ids
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 2);
+                },
+            },
+            {
+                // Priority 5: same type, same amount
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.balanceItem.type === negativeItem.balanceItem.type && p.remaining === -negativeItem.remaining;
+                },
+            },
+            {
+                // Priority 6: same type
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.balanceItem.type === negativeItem.balanceItem.type;
+                },
+            },
+            {
+                // Priority: any
+                alterPayments: false,
+                match: () => {
+                    return true;
+                },
+            },
+        ];
+
+        for (const matchMethod of matchMethods) {
+            // Sort negative items on hight > low
+            negativeItems.sort((a, b) => b.remaining - a.remaining);
+
+            // Sort positive items on due date, then hight > low
+            positiveItems.sort((a, b) => Sorter.stack(
+                Sorter.byDateValue(b.balanceItem.dueAt ?? new Date(0), a.balanceItem.dueAt ?? new Date(0)),
+                b.remaining - a.remaining,
+            ));
+
+            for (const negativeItem of negativeItems) {
+                if (negativeItem.remaining >= 0) {
+                    continue;
+                }
+
+                const match = positiveItems.find((p) => {
+                    return p.remaining > 0 && matchMethod.match(negativeItem, p);
+                });
+
+                if (!match) {
+                    continue;
+                }
+
+                if (matchMethod.alterPayments) {
+                    await this.swapPayments(negativeItem, match);
+                }
+                else {
+                    // Add to pending payment
+                    const moveAmount = Math.min(match.remaining, -negativeItem.remaining);
+
+                    negativeItem.remaining += moveAmount;
+                    match.remaining -= moveAmount;
+
+                    pendingPayment.set(negativeItem.balanceItem, (pendingPayment.get(negativeItem.balanceItem) ?? 0) - moveAmount);
+                    pendingPayment.set(match.balanceItem, (pendingPayment.get(match.balanceItem) ?? 0) + moveAmount);
+                }
+            }
+        }
+
+        // Create payment
+        if (pendingPayment.size !== 0) {
+            // Assert total is zero
+            const total = Array.from(pendingPayment.values()).reduce((a, b) => a + b, 0);
+            if (total !== 0) {
+                throw new Error('Total is not zero');
+            }
+
+            const payment = new Payment();
+            payment.organizationId = organizationId;
+            payment.price = 0;
+            payment.type = PaymentType.Reallocation;
+            payment.method = PaymentMethod.Unknown;
+            payment.status = PaymentStatus.Succeeded;
+            await payment.save();
+
+            // Create balance item payments
+            for (const [balanceItem, price] of pendingPayment) {
+                const balanceItemPayment = new BalanceItemPayment();
+                balanceItemPayment.balanceItemId = balanceItem.id;
+                balanceItemPayment.paymentId = payment.id;
+                balanceItemPayment.price = price;
+                balanceItemPayment.organizationId = organizationId;
+                await balanceItemPayment.save();
+            }
+        }
+
+        // Update outstanding
+        await BalanceItem.updateOutstanding([
+            ...negativeItems.filter(n => n.remaining !== n.balanceItem.priceOpen).map(n => n.balanceItem),
+            ...positiveItems.filter(p => p.remaining !== p.balanceItem.priceOpen).map(p => p.balanceItem),
+        ]);
+    },
+
+    async swapPayments(negativeItem: BalanceItemWithRemaining, match: BalanceItemWithRemaining) {
+        const { balanceItemPayments: allBalanceItemPayments, payments } = await BalanceItem.loadPayments([negativeItem.balanceItem, match.balanceItem]);
+
+        // Remove balance item payments of failed or deleted payments
+        const balanceItemPayments = allBalanceItemPayments.filter((bp) => {
+            const payment = payments.find(p => p.id === bp.paymentId);
+            if (!payment || payment.status === PaymentStatus.Failed) {
+                return false;
+            }
+            return true;
+        });
+
+        if (balanceItemPayments.length === 0) {
+            return;
+        }
+
+        // First try to find exact matches
+        await this.doSwapPayments(balanceItemPayments, negativeItem, match, { split: false, exactOnly: true });
+
+        // Try with not exact matches
+        await this.doSwapPayments(balanceItemPayments, negativeItem, match, { split: false, exactOnly: false });
+
+        // Try with matches that are too big
+        await this.doSwapPayments(balanceItemPayments, negativeItem, match, { split: true, exactOnly: false });
+    },
+
+    async doSwapPayments(balanceItemPayments: BalanceItemPayment[], negativeItem: BalanceItemWithRemaining, match: BalanceItemWithRemaining, options: { split: boolean; exactOnly: boolean }) {
+        if (negativeItem.remaining >= 0 || match.remaining <= 0) {
+            // Stop because one item is zero or switched sign
+            return;
+        }
+
+        // Try with matches that are too big
+        for (const bp of balanceItemPayments) {
+            const price = bp.price;
+
+            if (bp.balanceItemId === match.balanceItem.id) {
+                if (price < 0) {
+                    if (price < negativeItem.remaining || price < -match.remaining) {
+                        if (!options.split) {
+                            continue;
+                        }
+                        // Split the balance item payment in two: a part for negative item, and a part for match
+                        const swap = -Math.min(-negativeItem.remaining, match.remaining);
+
+                        // We need to split
+                        bp.price -= swap;
+                        await bp.save();
+
+                        // Create a new duplicate
+                        const newBP = new BalanceItemPayment();
+                        newBP.organizationId = bp.organizationId;
+                        newBP.paymentId = bp.paymentId;
+                        newBP.balanceItemId = negativeItem.balanceItem.id;
+                        newBP.price = swap;
+                        await newBP.save();
+
+                        negativeItem.remaining -= swap;
+                        match.remaining += swap;
+                    }
+                    else {
+                        if (options.exactOnly && !(price === negativeItem.remaining || price === -match.remaining)) {
+                            continue;
+                        }
+
+                        // Swap
+                        bp.balanceItemId = negativeItem.balanceItem.id;
+                        await bp.save();
+
+                        negativeItem.remaining -= price;
+                        match.remaining += price;
+                    }
+
+                    if (negativeItem.remaining >= 0 || match.remaining <= 0) {
+                        // Stop because one item is zero or switched sign
+                        return;
+                    }
+                }
+            }
+            else {
+                if (price > 0) {
+                    if (price > -negativeItem.remaining || price > match.remaining) {
+                        if (!options.split) {
+                            continue;
+                        }
+
+                        // Split the balance item payment in two: a part for negative item, and a part for match
+                        const swap = Math.min(-negativeItem.remaining, match.remaining);
+
+                        // We need to split
+                        bp.price -= swap;
+                        await bp.save();
+
+                        // Create a new duplicate
+                        const newBP = new BalanceItemPayment();
+                        newBP.organizationId = bp.organizationId;
+                        newBP.paymentId = bp.paymentId;
+                        newBP.balanceItemId = match.balanceItem.id;
+                        newBP.price = swap;
+                        await newBP.save();
+
+                        negativeItem.remaining += swap;
+                        match.remaining -= swap;
+                    }
+                    else {
+                        if (options.exactOnly && !(price === -negativeItem.remaining || price === match.remaining)) {
+                            continue;
+                        }
+
+                        // Swap
+                        bp.balanceItemId = match.balanceItem.id;
+                        await bp.save();
+
+                        negativeItem.remaining += price;
+                        match.remaining -= price;
+                    }
+
+                    if (negativeItem.remaining >= 0 || match.remaining <= 0) {
+                        // Stop because one item is zero or switched sign
+                        return;
+                    }
+                }
+            }
+        }
+    },
+
+};

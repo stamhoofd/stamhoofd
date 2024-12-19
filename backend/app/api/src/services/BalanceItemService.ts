@@ -1,7 +1,8 @@
 import { BalanceItem, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
-import { AuditLogSource, BalanceItemStatus, OrderStatus } from '@stamhoofd/structures';
-import { RegistrationService } from './RegistrationService';
+import { AuditLogSource, BalanceItemStatus, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { AuditLogService } from './AuditLogService';
+import { RegistrationService } from './RegistrationService';
+import { PaymentReallocationService } from './PaymentReallocationService';
 
 export const BalanceItemService = {
     async markPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
@@ -42,6 +43,17 @@ export const BalanceItemService = {
                     }
                 }
             }
+        }
+
+        // Reallocate outstanding balances
+        if (balanceItem.memberId) {
+            await PaymentReallocationService.reallocate(organization.id, balanceItem.memberId, ReceivableBalanceType.member);
+        }
+        else if (balanceItem.payingOrganizationId) {
+            await PaymentReallocationService.reallocate(organization.id, balanceItem.payingOrganizationId, ReceivableBalanceType.organization);
+        }
+        else if (balanceItem.userId) {
+            await PaymentReallocationService.reallocate(organization.id, balanceItem.userId, ReceivableBalanceType.user);
         }
     },
 
@@ -93,5 +105,4 @@ export const BalanceItemService = {
             }
         }
     },
-
 };

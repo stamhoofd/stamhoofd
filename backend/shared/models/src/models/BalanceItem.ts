@@ -344,7 +344,9 @@ export class BalanceItem extends Model {
 
         // Load balance payment items
         const { BalanceItemPayment } = await import('./BalanceItemPayment');
-        const balanceItemPayments = await BalanceItemPayment.where({ balanceItemId: { sign: 'IN', value: items.map(i => i.id) } });
+        const balanceItemPayments = await BalanceItemPayment.select()
+            .where('balanceItemId', items.map(i => i.id))
+            .fetch();
 
         const payments = await Payment.getByIDs(...balanceItemPayments.map(p => p.paymentId));
 
