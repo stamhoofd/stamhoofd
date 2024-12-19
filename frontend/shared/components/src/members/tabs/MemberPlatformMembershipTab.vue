@@ -70,7 +70,7 @@
                                     <span class="style-discount-price">{{ formatPrice(membership.price) }}</span>
                                 </template>
 
-                                <LoadingButton v-if="(!membership.generated || !isRegisteredAt(membership.organizationId)) && membership.periodId === platform.period.id && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
+                                <LoadingButton v-if="(!membership.generated || !isRegisteredAt(period.id, membership.organizationId)) && (!membership.balanceItemId || auth.hasPlatformFullAccess())" :loading="deletingMemberships.has(membership.id)">
                                     <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
                                 </LoadingButton>
                             </template>
@@ -125,8 +125,8 @@ platformManager.value.loadPeriods(false, true, owner).catch(e => errors.errorBox
 const periods = computed(() => platformManager.value.$platform.periods);
 const organization = useOrganization();
 
-function isRegisteredAt(organizationId: string) {
-    return props.member.filterRegistrations({ types: [GroupType.Membership], currentPeriod: true, organizationId }).length > 0;
+function isRegisteredAt(periodId: string, organizationId: string) {
+    return props.member.filterRegistrations({ types: [GroupType.Membership], periodId, organizationId }).length > 0;
 }
 
 const memberships = computed(() => {
