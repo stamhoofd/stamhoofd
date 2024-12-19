@@ -290,6 +290,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.startDate = item.calculatedStartDate;
 
             // Clear if we are reusing an existing registration
+            registration.trialUntil = null;
             registration.deactivatedAt = null;
             registration.pricePaid = 0;
             registration.payingOrganizationId = null;
