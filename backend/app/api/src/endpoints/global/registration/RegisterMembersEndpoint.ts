@@ -270,9 +270,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 reuseRegistration = (await Registration.getByID(item.replaceRegistrations[0].id)) ?? null;
             }
 
+            let startDate = item.calculatedStartDate;
+
             if (!reuseRegistration) {
-                // Otherwise try to reuse a registration in the same period, for the same group that has been deactived
-                reuseRegistration = existingRegistrations.find(r => r.deactivatedAt !== null) ?? null;
+                // Otherwise try to reuse a registration in the same period, for the same group that has been deactived for less than 7 days since the start of the new registration
+                reuseRegistration = existingRegistrations.find(r => r.deactivatedAt !== null && r.deactivatedAt.getTime() > startDate.getTime() - 7 * 24 * 60 * 60 * 1000) ?? null;
+
+                if (reuseRegistration && reuseRegistration.startDate && reuseRegistration.startDate < startDate && reuseRegistration.startDate >= group.settings.startDate && !item.trial) {
+                    startDate = reuseRegistration.startDate;
+                }
             }
 
             const registration = (reuseRegistration ?? new Registration())
@@ -287,13 +293,16 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.groupPrice = item.groupPrice;
             registration.options = item.options;
             registration.recordAnswers = item.recordAnswers;
-            registration.startDate = item.calculatedStartDate;
+            registration.startDate = startDate;
 
             // Clear if we are reusing an existing registration
             registration.trialUntil = null;
-            registration.deactivatedAt = null;
             registration.pricePaid = 0;
             registration.payingOrganizationId = null;
+
+            // NOTE: we don't reset deactivatedAt - registeredAt, because those will get reset when markValid is called later on (while keeping the original registeredAt date)
+            // registration.deactivatedAt = null;
+            // registration.registeredAt = null; // this is required to trigger platform membership updates
 
             if (item.trial) {
                 registration.trialUntil = item.calculatedTrialUntil;
