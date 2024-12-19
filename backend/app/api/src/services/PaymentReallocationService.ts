@@ -9,6 +9,12 @@ type BalanceItemWithRemaining = {
 
 export const PaymentReallocationService = {
     async reallocate(organizationId: string, objectId: string, type: ReceivableBalanceType) {
+        if (STAMHOOFD.environment === 'production') {
+            // Disabled on production for now
+            // until this has been tested more
+            return;
+        }
+
         const balanceItems = await CachedBalance.balanceForObjects(organizationId, [objectId], type);
 
         // The algorithm:
