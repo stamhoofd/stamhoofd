@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
+import { BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
 import { GroupType, MembersBlob, MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -412,12 +412,25 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Add platform memberships
             for (const { put } of patch.platformMemberships.getPuts()) {
                 if (put.periodId !== platform.periodId) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'Invalid period',
-                        human: 'Je kan geen aansluitingen maken voor een andere werkjaar dan het actieve werkjaar',
-                        field: 'periodId',
-                    });
+                    const period = await RegistrationPeriod.getByID(put.periodId);
+
+                    if (!period) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid period',
+                            human: Context.i18n.$t(`Je kan geen aansluitingen meer toevoegen in dit werkjaar`),
+                            field: 'periodId',
+                        });
+                    }
+
+                    if (period?.locked) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid period',
+                            human: Context.i18n.$t(`Je kan geen aansluitingen meer toevoegen in {period} (vergrendeld)`, { period: period?.getBaseStructure().name }),
+                            field: 'periodId',
+                        });
+                    }
                 }
 
                 if (organization && put.organizationId !== organization.id) {
@@ -508,12 +521,25 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 if (membership.periodId !== platform.periodId) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'Invalid period',
-                        human: 'Je kan geen aansluitingen meer verwijderen voor een ander werkjaar dan het actieve werkjaar',
-                        field: 'periodId',
-                    });
+                    const period = await RegistrationPeriod.getByID(membership.periodId);
+
+                    if (!period) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid period',
+                            human: Context.i18n.$t(`Je kan geen aansluitingen meer verwijderen in dit werkjaar`),
+                            field: 'periodId',
+                        });
+                    }
+
+                    if (period?.locked) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid period',
+                            human: Context.i18n.$t(`Je kan geen aansluitingen meer verwijderen in {period} (vergrendeld)`, { period: period?.getBaseStructure().name }),
+                            field: 'periodId',
+                        });
+                    }
                 }
 
                 if (!membership.canDelete() && !Context.auth.hasPlatformFullAccess()) {
