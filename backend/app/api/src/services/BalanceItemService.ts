@@ -46,6 +46,11 @@ export const BalanceItemService = {
         }
 
         // Reallocate outstanding balances
+        await this.reallocate(balanceItem, organization);
+    },
+
+    async reallocate(balanceItem: BalanceItem, organization: Organization) {
+        // Reallocate outstanding balances
         if (balanceItem.memberId) {
             await PaymentReallocationService.reallocate(organization.id, balanceItem.memberId, ReceivableBalanceType.member);
         }
@@ -69,6 +74,7 @@ export const BalanceItemService = {
                 }
             });
         }
+        await this.reallocate(balanceItem, organization);
     },
 
     async undoPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
@@ -79,6 +85,7 @@ export const BalanceItemService = {
                 await order.undoPaid(payment, organization);
             }
         }
+        await this.reallocate(balanceItem, organization);
     },
 
     async markFailed(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
