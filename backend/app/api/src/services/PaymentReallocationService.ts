@@ -1,5 +1,6 @@
 import { BalanceItem, BalanceItemPayment, CachedBalance, Payment } from '@stamhoofd/models';
-import { doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
+import { SQL } from '@stamhoofd/sql';
+import { BalanceItemStatus, doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 type BalanceItemWithRemaining = {
@@ -8,6 +9,20 @@ type BalanceItemWithRemaining = {
 };
 
 export const PaymentReallocationService = {
+    /**
+     * Move all canceled balance items payments to one single non-canceled item (note: they should be equal)
+     *
+     * This avoids the situation where you have multiple balance items for a registration, but only one registration
+     * -> this can cause confusion because people might think 'hey' the price for that registration is z, not b (while it is about a canceled registration)
+     */
+    async mergeBalanceItems(mergeToItem: BalanceItem, otherItems: BalanceItem[]) {
+        // Move all balance item payments to the merged item
+        await SQL.update(BalanceItemPayment.table)
+            .set('balanceItemId', mergeToItem.id)
+            .where('balanceItemId', otherItems.map(bi => bi.id))
+            .update();
+    },
+
     async reallocate(organizationId: string, objectId: string, type: ReceivableBalanceType) {
         if (STAMHOOFD.environment === 'production') {
             // Disabled on production for now
@@ -15,7 +30,37 @@ export const PaymentReallocationService = {
             return;
         }
 
-        const balanceItems = await CachedBalance.balanceForObjects(organizationId, [objectId], type);
+        let balanceItems = await CachedBalance.balanceForObjects(organizationId, [objectId], type);
+
+        const didMerge: BalanceItem[] = [];
+
+        // First try to merge balance items that are the same and have canceled variants
+        for (const balanceItem of balanceItems) {
+            if (balanceItem.status !== BalanceItemStatus.Due) {
+                continue;
+            }
+
+            const similarDueItems = balanceItems.filter(b => b.id !== balanceItem.id && b.status === BalanceItemStatus.Due && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
+
+            if (similarDueItems.length) {
+                // Not possible to merge into one: there are 2 due items
+                continue;
+            }
+            const similarCanceledItems = balanceItems.filter(b => b.id !== balanceItem.id && b.status !== BalanceItemStatus.Due && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
+
+            if (similarCanceledItems.length) {
+                await this.mergeBalanceItems(balanceItem, similarCanceledItems);
+                didMerge.push(balanceItem, ...similarCanceledItems);
+            }
+        }
+
+        if (didMerge.length) {
+            // Update outstanding
+            await BalanceItem.updateOutstanding(didMerge);
+
+            // Reload balance items
+            balanceItems = await CachedBalance.balanceForObjects(organizationId, [objectId], type);
+        }
 
         // The algorithm:
         // Search balance items that were paid too much, or have a negative open amount.

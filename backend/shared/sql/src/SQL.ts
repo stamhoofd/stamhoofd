@@ -7,6 +7,7 @@ import { SQLJsonExtract, SQLJsonLength, SQLJsonUnquote } from './SQLJsonExpressi
 import { parseTable, SQLSelect } from './SQLSelect';
 import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from './SQLWhere';
 import { SQLInsert } from './SQLInsert';
+import { SQLUpdate } from './SQLUpdate';
 
 class StaticSQL {
     wildcard(namespace?: string) {
@@ -52,6 +53,10 @@ class StaticSQL {
 
     insert(tableName: SQLTableExpression | string): InstanceType<typeof SQLInsert> {
         return new SQLInsert(tableName);
+    }
+
+    update(tableName: SQLTableExpression | string): InstanceType<typeof SQLUpdate> {
+        return new SQLUpdate(tableName);
     }
 
     assignment(key: SQLExpression | string, value: SQLExpression | SQLScalarValue): SQLAssignment {
