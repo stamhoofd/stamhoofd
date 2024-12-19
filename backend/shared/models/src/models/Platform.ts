@@ -42,7 +42,7 @@ export class Platform extends Model {
 
     async setPreviousPeriodId() {
         const period = await RegistrationPeriod.getByID(this.periodId);
-        this.previousPeriodId = period?.id ?? null;
+        this.previousPeriodId = period?.previousPeriodId ?? null;
     }
 
     static async getSharedPrivateStruct(): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
