@@ -263,7 +263,7 @@ export class AdminPermissionChecker {
             }
 
             const cachedBalance = await CachedBalance.getForObjects([member.id]);
-            if (cachedBalance.length === 0 || (cachedBalance[0].amount === 0 && cachedBalance[0].amountPending === 0)) {
+            if (cachedBalance.length === 0 || (cachedBalance[0].amountOpen === 0 && cachedBalance[0].amountPending === 0)) {
                 return true;
             }
         }

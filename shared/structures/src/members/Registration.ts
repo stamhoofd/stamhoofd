@@ -89,9 +89,15 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: BooleanDecoder, version: 20 })
     canRegister = false;
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: IntegerDecoder, optional: true })
     price = 0;
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: IntegerDecoder, optional: true })
     pricePaid = 0;
 

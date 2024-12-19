@@ -15,8 +15,6 @@ import { useRegistrationQuickActions } from './useRegistrationQuickActions';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 
-const $t = useTranslate();
-
 export function useDashboardQuickActions(): QuickActions {
     const registrationQuickActions = useRegistrationQuickActions();
     const contextOptions = useContextOptions();
@@ -24,6 +22,7 @@ export function useDashboardQuickActions(): QuickActions {
     const owner = useRequestOwner();
     const errors = useErrors();
     const auth = useAuth();
+    const $t = useTranslate();
 
     // Load outstanding amount
     const outstandingBalance = ref(null) as Ref<PayableBalanceCollection | null>;
@@ -71,7 +70,7 @@ export function useDashboardQuickActions(): QuickActions {
             }
 
             for (const organizationStatus of outstandingBalance.value?.organizations || []) {
-                const open = organizationStatus.amount - organizationStatus.amountPending;
+                const open = organizationStatus.amountOpen;
                 if (open <= 0) {
                     continue;
                 }
@@ -79,7 +78,10 @@ export function useDashboardQuickActions(): QuickActions {
                 arr.push({
                     illustration: outstandingAmountSvg,
                     title: 'Betaal openstaand bedrag aan ' + organizationStatus.organization.name,
-                    description: 'Je moet nog ' + Formatter.price(open) + ' betalen aan ' + organizationStatus.organization.name + ', via het tabblad Boekhouding.',
+                    description: $t('Je moet nog {price} betalen aan {name}, via het tabblad Boekhouding.', {
+                        price: Formatter.price(open),
+                        name: organizationStatus.organization.name,
+                    }),
                     action: async () => {
                         await GlobalEventBus.sendEvent('selectTabByName', 'boekhouding');
                     },

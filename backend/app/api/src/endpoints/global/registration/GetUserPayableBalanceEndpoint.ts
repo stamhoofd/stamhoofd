@@ -62,17 +62,17 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
         for (const organization of authenticatedOrganizations) {
             const items = receivableBalances.filter(b => b.organizationId === organization.id);
 
-            let amount = 0;
+            let amountOpen = 0;
             let amountPending = 0;
 
             for (const item of items) {
-                amount += item.amount;
+                amountOpen += item.amountOpen;
                 amountPending += item.amountPending;
             }
 
             billingStatus.organizations.push(PayableBalance.create({
                 organization,
-                amount,
+                amountOpen,
                 amountPending,
             }));
         }

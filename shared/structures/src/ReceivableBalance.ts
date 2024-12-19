@@ -1,9 +1,8 @@
 import { AnyDecoder, ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { TranslateMethod } from './I18nInterface.js';
 import { BalanceItem, BalanceItemWithPayments } from './BalanceItem.js';
+import { TranslateMethod } from './I18nInterface.js';
 import { PaymentGeneral } from './members/PaymentGeneral.js';
-import { Sorter } from '@stamhoofd/utility';
 
 export enum ReceivableBalanceType {
     organization = 'organization',
@@ -67,18 +66,12 @@ export class ReceivableBalance extends AutoEncoder {
     @field({ decoder: StringDecoder })
     organizationId: string;
 
-    @field({ decoder: IntegerDecoder })
-    amount = 0;
+    @field({ decoder: IntegerDecoder, field: 'amount' })
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    amountOpen = 0;
 
     @field({ decoder: IntegerDecoder })
     amountPending = 0;
-
-    /**
-     * @deprecated
-     */
-    get amountOpen() {
-        return this.amount;
-    }
 }
 
 export class DetailedReceivableBalance extends ReceivableBalance {

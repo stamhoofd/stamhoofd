@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Platform } from '@stamhoofd/models';
 import { BalanceItemType, Organization as OrganizationStruct } from '@stamhoofd/structures';
+import { BalanceItemService } from '../services/BalanceItemService';
 
 export class OrganizationCharger {
     static async chargeFromPlatform(args: { organizationsToCharge: OrganizationStruct[]; price: number; amount?: number; description: string }) {
@@ -30,6 +31,9 @@ export class OrganizationCharger {
 
         await Promise.all(balanceItems.map(balanceItem => balanceItem.save()));
         await BalanceItem.updateOutstanding(balanceItems);
+
+        // Reallocate
+        await BalanceItemService.reallocate(balanceItems, chargingOrganizationId);
     }
 
     private static createBalanceItem({ price, amount, description, chargingOrganizationId, organizationBeingCharged }: { price: number; amount?: number; description: string; chargingOrganizationId: string; organizationBeingCharged: OrganizationStruct }): BalanceItem {

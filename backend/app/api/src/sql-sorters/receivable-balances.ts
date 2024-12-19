@@ -21,13 +21,13 @@ export const receivableBalanceSorters: SQLSortDefinitions<CachedBalance> = {
             });
         },
     },
-    amount: {
+    amountOpen: {
         getValue(a) {
-            return a.amount;
+            return a.amountOpen;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.column('amount'),
+                column: SQL.column('amountOpen'),
                 direction,
             });
         },

@@ -200,6 +200,9 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
 
                 await BalanceItem.updateOutstanding(balanceItems);
+
+                // Reallocate
+                await BalanceItemService.reallocate(balanceItems, organization.id);
             }
 
             changedPayments.push(payment);

@@ -31,12 +31,12 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="item.amount >= 0">
+                <STListItem v-if="item.amountOpen >= 0">
                     <h3 class="style-definition-label">
                         {{ $t('28c2bc66-231f-44f3-9249-c1981b871a1f') }}
                     </h3>
                     <p class="style-definition-text">
-                        {{ formatPrice(item.amount + Math.max(0, item.amountPending)) }}
+                        {{ formatPrice(item.amountOpen + Math.max(0, item.amountPending)) }}
                     </p>
                     <p v-if="item.amountPending > 0" class="style-description-small">
                         waarvan {{ formatPrice(item.amountPending) }} in verwerking
@@ -51,7 +51,7 @@
                         {{ $t('Terug te betalen') }}
                     </h3>
                     <p class="style-definition-text error">
-                        {{ formatPrice(-item.amount + Math.max(0, -item.amountPending)) }}
+                        {{ formatPrice(-item.amountOpen + Math.max(0, -item.amountPending)) }}
                     </p>
                     <p v-if="item.amountPending > 0" class="style-description-small">
                         een betaling in verwerking van {{ formatPrice(item.amountPending) }} dient geannuleerd te worden

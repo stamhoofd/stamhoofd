@@ -49,7 +49,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
         scopeFilter = {
             organizationId: organization.id,
             $or: {
-                amount: { $neq: 0 },
+                amountOpen: { $neq: 0 },
                 amountPending: { $neq: 0 },
                 nextDueAt: { $neq: null },
             },

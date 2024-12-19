@@ -77,9 +77,9 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 
     new Column<ObjectType, number>({
-        id: 'amount',
+        id: 'amountOpen',
         name: 'Openstaand bedrag',
-        getValue: object => object.amount,
+        getValue: object => object.amountOpen,
         format: value => Formatter.price(value),
         getStyle: value => value === 0 ? 'gray' : '',
         minimumWidth: 100,

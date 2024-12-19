@@ -116,7 +116,7 @@ export function useRegistrationQuickActions(): QuickActions {
             }
 
             for (const organizationStatus of outstandingBalance.value?.organizations || []) {
-                const open = organizationStatus.amount - organizationStatus.amountPending;
+                const open = organizationStatus.amountOpen;
                 if (open <= 0) {
                     continue;
                 }

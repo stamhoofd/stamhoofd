@@ -6,6 +6,7 @@ import { BuckarooHelper } from '../helpers/BuckarooHelper';
 import { StripeHelper } from '../helpers/StripeHelper';
 import { BalanceItemPaymentService } from './BalanceItemPaymentService';
 import { AuditLogService } from './AuditLogService';
+import { BalanceItemService } from './BalanceItemService';
 
 export const PaymentService = {
     async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
@@ -31,6 +32,9 @@ export const PaymentService = {
                     }
 
                     await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
+
+                    // Reallocate
+                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
                 });
                 return;
             }
@@ -55,6 +59,9 @@ export const PaymentService = {
                     }
 
                     await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
+
+                    // Reallocate
+                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
                 });
             }
 
@@ -70,6 +77,9 @@ export const PaymentService = {
                     }
 
                     await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
+
+                    // Reallocate
+                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
                 });
             }
 
@@ -85,6 +95,9 @@ export const PaymentService = {
                     }
 
                     await BalanceItem.updateOutstanding(balanceItemPayments.map(p => p.balanceItem));
+
+                    // Reallocate
+                    await BalanceItemService.reallocate(balanceItemPayments.map(p => p.balanceItem), organization.id);
                 });
             }
         });

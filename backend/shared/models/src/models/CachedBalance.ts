@@ -33,7 +33,7 @@ export class CachedBalance extends Model {
     objectType: ReceivableBalanceType;
 
     @column({ type: 'integer' })
-    amount = 0;
+    amountOpen = 0;
 
     /**
      * The sum of unconfirmed payments
@@ -134,7 +134,7 @@ export class CachedBalance extends Model {
                 new SQLSum(
                     SQL.column('priceOpen'),
                 ),
-                new SQLAlias('data__amount'),
+                new SQLAlias('data__amountOpen'),
             ),
             new SQLSelectAs(
                 new SQLSum(
@@ -170,7 +170,7 @@ export class CachedBalance extends Model {
                 new SQLSum(
                     SQL.column('priceOpen'),
                 ),
-                new SQLAlias('data__amount'),
+                new SQLAlias('data__amountOpen'),
             ),
             new SQLSelectAs(
                 new SQLSum(
@@ -189,7 +189,7 @@ export class CachedBalance extends Model {
 
         const dueResult = await dueQuery.fetch();
 
-        const results: [string, { amount: number; amountPending: number; nextDueAt: Date | null }][] = [];
+        const results: [string, { amountOpen: number; amountPending: number; nextDueAt: Date | null }][] = [];
         for (const row of result) {
             if (!row['data']) {
                 throw new Error('Invalid data namespace');
@@ -200,22 +200,22 @@ export class CachedBalance extends Model {
             }
 
             const objectId = row[BalanceItem.table][columnName];
-            const amount = row['data']['amount'];
+            const amountOpen = row['data']['amountOpen'];
             const amountPending = row['data']['amountPending'];
 
             if (typeof objectId !== 'string') {
                 throw new Error('Invalid objectId');
             }
 
-            if (typeof amount !== 'number') {
-                throw new Error('Invalid amount');
+            if (typeof amountOpen !== 'number') {
+                throw new Error('Invalid amountOpen');
             }
 
             if (typeof amountPending !== 'number') {
                 throw new Error('Invalid amountPending');
             }
 
-            results.push([objectId, { amount, amountPending, nextDueAt: null }]);
+            results.push([objectId, { amountOpen, amountPending, nextDueAt: null }]);
         }
 
         for (const row of dueResult) {
@@ -229,7 +229,7 @@ export class CachedBalance extends Model {
 
             const objectId = row[BalanceItem.table][columnName];
             const dueAt = row['data']['dueAt'];
-            const amount = row['data']['amount'];
+            const amountOpen = row['data']['amountOpen'];
             const amountPending = row['data']['amountPending'];
 
             if (typeof objectId !== 'string') {
@@ -240,8 +240,8 @@ export class CachedBalance extends Model {
                 throw new Error('Invalid dueAt');
             }
 
-            if (typeof amount !== 'number') {
-                throw new Error('Invalid amount');
+            if (typeof amountOpen !== 'number') {
+                throw new Error('Invalid amountOpen');
             }
 
             if (typeof amountPending !== 'number') {
@@ -252,31 +252,31 @@ export class CachedBalance extends Model {
             if (result) {
                 result[1].nextDueAt = dueAt;
 
-                if (result[1].amount < 0) {
-                    if (amount > 0) {
+                if (result[1].amountOpen < 0) {
+                    if (amountOpen > 0) {
                         // Let the future due amount fill in the gap until maximum 0
-                        result[1].amount = Math.min(0, result[1].amount + amount);
+                        result[1].amountOpen = Math.min(0, result[1].amountOpen + amountOpen);
                     }
                 }
 
                 result[1].amountPending += amountPending;
             }
             else {
-                results.push([objectId, { amount: 0, amountPending: amountPending, nextDueAt: dueAt }]);
+                results.push([objectId, { amountOpen: 0, amountPending: amountPending, nextDueAt: dueAt }]);
             }
         }
 
         // Add missing object ids (with 0 amount, otherwise we don't reset the amounts back to zero when all the balance items are hidden)
         for (const objectId of objectIds) {
             if (!results.find(([id]) => id === objectId)) {
-                results.push([objectId, { amount: 0, amountPending: 0, nextDueAt: null }]);
+                results.push([objectId, { amountOpen: 0, amountPending: 0, nextDueAt: null }]);
             }
         }
 
         return results;
     }
 
-    private static async setForResults(organizationId: string, result: [string, { amount: number; amountPending: number; nextDueAt: null | Date }][], objectType: ReceivableBalanceType) {
+    private static async setForResults(organizationId: string, result: [string, { amountOpen: number; amountPending: number; nextDueAt: null | Date }][], objectType: ReceivableBalanceType) {
         if (result.length === 0) {
             return;
         }
@@ -286,19 +286,19 @@ export class CachedBalance extends Model {
                 'organizationId',
                 'objectId',
                 'objectType',
-                'amount',
+                'amountOpen',
                 'amountPending',
                 'nextDueAt',
                 'createdAt',
                 'updatedAt',
             )
-            .values(...result.map(([objectId, { amount, amountPending, nextDueAt }]) => {
+            .values(...result.map(([objectId, { amountOpen, amountPending, nextDueAt }]) => {
                 return [
                     uuidv4(),
                     organizationId,
                     objectId,
                     objectType,
-                    amount,
+                    amountOpen,
                     amountPending,
                     nextDueAt,
                     new Date(),
@@ -307,7 +307,7 @@ export class CachedBalance extends Model {
             }))
             .as('v')
             .onDuplicateKeyUpdate(
-                SQL.assignment('amount', SQL.column('v', 'amount')),
+                SQL.assignment('amountOpen', SQL.column('v', 'amountOpen')),
                 SQL.assignment('amountPending', SQL.column('v', 'amountPending')),
                 SQL.assignment('nextDueAt', SQL.column('v', 'nextDueAt')),
                 SQL.assignment('updatedAt', SQL.column('v', 'updatedAt')),

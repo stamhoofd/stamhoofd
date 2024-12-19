@@ -3,6 +3,7 @@ import { AuditLogSource, BalanceItemStatus, OrderStatus, ReceivableBalanceType }
 import { AuditLogService } from './AuditLogService';
 import { RegistrationService } from './RegistrationService';
 import { PaymentReallocationService } from './PaymentReallocationService';
+import { Formatter } from '@stamhoofd/utility';
 
 export const BalanceItemService = {
     async markPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
@@ -44,21 +45,23 @@ export const BalanceItemService = {
                 }
             }
         }
-
-        // Reallocate outstanding balances
-        await this.reallocate(balanceItem, organization);
     },
 
-    async reallocate(balanceItem: BalanceItem, organization: Organization) {
-        // Reallocate outstanding balances
-        if (balanceItem.memberId) {
-            await PaymentReallocationService.reallocate(organization.id, balanceItem.memberId, ReceivableBalanceType.member);
+    async reallocate(balanceItems: BalanceItem[], organizationId: string) {
+        const memberIds = Formatter.uniqueArray(balanceItems.map(b => b.memberId).filter(b => b !== null));
+        const payingOrganizationIds = Formatter.uniqueArray(balanceItems.map(b => b.payingOrganizationId).filter(b => b !== null));
+        const userIds = Formatter.uniqueArray(balanceItems.map(b => b.userId).filter(b => b !== null));
+
+        for (const memberId of memberIds) {
+            await PaymentReallocationService.reallocate(organizationId, memberId, ReceivableBalanceType.member);
         }
-        else if (balanceItem.payingOrganizationId) {
-            await PaymentReallocationService.reallocate(organization.id, balanceItem.payingOrganizationId, ReceivableBalanceType.organization);
+
+        for (const payingOrganizationId of payingOrganizationIds) {
+            await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization);
         }
-        else if (balanceItem.userId) {
-            await PaymentReallocationService.reallocate(organization.id, balanceItem.userId, ReceivableBalanceType.user);
+
+        for (const userId of userIds) {
+            await PaymentReallocationService.reallocate(organizationId, userId, ReceivableBalanceType.user);
         }
     },
 
@@ -74,7 +77,6 @@ export const BalanceItemService = {
                 }
             });
         }
-        await this.reallocate(balanceItem, organization);
     },
 
     async undoPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
@@ -85,7 +87,6 @@ export const BalanceItemService = {
                 await order.undoPaid(payment, organization);
             }
         }
-        await this.reallocate(balanceItem, organization);
     },
 
     async markFailed(balanceItem: BalanceItem, payment: Payment, organization: Organization) {

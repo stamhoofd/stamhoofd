@@ -108,7 +108,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
         const balances = await CachedBalance.getForObjects([request.params.id], organization.id);
 
         const created = new CachedBalance();
-        created.amount = 0;
+        created.amountOpen = 0;
         created.amountPending = 0;
         created.organizationId = organization.id;
         created.objectId = request.params.id;

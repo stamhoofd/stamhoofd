@@ -6,6 +6,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
+import { BalanceItemService } from '../../../../services/BalanceItemService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -208,8 +209,14 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
         await BalanceItem.updateOutstanding(updateOutstandingBalance);
 
+        // Reallocate
+        await BalanceItemService.reallocate(updateOutstandingBalance, organization.id);
+
+        // Reload returnedModels
+        const returnedModelsReloaded = await BalanceItem.getByIDs(...returnedModels.map(m => m.id));
+
         return new Response(
-            await BalanceItem.getStructureWithPayments(returnedModels),
+            await BalanceItem.getStructureWithPayments(returnedModelsReloaded),
         );
     }
 
