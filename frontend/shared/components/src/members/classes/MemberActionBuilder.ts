@@ -247,7 +247,7 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: 'Bewerk inschrijving',
+                name: 'Inschrijving bewerken',
                 priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
@@ -317,7 +317,7 @@ export class MemberActionBuilder {
     getActions(options: { includeDelete?: boolean } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
-                name: 'Bewerk gegevens',
+                name: 'Gegevens bewerken',
                 icon: 'edit',
                 priority: 2,
                 groupIndex: 1,
