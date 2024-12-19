@@ -812,12 +812,6 @@ export class RegisterItem {
                     return false;
                 }
 
-                const days = (m.endDate.getTime() - m.startDate.getTime()) / (24 * 60 * 60 * 1000);
-                if (days <= 28) {
-                    // This registration was not long enough to disallow a new trial
-                    return false;
-                }
-
                 return true;
             });
 

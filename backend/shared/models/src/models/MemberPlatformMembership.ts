@@ -129,22 +129,14 @@ export class MemberPlatformMembership extends Model {
         const platform = await Platform.getSharedStruct();
         const typeIds = platform.config.membershipTypes.filter(m => m.behaviour === PlatformMembershipTypeBehaviour.Period).map(m => m.id);
 
-        const memberships = await MemberPlatformMembership.select()
+        const membership = await MemberPlatformMembership.select()
             .where('memberId', member.id)
             .where('deletedAt', null)
             .where('periodId', period.previousPeriodId)
             .where('membershipTypeId', typeIds)
-            .fetch();
+            .first(false);
 
-        const hasBlockingMemberships = !!memberships.find((m) => {
-            const days = (m.endDate.getTime() - m.startDate.getTime()) / (24 * 60 * 60 * 1000);
-            if (days <= 28) {
-                // This registration was not long enough to disallow a new trial
-                return false;
-            }
-
-            return true;
-        });
+        const hasBlockingMemberships = !!membership;
 
         if (hasBlockingMemberships) {
             return false;
