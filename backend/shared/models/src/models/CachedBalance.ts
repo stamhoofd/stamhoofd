@@ -1,6 +1,6 @@
 import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQL, SQLAlias, SQLCalculation, SQLGreatest, SQLMin, SQLMinusSign, SQLMultiplicationSign, SQLSelect, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
-import { BalanceItem as BalanceItemStruct, BalanceItemStatus, ReceivableBalanceType } from '@stamhoofd/structures';
+import { SQL, SQLAlias, SQLMin, SQLSelect, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
+import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
 
@@ -31,6 +31,9 @@ export class CachedBalance extends Model {
      */
     @column({ type: 'string' })
     objectType: ReceivableBalanceType;
+
+    @column({ type: 'integer' })
+    amountPaid = 0;
 
     @column({ type: 'integer' })
     amountOpen = 0;
@@ -132,6 +135,12 @@ export class CachedBalance extends Model {
             SQL.column(columnName),
             new SQLSelectAs(
                 new SQLSum(
+                    SQL.column('pricePaid'),
+                ),
+                new SQLAlias('data__amountPaid'),
+            ),
+            new SQLSelectAs(
+                new SQLSum(
                     SQL.column('priceOpen'),
                 ),
                 new SQLAlias('data__amountOpen'),
@@ -168,6 +177,12 @@ export class CachedBalance extends Model {
             // If the current amount_due is negative, we can ignore that negative part if there is a future due item
             new SQLSelectAs(
                 new SQLSum(
+                    SQL.column('pricePaid'),
+                ),
+                new SQLAlias('data__amountPaid'),
+            ),
+            new SQLSelectAs(
+                new SQLSum(
                     SQL.column('priceOpen'),
                 ),
                 new SQLAlias('data__amountOpen'),
@@ -189,7 +204,7 @@ export class CachedBalance extends Model {
 
         const dueResult = await dueQuery.fetch();
 
-        const results: [string, { amountOpen: number; amountPending: number; nextDueAt: Date | null }][] = [];
+        const results: [string, { amountPaid: number; amountOpen: number; amountPending: number; nextDueAt: Date | null }][] = [];
         for (const row of result) {
             if (!row['data']) {
                 throw new Error('Invalid data namespace');
@@ -202,6 +217,7 @@ export class CachedBalance extends Model {
             const objectId = row[BalanceItem.table][columnName];
             const amountOpen = row['data']['amountOpen'];
             const amountPending = row['data']['amountPending'];
+            const amountPaid = row['data']['amountPaid'];
 
             if (typeof objectId !== 'string') {
                 throw new Error('Invalid objectId');
@@ -215,7 +231,11 @@ export class CachedBalance extends Model {
                 throw new Error('Invalid amountPending');
             }
 
-            results.push([objectId, { amountOpen, amountPending, nextDueAt: null }]);
+            if (typeof amountPaid !== 'number') {
+                throw new Error('Invalid amountPaid');
+            }
+
+            results.push([objectId, { amountPaid, amountOpen, amountPending, nextDueAt: null }]);
         }
 
         for (const row of dueResult) {
@@ -231,6 +251,7 @@ export class CachedBalance extends Model {
             const dueAt = row['data']['dueAt'];
             const amountOpen = row['data']['amountOpen'];
             const amountPending = row['data']['amountPending'];
+            const amountPaid = row['data']['amountPaid'];
 
             if (typeof objectId !== 'string') {
                 throw new Error('Invalid objectId');
@@ -248,6 +269,10 @@ export class CachedBalance extends Model {
                 throw new Error('Invalid amountPending');
             }
 
+            if (typeof amountPaid !== 'number') {
+                throw new Error('Invalid amountPaid');
+            }
+
             const result = results.find(r => r[0] === objectId);
             if (result) {
                 result[1].nextDueAt = dueAt;
@@ -260,23 +285,24 @@ export class CachedBalance extends Model {
                 }
 
                 result[1].amountPending += amountPending;
+                result[1].amountPaid += amountPaid;
             }
             else {
-                results.push([objectId, { amountOpen: 0, amountPending: amountPending, nextDueAt: dueAt }]);
+                results.push([objectId, { amountPaid, amountOpen: 0, amountPending, nextDueAt: dueAt }]);
             }
         }
 
         // Add missing object ids (with 0 amount, otherwise we don't reset the amounts back to zero when all the balance items are hidden)
         for (const objectId of objectIds) {
             if (!results.find(([id]) => id === objectId)) {
-                results.push([objectId, { amountOpen: 0, amountPending: 0, nextDueAt: null }]);
+                results.push([objectId, { amountPaid: 0, amountOpen: 0, amountPending: 0, nextDueAt: null }]);
             }
         }
 
         return results;
     }
 
-    private static async setForResults(organizationId: string, result: [string, { amountOpen: number; amountPending: number; nextDueAt: null | Date }][], objectType: ReceivableBalanceType) {
+    private static async setForResults(organizationId: string, result: [string, { amountPaid: number; amountOpen: number; amountPending: number; nextDueAt: null | Date }][], objectType: ReceivableBalanceType) {
         if (result.length === 0) {
             return;
         }
@@ -286,18 +312,20 @@ export class CachedBalance extends Model {
                 'organizationId',
                 'objectId',
                 'objectType',
+                'amountPaid',
                 'amountOpen',
                 'amountPending',
                 'nextDueAt',
                 'createdAt',
                 'updatedAt',
             )
-            .values(...result.map(([objectId, { amountOpen, amountPending, nextDueAt }]) => {
+            .values(...result.map(([objectId, { amountPaid, amountOpen, amountPending, nextDueAt }]) => {
                 return [
                     uuidv4(),
                     organizationId,
                     objectId,
                     objectType,
+                    amountPaid,
                     amountOpen,
                     amountPending,
                     nextDueAt,
@@ -307,6 +335,7 @@ export class CachedBalance extends Model {
             }))
             .as('v')
             .onDuplicateKeyUpdate(
+                SQL.assignment('amountPaid', SQL.column('v', 'amountPaid')),
                 SQL.assignment('amountOpen', SQL.column('v', 'amountOpen')),
                 SQL.assignment('amountPending', SQL.column('v', 'amountPending')),
                 SQL.assignment('nextDueAt', SQL.column('v', 'nextDueAt')),

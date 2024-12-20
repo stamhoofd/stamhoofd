@@ -7,6 +7,9 @@ export class PayableBalance extends AutoEncoder {
     @field({ decoder: Organization })
     organization: Organization;
 
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    amountPaid = 0;
+
     @field({ decoder: IntegerDecoder, field: 'amount' })
     @field({ decoder: IntegerDecoder, ...NextVersion })
     amountOpen = 0;

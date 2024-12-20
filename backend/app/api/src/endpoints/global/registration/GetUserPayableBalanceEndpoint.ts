@@ -64,16 +64,19 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
 
             let amountOpen = 0;
             let amountPending = 0;
+            let amountPaid = 0;
 
             for (const item of items) {
                 amountOpen += item.amountOpen;
                 amountPending += item.amountPending;
+                amountPaid += item.amountPaid;
             }
 
             billingStatus.organizations.push(PayableBalance.create({
                 organization,
                 amountOpen,
                 amountPending,
+                amountPaid,
             }));
         }
 

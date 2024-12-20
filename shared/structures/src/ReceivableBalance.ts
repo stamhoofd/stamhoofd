@@ -66,6 +66,9 @@ export class ReceivableBalance extends AutoEncoder {
     @field({ decoder: StringDecoder })
     organizationId: string;
 
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    amountPaid = 0;
+
     @field({ decoder: IntegerDecoder, field: 'amount' })
     @field({ decoder: IntegerDecoder, ...NextVersion })
     amountOpen = 0;
