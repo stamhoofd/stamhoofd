@@ -42,8 +42,11 @@
             <STInputBox :title="$t('Startdatum')" error-fields="customStartDate" :error-box="errors.errorBox">
                 <DateSelection v-model="customStartDate" :required="false" :placeholder="formatDate(item.defaultStartDate, true)" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
             </STInputBox>
-            <p class="style-description-small">
-                Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een proefperiode later te laten beginnen, of een te late inschrijving vroeger te laten starten.
+            <p v-if="item.group.settings.trialDays > 0" class="style-description-small">
+                Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een proefperiode later te laten beginnen, of een late inschrijving vroeger te laten starten.
+            </p>
+            <p v-else class="style-description-small">
+                Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een late inschrijving vroeger te laten starten.
             </p>
         </div>
 
