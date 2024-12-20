@@ -45,7 +45,7 @@
             </footer>
         </template>
 
-        <template v-if="item.calculatedPriceDueLater >= 0">
+        <template v-if="item.calculatedPriceDueLater > 0">
             <footer>
                 <p class="style-price">
                     {{ formatPrice(item.calculatedPriceDueLater) }} later te betalen
@@ -69,7 +69,6 @@
     </STListItem>
 </template>
 
-
 <script setup lang="ts">
 import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -83,25 +82,25 @@ const props = withDefaults(
         showGroup?: boolean;
     }>(),
     {
-        showGroup: true
-    }
+        showGroup: true,
+    },
 );
 
 // We do some caching here to prevent too many calculations on cart changes
-const canEdit = computed(() => props.item.showItemView)
+const canEdit = computed(() => props.item.showItemView);
 
 const checkoutRegisterItem = useCheckoutRegisterItem();
 
 async function deleteMe() {
-    props.item.checkout.remove(props.item)
+    props.item.checkout.remove(props.item);
 }
 
 async function editMe() {
     await checkoutRegisterItem({
         item: props.item,
         startCheckoutFlow: false,
-        displayOptions: {action: 'present', modalDisplayStyle: 'popup'}
-    })
+        displayOptions: { action: 'present', modalDisplayStyle: 'popup' },
+    });
 }
 
 </script>
