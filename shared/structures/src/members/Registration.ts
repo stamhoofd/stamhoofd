@@ -59,10 +59,10 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: DateDecoder, nullable: true })
     registeredAt: Date | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 354 })
     startDate: Date | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 354 })
     trialUntil: Date | null = null;
 
     /// Keep spot for this member temporarily
@@ -107,7 +107,7 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: new ArrayDecoder(StockReservation), nullable: true, version: 299 })
     stockReservations: StockReservation[] = [];
 
-    @field({ decoder: new ArrayDecoder(GenericBalance), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(GenericBalance), version: 354 })
     balances: GenericBalance[] = [];
 
     get isTrial() {

@@ -20,7 +20,7 @@ export class MemberPlatformMembership extends AutoEncoder {
     @field({ decoder: DateDecoder })
     startDate = new Date();
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 354 })
     trialUntil: Date | null = null;
 
     @field({ decoder: DateDecoder })

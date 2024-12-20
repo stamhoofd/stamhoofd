@@ -15,7 +15,7 @@ export class RegistrationPeriodBase extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     locked = false;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 354 })
     previousPeriodId: string | null = null;
 
     get name() {

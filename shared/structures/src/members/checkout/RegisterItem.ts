@@ -55,10 +55,10 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     replaceRegistrationIds: string[] = [];
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 354 })
     trial = false;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 354 })
     customStartDate: Date | null = null;
 
     hydrate(context: RegisterContext) {

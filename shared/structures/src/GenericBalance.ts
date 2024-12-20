@@ -11,11 +11,11 @@ export class GenericBalance extends AutoEncoder {
     @field({ decoder: StringDecoder })
     organizationId: string;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 354 })
     amountPaid = 0;
 
     @field({ decoder: IntegerDecoder, field: 'amount' })
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 354 })
     amountOpen = 0;
 
     @field({ decoder: IntegerDecoder })
