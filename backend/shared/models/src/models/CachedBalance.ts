@@ -94,6 +94,9 @@ export class CachedBalance extends Model {
             case ReceivableBalanceType.user:
                 await this.updateForUsers(organizationId, objectIds);
                 break;
+            case ReceivableBalanceType.registration:
+                await this.updateForRegistrations(organizationId, objectIds);
+                break;
         }
     }
 
@@ -105,6 +108,8 @@ export class CachedBalance extends Model {
                 return await this.balanceForMembers(organizationId, objectIds);
             case ReceivableBalanceType.user:
                 return await this.balanceForUsers(organizationId, objectIds);
+            case ReceivableBalanceType.registration:
+                return await this.balanceForRegistrations(organizationId, objectIds);
         }
     }
 
@@ -361,6 +366,14 @@ export class CachedBalance extends Model {
         await this.setForResults(organizationId, results, ReceivableBalanceType.member);
     }
 
+    static async updateForRegistrations(organizationId: string, registrationIds: string[]) {
+        if (registrationIds.length === 0) {
+            return;
+        }
+        const results = await this.fetchForObjects(organizationId, registrationIds, 'registrationId');
+        await this.setForResults(organizationId, results, ReceivableBalanceType.registration);
+    }
+
     static async updateForUsers(organizationId: string, userIds: string[]) {
         if (userIds.length === 0) {
             return;
@@ -388,6 +401,13 @@ export class CachedBalance extends Model {
             return [];
         }
         return await this.fetchBalanceItems(organizationId, userIds, 'userId', SQL.where('memberId', null));
+    }
+
+    static async balanceForRegistrations(organizationId: string, registrationIds: string[]) {
+        if (registrationIds.length === 0) {
+            return [];
+        }
+        return await this.fetchBalanceItems(organizationId, registrationIds, 'registrationId');
     }
 
     /**

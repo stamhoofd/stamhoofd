@@ -37,7 +37,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             throw Context.auth.error();
         }
 
-        if (request.body.changes.length == 0) {
+        if (request.body.changes.length === 0) {
             return new Response([]);
         }
 

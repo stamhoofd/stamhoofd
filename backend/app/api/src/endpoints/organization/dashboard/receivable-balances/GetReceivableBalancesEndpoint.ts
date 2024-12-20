@@ -53,14 +53,12 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
                 amountPending: { $neq: 0 },
                 nextDueAt: { $neq: null },
             },
+            $not: {
+                objectType: {
+                    $in: Context.auth.hasSomePlatformAccess() ? [ReceivableBalanceType.registration] : [ReceivableBalanceType.organization, ReceivableBalanceType.registration],
+                },
+            },
         };
-
-        if (!Context.auth.hasSomePlatformAccess()) {
-            // Cannot see debt between organizations
-            scopeFilter.objectType = {
-                $neq: ReceivableBalanceType.organization,
-            };
-        }
 
         const query = CachedBalance
             .select();

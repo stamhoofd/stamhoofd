@@ -100,6 +100,26 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
                     .fetch();
                 break;
             }
+
+            case ReceivableBalanceType.registration: {
+                paymentModels = await Payment.select()
+                    .where('organizationId', organization.id)
+                    .join(
+                        SQL.join(BalanceItemPayment.table)
+                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
+                    )
+                    .join(
+                        SQL.join(BalanceItem.table)
+                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
+                    )
+                    .where(SQL.column(BalanceItem.table, 'registrationId'), request.params.id)
+                    .andWhere(
+                        SQL.whereNot('status', PaymentStatus.Failed),
+                    )
+                    .groupBy(SQL.column(Payment.table, 'id'))
+                    .fetch();
+                break;
+            }
         }
 
         const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
@@ -110,6 +130,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
         const created = new CachedBalance();
         created.amountOpen = 0;
         created.amountPending = 0;
+        created.amountPaid = 0;
         created.organizationId = organization.id;
         created.objectId = request.params.id;
         created.objectType = request.params.type;

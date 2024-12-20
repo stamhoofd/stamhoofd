@@ -41,7 +41,7 @@ export class MergedMember extends Model {
     details: MemberDetails;
 
     /**
-     * Not yet paid balance
+     * @deprecated
      */
     @column({ type: 'integer' })
     outstandingBalance = 0;

@@ -32,6 +32,9 @@ export class Member extends AutoEncoder {
     @field({ decoder: MemberDetails, version: 165 })
     details: MemberDetails;
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: IntegerDecoder, optional: true })
     outstandingBalance = 0;
 

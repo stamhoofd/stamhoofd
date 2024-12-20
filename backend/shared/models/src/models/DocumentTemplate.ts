@@ -74,9 +74,11 @@ export class DocumentTemplate extends Model {
         let missingData = false;
 
         const group = await Group.getByID(registration.groupId);
-        const { items: balanceItems, payments } = await BalanceItem.getForRegistration(registration.id);
+        const { items: balanceItems, payments } = await BalanceItem.getForRegistration(registration.id, this.organizationId);
 
         const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : []);
+        const price = balanceItems.reduce((sum, item) => sum + item.price, 0);
+        const pricePaid = balanceItems.reduce((sum, item) => sum + item.pricePaid, 0);
 
         // We take the minimum date here, because there is a highter change of later paymetns to be for other things than the registration itself
         const paidAt = paidAtDates.length ? new Date(Math.min(...paidAtDates)) : null;
@@ -102,7 +104,7 @@ export class DocumentTemplate extends Model {
                     id: 'registration.startDate',
                     type: RecordType.Date,
                 }), // settings will be overwritten
-                dateValue: group?.settings?.startDate,
+                dateValue: registration.startDate ?? group?.settings?.startDate,
             }),
             'registration.endDate': RecordDateAnswer.create({
                 settings: RecordSettings.create({
@@ -114,16 +116,36 @@ export class DocumentTemplate extends Model {
             'registration.price':
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
+                        id: 'registration.price',
                         type: RecordType.Price,
                     }), // settings will be overwritten
-                    value: registration.price,
+                    value: price,
+                }),
+            // This one is duplicated in case it got disabled (we need to use it to check if document is included)
+            'registration.priceOriginal':
+                RecordPriceAnswer.create({
+                    settings: RecordSettings.create({
+                        id: 'registration.priceOriginal',
+                        type: RecordType.Price,
+                    }), // settings will be overwritten
+                    value: price,
+                }),
+            // This one is duplicated in case it got disabled (we need to use it to check if document is included)
+            'registration.pricePaidOriginal':
+                RecordPriceAnswer.create({
+                    settings: RecordSettings.create({
+                        id: 'registration.pricePaidOriginal',
+                        type: RecordType.Price,
+                    }), // settings will be overwritten
+                    value: pricePaid,
                 }),
             'registration.pricePaid':
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
+                        id: 'registration.pricePaid',
                         type: RecordType.Price,
                     }), // settings will be overwritten
-                    value: registration.pricePaid,
+                    value: pricePaid,
                 }),
             'registration.paidAt':
                 RecordDateAnswer.create({
@@ -483,14 +505,22 @@ export class DocumentTemplate extends Model {
             }
         }
 
-        if (this.settings.minPrice !== null) {
-            if ((registration.price ?? 0) < this.settings.minPrice) {
-                return false;
+        if (this.settings.minPrice !== null && this.settings.minPrice > 0) {
+            const priceAnswer = fieldAnswers.get('registration.priceOriginal');
+            if (priceAnswer && priceAnswer instanceof RecordPriceAnswer) {
+                if ((priceAnswer.value ?? 0) < this.settings.minPrice) {
+                    return false;
+                }
             }
         }
 
-        if (this.settings.minPricePaid !== null) {
-            if ((registration.pricePaid ?? 0) < this.settings.minPricePaid && (registration.price ?? 0) > 0) {
+        if (this.settings.minPricePaid !== null && this.settings.minPricePaid > 0) {
+            const pricePaidAnswer = fieldAnswers.get('registration.pricePaidOriginal');
+            const priceAnswer = fieldAnswers.get('registration.priceOriginal');
+            const price = (priceAnswer instanceof RecordPriceAnswer ? priceAnswer.value : 0) ?? 0;
+            const pricePaid = (pricePaidAnswer instanceof RecordPriceAnswer ? pricePaidAnswer.value : 0) ?? 0;
+
+            if (pricePaid < this.settings.minPricePaid && price > 0) {
                 return false;
             }
         }

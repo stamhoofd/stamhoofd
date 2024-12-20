@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AuditLog, BalanceItem, CachedBalance, Document, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, Document as DocumentStruct, Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLog, BalanceItem, CachedBalance, Document, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, Document as DocumentStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -323,6 +323,9 @@ export class AuthenticatedStructures {
         }
         const organizations = new Map<string, Organization>();
 
+        const registrationIds = Formatter.uniqueArray(members.flatMap(m => m.registrations.map(r => r.id)));
+        const balances = await CachedBalance.getForObjects(registrationIds, Context.organization?.id ?? null);
+
         if (includeUser) {
             for (const organizationId of includeUser.permissions?.organizationPermissions.keys() ?? []) {
                 if (includeContextOrganization || organizationId !== Context.auth.organization?.id) {
@@ -365,7 +368,25 @@ export class AuthenticatedStructures {
                 }
             }
             member.registrations = member.registrations.filter(r => (Context.auth.organization && Context.auth.organization.active && r.organizationId === Context.auth.organization.id) || (organizations.get(r.organizationId)?.active ?? false));
-            const blob = member.getStructureWithRegistrations();
+            const balancesPermission = await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read);
+
+            const blob = MemberWithRegistrationsBlob.create({
+                ...member,
+                registrations: member.registrations.map((r) => {
+                    const base = r.getStructure();
+
+                    base.balances = balancesPermission
+                        ? (balances.filter(b => r.id === b.objectId).map((b) => {
+                                return GenericBalance.create(b);
+                            }))
+                        : [];
+
+                    return base;
+                }),
+                details: member.details,
+                users: member.users.map(u => u.getStructure()),
+            });
+
             memberBlobs.push(
                 await Context.auth.filterMemberData(member, blob),
             );
@@ -568,9 +589,15 @@ export class AuthenticatedStructures {
 
         const organizationStructs = await this.organizations(organizations);
 
+        const registrationIds = Formatter.uniqueArray([
+            ...balances.filter(b => b.objectType === ReceivableBalanceType.registration).map(b => b.objectId),
+        ]);
+        const registrations = await Registration.getByIDs(...registrationIds);
+
         const memberIds = Formatter.uniqueArray([
             ...balances.filter(b => b.objectType === ReceivableBalanceType.member).map(b => b.objectId),
             ...responsibilities.map(r => r.memberId),
+            ...registrations.map(r => r.memberId),
         ]);
         const members = memberIds.length > 0 ? await Member.getByIDs(...memberIds) : [];
 
@@ -618,6 +645,49 @@ export class AuthenticatedStructures {
             }
             else if (balance.objectType === ReceivableBalanceType.member) {
                 const member = members.find(m => m.id === balance.objectId) ?? null;
+                if (member) {
+                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
+                    object = ReceivableBalanceObject.create({
+                        id: balance.objectId,
+                        name: member.details.name,
+                        contacts: [
+                            ...(member.details.getMemberEmails().length
+                                ? [
+                                        ReceivableBalanceObjectContact.create({
+                                            firstName: member.details.firstName ?? '',
+                                            lastName: member.details.lastName ?? '',
+                                            emails: member.details.getMemberEmails(),
+                                            meta: {
+                                                type: 'member',
+                                                responsibilityIds: [],
+                                                url,
+                                            },
+                                        }),
+                                    ]
+                                : []),
+
+                            ...(member.details.parentsHaveAccess
+                                ? member.details.parents.filter(p => !!p.email).map(p => ReceivableBalanceObjectContact.create({
+                                    firstName: p.firstName ?? '',
+                                    lastName: p.lastName ?? '',
+                                    emails: [p.email!],
+                                    meta: {
+                                        type: 'parent',
+                                        responsibilityIds: [],
+                                        url,
+                                    },
+                                }))
+                                : []),
+                        ],
+                    });
+                }
+            }
+            else if (balance.objectType === ReceivableBalanceType.registration) {
+                const registration = registrations.find(r => r.id === balance.objectId) ?? null;
+                if (!registration) {
+                    continue;
+                }
+                const member = members.find(m => m.id === registration.memberId) ?? null;
                 if (member) {
                     const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
                     object = ReceivableBalanceObject.create({

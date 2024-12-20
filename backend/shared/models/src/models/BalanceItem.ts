@@ -1,11 +1,11 @@
 import { column, Database, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { BalanceItem as BalanceItemStruct, BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, OrderStatus, Payment as PaymentStruct, PrivatePayment } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
-import { Document, Organization, Payment, Webshop } from './';
+import { Document, Payment } from './';
 import { CachedBalance } from './CachedBalance';
 
 /**
@@ -220,8 +220,18 @@ export class BalanceItem extends Model {
         await this.deleteItems(items);
     }
 
-    static async getForRegistration(registrationId: string) {
-        const items = await BalanceItem.where({ registrationId });
+    static async getForRegistration(registrationId: string, organizationId?: string) {
+        let q = BalanceItem.select()
+            .where('registrationId', registrationId)
+            .whereNot('status', BalanceItemStatus.Hidden);
+
+        if (organizationId) {
+            q = q.where('organizationId', organizationId);
+        }
+
+        const items = await q
+            .fetch();
+
         return {
             items,
             ...(await this.loadPayments(items)),
@@ -237,15 +247,6 @@ export class BalanceItem extends Model {
 
         await BalanceItem.updatePricePaid(items.map(i => i.id));
 
-        // Deprecated: the member balances have moved to CachedBalance
-        // Update outstanding amount of related members and registrations
-        const memberIds: string[] = Formatter.uniqueArray(items.map(p => p.memberId).filter(id => id !== null));
-
-        const Member = (await import('./Member')).Member;
-        await Member.updateOutstandingBalance(memberIds);
-
-        const { Registration } = await import('./Registration');
-
         const organizationIds = Formatter.uniqueArray(items.map(p => p.organizationId));
         for (const organizationId of organizationIds) {
             const filteredItems = items.filter(i => i.organizationId === organizationId);
@@ -260,9 +261,7 @@ export class BalanceItem extends Model {
             await CachedBalance.updateForOrganizations(organizationId, organizationIds);
 
             const registrationIds: string[] = Formatter.uniqueArray(filteredItems.map(p => p.registrationId).filter(id => id !== null));
-
-            // Deprecated: we'll need to move the outstanding balance of registrations to CachedBalance
-            await Registration.updateOutstandingBalance(registrationIds, organizationId);
+            await CachedBalance.updateForRegistrations(organizationId, registrationIds);
 
             if (registrationIds.length) {
                 await Document.updateForRegistrations(registrationIds, organizationId);

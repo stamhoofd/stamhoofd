@@ -55,7 +55,7 @@ export class Registration extends Model {
 
     /**
      * @deprecated
-     * Should move to cached balances
+     * Moved to cached balances
      */
     @column({ type: 'integer', nullable: true })
     price: number | null = null;
@@ -121,8 +121,7 @@ export class Registration extends Model {
 
     /**
      * @deprecated
-     * Should move to cached balances
-     * Part of price that is paid
+     * Moved to cached balances
      */
     @column({ type: 'integer' })
     pricePaid = 0;
@@ -141,45 +140,6 @@ export class Registration extends Model {
             group: this.group.getStructure(),
             price: this.price ?? 0,
         });
-    }
-
-    /**
-     * Update the outstanding balance of multiple members in one go (or all members)
-     */
-    static async updateOutstandingBalance(registrationIds: string[] | 'all', organizationId?: string) {
-        if (registrationIds !== 'all' && registrationIds.length === 0) {
-            return;
-        }
-
-        const params: any[] = [];
-        let firstWhere = '';
-        let secondWhere = '';
-
-        if (registrationIds !== 'all') {
-            firstWhere = ` AND registrationId IN (?)`;
-            params.push(registrationIds);
-
-            secondWhere = `WHERE registrations.id IN (?)`;
-            params.push(registrationIds);
-        }
-
-        const query = `UPDATE
-            registrations
-            LEFT JOIN (
-                SELECT
-                    registrationId,
-                    sum(unitPrice * amount) AS price,
-                    sum(pricePaid) AS pricePaid
-                FROM
-                    balance_items
-                WHERE status != 'Hidden'${firstWhere}
-                GROUP BY
-                    registrationId
-            ) i ON i.registrationId = registrations.id 
-        SET registrations.price = coalesce(i.price, 0), registrations.pricePaid = coalesce(i.pricePaid, 0)
-        ${secondWhere}`;
-
-        await Database.update(query, params);
     }
 
     /**

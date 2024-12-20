@@ -48,6 +48,7 @@ export * from './src/PermissionsResourceType.js';
 export * from './src/Platform.js';
 export * from './src/Policy.js';
 export * from './src/ReceivableBalance.js';
+export * from './src/GenericBalance.js';
 export * from './src/RegisterCodeStatus.js';
 export * from './src/RegistrationPeriod.js';
 export * from './src/RegistrationPeriodBase.js';

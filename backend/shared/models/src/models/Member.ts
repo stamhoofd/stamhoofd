@@ -63,7 +63,8 @@ export class Member extends Model {
     details: MemberDetails;
 
     /**
-     * Not yet paid balance
+     * @deprecated
+     * Unreliable since a member can have outstanding balance to multiple organizations now
      */
     @column({ type: 'integer' })
     outstandingBalance = 0;
@@ -101,44 +102,6 @@ export class Member extends Model {
      */
     static async getWithRegistrations(id: string): Promise<MemberWithRegistrations | null> {
         return (await this.getBlobByIds(id))[0] ?? null;
-    }
-
-    /**
-     * Update the outstanding balance of multiple members in one go (or all members)
-     */
-    static async updateOutstandingBalance(memberIds: string[] | 'all') {
-        if (memberIds !== 'all' && memberIds.length == 0) {
-            return;
-        }
-
-        const params: any[] = [];
-        let firstWhere = '';
-        let secondWhere = '';
-
-        if (memberIds !== 'all') {
-            firstWhere = ` AND memberId IN (?)`;
-            params.push(memberIds);
-
-            secondWhere = `WHERE members.id IN (?)`;
-            params.push(memberIds);
-        }
-
-        const query = `UPDATE
-            members
-            LEFT JOIN (
-                SELECT
-                    memberId,
-                    sum(unitPrice * amount) - sum(pricePaid) AS outstandingBalance
-                FROM
-                    balance_items
-                WHERE status != 'Hidden'${firstWhere}
-                GROUP BY
-                    memberId
-            ) i ON i.memberId = members.id 
-        SET members.outstandingBalance = COALESCE(i.outstandingBalance, 0)
-        ${secondWhere}`;
-
-        await Database.update(query, params);
     }
 
     /**
@@ -375,15 +338,6 @@ export class Member extends Model {
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
         return this.getBlobByIds(...(await this.getMemberIdsWithRegistrationForUser(user)));
-    }
-
-    getStructureWithRegistrations(this: MemberWithRegistrations, forOrganization: null | boolean = null) {
-        return MemberWithRegistrationsBlob.create({
-            ...this,
-            registrations: this.registrations.map(r => r.getStructure()),
-            details: this.details,
-            users: this.users.map(u => u.getStructure()),
-        });
     }
 
     static getRegistrationWithMemberStructure(registration: RegistrationWithMember & { group: import('./Group').Group }): RegistrationWithMemberStruct {

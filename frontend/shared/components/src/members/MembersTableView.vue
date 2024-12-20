@@ -466,7 +466,7 @@ else {
             new Column<ObjectType, number>({
                 name: 'Prijs',
                 allowSorting: false,
-                getValue: v => v.filterRegistrations({ groups: groups }).reduce((sum, r) => sum + r.price, 0),
+                getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0),
                 format: (outstandingBalance) => {
                     if (outstandingBalance < 0) {
                         return Formatter.price(outstandingBalance);
@@ -487,7 +487,7 @@ else {
             new Column<ObjectType, number>({
                 name: 'Te betalen',
                 allowSorting: false,
-                getValue: v => v.filterRegistrations({ groups: groups }).reduce((sum, r) => sum + (r.price - r.pricePaid), 0),
+                getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen), 0),
                 format: (outstandingBalance) => {
                     if (outstandingBalance < 0) {
                         return Formatter.price(outstandingBalance);

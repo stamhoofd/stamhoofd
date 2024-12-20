@@ -1063,6 +1063,7 @@ export class AdminPermissionChecker {
             for (const registration of cloned.registrations) {
                 registration.price = 0;
                 registration.pricePaid = 0;
+                registration.balances = [];
             }
         }
 
