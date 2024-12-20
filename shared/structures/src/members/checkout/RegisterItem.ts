@@ -751,6 +751,13 @@ export class RegisterItem {
     }
 
     get defaultStartDate() {
+        if (this.replaceRegistrations.length > 0) {
+            const reg = this.replaceRegistrations[0];
+            if (reg.startDate && reg.startDate.getTime() >= this.group.settings.startDate.getTime()) {
+                return reg.startDate;
+            }
+            return this.group.settings.startDate;
+        }
         let startDate = Formatter.luxon(new Date());
         startDate = startDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
         return new Date(Math.max(startDate.toJSDate().getTime(), this.group.settings.startDate.getTime()));
