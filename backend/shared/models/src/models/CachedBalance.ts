@@ -73,6 +73,10 @@ export class CachedBalance extends Model {
     updatedAt: Date;
 
     static async getForObjects(objectIds: string[], limitOrganizationId?: string | null): Promise<CachedBalance[]> {
+        if (objectIds.length === 0) {
+            return [];
+        }
+
         const query = this.select()
             .where('objectId', objectIds);
 
@@ -84,6 +88,10 @@ export class CachedBalance extends Model {
     }
 
     static async updateForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
+        if (objectIds.length === 0) {
+            return;
+        }
+
         switch (objectType) {
             case ReceivableBalanceType.organization:
                 await this.updateForOrganizations(organizationId, objectIds);
@@ -101,6 +109,10 @@ export class CachedBalance extends Model {
     }
 
     static async balanceForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
+        if (objectIds.length === 0) {
+            return [];
+        }
+
         switch (objectType) {
             case ReceivableBalanceType.organization:
                 return await this.balanceForOrganizations(organizationId, objectIds);
