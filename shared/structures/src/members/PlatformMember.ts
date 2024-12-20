@@ -10,13 +10,14 @@ import { PermissionsResourceType } from '../PermissionsResourceType.js';
 
 import { Document as DocumentStruct } from '../Document.js';
 import { Platform } from '../Platform.js';
-import { UserPermissions } from '../UserPermissions.js';
 import { UserWithMembers } from '../UserWithMembers.js';
 import { Address } from '../addresses/Address.js';
+import { Country } from '../addresses/CountryDecoder.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { MemberDetails, MemberProperty } from './MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
+import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import { ObjectWithRecords } from './ObjectWithRecords.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
 import { Parent } from './Parent.js';
@@ -25,8 +26,6 @@ import { RegisterItem } from './checkout/RegisterItem.js';
 import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
-import { Country } from '../addresses/CountryDecoder.js';
-import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -915,14 +914,13 @@ export class PlatformMember implements ObjectWithRecords {
         return categories;
     }
 
-    getEnabledRecordCategories(options: { checkPermissions?: {
-        permissions: UserPermissions | null;
-        level: PermissionLevel; } | null;
-    scopeOrganization?: Organization | null;
-    scopeGroup?: Group | null;
+    getEnabledRecordCategories(options: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } | null;
+        scopeOrganization?: Organization | null;
+        scopeGroup?: Group | null;
     }): RecordCategory[] {
         const checkPermissions = options.checkPermissions;
-        if (checkPermissions && !checkPermissions.permissions) {
+        const isUserManager = options.checkPermissions?.user.members.members.some(m => m.id === this.id) ?? false;
+        if (!isUserManager && (checkPermissions && !checkPermissions.user.permissions)) {
             return [];
         }
 
@@ -939,25 +937,33 @@ export class PlatformMember implements ObjectWithRecords {
                 }
 
                 if (recordCategory.isEnabled(this)) {
-                    if (checkPermissions && checkPermissions.permissions) {
-                        // Check permissions
-                        // we need at least permission in one organization
-                        let hasPermission = false;
-                        for (const organization of scopedOrganizations) {
-                            const organizationPermissions = checkPermissions.permissions.forOrganization(organization, Platform.shared);
-
-                            if (!organizationPermissions) {
+                    if (checkPermissions) {
+                        if (isUserManager) {
+                            const hasPermission = recordCategory.checkPermissionForUserManager(checkPermissions.level);
+                            if (!hasPermission) {
                                 continue;
                             }
-
-                            if (organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, recordCategory.id, checkPermissions.level)) {
-                                hasPermission = true;
-                                break;
-                            }
                         }
+                        else if (checkPermissions.user.permissions) {
+                            // Check permissions
+                            // we need at least permission in one organization
+                            let hasPermission = false;
+                            for (const organization of scopedOrganizations) {
+                                const organizationPermissions = checkPermissions.user.permissions.forOrganization(organization, Platform.shared);
 
-                        if (!hasPermission) {
-                            continue;
+                                if (!organizationPermissions) {
+                                    continue;
+                                }
+
+                                if (organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, recordCategory.id, checkPermissions.level)) {
+                                    hasPermission = true;
+                                    break;
+                                }
+                            }
+
+                            if (!hasPermission) {
+                                continue;
+                            }
                         }
                     }
 

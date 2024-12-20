@@ -3,6 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ResolutionRequest } from '../../files/ResolutionRequest.js';
+import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { type RecordAnswer } from './RecordAnswer.js';
 
 export enum RecordType {
@@ -242,6 +243,9 @@ export class RecordSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[];
 
+    @field({ decoder: new EnumDecoder(PermissionLevel), ...NextVersion })
+    userManagerPermissionLevel = PermissionLevel.Write;
+
     getDiffValue() {
         const type = getRecordTypeName(this.type);
         if (this.required) {
@@ -269,6 +273,10 @@ export class RecordSettings extends AutoEncoder {
         if (answer) {
             answer.validate();
         }
+    }
+
+    checkPermissionForUserManager(lvlNumber: number) {
+        return getPermissionLevelNumber(this.userManagerPermissionLevel) >= lvlNumber;
     }
 
     get excelColumns() {
