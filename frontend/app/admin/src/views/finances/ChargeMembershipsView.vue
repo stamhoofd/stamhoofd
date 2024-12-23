@@ -188,7 +188,7 @@
                         <h2>Proefperiodes</h2>
 
                         <div class="style-stats-grid">
-                            <STInputBox :title="$t('Aantal')">
+                            <STInputBox :title="$t('faa31f24-a42f-454b-9ceb-417c46dcee0d')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -197,7 +197,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('Unieke leden')">
+                            <STInputBox :title="$t('8e0924af-042c-42ab-85e1-dda0a2106b98')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -206,7 +206,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('Totaal bedrag')">
+                            <STInputBox :title="$t('e886fb7a-9312-4e74-b426-5acb694fe009')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -215,7 +215,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('Unieke groepen')">
+                            <STInputBox :title="$t('b789017f-58d2-438b-b73a-2a4d075e3c5b')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -231,7 +231,7 @@
                         <h2>Detail "{{ type.name }}"</h2>
 
                         <div class="style-stats-grid">
-                            <STInputBox :title="$t('Aantal')">
+                            <STInputBox :title="$t('faa31f24-a42f-454b-9ceb-417c46dcee0d')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -240,7 +240,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('Unieke leden')">
+                            <STInputBox :title="$t('8e0924af-042c-42ab-85e1-dda0a2106b98')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -249,7 +249,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('Totaal bedrag')">
+                            <STInputBox :title="$t('e886fb7a-9312-4e74-b426-5acb694fe009')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -258,7 +258,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('Unieke groepen')">
+                            <STInputBox :title="$t('b789017f-58d2-438b-b73a-2a4d075e3c5b')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>

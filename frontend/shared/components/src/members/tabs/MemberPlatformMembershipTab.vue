@@ -10,7 +10,7 @@
                     <hr>
                     <h2>{{ period.name }}</h2>
                     <p v-if="getMembershipsForPeriod(period.id).length === 0" class="warning-box">
-                        {{ $t('Dit lid is niet aangesloten in {werkjaar} bij KSA Nationaal, en is daardoor ook niet verzekerd.', {werkjaar: period.name}) }}
+                        {{ $t('65cbb5ad-4a6b-4800-a7db-59627fb576ef', {werkjaar: period.name}) }}
                     </p>
 
                     <STList v-else>
@@ -57,10 +57,10 @@
                             </p>
 
                             <p v-if="membership.generated && auth.hasPlatformFullAccess()" class="style-description-small">
-                                {{ $t('Deze aansluiting werd automatisch aangemaakt') }}
+                                {{ $t('41464f90-088a-4c6a-827b-cd5907ad1fac') }}
                             </p>
                             <p v-if="membership.balanceItemId && auth.hasPlatformFullAccess()" class="style-description-small">
-                                {{ $t('Deze aansluiting werd reeds aangerekend') }}
+                                {{ $t('8e515034-5d58-4042-84e6-7e32943dbdec') }}
                             </p>
 
                             <template v-if="hasFull && !period.locked && (!organization || membership.organizationId === organization.id)" #right>

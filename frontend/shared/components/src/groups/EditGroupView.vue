@@ -459,21 +459,21 @@
             <template v-if="$feature('member-trials')">
                 <template v-if="patched.type === GroupType.Membership">
                     <hr>
-                    <h2>{{ $t('Proefperiodes') }}</h2>
-                    <p>{{ $t('Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.') }}</p>
+                    <h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
+                    <p>{{ $t('89a760d7-8995-458c-9635-da104971e95c') }}</p>
 
-                    <STInputBox :title="$t('Aantal dagen op proef')" error-fields="settings.trialDays" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('f0ceba51-bad2-4454-9a9b-4b12f0983c82')" error-fields="settings.trialDays" :error-box="errors.errorBox">
                         <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
                     </STInputBox>
                     <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
-                        {{ $t('Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij KSA Nationaal.', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
+                        {{ $t('d68a6d63-d782-49e2-84a5-4f77dbfa2977', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
                     </p>
 
-                    <STInputBox :title="$t('Datum eerste activiteit of vergadering')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
                         <DateSelection v-model="startDate" :placeholder="formatDate(patched.settings.startDate, true)" :min="period?.startDate" :max="period?.endDate" />
                     </STInputBox>
                     <p class="style-description-small">
-                        {{ $t('Als nieuwe leden inschrijven voor deze datum, begint de proefperiode pas te lopen vanaf deze datum. Handig als de activiteiten pas na het begin van de inschrijvingen starten.') }}
+                        {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
                     </p>
                 </template>
             </template>

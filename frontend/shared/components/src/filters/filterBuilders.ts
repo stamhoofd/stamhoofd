@@ -115,7 +115,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             const all = [];
             all.push(
                 new StringFilterBuilder({
-                    name: $t('GroepsID'),
+                    name: $t('2f2899e5-4c62-4452-97d2-97f4fd670e86'),
                     key: 'organizationId',
                     allowCreation: false,
                     wrapper: UIFilterWrapperMarker,
@@ -439,7 +439,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('Naam ouder'),
+                    name: $t('4824fef7-9c02-4a3f-b2fd-117857a7b82c'),
                     key: 'name',
                     wrapper: {
                         $or: [
@@ -484,7 +484,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('Straatnaam'),
+                    name: $t('f8bfc32b-5bc4-4ccc-82ed-514dffd011c2'),
                     key: 'street',
                     wrapper: {
                         $or: [
@@ -501,7 +501,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('Huisnummer'),
+                    name: $t('99ea968b-f820-4791-96c3-bb1033603013'),
                     key: 'number',
                     wrapper: {
                         $or: [

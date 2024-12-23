@@ -30,7 +30,7 @@
                         </template>
                     </TrackingYearInput>
                     <p class="style-description-small">
-                        {{ $t('Een lid kan inschrijven in een leeftijdsgroep met leeftijdslimieten alsof het geboren werd in het volgjaar.') }}
+                        {{ $t('3ebf23d3-9609-42b3-b7ae-54bd9c4d08a1') }}
                     </p>
                 </template>
 

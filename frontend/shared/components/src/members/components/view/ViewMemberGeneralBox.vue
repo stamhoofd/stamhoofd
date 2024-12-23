@@ -24,7 +24,7 @@
             </template>
 
             <template v-if="member.patchedMember.details.trackingYear">
-                <dt>{{ $t('Volgjaar') }}</dt>
+                <dt>{{ $t('99b87ddc-3a72-45fa-923a-10bf130fb4de') }}</dt>
                 <dd v-copyable>
                     {{ member.patchedMember.details.trackingYear }}
                 </dd>

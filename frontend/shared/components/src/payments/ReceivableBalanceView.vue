@@ -48,7 +48,7 @@
 
                 <STListItem v-else>
                     <h3 class="style-definition-label">
-                        {{ $t('Terug te betalen') }}
+                        {{ $t('d9ba4476-8dbe-46d5-bad9-e49c062cbfa1') }}
                     </h3>
                     <p class="style-definition-text error">
                         {{ formatPrice(-item.amountOpen + Math.max(0, -item.amountPending)) }}

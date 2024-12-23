@@ -7,10 +7,10 @@
             {{ registrationOrganization.name }}
         </p>
         <p v-else-if="registration.deactivatedAt" class="style-title-prefix-list">
-            {{ $t('Stopgezet') }}
+            {{ $t('9f80f234-d51c-4ef2-ba59-fc55fb1044c4') }}
         </p>
         <p v-else-if="registration.isTrial" class="style-title-prefix-list">
-            {{ $t('Proefperiode') }}
+            {{ $t('7e75723b-d09c-4722-942f-3ae2777de14c') }}
         </p>
 
         <h3 class="style-title-list">

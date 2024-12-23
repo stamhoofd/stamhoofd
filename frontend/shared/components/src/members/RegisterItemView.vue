@@ -39,7 +39,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
         <div v-if="admin" class="container">
-            <STInputBox :title="$t('Startdatum')" error-fields="customStartDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('a1ae6e8f-dbcd-4a53-a67c-0244d28ccb74')" error-fields="customStartDate" :error-box="errors.errorBox">
                 <DateSelection v-model="customStartDate" :required="false" :placeholder="formatDate(item.defaultStartDate, true)" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
             </STInputBox>
             <p v-if="item.group.settings.trialDays > 0" class="style-description-small">

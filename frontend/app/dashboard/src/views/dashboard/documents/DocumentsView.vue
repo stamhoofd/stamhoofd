@@ -11,7 +11,7 @@
         :Route="Route"
     >
         <template #empty>
-            {{ $t('Er zijn nog geen documenten.') }}
+            {{ $t('d3903009-28d5-48d6-b109-c89b88a9f36e') }}
         </template>
     </ModernTableView>
 </template>

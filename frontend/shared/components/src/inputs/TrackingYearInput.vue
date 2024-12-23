@@ -1,6 +1,6 @@
 <template>
-    <STInputBox :title="$t('Volgjaar')" error-fields="trackingYear" :error-box="errors.errorBox">
-        <NumberInput v-model="trackingYear" :title="$t('Volgjaar')" :validator="errors.validator" :min="1900" :max="max" />
+    <STInputBox :title="$t('99b87ddc-3a72-45fa-923a-10bf130fb4de')" error-fields="trackingYear" :error-box="errors.errorBox">
+        <NumberInput v-model="trackingYear" :title="$t('99b87ddc-3a72-45fa-923a-10bf130fb4de')" :validator="errors.validator" :min="1900" :max="max" />
         <template #right>
             <slot name="right" />
         </template>
