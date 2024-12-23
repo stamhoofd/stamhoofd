@@ -22,20 +22,29 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import { ObjectWithRecords, RecordCategory, RecordCheckboxAnswer } from '@stamhoofd/structures';
+import { ObjectWithRecords, PermissionLevel, RecordCategory, RecordCheckboxAnswer } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import { useAppContext } from '../../context';
 
 const props = defineProps<{
     value: T;
     category: RecordCategory;
 }>();
 
+const app = useAppContext();
+const isAdmin = app === 'dashboard' || app === 'admin';
+const filterOptions = isAdmin
+    ? undefined
+    : {
+            level: PermissionLevel.Read,
+        };
+
 const answers = computed(() => {
     return props.value.getRecordAnswers();
 });
 
 const recordsWithAnswers = computed(() => {
-    const records = props.category.filterRecords(props.value);
+    const records = props.category.filterRecords(props.value, filterOptions);
 
     return records.map((record) => {
         const answer = answers.value.get(record.id);
