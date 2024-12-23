@@ -494,41 +494,30 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     options: platform.config.membershipTypes.map((type) => {
                         return new MultipleChoiceUIFilterOption(type.name, type.id);
                     }),
-                    wrapFilter: (f: StamhoofdFilter) => {
-                        const choices = Array.isArray(f) ? f : [f];
-                        const d = new Date();
-                        d.setHours(12);
-                        d.setMinutes(0);
-                        d.setSeconds(0);
-                        d.setMilliseconds(0);
-
-                        const filters: StamhoofdFilter = [
-                            {
+                    wrapper: {
+                        platformMemberships: {
+                            $elemMatch: {
                                 membershipTypeId: {
-                                    $in: choices as string[],
+                                    $in: UIFilterWrapperMarker,
                                 },
-                                expireDate: null,
+                                startDate: {
+                                    $lte: { $: '$now' },
+                                },
                                 endDate: {
-                                    $gt: Formatter.dateIso(d),
+                                    $gt: { $: '$now' },
                                 },
+                                $or: [
+                                    {
+                                        expireDate: null,
+                                    },
+                                    {
+                                        expireDate: {
+                                            $gt: { $: '$now' },
+                                        },
+                                    },
+                                ],
                             },
-                            {
-                                membershipTypeId: {
-                                    $in: choices as string[],
-                                },
-                                expireDate: {
-                                    $gt: Formatter.dateIso(d),
-                                },
-                            },
-                        ];
-
-                        return {
-                            platformMemberships: {
-                                $elemMatch: {
-                                    $or: filters,
-                                },
-                            },
-                        };
+                        },
                     },
                 }),
             );
