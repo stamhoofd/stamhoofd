@@ -242,6 +242,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             startDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'startDate')),
             endDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'endDate')),
             expireDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'expireDate')),
+            trialUntil: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'trialUntil')),
         },
     ),
 
