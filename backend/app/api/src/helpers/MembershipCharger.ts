@@ -36,6 +36,7 @@ export const MembershipCharger = {
                 .where('balanceItemId', null)
                 .where('deletedAt', null)
                 .whereNot('organizationId', chargeVia)
+                .where(SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date()))
                 .limit(chunkSize)
                 .orderBy(
                     new SQLOrderBy({

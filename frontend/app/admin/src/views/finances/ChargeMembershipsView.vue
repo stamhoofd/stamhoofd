@@ -183,12 +183,55 @@
                         </LoadingButton>
                     </p>
 
+                    <div v-if="summary && summary?.trials.members > 0" class="container">
+                        <hr>
+                        <h2>Proefperiodes</h2>
+
+                        <div class="style-stats-grid">
+                            <STInputBox :title="$t('Aantal')">
+                                <p class="style-price-big">
+                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-else>
+                                        {{ formatInteger(summary.trials.memberships) }}
+                                    </span>
+                                </p>
+                            </STInputBox>
+
+                            <STInputBox :title="$t('Unieke leden')">
+                                <p class="style-price-big">
+                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-else>
+                                        {{ formatInteger(summary.trials.members) }}
+                                    </span>
+                                </p>
+                            </STInputBox>
+
+                            <STInputBox :title="$t('Totaal bedrag')">
+                                <p class="style-price-big">
+                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-else>
+                                        {{ formatPrice(summary.trials.price) }}
+                                    </span>
+                                </p>
+                            </STInputBox>
+
+                            <STInputBox :title="$t('Unieke groepen')">
+                                <p class="style-price-big">
+                                    <span v-if="!summary" class="style-placeholder-skeleton" />
+                                    <span v-else>
+                                        {{ formatInteger(summary.trials.organizations) }}
+                                    </span>
+                                </p>
+                            </STInputBox>
+                        </div>
+                    </div>
+
                     <div v-for="type of platform.config.membershipTypes" :key="type.id" class="container">
                         <hr>
                         <h2>Detail "{{ type.name }}"</h2>
 
                         <div class="style-stats-grid">
-                            <STInputBox title="Aantal">
+                            <STInputBox :title="$t('Aantal')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -197,7 +240,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox title="Unieke leden">
+                            <STInputBox :title="$t('Unieke leden')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -206,7 +249,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox title="Totaal bedrag">
+                            <STInputBox :title="$t('Totaal bedrag')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -215,7 +258,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox title="Unieke groepen">
+                            <STInputBox :title="$t('Unieke groepen')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>

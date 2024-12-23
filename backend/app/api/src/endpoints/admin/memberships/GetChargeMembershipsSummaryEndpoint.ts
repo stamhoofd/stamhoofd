@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SQL, SQLAlias, SQLCount, SQLDistinct, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLCount, SQLDistinct, SQLSelectAs, SQLSum, SQLWhereSign } from '@stamhoofd/sql';
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -43,6 +43,29 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
         const platform = await Platform.getShared();
         const chargeVia = platform.membershipOrganizationId;
 
+        const total = await this.fetchTotal(chargeVia, false);
+        const totalTrials = await this.fetchTotal(chargeVia, true);
+
+        return new Response(
+            ChargeMembershipsSummary.create({
+                running: false,
+                memberships: total.memberships ?? 0,
+                members: total.members ?? 0,
+                price: total.price ?? 0,
+                organizations: total.organizations ?? 0,
+                membershipsPerType: await this.fetchPerType(chargeVia),
+                trials: ChargeMembershipsTypeSummary.create({
+                    memberships: totalTrials.memberships ?? 0,
+                    members: totalTrials.members ?? 0,
+                    price: totalTrials.price ?? 0,
+                    organizations: totalTrials.organizations ?? 0,
+                }),
+            }),
+        );
+    }
+
+    async fetchTotal(chargeVia: string | null, trial = false) {
+        const noTrial = SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date());
         const query = SQL
             .select(
                 new SQLSelectAs(
@@ -81,25 +104,29 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
             .where('deletedAt', null)
             .whereNot('organizationId', chargeVia);
 
+        if (!trial) {
+            query.where(noTrial);
+        }
+        else {
+            query.whereNot(noTrial);
+        }
+
         const result = await query.fetch();
         const members = result[0]['data']['members'] as number;
         const memberships = result[0]['data']['memberships'] as number;
         const organizations = result[0]['data']['organizations'] as number;
         const price = result[0]['data']['price'] as number;
 
-        return new Response(
-            ChargeMembershipsSummary.create({
-                running: false,
-                memberships: memberships ?? 0,
-                members: members ?? 0,
-                price: price ?? 0,
-                organizations: organizations ?? 0,
-                membershipsPerType: await this.fetchPerType(chargeVia),
-            }),
-        );
+        return {
+            members,
+            memberships,
+            organizations,
+            price,
+        };
     }
 
-    async fetchPerType(chargeVia: string | null) {
+    async fetchPerType(chargeVia: string | null, trial = false) {
+        const trialQ = SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date());
         const query = SQL
             .select(
                 SQL.column('member_platform_memberships', 'membershipTypeId'),
@@ -137,10 +164,18 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
             .from('member_platform_memberships')
             .where('balanceItemId', null)
             .where('deletedAt', null)
+            .where(trialQ)
             .whereNot('organizationId', chargeVia)
             .groupBy(
                 SQL.column('member_platform_memberships', 'membershipTypeId'),
             );
+
+        if (!trial) {
+            query.where(trialQ);
+        }
+        else {
+            query.whereNot(trialQ);
+        }
 
         const result = await query.fetch();
         const membershipsPerType = new Map<string, ChargeMembershipsTypeSummary>();

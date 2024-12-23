@@ -7,10 +7,10 @@ export type ParseWhereArguments = [
     where: SQLWhere,
 ] | [
     whereOrColumn: SQLExpression | string,
-    sign: SQLWhereSign,
     value: SQLDynamicExpression,
 ] | [
     whereOrColumn: SQLExpression | string,
+    sign: SQLWhereSign,
     value: SQLDynamicExpression,
 ];
 
