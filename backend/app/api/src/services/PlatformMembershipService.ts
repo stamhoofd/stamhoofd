@@ -225,12 +225,12 @@ export class PlatformMembershipService {
 
                     const shouldApplyReducedPrice = me.details.shouldApplyReducedPrice;
 
-                    const cheapestMembership = defaultMembershipsWithOrganization.sort(({ membership: a, registration: ar, organization: ao }, { membership: b, registration: br, organization: bo }) => {
-                        const tagIdsA = ao?.meta.tags ?? [];
-                        const tagIdsB = bo?.meta.tags ?? [];
-                        const diff = a.getPrice(period.id, ar.startDate ?? ar.registeredAt ?? now, tagIdsA, shouldApplyReducedPrice)! - b.getPrice(period.id, ar.startDate ?? ar.registeredAt ?? now, tagIdsB, shouldApplyReducedPrice)!;
+                    const cheapestMembership = defaultMembershipsWithOrganization.sort((a, b) => {
+                        const tagIdsA = a.organization?.meta.tags ?? [];
+                        const tagIdsB = b.organization?.meta.tags ?? [];
+                        const diff = a.membership.getPrice(period.id, a.registration.startDate ?? a.registration.registeredAt ?? now, tagIdsA, shouldApplyReducedPrice)! - b.membership.getPrice(period.id, a.registration.startDate ?? a.registration.registeredAt ?? now, tagIdsB, shouldApplyReducedPrice)!;
                         if (diff === 0) {
-                            return Sorter.byDateValue(br.createdAt, ar.createdAt);
+                            return Sorter.byDateValue(b.registration.startDate ?? b.registration.createdAt, a.registration.startDate ?? a.registration.createdAt);
                         }
                         return diff;
                     })[0];
