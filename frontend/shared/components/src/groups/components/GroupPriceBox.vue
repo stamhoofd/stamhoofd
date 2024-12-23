@@ -58,13 +58,15 @@ const props = withDefaults(defineProps<{
     group: Group;
     errors: ReturnType<typeof useErrors>;
     defaultMembershipTypeId?: string | null;
+    showNameAlways?: boolean;
 }>(), {
     defaultMembershipTypeId: null,
+    showNameAlways: false,
 });
 
 const emit = defineEmits(['patch:price']);
 const { patched, addPatch } = useEmitPatch<GroupPrice>(props, emit, 'price');
-const isSingle = computed(() => props.group.settings.prices.length <= 1);
+const isSingle = computed(() => !props.showNameAlways && props.group.settings.prices.length <= 1);
 
 const name = computed({
     get: () => patched.value.name,

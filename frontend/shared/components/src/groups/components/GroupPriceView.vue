@@ -5,7 +5,7 @@
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <GroupPriceBox :price="patched" :group="group" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPatch" />
+        <GroupPriceBox :price="patched" :group="group" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :show-name-always="showNameAlways" @patch:price="addPatch" />
     </SaveView>
 </template>
 
@@ -31,11 +31,13 @@ const props = withDefaults(
         deleteHandler?: (() => Promise<void>) | null;
         showToasts?: boolean;
         defaultMembershipTypeId?: string | null;
+        showNameAlways?: boolean;
     }>(),
     {
         deleteHandler: null,
         showToasts: true,
         defaultMembershipTypeId: null,
+        showNameAlways: false,
     },
 );
 
@@ -84,7 +86,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            await Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
+            Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }
         await pop({ force: true });
     }

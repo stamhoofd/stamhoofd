@@ -511,7 +511,7 @@ import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
-import { useAuth, useDraggableArray, useFeatureFlag, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
+import { useAuth, useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
@@ -1042,6 +1042,7 @@ async function addGroupPrice() {
                     group: patched,
                     isNew: true,
                     defaultMembershipTypeId,
+                    showNameAlways: true,
                     saveHandler: async (patch: AutoEncoderPatchType<GroupPrice>) => {
                         addPricePut(price.patch(patch));
                     },
