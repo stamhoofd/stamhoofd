@@ -25,18 +25,18 @@
 import { useIsMobile, usePlatformFamilyManager } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
 import { onMounted } from 'vue';
-import { ViewMemberAccountsBox, ViewMemberSecurityCodeBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';
+import { ViewMemberAccountsBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberSecurityCodeBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';
 import ViewMemberResponsibilitiesBox from '../components/view/ViewMemberResponsibilitiesBox.vue';
 
 const isMobile = useIsMobile();
 
 const props = defineProps<{
-    member: PlatformMember
+    member: PlatformMember;
 }>();
 
 const platformFamilyManager = usePlatformFamilyManager();
 
 onMounted(() => {
-    platformFamilyManager.loadFamilyMembers(props.member, {shouldRetry: true}).catch(console.error)
+    platformFamilyManager.loadFamilyMembers(props.member, { shouldRetry: true }).catch(console.error);
 });
 </script>
