@@ -111,7 +111,6 @@ import { Company, OrganizationMetaData, PatchAnswers, SetupStepType } from '@sta
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
 import EditCompanyView from './components/EditCompanyView.vue';
-
 import EditOrganizationRecordCategoryBox from './components/EditOrganizationRecordCategoryBox.vue';
 
 const props = defineProps<{ isReview?: boolean }>();
