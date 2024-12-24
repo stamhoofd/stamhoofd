@@ -168,6 +168,8 @@
                 </STListItem>
             </STList>
 
+            <ViewOrganizationRecordCategoriesBox :organization="organization" />
+
             <div v-if="setupSteps.steps.size" class="container">
                 <hr>
                 <h2>{{ $t('6355a1b9-7b98-48c4-9aca-91df9a22d66e') }}</h2>
@@ -191,13 +193,14 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useBackForward, useContext, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
+import ViewOrganizationRecordCategoriesBox from './components/ViewOrganizationRecordCategoriesBox.vue';
 
 const props = defineProps<{
     organization: Organization;
