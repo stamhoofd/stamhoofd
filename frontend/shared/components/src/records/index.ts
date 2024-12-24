@@ -8,4 +8,5 @@ export { default as FinancialSupportSettingsView } from './FinancialSupportSetti
 export { default as DataPermissionSettingsView } from './DataPermissionSettingsView.vue';
 export { default as EditRecordView } from './EditRecordView.vue';
 export { default as RecordRow } from './components/RecordRow.vue';
+export { default as FillRecordCategoryBox } from './components/FillRecordCategoryBox.vue';
 export * from './RecordEditorSettings';
