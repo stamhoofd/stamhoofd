@@ -9,6 +9,7 @@ import { ReduceablePrice } from './GroupSettings.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
+import { OrganizationLvlRecordsConfiguration } from './OrganizationLvlRecordsConfiguration.js';
 import { PermissionRoleDetailed } from './PermissionRole.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
@@ -341,6 +342,10 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: OrganizationRecordsConfiguration, version: 253 })
     recordsConfiguration = OrganizationRecordsConfiguration.create({});
+
+    // todo: change name
+    @field({ decoder: OrganizationLvlRecordsConfiguration, ...NextVersion })
+    organizationLvlRecordsConfiguration = OrganizationLvlRecordsConfiguration.create({});
 
     @field({ decoder: new ArrayDecoder(OrganizationTag), version: 260 })
     tags: OrganizationTag[] = [];

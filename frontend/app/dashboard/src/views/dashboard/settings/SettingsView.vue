@@ -483,6 +483,7 @@ defineRoutes([
         component: BalanceNotificationSettingsView as unknown as ComponentOptions,
     },
 ]);
+
 const $navigate = useNavigate();
 const stripeAccounts = ref([]) as Ref<StripeAccount[]>;
 const loadingStripeAccounts = ref(false);

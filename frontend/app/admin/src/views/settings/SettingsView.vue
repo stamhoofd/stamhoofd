@@ -113,15 +113,15 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('5d0062df-e595-4e28-b1e3-d399102dfadf') }}
+                        Gegevens van organisaties
                     </h2>
                     <p class="style-description">
-                        {{ $t('76b00f58-a587-431f-9c28-1b86d394fc26') }}
+                        Kies welke informatie je verzamelt van organisaties
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -274,14 +274,14 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, OrganizationLvlRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditEventTypesView from './event-types/EditEventTypesView.vue';
-import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
 import LabsView from './LabsView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
+import OrganizationRecordConfigurationView from './organization-records/OrganizationRecordConfigurationView.vue';
 import EditPrivacyView from './privacy/EditPrivacyView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 
@@ -296,12 +296,12 @@ enum Routes {
     EmailSettings = 'emailadressen',
     EventTypes = 'soorten-activiteiten',
     CorporateIdentity = 'huisstijl',
-    Premises = 'lokalen',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
     Terms = 'voorwaarden',
     Labs = 'experimenten',
     SingleSignOn = 'sso',
+    OrganizationRecordConfiguration = 'organisatie-gegevens',
 }
 
 const platform = usePlatform();
@@ -421,9 +421,23 @@ defineRoutes([
         component: EditEventTypesView as ComponentOptions,
     },
     {
-        url: Routes.Premises,
+        url: Routes.OrganizationRecordConfiguration,
         present: 'popup',
-        component: EditPremiseTypesView as ComponentOptions,
+        component: OrganizationRecordConfigurationView as unknown as ComponentOptions,
+        paramsToProps() {
+            return {
+                recordsConfiguration: platform.value.config.organizationLvlRecordsConfiguration,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationLvlRecordsConfiguration>) => {
+                    await platformManager.value.patch(Platform.patch({
+                        config: PlatformConfig.patch({
+                            organizationLvlRecordsConfiguration: patch,
+                        }),
+                    }));
+
+                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                },
+            };
+        },
     },
     {
         url: Routes.SingleSignOn,
