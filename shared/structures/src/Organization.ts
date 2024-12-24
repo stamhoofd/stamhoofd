@@ -2,15 +2,21 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDe
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from './addresses/Address.js';
+import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
+import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
+import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { Group } from './Group.js';
 import { GroupCategoryTree } from './GroupCategory.js';
+import { ObjectWithRecords } from './members/ObjectWithRecords.js';
+import { RecordAnswer } from './members/records/RecordAnswer.js';
+import { RecordSettings } from './members/records/RecordSettings.js';
 import { OrganizationMetaData } from './OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod.js';
 import { UserWithMembers } from './UserWithMembers.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
 
-export class BaseOrganization extends AutoEncoder {
+export class BaseOrganization extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -68,6 +74,25 @@ export class BaseOrganization extends AutoEncoder {
 
     get dashboardDomain(): string {
         return STAMHOOFD.domains.dashboard;
+    }
+
+    isRecordEnabled(_record: RecordSettings): boolean {
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return this.meta.recordAnswers;
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter): boolean {
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, organizationItemInMemoryFilterCompilers);
+            return compiledFilter(this);
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
     }
 }
 

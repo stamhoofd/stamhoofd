@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
 
-        <p v-if="allowChildCategories" class="style-description">
+        <p v-if="allowChildCategories && type === RecordEditorType.PlatformMember" class="style-description">
             Een vragenlijst bevat één of meerdere persoonsgegevens, eventueel opgedeeld in categorieën. Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
         <p v-else class="style-description">
@@ -157,6 +157,7 @@ import { Ref, computed, getCurrentInstance, reactive, ref } from 'vue';
 import { useAppContext } from '../context/appContext';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
+import { GroupUIFilterBuilder } from '../filters';
 import PropertyFilterInput from '../filters/PropertyFilterInput.vue';
 import { propertyFilterToString } from '../filters/UIFilter';
 import { useDraggableArray, usePatchArray } from '../hooks';
@@ -165,9 +166,8 @@ import { Toast } from '../overlays/Toast';
 import { NavigationActions } from '../types/NavigationActions';
 import EditRecordView from './EditRecordView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
-import { RecordEditorSettings } from './RecordEditorSettings';
+import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
-import { GroupUIFilterBuilder } from '../filters';
 
 // Define
 const props = defineProps<{
@@ -190,6 +190,7 @@ const saving = ref(false);
 const deleting = ref(false);
 const filterBuilder = props.settings.filterBuilder(props.rootCategories);
 const app = useAppContext();
+const type = props.settings.type;
 
 // Computed
 const patchedCategory = computed(() => {
@@ -363,7 +364,7 @@ async function save() {
     }
     saving.value = true;
     try {
-        await props.saveHandler(patch.value);
+        props.saveHandler(patch.value);
         await pop({ force: true });
     }
     catch (e) {
@@ -482,7 +483,7 @@ async function deleteMe() {
 
     deleting.value = true;
     try {
-        await props.saveHandler(patch);
+        props.saveHandler(patch);
         await pop({ force: true });
     }
     catch (e) {
