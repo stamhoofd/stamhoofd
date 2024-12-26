@@ -223,11 +223,11 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return `E-mailadressen die zich hebben uitgeschreven`;
 
         case AuditLogType.EmailTemplateAdded:
-            return `Nieuwe e-mailtemplates`;
+            return `Nieuw e-mailsjabloon`;
         case AuditLogType.EmailTemplateEdited:
-            return `Wijzigingen aan e-mailtemplates`;
+            return `Wijzigingen aan e-mailsjablonen`;
         case AuditLogType.EmailTemplateDeleted:
-            return `Verwijderde e-mailtemplates`;
+            return `Verwijderde E-mailsjablonen`;
 
         case AuditLogType.EmailAddressFraudComplaint:
             return `E-mailadressen die een fraudeklacht hebben ingediend`;
@@ -509,13 +509,13 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `{{e}} heeft zich uitgeschreven voor e-mails`;
 
         case AuditLogType.EmailTemplateAdded:
-            return `E-mailtemplate {{e}} werd aangemaakt {{if org " voor " org}}`;
+            return `E-mailsjabloon {{e}} werd aangemaakt {{if org " voor " org}}`;
 
         case AuditLogType.EmailTemplateEdited:
-            return `E-mailtemplate {{e}} werd gewijzigd {{if org " voor " org}}`;
+            return `E-mailsjabloon {{e}} werd gewijzigd {{if org " voor " org}}`;
 
         case AuditLogType.EmailTemplateDeleted:
-            return `E-mailtemplate {{e}} werd verwijderd {{if org " voor " org}}`;
+            return `E-mailsjabloon {{e}} werd verwijderd {{if org " voor " org}}`;
     }
 }
 

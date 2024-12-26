@@ -460,6 +460,9 @@ export class Formatter {
     }
 
     static escapeHtml(unsafe: string): string {
+        if (!unsafe) {
+            return '';
+        }
         return unsafe
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')

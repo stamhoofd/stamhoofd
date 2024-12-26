@@ -97,10 +97,10 @@
                                 <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                             </template>
                             <h2 class="style-title-list">
-                                Automatische e-mails
+                                E-mailsjablonen
                             </h2>
                             <p class="style-description">
-                                Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven.
+                                Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven voor deze activiteit.
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />

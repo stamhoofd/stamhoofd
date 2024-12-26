@@ -456,6 +456,81 @@ export class BalanceItem extends AutoEncoder {
         }
         return null;
     }
+
+    static getDetailsHTMLTable(items: BalanceItem[]): string {
+        const grouped = GroupedBalanceItems.group(BalanceItem.filterBalanceItems(items));
+
+        if (grouped.length === 0) {
+            return '<p class="description">Geen openstaand bedrag</p>';
+        }
+
+        let str = '';
+        str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+
+        for (const item of grouped) {
+            let prefix = '';
+            let prefixClass = '';
+            const title = item.itemTitle;
+            let description = Formatter.escapeHtml(item.itemDescription ?? '');
+            let price = '';
+
+            if (item.dueAt) {
+                prefix = `Te betalen tegen ${Formatter.date(item.dueAt)}`;
+
+                if (item.isOverDue) {
+                    prefixClass = 'error';
+                }
+            }
+            else if (item.status === BalanceItemStatus.Canceled) {
+                prefix = 'Geannuleerd';
+                prefixClass = 'error';
+            }
+            else if (item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0) {
+                prefix = 'Te veel betaald';
+            }
+            else if (item.priceOpen < 0) {
+                prefix = 'Terug te krijgen';
+            }
+
+            if (!item.isDue) {
+                price = `(${Formatter.price(item.priceOpen)})`;
+            }
+            else {
+                price = Formatter.price(item.priceOpen);
+            }
+
+            if (item.price === item.amount * item.unitPrice) {
+                if (description) {
+                    description += `\n`;
+                }
+                description += `${Formatter.escapeHtml(Formatter.float(item.amount))} x ${Formatter.escapeHtml(Formatter.price(item.unitPrice))}`;
+            }
+            else {
+                if (description) {
+                    description += `\n`;
+                }
+                description += `<span class="email-style-discount-old-price">${Formatter.escapeHtml(Formatter.float(item.amount))} x ${Formatter.escapeHtml(Formatter.price(item.unitPrice))}</span><span class="email-style-discount-price">${Formatter.escapeHtml(Formatter.price(item.price))}</span>`;
+            }
+
+            if (item.pricePaid !== 0 && item.pricePaid !== (item.amount * item.unitPrice)) {
+                if (description) {
+                    description += `\n`;
+                }
+                description += `Betaald: ${Formatter.price(item.pricePaid)}`;
+            }
+
+            if (item.pricePending !== 0) {
+                if (description) {
+                    description += `\n`;
+                }
+                description += `In verwerking: ${Formatter.price(item.pricePending)}`;
+            }
+
+            str += `<tr><td>${prefix ? `<p class="email-style-title-prefix-list${prefixClass ? ' ' + prefixClass : ''}">${Formatter.escapeHtml(prefix)}</p>` : ''}<h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${description ? `<p class="email-style-description-small pre-wrap">${description}</p>` : ''}</td><td>${Formatter.escapeHtml(price)}</td></tr>`;
+        }
+
+        return str + '</tbody></table>';
+    }
 }
 
 export class BalanceItemPayment extends AutoEncoder {

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loadingView="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? 'Sluiten' : 'Opslaan'" @save="save">
+    <SaveView :loading-view="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? 'Sluiten' : 'Opslaan'" @save="save">
         <h1>{{ viewTitle }}</h1>
         <SegmentedControl v-if="tabItems.length > 1" v-model="tab" :items="tabItems.map(i => i.id)" :labels="tabItems.map(i => i.label)" />
 
@@ -59,12 +59,12 @@
         </p>
 
         <p v-if="tab === 'userGenerated'">
-            <button class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedMembersEmail)" v-if="types.includes(EmailTemplateType.SavedMembersEmail)">
+            <button v-if="types.includes(EmailTemplateType.SavedMembersEmail)" class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedMembersEmail)">
                 <span class="icon add" />
                 <span>Nieuwe template naar leden</span>
             </button>
 
-            <button class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedReceivableBalancesEmail)" v-if="cachedOutstandingBalancesEnabled && types.includes(EmailTemplateType.SavedReceivableBalancesEmail)">
+            <button v-if="cachedOutstandingBalancesEnabled && types.includes(EmailTemplateType.SavedReceivableBalancesEmail)" class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedReceivableBalancesEmail)">
                 <span class="icon add" />
                 <span>Nieuwe template naar openstaande bedragen</span>
             </button>
@@ -109,7 +109,7 @@ const props = withDefaults(
         allowEditGenerated: true,
     });
 
-const viewTitle = computed(() => props.onSelect ? 'Kies een emailtemplate' : 'Wijzig automatische e-mails');
+const viewTitle = computed(() => props.onSelect ? 'Kies een e-mailsjabloon' : 'Wijzig e-mailsjablonen');
 const templates = ref([]) as Ref<EmailTemplate[]>;
 const errors = useErrors();
 const { patched, addPatch, addPut, addDelete, patch, hasChanges } = usePatchArray(templates);

@@ -9,6 +9,12 @@ $color-border-original: $color-gray-2;
 $color-border: var(--color-border, $color-border-original);
 $element: "body" !default;
 
+$color-gray-text: $color-gray-4;
+
+$color-error: #f0153d;
+$color-primary: #0053ff;
+$color-discount: #ff4747;
+
 #{$element} {
     color: #000716;
     color: var(--color-dark, #000716);
@@ -155,8 +161,78 @@ a {
     
 }
 
-.style-inline-code {
+.email-style-inline-code {
     font-family: monospace;
     white-space: pre-wrap;
     display: inline-block;
+}
+
+.email-style-description-small {
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: normal;
+    color: $color-gray-text;
+    font-variation-settings: 'opsz' 19;
+}
+
+.email-style-title-list {
+    font-size: 16px;
+    line-height: 1.3;
+    font-weight: 500;
+
+    + p {
+       padding-top: 3px; 
+    }
+}
+
+.email-style-title-prefix-list {
+    font-size: 11px;
+    line-height: 1.5;
+    font-weight: bold;
+    color: $color-primary;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+
+    &.error {
+        color: $color-error;
+    }
+}
+
+
+.email-style-price-base {
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+
+    &.disabled {
+        opacity: 0.6;
+    }
+
+    &.negative {
+        color: $color-error;
+    }
+}
+
+.email-style-price {
+    @extend .email-style-price-base;
+    font-weight: bold;
+    color: $color-primary;
+}
+
+.email-style-discount-old-price {
+    @extend .email-style-price-base;
+    text-decoration: line-through;
+    color: $color-gray-4;
+}
+
+.email-style-discount-price {
+    @extend .email-style-price-base;
+    font-weight: bold;
+    color: $color-discount;
+    margin-left: 5px;
+}
+
+.pre-wrap {
+    white-space: pre-wrap;
 }

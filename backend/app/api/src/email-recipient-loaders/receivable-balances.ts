@@ -1,5 +1,5 @@
-import { Email } from '@stamhoofd/models';
-import { receivableBalanceObjectContactInMemoryFilterCompilers, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, Replacement, StamhoofdFilter } from '@stamhoofd/structures';
+import { BalanceItem, CachedBalance, Email } from '@stamhoofd/models';
+import { BalanceItem as BalanceItemStruct, receivableBalanceObjectContactInMemoryFilterCompilers, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, Replacement, StamhoofdFilter } from '@stamhoofd/structures';
 import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -9,10 +9,18 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
     // Map all contacts to recipients
     const compiledFilter = compileToInMemoryFilter(subfilter, receivableBalanceObjectContactInMemoryFilterCompilers);
 
-    return new PaginatedResponse({
-        results: result.results.flatMap((balance) => {
-            return balance.object.contacts.filter(c => compiledFilter(c)).flatMap((contact) => {
-                return contact.emails.map(email => EmailRecipient.create({
+    // const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type);
+    // const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
+
+    const recipients: EmailRecipient[] = [];
+    for (const balance of result.results) {
+        const balanceItemModels = await CachedBalance.balanceForObjects(balance.organizationId, [balance.object.id], balance.objectType);
+        const balanceItems = balanceItemModels.map(i => i.getStructure());
+
+        const filteredContacts = balance.object.contacts.filter(c => compiledFilter(c));
+        for (const contact of filteredContacts) {
+            for (const email of contact.emails) {
+                const recipient = EmailRecipient.create({
                     firstName: contact.firstName,
                     lastName: contact.lastName,
                     email,
@@ -30,6 +38,11 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
                             token: 'outstandingBalance',
                             value: Formatter.price(balance.amountOpen),
                         }),
+                        Replacement.create({
+                            token: 'balanceTable',
+                            value: '',
+                            html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
+                        }),
                         ...(contact.meta && contact.meta.url && typeof contact.meta.url === 'string'
                             ? [Replacement.create({
                                     token: 'paymentUrl',
@@ -37,9 +50,14 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
                                 })]
                             : []),
                     ],
-                }));
-            });
-        }),
+                });
+                recipients.push(recipient);
+            }
+        }
+    }
+
+    return new PaginatedResponse({
+        results: recipients,
         next: result.next,
     });
 }

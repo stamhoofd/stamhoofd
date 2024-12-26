@@ -46,41 +46,41 @@ const props = withDefaults(
         emailTemplate: EmailTemplate;
         isNew: boolean;
         saveHandler: (patch: AutoEncoderPatchType<EmailTemplate>) => Promise<void>;
-        prefix?: string|null
+        prefix?: string | null;
     }>(), {
-        prefix: null
-    }
-)
+        prefix: null,
+    },
+);
 
-const {patched, addPatch, hasChanges, patch} = usePatch(props.emailTemplate);
-const errors = useErrors()
+const { patched, addPatch, hasChanges, patch } = usePatch(props.emailTemplate);
+const errors = useErrors();
 const editorView = ref(null) as Ref<EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
-const pop = usePop()
+const pop = usePop();
 const $t = useTranslate();
 
 onMounted(() => {
     if (props.emailTemplate.json && props.emailTemplate.json.type) {
-        editor.value?.commands.setContent(props.emailTemplate.json)
+        editor.value?.commands.setContent(props.emailTemplate.json);
     }
 });
 
 const subject = computed({
     get: () => patched.value.subject,
-    set: (subject) => addPatch({subject})
+    set: subject => addPatch({ subject }),
 });
 
 const exampleRecipient = computed(() => EmailTemplate.getRecipientType(patched.value.type) ? getExampleRecipient(EmailTemplate.getRecipientType(patched.value.type)) : null);
 const smartVariables = computed(() => {
     if (exampleRecipient.value) {
-        return EditorSmartVariable.forRecipient(exampleRecipient.value)
+        return EditorSmartVariable.forRecipient(exampleRecipient.value);
     }
     const a = EmailTemplate.getSupportedReplacementsForType(patched.value.type);
     return EditorSmartVariable.all.filter(v => a.includes(v.id));
 });
 const smartButtons = computed(() => {
     if (exampleRecipient.value) {
-        return EditorSmartButton.forRecipient(exampleRecipient.value)
+        return EditorSmartButton.forRecipient(exampleRecipient.value);
     }
 
     const a = EmailTemplate.getSupportedReplacementsForType(patched.value.type);
@@ -88,32 +88,33 @@ const smartButtons = computed(() => {
 });
 
 async function getHTML() {
-    const e = editor.value
+    const e = editor.value;
     if (!e) {
         // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
         return {
-            text: "",
-            html: "",
-            json: {}
-        }
+            text: '',
+            html: '',
+            json: {},
+        };
     }
 
     const base: string = e.getHTML();
     return {
         ...await EmailStyler.format(base, subject.value),
-        json: e.getJSON()
-    }
+        json: e.getJSON(),
+    };
 }
 
 async function save() {
     try {
         addPatch({
-            ...(await getHTML())
-        })
+            ...(await getHTML()),
+        });
         await props.saveHandler(patched.value);
-        await pop({force: true})
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 }
 
@@ -121,11 +122,11 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value && (await getHTML()).text === patched.value.text) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 
 </script>

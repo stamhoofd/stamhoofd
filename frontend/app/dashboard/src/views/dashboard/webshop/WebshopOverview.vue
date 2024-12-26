@@ -287,7 +287,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
                         <h2 class="style-title-list">
-                            E-mails
+                            E-mailsjablonen
                         </h2>
                         <p class="style-description">
                             Wijzig de inhoud van automatische e-mails naar bestellers.

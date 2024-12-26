@@ -120,6 +120,18 @@ export class EditorSmartVariable extends AutoEncoder {
             ],
         });
 
+        const exampleBalanceItem = BalanceItem.create({
+            description: 'Voorbeeld item 1',
+            amount: 5,
+            unitPrice: 1000,
+        });
+
+        const exampleBalanceItem2 = BalanceItem.create({
+            description: 'Voorbeeld item 2',
+            amount: 1,
+            unitPrice: 500,
+        });
+
         const variables = [
             EditorSmartVariable.create({
                 id: 'firstName',
@@ -296,6 +308,16 @@ export class EditorSmartVariable extends AutoEncoder {
             name: 'Overzichtstabel',
             example: 'overview table',
             html: exampleRegistrationPayment.getDetailsHTMLTable(),
+        }));
+
+        variables.push(EditorSmartVariable.create({
+            id: 'balanceTable',
+            name: 'Overzichtstabel',
+            example: 'overview table',
+            html: BalanceItem.getDetailsHTMLTable([
+                exampleBalanceItem,
+                exampleBalanceItem2,
+            ]),
         }));
 
         variables.push(EditorSmartVariable.create({
