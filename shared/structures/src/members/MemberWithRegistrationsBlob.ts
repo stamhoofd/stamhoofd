@@ -56,10 +56,10 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             value: this.details.lastName ?? '',
         }));
 
-        shared.push(Replacement.create({
+        /* shared.push(Replacement.create({
             token: 'outstandingBalance',
             value: Formatter.price(this.outstandingBalance),
-        }));
+        })); */
 
         const createLoginDetailsReplacement = (email: string) => {
             const formattedEmail = Formatter.escapeHtml(email);

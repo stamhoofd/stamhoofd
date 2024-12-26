@@ -312,7 +312,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'balanceTable',
-            name: 'Overzichtstabel',
+            name: 'Tabel met openstaande bedragen',
             example: 'overview table',
             html: BalanceItem.getDetailsHTMLTable([
                 exampleBalanceItem,
