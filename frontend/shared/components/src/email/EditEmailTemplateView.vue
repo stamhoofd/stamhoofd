@@ -2,10 +2,10 @@
     <EditorView ref="editorView" class="mail-view" title="E-mail template" save-text="Opslaan" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="save">
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
-            Nieuwe template
+            Nieuw sjabloon
         </h1>
         <h1 v-else class="style-navigation-title">
-            Wijzig template
+            Wijzig sjabloon
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />

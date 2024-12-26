@@ -61,12 +61,12 @@
         <p v-if="tab === 'userGenerated'">
             <button v-if="types.includes(EmailTemplateType.SavedMembersEmail)" class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedMembersEmail)">
                 <span class="icon add" />
-                <span>Nieuwe template naar leden</span>
+                <span>Nieuw sjabloon naar leden</span>
             </button>
 
             <button v-if="cachedOutstandingBalancesEnabled && types.includes(EmailTemplateType.SavedReceivableBalancesEmail)" class="button text" type="button" @click="addTemplate(EmailTemplateType.SavedReceivableBalancesEmail)">
                 <span class="icon add" />
-                <span>Nieuwe template naar openstaande bedragen</span>
+                <span>Nieuw sjabloon naar openstaande bedragen</span>
             </button>
         </p>
     </SaveView>
