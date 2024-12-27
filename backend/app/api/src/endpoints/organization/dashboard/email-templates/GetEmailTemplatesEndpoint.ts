@@ -106,6 +106,20 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                     },
                 }));
 
+        if (organization && (request.query.webshopId || request.query.groupIds)) {
+            const orgDefaults = (await EmailTemplate.where({
+                organizationId: organization.id,
+                webshopId: null,
+                groupId: null,
+                type: {
+                    sign: 'IN',
+                    value: defaultTemplateTypes,
+                },
+            }));
+
+            defaultTemplates.unshift(...orgDefaults);
+        }
+
         return new Response(templates.concat(defaultTemplates).map(template => EmailTemplateStruct.create(template)));
     }
 }
