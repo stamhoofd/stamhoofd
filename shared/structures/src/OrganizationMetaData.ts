@@ -16,6 +16,7 @@ import { PaymentConfiguration } from './PaymentConfiguration.js';
 import { PaymentMethod } from './PaymentMethod.js';
 import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
+import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 
 export class OrganizationPackages extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })
@@ -442,20 +443,40 @@ export class OrganizationMetaData extends AutoEncoder {
         return this.categories.find(c => c.id === this.rootCategoryId);
     }
 
-    getEmailReplacements() {
-        if (!this.color) {
-            return [];
-        }
-        return [
+    getEmailReplacements(organization: { name: string; privateMeta: OrganizationPrivateMetaData | null }) {
+        const base: Replacement[] = [
             Replacement.create({
-                token: 'primaryColor',
-                value: this.color ? this.color : '#0053ff',
+                token: 'organizationName',
+                value: organization.name,
             }),
-            Replacement.create({
-                token: 'primaryColorContrast',
-                value: this.color ? Colors.getContrastColor(this.color) : '#fff',
-            }),
+
         ];
+
+        const fromAddress = organization.privateMeta?.emails?.find(e => e.default)?.email || organization.privateMeta?.emails[0].email;
+
+        if (fromAddress) {
+            base.push(
+                Replacement.create({
+                    token: 'fromAddress',
+                    value: fromAddress,
+                }),
+            );
+        }
+
+        if (this.color) {
+            base.push(
+                Replacement.create({
+                    token: 'primaryColor',
+                    value: this.color ? this.color : '#0053ff',
+                }),
+                Replacement.create({
+                    token: 'primaryColorContrast',
+                    value: this.color ? Colors.getContrastColor(this.color) : '#fff',
+                }),
+            );
+        }
+
+        return base;
     }
 
     /**

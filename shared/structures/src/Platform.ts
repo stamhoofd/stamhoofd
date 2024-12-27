@@ -409,6 +409,10 @@ export class PlatformConfig extends AutoEncoder {
                 token: 'primaryColorContrast',
                 value: this.color ? Colors.getContrastColor(this.color) : '#fff',
             }),
+            Replacement.create({
+                token: 'organizationName',
+                value: this.name,
+            }),
         ];
     }
 }

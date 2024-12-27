@@ -95,7 +95,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                         : []
                 );
 
-        const defaultTemplateTypes = organization ? types.filter(type => EmailTemplateStruct.isSavedEmail(type)) : types;
+        const defaultTemplateTypes = organization ? types.filter(type => !EmailTemplateStruct.isSavedEmail(type)) : types;
         const defaultTemplates = defaultTemplateTypes.length === 0
             ? []
             : (await EmailTemplate.where({

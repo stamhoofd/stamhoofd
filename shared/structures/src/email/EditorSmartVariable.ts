@@ -1,26 +1,14 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import { Address, ValidatedAddress } from '../addresses/Address.js';
-import { Country } from '../addresses/CountryDecoder.js';
 import { BalanceItem, BalanceItemRelation, BalanceItemRelationType } from '../BalanceItem.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
-import { Recipient } from '../endpoints/EmailRequest.js';
-import { Payment } from '../members/Payment.js';
+import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
-import { Organization } from '../Organization.js';
-import { OrganizationMetaData } from '../OrganizationMetaData.js';
-import { OrganizationType } from '../OrganizationType.js';
 import { PaymentMethod } from '../PaymentMethod.js';
-import { Cart } from '../webshops/Cart.js';
-import { CartItem, CartItemPrice } from '../webshops/CartItem.js';
-import { Customer } from '../webshops/Customer.js';
-import { Order, OrderData } from '../webshops/Order.js';
-import { Product, ProductPrice } from '../webshops/Product.js';
 import { TransferDescriptionType, TransferSettings } from '../webshops/TransferSettings.js';
-import { WebshopPreview } from '../webshops/Webshop.js';
-import { WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '../webshops/WebshopMetaData.js';
 import { EmailRecipient } from './Email.js';
+import { EditorSmartButton } from './EditorSmartButton.js';
 
 export class EditorSmartVariable extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -50,19 +38,36 @@ export class EditorSmartVariable extends AutoEncoder {
 
     static forRecipient(recipient: EmailRecipient | Recipient) {
         const replacements = [...recipient.replacements, ...recipient.getDefaultReplacements()];
+        return this.forReplacements(replacements);
+    }
 
-        return this.all.map(v => v.clone()).filter((variable) => {
+    static forReplacements(replacements: Replacement[]) {
+        return this.fillExamples(this.all.map(v => v.clone()), replacements);
+    }
+
+    static fillExamples<T extends EditorSmartVariable | EditorSmartButton>(list: T[], replacements: Replacement[]) {
+        return list.filter((variable) => {
+            // Always supported: signInUrl + unsubscribeUrl
+            if (variable.id === 'signInUrl' || variable.id === 'unsubscribeUrl') {
+                return true;
+            }
+
             const replacement = replacements.find(r => r.token === variable.id && (r.value.length > 0 || r.html !== undefined));
             if (!replacement) {
                 // Not found
                 return false;
             }
             else {
-                if (replacement.html) {
-                    variable.html = replacement.html;
+                if (variable instanceof EditorSmartVariable) {
+                    if (replacement.html) {
+                        variable.html = replacement.html;
+                    }
+                    if (variable.html === undefined && replacement.value) {
+                        variable.example = replacement.value;
+                    }
                 }
-                if (variable.html === undefined && replacement.value) {
-                    variable.example = replacement.value;
+                else {
+                    // Do not change text
                 }
             }
             return true;
@@ -134,6 +139,11 @@ export class EditorSmartVariable extends AutoEncoder {
 
         const variables = [
             EditorSmartVariable.create({
+                id: 'greeting',
+                name: 'Begroeting',
+                example: 'Dag John,',
+            }),
+            EditorSmartVariable.create({
                 id: 'firstName',
                 name: 'Voornaam',
                 example: '',
@@ -147,8 +157,13 @@ export class EditorSmartVariable extends AutoEncoder {
             }),
             EditorSmartVariable.create({
                 id: 'email',
-                name: 'E-mailadres',
-                example: '',
+                name: 'E-mailadres ontvanger',
+                example: 'ontvanger@voorbeeld.com',
+            }),
+            EditorSmartVariable.create({
+                id: 'fromAddress',
+                name: 'E-mailadres verstuurder',
+                example: 'verstuurder@voorbeeld.com',
             }),
             EditorSmartVariable.create({
                 id: 'firstNameMember',
@@ -171,11 +186,6 @@ export class EditorSmartVariable extends AutoEncoder {
                 id: 'platformOrOrganizationName',
                 name: 'Naam van de vereniging of van het platform',
                 example: 'Demovereniging',
-            }),
-            EditorSmartVariable.create({
-                id: 'greeting',
-                name: 'Begroeting',
-                example: 'Dag John,',
             }),
             EditorSmartVariable.create({
                 id: 'outstandingBalance',
@@ -331,7 +341,7 @@ export class EditorSmartVariable extends AutoEncoder {
             id: 'paymentTable',
             name: 'Tabel met betaalinstructies',
             example: 'payment table',
-            html: '',
+            html: exampleRegistrationPayment.getHTMLTable(),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -382,121 +392,6 @@ export class EditorSmartVariable extends AutoEncoder {
             example: STPackageTypeHelper.getName(STPackageType.Members),
         }));
 
-        fillSmartVariables(variables);
-
         return variables;
-    }
-}
-
-function fillSmartVariables(variables: EditorSmartVariable[]) {
-    const exampleOrder = Order.create({
-        id: '',
-        payment: Payment.create({
-            id: '',
-            method: PaymentMethod.Transfer,
-            transferDescription: '+++111/111/111+++',
-            price: 1500,
-            transferSettings: TransferSettings.create({
-                type: TransferDescriptionType.Structured,
-                iban: 'BE1234 1234 1234',
-                creditor: 'Demovereniging',
-            }),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        }),
-        webshopId: '',
-        number: 15,
-        data: OrderData.create({
-            customer: Customer.create({
-                firstName: 'John',
-                lastName: 'Doe',
-                email: 'john@example.com',
-                phone: '+32 479 45 71 52',
-            }),
-            timeSlot: WebshopTimeSlot.create({
-                date: new Date(),
-                startTime: 12 * 60,
-                endTime: 13 * 60,
-            }),
-            checkoutMethod: WebshopTakeoutMethod.create({
-                name: 'Bakkerij',
-                address: Address.create({
-                    street: 'Demostraat',
-                    number: '12',
-                    postalCode: '9000',
-                    city: 'Gent',
-                    country: Country.Belgium,
-                }),
-            }),
-            address: ValidatedAddress.create({
-                street: 'Demostraat',
-                number: '12',
-                postalCode: '9000',
-                city: 'Gent',
-                country: Country.Belgium,
-                cityId: '',
-                parentCityId: null,
-                provinceId: '',
-            }),
-            cart: Cart.create({
-                items: [
-                    CartItem.create({
-                        product: Product.create({
-                            name: 'Voorbeeld product',
-                        }),
-                        productPrice: ProductPrice.create({
-                            price: 550,
-                        }),
-                        amount: 2,
-                        calculatedPrices: [CartItemPrice.create({
-                            price: 550,
-                        }), CartItemPrice.create({
-                            price: 550,
-                        })],
-                    }),
-                    CartItem.create({
-                        product: Product.create({
-                            name: 'Nog een voorbeeld product',
-                        }),
-                        productPrice: ProductPrice.create({
-                            price: 400,
-                        }),
-                        amount: 1,
-                        calculatedPrices: [CartItemPrice.create({
-                            price: 400,
-                        })],
-                    }),
-                ],
-            }),
-            paymentMethod: PaymentMethod.CreditCard,
-
-        }),
-    });
-
-    const recipient = exampleOrder.getEmailRecipient(Organization.create({
-        name: 'Demovereniging',
-        uri: 'demo',
-        meta: OrganizationMetaData.create({
-            type: OrganizationType.Other,
-            defaultStartDate: new Date(),
-            defaultEndDate: new Date(),
-        }),
-        address: Address.createDefault(Country.Belgium),
-    }), WebshopPreview.create({
-        meta: WebshopMetaData.create({
-            name: 'Demowinkel',
-        }),
-    }));
-
-    for (const replacement of [...recipient.replacements, ...recipient.getDefaultReplacements()]) {
-        const variable = variables.find(v => v.id === replacement.token);
-        if (variable) {
-            if (replacement.html && (variable.html === undefined || variable.html.length == 0)) {
-                variable.html = replacement.html;
-            }
-            if (variable.html === undefined) {
-                variable.example = replacement.value;
-            }
-        }
     }
 }

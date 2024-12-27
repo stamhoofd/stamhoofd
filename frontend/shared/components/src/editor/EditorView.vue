@@ -1,5 +1,5 @@
 <template>
-    <form class="editor-view st-view" :style="{'--editor-primary-color': primaryColor, '--editor-primary-color-contrast': primaryColorContrast}" @submit.prevent="$emit('save')">
+    <form class="editor-view st-view" @submit.prevent="$emit('save')">
         <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true">
             <template #left>
                 <BackButton v-if="canPop" @click="pop" />
@@ -33,7 +33,7 @@
             <hr class="mail-hr">
 
             <div class="editor-container">
-                <editor-content :editor="editor" class="editor-content" />
+                <editor-content v-color="primaryColor" :editor="editor" class="editor-content" />
                 <footer>
                     <slot name="footer" />
                 </footer>
@@ -41,15 +41,15 @@
             <TextStyleButtonsView v-if="!$isMobile && showTextStyles && !showLinkEditor" class="editor-button-bar sticky" :editor="editor" />
 
             <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartButton') && getSmartButton(editor.getAttributes('smartButton').id)" class="editor-button-bar hint sticky">
-                {{ getSmartButton(editor.getAttributes('smartButton').id).hint }}
+                {{ getSmartButton(editor.getAttributes('smartButton').id)!.hint }}
             </div>
 
-            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartVariable') && getSmartVariable(editor.getAttributes('smartVariable').id).hint" class="editor-button-bar hint sticky">
-                {{ getSmartVariable(editor.getAttributes('smartVariable').id).hint }}
+            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartVariable') && getSmartVariable(editor.getAttributes('smartVariable').id)?.hint" class="editor-button-bar hint sticky">
+                {{ getSmartVariable(editor.getAttributes('smartVariable').id)!.hint }}
             </div>
 
-            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartVariableBlock') && getSmartVariable(editor.getAttributes('smartVariableBlock').id).hint" class="editor-button-bar hint sticky">
-                {{ getSmartVariable(editor.getAttributes('smartVariableBlock').id).hint }}
+            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartVariableBlock') && getSmartVariable(editor.getAttributes('smartVariableBlock').id)?.hint" class="editor-button-bar hint sticky">
+                {{ getSmartVariable(editor.getAttributes('smartVariableBlock').id)!.hint }}
             </div>
 
             <form v-if="showLinkEditor" class="editor-button-bar sticky link" autocomplete="off" novalidate data-submit-last-field @submit.prevent="saveLink()">
@@ -64,9 +64,7 @@
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                        </template>
-                        <template v-if="editor.isActive('link')" #right>
-                            <button v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
@@ -99,7 +97,7 @@
             <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
             <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
             <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent />
-            <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.native.prevent>
+            <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.prevent>
                 <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
             </UploadButton>
             <slot name="buttons" />
@@ -107,8 +105,8 @@
     </form>
 </template>
 
-<script lang="ts">
-import { EditorSmartButton, EditorSmartVariable, Image, ResolutionRequest, Version } from '@stamhoofd/structures';
+<script lang="ts" setup>
+import { EditorSmartButton, EditorSmartVariable, Image, Replacement, ResolutionRequest } from '@stamhoofd/structures';
 import { Content, JSONContent } from '@tiptap/core';
 import { Image as ImageExtension } from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -116,9 +114,7 @@ import Typography from '@tiptap/extension-typography';
 import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
-import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
 
-import { default as TooltipDirective } from '../directives/Tooltip';
 import UploadButton from '../inputs/UploadButton.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
@@ -133,8 +129,8 @@ import { DescriptiveText } from './EditorDescriptiveText';
 import { SmartButtonInlineNode, SmartButtonNode } from './EditorSmartButton';
 import { SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { encodeObject } from '@simonbackx/simple-encoding';
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
+import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -162,401 +158,386 @@ const CustomImage = ImageExtension.extend({
     },
 });
 
-@Component({
-    components: {
-        STNavigationBar,
-        STList,
-        STListItem,
-        STToolbar,
-        LoadingButton,
-        BackButton,
-        STButtonToolbar,
-        EditorContent,
-        TextStyleButtonsView,
-        UploadButton,
+const props = withDefaults(
+    defineProps<{
+        loading?: boolean;
+        disabled?: boolean;
+        title?: string;
+        saveText?: string;
+        saveIcon?: string | null;
+        cancelText?: string;
+        replacements?: Replacement[];
+    }>(),
+    {
+        loading: false,
+        disabled: false,
+        title: '',
+        saveText: 'Opslaan',
+        saveIcon: null,
+        cancelText: 'Annuleren',
+        replacements: () => [],
     },
-    directives: {
-        Tooltip: TooltipDirective,
-    },
-})
-export default class EditorView extends Mixins(NavigationMixin) {
-    @Prop({ default: false })
-    loading!: boolean;
+);
 
-    @Prop({ default: false })
-    disabled!: boolean;
+function smartVariablesFor(replacements: Replacement[]) {
+    return EditorSmartVariable.fillExamples(EditorSmartVariable.all, replacements);
+}
 
-    @Prop({ default: '' })
-    title!: string;
+function smartButtonsFor(replacements: Replacement[]) {
+    return EditorSmartVariable.fillExamples(EditorSmartButton.all, replacements);
+}
 
-    @Prop({ default: 'Opslaan' })
-    saveText!: string;
+const smartVariables = computed(() => {
+    return smartVariablesFor(props.replacements);
+});
+const smartButtons = computed(() => {
+    return smartButtonsFor(props.replacements);
+});
+const showTextStyles = ref(false);
+const editLink = ref('');
+const showLinkEditor = ref(false);
+const canPop = useCanPop();
+const canDismiss = useCanDismiss();
+const pop = usePop();
+const dismiss = useDismiss();
+const editor = ref(buildEditor());
 
-    @Prop({ default: null })
-    saveIcon!: string | null;
-
-    @Prop({ default: 'Annuleren' })
-    cancelText!: string;
-
-    @Prop({ default: () => [] })
-    smartVariables!: EditorSmartVariable[];
-
-    @Prop({ default: () => [] })
-    smartButtons!: EditorSmartButton[];
-
-    // Handling
-
-    showTextStyles = false;
-    editLink = '';
-    showLinkEditor = false;
-
-    editor = this.buildEditor();
-
-    beforeUnmount() {
-        // this.editor.destroy()
-    }
-
-    openLinkEditor() {
-        if (this.showLinkEditor) {
-            this.editor.chain().focus().run();
-            this.$nextTick(() => {
-                this.showLinkEditor = false;
-            });
-            return;
-        }
-        if (!this.editor.isActive('link') && this.editor.state.selection.empty) {
-            new Toast('Selecteer eerst tekst die je klikbaar wilt maken', 'info').show();
-            return;
-        }
-        this.editLink = this.editor.getAttributes('link')?.href ?? '';
-        this.showLinkEditor = true;
-        this.$nextTick(() => {
-            (this.$refs.linkInput as HTMLInputElement).focus();
-        });
-    }
-
-    isValidHttpUrl(string: string) {
-        let url;
-
-        try {
-            url = new URL(string);
-        }
-        catch (_) {
-            return false;
-        }
-
-        return url.protocol === 'http:' || url.protocol === 'https:';
-    }
-
-    saveLink() {
-        let cleanedUrl = this.editLink.trim();
-
-        if (cleanedUrl.length === 0) {
-            this.clearLink();
-            return;
-        }
-
-        if (!cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://')) {
-            cleanedUrl = 'http://' + cleanedUrl;
-        }
-
-        if (!this.isValidHttpUrl(cleanedUrl)) {
-            new Toast('Ongeldige URL', 'error red').show();
-            return;
-        }
-
-        this.editor.chain().focus().setLink({ href: cleanedUrl }).focus().run();
-        this.$nextTick(() => {
-            this.showLinkEditor = false;
-        });
-    }
-
-    clearLink() {
-        this.editor.chain().focus().unsetLink().focus().run();
-        this.$nextTick(() => {
-            this.showLinkEditor = false;
-        });
-    }
-
-    get imageResolutions(): ResolutionRequest[] {
-        return [
-            ResolutionRequest.create({
-                width: 600,
+function buildEditor(content: Content = '') {
+    return new Editor({
+        content,
+        extensions: [
+            StarterKit,
+            Typography.configure({}),
+            SmartVariableNode.configure({
+                smartVariables: smartVariables.value.filter(s => !s.html),
             }),
-        ];
-    }
-
-    get primaryColor() {
-        return this.smartVariables.find(v => v.id === 'primaryColor')?.example || '#0053ff';
-    }
-
-    get primaryColorContrast() {
-        return this.smartVariables.find(v => v.id === 'primaryColorContrast')?.example || '#fff';
-    }
-
-    insertImage(image: Image | null) {
-        if (image === null) {
-            return;
-        }
-        const resolution = image.resolutions[0];
-        if (!resolution) {
-            return;
-        }
-        this.editor.chain().focus().setImage({ src: resolution.file.getPublicPath(), alt: image.source.name ?? undefined, width: resolution.width, height: resolution.height }).run();
-        new Toast('Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.', 'info').show();
-    }
-
-    openTextStyles(event) {
-        // Get initial selection
-        const m = this;
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: 'Vet',
-                    icon: 'bold',
-                    selected: this.editor.isActive('bold'),
-                    action: () => {
-                        m.editor.chain().focus().toggleBold().run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Cursief',
-                    icon: 'italic',
-                    selected: this.editor.isActive('italic'),
-                    action: () => {
-                        m.editor.chain().focus().toggleItalic().run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Onderstrepen',
-                    icon: 'underline',
-                    selected: this.editor.isActive('underline'),
-                    action: () => {
-                        m.editor.chain().focus().toggleUnderline().run();
-                        return true;
-                    },
-                }),
-            ],
-            [
-                new ContextMenuItem({
-                    name: 'Titel',
-                    icon: 'h1',
-                    selected: this.editor.isActive('heading', { level: 1 }),
-                    action: () => {
-                        m.editor.chain().focus().toggleHeading({ level: 1 }).run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Koptekst',
-                    icon: 'h2',
-                    selected: this.editor.isActive('heading', { level: 2 }),
-                    action: () => {
-                        m.editor.chain().focus().toggleHeading({ level: 2 }).run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Subkop',
-                    icon: 'h3',
-                    selected: this.editor.isActive('heading', { level: 3 }),
-                    action: () => {
-                        m.editor.chain().focus().toggleHeading({ level: 3 }).run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Licht gekleurd',
-                    icon: 'info-circle',
-                    selected: this.editor.isActive('descriptiveText'),
-                    action: () => {
-                        m.editor.chain().focus().toggleDescriptiveText().run();
-                        return true;
-                    },
-                }),
-            ],
-            [
-                new ContextMenuItem({
-                    name: 'Opsomming met bolletjes',
-                    icon: 'ul',
-                    selected: this.editor.isActive('bulletList'),
-                    action: () => {
-                        m.editor.chain().focus().toggleBulletList().run();
-                        return true;
-                    },
-                }),
-                new ContextMenuItem({
-                    name: 'Opsomming met nummers',
-                    icon: 'ol',
-                    selected: this.editor.isActive('orderedList'),
-                    action: () => {
-                        m.editor.chain().focus().toggleOrderedList().run();
-                        return true;
-                    },
-                }),
-            ],
-        ]);
-        menu.show({ button: event.currentTarget, yPlacement: 'top' }).catch(console.error);
-    }
-
-    buildEditor(content: Content = '') {
-        console.log('build editor');
-        console.log('smart variables', this.smartVariables);
-        return new Editor({
-            content,
-            extensions: [
-                StarterKit,
-                Typography.configure({}),
-                SmartVariableNode.configure({
-                    smartVariables: this.smartVariables.filter(s => !s.html),
-                }),
-                SmartVariableNodeBlock.configure({
-                    smartVariables: this.smartVariables.filter(s => !!s.html),
-                }),
-                SmartButtonNode.configure({
-                    smartButtons: this.smartButtons,
-                }),
-                SmartButtonInlineNode.configure({
-                    smartButtons: this.smartButtons,
-                }),
-                Link.configure({
-                    openOnClick: false,
-                }),
-                Underline,
-                DescriptiveText,
-                CustomImage,
-            ],
-            onSelectionUpdate: ({ editor }) => {
-                if (this.showLinkEditor) {
-                    if (editor.isActive('link')) {
-                        this.editLink = editor.getAttributes('link')?.href ?? '';
-                    }
-                    else {
-                        if (this.editor.state.selection.empty) {
-                            this.showLinkEditor = false;
-                        }
-                    }
+            SmartVariableNodeBlock.configure({
+                smartVariables: smartVariables.value.filter(s => !!s.html),
+            }),
+            SmartButtonNode.configure({
+                smartButtons: smartButtons.value,
+            }),
+            SmartButtonInlineNode.configure({
+                smartButtons: smartButtons.value,
+            }),
+            Link.configure({
+                openOnClick: false,
+            }),
+            Underline,
+            DescriptiveText,
+            CustomImage,
+        ],
+        onSelectionUpdate: ({ editor }) => {
+            if (showLinkEditor.value) {
+                if (editor.isActive('link')) {
+                    editLink.value = editor.getAttributes('link')?.href ?? '';
                 }
-            },
-        });
-    }
-
-    @Watch('smartVariables')
-    onSmartVariablesChanged(newSmartVariables: EditorSmartVariable[], oldSmartVariables: EditorSmartVariable[]) {
-        if (JSON.stringify(encodeObject(newSmartVariables, { version: Version })) === JSON.stringify(encodeObject(oldSmartVariables, { version: Version }))) {
-            return;
-        }
-
-        const content = this.editor.getJSON();
-
-        // Loop all nodes with type smartButton or smartText and remove them if needed (when they are not in the smartVariables + list warning)
-        // this.checkNode(content, newSmartVariables, oldSmartVariables)
-        this.warnInvalidNodes(content, newSmartVariables, oldSmartVariables);
-        this.deleteInvalidNodes(content);
-
-        // console.log(content)
-        this.editor.destroy();
-        this.editor = this.buildEditor(content);
-    }
-
-    /**
-     * Return true if node needs to be kept
-     */
-    warnInvalidNodes(node: JSONContent, newSmartVariables: EditorSmartVariable[], oldSmartVariables: EditorSmartVariable[]) {
-        if (node.type === 'smartVariable') {
-            if (!newSmartVariables.find(smartVariable => smartVariable.id === node.attrs?.id)) {
-                // If did found in old?
-                const old = oldSmartVariables.find(smartVariable => smartVariable.id === node.attrs?.id);
-                if (old && old.deleteMessage) {
-                    new Toast(old.deleteMessage, 'warning yellow').setHide(30 * 1000).show();
+                else {
+                    if (editor.state.selection.empty) {
+                        showLinkEditor.value = false;
+                    }
                 }
             }
-        }
+        },
+    });
+}
 
-        if (node.content) {
-            for (const childNode of node.content)
-                this.warnInvalidNodes(childNode, newSmartVariables, oldSmartVariables);
+const linkInput = useTemplateRef('linkInput');
+
+onBeforeUnmount(() => {
+    editor.value.destroy();
+});
+
+async function openLinkEditor() {
+    if (showLinkEditor.value) {
+        editor.value.chain().focus().run();
+        await nextTick(() => {
+            showLinkEditor.value = false;
+        });
+        return;
+    }
+    if (!editor.value.isActive('link') && editor.value.state.selection.empty) {
+        new Toast('Selecteer eerst tekst die je klikbaar wilt maken', 'info').show();
+        return;
+    }
+    editLink.value = editor.value.getAttributes('link')?.href ?? '';
+    showLinkEditor.value = true;
+    await nextTick(() => {
+        linkInput.value?.focus();
+    });
+}
+
+function isValidHttpUrl(string: string) {
+    let url;
+
+    try {
+        url = new URL(string);
+    }
+    catch (_) {
+        return false;
+    }
+
+    return url.protocol === 'http:' || url.protocol === 'https:';
+}
+
+async function saveLink() {
+    let cleanedUrl = editLink.value.trim();
+
+    if (cleanedUrl.length === 0) {
+        await clearLink();
+        return;
+    }
+
+    if (!cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://')) {
+        cleanedUrl = 'http://' + cleanedUrl;
+    }
+
+    if (!isValidHttpUrl(cleanedUrl)) {
+        new Toast('Ongeldige URL', 'error red').show();
+        return;
+    }
+
+    editor.value.chain().focus().setLink({ href: cleanedUrl }).focus().run();
+    await nextTick(() => {
+        showLinkEditor.value = false;
+    });
+}
+//
+async function clearLink() {
+    editor.value.chain().focus().unsetLink().focus().run();
+    await nextTick(() => {
+        showLinkEditor.value = false;
+    });
+}
+//
+const imageResolutions = [
+    ResolutionRequest.create({
+        width: 600,
+    }),
+];
+
+const primaryColor = computed(() => {
+    return props.replacements.find(v => v.token === 'primaryColor')?.value || '#0053ff';
+});
+
+//
+function insertImage(image: Image | null) {
+    if (image === null) {
+        return;
+    }
+    const resolution = image.resolutions[0];
+    if (!resolution) {
+        return;
+    }
+    editor.value.chain().focus().setImage({ src: resolution.file.getPublicPath(), alt: image.source.name ?? undefined, width: resolution.width, height: resolution.height }).run();
+    new Toast('Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.', 'info').show();
+}
+//
+async function openTextStyles(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Vet',
+                icon: 'bold',
+                selected: editor.value.isActive('bold'),
+                action: () => {
+                    editor.value.chain().focus().toggleBold().run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Cursief',
+                icon: 'italic',
+                selected: editor.value.isActive('italic'),
+                action: () => {
+                    editor.value.chain().focus().toggleItalic().run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Onderstrepen',
+                icon: 'underline',
+                selected: editor.value.isActive('underline'),
+                action: () => {
+                    editor.value.chain().focus().toggleUnderline().run();
+                    return true;
+                },
+            }),
+        ],
+        [
+            new ContextMenuItem({
+                name: 'Titel',
+                icon: 'h1',
+                selected: editor.value.isActive('heading', { level: 1 }),
+                action: () => {
+                    editor.value.chain().focus().toggleHeading({ level: 1 }).run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Koptekst',
+                icon: 'h2',
+                selected: editor.value.isActive('heading', { level: 2 }),
+                action: () => {
+                    editor.value.chain().focus().toggleHeading({ level: 2 }).run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Subkop',
+                icon: 'h3',
+                selected: editor.value.isActive('heading', { level: 3 }),
+                action: () => {
+                    editor.value.chain().focus().toggleHeading({ level: 3 }).run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Licht gekleurd',
+                icon: 'info-circle',
+                selected: editor.value.isActive('descriptiveText'),
+                action: () => {
+                    editor.value.chain().focus().toggleDescriptiveText().run();
+                    return true;
+                },
+            }),
+        ],
+        [
+            new ContextMenuItem({
+                name: 'Opsomming met bolletjes',
+                icon: 'ul',
+                selected: editor.value.isActive('bulletList'),
+                action: () => {
+                    editor.value.chain().focus().toggleBulletList().run();
+                    return true;
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Opsomming met nummers',
+                icon: 'ol',
+                selected: editor.value.isActive('orderedList'),
+                action: () => {
+                    editor.value.chain().focus().toggleOrderedList().run();
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ button: event.currentTarget as any, yPlacement: 'top' }).catch(console.error);
+}
+
+watch(() => props.replacements, (newReplacements, oldReplacements) => {
+    if (JSON.stringify(newReplacements) === JSON.stringify(oldReplacements)) {
+        return;
+    }
+
+    const content = editor.value.getJSON();
+
+    // Loop all nodes with type smartButton or smartText and remove them if needed (when they are not in the smartVariables + list warning)
+    warnInvalidNodes(content, smartVariablesFor(newReplacements), smartVariablesFor(oldReplacements));
+    deleteInvalidNodes(content);
+
+    editor.value.destroy();
+    editor.value = buildEditor(content);
+});
+
+function warnInvalidNodes(node: JSONContent, newSmartVariables: EditorSmartVariable[], oldSmartVariables: EditorSmartVariable[]) {
+    if (node.type === 'smartVariable') {
+        if (!newSmartVariables.find(smartVariable => smartVariable.id === node.attrs?.id)) {
+            // If did found in old?
+            const old = oldSmartVariables.find(smartVariable => smartVariable.id === node.attrs?.id);
+            if (old && old.deleteMessage) {
+                new Toast(old.deleteMessage, 'warning yellow').setHide(30 * 1000).show();
+            }
         }
     }
 
-    /**
-     * Return true if node needs to be kept
-     */
-    deleteInvalidNodes(node: JSONContent) {
-        if (node.type === 'smartButton' || node.type === 'smartButtonInline') {
-            return !!this.smartButtons.find(smartButton => smartButton.id === node.attrs?.id);
+    if (node.content) {
+        for (const childNode of node.content) {
+            warnInvalidNodes(childNode, newSmartVariables, oldSmartVariables);
         }
-        if (node.type === 'smartVariable') {
-            return !!this.smartVariables.find(v => v.id === node.attrs?.id);
-        }
-        if (node.content) {
-            node.content = node.content.filter((childNode) => {
-                return this.deleteInvalidNodes(childNode);
-            });
-        }
-        return true;
-    }
-
-    getSmartButton(id: string) {
-        return this.smartButtons.find(button => button.id === id);
-    }
-
-    getSmartVariable(id: string) {
-        return this.smartVariables.find(button => button.id === id);
-    }
-
-    showSmartVariableMenu(event: MouseEvent) {
-        // Get initial selection
-        const initialSelection = document.activeElement;
-
-        const m = this;
-        const menu = new ContextMenu([
-            ...(this.smartVariables.length > 0
-                ? [
-                        this.smartVariables.map((variable) => {
-                            return new ContextMenuItem({
-                                name: variable.name,
-                                description: variable.description ? variable.description : undefined,
-                                action: () => {
-                                    if (initialSelection && initialSelection.tagName === 'INPUT') {
-                                        // Allow replacements in input fields
-                                        const input = initialSelection as HTMLInputElement;
-
-                                        if (input.selectionStart !== null && input.selectionEnd !== null) {
-                                            input.setRangeText(`{{${variable.id}}}`, input.selectionStart, input.selectionEnd, 'end');
-                                            input.focus();
-                                        }
-                                    }
-                                    else {
-                                        m.editor.chain().focus().insertSmartVariable(variable).run();
-                                    }
-
-                                    return true;
-                                },
-                            });
-                        }),
-                    ]
-                : []),
-            ...(this.smartButtons.length > 0
-                ? [
-                        this.smartButtons.map((variable) => {
-                            return new ContextMenuItem({
-                                name: variable.name,
-                                action: () => {
-                                    m.editor.chain().focus().insertSmartButton(variable).run();
-
-                                    return true;
-                                },
-                            });
-                        }),
-                    ]
-                : []),
-        ]);
-        menu.show({ button: event.currentTarget, yPlacement: 'top' }).catch(console.error);
     }
 }
+//
+/**
+ * Return true if node needs to be kept
+ */
+function deleteInvalidNodes(node: JSONContent) {
+    if (node.type === 'smartButton' || node.type === 'smartButtonInline') {
+        return !!smartButtons.value.find(smartButton => smartButton.id === node.attrs?.id);
+    }
+    if (node.type === 'smartVariable') {
+        return !!smartVariables.value.find(v => v.id === node.attrs?.id);
+    }
+    if (node.content) {
+        node.content = node.content.filter((childNode) => {
+            return deleteInvalidNodes(childNode);
+        });
+    }
+    return true;
+}
+
+function getSmartButton(id: string) {
+    return smartButtons.value.find(button => button.id === id);
+}
+
+function getSmartVariable(id: string) {
+    return smartVariables.value.find(button => button.id === id);
+}
+
+async function showSmartVariableMenu(event: MouseEvent) {
+    // Get initial selection
+    const initialSelection = document.activeElement;
+
+    const menu = new ContextMenu([
+        ...(smartVariables.value.length > 0
+            ? [
+                    smartVariables.value.map((variable) => {
+                        return new ContextMenuItem({
+                            name: variable.name,
+                            description: variable.description ? variable.description : undefined,
+                            action: () => {
+                                if (initialSelection && initialSelection.tagName === 'INPUT') {
+                                    // Allow replacements in input fields
+                                    const input = initialSelection as HTMLInputElement;
+
+                                    if (input.selectionStart !== null && input.selectionEnd !== null) {
+                                        input.setRangeText(`{{${variable.id}}}`, input.selectionStart, input.selectionEnd, 'end');
+                                        input.focus();
+                                    }
+                                }
+                                else {
+                                    editor.value.chain().focus().insertSmartVariable(variable).run();
+                                }
+
+                                return true;
+                            },
+                        });
+                    }),
+                ]
+            : []),
+        ...(smartButtons.value.length > 0
+            ? [
+                    smartButtons.value.map((variable) => {
+                        return new ContextMenuItem({
+                            name: variable.name,
+                            action: () => {
+                                editor.value.chain().focus().insertSmartButton(variable).run();
+
+                                return true;
+                            },
+                        });
+                    }),
+                ]
+            : []),
+    ]);
+    menu.show({ button: event.currentTarget as any, yPlacement: 'top' }).catch(console.error);
+}
+
+defineExpose({
+    editor,
+});
+
 </script>
 
 <style lang="scss">
@@ -702,10 +683,6 @@ export default class EditorView extends Mixins(NavigationMixin) {
             .button {
                 cursor: default !important;
 
-                &.primary {
-                    background-color: var(--editor-primary-color, #{$color-primary});
-                    color: var(--editor-primary-color-contrast, #{$color-primary-contrast});
-                }
             }
 
             img {

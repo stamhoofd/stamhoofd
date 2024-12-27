@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :replacements="replacements" @save="send">
             <h1 class="style-navigation-title">
                 Nieuwe e-mail
             </h1>
@@ -160,8 +160,11 @@ class TmpFile {
 }
 
 const creatingEmail = ref(true);
-const smartVariables = computed(() => email.value ? email.value.smartVariables : []);
-const smartButtons = computed(() => email.value ? email.value.smartButtons : []);
+const organization = useOrganization();
+const platform = usePlatform();
+const replacements = computed(() => {
+    return email.value ? (email.value.exampleRecipient?.getReplacements(organization.value, platform.value) ?? []) : [];
+});
 const errors = useErrors();
 const files = ref([]) as Ref<TmpFile[]>;
 const auth = useAuth();
@@ -173,12 +176,10 @@ const owner = useRequestOwner();
 const selectedRecipientOptions = ref(props.recipientFilterOptions.map(o => [o.options[0].id]));
 
 const groupByEmail = ref(false);
-const editorView = ref(null) as Ref<EditorView | null>;
+const editorView = ref(null) as Ref<typeof EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
 const pop = usePop();
 const present = usePresent();
-const organization = useOrganization();
-const platform = usePlatform();
 
 const emails = computed(() => {
     if (organization.value) {

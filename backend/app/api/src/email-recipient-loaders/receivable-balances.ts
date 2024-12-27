@@ -30,11 +30,6 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
                             value: balance.object.name,
                         }),
                         Replacement.create({
-                            // Deprecated: for backwards compatibility
-                            token: 'organizationName',
-                            value: balance.object.name,
-                        }),
-                        Replacement.create({
                             token: 'outstandingBalance',
                             value: Formatter.price(balance.amountOpen),
                         }),

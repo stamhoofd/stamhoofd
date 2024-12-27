@@ -9,6 +9,7 @@ import { PaymentMethod } from './PaymentMethod.js';
 import { PaymentProvider } from './PaymentProvider.js';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { StripeMetaData } from './StripeAccount.js';
+import { Replacement } from './endpoints/EmailRequest.js';
 
 export class CreditItem extends AutoEncoder {
     /**

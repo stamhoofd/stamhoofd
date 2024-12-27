@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" title="E-mail template" save-text="Opslaan" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="save">
+    <EditorView ref="editorView" class="mail-view" title="E-mail template" save-text="Opslaan" :replacements="replacements" @save="save">
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
             Nieuw sjabloon
@@ -38,8 +38,9 @@ import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { usePatch } from '../hooks';
+import { useOrganization, usePatch, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { Replacement } from '@stamhoofd/structures';
 
 const props = withDefaults(
     defineProps<{
@@ -58,6 +59,8 @@ const editorView = ref(null) as Ref<EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
 const pop = usePop();
 const $t = useTranslate();
+const organization = useOrganization();
+const platform = usePlatform();
 
 onMounted(() => {
     if (props.emailTemplate.json && props.emailTemplate.json.type) {
@@ -71,20 +74,24 @@ const subject = computed({
 });
 
 const exampleRecipient = computed(() => EmailTemplate.getRecipientType(patched.value.type) ? getExampleRecipient(EmailTemplate.getRecipientType(patched.value.type)) : null);
-const smartVariables = computed(() => {
-    if (exampleRecipient.value) {
-        return EditorSmartVariable.forRecipient(exampleRecipient.value);
-    }
-    const a = EmailTemplate.getSupportedReplacementsForType(patched.value.type);
-    return EditorSmartVariable.all.filter(v => a.includes(v.id));
-});
-const smartButtons = computed(() => {
-    if (exampleRecipient.value) {
-        return EditorSmartButton.forRecipient(exampleRecipient.value);
+const replacements = computed(() => {
+    const base: Replacement[] = [...EmailTemplate.getSupportedReplacementsForType(patched.value.type)];
+
+    // Change some defaults
+    if (organization.value) {
+        const defaultReplacements = organization.value.meta.getEmailReplacements(organization.value);
+        base.push(...defaultReplacements);
     }
 
-    const a = EmailTemplate.getSupportedReplacementsForType(patched.value.type);
-    return EditorSmartButton.all.filter(v => a.includes(v.id));
+    if (platform.value) {
+        const defaultReplacements = platform.value.config.getEmailReplacements();
+        base.push(...defaultReplacements);
+    }
+
+    if (exampleRecipient.value) {
+        return [...exampleRecipient.value.replacements, ...exampleRecipient.value.getDefaultReplacements(), ...base];
+    }
+    return base;
 });
 
 async function getHTML() {

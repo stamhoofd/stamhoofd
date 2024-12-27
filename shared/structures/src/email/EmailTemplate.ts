@@ -1,6 +1,8 @@
 import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Email, EmailRecipientFilterType } from './Email.js';
+import { Replacement } from '../endpoints/EmailRequest.js';
+import { DefaultExampleReplacements, ExampleReplacements } from './exampleReplacements.js';
 
 export enum EmailTemplateType {
     /**
@@ -197,46 +199,46 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.SavedMembersEmail: return 'Opgeslagen e-mail naar leden';
             case EmailTemplateType.SavedReceivableBalancesEmail: return 'Opgeslagen e-mail naar openstaande bedragen';
 
-            case EmailTemplateType.DefaultMembersEmail: return 'Placeholder: Standaard e-mail naar leden';
-            case EmailTemplateType.DefaultReceivableBalancesEmail: return 'Placeholder: Standaard e-mail naar openstaande bedragen';
+            case EmailTemplateType.DefaultMembersEmail: return 'Standaard e-mail naar leden';
+            case EmailTemplateType.DefaultReceivableBalancesEmail: return 'Standaard e-mail naar openstaande bedragen';
 
-            case EmailTemplateType.MembersExpirationReminder: return 'Billing: Herinnering verlopen pakket ledenadministratie';
-            case EmailTemplateType.WebshopsExpirationReminder: return 'Billing: Herinnering verlopen pakket webshops';
-            case EmailTemplateType.SingleWebshopExpirationReminder: return 'Billing: Herinnering verlopen pakket enkele webshop';
-            case EmailTemplateType.TrialWebshopsExpirationReminder: return 'Billing: Herinnering verlopen proefperiode pakket webshops';
-            case EmailTemplateType.TrialMembersExpirationReminder: return 'Billing: Herinnering verlopen proefperiode pakket ledenadministratie';
-            case EmailTemplateType.OrderNotification: return 'Webshop: Bestelling notificatie voor beheerders';
+            case EmailTemplateType.MembersExpirationReminder: return 'Herinnering verlopen pakket ledenadministratie';
+            case EmailTemplateType.WebshopsExpirationReminder: return 'Herinnering verlopen pakket webshops';
+            case EmailTemplateType.SingleWebshopExpirationReminder: return 'Herinnering verlopen pakket enkele webshop';
+            case EmailTemplateType.TrialWebshopsExpirationReminder: return 'Herinnering verlopen proefperiode pakket webshops';
+            case EmailTemplateType.TrialMembersExpirationReminder: return 'Herinnering verlopen proefperiode pakket ledenadministratie';
+            case EmailTemplateType.OrderNotification: return 'Bestelling notificatie voor beheerders';
 
-            case EmailTemplateType.RegistrationConfirmation: return 'Inschrijvingen: Bevestiging';
-            case EmailTemplateType.RegistrationTransferDetails: return 'Inschrijvingen: Betaalinstructies met overschrijving';
+            case EmailTemplateType.RegistrationConfirmation: return 'Bevestiging van inschrijving';
+            case EmailTemplateType.RegistrationTransferDetails: return 'Betaalinstructies met overschrijving';
 
-            case EmailTemplateType.OrderConfirmationOnline: return 'Webshop: Bestelling bevestiging online betaling';
-            case EmailTemplateType.OrderConfirmationTransfer: return 'Webshop: Bestelling bevestiging overschrijving';
-            case EmailTemplateType.OrderConfirmationPOS: return 'Webshop: Bestelling bevestiging betaling aan de kassa';
-            case EmailTemplateType.OrderReceivedTransfer: return 'Webshop: Bestelling ontvangen overschrijving';
-            case EmailTemplateType.OrderOnlinePaymentFailed: return 'Webshop: Online betaling mislukt';
-            case EmailTemplateType.TicketsConfirmation: return 'Webshop: Tickets bevestiging';
-            case EmailTemplateType.TicketsConfirmationTransfer: return 'Webshop: Tickets bevestiging overschrijving';
-            case EmailTemplateType.TicketsConfirmationPOS: return 'Webshop: Tickets bevestiging betaling aan de kassa';
-            case EmailTemplateType.TicketsReceivedTransfer: return 'Webshop: Tickets ontvangen overschrijving';
+            case EmailTemplateType.OrderConfirmationOnline: return 'Bestelling bevestiging: online betaling';
+            case EmailTemplateType.OrderConfirmationTransfer: return 'Bestelling bevestiging: overschrijving';
+            case EmailTemplateType.OrderConfirmationPOS: return 'Bestelling bevestiging: betaling aan de kassa';
+            case EmailTemplateType.OrderReceivedTransfer: return 'Bevestiging ontvangen overschrijving';
+            case EmailTemplateType.OrderOnlinePaymentFailed: return 'Online betaling mislukt';
+            case EmailTemplateType.TicketsConfirmation: return 'E-mail met tickets: online betaling';
+            case EmailTemplateType.TicketsConfirmationTransfer: return 'Bevestiging voor bestelling met overschrijving (nog geen tickets)';
+            case EmailTemplateType.TicketsConfirmationPOS: return 'E-mail met tickets: betaling aan de kassa';
+            case EmailTemplateType.TicketsReceivedTransfer: return 'E-mail met tickets: na ontvangen overschrijving';
 
-            case EmailTemplateType.OrganizationUnstableDNS: return 'DNS: instabiele DNS';
-            case EmailTemplateType.OrganizationInvalidDNS: return 'DNS: ongeldige DNS';
-            case EmailTemplateType.OrganizationValidDNS: return 'DNS: geldige DNS';
-            case EmailTemplateType.OrganizationStableDNS: return 'DNS: stabiele DNS';
-            case EmailTemplateType.OrganizationDNSSetupComplete: return 'DNS: DNS setup compleet';
+            case EmailTemplateType.OrganizationUnstableDNS: return 'Instabiele DNS';
+            case EmailTemplateType.OrganizationInvalidDNS: return 'Ongeldige DNS';
+            case EmailTemplateType.OrganizationValidDNS: return 'Geldige DNS';
+            case EmailTemplateType.OrganizationStableDNS: return 'Stabiele DNS';
+            case EmailTemplateType.OrganizationDNSSetupComplete: return 'DNS setup compleet';
 
-            case EmailTemplateType.OrganizationDripWelcome: return 'Organisatie: drip welkom';
-            case EmailTemplateType.OrganizationDripWebshopTrialCheckin: return 'Organisatie: drip webshop proefperiode checkin';
-            case EmailTemplateType.OrganizationDripMembersTrialCheckin: return 'Organisatie: drip ledenadministratie proefperiode checkin';
-            case EmailTemplateType.OrganizationDripWebshopTrialExpired: return 'Organisatie: drip webshop proefperiode verlopen';
-            case EmailTemplateType.OrganizationDripMembersTrialExpired: return 'Organisatie: drip ledenadministratie proefperiode verlopen';
-            case EmailTemplateType.OrganizationDripTrialExpiredReminder: return 'Organisatie: drip proefperiode verlopen reminder';
-            case EmailTemplateType.OrganizationDripWebshopNotRenewed: return 'Organisatie: drip webshop niet verlengd';
-            case EmailTemplateType.OrganizationDripMembersNotRenewed: return 'Organisatie: drip ledenadministratie niet verlengd';
+            case EmailTemplateType.OrganizationDripWelcome: return 'Welkom';
+            case EmailTemplateType.OrganizationDripWebshopTrialCheckin: return 'Webshop proefperiode checkin';
+            case EmailTemplateType.OrganizationDripMembersTrialCheckin: return 'Ledenadministratie proefperiode checkin';
+            case EmailTemplateType.OrganizationDripWebshopTrialExpired: return 'Webshop proefperiode verlopen';
+            case EmailTemplateType.OrganizationDripMembersTrialExpired: return 'Ledenadministratie proefperiode verlopen';
+            case EmailTemplateType.OrganizationDripTrialExpiredReminder: return 'Proefperiode verlopen reminder';
+            case EmailTemplateType.OrganizationDripWebshopNotRenewed: return 'Webshop niet verlengd';
+            case EmailTemplateType.OrganizationDripMembersNotRenewed: return 'Ledenadministratie niet verlengd';
 
-            case EmailTemplateType.ExcelExportSucceeded: return 'Export: Excel export geslaagd';
-            case EmailTemplateType.ExcelExportFailed: return 'Export: Excel export mislukt';
+            case EmailTemplateType.ExcelExportSucceeded: return 'Excel export geslaagd';
+            case EmailTemplateType.ExcelExportFailed: return 'Excel export mislukt';
 
             case EmailTemplateType.SignupAlreadyHasAccount: return 'Registratie: account bestaat al';
             case EmailTemplateType.ForgotPasswordButNoAccount: return 'Wachtwoord vergeten: geen account';
@@ -247,9 +249,85 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.AdminInvitation: return 'Uitnodiging beheerder: bestaande gebruiker';
             case EmailTemplateType.AdminInvitationNewUser: return 'Uitnodiging beheerder: nieuwe gebruiker';
 
-            case EmailTemplateType.UserBalanceIncreaseNotification: return 'Gebruiker: saldo verhoogd';
-            case EmailTemplateType.UserBalanceReminder: return 'Gebruiker: saldo herinnering';
+            case EmailTemplateType.UserBalanceIncreaseNotification: return 'Saldo verhoogd';
+            case EmailTemplateType.UserBalanceReminder: return 'Saldo herinnering';
         }
+    }
+
+    static getTypeCategory(type: EmailTemplateType): string {
+        switch (type) {
+            case EmailTemplateType.SavedMembersEmail:
+            case EmailTemplateType.SavedReceivableBalancesEmail:
+                return 'Opgeslagen e-mail';
+
+            case EmailTemplateType.DefaultMembersEmail:
+            case EmailTemplateType.DefaultReceivableBalancesEmail:
+                return 'Placeholder';
+
+            case EmailTemplateType.MembersExpirationReminder:
+            case EmailTemplateType.WebshopsExpirationReminder:
+            case EmailTemplateType.SingleWebshopExpirationReminder:
+            case EmailTemplateType.TrialWebshopsExpirationReminder:
+            case EmailTemplateType.TrialMembersExpirationReminder:
+                return 'Billing';
+
+            case EmailTemplateType.RegistrationConfirmation:
+            case EmailTemplateType.RegistrationTransferDetails:
+                return 'Inschrijvingen';
+
+            case EmailTemplateType.OrderNotification:
+                return 'Webshop';
+            case EmailTemplateType.OrderConfirmationOnline:
+            case EmailTemplateType.OrderConfirmationTransfer:
+            case EmailTemplateType.OrderConfirmationPOS:
+            case EmailTemplateType.OrderReceivedTransfer:
+            case EmailTemplateType.OrderOnlinePaymentFailed:
+                return 'Webshop zonder tickets';
+            case EmailTemplateType.TicketsConfirmation:
+            case EmailTemplateType.TicketsConfirmationTransfer:
+            case EmailTemplateType.TicketsConfirmationPOS:
+            case EmailTemplateType.TicketsReceivedTransfer:
+                return 'Webshop met tickets';
+
+            case EmailTemplateType.OrganizationUnstableDNS:
+            case EmailTemplateType.OrganizationInvalidDNS:
+            case EmailTemplateType.OrganizationValidDNS:
+            case EmailTemplateType.OrganizationStableDNS:
+            case EmailTemplateType.OrganizationDNSSetupComplete:
+                return 'DNS';
+
+            case EmailTemplateType.OrganizationDripWelcome:
+            case EmailTemplateType.OrganizationDripWebshopTrialCheckin:
+            case EmailTemplateType.OrganizationDripMembersTrialCheckin:
+            case EmailTemplateType.OrganizationDripWebshopTrialExpired:
+            case EmailTemplateType.OrganizationDripMembersTrialExpired:
+            case EmailTemplateType.OrganizationDripTrialExpiredReminder:
+            case EmailTemplateType.OrganizationDripWebshopNotRenewed:
+            case EmailTemplateType.OrganizationDripMembersNotRenewed:
+                return 'Drip';
+
+            case EmailTemplateType.ExcelExportSucceeded:
+            case EmailTemplateType.ExcelExportFailed:
+                return 'Excel export';
+
+            case EmailTemplateType.SignupAlreadyHasAccount:
+            case EmailTemplateType.ForgotPasswordButNoAccount:
+            case EmailTemplateType.ForgotPassword:
+            case EmailTemplateType.DeleteAccountConfirmation:
+            case EmailTemplateType.VerifyEmail:
+            case EmailTemplateType.VerifyEmailWithoutCode:
+                return 'Accounts en wachtwoorden';
+
+            case EmailTemplateType.AdminInvitation:
+            case EmailTemplateType.AdminInvitationNewUser:
+                return 'Uitnodiging beheerder';
+
+            case EmailTemplateType.UserBalanceIncreaseNotification:
+            case EmailTemplateType.UserBalanceReminder:
+                return 'Openstaand bedrag';
+        }
+
+        return 'Andere';
     }
 
     static allowPlatformLevel(type: EmailTemplateType): boolean {
@@ -281,6 +359,8 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.TicketsConfirmationTransfer: return true;
             case EmailTemplateType.TicketsConfirmationPOS: return true;
             case EmailTemplateType.TicketsReceivedTransfer: return true;
+            case EmailTemplateType.UserBalanceIncreaseNotification: return true;
+            case EmailTemplateType.UserBalanceReminder: return true;
         }
 
         return false;
@@ -288,11 +368,11 @@ export class EmailTemplate extends AutoEncoder {
 
     static getPlatformTypeDescription(type: EmailTemplateType): string | null {
         switch (type) {
-            case EmailTemplateType.OrganizationUnstableDNS: return 'Organisatie: instabiele DNS';
-            case EmailTemplateType.OrganizationInvalidDNS: return 'Organisatie: ongeldige DNS';
-            case EmailTemplateType.OrganizationValidDNS: return 'Organisatie: geldige DNS';
-            case EmailTemplateType.OrganizationStableDNS: return 'Organisatie: stabiele DNS';
-            case EmailTemplateType.OrganizationDNSSetupComplete: return 'Organisatie: DNS setup compleet';
+            case EmailTemplateType.OrganizationUnstableDNS: return 'Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een vereniging instabiel te zijn.';
+            case EmailTemplateType.OrganizationInvalidDNS: return 'Bij een routinecontrole blijken de DNS-instellingen van de domeinnaam van een vereniging ongeldig te zijn.';
+            case EmailTemplateType.OrganizationValidDNS: return 'Na een controle blijken de DNS-instellingen van de domeinnaam van een vereniging geldig te zijn.';
+            case EmailTemplateType.OrganizationStableDNS: return 'Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een vereniging terug stabiel te zijn.';
+            case EmailTemplateType.OrganizationDNSSetupComplete: return 'De DNS-instellingen van de domeinnaam van een vereniging zijn correct ingesteld.';
 
             case EmailTemplateType.OrderOnlinePaymentFailed: return 'Wanneer een online betaling bij een webshop mislukt na een lange tijd wachten - zou zelden mogen voorkomen';
 
@@ -338,7 +418,7 @@ export class EmailTemplate extends AutoEncoder {
         return '';
     }
 
-    static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
+    static getSupportedReplacementsForType(type: EmailTemplateType): Replacement[] {
         if ([
             EmailTemplateType.DefaultReceivableBalancesEmail,
             EmailTemplateType.SavedReceivableBalancesEmail,
@@ -346,119 +426,110 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.UserBalanceReminder,
         ].includes(type)) {
             return [
-                'greeting',
-                'firstName',
-                'lastName',
-                'email',
-                'paymentUrl',
-                'organizationName',
-                'outstandingBalance',
-                'balanceTable',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.paymentUrl,
+                ExampleReplacements.outstandingBalance,
+                ExampleReplacements.balanceTable,
             ];
         }
+
+        if ([
+            EmailTemplateType.SavedMembersEmail,
+            EmailTemplateType.DefaultMembersEmail,
+        ].includes(type)) {
+            return [
+                ...DefaultExampleReplacements,
+                ExampleReplacements.firstNameMember,
+                ExampleReplacements.lastNameMember,
+                ExampleReplacements.outstandingBalance,
+                ExampleReplacements.balanceTable,
+            ];
+        }
+
         if (type === EmailTemplateType.SignupAlreadyHasAccount) {
             return [
-                'greeting',
-                'email',
-                'resetUrl',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.resetUrl,
             ];
         }
 
         if (type === EmailTemplateType.ForgotPasswordButNoAccount) {
             return [
-                'email',
+                // Name not available
+                ExampleReplacements.email,
             ];
         }
 
         if (type === EmailTemplateType.DeleteAccountConfirmation) {
-            return [
-                'email',
-            ];
+            return DefaultExampleReplacements;
         }
 
         if (type === EmailTemplateType.ForgotPassword) {
             return [
-                'greeting',
-                'firstName',
-                'lastName',
-                'email',
-                'resetUrl',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.resetUrl,
             ];
         }
 
         if (type === EmailTemplateType.VerifyEmail) {
             return [
-                'greeting',
-                'email',
-                'confirmEmailUrl',
-                'confirmEmailCode',
-                'organizationName',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.confirmEmailUrl,
+                ExampleReplacements.confirmEmailCode,
             ];
         }
 
         if (type === EmailTemplateType.VerifyEmailWithoutCode) {
             return [
-                'greeting',
-                'email',
-                'confirmEmailUrl',
-                'organizationName',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.confirmEmailUrl,
             ];
         }
 
         if (type === EmailTemplateType.AdminInvitation) {
             return [
-                'greeting',
-                'email',
-                'platformOrOrganizationName',
-                'inviterName',
-                'validUntil',
-                'signInUrl',
-                'resetUrl',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.platformOrOrganizationName,
+                ExampleReplacements.inviterName,
+                ExampleReplacements.validUntil,
+                ExampleReplacements.signInUrl,
+                ExampleReplacements.resetUrl,
             ];
         }
 
         if (type === EmailTemplateType.AdminInvitationNewUser) {
             return [
-                'greeting',
-                'email',
-                'platformOrOrganizationName',
-                'inviterName',
-                'validUntil',
-                'resetUrl',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.platformOrOrganizationName,
+                ExampleReplacements.inviterName,
+                ExampleReplacements.validUntil,
+                ExampleReplacements.resetUrl,
             ];
         }
 
         if (type === EmailTemplateType.ExcelExportSucceeded) {
             return [
-                'greeting',
-                'firstName',
-                'lastName',
-                'downloadUrl',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.downloadUrl,
             ];
         }
 
         if (type === EmailTemplateType.ExcelExportFailed) {
             return [
-                'greeting',
-                'firstName',
-                'lastName',
+                ...DefaultExampleReplacements,
             ];
         }
 
         if (type === EmailTemplateType.RegistrationConfirmation) {
             return [
-                'greeting',
-                'firstName',
-                'lastName',
-                'firstNameMember',
-                'lastNameMember',
-                'email',
-                'registerUrl',
-                'organizationName',
-                'groupName',
-                'signInUrl',
-                'unsubscribeUrl',
-                'loginDetails',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.firstNameMember,
+                ExampleReplacements.lastNameMember,
+                ExampleReplacements.registerUrl,
+                ExampleReplacements.groupName,
+                ExampleReplacements.signInUrl,
+                ExampleReplacements.unsubscribeUrl,
+                ExampleReplacements.loginDetails,
             ];
         }
 
@@ -470,31 +541,27 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.OrganizationValidDNS,
         ].includes(type)) {
             return [
-                'greeting',
-                'firstName',
-                'lastName',
-                'email',
-                'organizationName',
-                'mailDomain',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.mailDomain,
             ];
         }
 
         if (type === EmailTemplateType.RegistrationTransferDetails) {
             return [
-                'priceToPay',
-                'paymentMethod',
-                'transferDescription',
-                'transferBankAccount',
-                'transferBankCreditor',
-                'overviewContext',
-                'memberNames',
-                'overviewTable',
-                'paymentTable',
-                'registerUrl',
-                'organizationName',
-                'signInUrl',
-                'unsubscribeUrl',
-                'loginDetails',
+                ExampleReplacements.priceToPay,
+                ExampleReplacements.paymentMethod,
+                ExampleReplacements.transferDescription,
+                ExampleReplacements.transferBankAccount,
+                ExampleReplacements.transferBankCreditor,
+                ExampleReplacements.overviewContext,
+                ExampleReplacements.memberNames,
+                ExampleReplacements.overviewTable,
+                ExampleReplacements.paymentTable,
+                ExampleReplacements.registerUrl,
+                ExampleReplacements.organizationName,
+                ExampleReplacements.signInUrl,
+                ExampleReplacements.unsubscribeUrl,
+                ExampleReplacements.loginDetails,
             ];
         }
 
@@ -506,50 +573,41 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.SingleWebshopExpirationReminder,
         ].includes(type)) {
             return [
-                'greeting',
-                'firstName',
-                'organizationName',
-                'packageName',
-                'validUntil',
-                'validUntilDate',
-                'renewUrl',
-                'unsubscribeUrl',
+                ...DefaultExampleReplacements,
+                ExampleReplacements.packageName,
+                ExampleReplacements.validUntil,
+                ExampleReplacements.validUntilDate,
+                ExampleReplacements.renewUrl,
+                ExampleReplacements.unsubscribeUrl,
             ];
         }
         const sharedReplacements = [
-            'orderPrice',
-            'orderStatus',
-            'orderDetailsTable',
-            'orderTable',
-            'paymentTable',
-            'orderUrl',
-            'paymentMethod',
-            'organizationName',
-            'webshopName',
-            'unsubscribeUrl',
+            ...DefaultExampleReplacements,
+            ExampleReplacements.orderPrice,
+            ExampleReplacements.orderStatus,
+            ExampleReplacements.orderDetailsTable,
+            ExampleReplacements.orderTable,
+            ExampleReplacements.paymentTable,
+            ExampleReplacements.orderUrl,
+            ExampleReplacements.paymentMethod,
+            ExampleReplacements.organizationName,
+            ExampleReplacements.webshopName,
+            ExampleReplacements.unsubscribeUrl,
         ];
 
         if (type !== EmailTemplateType.OrderOnlinePaymentFailed) {
             sharedReplacements.push(
-                'nr',
+                ExampleReplacements.nr,
             );
         }
 
         if (type === EmailTemplateType.OrderConfirmationTransfer || type === EmailTemplateType.TicketsConfirmationTransfer) {
             return [
                 ...sharedReplacements,
-                'transferDescription',
-                'transferBankAccount',
-                'transferBankCreditor',
+                ExampleReplacements.transferDescription,
+                ExampleReplacements.transferBankAccount,
+                ExampleReplacements.transferBankCreditor,
             ];
-        }
-
-        if (type !== EmailTemplateType.OrderNotification) {
-            sharedReplacements.push(
-                'greeting',
-                'firstName',
-                'lastName',
-            );
         }
 
         return sharedReplacements;

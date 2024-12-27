@@ -5,47 +5,58 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STList v-if="editableList.length">
-            <STListItem v-for="emailTemplate in editableList" :key="emailTemplate.type + ':' + emailTemplate.id" :selectable="true" class="right-stack" @click="doSelectItem(emailTemplate)">
-                <template #left>
-                    <span v-if="EmailTemplate.isSavedEmail(emailTemplate.type)" class="icon email-template" />
-                    <span v-else-if="!emailTemplate.id && emailTemplate.html" v-tooltip="'De standaard e-mail wordt gebruikt'" class="icon email" />
-                    <span v-else-if="!emailTemplate.id" v-tooltip="'Niet actief'" class="icon help" />
-                    <span v-else v-tooltip="'Aangepast vanaf standaard template'" class="icon layered">
-                        <span class="icon email-edited-layer-1" />
-                        <span class="icon email-edited-layer-2 primary" />
-                    </span>
-                </template>
+        <div v-for="group of groupedList" :key="group.name" class="container">
+            <hr v-if="tab !== 'userGenerated'">
+            <h2 v-if="tab !== 'userGenerated'">
+                {{ group.name }}
+            </h2>
+            <STList>
+                <STListItem v-for="emailTemplate in group.templates" :key="emailTemplate.type + ':' + emailTemplate.id" :selectable="true" class="right-stack" @click="doSelectItem(emailTemplate)">
+                    <template #left>
+                        <figure class="style-image-with-icon" :class="{gray: !emailTemplate.id && !!emailTemplate.html, error: !emailTemplate.id && !emailTemplate.html}">
+                            <figure>
+                                <span class="icon email" />
+                            </figure>
+                            <aside>
+                                <span v-if="!emailTemplate.id && !emailTemplate.html" v-tooltip="'Er wordt geen e-mail verzonden'" class="icon disabled error small stroke" />
+                                <span v-else-if="!emailTemplate.id" v-tooltip="'Het standaard sjabloon wordt gebruikt'" class="icon lightning small stroke" />
+                                <span v-else v-tooltip="'De standaard e-mail werd aangepast'" class="icon lightning primary small stroke " />
+                            </aside>
+                        </figure>
+                    </template>
 
-                <p v-if="getTemplatePrefix(emailTemplate)" class="style-title-prefix-list">
-                    {{ getTemplatePrefix(emailTemplate) }}
-                </p>
+                    <p v-if="getTemplatePrefix(emailTemplate)" class="style-title-prefix-list">
+                        {{ getTemplatePrefix(emailTemplate) }}
+                    </p>
 
-                <h2 class="style-title-list">
-                    {{ EmailTemplate.isSavedEmail(emailTemplate.type) ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type) }}
-                </h2>
+                    <h2 class="style-title-list">
+                        {{ EmailTemplate.isSavedEmail(emailTemplate.type) ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type) }}
+                    </h2>
 
-                <p class="style-description-small">
-                    {{ (!organization ? EmailTemplate.getPlatformTypeDescription(emailTemplate.type) : null) ?? EmailTemplate.getTypeDescription(emailTemplate.type) }}
-                </p>
+                    <p class="style-description-small">
+                        {{ (!organization ? EmailTemplate.getPlatformTypeDescription(emailTemplate.type) : null) ?? EmailTemplate.getTypeDescription(emailTemplate.type) }}
+                    </p>
 
-                <p v-if="!organization && EmailTemplate.allowOrganizationLevel(emailTemplate.type) && !emailTemplate.groupId && !emailTemplate.organizationId" class="style-description-small">
-                    Een lokale groep kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.
-                </p>
+                    <p v-if="!organization && EmailTemplate.allowOrganizationLevel(emailTemplate.type) && !emailTemplate.groupId && !emailTemplate.organizationId" class="style-description-small">
+                        Een lokale groep kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.
+                    </p>
 
-                <p v-if="emailTemplate.id" class="style-description-small">
-                    Laatst gewijzigd op {{ formatDateTime(emailTemplate.updatedAt) }}
-                </p>
+                    <p v-if="emailTemplate.id" class="style-description-small">
+                        Laatst gewijzigd op {{ formatDateTime(emailTemplate.updatedAt) }}
+                    </p>
+                    <p v-else-if="!emailTemplate.id && emailTemplate.html" class="style-description-small">
+                        Standaard sjabloon wordt gebruikt
+                    </p>
 
-                <template #right>
-                    <button v-if="emailTemplate.id" class="button icon trash gray" type="button" @click.stop="deleteEmail(emailTemplate)" />
-                    <button class="button icon edit gray" type="button" @click.stop="editEmail(emailTemplate)" />
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
-        </STList>
+                    <template #right>
+                        <button v-if="emailTemplate.id" class="button icon trash gray" type="button" @click.stop="deleteEmail(emailTemplate)" />
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+        </div>
 
-        <p v-else class="info-box">
+        <p v-if="groupedList.length === 0" class="info-box">
             Geen emailtemplates gevonden
         </p>
 
@@ -203,6 +214,20 @@ const editableList = computed(() => {
     return base;
 });
 
+const groupedList = computed(() => {
+    const result: Map<string, { name: string; templates: EmailTemplate[] }> = new Map();
+
+    for (const template of editableList.value) {
+        const key = EmailTemplate.getTypeCategory(template.type);
+        if (!result.has(key)) {
+            result.set(key, { name: key, templates: [] });
+        }
+        result.get(key)!.templates.push(template);
+    }
+
+    return Array.from(result.values()).sort((a, b) => a.name.localeCompare(b.name));
+});
+
 function getTemplatePrefix(emailTemplate: EmailTemplate) {
     if (emailTemplate.groupId && props.groups) {
         const group = props.groups.find(g => g.id === emailTemplate.groupId);
@@ -261,7 +286,7 @@ async function addCreateOption() {
 
 async function deleteEmail(emailTemplate: EmailTemplate) {
     if (emailTemplate.id) {
-        if (!await CenteredMessage.confirm('Weet je zeker dat je deze email template wilt verwijderen?', 'Verwijderen')) {
+        if (!await CenteredMessage.confirm('Weet je zeker dat je dit sjabloon wilt verwijderen?', 'Verwijderen')) {
             return;
         }
         addDelete(emailTemplate.id);

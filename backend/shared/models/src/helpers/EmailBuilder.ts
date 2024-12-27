@@ -305,6 +305,8 @@ export async function getEmailBuilder(organization: Organization | null, email: 
     }
     email.recipients = cleaned;
 
+    const fromAddress = Email.parseEmailStr(email.from)[0];
+
     // Update recipients
     for (const recipient of email.recipients) {
         recipient.replacements = recipient.replacements.slice();
@@ -323,6 +325,13 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             value: signInUrl,
         }));
 
+        if (fromAddress) {
+            recipient.replacements.push(Replacement.create({
+                token: 'fromAddress',
+                value: fromAddress,
+            }));
+        }
+
         if (email.defaultReplacements) {
             recipient.replacements.push(...email.defaultReplacements);
         }
@@ -330,7 +339,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         recipient.replacements.push(...recipient.getDefaultReplacements());
 
         if (organization) {
-            const extra = organization.meta.getEmailReplacements();
+            const extra = organization.meta.getEmailReplacements(organization);
             recipient.replacements.push(...extra);
         }
 

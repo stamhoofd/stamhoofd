@@ -24,7 +24,7 @@ export class Replacement extends AutoEncoder {
     token: string;
 
     @field({ decoder: StringDecoder })
-    value: string;
+    value = '';
 
     @field({ decoder: StringDecoder, optional: true })
     html?: string;

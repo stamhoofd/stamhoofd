@@ -203,3 +203,4 @@ export * from './src/AuditLogReplacement.js';
 
 // Wire up circular dependencies
 import './src/circular-dependencies/AuditLogReplacementDependencies.js';
+import './src/circular-dependencies/ExampleReplacementsDependencies.js';

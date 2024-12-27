@@ -1,5 +1,5 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -631,14 +631,14 @@ export class Email extends Model {
             recipientRow = getExampleRecipient();
         }
 
-        const smartVariables = recipientRow ? EditorSmartVariable.forRecipient(recipientRow) : [];
-        const smartButtons = recipientRow ? EditorSmartButton.forRecipient(recipientRow) : [];
+        recipientRow.replacements.push(Replacement.create({
+            token: 'fromAddress',
+            value: this.fromAddress ?? '',
+        }));
 
         return EmailPreview.create({
             ...this,
             exampleRecipient: recipientRow,
-            smartVariables,
-            smartButtons,
         });
     }
 }

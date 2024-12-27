@@ -8,6 +8,9 @@ import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { MemberDetails } from '../members/MemberDetails.js';
 import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob.js';
 import { EmailTemplate, EmailTemplateType } from './EmailTemplate.js';
+import { Platform } from '../Platform.js';
+import { OrganizationMetaData } from '../OrganizationMetaData.js';
+import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 
 export enum EmailRecipientFilterType {
     Members = 'Members',
@@ -166,16 +169,31 @@ export class EmailRecipient extends AutoEncoder {
     getDefaultReplacements() {
         return Recipient.create(this).getDefaultReplacements();
     }
+
+    getReplacements(organization: { meta: OrganizationMetaData; privateMeta: OrganizationPrivateMetaData | null; name: string } | null, platform: Platform) {
+        return [
+            ...this.replacements,
+            ...this.getDefaultReplacements(),
+            ...(organization ? organization.meta.getEmailReplacements(organization) : []),
+            ...platform.config.getEmailReplacements(),
+        ];
+    }
 }
 
 export class EmailPreview extends Email {
     @field({ decoder: EmailRecipient, nullable: true })
     exampleRecipient: EmailRecipient | null = null;
 
-    @field({ decoder: new ArrayDecoder(EditorSmartVariable) })
+    /**
+     * @deprecated
+     */
+    @field({ decoder: new ArrayDecoder(EditorSmartVariable), optional: true })
     smartVariables: EditorSmartVariable[] = [];
 
-    @field({ decoder: new ArrayDecoder(EditorSmartButton) })
+    /**
+     * @deprecated
+     */
+    @field({ decoder: new ArrayDecoder(EditorSmartButton), optional: true })
     smartButtons: EditorSmartButton[] = [];
 
     // todo: count stats
