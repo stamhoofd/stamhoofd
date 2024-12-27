@@ -101,6 +101,14 @@ export class BuckarooSettings extends AutoEncoder {
     paymentMethods: PaymentMethod[] = [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq];
 }
 
+export class BalanceNotificationSettings extends AutoEncoder {
+    @field({ decoder: BooleanDecoder })
+    enabled = true;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    emailId: string | null = null;
+}
+
 export class OrganizationPrivateMetaData extends AutoEncoder {
     /**
      * @deprecated
@@ -147,6 +155,12 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(OrganizationEmail), version: 9 })
     emails: OrganizationEmail[] = [];
+
+    /**
+     * Balance reminder email settings
+     */
+    @field({ decoder: BalanceNotificationSettings, ...NextVersion })
+    balanceNotificationSettings = BalanceNotificationSettings.create({});
 
     /**
      * @deprecated

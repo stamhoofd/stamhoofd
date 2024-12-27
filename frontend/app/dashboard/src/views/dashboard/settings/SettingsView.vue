@@ -229,6 +229,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem v-if="$feature('member-trials')" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceNotifications)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Notificaties voor openstaande bedragen
+                    </h2>
+                    <p class="style-description">
+                        Stuur automatisch e-mails naar leden als hun openstaand bedrag stijgt of als betaalherinnering.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
             <template v-if="feature('sso')">
@@ -326,6 +341,7 @@ import SSOSettingsView from './SSOSettingsView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
+import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
 
 enum Routes {
     General = 'algemeen',
@@ -345,6 +361,7 @@ enum Routes {
     Referrals = 'referrals',
     Labs = 'experimenten',
     Premises = 'lokalen',
+    BalanceNotifications = 'openstaande-bedragen-notificaties',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -453,6 +470,11 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.BalanceNotifications,
+        present: 'popup',
+        component: BalanceNotificationSettingsView as unknown as ComponentOptions,
     },
 ]);
 const $navigate = useNavigate();
