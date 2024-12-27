@@ -795,6 +795,16 @@ checkoutUIFilterBuilders.unshift(
 // Cached outstanding balances
 
 export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
+    new NumberFilterBuilder({
+        name: 'Openstaand bedrag',
+        type: NumberFilterFormat.Currency,
+        key: 'amountOpen',
+    }),
+    new NumberFilterBuilder({
+        name: 'Bedrag in verwerking',
+        type: NumberFilterFormat.Currency,
+        key: 'amountPending',
+    }),
     new MultipleChoiceFilterBuilder({
         name: 'Type',
         options: [
