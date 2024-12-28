@@ -1,17 +1,17 @@
-import { column, Database, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { column, Database } from '@simonbackx/simple-database';
 import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
-import { SQL, SQLSelect } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 import { Document, Payment } from './';
 import { CachedBalance } from './CachedBalance';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
  */
-export class BalanceItem extends Model {
+export class BalanceItem extends QueryableModel {
     static table = 'balance_items';
 
     @column({
@@ -461,23 +461,5 @@ export class BalanceItem extends Model {
             .where('payingOrganizationId', organizationId)
             .whereNot('status', BalanceItemStatus.Hidden)
             .fetch();
-    }
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): BalanceItem => {
-            const d = (this as typeof BalanceItem & typeof Model).fromRow(row[this.table] as any) as BalanceItem | undefined;
-
-            if (!d) {
-                throw new Error('EmailTemplate not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
     }
 }

@@ -1,5 +1,5 @@
-import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQL, SQLAlias, SQLMin, SQLSelect, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel, SQL, SQLAlias, SQLMin, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
@@ -7,7 +7,7 @@ import { BalanceItem } from './BalanceItem';
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
  */
-export class CachedBalance extends Model {
+export class CachedBalance extends QueryableModel {
     static table = 'cached_outstanding_balances';
 
     @column({
@@ -323,7 +323,7 @@ export class CachedBalance extends Model {
         if (result.length === 0) {
             return;
         }
-        const query = SQL.insert(this.table)
+        const query = this.insert()
             .columns(
                 'id',
                 'organizationId',
@@ -420,23 +420,5 @@ export class CachedBalance extends Model {
             return [];
         }
         return await this.fetchBalanceItems(organizationId, registrationIds, 'registrationId');
-    }
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): CachedBalance => {
-            const d = (this as typeof CachedBalance & typeof Model).fromRow(row[this.table] as any) as CachedBalance | undefined;
-
-            if (!d) {
-                throw new Error('EmailTemplate not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
     }
 }
