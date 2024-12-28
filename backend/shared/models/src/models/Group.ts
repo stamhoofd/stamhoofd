@@ -1,10 +1,10 @@
-import { column, Database, ManyToOneRelation, Model, OneToManyRelation, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
 import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLSelect } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
 
@@ -21,7 +21,7 @@ if (Registration === undefined) {
     throw new Error('Import Registration is undefined');
 }
 
-export class Group extends Model {
+export class Group extends QueryableModel {
     static table = 'groups';
 
     @column({
@@ -100,10 +100,9 @@ export class Group extends Model {
     static async getAll(organizationId: string, periodId: string | null, active = true) {
         const w: any = periodId ? { periodId } : {};
         if (active) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             return await Group.where({ organizationId, deletedAt: null, ...w });
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
         return await Group.where({ organizationId, ...w });
     }
 
@@ -298,24 +297,6 @@ export class Group extends Model {
 
     static async freeStockReservations(groupId: string, reservations: StockReservation[]) {
         return await this.applyStockReservations(groupId, reservations, true);
-    }
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): Group => {
-            const d = (this as typeof Group & typeof Model).fromRow(row[this.table] as any) as Group | undefined;
-
-            if (!d) {
-                throw new Error('EmailTemplate not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
     }
 }
 

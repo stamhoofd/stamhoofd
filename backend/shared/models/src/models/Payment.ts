@@ -1,12 +1,12 @@
-import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings, BaseOrganization, PaymentType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Organization } from './';
-import { SQL, SQLSelect } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 
-export class Payment extends Model {
+export class Payment extends QueryableModel {
     static table = 'payments';
 
     @column({
@@ -244,23 +244,5 @@ export class Payment extends Model {
         const orders = await Order.getByIDs(...orderIds);
 
         return { registrations, orders };
-    }
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): Payment => {
-            const d = (this as typeof Payment & typeof Model).fromRow(row[this.table] as any) as Payment | undefined;
-
-            if (!d) {
-                throw new Error('EmailTemplate not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard(this.table));
-        return select.from(SQL.table(this.table));
     }
 }

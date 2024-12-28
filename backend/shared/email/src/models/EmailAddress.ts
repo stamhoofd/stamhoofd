@@ -1,6 +1,6 @@
-import { column, Database, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { column, Database } from '@simonbackx/simple-database';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLSelect, SQLWhere } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { EmailInterfaceRecipient } from '../classes/Email';
@@ -17,7 +17,7 @@ async function randomBytes(size: number): Promise<Buffer> {
     });
 }
 
-export class EmailAddress extends Model {
+export class EmailAddress extends QueryableModel {
     static table = 'email_addresses';
 
     @column({
@@ -153,23 +153,5 @@ export class EmailAddress extends Model {
         }
 
         return recipients.filter(r => !remove.includes(r.email));
-    }
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): EmailAddress => {
-            const d = (this as typeof EmailAddress & typeof Model).fromRow(row[this.table] as any) as EmailAddress | undefined;
-
-            if (!d) {
-                throw new Error('EmailTemplate not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
     }
 }

@@ -1,13 +1,13 @@
-import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { AnyDecoder } from '@simonbackx/simple-encoding';
-import { SQL, SQLSelect } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Holds the challenges for a given email. User should not exist, since that would allow user enumeration attacks
  */
-export class EmailTemplate extends Model {
+export class EmailTemplate extends QueryableModel {
     static table = 'email_templates';
 
     @column({
@@ -64,23 +64,5 @@ export class EmailTemplate extends Model {
 
     getStructure() {
         return EmailTemplateStruct.create(this);
-    }
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): EmailTemplate => {
-            const d = (this as typeof EmailTemplate & typeof Model).fromRow(row[this.table] as any) as EmailTemplate | undefined;
-
-            if (!d) {
-                throw new Error('EmailTemplate not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
     }
 }

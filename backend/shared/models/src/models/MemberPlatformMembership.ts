@@ -1,6 +1,6 @@
-import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
+import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +11,7 @@ import { Platform } from './Platform';
 import { Registration } from './Registration';
 import { RegistrationPeriod } from './RegistrationPeriod';
 
-export class MemberPlatformMembership extends Model {
+export class MemberPlatformMembership extends QueryableModel {
     static table = 'member_platform_memberships';
 
     // Columns
@@ -316,23 +316,5 @@ export class MemberPlatformMembership extends Model {
                 await BalanceItem.deleteItems([balanceItem]);
             }
         }
-    }
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): MemberPlatformMembership => {
-            const d = (this as typeof MemberPlatformMembership & typeof Model).fromRow(row[this.table] as any) as MemberPlatformMembership | undefined;
-
-            if (!d) {
-                throw new Error('MemberPlatformMembership not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
     }
 }

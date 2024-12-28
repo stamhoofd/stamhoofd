@@ -1,9 +1,9 @@
-import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { RegistrationPeriodBase, RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-export class RegistrationPeriod extends Model {
+export class RegistrationPeriod extends QueryableModel {
     static table = 'registration_periods';
 
     @column({
@@ -96,23 +96,5 @@ export class RegistrationPeriod extends Model {
         }
 
         this.previousPeriodId = previousPeriod?.id ?? null;
-    }
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): RegistrationPeriod => {
-            const d = (this as typeof RegistrationPeriod & typeof Model).fromRow(row[this.table] as any) as RegistrationPeriod | undefined;
-
-            if (!d) {
-                throw new Error('MemberPlatformMembership not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
     }
 }

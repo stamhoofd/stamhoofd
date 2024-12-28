@@ -1,10 +1,10 @@
-import { column, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { ArrayDecoder, Decoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SQL, SQLSelect } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 import { AuditLogPatchItem, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { v7 as uuidv7 } from 'uuid';
 
-export class AuditLog extends Model {
+export class AuditLog extends QueryableModel {
     static table = 'audit_logs';
 
     // Columns
@@ -67,22 +67,4 @@ export class AuditLog extends Model {
         },
     })
     createdAt: Date;
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): AuditLog => {
-            const d = (this as typeof AuditLog & typeof Model).fromRow(row[this.table] as any) as AuditLog | undefined;
-
-            if (!d) {
-                throw new Error('EmailTemplate not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
-    }
 }

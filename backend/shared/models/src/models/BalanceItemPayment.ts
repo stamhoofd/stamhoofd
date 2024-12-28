@@ -1,14 +1,14 @@
-import { column, ManyToOneRelation, Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
 
 import { BalanceItem, Payment } from './';
-import { SQLSelect, SQL } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 
 /**
  * Keeps track of all the created payments of a balance item, which contains the (tries) to pay a balance item.
  * It also keeps track of how much a given payment is split between multiple balance items, which makes it possible to pay a balance item partially.
  */
-export class BalanceItemPayment extends Model {
+export class BalanceItemPayment extends QueryableModel {
     static table = 'balance_item_payments';
 
     @column({
@@ -57,22 +57,4 @@ export class BalanceItemPayment extends Model {
 
     static balanceItem = new ManyToOneRelation(BalanceItem, 'balanceItem');
     static payment = new ManyToOneRelation(Payment, 'payment');
-
-    /**
-     * Experimental: needs to move to library
-     */
-    static select() {
-        const transformer = (row: SQLResultNamespacedRow): BalanceItemPayment => {
-            const d = (this as typeof BalanceItemPayment & typeof Model).fromRow(row[this.table] as any) as BalanceItemPayment | undefined;
-
-            if (!d) {
-                throw new Error('EmailTemplate not found');
-            }
-
-            return d;
-        };
-
-        const select = new SQLSelect(transformer, SQL.wildcard());
-        return select.from(SQL.table(this.table));
-    }
 }
