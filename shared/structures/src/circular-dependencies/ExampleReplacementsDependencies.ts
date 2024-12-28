@@ -1,6 +1,6 @@
 import { Address, ValidatedAddress } from '../addresses/Address';
 import { Country } from '../addresses/CountryDecoder';
-import { ExampleReplacements } from '../email/exampleReplacements';
+import { injectReplacementValues } from '../email/exampleReplacements';
 import { Replacement } from '../endpoints/EmailRequest';
 import { Payment } from '../members/Payment';
 import { Organization } from '../Organization';
@@ -16,6 +16,7 @@ import { TransferSettings, TransferDescriptionType } from '../webshops/TransferS
 import { WebshopPreview } from '../webshops/Webshop';
 import { WebshopTimeSlot, WebshopTakeoutMethod, WebshopMetaData } from '../webshops/WebshopMetaData';
 
+injectReplacementValues(fillReplacements);
 function fillReplacements(replacements: Replacement[]) {
     const exampleOrder = Order.create({
         id: '',
@@ -124,5 +125,3 @@ function fillReplacements(replacements: Replacement[]) {
         }
     }
 }
-
-fillReplacements(Object.values(ExampleReplacements));

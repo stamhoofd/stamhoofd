@@ -15,7 +15,42 @@ const exampleBalanceItem2 = BalanceItem.create({
     unitPrice: 500,
 });
 
+let _injectedReplacementValues = (replacements: Replacement[]): void => {
+    throw new Error('injectReplacementValues is not yet injected. Call injectReplacementValues to inject dependencies.');
+};
+
+export function injectReplacementValues(injected: typeof _injectedReplacementValues) {
+    _injectedReplacementValues = injected;
+}
+
+let filled = false;
+
+function fillReplacementsIfNeeded() {
+    if (!filled) {
+        _injectedReplacementValues(Object.values(_ExampleReplacements));
+        filled = true;
+    }
+}
+
 export const ExampleReplacements = {
+    get all() {
+        fillReplacementsIfNeeded();
+        return _ExampleReplacements;
+    },
+
+    get default() {
+        fillReplacementsIfNeeded();
+        return [
+            _ExampleReplacements.greeting,
+            _ExampleReplacements.firstName,
+            _ExampleReplacements.lastName,
+            _ExampleReplacements.email,
+            _ExampleReplacements.organizationName,
+        ];
+    },
+};
+
+const _ExampleReplacements = {
     greeting: Replacement.create({
         token: 'greeting',
         value: 'Dag Jan,',
@@ -194,11 +229,3 @@ export const ExampleReplacements = {
     }),
 
 };
-
-export const DefaultExampleReplacements = [
-    ExampleReplacements.greeting,
-    ExampleReplacements.firstName,
-    ExampleReplacements.lastName,
-    ExampleReplacements.email,
-    ExampleReplacements.organizationName,
-];

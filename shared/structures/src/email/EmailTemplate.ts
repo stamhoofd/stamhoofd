@@ -1,8 +1,8 @@
 import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Email, EmailRecipientFilterType } from './Email.js';
+import { EmailRecipientFilterType } from './Email.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
-import { DefaultExampleReplacements, ExampleReplacements } from './exampleReplacements.js';
+import { ExampleReplacements } from './exampleReplacements.js';
 
 export enum EmailTemplateType {
     /**
@@ -426,10 +426,10 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.UserBalanceReminder,
         ].includes(type)) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.paymentUrl,
-                ExampleReplacements.outstandingBalance,
-                ExampleReplacements.balanceTable,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.paymentUrl,
+                ExampleReplacements.all.outstandingBalance,
+                ExampleReplacements.all.balanceTable,
             ];
         }
 
@@ -438,98 +438,98 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.DefaultMembersEmail,
         ].includes(type)) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.firstNameMember,
-                ExampleReplacements.lastNameMember,
-                ExampleReplacements.outstandingBalance,
-                ExampleReplacements.balanceTable,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.firstNameMember,
+                ExampleReplacements.all.lastNameMember,
+                ExampleReplacements.all.outstandingBalance,
+                ExampleReplacements.all.balanceTable,
             ];
         }
 
         if (type === EmailTemplateType.SignupAlreadyHasAccount) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.resetUrl,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.resetUrl,
             ];
         }
 
         if (type === EmailTemplateType.ForgotPasswordButNoAccount) {
             return [
                 // Name not available
-                ExampleReplacements.email,
+                ExampleReplacements.all.email,
             ];
         }
 
         if (type === EmailTemplateType.DeleteAccountConfirmation) {
-            return DefaultExampleReplacements;
+            return ExampleReplacements.default;
         }
 
         if (type === EmailTemplateType.ForgotPassword) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.resetUrl,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.resetUrl,
             ];
         }
 
         if (type === EmailTemplateType.VerifyEmail) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.confirmEmailUrl,
-                ExampleReplacements.confirmEmailCode,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.confirmEmailUrl,
+                ExampleReplacements.all.confirmEmailCode,
             ];
         }
 
         if (type === EmailTemplateType.VerifyEmailWithoutCode) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.confirmEmailUrl,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.confirmEmailUrl,
             ];
         }
 
         if (type === EmailTemplateType.AdminInvitation) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.platformOrOrganizationName,
-                ExampleReplacements.inviterName,
-                ExampleReplacements.validUntil,
-                ExampleReplacements.signInUrl,
-                ExampleReplacements.resetUrl,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.platformOrOrganizationName,
+                ExampleReplacements.all.inviterName,
+                ExampleReplacements.all.validUntil,
+                ExampleReplacements.all.signInUrl,
+                ExampleReplacements.all.resetUrl,
             ];
         }
 
         if (type === EmailTemplateType.AdminInvitationNewUser) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.platformOrOrganizationName,
-                ExampleReplacements.inviterName,
-                ExampleReplacements.validUntil,
-                ExampleReplacements.resetUrl,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.platformOrOrganizationName,
+                ExampleReplacements.all.inviterName,
+                ExampleReplacements.all.validUntil,
+                ExampleReplacements.all.resetUrl,
             ];
         }
 
         if (type === EmailTemplateType.ExcelExportSucceeded) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.downloadUrl,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.downloadUrl,
             ];
         }
 
         if (type === EmailTemplateType.ExcelExportFailed) {
             return [
-                ...DefaultExampleReplacements,
+                ...ExampleReplacements.default,
             ];
         }
 
         if (type === EmailTemplateType.RegistrationConfirmation) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.firstNameMember,
-                ExampleReplacements.lastNameMember,
-                ExampleReplacements.registerUrl,
-                ExampleReplacements.groupName,
-                ExampleReplacements.signInUrl,
-                ExampleReplacements.unsubscribeUrl,
-                ExampleReplacements.loginDetails,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.firstNameMember,
+                ExampleReplacements.all.lastNameMember,
+                ExampleReplacements.all.registerUrl,
+                ExampleReplacements.all.groupName,
+                ExampleReplacements.all.signInUrl,
+                ExampleReplacements.all.unsubscribeUrl,
+                ExampleReplacements.all.loginDetails,
             ];
         }
 
@@ -541,27 +541,27 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.OrganizationValidDNS,
         ].includes(type)) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.mailDomain,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.mailDomain,
             ];
         }
 
         if (type === EmailTemplateType.RegistrationTransferDetails) {
             return [
-                ExampleReplacements.priceToPay,
-                ExampleReplacements.paymentMethod,
-                ExampleReplacements.transferDescription,
-                ExampleReplacements.transferBankAccount,
-                ExampleReplacements.transferBankCreditor,
-                ExampleReplacements.overviewContext,
-                ExampleReplacements.memberNames,
-                ExampleReplacements.overviewTable,
-                ExampleReplacements.paymentTable,
-                ExampleReplacements.registerUrl,
-                ExampleReplacements.organizationName,
-                ExampleReplacements.signInUrl,
-                ExampleReplacements.unsubscribeUrl,
-                ExampleReplacements.loginDetails,
+                ExampleReplacements.all.priceToPay,
+                ExampleReplacements.all.paymentMethod,
+                ExampleReplacements.all.transferDescription,
+                ExampleReplacements.all.transferBankAccount,
+                ExampleReplacements.all.transferBankCreditor,
+                ExampleReplacements.all.overviewContext,
+                ExampleReplacements.all.memberNames,
+                ExampleReplacements.all.overviewTable,
+                ExampleReplacements.all.paymentTable,
+                ExampleReplacements.all.registerUrl,
+                ExampleReplacements.all.organizationName,
+                ExampleReplacements.all.signInUrl,
+                ExampleReplacements.all.unsubscribeUrl,
+                ExampleReplacements.all.loginDetails,
             ];
         }
 
@@ -573,40 +573,40 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.SingleWebshopExpirationReminder,
         ].includes(type)) {
             return [
-                ...DefaultExampleReplacements,
-                ExampleReplacements.packageName,
-                ExampleReplacements.validUntil,
-                ExampleReplacements.validUntilDate,
-                ExampleReplacements.renewUrl,
-                ExampleReplacements.unsubscribeUrl,
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.packageName,
+                ExampleReplacements.all.validUntil,
+                ExampleReplacements.all.validUntilDate,
+                ExampleReplacements.all.renewUrl,
+                ExampleReplacements.all.unsubscribeUrl,
             ];
         }
         const sharedReplacements = [
-            ...DefaultExampleReplacements,
-            ExampleReplacements.orderPrice,
-            ExampleReplacements.orderStatus,
-            ExampleReplacements.orderDetailsTable,
-            ExampleReplacements.orderTable,
-            ExampleReplacements.paymentTable,
-            ExampleReplacements.orderUrl,
-            ExampleReplacements.paymentMethod,
-            ExampleReplacements.organizationName,
-            ExampleReplacements.webshopName,
-            ExampleReplacements.unsubscribeUrl,
+            ...ExampleReplacements.default,
+            ExampleReplacements.all.orderPrice,
+            ExampleReplacements.all.orderStatus,
+            ExampleReplacements.all.orderDetailsTable,
+            ExampleReplacements.all.orderTable,
+            ExampleReplacements.all.paymentTable,
+            ExampleReplacements.all.orderUrl,
+            ExampleReplacements.all.paymentMethod,
+            ExampleReplacements.all.organizationName,
+            ExampleReplacements.all.webshopName,
+            ExampleReplacements.all.unsubscribeUrl,
         ];
 
         if (type !== EmailTemplateType.OrderOnlinePaymentFailed) {
             sharedReplacements.push(
-                ExampleReplacements.nr,
+                ExampleReplacements.all.nr,
             );
         }
 
         if (type === EmailTemplateType.OrderConfirmationTransfer || type === EmailTemplateType.TicketsConfirmationTransfer) {
             return [
                 ...sharedReplacements,
-                ExampleReplacements.transferDescription,
-                ExampleReplacements.transferBankAccount,
-                ExampleReplacements.transferBankCreditor,
+                ExampleReplacements.all.transferDescription,
+                ExampleReplacements.all.transferBankAccount,
+                ExampleReplacements.all.transferBankCreditor,
             ];
         }
 
