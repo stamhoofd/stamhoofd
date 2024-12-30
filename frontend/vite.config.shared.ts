@@ -63,6 +63,7 @@ else {
 export function buildConfig(options: { port: number; clientFiles?: string[] }): UserConfig {
     return {
         mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
+        logLevel: 'warn', // Options are 'info', 'warn', 'error', and 'silent'
         resolve: {
             alias: {
                 '@stamhoofd/components': resolve(__dirname, './shared/components'),
