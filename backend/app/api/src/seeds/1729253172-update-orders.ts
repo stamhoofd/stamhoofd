@@ -1,7 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Order } from '@stamhoofd/models';
-import { sleep } from '@stamhoofd/utility';
-import { ModelHelper } from '../helpers/ModelHelper';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
@@ -11,22 +9,13 @@ export default new Migration(async () => {
 
     console.log('Start saving orders.');
 
-    const limit = 100;
-    let count = limit;
+    const batchSize = 100;
+    let count = 0;
 
-    await ModelHelper.loop(Order, 'id', async (batch: Order[]) => {
-        console.log('Saving orders...', `(${count})`);
+    for await (const order of Order.select().limit(batchSize).all()) {
+        await order.save();
+        count += 1;
+    }
 
-        // save all orders to update the new columns
-        for (const order of batch) {
-            await order.save();
-        }
-
-        count += limit;
-    },
-    { limit });
-
-    await sleep(1000);
-
-    console.log('Finished saving orders.');
+    console.log('Finished saving ' + count + ' orders.');
 });

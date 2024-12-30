@@ -37,7 +37,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
             throw Context.auth.error();
         }
 
-        const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type);
+        const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type, true);
         let paymentModels: Payment[] = [];
 
         switch (request.params.type) {

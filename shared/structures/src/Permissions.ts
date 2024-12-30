@@ -36,6 +36,12 @@ export class Permissions extends AutoEncoder {
     })
     resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map();
 
+    static get full() {
+        return Permissions.create({
+            level: PermissionLevel.Full,
+        });
+    }
+
     hasRole(role: PermissionRole): boolean {
         return this.roles.find(r => r.id === role.id) !== undefined;
     }

@@ -88,24 +88,8 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // Check default
         if (JSON.stringify(model.json).length < 3 && model.recipientFilter.filters[0].type && EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)) {
             const type = EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type);
-
-            // Most specific template: for specific group
-            let templates = (await EmailTemplate.where({ type, organizationId: organization?.id ?? null, groupId: null }));
-
-            // Then default
-            if (templates.length == 0 && organization) {
-                templates = (await EmailTemplate.where({ type, organizationId: null, groupId: null }));
-            }
-
-            if (templates.length == 0) {
-                // No default
-            }
-            else {
-                const defaultTemplate = templates[0];
-                model.html = defaultTemplate.html;
-                model.text = defaultTemplate.text;
-                model.subject = defaultTemplate.subject;
-                model.json = defaultTemplate.json;
+            if (type) {
+                await model.setFromTemplate(type);
             }
         }
 

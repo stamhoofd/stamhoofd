@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { EmailRecipient as EmailRecipientStruct, Replacement } from '@stamhoofd/structures';
+import { EmailRecipient as EmailRecipientStruct, Recipient, Replacement } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -17,6 +17,20 @@ export class EmailRecipient extends QueryableModel {
 
     @column({ type: 'string' })
     emailId: string;
+
+    /**
+     * Helper to prevent sending too many emails to the same person.
+     * Allows for filtering on objects that didn't receive a specific email yet
+     */
+    @column({ type: 'string', nullable: true })
+    objectId: string | null = null;
+
+    /**
+     * Helper to prevent sending too many emails to the same person.
+     * Allows for filtering on objects that didn't receive a specific email yet
+     */
+    @column({ type: 'string', nullable: true })
+    emailType: string | null = null;
 
     @column({ type: 'string', nullable: true })
     firstName: string | null = null;
@@ -78,5 +92,9 @@ export class EmailRecipient extends QueryableModel {
 
     getStructure() {
         return EmailRecipientStruct.create(this);
+    }
+
+    getRecipient() {
+        return this.getStructure().getRecipient();
     }
 }

@@ -3,6 +3,7 @@ import { QueryableModel, SQL, SQLAlias, SQLMin, SQLSelectAs, SQLSum, SQLWhere, S
 import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
+import { MemberUser } from './MemberUser';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -108,7 +109,7 @@ export class CachedBalance extends QueryableModel {
         }
     }
 
-    static async balanceForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
+    static async balanceForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType, includeUserMembers = false) {
         if (objectIds.length === 0) {
             return [];
         }
@@ -119,7 +120,7 @@ export class CachedBalance extends QueryableModel {
             case ReceivableBalanceType.member:
                 return await this.balanceForMembers(organizationId, objectIds);
             case ReceivableBalanceType.user:
-                return await this.balanceForUsers(organizationId, objectIds);
+                return await this.balanceForUsers(organizationId, objectIds, includeUserMembers);
             case ReceivableBalanceType.registration:
                 return await this.balanceForRegistrations(organizationId, objectIds);
         }
@@ -390,7 +391,43 @@ export class CachedBalance extends QueryableModel {
         if (userIds.length === 0) {
             return;
         }
-        const results = await this.fetchForObjects(organizationId, userIds, 'userId', SQL.where('memberId', null));
+        const results = await this.fetchForObjects(
+            organizationId,
+            userIds,
+            'userId',
+            SQL.where('memberId', null),
+        );
+
+        // We also need to include the balance of the related members for each user
+
+        // Fetch members of these users
+        const memberUsers = await MemberUser.select().where('usersId', userIds).fetch();
+
+        const memberCachedBalances = await this.getForObjects(memberUsers.map(mu => mu.membersId), organizationId);
+
+        for (const memberCachedBalance of memberCachedBalances) {
+            const userIds = memberUsers.filter(mu => mu.membersId === memberCachedBalance.objectId).map(mu => mu.usersId);
+
+            for (const userId of userIds) {
+                // if already in results: append
+                const result = results.find(([objectId]) => objectId === userId);
+
+                if (result) {
+                    result[1].amountPaid += memberCachedBalance.amountPaid;
+                    result[1].amountOpen += memberCachedBalance.amountOpen;
+                    result[1].amountPending += memberCachedBalance.amountPending;
+                    if (memberCachedBalance.nextDueAt && (!result[1].nextDueAt || memberCachedBalance.nextDueAt > result[1].nextDueAt)) {
+                        result[1].nextDueAt = memberCachedBalance.nextDueAt;
+                    }
+                }
+                else {
+                    // Not possible
+                    throw new Error('User not found in results');
+                }
+            }
+        }
+
+        // Fetch cached balance of these members and merge the results
         await this.setForResults(organizationId, results, ReceivableBalanceType.user);
     }
 
@@ -408,11 +445,20 @@ export class CachedBalance extends QueryableModel {
         return await this.fetchBalanceItems(organizationId, memberIds, 'memberId');
     }
 
-    static async balanceForUsers(organizationId: string, userIds: string[]) {
+    static async balanceForUsers(organizationId: string, userIds: string[], includeUserMembers = false) {
         if (userIds.length === 0) {
             return [];
         }
-        return await this.fetchBalanceItems(organizationId, userIds, 'userId', SQL.where('memberId', null));
+        const base = await this.fetchBalanceItems(organizationId, userIds, 'userId', SQL.where('memberId', null));
+
+        if (!includeUserMembers) {
+            return base;
+        }
+
+        const memberUsers = await MemberUser.select().where('usersId', userIds).fetch();
+        const memberIds = memberUsers.map(mu => mu.membersId);
+        const memberCachedBalances = await this.balanceForMembers(organizationId, memberIds);
+        return base.concat(memberCachedBalances);
     }
 
     static async balanceForRegistrations(organizationId: string, registrationIds: string[]) {

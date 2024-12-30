@@ -19,6 +19,10 @@
         <Checkbox :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
             Proefperiodes
         </Checkbox>
+
+        <Checkbox :model-value="getFeatureFlag('balance-emails')" @update:model-value="setFeatureFlag('balance-emails', !!$event)">
+            Notificaties voor openstaande bedragen
+        </Checkbox>
     </SaveView>
 </template>
 

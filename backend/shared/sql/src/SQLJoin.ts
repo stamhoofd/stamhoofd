@@ -1,16 +1,16 @@
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from "./SQLExpression";
-import { SQLWhere, Whereable } from "./SQLWhere";
+import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression';
+import { SQLWhere, Whereable } from './SQLWhere';
 
 export enum SQLJoinType {
-    Left = "Left",
-    Right = "Right",
-    Inner = "Inner",
-    Outer = "Outer"
+    Left = 'Left',
+    Right = 'Right',
+    Inner = 'Inner',
+    Outer = 'Outer',
 }
 
 class EmptyClass {}
 export class SQLJoin extends Whereable(EmptyClass) implements SQLExpression {
-    type = SQLJoinType.Left
+    type = SQLJoinType.Left;
     table: SQLExpression;
 
     constructor(type: SQLJoinType, table: SQLExpression) {
@@ -28,12 +28,12 @@ export class SQLJoin extends Whereable(EmptyClass) implements SQLExpression {
         }
     }
 
-    getSQL(options?: SQLExpressionOptions | undefined): SQLQuery {
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
             this.getJoinPrefix(),
-            this.table?.getSQL(),
+            this.table?.getSQL(options),
             this._where ? 'ON' : undefined,
-            this._where?.getSQL()
-        ], ' ')
+            this._where?.getSQL(options),
+        ], ' ');
     }
 }

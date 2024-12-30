@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -9,9 +9,10 @@ import { Email as EmailClass } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { getEmailBuilder } from '../helpers/EmailBuilder';
+import { fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { Organization } from './Organization';
+import { EmailTemplate } from './EmailTemplate';
 
 export class Email extends QueryableModel {
     static table = 'emails';
@@ -31,6 +32,13 @@ export class Email extends QueryableModel {
 
     @column({ type: 'json', decoder: EmailRecipientFilter })
     recipientFilter: EmailRecipientFilter = EmailRecipientFilter.create({});
+
+    /**
+     * Helper to prevent sending too many emails to the same person.
+     * Allows for filtering on objects that didn't receive a specific email yet
+     */
+    @column({ type: 'string', nullable: true })
+    emailType: string | null = null;
 
     @column({ type: 'string', nullable: true })
     subject: string | null;
@@ -204,6 +212,28 @@ export class Email extends QueryableModel {
         return '"' + cleanedName + '" <' + address + '>';
     }
 
+    async setFromTemplate(type: EmailTemplateType) {
+        // Most specific template: for specific group
+        let templates = (await EmailTemplate.where({ type, organizationId: this.organizationId, groupId: null, webshopId: null }));
+
+        // Then default
+        if (templates.length === 0 && this.organizationId) {
+            templates = (await EmailTemplate.where({ type, organizationId: null, groupId: null, webshopId: null }));
+        }
+
+        if (templates.length === 0) {
+            // No default
+            return false;
+        }
+        const defaultTemplate = templates[0];
+        this.html = defaultTemplate.html;
+        this.text = defaultTemplate.text;
+        this.subject = defaultTemplate.subject;
+        this.json = defaultTemplate.json;
+
+        return true;
+    }
+
     async send() {
         this.throwIfNotReadyToSend();
         await this.save();
@@ -345,9 +375,7 @@ export class Email extends QueryableModel {
                     });
                     sendingPromises.push(promise);
 
-                    const virtualRecipient = Recipient.create({
-                        ...recipient,
-                    });
+                    const virtualRecipient = recipient.getRecipient();
 
                     const callback = async (error: Error | null) => {
                         if (error === null) {
@@ -391,8 +419,14 @@ export class Email extends QueryableModel {
                 await Promise.all(sendingPromises);
             }
 
-            console.log('Finished sending email', upToDate.id);
+            if (upToDate.recipientCount === 0 && upToDate.userId === null) {
+                // We only delete automated emails (email type) if they have no recipients
+                console.log('No recipients found for email ', upToDate.id, ' deleting...');
+                await upToDate.delete();
+                return;
+            }
 
+            console.log('Finished sending email', upToDate.id);
             // Mark email as sent
             upToDate.status = EmailStatus.Sent;
             await upToDate.save();
@@ -498,7 +532,7 @@ export class Email extends QueryableModel {
                     let request: LimitedFilteredRequest | null = new LimitedFilteredRequest({
                         filter: subfilter.filter,
                         sort: [{ key: 'id', order: SortItemDirection.ASC }],
-                        limit: 1000,
+                        limit: 100,
                         search: subfilter.search,
                     });
 
@@ -510,6 +544,8 @@ export class Email extends QueryableModel {
 
                         for (const item of response.results) {
                             const recipient = new EmailRecipient();
+                            recipient.emailType = upToDate.emailType;
+                            recipient.objectId = item.objectId;
                             recipient.emailId = upToDate.id;
                             recipient.email = item.email;
                             recipient.firstName = item.firstName;
@@ -522,10 +558,6 @@ export class Email extends QueryableModel {
                         request = response.next ?? null;
                     }
                 }
-
-                // todo: loop all members that match the filter in batches of 1000
-                // create a new row for every member + calculate the replacement values
-                // todo: do intermediate checks on whether the email was deleted, and stop processing if needed
 
                 upToDate.recipientsStatus = EmailRecipientsStatus.Created;
                 upToDate.recipientCount = count;
@@ -613,28 +645,28 @@ export class Email extends QueryableModel {
     }
 
     async getPreviewStructure() {
-        const recipient = await SQL.select()
-            .from(SQL.table(EmailRecipient.table))
-            .where(SQL.column('emailId'), this.id)
+        const emailRecipient = await EmailRecipient.select()
+            .where('emailId', this.id)
             .first(false);
 
         let recipientRow: EmailRecipientStruct | undefined;
 
-        if (recipient) {
-            const emailRecipient = EmailRecipient.fromRow(recipient[EmailRecipient.table]);
-            if (emailRecipient) {
-                recipientRow = emailRecipient.getStructure();
-            }
+        if (emailRecipient) {
+            recipientRow = emailRecipient.getStructure();
         }
 
         if (!recipientRow) {
             recipientRow = getExampleRecipient();
         }
 
-        recipientRow.replacements.push(Replacement.create({
-            token: 'fromAddress',
-            value: this.fromAddress ?? '',
-        }));
+        const virtualRecipient = recipientRow.getRecipient();
+
+        await fillRecipientReplacements(virtualRecipient, {
+            organization: this.organizationId ? (await Organization.getByID(this.organizationId))! : null,
+            fromAddress: this.fromAddress,
+        });
+
+        recipientRow.replacements = virtualRecipient.replacements;
 
         return EmailPreview.create({
             ...this,

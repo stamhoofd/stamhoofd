@@ -86,7 +86,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useContext, useErrors, useFeatureFlag, useOrganization, usePatchArray } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useContext, useErrors, useFeatureFlag, useOrganization, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Group } from '@stamhoofd/structures';
@@ -107,8 +107,15 @@ const props = withDefaults(
         groups: null,
         webshopId: null,
         types: () => {
+            const app = useAppContext();
+            const platform = usePlatform();
+
             return [...Object.values(EmailTemplateType)].filter((type) => {
-                const app = useAppContext();
+                if (!platform.value.config.featureFlags.includes('balance-emails') 
+                    && [EmailTemplateType.UserBalanceIncreaseNotification, EmailTemplateType.UserBalanceReminder].includes(type)) {
+                    return false;
+                }
+
                 if (app === 'admin') {
                     return EmailTemplate.allowPlatformLevel(type);
                 }

@@ -4,8 +4,8 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
-import { QueryableModel } from '@stamhoofd/sql';
-import { Document, Payment } from './';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { Document, MemberUser, Payment } from './';
 import { CachedBalance } from './CachedBalance';
 
 /**
@@ -254,7 +254,15 @@ export class BalanceItem extends QueryableModel {
             const memberIds = Formatter.uniqueArray(filteredItems.map(p => p.memberId).filter(id => id !== null));
             await CachedBalance.updateForMembers(organizationId, memberIds);
 
-            const userIds = Formatter.uniqueArray(filteredItems.filter(p => p.memberId === null && p.userId !== null).map(p => p.userId!));
+            let userIds = filteredItems.filter(p => p.userId !== null).map(p => p.userId!);
+
+            if (memberIds.length) {
+                // Now also include the userIds of the members
+                const userMemberIds = (await MemberUser.select().where('membersId', memberIds).fetch()).map(m => m.usersId);
+                userIds.push(...userMemberIds);
+            }
+            userIds = Formatter.uniqueArray(userIds);
+
             await CachedBalance.updateForUsers(organizationId, userIds);
 
             const organizationIds = Formatter.uniqueArray(filteredItems.map(p => p.payingOrganizationId).filter(id => id !== null));
@@ -327,13 +335,6 @@ export class BalanceItem extends QueryableModel {
         ${secondWhere}`;
 
         await Database.update(query, params);
-    }
-
-    /**
-     * @deprecated
-     */
-    static async updatePricePending(balanceItemIds: string[] | 'all') {
-        // deprecated
     }
 
     static async loadPayments(items: BalanceItem[]) {

@@ -230,7 +230,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="$feature('member-trials')" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceNotifications)">
+                <STListItem v-if="$feature('balance-emails')" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceNotifications)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                     </template>
@@ -400,7 +400,14 @@ defineRoutes([
         component: EditEmailTemplatesView as ComponentOptions,
         paramsToProps() {
             return {
-                types: [...Object.values(EmailTemplateType)].filter(t => EmailTemplate.allowOrganizationLevel(t)),
+                types: [...Object.values(EmailTemplateType)].filter((t) => {
+                    if (!platform.value.config.featureFlags.includes('balance-emails')
+                        && [EmailTemplateType.UserBalanceIncreaseNotification, EmailTemplateType.UserBalanceReminder].includes(t)) {
+                        return false;
+                    }
+
+                    return EmailTemplate.allowOrganizationLevel(t);
+                }),
             };
         },
     },

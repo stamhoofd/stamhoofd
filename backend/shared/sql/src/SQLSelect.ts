@@ -3,7 +3,7 @@ import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeS
 import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions';
 import { SQLJoin } from './SQLJoin';
 import { Orderable } from './SQLOrderBy';
-import { Whereable } from './SQLWhere';
+import { SQLWhereSign, Whereable } from './SQLWhere';
 
 class EmptyClass {}
 
@@ -19,7 +19,19 @@ export function parseTable(tableOrExpressiongOrNamespace: SQLExpression | string
     }
 }
 
-export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
+export type IterableSQLSelect<T extends object = SQLResultNamespacedRow> = AsyncIterableIterator<T, undefined> & {
+    isDone: boolean;
+    options: IterableSQLSelectOptions;
+    maxQueries(maxQueries: number): IterableSQLSelect<T>;
+};
+export type IterableSQLSelectOptions = {
+    /**
+     * The loop will cancel after this amount of queries - but you can continue to loop over the results when starting a new for loop.
+     */
+    maxQueries?: number;
+};
+
+export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
     _columns: SQLExpression[];
     _from: SQLExpression;
 
@@ -81,8 +93,14 @@ export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(E
             query.push('/*+ MAX_EXECUTION_TIME(' + this._max_execution_time + ') */');
         }
 
-        options = options ?? {};
+        // Create a clone since we are mutating the default namespaces
+        const parentOptions = options;
+        options = options ? { ...options } : {};
         options.defaultNamespace = (this._from as any).namespace ?? (this._from as any).table ?? undefined;
+
+        if (parentOptions?.defaultNamespace) {
+            options.parentNamespace = parentOptions.defaultNamespace;
+        }
 
         const columns = this._columns.map(c => c.getSQL(options));
         query.push(
@@ -136,7 +154,7 @@ export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(E
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
         // when debugging: log all queries
-        // console.log(query, params);
+        console.log(query, params);
         const [rows] = await Database.select(query, params, { nestTables: true });
 
         // Now map aggregated queries to the correct namespace
@@ -237,5 +255,193 @@ export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(E
         }
         console.warn('Invalid sum SQL response', rows);
         return 0;
+    }
+
+    all(options: IterableSQLSelectOptions = {}): T extends { id: string } ? IterableSQLSelect<T> : never {
+        if (this._orderBy) {
+            throw new Error('Cannot use async iterator with custom order by. Results should be ordered by ID');
+        }
+
+        if (this._offset !== null) {
+            throw new Error('Cannot use async iterator with offset');
+        }
+
+        if (!this._limit) {
+            this._limit = 100;
+        }
+
+        const limit = this._limit;
+        this.orderBy('id');
+
+        let next: this | null = this.clone();
+        const base = this;
+
+        let stack: T[] = [];
+        let stackIndex = 0;
+
+        return {
+            queryCount: 0,
+            options,
+            [Symbol.asyncIterator]() {
+                return {
+                    ...this,
+
+                    // Reset the iterator
+                    queryCount: 0,
+                };
+            },
+            get isDone() {
+                return !next && (stackIndex + 1) >= stack.length;
+            },
+            async next(): Promise<IteratorResult<T, undefined>> {
+                stackIndex++;
+
+                if (stackIndex < stack.length) {
+                    return {
+                        done: false,
+                        value: stack[stackIndex],
+                    };
+                }
+
+                if (!next) {
+                    stack = []; // Clean up memory
+                    return {
+                        done: true,
+                        value: undefined,
+                    };
+                }
+
+                if (this.options.maxQueries !== undefined && this.queryCount >= this.options.maxQueries) {
+                    // Stopping early
+                    return {
+                        done: true,
+                        value: undefined,
+                    };
+                }
+
+                stack = await next.fetch();
+                next = null;
+                this.queryCount += 1;
+
+                if (stack.length === 0) {
+                    return {
+                        done: true,
+                        value: undefined,
+                    };
+                }
+                stackIndex = 0;
+
+                if (stack.length >= limit) {
+                    next = base.clone();
+                    const lastResult = stack[stack.length - 1]!;
+                    if (!('id' in lastResult)) {
+                        throw new Error('Cannot use async iterator without ID column');
+                    }
+
+                    const lastId = lastResult.id;
+                    if (typeof lastId !== 'string') {
+                        throw new Error('Cannot use async iterator without string ID column');
+                    }
+
+                    next.andWhere('id', '>', lastId);
+                }
+
+                return {
+                    done: false,
+                    value: stack[stackIndex],
+                };
+            },
+            maxQueries(maxQueries: number) {
+                this.options.maxQueries = maxQueries;
+                return this;
+            },
+        } as IterableSQLSelect<T> as any;
+    }
+
+    allBatched(options: IterableSQLSelectOptions = {}): T extends { id: string } ? IterableSQLSelect<T[]> : never {
+        if (this._orderBy) {
+            throw new Error('Cannot use async iterator with custom order by. Results should be ordered by ID');
+        }
+
+        if (this._offset !== null) {
+            throw new Error('Cannot use async iterator with offset');
+        }
+
+        if (!this._limit) {
+            this._limit = 100;
+        }
+
+        const limit = this._limit;
+        this.orderBy('id');
+
+        let next: this | null = this.clone();
+        const base = this;
+
+        return {
+            queryCount: 0,
+            options,
+            [Symbol.asyncIterator]() {
+                return {
+                    ...this,
+
+                    // Reset the iterator
+                    queryCount: 0,
+                };
+            },
+            get isDone() {
+                return !next;
+            },
+            async next(): Promise<IteratorResult<T[], undefined>> {
+                if (!next) {
+                    return {
+                        done: true,
+                        value: undefined,
+                    };
+                }
+
+                if (this.options.maxQueries !== undefined && this.queryCount >= this.options.maxQueries) {
+                    // Stopping early
+                    return {
+                        done: true,
+                        value: undefined,
+                    };
+                }
+
+                const stack = await next.fetch();
+                next = null;
+                this.queryCount += 1;
+
+                if (stack.length === 0) {
+                    return {
+                        done: true,
+                        value: undefined,
+                    };
+                }
+
+                if (stack.length >= limit) {
+                    next = base.clone();
+                    const lastResult = stack[stack.length - 1]!;
+                    if (!('id' in lastResult)) {
+                        throw new Error('Cannot use async iterator without ID column');
+                    }
+
+                    const lastId = lastResult.id;
+                    if (typeof lastId !== 'string') {
+                        throw new Error('Cannot use async iterator without string ID column');
+                    }
+
+                    next.andWhere('id', '>', lastId);
+                }
+
+                return {
+                    done: false,
+                    value: stack,
+                };
+            },
+            maxQueries(maxQueries: number) {
+                this.options.maxQueries = maxQueries;
+                return this;
+            },
+        } as IterableSQLSelect<T[]> as any;
     }
 }

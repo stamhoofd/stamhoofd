@@ -329,23 +329,74 @@ export class SQLWildcardSelectExpression implements SQLExpression {
     }
 }
 
+export class SQLNamespaceExpression implements SQLExpression {
+    namespace: string;
+
+    constructor(namespace: string) {
+        this.namespace = namespace;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return Database.escapeId(this.namespace);
+    }
+}
+
+export const SQLDefaultNamespace: SQLExpression = {
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (!options?.defaultNamespace) {
+            throw new Error('No default namespace provided');
+        }
+        return Database.escapeId(options.defaultNamespace);
+    },
+};
+
+/**
+ * Reference the table of the parent query
+ */
+export const SQLParentNamespace: SQLExpression = {
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (!options?.parentNamespace) {
+            throw new Error('No parent namespace provided');
+        }
+        return Database.escapeId(options.parentNamespace);
+    },
+};
+
+export type SQLColumnExpressionParams = [
+    namespace: string | SQLExpression,
+    column: string,
+] | [
+    column: string,
+];
+
 export class SQLColumnExpression implements SQLExpression {
-    namespace?: string;
+    namespace: SQLExpression;
     column: string;
 
-    constructor(namespace: string, column: string);
-    constructor(column: string);
-    constructor(namespaceOrColumn: string, column?: string) {
-        if (column === undefined) {
-            this.column = namespaceOrColumn;
+    constructor(...args: SQLColumnExpressionParams) {
+        if (args.length === 1) {
+            this.namespace = SQLDefaultNamespace;
+            this.column = args[0];
             return;
         }
-        this.namespace = namespaceOrColumn;
+
+        const [namespace, column] = args;
+
+        if (typeof namespace === 'string') {
+            this.namespace = new SQLNamespaceExpression(namespace);
+        }
+        else {
+            this.namespace = namespace;
+        }
         this.column = column;
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return Database.escapeId(this.namespace ?? options?.defaultNamespace ?? '') + '.' + Database.escapeId(this.column);
+        return joinSQLQuery([
+            this.namespace.getSQL(options),
+            '.',
+            Database.escapeId(this.column),
+        ]);
     }
 }
 

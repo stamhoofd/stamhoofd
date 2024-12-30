@@ -3,6 +3,31 @@ import { SQLArray, SQLColumnExpression, SQLDynamicExpression, SQLNull, readDynam
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
+export enum SQLWhereSign {
+    Equal = '=',
+    Greater = '>',
+    GreaterEqual = '>=',
+    Less = '<',
+    LessEqual = '<=',
+    NotEqual = '!=',
+};
+
+export const SQLWhereSignMap = {
+    '=': SQLWhereSign.Equal,
+    '>': SQLWhereSign.Greater,
+    '>=': SQLWhereSign.GreaterEqual,
+    '<': SQLWhereSign.Less,
+    '<=': SQLWhereSign.LessEqual,
+    '!=': SQLWhereSign.NotEqual,
+} as const;
+
+function parseWhereSign(sign: SQLWhereSign | keyof typeof SQLWhereSignMap): SQLWhereSign {
+    if (typeof sign === 'string' && Object.hasOwnProperty.call(SQLWhereSignMap, sign)) {
+        return SQLWhereSignMap[sign];
+    }
+    return sign as SQLWhereSign;
+}
+
 export type ParseWhereArguments = [
     where: SQLWhere,
 ] | [
@@ -10,7 +35,7 @@ export type ParseWhereArguments = [
     value: SQLDynamicExpression,
 ] | [
     whereOrColumn: SQLExpression | string,
-    sign: SQLWhereSign,
+    sign: SQLWhereSign | keyof typeof SQLWhereSignMap,
     value: SQLDynamicExpression,
 ];
 
@@ -124,36 +149,27 @@ export class SQLEmptyWhere extends SQLWhere {
     }
 }
 
-export enum SQLWhereSign {
-    Equal = '=',
-    Greater = '>',
-    GreaterEqual = '>=',
-    Less = '<',
-    LessEqual = '<=',
-    NotEqual = '!=',
-}
-
 export class SQLWhereEqual extends SQLWhere {
     column: SQLExpression;
     sign = SQLWhereSign.Equal;
     value: SQLExpression;
 
-    static parseWhere(...[whereOrColumn, signOrValue, value]: ParseWhereArguments): SQLWhere {
-        if (signOrValue === undefined) {
-            return whereOrColumn as SQLWhere;
+    static parseWhere(...parsed: ParseWhereArguments): SQLWhere {
+        if (parsed[1] === undefined) {
+            return parsed[0];
         }
 
-        if (value !== undefined) {
+        if (parsed.length === 3) {
             return new SQLWhereEqual(
-                typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn,
-                signOrValue as SQLWhereSign,
-                readDynamicSQLExpression(value),
+                typeof parsed[0] === 'string' ? new SQLColumnExpression(parsed[0]) : parsed[0],
+                parseWhereSign(parsed[1]),
+                readDynamicSQLExpression(parsed[2]),
             );
         }
         return new SQLWhereEqual(
-            typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn,
+            typeof parsed[0] === 'string' ? new SQLColumnExpression(parsed[0]) : parsed[0],
             SQLWhereSign.Equal,
-            readDynamicSQLExpression(signOrValue),
+            readDynamicSQLExpression(parsed[1]),
         );
     }
 
@@ -188,12 +204,24 @@ export class SQLWhereEqual extends SQLWhere {
 
     invert(): this {
         switch (this.sign) {
-            case SQLWhereSign.Equal: this.sign = SQLWhereSign.NotEqual; break;
-            case SQLWhereSign.NotEqual: this.sign = SQLWhereSign.Equal; break;
-            case SQLWhereSign.Greater: this.sign = SQLWhereSign.LessEqual; break;
-            case SQLWhereSign.Less: this.sign = SQLWhereSign.GreaterEqual; break;
-            case SQLWhereSign.GreaterEqual: this.sign = SQLWhereSign.Less; break;
-            case SQLWhereSign.LessEqual: this.sign = SQLWhereSign.Greater; break;
+            case SQLWhereSign.Equal:
+                this.sign = SQLWhereSign.NotEqual;
+                break;
+            case SQLWhereSign.NotEqual:
+                this.sign = SQLWhereSign.Equal;
+                break;
+            case SQLWhereSign.Greater:
+                this.sign = SQLWhereSign.LessEqual;
+                break;
+            case SQLWhereSign.Less:
+                this.sign = SQLWhereSign.GreaterEqual;
+                break;
+            case SQLWhereSign.GreaterEqual:
+                this.sign = SQLWhereSign.Less;
+                break;
+            case SQLWhereSign.LessEqual:
+                this.sign = SQLWhereSign.Greater;
+                break;
         }
         return this;
     }
@@ -305,7 +333,7 @@ export class SQLWhereExists extends SQLWhere {
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
             `${this.notExists ? 'NOT EXISTS' : 'EXISTS'} (`,
-            this.subquery.getSQL({ ...options }),
+            this.subquery.getSQL(options),
             `)`,
         ]);
     }

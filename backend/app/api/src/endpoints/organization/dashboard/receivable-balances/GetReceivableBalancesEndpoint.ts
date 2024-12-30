@@ -55,6 +55,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             },
             $not: {
                 objectType: {
+                    // Filter out registration and organization types
                     $in: Context.auth.hasSomePlatformAccess() ? [ReceivableBalanceType.registration] : [ReceivableBalanceType.organization, ReceivableBalanceType.registration],
                 },
             },

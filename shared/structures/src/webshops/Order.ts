@@ -358,6 +358,7 @@ export class Order extends AutoEncoder {
         const email = customer.email.toLowerCase();
 
         return EmailRecipient.create({
+            objectId: this.id,
             firstName: customer.firstName,
             lastName: customer.lastName,
             email,

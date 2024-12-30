@@ -1,9 +1,9 @@
 import { Email, EmailAddress, EmailBuilder } from '@stamhoofd/email';
-import { EmailTemplateType, OrganizationEmail, Recipient, Replacement } from '@stamhoofd/structures';
+import { Platform as PlatformStruct, BalanceItem as BalanceItemStruct, EmailTemplateType, OrganizationEmail, ReceivableBalanceType, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models';
+import { CachedBalance, EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models';
 import { I18n } from '@stamhoofd/backend-i18n';
 
 export type EmailTemplateOptions = {
@@ -238,7 +238,7 @@ export function replaceText(text: string, replacements: Replacement[]) {
  * @param organization defines replacements and unsubsribe behaviour
  */
 export async function getEmailBuilder(organization: Organization | null, email: EmailBuilderOptions) {
-    const platform = await Platform.getSharedStruct();
+    const platform = await Platform.getSharedPrivateStruct();
     // Update recipients
     const cleaned: Recipient[] = [];
     for (const recipient of email.recipients) {
@@ -311,41 +311,15 @@ export async function getEmailBuilder(organization: Organization | null, email: 
     for (const recipient of email.recipients) {
         recipient.replacements = recipient.replacements.slice();
 
-        // Default signInUrl
-        let signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipient.email);
-
-        const recipientUser = await User.getForAuthentication(organization?.id ?? null, recipient.email);
-        if (!recipientUser) {
-            // We can create a special token
-            signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipient.email);
-        }
-
-        recipient.replacements.push(Replacement.create({
-            token: 'signInUrl',
-            value: signInUrl,
-        }));
-
-        if (fromAddress) {
-            recipient.replacements.push(Replacement.create({
-                token: 'fromAddress',
-                value: fromAddress,
-            }));
-        }
-
         if (email.defaultReplacements) {
             recipient.replacements.push(...email.defaultReplacements);
         }
 
-        recipient.replacements.push(...recipient.getDefaultReplacements());
-
-        if (organization) {
-            const extra = organization.meta.getEmailReplacements(organization);
-            recipient.replacements.push(...extra);
-        }
-
-        // Defaults
-        const extra = platform.config.getEmailReplacements();
-        recipient.replacements.push(...extra);
+        await fillRecipientReplacements(recipient, {
+            organization,
+            platform,
+            fromAddress,
+        });
     }
 
     const queue = email.recipients.slice();
@@ -388,4 +362,76 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         };
     };
     return builder;
+}
+
+export async function fillRecipientReplacements(recipient: Recipient, options: {
+    organization: Organization | null;
+    platform?: PlatformStruct;
+    fromAddress: string | null;
+}) {
+    if (!options.platform) {
+        options.platform = await Platform.getSharedPrivateStruct();
+    }
+    const { organization, platform, fromAddress } = options;
+    recipient.replacements = recipient.replacements.slice();
+
+    // Default signInUrl
+    let signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipient.email);
+
+    const recipientUser = await User.getForAuthentication(organization?.id ?? null, recipient.email, { allowWithoutAccount: true });
+    if (!recipientUser || !recipientUser.hasAccount()) {
+        // We can create a special token
+        signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipient.email);
+    }
+
+    recipient.replacements.push(Replacement.create({
+        token: 'signInUrl',
+        value: signInUrl,
+    }));
+
+    recipient.replacements.push(
+        Replacement.create({
+            token: 'loginDetails',
+            value: '',
+            html: recipientUser && recipientUser.hasAccount() ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(recipientUser.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(recipient.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`,
+        }),
+    );
+
+    // Load balance of this user
+    // todo: only if detected it is used
+    if (organization && recipientUser && !recipient.replacements.find(r => r.token === 'balanceTable')) {
+        const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [recipientUser.id], ReceivableBalanceType.user, true);
+        const balanceItems = balanceItemModels.map(i => i.getStructure());
+
+        // Get members
+        recipient.replacements.push(
+            Replacement.create({
+                token: 'outstandingBalance',
+                value: Formatter.price(balanceItems.reduce((sum, i) => sum + i.priceOpen, 0)),
+            }),
+            Replacement.create({
+                token: 'balanceTable',
+                value: '',
+                html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
+            }),
+        );
+    }
+
+    if (fromAddress) {
+        recipient.replacements.push(Replacement.create({
+            token: 'fromAddress',
+            value: fromAddress,
+        }));
+    }
+
+    recipient.replacements.push(...recipient.getDefaultReplacements());
+
+    if (organization) {
+        const extra = organization.meta.getEmailReplacements(organization);
+        recipient.replacements.push(...extra);
+    }
+
+    // Defaults
+    const extra = platform.config.getEmailReplacements();
+    recipient.replacements.push(...extra);
 }

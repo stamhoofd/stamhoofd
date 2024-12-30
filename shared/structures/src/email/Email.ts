@@ -11,6 +11,7 @@ import { EmailTemplate, EmailTemplateType } from './EmailTemplate.js';
 import { Platform } from '../Platform.js';
 import { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
+import { Version } from '../Version.js';
 
 export enum EmailRecipientFilterType {
     Members = 'Members',
@@ -133,6 +134,12 @@ export class EmailRecipient extends AutoEncoder {
     @field({ decoder: StringDecoder })
     emailId: string = '';
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    objectId: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    emailType: string | null = null;
+
     @field({ decoder: StringDecoder, nullable: true })
     firstName: string | null = null;
 
@@ -177,6 +184,12 @@ export class EmailRecipient extends AutoEncoder {
             ...(organization ? organization.meta.getEmailReplacements(organization) : []),
             ...platform.config.getEmailReplacements(),
         ];
+    }
+
+    getRecipient() {
+        return Recipient.create({
+            ...this,
+        });
     }
 }
 

@@ -12,13 +12,9 @@ export async function resumeEmails() {
     const emails = Email.fromRows(result, Email.table);
 
     for (const email of emails) {
-        if (!email.userId) {
-            console.warn('Cannot retry sending email because userId is not set - which is required for setting the scope', email.id);
-            continue;
-        }
         console.log('Resuming email that has sending status on boot', email.id);
 
-        const user = await User.getByID(email.userId);
+        const user = email.userId ? (await User.getByID(email.userId)) : await User.getSystem();
         if (!user) {
             console.warn('Cannot retry sending email because user not found', email.id);
             continue;

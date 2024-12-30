@@ -53,3 +53,4 @@ export * from './EmailRecipient';
 export * from './Event';
 export * from './CachedBalance';
 export * from './AuditLog';
+export * from './MemberUser';

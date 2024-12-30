@@ -52,7 +52,11 @@ const filterBuilders = cachedOutstandingBalanceUIFilterBuilders;
 
 function getRequiredFilter(): StamhoofdFilter | null {
     if (!props.objectType) {
-        return null;
+        return {
+            objectType: {
+                $in: [ReceivableBalanceType.member, ReceivableBalanceType.organization],
+            },
+        };
     }
 
     return {

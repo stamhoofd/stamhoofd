@@ -1,7 +1,7 @@
-import { BalanceItem, CachedBalance, Email } from '@stamhoofd/models';
-import { BalanceItem as BalanceItemStruct, receivableBalanceObjectContactInMemoryFilterCompilers, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, Replacement, StamhoofdFilter } from '@stamhoofd/structures';
-import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint';
+import { CachedBalance, Email } from '@stamhoofd/models';
+import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, Replacement, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint';
 
 async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) {
     const result = await GetReceivableBalancesEndpoint.buildData(query);
@@ -14,13 +14,14 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
 
     const recipients: EmailRecipient[] = [];
     for (const balance of result.results) {
-        const balanceItemModels = await CachedBalance.balanceForObjects(balance.organizationId, [balance.object.id], balance.objectType);
+        const balanceItemModels = await CachedBalance.balanceForObjects(balance.organizationId, [balance.object.id], balance.objectType, true);
         const balanceItems = balanceItemModels.map(i => i.getStructure());
 
         const filteredContacts = balance.object.contacts.filter(c => compiledFilter(c));
         for (const contact of filteredContacts) {
             for (const email of contact.emails) {
                 const recipient = EmailRecipient.create({
+                    objectId: balance.id, // Note: not set member, user or organization id here - should be the queryable balance id
                     firstName: contact.firstName,
                     lastName: contact.lastName,
                     email,

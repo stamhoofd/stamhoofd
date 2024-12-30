@@ -1,7 +1,7 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete';
 import { isSQLExpression, SQLExpression } from './SQLExpression';
-import { SQLAssignment, SQLColumnExpression, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
+import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
 import { SQLJoin, SQLJoinType } from './SQLJoin';
 import { SQLJsonExtract, SQLJsonLength, SQLJsonUnquote } from './SQLJsonExpressions';
 import { parseTable, SQLSelect } from './SQLSelect';
@@ -14,13 +14,8 @@ class StaticSQL {
         return new SQLWildcardSelectExpression(namespace);
     }
 
-    column(namespace: string, column: string): SQLColumnExpression;
-    column(column: string): SQLColumnExpression;
-    column(namespaceOrColumn: string, column?: string): SQLColumnExpression {
-        if (column === undefined) {
-            return new SQLColumnExpression(namespaceOrColumn);
-        }
-        return new SQLColumnExpression(namespaceOrColumn, column);
+    column(...args: SQLColumnExpressionParams): SQLColumnExpression {
+        return new SQLColumnExpression(...args);
     }
 
     jsonValue(column: SQLExpression, path: string): SQLJsonExtract {

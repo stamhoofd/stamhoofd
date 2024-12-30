@@ -6,6 +6,7 @@ import argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Organization } from './';
+import { QueueHandler } from '@stamhoofd/queues';
 
 export class User extends QueryableModel {
     static table = 'users';
@@ -479,5 +480,31 @@ export class User extends QueryableModel {
                 name: this.name,
             },
         ];
+    }
+
+    /**
+     * Get internal system user that can be used on places that require a user object but the system is the actor
+     */
+    static async getSystem(): Promise<User> {
+        return QueueHandler.schedule('User.getSystem', async () => {
+            // Build a new one
+            let model = await this.getByID('1');
+            if (!model) {
+                // Create a new platform
+                model = new User();
+                model.id = '1';
+                model.firstName = 'System';
+                model.email = 'webmaster@stamhoofd.be';
+                model.verified = true;
+                model.permissions = UserPermissions.create({
+                    globalPermissions: Permissions.full,
+                });
+                model.organizationId = null;
+
+                await model.save();
+            }
+
+            return model;
+        });
     }
 }

@@ -1,7 +1,6 @@
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, OrganizationTag, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
-import { ModelHelper } from './ModelHelper';
 import { AuditLogService } from '../services/AuditLogService';
 
 export class TagHelper extends SharedTagHelper {
@@ -14,17 +13,15 @@ export class TagHelper extends SharedTagHelper {
                 let platform = await Platform.getShared();
 
                 const tagCounts = new Map<string, number>();
-                await this.loopOrganizations(async (organizations) => {
-                    for (const organization of organizations) {
-                        organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platform.config.tags);
 
-                        for (const tag of organization.meta.tags) {
-                            tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-                        }
+                for await (const organization of Organization.select().all()) {
+                    organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, platform.config.tags);
+
+                    for (const tag of organization.meta.tags) {
+                        tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
                     }
-
-                    await Promise.all(organizations.map(organization => organization.save()));
-                });
+                    await organization.save();
+                }
 
                 // Reload platform to avoid race conditions
                 platform = await Platform.getShared();
@@ -37,10 +34,6 @@ export class TagHelper extends SharedTagHelper {
                 await platform.save();
             });
         });
-    }
-
-    private static async loopOrganizations(onBatchReceived: (batch: Organization[]) => Promise<void>) {
-        await ModelHelper.loop(Organization, 'id', onBatchReceived, { limit: 10 });
     }
 
     /**

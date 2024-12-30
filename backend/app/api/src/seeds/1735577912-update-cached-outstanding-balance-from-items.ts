@@ -10,26 +10,13 @@ export default new Migration(async () => {
 
     process.stdout.write('\n');
     let c = 0;
-    let id: string = '';
 
     await logger.setContext({ tags: ['silent-seed', 'seed'] }, async () => {
-        while (true) {
-            const items = await BalanceItem.where({
-                id: {
-                    value: id,
-                    sign: '>',
-                },
-            }, { limit: 1000, sort: ['id'] });
-
+        for await (const items of BalanceItem.select().limit(1000).allBatched()) {
             await BalanceItem.updateOutstanding(items);
 
             c += items.length;
             process.stdout.write('.');
-
-            if (items.length < 1000) {
-                break;
-            }
-            id = items[items.length - 1].id;
         }
     });
 

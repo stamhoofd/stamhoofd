@@ -1,9 +1,10 @@
-import { Member, MemberResponsibilityRecord, MemberWithRegistrations, User } from '@stamhoofd/models';
+import { CachedBalance, Member, MemberResponsibilityRecord, MemberWithRegistrations, User } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuditLogSource, MemberDetails, Permissions, UserPermissions } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import basex from 'base-x';
 import { AuditLogService } from '../services/AuditLogService';
+import { Formatter } from '@stamhoofd/utility';
 
 const ALPHABET = '123456789ABCDEFGHJKMNPQRSTUVWXYZ'; // Note: we removed 0, O, I and l to make it easier for humans
 const customBase = basex(ALPHABET);
@@ -185,6 +186,9 @@ export class MemberUserSyncerStatic {
         console.log('Removing access for ' + user.id + ' to member ' + member.id);
         await Member.users.reverse('members').unlink(user, member);
 
+        // Update balance of this user, as it could have changed
+        await this.updateUserBalance(user.id, member.id);
+
         if (user.memberId === member.id) {
             user.memberId = null;
         }
@@ -305,6 +309,23 @@ export class MemberUserSyncerStatic {
         if (!member.users.find(u => u.id === user.id)) {
             await Member.users.reverse('members').link(user, [member]);
             member.users.push(user);
+
+            // Update balance of this user, as it could have changed
+            await this.updateUserBalance(user.id, member.id);
+        }
+    }
+
+    /**
+     * Update the balance after making a change in linked member/users
+     */
+    async updateUserBalance(userId: string, memberId: string) {
+        // Update balance of this user, as it could have changed
+        const memberBalances = await CachedBalance.getForObjects([memberId]);
+        if (memberBalances.length > 0) {
+            const organizationIds = Formatter.uniqueArray(memberBalances.map(b => b.organizationId));
+            for (const organizationId of organizationIds) {
+                await CachedBalance.updateForUsers(organizationId, [userId]);
+            }
         }
     }
 }

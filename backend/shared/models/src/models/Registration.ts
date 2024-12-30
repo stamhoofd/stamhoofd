@@ -181,14 +181,6 @@ export class Registration extends QueryableModel {
             userId: user.id,
             replacements: [
                 Replacement.create({
-                    token: 'firstName',
-                    value: member.details.firstName,
-                }),
-                Replacement.create({
-                    token: 'lastName',
-                    value: member.details.lastName,
-                }),
-                Replacement.create({
                     token: 'firstNameMember',
                     value: member.details.firstName,
                 }),
@@ -197,25 +189,12 @@ export class Registration extends QueryableModel {
                     value: member.details.lastName,
                 }),
                 Replacement.create({
-                    token: 'email',
-                    value: user.email,
-                }),
-                Replacement.create({
                     token: 'registerUrl',
                     value: 'https://' + organization.getHost(),
                 }),
                 Replacement.create({
-                    token: 'organizationName',
-                    value: organization.name,
-                }),
-                Replacement.create({
                     token: 'groupName',
                     value: group.settings.name,
-                }),
-                Replacement.create({
-                    token: 'loginDetails',
-                    value: '',
-                    html: user.hasAccount() ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(user.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(user.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`,
                 }),
             ],
         }));
@@ -310,11 +289,6 @@ export class Registration extends QueryableModel {
                     Replacement.create({
                         token: 'organizationName',
                         value: organization.name,
-                    }),
-                    Replacement.create({
-                        token: 'loginDetails',
-                        value: '',
-                        html: user.hasAccount() ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(user.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(user.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`,
                     }),
                 ],
             }),

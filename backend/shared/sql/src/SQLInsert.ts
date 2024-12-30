@@ -47,8 +47,14 @@ export class SQLInsert implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        options = options ?? {};
+        // Create a clone since we are mutating the default namespaces
+        const parentOptions = options;
+        options = options ? { ...options } : {};
         options.defaultNamespace = (this._into as any).namespace ?? (this._into).table ?? undefined;
+
+        if (parentOptions?.defaultNamespace) {
+            options.parentNamespace = parentOptions.defaultNamespace;
+        }
 
         const query: SQLQuery[] = [
             'INSERT INTO',

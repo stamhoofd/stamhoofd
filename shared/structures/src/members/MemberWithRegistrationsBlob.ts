@@ -80,6 +80,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         if (this.details.email && (subtypes === null || subtypes.includes('member'))) {
             recipients.push(
                 EmailRecipient.create({
+                    objectId: this.id,
                     firstName: this.details.firstName,
                     lastName: this.details.lastName,
                     email: this.details.email,
@@ -96,6 +97,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                 if (parent.email) {
                     recipients.push(
                         EmailRecipient.create({
+                            objectId: this.id,
                             firstName: parent.firstName,
                             lastName: parent.lastName,
                             email: parent.email,
@@ -113,6 +115,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             for (const unverifiedEmail of this.details.unverifiedEmails) {
                 recipients.push(
                     EmailRecipient.create({
+                        objectId: this.id,
                         email: unverifiedEmail,
                         replacements: [
                             Replacement.create({
