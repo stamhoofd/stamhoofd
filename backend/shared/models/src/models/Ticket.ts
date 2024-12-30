@@ -1,4 +1,5 @@
-import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { CartReservedSeat } from '@stamhoofd/structures';
 import basex from 'base-x';
 import crypto from 'crypto';
@@ -27,7 +28,7 @@ async function randomBytes(size: number): Promise<Buffer> {
  * This avoids the select in the database, saving some bytes in network communication
  * (especially needed when clients requests all the changed tickets)
  */
-export class Ticket extends Model {
+export class Ticket extends QueryableModel {
     static table = 'webshop_tickets';
 
     // Columns

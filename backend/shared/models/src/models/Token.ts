@@ -1,4 +1,5 @@
-import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { ApiUser } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
@@ -44,7 +45,7 @@ export const apiUserRateLimiter = new RateLimiter({
     ],
 });
 
-export class Token extends Model {
+export class Token extends QueryableModel {
     static table = 'tokens';
     static MAX_DEVICES = 15;
 

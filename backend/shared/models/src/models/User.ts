@@ -1,12 +1,13 @@
-import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
+import { QueryableModel } from '@stamhoofd/sql';
 import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Organization } from './';
 
-export class User extends Model {
+export class User extends QueryableModel {
     static table = 'users';
 
     // Columns
@@ -140,7 +141,7 @@ export class User extends Model {
         }
 
         return (
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
             await User.where(query)
         ).filter(a => !a.isApiUser);
     }

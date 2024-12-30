@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { Requirements, StripeBusinessProfile, StripeCompany, StripeMetaAccountDashboardSettings, StripeMetaAccountSettings, StripeMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
  */
-export class StripeAccount extends Model {
+export class StripeAccount extends QueryableModel {
     static table = 'stripe_accounts';
 
     @column({

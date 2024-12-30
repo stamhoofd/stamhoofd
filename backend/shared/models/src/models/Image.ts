@@ -1,12 +1,13 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { QueryableModel } from '@stamhoofd/sql';
 import { File, Resolution, ResolutionRequest } from '@stamhoofd/structures';
 import AWS from 'aws-sdk';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 
-export class Image extends Model {
+export class Image extends QueryableModel {
     static table = 'images';
 
     @column({ primary: true, type: 'string', beforeSave(value) {

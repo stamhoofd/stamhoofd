@@ -1,5 +1,6 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { AnyDecoder } from '@simonbackx/simple-encoding';
+import { QueryableModel } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 
@@ -28,7 +29,7 @@ enum OneTimeTokenType {
 /**
  * Token that saves some information and can execute an action if you have access to the token (e.g. in an email)
  */
-export class OneTimeToken extends Model {
+export class OneTimeToken extends QueryableModel {
     static table = 'one_time_tokens';
 
     // Columns

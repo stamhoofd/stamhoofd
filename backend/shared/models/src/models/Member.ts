@@ -1,6 +1,6 @@
-import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { SQL } from '@stamhoofd/sql';
-import { MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, TinyMember } from '@stamhoofd/structures';
+import { column, Database, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { MemberDetails, RegistrationWithMember as RegistrationWithMemberStruct, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,7 +13,7 @@ export type MemberWithRegistrations = Member & {
 // Defined here to prevent cycles
 export type RegistrationWithMember = Registration & { member: Member };
 
-export class Member extends Model {
+export class Member extends QueryableModel {
     static table = 'members';
 
     // #region Columns

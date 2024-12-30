@@ -1,7 +1,8 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { v4 as uuidv4 } from 'uuid';
 
-export class BuckarooPayment extends Model {
+export class BuckarooPayment extends QueryableModel {
     static table = 'buckaroo_payments';
 
     @column({

@@ -1,12 +1,13 @@
-import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { QueryableModel } from '@stamhoofd/sql';
 import { Country } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { City } from './City';
 
-export class PostalCode extends Model {
+export class PostalCode extends QueryableModel {
     static table = 'postal_codes';
 
     @column({

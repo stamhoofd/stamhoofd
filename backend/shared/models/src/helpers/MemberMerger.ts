@@ -1,5 +1,4 @@
-import { Model } from '@simonbackx/simple-database';
-import { SQL } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
 import {
     Address,
     BooleanStatus,
@@ -191,7 +190,7 @@ async function mergeMemberPlatformMemberships(base: Member, other: Member) {
     await mergeModels(base, other, MemberPlatformMembership);
 }
 
-class ModelWithMemberId extends Model {
+class ModelWithMemberId extends QueryableModel {
     memberId: string | null;
 }
 

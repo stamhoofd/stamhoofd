@@ -1,8 +1,9 @@
-import { column, Database, Model } from '@simonbackx/simple-database';
+import { column, Database } from '@simonbackx/simple-database';
 import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email, EmailInterfaceRecipient } from '@stamhoofd/email';
+import { QueryableModel } from '@stamhoofd/sql';
 import { Address, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
@@ -15,7 +16,7 @@ import { getEmailBuilderForTemplate } from '../helpers/EmailBuilder';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { OrganizationRegistrationPeriod, StripeAccount } from './';
 
-export class Organization extends Model {
+export class Organization extends QueryableModel {
     static table = 'organizations';
 
     @column({

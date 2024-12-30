@@ -1,14 +1,15 @@
-import { column, Model } from '@simonbackx/simple-database';
-import { Document as DocumentStruct, DocumentData, DocumentStatus, Platform, Version } from '@stamhoofd/structures';
+import { column } from '@simonbackx/simple-database';
+import { DocumentData, DocumentStatus, Document as DocumentStruct, Platform, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import { QueryableModel } from '@stamhoofd/sql';
 import { render } from '../helpers/Handlebars';
 import { RegistrationWithMember } from './Member';
 import { Organization } from './Organization';
 import { Registration } from './Registration';
 
-export class Document extends Model {
+export class Document extends QueryableModel {
     static table = 'documents';
 
     @column({ primary: true, type: 'string', beforeSave(value) {

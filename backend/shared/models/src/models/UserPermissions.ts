@@ -1,10 +1,11 @@
-import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Organization, User } from './';
 
-export class UserPermissions extends Model {
+export class UserPermissions extends QueryableModel {
     static table = 'user_permissions';
 
     // Columns

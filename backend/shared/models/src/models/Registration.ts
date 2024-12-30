@@ -1,13 +1,14 @@
-import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { QueryableModel } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { Group, Organization, User } from './';
 
-export class Registration extends Model {
+export class Registration extends QueryableModel {
     static table = 'registrations';
 
     @column({

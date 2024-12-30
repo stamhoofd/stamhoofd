@@ -1,4 +1,5 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 
@@ -17,7 +18,7 @@ async function randomBytes(size: number): Promise<Buffer> {
     });
 }
 
-export class RegisterCode extends Model {
+export class RegisterCode extends QueryableModel {
     static table = 'register_codes';
 
     @column({ type: 'string', primary: true })

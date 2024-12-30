@@ -1,6 +1,7 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { PartialWithoutMethods, PlainObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { QueryableModel } from '@stamhoofd/sql';
 import { MollieOnboarding, MollieProfile, MollieStatus } from '@stamhoofd/structures';
 import { IncomingMessage } from 'http';
 import https from 'https';
@@ -11,7 +12,7 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export class MollieToken extends Model {
+export class MollieToken extends QueryableModel {
     static table = 'mollie_tokens';
 
     @column({ primary: true, type: 'string' })

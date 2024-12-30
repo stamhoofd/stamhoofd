@@ -1,9 +1,10 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { QueryableModel } from '@stamhoofd/sql';
 import { Discount, DiscountCode } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-export class WebshopDiscountCode extends Model {
+export class WebshopDiscountCode extends QueryableModel {
     static table = 'webshop_discount_codes';
 
     // Columns

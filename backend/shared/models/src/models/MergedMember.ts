@@ -1,8 +1,9 @@
-import { Model, column } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { MemberDetails } from '@stamhoofd/structures';
 import { Member } from './';
 
-export class MergedMember extends Model {
+export class MergedMember extends QueryableModel {
     static override table = 'merged_members';
 
     // #region Member columns

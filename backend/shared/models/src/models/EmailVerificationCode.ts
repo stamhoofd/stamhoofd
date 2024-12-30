@@ -1,6 +1,7 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
+import { QueryableModel } from '@stamhoofd/sql';
 import { EmailTemplateType, Recipient, Replacement } from '@stamhoofd/structures';
 import basex from 'base-x';
 import crypto from 'crypto';
@@ -38,7 +39,7 @@ async function randomInt(max: number): Promise<number> {
 /**
  * Holds the verificationCodes for a given email (not a user, since a user can switch email addresses and might avoid verification that way)
  */
-export class EmailVerificationCode extends Model {
+export class EmailVerificationCode extends QueryableModel {
     static table = 'email_verification_codes';
 
     @column({

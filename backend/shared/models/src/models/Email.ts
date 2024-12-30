@@ -1,5 +1,5 @@
-import { column, Model } from '@simonbackx/simple-database';
-import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { column } from '@simonbackx/simple-database';
+import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -7,13 +7,13 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email as EmailClass } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { Organization } from './Organization';
 
-export class Email extends Model {
+export class Email extends QueryableModel {
     static table = 'emails';
 
     @column({

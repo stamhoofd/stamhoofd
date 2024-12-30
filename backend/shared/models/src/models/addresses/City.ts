@@ -1,10 +1,11 @@
-import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation } from '@simonbackx/simple-database';
 import { Country } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
+import { QueryableModel } from '@stamhoofd/sql';
 import { Province } from './Province';
 
-export class City extends Model {
+export class City extends QueryableModel {
     static table = 'cities';
 
     @column({

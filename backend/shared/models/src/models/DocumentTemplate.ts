@@ -1,20 +1,21 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, Parent, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import { QueryableModel } from '@stamhoofd/sql';
 import { render } from '../helpers/Handlebars';
 import { BalanceItem } from './BalanceItem';
 import { Document } from './Document';
 import { Group } from './Group';
 import { Member, RegistrationWithMember } from './Member';
 import { Organization } from './Organization';
-import { User } from './User';
 import { Registration } from './Registration';
+import { User } from './User';
 
-export class DocumentTemplate extends Model {
+export class DocumentTemplate extends QueryableModel {
     static table = 'document_templates';
 
     @column({ primary: true, type: 'string', beforeSave(value) {

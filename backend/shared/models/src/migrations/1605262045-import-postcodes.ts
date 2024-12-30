@@ -1,13 +1,12 @@
-import { Migration } from '@simonbackx/simple-database';
-import { column, Model } from '@simonbackx/simple-database';
-import { StringCompare } from '@stamhoofd/utility';
-import { v4 as uuidv4 } from 'uuid';
+import { column, Migration } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { Country } from '@stamhoofd/structures';
+import { StringCompare } from '@stamhoofd/utility';
 import { City } from '../models/addresses/City';
 import { PostalCode } from '../models/addresses/PostalCode';
 import { Province } from '../models/addresses/Province';
 
-export class Gemeente extends Model {
+export class Gemeente extends QueryableModel {
     static table = 'gemeenten';
 
     @column({

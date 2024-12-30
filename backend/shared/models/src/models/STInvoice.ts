@@ -1,10 +1,11 @@
-import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Organization, Payment } from './';
 
-export class STInvoice extends Model {
+export class STInvoice extends QueryableModel {
     static table = 'stamhoofd_invoices';
 
     private static numberCache: number | null = null;

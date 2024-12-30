@@ -1,4 +1,5 @@
-import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,7 +16,7 @@ import { Organization } from './';
  *
  * So please make sure you don't edit existing items, unless you change the id
  */
-export class STPendingInvoice extends Model {
+export class STPendingInvoice extends QueryableModel {
     static table = 'stamhoofd_pending_invoices';
 
     // Columns

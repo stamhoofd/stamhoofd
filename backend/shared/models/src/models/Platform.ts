@@ -1,10 +1,11 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Platform as PlatformStruct, PlatformConfig, PlatformPrivateConfig } from '@stamhoofd/structures';
+import { QueryableModel } from '@stamhoofd/sql';
+import { PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { RegistrationPeriod } from './RegistrationPeriod';
 
-export class Platform extends Model {
+export class Platform extends QueryableModel {
     static table = 'platform';
 
     @column({

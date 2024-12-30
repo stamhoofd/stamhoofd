@@ -1,5 +1,6 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { QueryableModel } from '@stamhoofd/sql';
 import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,7 +9,7 @@ import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { GroupBuilder } from '../helpers/GroupBuilder';
 import { Organization } from './';
 
-export class STPackage extends Model {
+export class STPackage extends QueryableModel {
     static table = 'stamhoofd_packages';
 
     // Columns

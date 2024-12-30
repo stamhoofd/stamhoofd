@@ -1,5 +1,6 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { QueryableModel } from '@stamhoofd/sql';
 import { PayconiqAccount, PaymentStatus, Version } from '@stamhoofd/structures';
 import { IncomingMessage } from 'http';
 import https from 'https';
@@ -7,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Organization, Payment } from './';
 
-export class PayconiqPayment extends Model {
+export class PayconiqPayment extends QueryableModel {
     static table = 'payconiq_payments';
 
     @column({

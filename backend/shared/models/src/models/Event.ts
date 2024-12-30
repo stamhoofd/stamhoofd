@@ -1,9 +1,10 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
+import { QueryableModel } from '@stamhoofd/sql';
 import { EventMeta, Event as EventStruct, GroupType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group';
 
-export class Event extends Model {
+export class Event extends QueryableModel {
     static table = 'events';
 
     @column({ primary: true, type: 'string', beforeSave(value) {

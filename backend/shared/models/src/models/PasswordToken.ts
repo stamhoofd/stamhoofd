@@ -1,5 +1,6 @@
-import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { I18n } from '@stamhoofd/backend-i18n';
+import { QueryableModel } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 
@@ -21,7 +22,7 @@ async function randomBytes(size: number): Promise<Buffer> {
     });
 }
 
-export class PasswordToken extends Model {
+export class PasswordToken extends QueryableModel {
     static table = 'password_tokens';
 
     // Columns

@@ -1,6 +1,7 @@
-import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
+import { QueryableModel } from '@stamhoofd/sql';
 import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,7 +10,7 @@ import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { WebshopCounter } from '../helpers/WebshopCounter';
 import { BalanceItem, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
 
-export class Order extends Model {
+export class Order extends QueryableModel {
     static table = 'webshop_orders';
 
     // Columns
