@@ -22,7 +22,7 @@
 
         <div class="split-inputs">
             <STInputBox :title="$t('7453643b-fdb2-4aa1-9964-ddd71762c983')" error-fields="price" :error-box="errors.errorBox">
-                <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" :min="null"/>
+                <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" :min="null" />
             </STInputBox>
             <STInputBox :title="$t('a0f52fae-a4e6-4c3c-a6af-83218dd399b2')" error-fields="amount" :error-box="errors.errorBox">
                 <NumberInput v-model="amount" :title="$t('a0f52fae-a4e6-4c3c-a6af-83218dd399b2')" :validator="errors.validator" :min="1" />

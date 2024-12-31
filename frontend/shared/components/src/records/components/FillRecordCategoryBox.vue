@@ -10,13 +10,13 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <RecordAnswerInput v-for="record of filteredRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
+        <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
             <hr>
             <h2>{{ childCategory.name }}</h2>
             <p v-if="childCategory.description" class="style-description pre-wrap" v-text="childCategory.description" />
 
-            <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
+            <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         </div>
 
         <p v-if="!markReviewed && lastReviewed" class="style-description-small">
@@ -36,8 +36,8 @@
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
 import { PatchMap } from '@simonbackx/simple-encoding';
-import { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
-import { computed, nextTick } from 'vue';
+import { ObjectWithRecords, PatchAnswers, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import { useAppContext } from '../../context/appContext';
 import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
@@ -65,7 +65,13 @@ const props = withDefaults(
 );
 const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
+const isAdmin = app === 'dashboard' || app === 'admin';
 const markReviewed = props.forceMarkReviewed ?? (app !== 'dashboard' && app !== 'admin');
+const filterOptions = isAdmin
+    ? undefined
+    : {
+            level: PermissionLevel.Write,
+        };
 
 useValidation(props.validator, () => {
     if (markReviewed) {
@@ -91,12 +97,12 @@ const now = new Date();
 
 const canMarkReviewed = computed(() => !lastReviewed.value || lastReviewed.value < now || isLastReviewIncomplete.value);
 
-const filteredRecords = computed(() => {
-    return props.category.filterRecords(props.value);
+const filteredWriteableRecords = computed(() => {
+    return props.category.filterRecords(props.value, filterOptions);
 });
 
-const deepFilteredRecords = computed(() => {
-    return props.category.getAllFilteredRecords(props.value);
+const deepFilteredWriteableRecords = computed(() => {
+    return props.category.getAllFilteredRecords(props.value, filterOptions);
 });
 
 const isOptional = computed(() => {
@@ -110,7 +116,7 @@ const childCategories = computed(() => {
 function calculateLastReviewed() {
     let last: Date | null = null;
 
-    for (const record of deepFilteredRecords.value) {
+    for (const record of deepFilteredWriteableRecords.value) {
         const answer = answers.value.get(record.id);
         if (answer && answer.reviewedAt) {
             // Mark reviewed
@@ -127,7 +133,7 @@ function calculateLastReviewIncomplete(date: Date | null) {
         return false;
     }
 
-    for (const record of deepFilteredRecords.value) {
+    for (const record of deepFilteredWriteableRecords.value) {
         const answer = answers.value.get(record.id);
         if (!answer || !answer.reviewedAt || answer.reviewedAt < date) {
             return true;
@@ -139,7 +145,7 @@ function calculateLastReviewIncomplete(date: Date | null) {
 function doMarkReviewed() {
     const patch = new PatchMap() as PatchAnswers;
 
-    for (const record of deepFilteredRecords.value) {
+    for (const record of deepFilteredWriteableRecords.value) {
         const answer = answers.value.get(record.id);
         if (!answer) {
             continue;
