@@ -42,6 +42,7 @@ export class UpdateStatus {
     progress: number | null = null
 
     status: 'checking' | 'downloading' | 'installing' = 'checking'
+    shouldBeVisible = false;
 
     options: UpdateOptions
 
@@ -137,6 +138,7 @@ export class UpdateStatus {
     }
 
     show() {
+        this.shouldBeVisible = true;
         ModalStackEventBus.sendEvent("present", {
             components: [
                 new ComponentWithProperties(CheckUpdateView, {
@@ -149,6 +151,13 @@ export class UpdateStatus {
     }
 
     hide() {
+        if (!this.doHide) {
+            if (this.options.visibleCheck) {
+                console.error("No doHide function set")
+            }
+        }
+
+        this.shouldBeVisible = false; // If the CheckUpdateView is mounted after this, it will automatically hide
         this.doHide?.()
         this.doHide = null
     }

@@ -51,6 +51,18 @@ export default class App extends Vue {
                     }
                 }
 
+                // First check updates, and only after that, check for global routes
+                // reason: otherwise the checkUpdates will dismiss the modal stack, and that can hide the reset password view instead of the update view
+                try {
+                    await AppManager.shared.checkUpdates({
+                        visibleCheck: 'spinner',
+                        visibleDownload: true,
+                        installAutomatically: true
+                    })
+                } catch (e) {
+                    console.error(e)
+                }
+                // Check routes
                 this.checkGlobalRoutes()
 
                 return new ComponentWithProperties(AuthenticatedView, {
@@ -87,6 +99,7 @@ export default class App extends Vue {
     }
 
     checkGlobalRoutes() {
+        console.log("Check global routes")
         // Always set initial route
         UrlHelper.setUrl("/")
 
@@ -95,6 +108,7 @@ export default class App extends Vue {
         const queryString = UrlHelper.shared.getSearchParams()
 
         if (parts.length == 2 && parts[0] == 'reset-password') {
+            console.log("Reset password")
             UrlHelper.shared.clear()
 
             // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
@@ -105,6 +119,7 @@ export default class App extends Vue {
             (this.$refs.modalStack as any).present({
                 url: UrlHelper.transformUrl(currentPath),
                 adjustHistory: false,
+                animated: false,
                 components: [
                     new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false)
                 ]
@@ -152,7 +167,7 @@ export default class App extends Vue {
         }
     }
 
-    mounted() {
+     mounted() {
         // Update organization when opening an old tab again
         SessionManager.listenForOrganizationUpdates()
 
@@ -179,12 +194,6 @@ export default class App extends Vue {
                 ]
             })
         })
-
-        AppManager.shared.checkUpdates({
-            visibleCheck: 'spinner',
-            visibleDownload: true,
-            installAutomatically: true
-        }).catch(console.error)
     }
 
     async unsubscribe(id: string, token: string, type: 'all' | 'marketing') {
