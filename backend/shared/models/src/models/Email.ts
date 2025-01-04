@@ -555,7 +555,6 @@ export class Email extends QueryableModel {
                     });
 
                     while (request) {
-                        console.log('Loading email page', subfilter.type, request);
                         const response = await loader.fetch(request, subfilter.subfilter);
 
                         count += response.results.length;
@@ -628,7 +627,6 @@ export class Email extends QueryableModel {
                     });
 
                     while (request) {
-                        console.log('Loading email page', subfilter.type, request);
                         const response = await loader.fetch(request, subfilter.subfilter);
 
                         // Note: it is possible that a result in the database doesn't return a recipient (in memory filtering)
