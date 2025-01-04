@@ -4,7 +4,7 @@
             {{ $t('Notificaties voor openstaande bedragen') }}
         </h1>
 
-        <p>Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na één week niet omlaag ging, ontvangen ze ook nog 4 keer een herinneringsemail. Daarna moet je het zelf opvolgen. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.</p>
+        <p>Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na een bepaalde periode nog steeds open staat, ontvangen ze ook om die ingestelde periode een herinneringsemail. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -58,7 +58,7 @@
         <div v-if="enabled && (patched.privateMeta?.emails ?? []).length" class="container">
             <hr>
             <h2>Geavanceerd</h2>
-            <p>Kies hoeveel dagen er minimaal tussen elke e-mail moeten zijn, en hoeveel e-mails je maximaal wilt versturen ter herinnering.</p>
+            <p>Kies hoeveel dagen er minimaal tussen elke e-mail moet zitten, en hoeveel e-mails je maximaal wilt versturen ter herinnering voor een openstaand bedrag. E-mails die je zelf verstuurt tellen niet mee.</p>
 
             <STInputBox title="Minimum dagen tussen herinneringmails" error-fields="price" :error-box="errors.errorBox">
                 <NumberInput

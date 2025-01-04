@@ -10,6 +10,10 @@
         :prefix-column="allColumns[0]"
         :Route="Route"
     >
+        <p class="style-description">
+            De openstaande bedragen kunnen soms herhaald worden als er meerdere ouders of e-mailadressen zijn ingesteld bij een lid.
+        </p>
+
         <template #empty>
             {{ $t('0637e394-fbd7-42ea-9a1b-5acdcc86419a') }}
         </template>
@@ -54,13 +58,23 @@ function getRequiredFilter(): StamhoofdFilter | null {
     if (!props.objectType) {
         return {
             objectType: {
-                $in: [ReceivableBalanceType.member, ReceivableBalanceType.organization],
+                $in: [ReceivableBalanceType.user, ReceivableBalanceType.organization],
+            },
+            $or: {
+                amountOpen: { $neq: 0 },
+                amountPending: { $neq: 0 },
+                nextDueAt: { $neq: null },
             },
         };
     }
 
     return {
         objectType: props.objectType,
+        $or: {
+            amountOpen: { $neq: 0 },
+            amountPending: { $neq: 0 },
+            nextDueAt: { $neq: null },
+        },
     };
 }
 

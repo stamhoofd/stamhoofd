@@ -62,7 +62,7 @@
                             Te ontvangen bedragen
                         </h2>
                         <p class="style-description">
-                            Lijst van alle leden en verenigingen die nog een openstaand bedrag hebben tegenover {{ organization!.name }}
+                            Lijst van alle leden die nog een openstaand bedrag hebben tegenover {{ organization!.name }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

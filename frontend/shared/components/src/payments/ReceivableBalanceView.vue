@@ -60,6 +60,24 @@
                         waarvan een terugbetaling van {{ formatPrice(-item.amountPending) }} nog in verwerking
                     </p>
                 </STListItem>
+
+                <STListItem v-if="item.amountOpen > 0">
+                    <h3 class="style-definition-label">
+                        {{ $t('Laatste automatische herinneringsmail') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : 'Nog niet verstuurd' }}
+                    </p>
+                    <p v-if="item.lastReminderEmail && item.reminderEmailCount > 1" class="style-description-small">
+                        Al {{ item.reminderEmailCount }} automatische e-mails verstuurd
+                    </p>
+                    <p v-if="item.lastReminderEmail && item.reminderEmailCount && item.lastReminderAmountOpen !== item.amountOpen" class="style-description-small">
+                        Bedrag was toen {{ formatPrice(item.lastReminderAmountOpen) }}
+                    </p>
+                    <p v-if="!item.lastReminderEmail || item.reminderEmailCount === 0" class="style-description-small">
+                        De automatische e-mail wordt uitgesteld als er recent manueel een e-mail verstuurd werd.
+                    </p>
+                </STListItem>
             </STList>
 
             <hr>

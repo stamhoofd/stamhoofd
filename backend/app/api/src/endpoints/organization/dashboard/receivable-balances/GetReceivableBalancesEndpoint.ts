@@ -48,17 +48,6 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
 
         scopeFilter = {
             organizationId: organization.id,
-            $or: {
-                amountOpen: { $neq: 0 },
-                amountPending: { $neq: 0 },
-                nextDueAt: { $neq: null },
-            },
-            $not: {
-                objectType: {
-                    // Filter out registration and organization types
-                    $in: Context.auth.hasSomePlatformAccess() ? [ReceivableBalanceType.registration] : [ReceivableBalanceType.organization, ReceivableBalanceType.registration],
-                },
-            },
         };
 
         const query = CachedBalance

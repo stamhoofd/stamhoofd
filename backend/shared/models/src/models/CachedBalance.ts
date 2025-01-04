@@ -377,6 +377,14 @@ export class CachedBalance extends QueryableModel {
                         .then(0)
                         .else(SQL.column('reminderEmailCount')),
                 ),
+
+                // Reset lastReminderEmail if amountOpen is zero
+                SQL.assignment(
+                    'lastReminderEmail',
+                    SQL.if(SQL.column('v', 'amountOpen'), 0)
+                        .then(null)
+                        .else(SQL.column('lastReminderEmail')),
+                ),
             );
 
         await query.insert();

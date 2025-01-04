@@ -1,4 +1,4 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem, BalanceItemWithPayments } from './BalanceItem.js';
 import { TranslateMethod } from './I18nInterface.js';
@@ -77,6 +77,15 @@ export class ReceivableBalance extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     amountPending = 0;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    lastReminderEmail: Date | null = null;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    lastReminderAmountOpen = 0;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    reminderEmailCount = 0;
 }
 
 export class DetailedReceivableBalance extends ReceivableBalance {
