@@ -68,6 +68,17 @@ async function balanceEmails() {
                 reminderEmailCount: 0,
             },
         });
+        await sendTemplate({
+            objectType: ReceivableBalanceType.organization,
+            organization,
+            emailAddress,
+            systemUser,
+            templateType: EmailTemplateType.OrganizationBalanceIncreaseNotification,
+            filter: {
+                reminderAmountIncreased: true,
+                reminderEmailCount: 0,
+            },
+        });
         const maximumEmailCount = organization.privateMeta.balanceNotificationSettings.maximumReminderEmails;
 
         // Reminder emails
@@ -78,6 +89,22 @@ async function balanceEmails() {
                 emailAddress,
                 systemUser,
                 templateType: EmailTemplateType.UserBalanceReminder,
+                filter: {
+                    $and: [
+                        {
+                            reminderEmailCount: { $gt: 0 },
+                        }, {
+                            reminderEmailCount: { $lt: maximumEmailCount },
+                        },
+                    ],
+                },
+            });
+            await sendTemplate({
+                objectType: ReceivableBalanceType.organization,
+                organization,
+                emailAddress,
+                systemUser,
+                templateType: EmailTemplateType.OrganizationBalanceReminder,
                 filter: {
                     $and: [
                         {
@@ -133,15 +160,6 @@ async function sendTemplate({
                             objectType,
                         },
                         {
-                            // Don't send if a change is expected within 5 days (or hasn't been processed)
-                            $or: [
-                                { nextDueAt: null },
-                                {
-                                    nextDueAt: { $gt: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 5) },
-                                },
-                            ],
-                        },
-                        {
                             // Never send more than minimumDaysBetween
                             $or: [
                                 { lastReminderEmail: null },
@@ -149,7 +167,7 @@ async function sendTemplate({
                             ],
                         },
                         filter,
-                        {
+                        /* {
                             // Do not send if already received any email very recently
                             $not: {
                                 emails: {
@@ -160,7 +178,7 @@ async function sendTemplate({
                                     },
                                 },
                             },
-                        },
+                        }, */
                     ],
 
                 },

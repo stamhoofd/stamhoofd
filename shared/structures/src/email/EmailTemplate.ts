@@ -104,11 +104,13 @@ export enum EmailTemplateType {
      * E.g. end of trial, manually added a balance item...
      */
     UserBalanceIncreaseNotification = 'UserBalanceIncreaseNotification',
+    OrganizationBalanceIncreaseNotification = 'OrganizationBalanceIncreaseNotification',
 
     /**
      * A reminder e-mail to the user that their balance has to be paid.
      */
     UserBalanceReminder = 'UserBalanceReminder',
+    OrganizationBalanceReminder = 'OrganizationBalanceReminder',
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -251,6 +253,9 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.UserBalanceIncreaseNotification: return 'Saldo verhoogd';
             case EmailTemplateType.UserBalanceReminder: return 'Saldo herinnering';
+
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return 'Saldo verhoogd';
+            case EmailTemplateType.OrganizationBalanceReminder: return 'Saldo herinnering';
         }
     }
 
@@ -324,7 +329,11 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.UserBalanceIncreaseNotification:
             case EmailTemplateType.UserBalanceReminder:
-                return 'Openstaand bedrag';
+                return 'Openstaand bedrag leden';
+
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification:
+            case EmailTemplateType.OrganizationBalanceReminder:
+                return 'Openstaand bedrag groepen';
         }
 
         return 'Andere';
@@ -412,7 +421,10 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.TicketsReceivedTransfer: return 'De e-mail die een besteller nog ontvangt als je de betaling hebt gemarkeerd als ontvangen (enkel bij betaalmethode overschrijving)';
 
             case EmailTemplateType.UserBalanceIncreaseNotification: return 'Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een gebruiker omhoog is gegaan. Bijvoorbeeld als iemand een openstaand bedrag heeft toegevoegd bij een lid.';
-            case EmailTemplateType.UserBalanceReminder: return 'Automatische e-mail die \'s ochtends wordt verzonden als een gebruiker nog een openstaand bedrag heeft.';
+            case EmailTemplateType.UserBalanceReminder: return 'Automatische e-mail die \'s ochtends wordt verzonden als een gebruiker nog steeds een openstaand bedrag heeft.';
+
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return 'Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een groep omhoog is gegaan.';
+            case EmailTemplateType.OrganizationBalanceReminder: return 'Automatische e-mail die \'s ochtends wordt verzonden als een groep nog steeds een openstaand bedrag heeft.';
         }
 
         return '';
@@ -424,12 +436,15 @@ export class EmailTemplate extends AutoEncoder {
             EmailTemplateType.SavedReceivableBalancesEmail,
             EmailTemplateType.UserBalanceIncreaseNotification,
             EmailTemplateType.UserBalanceReminder,
+            EmailTemplateType.OrganizationBalanceIncreaseNotification,
+            EmailTemplateType.OrganizationBalanceReminder,
         ].includes(type)) {
             return [
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.paymentUrl,
                 ExampleReplacements.all.outstandingBalance,
                 ExampleReplacements.all.balanceTable,
+                ExampleReplacements.all.objectName,
             ];
         }
 

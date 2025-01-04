@@ -87,6 +87,10 @@ const _ExampleReplacements = {
         token: 'outstandingBalance',
         value: '€ 55,00',
     }),
+    objectName: Replacement.create({
+        token: 'objectName',
+        value: 'Naam schuldenaar',
+    }),
     resetUrl: Replacement.create({
         token: 'resetUrl',
         value: 'https://www.example.com/reset',

@@ -61,7 +61,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="item.amountOpen > 0">
+                <STListItem v-if="item.amountOpen > 0 && $feature('balance-emails')">
                     <h3 class="style-definition-label">
                         {{ $t('Laatste automatische herinneringsmail') }}
                     </h3>
@@ -75,7 +75,7 @@
                         Bedrag was toen {{ formatPrice(item.lastReminderAmountOpen) }}
                     </p>
                     <p v-if="!item.lastReminderEmail || item.reminderEmailCount === 0" class="style-description-small">
-                        De automatische e-mail wordt uitgesteld als er recent manueel een e-mail verstuurd werd.
+                        Als automatische e-mails zijn ingeschakeld wordt de eerste e-mail morgenvroeg verzonden.
                     </p>
                 </STListItem>
             </STList>
