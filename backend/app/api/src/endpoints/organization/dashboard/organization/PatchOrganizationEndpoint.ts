@@ -125,6 +125,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.inheritedResponsibilityRoles = request.body.privateMeta.inheritedResponsibilityRoles.applyTo(organization.privateMeta.inheritedResponsibilityRoles);
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey;
                 organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
+                organization.privateMeta.balanceNotificationSettings = patchObject(organization.privateMeta.balanceNotificationSettings, request.body.privateMeta.balanceNotificationSettings);
 
                 if (request.body.privateMeta.mollieProfile !== undefined) {
                     organization.privateMeta.mollieProfile = patchObject(organization.privateMeta.mollieProfile, request.body.privateMeta.mollieProfile);

@@ -234,7 +234,7 @@ export class Email extends QueryableModel {
         return true;
     }
 
-    async send() {
+    async send(): Promise<Email | null> {
         this.throwIfNotReadyToSend();
         await this.save();
 
@@ -251,7 +251,7 @@ export class Email extends QueryableModel {
             if (upToDate.status === EmailStatus.Sent) {
                 // Already done
                 // In other cases -> queue has stopped and we can retry
-                return;
+                return upToDate;
             }
             const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
             upToDate.throwIfNotReadyToSend();
@@ -406,7 +406,7 @@ export class Email extends QueryableModel {
                         replyTo,
                         subject: upToDate.subject!,
                         html: upToDate.html!,
-                        type: 'broadcast',
+                        type: upToDate.emailType ? 'transactional' : 'broadcast',
                         attachments,
                         callback(error: Error | null) {
                             callback(error).catch(console.error);
@@ -423,13 +423,14 @@ export class Email extends QueryableModel {
                 // We only delete automated emails (email type) if they have no recipients
                 console.log('No recipients found for email ', upToDate.id, ' deleting...');
                 await upToDate.delete();
-                return;
+                return null;
             }
 
             console.log('Finished sending email', upToDate.id);
             // Mark email as sent
             upToDate.status = EmailStatus.Sent;
             await upToDate.save();
+            return upToDate;
         });
     }
 

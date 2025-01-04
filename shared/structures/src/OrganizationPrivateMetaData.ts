@@ -108,6 +108,15 @@ export class BalanceNotificationSettings extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true })
     emailId: string | null = null;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    maximumReminderEmails = 3;
+
+    /**
+     * Minimum days between emails
+     */
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    minimumDaysBetween = 5;
 }
 
 export class OrganizationPrivateMetaData extends AutoEncoder {

@@ -33,7 +33,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { EditorSmartButton, EditorSmartVariable, EmailTemplate, getExampleRecipient } from '@stamhoofd/structures';
-import { Ref, computed, onMounted, ref } from 'vue';
+import { Ref, computed, nextTick, onMounted, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
@@ -117,7 +117,8 @@ async function save() {
         addPatch({
             ...(await getHTML()),
         });
-        await props.saveHandler(patched.value);
+        await nextTick();
+        await props.saveHandler(patch.value);
         await pop({ force: true });
     }
     catch (e) {

@@ -1,5 +1,6 @@
 import { Database } from '@simonbackx/simple-database';
 import { joinSQLQuery, SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression';
+import { ParseWhereArguments, SQLEmptyWhere } from './SQLWhere';
 
 export type SQLScalarValue = string | number | boolean | Date;
 export type SQLDynamicExpression = SQLScalarValue | SQLScalarValue[] | null | SQLExpression;
@@ -420,5 +421,37 @@ export class SQLTableExpression implements SQLExpression {
             return Database.escapeId(this.table);
         }
         return Database.escapeId(this.table) + ' ' + Database.escapeId(this.namespace);
+    }
+}
+
+export class SQLIf implements SQLExpression {
+    _if: SQLExpression;
+    _then: SQLExpression = new SQLNull();
+    _else: SQLExpression = new SQLNull();
+
+    constructor(...args: ParseWhereArguments) {
+        this._if = new SQLEmptyWhere().and(...args);
+    }
+
+    then(then: SQLDynamicExpression): SQLIf {
+        this._then = readDynamicSQLExpression(then);
+        return this;
+    }
+
+    else(_else: SQLDynamicExpression): SQLIf {
+        this._else = readDynamicSQLExpression(_else);
+        return this;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'IF(',
+            this._if.getSQL(options),
+            ',',
+            this._then.getSQL(options),
+            ',',
+            this._else.getSQL(options),
+            ')',
+        ]);
     }
 }

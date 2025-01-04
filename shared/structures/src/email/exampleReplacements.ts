@@ -46,6 +46,7 @@ export const ExampleReplacements = {
             _ExampleReplacements.lastName,
             _ExampleReplacements.email,
             _ExampleReplacements.organizationName,
+            _ExampleReplacements.fromAddress,
         ];
     },
 };
@@ -66,6 +67,10 @@ const _ExampleReplacements = {
     email: Replacement.create({
         token: 'email',
         value: 'jan.jansen@voorbeeld.com',
+    }),
+    fromAddress: Replacement.create({
+        token: 'fromAddress',
+        value: 'verstuurder@voorbeeld.com',
     }),
     paymentUrl: Replacement.create({
         token: 'paymentUrl',

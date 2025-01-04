@@ -1,7 +1,7 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete';
 import { isSQLExpression, SQLExpression } from './SQLExpression';
-import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
+import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
 import { SQLJoin, SQLJoinType } from './SQLJoin';
 import { SQLJsonExtract, SQLJsonLength, SQLJsonUnquote } from './SQLJsonExpressions';
 import { parseTable, SQLSelect } from './SQLSelect';
@@ -96,6 +96,10 @@ class StaticSQL {
     join(expression: SQLExpression): SQLJoin;
     join(tableOrExpressiongOrNamespace: SQLExpression | string, table?: string): SQLJoin {
         return new SQLJoin(SQLJoinType.Inner, parseTable(tableOrExpressiongOrNamespace, table));
+    }
+
+    if(...args: ConstructorParameters<typeof SQLIf>): SQLIf {
+        return new SQLIf(...args);
     }
 }
 

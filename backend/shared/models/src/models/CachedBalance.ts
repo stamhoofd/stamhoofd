@@ -51,6 +51,15 @@ export class CachedBalance extends QueryableModel {
     @column({ type: 'datetime', nullable: true })
     nextDueAt: Date | null = null;
 
+    @column({ type: 'datetime', nullable: true })
+    lastReminderEmail: Date | null = null;
+
+    @column({ type: 'integer' })
+    lastReminderAmountOpen = 0;
+
+    @column({ type: 'integer' })
+    reminderEmailCount = 0;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
@@ -336,6 +345,7 @@ export class CachedBalance extends QueryableModel {
                 'nextDueAt',
                 'createdAt',
                 'updatedAt',
+                'reminderEmailCount',
             )
             .values(...result.map(([objectId, { amountPaid, amountOpen, amountPending, nextDueAt }]) => {
                 return [
@@ -349,6 +359,7 @@ export class CachedBalance extends QueryableModel {
                     nextDueAt,
                     new Date(),
                     new Date(),
+                    0,
                 ];
             }))
             .as('v')
@@ -358,6 +369,14 @@ export class CachedBalance extends QueryableModel {
                 SQL.assignment('amountPending', SQL.column('v', 'amountPending')),
                 SQL.assignment('nextDueAt', SQL.column('v', 'nextDueAt')),
                 SQL.assignment('updatedAt', SQL.column('v', 'updatedAt')),
+
+                // Reset email count if amountOpen is zero
+                SQL.assignment(
+                    'reminderEmailCount',
+                    SQL.if(SQL.column('v', 'amountOpen'), 0)
+                        .then(0)
+                        .else(SQL.column('reminderEmailCount')),
+                ),
             );
 
         await query.insert();

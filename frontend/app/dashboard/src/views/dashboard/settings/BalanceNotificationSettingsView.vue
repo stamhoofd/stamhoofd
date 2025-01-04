@@ -54,12 +54,38 @@
                 </STListItem>
             </STList>
         </div>
+
+        <div v-if="enabled && (patched.privateMeta?.emails ?? []).length" class="container">
+            <hr>
+            <h2>Geavanceerd</h2>
+            <p>Kies hoeveel dagen er minimaal tussen elke e-mail moeten zijn, en hoeveel e-mails je maximaal wilt versturen ter herinnering.</p>
+
+            <STInputBox title="Minimum dagen tussen herinneringmails" error-fields="price" :error-box="errors.errorBox">
+                <NumberInput
+                    v-model="minimumDaysBetween" placeholder=""
+                    suffix="dagen"
+                    suffix-singular="dag"
+                    :min="1"
+                    :stepper="true"
+                />
+            </STInputBox>
+
+            <STInputBox title="Maximum e-mails" error-fields="price" :error-box="errors.errorBox">
+                <NumberInput
+                    v-model="maximumReminderEmails" placeholder=""
+                    suffix="e-mails"
+                    suffix-singular="e-mail"
+                    :min="1"
+                    :stepper="true"
+                />
+            </STInputBox>
+        </div>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, useErrors, usePatch } from '@stamhoofd/components';
+import { NumberInput, CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, useErrors, usePatch } from '@stamhoofd/components';
 import { BalanceNotificationSettings, OrganizationPrivateMetaData } from '@stamhoofd/structures';
 
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
@@ -95,6 +121,32 @@ const emailId = computed({
             privateMeta: OrganizationPrivateMetaData.patch({
                 balanceNotificationSettings: BalanceNotificationSettings.patch({
                     emailId: value,
+                }),
+            }),
+        });
+    },
+});
+
+const minimumDaysBetween = computed({
+    get: () => patched.value.privateMeta?.balanceNotificationSettings?.minimumDaysBetween ?? 1,
+    set: (value) => {
+        addPatch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                balanceNotificationSettings: BalanceNotificationSettings.patch({
+                    minimumDaysBetween: value,
+                }),
+            }),
+        });
+    },
+});
+
+const maximumReminderEmails = computed({
+    get: () => patched.value.privateMeta?.balanceNotificationSettings?.maximumReminderEmails ?? 5,
+    set: (value) => {
+        addPatch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                balanceNotificationSettings: BalanceNotificationSettings.patch({
+                    maximumReminderEmails: value,
                 }),
             }),
         });

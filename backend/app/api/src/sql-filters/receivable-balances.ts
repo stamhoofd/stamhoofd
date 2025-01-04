@@ -1,4 +1,4 @@
-import { SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler } from '@stamhoofd/sql';
+import { SQL, SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler } from '@stamhoofd/sql';
 import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers';
 
 /**
@@ -12,6 +12,16 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
     amountOpen: createSQLColumnFilterCompiler('amountOpen'),
     amountPending: createSQLColumnFilterCompiler('amountPending'),
     nextDueAt: createSQLColumnFilterCompiler('nextDueAt'),
+    lastReminderEmail: createSQLColumnFilterCompiler('lastReminderEmail'),
+    reminderEmailCount: createSQLColumnFilterCompiler('reminderEmailCount'),
+    reminderAmountIncreased: createSQLExpressionFilterCompiler(
+        SQL.if(
+            SQL.column('amountOpen'),
+            '>',
+            SQL.column('lastReminderAmountOpen'),
+        ).then(1).else(0),
+        { isJSONValue: false, isJSONObject: false },
+    ),
 
     // Allowed to filter by recent emails
     ...EmailRelationFilterCompilers,

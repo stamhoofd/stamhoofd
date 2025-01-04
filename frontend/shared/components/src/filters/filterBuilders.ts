@@ -805,7 +805,7 @@ export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
         type: NumberFilterFormat.Currency,
         key: 'amountPending',
     }),
-    new MultipleChoiceFilterBuilder({
+    /* new MultipleChoiceFilterBuilder({
         name: 'Type',
         options: [
             new MultipleChoiceUIFilterOption('Verenigingen', ReceivableBalanceType.organization),
@@ -817,7 +817,7 @@ export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
                 $in: UIFilterWrapperMarker,
             },
         },
-    }),
+    }), */
 ];
 
 cachedOutstandingBalanceUIFilterBuilders.unshift(
