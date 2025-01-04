@@ -78,13 +78,13 @@ export class ReceivableBalance extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     amountPending = 0;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 355 })
     lastReminderEmail: Date | null = null;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 355 })
     lastReminderAmountOpen = 0;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 355 })
     reminderEmailCount = 0;
 }
 

@@ -135,10 +135,10 @@ export class EmailRecipient extends AutoEncoder {
     @field({ decoder: StringDecoder })
     emailId: string = '';
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 355 })
     objectId: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 355 })
     emailType: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })

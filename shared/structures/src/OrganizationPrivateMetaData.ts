@@ -109,13 +109,13 @@ export class BalanceNotificationSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     emailId: string | null = null;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 355 })
     maximumReminderEmails = 3;
 
     /**
      * Minimum days between emails
      */
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 355 })
     minimumDaysBetween = 5;
 }
 
@@ -169,7 +169,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     /**
      * Balance reminder email settings
      */
-    @field({ decoder: BalanceNotificationSettings, ...NextVersion })
+    @field({ decoder: BalanceNotificationSettings, version: 355 })
     balanceNotificationSettings = BalanceNotificationSettings.create({});
 
     /**
