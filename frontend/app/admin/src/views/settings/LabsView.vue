@@ -20,6 +20,10 @@
             Proefperiodes
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('cached-outstanding-balances')" @update:model-value="setFeatureFlag('cached-outstanding-balances', !!$event)">
+            Openstaande bedragen
+        </Checkbox>
+
         <Checkbox :model-value="getFeatureFlag('balance-emails')" @update:model-value="setFeatureFlag('balance-emails', !!$event)">
             Notificaties voor openstaande bedragen
         </Checkbox>
