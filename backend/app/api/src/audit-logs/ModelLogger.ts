@@ -113,8 +113,23 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
         try {
             const context = ContextInstance.optional;
             const log = new AuditLog();
-            const settings = AuditLogService.getContext();
-            const userId = settings?.userId !== undefined ? settings?.userId : (context?.optionalAuth?.user?.id ?? settings?.fallbackUserId ?? null);
+            let settings = AuditLogService.getContext();
+            let userId = settings?.userId !== undefined ? settings?.userId : (context?.optionalAuth?.user?.id ?? settings?.fallbackUserId ?? null);
+
+            if (userId === '1') {
+                // System user
+                userId = null;
+
+                if (!settings?.source) {
+                    if (settings) {
+                        settings.source = AuditLogSource.System;
+                    }
+                    else {
+                        settings = { source: AuditLogSource.System };
+                    }
+                }
+            }
+
             log.userId = userId;
 
             log.organizationId = context?.organization?.id ?? settings?.fallbackOrganizationId ?? null;

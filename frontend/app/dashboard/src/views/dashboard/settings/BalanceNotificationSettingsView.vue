@@ -4,7 +4,7 @@
             {{ $t('Notificaties voor openstaande bedragen') }}
         </h1>
 
-        <p>Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na een bepaalde periode nog steeds open staat, ontvangen ze ook om die ingestelde periode een herinneringsemail. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.</p>
+        <p>Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na een bepaalde periode nog steeds open staat, ontvangen ze ook telkens een herinneringsemail. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 

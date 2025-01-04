@@ -36,6 +36,7 @@ export enum EmailStatus {
     Sending = 'Sending',
     Sent = 'Sent',
     Deleted = 'Deleted',
+    Failed = 'Failed',
 }
 
 export enum EmailRecipientsStatus {

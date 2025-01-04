@@ -8,6 +8,7 @@ export const EmailLogger = new ModelLogger(Email, {
         if (event.type === 'deleted') {
             return;
         }
+
         let oldStatus = EmailStatus.Draft;
 
         if (event.type === 'updated') {
@@ -35,6 +36,11 @@ export const EmailLogger = new ModelLogger(Email, {
             };
         }
 
+        if (event.model.emailType) {
+            // don't log the scheduled part of automated emails
+            return;
+        }
+
         return {
             type: AuditLogType.EmailSending,
             data: {
@@ -48,7 +54,7 @@ export const EmailLogger = new ModelLogger(Email, {
         const map = new Map([
             ['e', AuditLogReplacement.create({
                 id: model.id,
-                value: model.subject || '',
+                value: replaceHtml(model.subject ?? '', options.data.recipient?.replacements ?? []),
                 type: AuditLogReplacementType.Email,
             })],
             ['c', AuditLogReplacement.create({

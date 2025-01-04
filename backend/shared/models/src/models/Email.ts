@@ -248,10 +248,27 @@ export class Email extends QueryableModel {
                     human: 'De e-mail die je probeert te versturen bestaat niet meer',
                 });
             }
-            if (upToDate.status === EmailStatus.Sent) {
+            if (upToDate.status === EmailStatus.Sent || upToDate.status === EmailStatus.Failed) {
                 // Already done
                 // In other cases -> queue has stopped and we can retry
                 return upToDate;
+            }
+
+            if (upToDate.status === EmailStatus.Sending) {
+                // This is a retry.
+                if (upToDate.emailType) {
+                    // Not eligible for retry
+                    upToDate.status = EmailStatus.Failed;
+                    await upToDate.save();
+                    return upToDate;
+                }
+                if (upToDate.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
+                    // Too long
+                    console.error('Email has been sending for too long. Marking as failed...', upToDate.id);
+                    upToDate.status = EmailStatus.Failed;
+                    await upToDate.save();
+                    return upToDate;
+                }
             }
             const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
             upToDate.throwIfNotReadyToSend();
