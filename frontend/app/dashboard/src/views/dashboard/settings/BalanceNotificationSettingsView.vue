@@ -55,7 +55,7 @@
             </STList>
         </div>
 
-        <div v-if="enabled && (patched.privateMeta?.emails ?? []).length" class="container">
+        <div v-if="enabled" class="container">
             <hr>
             <h2>Geavanceerd</h2>
             <p>Kies hoeveel dagen er minimaal tussen elke e-mail moet zitten, en hoeveel e-mails je maximaal wilt versturen ter herinnering voor een openstaand bedrag. E-mails die je zelf verstuurt tellen niet mee.</p>
