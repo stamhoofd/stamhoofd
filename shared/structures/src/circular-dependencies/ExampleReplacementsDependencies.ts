@@ -1,20 +1,20 @@
-import { Address, ValidatedAddress } from '../addresses/Address';
-import { Country } from '../addresses/CountryDecoder';
-import { injectReplacementValues } from '../email/exampleReplacements';
-import { Replacement } from '../endpoints/EmailRequest';
-import { Payment } from '../members/Payment';
-import { Organization } from '../Organization';
-import { OrganizationMetaData } from '../OrganizationMetaData';
-import { OrganizationType } from '../OrganizationType';
-import { PaymentMethod } from '../PaymentMethod';
-import { Cart } from '../webshops/Cart';
-import { CartItem, CartItemPrice } from '../webshops/CartItem';
-import { Customer } from '../webshops/Customer';
-import { Order, OrderData } from '../webshops/Order';
-import { Product, ProductPrice } from '../webshops/Product';
-import { TransferSettings, TransferDescriptionType } from '../webshops/TransferSettings';
-import { WebshopPreview } from '../webshops/Webshop';
-import { WebshopTimeSlot, WebshopTakeoutMethod, WebshopMetaData } from '../webshops/WebshopMetaData';
+import { Address, ValidatedAddress } from '../addresses/Address.js';
+import { Country } from '../addresses/CountryDecoder.js';
+import { injectReplacementValues } from '../email/exampleReplacements.js';
+import { Replacement } from '../endpoints/EmailRequest.js';
+import { Payment } from '../members/Payment.js';
+import { Organization } from '../Organization.js';
+import { OrganizationMetaData } from '../OrganizationMetaData.js';
+import { OrganizationType } from '../OrganizationType.js';
+import { PaymentMethod } from '../PaymentMethod.js';
+import { Cart } from '../webshops/Cart.js';
+import { CartItem, CartItemPrice } from '../webshops/CartItem.js';
+import { Customer } from '../webshops/Customer.js';
+import { Order, OrderData } from '../webshops/Order.js';
+import { Product, ProductPrice } from '../webshops/Product.js';
+import { TransferSettings, TransferDescriptionType } from '../webshops/TransferSettings.js';
+import { WebshopPreview } from '../webshops/Webshop.js';
+import { WebshopTimeSlot, WebshopTakeoutMethod, WebshopMetaData } from '../webshops/WebshopMetaData.js';
 
 injectReplacementValues(fillReplacements);
 function fillReplacements(replacements: Replacement[]) {

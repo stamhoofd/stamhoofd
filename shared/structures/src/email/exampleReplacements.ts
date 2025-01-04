@@ -1,7 +1,7 @@
 import { Formatter } from '@stamhoofd/utility';
-import { BalanceItem } from '../BalanceItem';
+import { BalanceItem } from '../BalanceItem.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
-import { STPackageType, STPackageTypeHelper } from '../billing/STPackage';
+import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
 
 const exampleBalanceItem = BalanceItem.create({
     description: 'Voorbeeld item 1',
