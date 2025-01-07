@@ -37,7 +37,6 @@ async function balanceEmails() {
     const platform = await Platform.getSharedPrivateStruct();
 
     if (!platform.config.featureFlags.includes('balance-emails')) {
-        console.log('Feature flag not enabled, skipping.');
         return;
     }
     const systemUser = await User.getSystem();
