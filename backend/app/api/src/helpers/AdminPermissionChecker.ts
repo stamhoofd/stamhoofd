@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, EventPermissionChecker, FinancialSupportSettings, getPermissionLevelNumber, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
 
@@ -1016,10 +1016,9 @@ export class AdminPermissionChecker {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager) {
-            const lvlNumber = getPermissionLevelNumber(level);
             for (const category of categories) {
                 for (const record of category.getAllRecords()) {
-                    if (record.checkPermissionForUserManager(lvlNumber)) {
+                    if (record.checkPermissionForUserManager(level)) {
                         set.add(record.id);
                     }
                 }

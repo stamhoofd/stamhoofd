@@ -244,7 +244,7 @@ export class RecordSettings extends AutoEncoder {
     resolutions?: ResolutionRequest[];
 
     @field({ decoder: new EnumDecoder(PermissionLevel), ...NextVersion })
-    userManagerPermissionLevel = PermissionLevel.Write;
+    externalPermissionLevel = PermissionLevel.Write;
 
     getDiffValue() {
         const type = getRecordTypeName(this.type);
@@ -275,8 +275,8 @@ export class RecordSettings extends AutoEncoder {
         }
     }
 
-    checkPermissionForUserManager(lvlNumber: number) {
-        return getPermissionLevelNumber(this.userManagerPermissionLevel) >= lvlNumber;
+    checkPermissionForUserManager(level: PermissionLevel) {
+        return getPermissionLevelNumber(this.externalPermissionLevel) >= getPermissionLevelNumber(level);
     }
 
     get excelColumns() {

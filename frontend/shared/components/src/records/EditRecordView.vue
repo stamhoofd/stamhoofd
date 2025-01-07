@@ -131,12 +131,12 @@
 
         <hr>
         <h2>Zichtbaarheid voor leden</h2>
-        <p>Beperk de zichtbaarheid van deze vraag voor leden.</p>
+        <p>Beperk de zichtbaarheid van deze vraag voor leden. De toegangsrechten voor beheerders worden hier onafhankelijk van geregeld via de instellingen van functies en beheerdersrollen.</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="righstForNonAdmins" :value="PermissionLevel.None" name="righstForNonAdmins" />
+                    <Radio v-model="externalPermissionLevel" :value="PermissionLevel.None" name="righstForNonAdmins" />
                 </template>
                 <h3 class="style-title-list">
                     Niet zichtbaar
@@ -145,7 +145,7 @@
 
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="righstForNonAdmins" :value="PermissionLevel.Read" name="righstForNonAdmins" />
+                    <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Read" name="righstForNonAdmins" />
                 </template>
                 <h3 class="style-title-list">
                     Enkel lezen
@@ -154,7 +154,7 @@
 
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="righstForNonAdmins" :value="PermissionLevel.Write" name="righstForNonAdmins" />
+                    <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Write" name="righstForNonAdmins" />
                 </template>
                 <h3 class="style-title-list">
                     Bewerken
@@ -537,10 +537,10 @@ const commentsDescription = computed({
     },
 });
 
-const righstForNonAdmins = computed({
-    get: () => patchedRecord.value.userManagerPermissionLevel,
-    set: (userManagerPermissionLevel: PermissionLevel) => {
-        addPatch({ userManagerPermissionLevel });
+const externalPermissionLevel = computed({
+    get: () => patchedRecord.value.externalPermissionLevel,
+    set: (externalPermissionLevel: PermissionLevel) => {
+        addPatch({ externalPermissionLevel });
     },
 });
 

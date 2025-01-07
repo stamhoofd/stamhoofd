@@ -66,7 +66,7 @@ export class RecordCategory extends AutoEncoder {
 
     filterRecords<T extends ObjectWithRecords>(filterValue: T, checkUserManagerPermissions?: { level: PermissionLevel }): RecordSettings[] {
         if (checkUserManagerPermissions) {
-            const level = getPermissionLevelNumber(checkUserManagerPermissions.level);
+            const level = checkUserManagerPermissions.level;
             return this.records.filter(r => r.checkPermissionForUserManager(level) && filterValue.isRecordEnabled(r));
         }
 
@@ -98,7 +98,7 @@ export class RecordCategory extends AutoEncoder {
 
     checkPermissionForUserManager(level: PermissionLevel): boolean {
         const levelNumber = getPermissionLevelNumber(level);
-        const hasPermission = this.records.some(r => getPermissionLevelNumber(r.userManagerPermissionLevel) >= levelNumber);
+        const hasPermission = this.records.some(r => getPermissionLevelNumber(r.externalPermissionLevel) >= levelNumber);
         if (hasPermission) {
             return true;
         }
