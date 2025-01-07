@@ -22,13 +22,18 @@ const organization = useOrganization();
 const auth = useAuth();
 
 const recordCategories = computed(() => {
-    return RecordCategory.flattenCategories(props.member.getEnabledRecordCategories({
-        checkPermissions: {
-            permissions: auth.userPermissions,
-            level: PermissionLevel.Read,
-        },
+    const checkPermissions = {
+        user: auth.user!,
+        level: PermissionLevel.Read,
+    };
+
+    const member = props.member;
+    const categories = member.getEnabledRecordCategories({
+        checkPermissions,
         scopeOrganization: organization.value,
-    }), props.member);
+    });
+
+    return RecordCategory.flattenCategories(categories, member);
 });
 
 </script>

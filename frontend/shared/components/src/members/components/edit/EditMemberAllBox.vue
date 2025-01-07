@@ -86,12 +86,11 @@ const recordCategories = computed(() =>
     props.member.getEnabledRecordCategories({
         checkPermissions: isAdmin
             ? {
-                    permissions: auth.userPermissions,
+                    user: auth.user!,
                     level: PermissionLevel.Write,
                 }
             : null,
         scopeOrganization: organization.value,
     }),
 );
-
 </script>

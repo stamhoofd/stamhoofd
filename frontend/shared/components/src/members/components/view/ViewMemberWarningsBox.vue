@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
 import { useAuth, useOrganization } from '../../../hooks';
@@ -38,7 +38,7 @@ const $t = useTranslate();
 const autoCompletedAnswers = computed(() => {
     const recordCategories = props.member.getEnabledRecordCategories({
         checkPermissions: {
-            permissions: auth.userPermissions,
+            user: auth.user!,
             level: PermissionLevel.Read,
         },
         scopeOrganization: organization.value,

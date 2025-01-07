@@ -2,8 +2,9 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from 
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
-import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
+import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
+import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import { ObjectWithRecords } from '../ObjectWithRecords.js';
 import { RecordAnswer } from './RecordAnswer.js';
 import { RecordSettings } from './RecordSettings.js';
@@ -53,17 +54,22 @@ export class RecordCategory extends AutoEncoder {
         return this.records;
     }
 
-    getAllFilteredRecords<T extends ObjectWithRecords>(filterValue: T): RecordSettings[] {
+    getAllFilteredRecords<T extends ObjectWithRecords>(filterValue: T, checkUserManagerPermissions?: { level: PermissionLevel }): RecordSettings[] {
         if (this.childCategories.length > 0) {
             return [
-                ...this.filterChildCategories(filterValue).flatMap(c => c.getAllFilteredRecords(filterValue)),
-                ...this.filterRecords(filterValue),
+                ...this.filterChildCategories(filterValue).flatMap(c => c.getAllFilteredRecords(filterValue, checkUserManagerPermissions)),
+                ...this.filterRecords(filterValue, checkUserManagerPermissions),
             ];
         }
-        return this.filterRecords(filterValue);
+        return this.filterRecords(filterValue, checkUserManagerPermissions);
     }
 
-    filterRecords<T extends ObjectWithRecords>(filterValue: T) {
+    filterRecords<T extends ObjectWithRecords>(filterValue: T, checkUserManagerPermissions?: { level: PermissionLevel }): RecordSettings[] {
+        if (checkUserManagerPermissions) {
+            const level = checkUserManagerPermissions.level;
+            return this.records.filter(r => r.checkPermissionForUserManager(level) && filterValue.isRecordEnabled(r));
+        }
+
         return this.records.filter(r => filterValue.isRecordEnabled(r));
     }
 
@@ -87,6 +93,19 @@ export class RecordCategory extends AutoEncoder {
             return true;
         }
 
+        return false;
+    }
+
+    checkPermissionForUserManager(level: PermissionLevel): boolean {
+        const levelNumber = getPermissionLevelNumber(level);
+        const hasPermission = this.records.some(r => getPermissionLevelNumber(r.externalPermissionLevel) >= levelNumber);
+        if (hasPermission) {
+            return true;
+        }
+
+        if (this.childCategories.length) {
+            return this.childCategories.some(c => c.checkPermissionForUserManager(level));
+        }
         return false;
     }
 

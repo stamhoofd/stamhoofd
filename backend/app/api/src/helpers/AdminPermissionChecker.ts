@@ -820,21 +820,26 @@ export class AdminPermissionChecker {
         const recordCategories: RecordCategory[] = [];
         for (const organization of organizations) {
             if (isUserManager) {
-                // If the user is a manager, we can always access all records
-                // if we ever add private records, we can exclude them here
                 for (const category of organization.meta.recordsConfiguration.recordCategories) {
-                    recordCategories.push(category);
+                    if (category.checkPermissionForUserManager(level)) {
+                        recordCategories.push(category);
+                    }
                 }
-                continue;
             }
 
             const permissions = await this.getOrganizationPermissions(organization);
+
             if (!permissions) {
                 continue;
             }
 
             // Now add all records of this organization
             for (const category of organization.meta.recordsConfiguration.recordCategories) {
+                if (isUserManager && recordCategories.find(c => c.id === category.id)) {
+                    // Already added
+                    continue;
+                }
+
                 if (permissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
                     recordCategories.push(category);
                 }
@@ -862,8 +867,13 @@ export class AdminPermissionChecker {
                     continue;
                 }
 
-                if (isUserManager || platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
+                if (platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
                     recordCategories.push(category);
+                }
+                else if (isUserManager) {
+                    if (category.checkPermissionForUserManager(level)) {
+                        recordCategories.push(category);
+                    }
                 }
             }
         }
@@ -1003,10 +1013,22 @@ export class AdminPermissionChecker {
     async getAccessibleRecordSet(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<Set<string>> {
         const categories = await this.getAccessibleRecordCategories(member, level);
         const set = new Set<string>();
+        const isUserManager = this.isUserManager(member);
 
-        for (const category of categories) {
-            for (const record of category.getAllRecords()) {
-                set.add(record.id);
+        if (isUserManager) {
+            for (const category of categories) {
+                for (const record of category.getAllRecords()) {
+                    if (record.checkPermissionForUserManager(level)) {
+                        set.add(record.id);
+                    }
+                }
+            }
+        }
+        else {
+            for (const category of categories) {
+                for (const record of category.getAllRecords()) {
+                    set.add(record.id);
+                }
             }
         }
 
@@ -1033,17 +1055,6 @@ export class AdminPermissionChecker {
      * Changes data inline
      */
     async filterMemberData(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob): Promise<MemberWithRegistrationsBlob> {
-        const isUserManager = this.isUserManager(member);
-        if (isUserManager) {
-            // For the user manager, we don't delete data, because when registering a new member, it doesn't have any organizations yet...
-            if (!(await this.canAccessMember(member, PermissionLevel.Full))) {
-                data.details.securityCode = null;
-                data.details.notes = null;
-            }
-
-            return data;
-        }
-
         const records = await this.getAccessibleRecordSet(member, PermissionLevel.Read);
 
         const cloned = data.clone();
@@ -1052,6 +1063,17 @@ export class AdminPermissionChecker {
             if (!records.has(value.settings.id)) {
                 cloned.details.recordAnswers.delete(key);
             }
+        }
+
+        const isUserManager = this.isUserManager(member);
+        if (isUserManager) {
+            // For a user manager without an organization, we don't delete data, because when registering a new member, it doesn't have any organizations yet...
+            if (!(await this.canAccessMember(member, PermissionLevel.Full))) {
+                cloned.details.securityCode = null;
+                cloned.details.notes = null;
+            }
+
+            return cloned;
         }
 
         // Has financial read access?
@@ -1106,7 +1128,6 @@ export class AdminPermissionChecker {
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
         const isSetFinancialSupportTrue = data.details.shouldApplyReducedPrice;
-        const isUserManager = this.isUserManager(member);
 
         if (data.details.securityCode !== undefined || data.details.trackingYear !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
@@ -1136,7 +1157,7 @@ export class AdminPermissionChecker {
                 });
             }
 
-            const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write);
+            const records = await this.getAccessibleRecordSet(member, PermissionLevel.Write);
 
             for (const [key, value] of data.details.recordAnswers.entries()) {
                 let name: string | undefined = undefined;
@@ -1162,7 +1183,7 @@ export class AdminPermissionChecker {
                     name = value.settings.name;
                 }
 
-                if (!isUserManager && !records.has(key)) {
+                if (!records.has(key)) {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
@@ -1171,6 +1192,8 @@ export class AdminPermissionChecker {
                 }
             }
         }
+
+        const isUserManager = this.isUserManager(member);
 
         if (hasNotes && isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full))) {
             throw new SimpleError({
