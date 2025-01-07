@@ -6,7 +6,43 @@ import { PaymentReallocationService } from './PaymentReallocationService';
 import { Formatter } from '@stamhoofd/utility';
 
 export const BalanceItemService = {
-    async markPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
+    /**
+     * Safe method to correct balance items that missed a markPaid call, but avoid double marking an order as valid.
+     */
+    async markPaidRepeated(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
+        if (balanceItem.pricePaid <= 0) {
+            return;
+        }
+
+        await this.markDue(balanceItem);
+
+        // Registrations are safe to mark valid multiple times
+        if (balanceItem.registrationId) {
+            await RegistrationService.markValid(balanceItem.registrationId);
+        }
+
+        // Orders aren't safe to mark paid twice - so only mark paid if not yet valid
+        // The only downside of this is that we won't send a paid email for transfer orders
+        // we should fix that in the future by introducing a paidAt timestamp for orders
+        if (balanceItem.orderId) {
+            const order = await Order.getByID(balanceItem.orderId);
+            if (order && !this.validAt) {
+                await order.markPaid(payment, organization);
+
+                // Save number in balance description
+                if (order.number !== null) {
+                    const webshop = await Webshop.getByID(order.webshopId);
+
+                    if (webshop) {
+                        balanceItem.description = order.generateBalanceDescription(webshop);
+                        await balanceItem.save();
+                    }
+                }
+            }
+        }
+    },
+
+    async markDue(balanceItem: BalanceItem) {
         if (balanceItem.status === BalanceItemStatus.Hidden) {
             await BalanceItem.reactivateItems([balanceItem]);
         }
@@ -18,6 +54,10 @@ export const BalanceItemService = {
                 await BalanceItem.reactivateItems([depending]);
             }
         }
+    },
+
+    async markPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
+        await this.markDue(balanceItem);
 
         // It is possible this balance item was earlier paid
         // and later the regigstration / order has been canceled and it became a negative balance item - which as some point has been reembursed and marked as 'paid'
