@@ -26,7 +26,7 @@ export const BalanceItemService = {
         // we should fix that in the future by introducing a paidAt timestamp for orders
         if (balanceItem.orderId) {
             const order = await Order.getByID(balanceItem.orderId);
-            if (order && !this.validAt) {
+            if (order && !order.validAt) {
                 await order.markPaid(payment, organization);
 
                 // Save number in balance description
