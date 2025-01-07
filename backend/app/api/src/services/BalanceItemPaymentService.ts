@@ -7,7 +7,7 @@ type Loaded<T> = (T) extends ManyToOneRelation<infer Key, infer Model> ? Record<
 
 export const BalanceItemPaymentService = {
     async markPaid(balanceItemPayment: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
-        const wasPaid = balanceItemPayment.balanceItem.priceOpen === 0;
+        const wasPaid = balanceItemPayment.balanceItem.isPaid;
 
         // Update cached amountPaid of the balance item (balanceItemPayment will get overwritten later, but we need it to calculate the status)
         balanceItemPayment.balanceItem.pricePaid += balanceItemPayment.price;
@@ -17,7 +17,7 @@ export const BalanceItemPaymentService = {
         }
 
         await balanceItemPayment.balanceItem.save();
-        const isPaid = balanceItemPayment.balanceItem.priceOpen === 0;
+        const isPaid = balanceItemPayment.balanceItem.isPaid;
 
         // Do logic of balance item
         if (isPaid && !wasPaid && balanceItemPayment.price >= 0 && balanceItemPayment.balanceItem.status === BalanceItemStatus.Due) {

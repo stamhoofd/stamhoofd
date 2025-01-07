@@ -149,6 +149,20 @@ export class BalanceItem extends QueryableModel {
         return this.price - this.pricePaid - this.pricePending;
     }
 
+    /**
+     * price minus pricePaid
+     */
+    get priceUnpaid() {
+        return this.price - this.pricePaid;
+    }
+
+    get isPaid() {
+        if (this.price < 0) {
+            return this.priceUnpaid >= 0;
+        }
+        return this.priceUnpaid <= 0;
+    }
+
     static async deleteItems(items: BalanceItem[]) {
         // Find depending items
         const dependingItemIds = Formatter.uniqueArray(items.filter(i => !!i.dependingBalanceItemId).map(i => i.dependingBalanceItemId!)).filter(id => !items.some(item => item.id === id));
