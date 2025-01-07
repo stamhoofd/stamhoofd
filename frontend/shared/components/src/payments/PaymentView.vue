@@ -229,7 +229,7 @@
                 <STList>
                     <STListItem v-if="payment.isFailed && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
                         <h2 class="style-title-list">
-                            Heactiveer
+                            Heractiveer
                         </h2>
                         <p class="style-description">
                             Wijzig de status terug naar 'wacht op betaling'.
