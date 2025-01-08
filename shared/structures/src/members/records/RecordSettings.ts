@@ -243,7 +243,7 @@ export class RecordSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[];
 
-    @field({ decoder: new EnumDecoder(PermissionLevel), ...NextVersion })
+    @field({ decoder: new EnumDecoder(PermissionLevel), version: 356 })
     externalPermissionLevel = PermissionLevel.Write;
 
     getDiffValue() {
