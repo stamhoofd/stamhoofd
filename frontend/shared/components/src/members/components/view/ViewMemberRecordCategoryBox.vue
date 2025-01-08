@@ -13,33 +13,33 @@
 
 <script setup lang="ts">
 import { PlatformMember, RecordCategory } from '@stamhoofd/structures';
-import ViewRecordCategoryAnswersBox from '../../../records/components/ViewRecordCategoryAnswersBox.vue';
+import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useOrganization } from '../../../hooks';
-import { computed } from 'vue';
+import ViewRecordCategoryAnswersBox from '../../../records/components/ViewRecordCategoryAnswersBox.vue';
 
 const props = defineProps<{
-    category: RecordCategory,
-    member: PlatformMember
-}>()
+    category: RecordCategory;
+    member: PlatformMember;
+}>();
 
-const app = useAppContext()
+const app = useAppContext();
 const organization = useOrganization();
 
 const owningOrganization = computed(() => {
-    return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id === props.category.id))
-})
+    return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id === props.category.id));
+});
 const titleSuffix = computed(() => {
     if (app === 'registration') {
-        return ""
+        return '';
     }
 
     // Platform admins can see who owns the record category
     if (owningOrganization.value && (!organization.value || owningOrganization.value.id !== organization.value.id)) {
-        return owningOrganization.value.name
+        return owningOrganization.value.name;
     }
 
-    return ""
-})
+    return '';
+});
 
 </script>

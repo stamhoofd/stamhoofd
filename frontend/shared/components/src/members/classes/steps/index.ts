@@ -1,4 +1,4 @@
-import { PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { PermissionLevel, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { EditMemberStep } from '../MemberStepManager';
 import { MemberDataPermissionStep } from './MemberDataPermissionStep';
 import { MemberEmergencyContactsStep } from './MemberEmergencyContactsStep';
@@ -23,7 +23,9 @@ export function getAllMemberSteps(member: PlatformMember, item: RegisterItem | n
 
     // We'll skip these steps for now for administrators - unless it is a requirement for the platform/owning organization is different
     for (const recordCategory of member.getAllRecordCategories()) {
-        steps.push(new MemberRecordCategoryStep(recordCategory, item, options));
+        if (recordCategory.checkPermissionForUserManager(PermissionLevel.Write)) {
+            steps.push(new MemberRecordCategoryStep(recordCategory, item, options));
+        }
     }
 
     return steps;

@@ -79,17 +79,11 @@ const props = withDefaults(
 const auth = useAuth();
 const organization = useOrganization();
 const app = useAppContext();
-const isAdmin = app === 'dashboard' || app === 'admin';
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
 
 const recordCategories = computed(() =>
     props.member.getEnabledRecordCategories({
-        checkPermissions: isAdmin
-            ? {
-                    user: auth.user!,
-                    level: PermissionLevel.Write,
-                }
-            : null,
+        checkPermissions: { user: auth.user!, level: PermissionLevel.Write },
         scopeOrganization: organization.value,
     }),
 );
