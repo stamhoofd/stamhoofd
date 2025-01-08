@@ -12,7 +12,9 @@
         }
     },
     "license": "UNLICENCED",
-    "sideEffects": false,
+    "sideEffects": [
+        "./src/circular-dependencies/*.ts"
+    ],
     "files": [
         "dist",
         "esm/dist",
