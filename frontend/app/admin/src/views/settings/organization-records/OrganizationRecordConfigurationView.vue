@@ -4,18 +4,6 @@
             {{ title }}
         </h1>
 
-        <hr>
-        <h2>Soorten lokalen</h2>
-        <PremiseTypesList v-model="draggableTypes" :add-array-patch="addArrayPatch" />
-
-        <hr>
-        <h2 v-if="app === 'admin'">
-            Ingebouwde organisatiegegevens uitbreiden
-        </h2>
-        <h2 v-else>
-            Extra organisatiegegevens
-        </h2>
-
         <p>
             Breid het aantal organisatiegegevens zelf nog uit.
         </p>
@@ -31,12 +19,10 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, checkoutUIFilterBuilders, ErrorBox, RecordEditorSettings, RecordEditorType, SaveView, useAppContext, useDraggableArray, useErrors, usePatch, usePatchArray, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, checkoutUIFilterBuilders, ErrorBox, RecordEditorSettings, RecordEditorType, SaveView, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { usePlatformManager } from '@stamhoofd/networking';
-import { Address, BaseOrganization, Country, OrganizationLvlRecordsConfiguration, OrganizationMetaData, PatchAnswers, Platform, PlatformConfig, RecordCategory } from '@stamhoofd/structures';
+import { Address, BaseOrganization, Country, OrganizationLvlRecordsConfiguration, OrganizationMetaData, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import PremiseTypesList from '../event-types/PremiseTypesList.vue';
 import EditOrganizationRecordSettings from './EditOrganizationRecordSettings.vue';
 
 const props = defineProps<{
@@ -47,18 +33,12 @@ const props = defineProps<{
 const saving = ref(false);
 
 const title = 'Gegevens van organisaties';
-const app = useAppContext();
 const pop = usePop();
-const platform = usePlatform();
-const platformManager = usePlatformManager();
 
 const $t = useTranslate();
 
 const { patch: patchRecords, patched, addPatch, hasChanges: hasRecordChanges } = usePatch(props.recordsConfiguration);
 
-const originalTypes = computed(() => platform.value.config.premiseTypes);
-const { patched: premiseTypes, patch: premiseTypesPatch, addArrayPatch, hasChanges: hasPremiseTypeChanges } = usePatchArray(originalTypes);
-const draggableTypes = useDraggableArray(() => premiseTypes.value, addArrayPatch);
 const errors = useErrors();
 
 function addCategoriesPatch(p: PatchableArrayAutoEncoder<RecordCategory>) {
@@ -102,13 +82,6 @@ async function save() {
     errors.errorBox = null;
 
     try {
-        if (hasPremiseTypeChanges.value) {
-            await platformManager.value.patch(Platform.patch({
-                config: PlatformConfig.patch({
-                    premiseTypes: premiseTypesPatch.value,
-                }),
-            }));
-        }
         await props.saveHandler(patchRecords.value);
         await pop({ force: true });
     }

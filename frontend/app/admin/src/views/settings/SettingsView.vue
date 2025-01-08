@@ -113,9 +113,24 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('5d0062df-e595-4e28-b1e3-d399102dfadf') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('76b00f58-a587-431f-9c28-1b86d394fc26') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/list.svg">
                     </template>
                     <h2 class="style-title-list">
                         Gegevens van organisaties
@@ -279,6 +294,7 @@ import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditEventTypesView from './event-types/EditEventTypesView.vue';
+import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
 import LabsView from './LabsView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 import OrganizationRecordConfigurationView from './organization-records/OrganizationRecordConfigurationView.vue';
@@ -296,6 +312,7 @@ enum Routes {
     EmailSettings = 'emailadressen',
     EventTypes = 'soorten-activiteiten',
     CorporateIdentity = 'huisstijl',
+    Premises = 'lokalen',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
     Terms = 'voorwaarden',
@@ -419,6 +436,11 @@ defineRoutes([
         url: Routes.EventTypes,
         present: 'popup',
         component: EditEventTypesView as ComponentOptions,
+    },
+    {
+        url: Routes.Premises,
+        present: 'popup',
+        component: EditPremiseTypesView as ComponentOptions,
     },
     {
         url: Routes.OrganizationRecordConfiguration,
