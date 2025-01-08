@@ -13,7 +13,12 @@
     },
     "license": "UNLICENCED",
     "sideEffects": [
-        "./src/circular-dependencies/*.ts"
+        "./src/circular-dependencies/*.ts",
+        "./index.ts",
+        "./esm/dist/src/circular-dependencies/*.js",
+        "./dist/src/circular-dependencies/*.js",
+        "./esm/dist/index.js",
+        "./dist/index.js"
     ],
     "files": [
         "dist",
