@@ -979,6 +979,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     });
                 }
                 const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                const locale = Context.i18n.locale.replace('-', '_');
                 const molliePayment = await mollieClient.payments.create({
                     amount: {
                         currency: 'EUR',
@@ -993,6 +994,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     metadata: {
                         paymentId: payment.id,
                     },
+                    locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
                 });
                 paymentUrl = molliePayment.getCheckoutUrl();
 
