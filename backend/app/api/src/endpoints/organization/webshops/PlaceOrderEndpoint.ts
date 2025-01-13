@@ -267,6 +267,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             })
                         }
                         const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                        const locale = request.i18n.locale.replace('-', '_');
                         const molliePayment = await mollieClient.payments.create({
                             amount: {
                                 currency: 'EUR',
@@ -284,6 +285,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 webshop: webshop.id,
                                 payment: payment.id
                             },
+                            locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
                         });
                         console.log(molliePayment)
                         paymentUrl = molliePayment.getCheckoutUrl()
