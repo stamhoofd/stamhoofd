@@ -89,8 +89,8 @@ export class I18nController {
     correctLocale() {
         // Some locales are invalid
         const validLocales = {
-            [Country.Belgium]: ["nl", "en"],
-            [Country.Netherlands]: ["nl", "en"],
+            [Country.Belgium]: ["nl"],
+            [Country.Netherlands]: ["nl"],
         }
 
         if (!validLocales[this.country]) {
