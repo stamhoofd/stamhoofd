@@ -11,9 +11,11 @@
             {{ Formatter.relativeTime(log.createdAt, {hours: false}) }}
         </p>
 
-        <h3 class="style-title-list">
+        <h3 v-if="showDescriptionInTitle" v-text="log.description" />
+        <h3 v-else class="style-title-list">
             <RenderTextComponent :text="log.renderableTitle" />
         </h3>
+
         <p v-if="userDescription.length" class="style-description pre-wrap">
             <RenderTextComponent :text="userDescription" />
         </p>
@@ -21,22 +23,23 @@
             <RenderTextComponent :text="log.renderableDescription" />
         </p>
 
-        <p v-if="log.description" class="style-description-small pre-wrap" v-text="log.description" />
+        <p v-if="log.description && !showDescriptionInTitle" class="style-description-small pre-wrap" v-text="log.description" />
 
         <PatchListText v-if="log.patchList" :items="log.patchList" />
     </STListItem>
 </template>
 
 <script setup lang="ts">
-import { AuditLog, AuditLogReplacement, AuditLogReplacementType, AuditLogSource } from '@stamhoofd/structures';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { AuditLog, AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 import IconContainer from '../../icons/IconContainer.vue';
 import ProgressIcon from '../../icons/ProgressIcon.vue';
+import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
+import AuditLogsView from '../AuditLogsView.vue';
 import PatchListText from './PatchListText.vue';
 import { RenderTextComponent } from './RenderTextComponent';
-import { Formatter } from '@stamhoofd/utility';
-import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import AuditLogsView from '../AuditLogsView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -47,6 +50,8 @@ const props = withDefaults(
     });
 
 const userDescription: unknown[] = [];
+
+const showDescriptionInTitle = computed(() => props.log.type === AuditLogType.Unknown && props.log.description);
 
 if (props.log.user) {
     if (props.log.source === AuditLogSource.User) {

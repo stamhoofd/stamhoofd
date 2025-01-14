@@ -257,7 +257,7 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`flag`, `canceled red`];
 
         case AuditLogType.Unknown:
-            return [`help`];
+            return [`history`];
 
         case AuditLogType.EventEdited:
             return [`calendar`, `edit`];
