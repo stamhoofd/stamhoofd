@@ -463,7 +463,7 @@ export class Organization extends QueryableModel {
             template: {
                 type: data.type,
             },
-            from: data.personal ? Email.getPersonalEmailFor(this.i18n) : Email.getInternalEmailFor(this.i18n),
+            from: Email.getInternalEmailFor(this.i18n),
             singleBcc: data.bcc ? 'simon@stamhoofd.be' : undefined,
             replyTo: data.replyTo,
             type: 'transactional',
