@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { ArrayDecoder, Decoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { AuditLogPatchItem, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { v7 as uuidv7 } from 'uuid';
@@ -52,6 +52,9 @@ export class AuditLog extends QueryableModel {
 
     @column({ type: 'json', decoder: new MapDecoder(StringDecoder, AuditLogReplacement as Decoder<AuditLogReplacement>) })
     replacements: Map<string, AuditLogReplacement> = new Map();
+
+    @column({ type: 'json', decoder: new MapDecoder(StringDecoder, StringOrNumberDecoder) })
+    meta: Map<string, string | number> = new Map();
 
     @column({ type: 'json', decoder: new ArrayDecoder(AuditLogPatchItem as Decoder<AuditLogPatchItem>) })
     patchList: AuditLogPatchItem[] = [];

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { RenderContext, renderTemplate } from './AuditLogRenderer.js';
 import { AuditLogReplacement } from './AuditLogReplacement.js';
@@ -232,8 +232,6 @@ export function getAuditLogTypeName(type: AuditLogType): string {
         case AuditLogType.EmailAddressFraudComplaint:
             return `E-mailadressen die een fraudeklacht hebben ingediend`;
     }
-
-    return type;
 }
 
 export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?: string] {
@@ -366,7 +364,6 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
         case AuditLogType.EmailTemplateDeleted:
             return [`email-template`, `canceled red`];
     }
-    return [`help`];
 }
 
 function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
@@ -730,6 +727,9 @@ export class AuditLog extends AutoEncoder {
 
     @field({ decoder: new MapDecoder(StringDecoder, AuditLogReplacement) })
     replacements: Map<string, AuditLogReplacement>;
+
+    @field({ decoder: new MapDecoder(StringDecoder, StringOrNumberDecoder), ...NextVersion })
+    meta: Map<string, string | number> = new Map();
 
     @field({ decoder: new ArrayDecoder(AuditLogPatchItem) })
     patchList: AuditLogPatchItem[] = [];
