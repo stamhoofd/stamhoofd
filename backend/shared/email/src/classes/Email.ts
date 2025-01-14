@@ -340,10 +340,6 @@ class EmailStatic {
         return '"Stamhoofd" <'+ (i18n.$t("shared.emails.general")) +'>'
     }
 
-    getPersonalEmailFor(i18n: I18n) {
-        return '"Simon Backx" <'+ (i18n.$t("shared.emails.personal")) +'>'
-    }
-
     /**
      * Send an internal e-mail (from stamhoofd)
      */

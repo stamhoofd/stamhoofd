@@ -125,7 +125,6 @@ export class RegisterCode extends Model {
                     // Delay email until everything is validated and saved
                     delayEmails.push({
                         to: admins,
-                        bcc: "simon@stamhoofd.be",
                         subject: organization.name+" heeft jullie doorverwijzingslink gebruikt 🥳",
                         type: "transactional",
                         text: "Dag "+otherOrganization.name+",\n\nGoed nieuws! "+organization.name+" heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren.\n\n— Stamhoofd"
@@ -134,7 +133,6 @@ export class RegisterCode extends Model {
                     // Delay email until everything is validated and saved
                     delayEmails.push({
                         to: admins,
-                        bcc: "simon@stamhoofd.be",
                         subject: organization.name+" heeft jullie doorverwijzingslink gebruikt 🥳",
                         type: "transactional",
                         text: "Dag "+otherOrganization.name+",\n\nGoed nieuws! "+organization.name+" heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 1 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"

@@ -1,11 +1,11 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { Email } from "@stamhoofd/email";
+import { QueueHandler } from "@stamhoofd/queues";
+import { STInvoiceItem } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization, RegisterCode, STCredit, STPendingInvoice } from "./";
-import { STInvoiceItem } from "@stamhoofd/structures";
-import { QueueHandler } from "@stamhoofd/queues";
 
 export class UsedRegisterCode extends Model {
     static table = "used_register_codes";
@@ -120,7 +120,6 @@ export class UsedRegisterCode extends Model {
             if (code.invoiceValue) {
                 Email.sendInternal({
                     to: admins,
-                    bcc: "simon@stamhoofd.be",
                     subject: `${organization.name} heeft jullie tegoed gebruikt`,
                     text: "Dag "+receivingOrganization.name+",\n\n"+organization.name+" had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze dit ook gebruikt. Zoals afgesproken wordt hiervoor " + Formatter.price(code.invoiceValue)+ " aangerekend via jullie openstaand saldo in jullie Stamhoofd account."
                     + "\n\n— Stamhoofd"
@@ -130,7 +129,6 @@ export class UsedRegisterCode extends Model {
                 // Delay email until everything is validated and saved
                 Email.sendInternal({
                     to: admins,
-                    bcc: "simon@stamhoofd.be",
                     subject: "Je hebt "+Formatter.price(credit.change)+" tegoed ontvangen 💰",
                     text: "Dag "+receivingOrganization.name+",\n\nGeweldig nieuws! "+organization.name+" had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst minstens één euro uitgegeven. Daardoor ontvangen jullie "+Formatter.price(credit.change)+" tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). "
                     + (credit.change <= 90*100 ? ("Bij de volgende vereniging ontvangen jullie nog meer: "+Formatter.price(credit.change + 10*100)+". ") : "")

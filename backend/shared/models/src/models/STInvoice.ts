@@ -312,7 +312,6 @@ export class STInvoice extends Model {
                     // Send the e-mail
                     Email.sendInternal({
                         to: invoicingTo,
-                        bcc: "simon@stamhoofd.be",
                         subject: "Factuur " + this.number + " voor " + organization.name,
                         text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie factuur "+ this.number +" voor jullie administratie. Deze werd al betaald, je hoeft dus geen actie meer te ondernemen. Neem gerust contact met ons op (via "+organization.i18n.$t("shared.emails.general")+") als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         attachments: [
