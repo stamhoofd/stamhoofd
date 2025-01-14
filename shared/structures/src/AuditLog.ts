@@ -728,7 +728,7 @@ export class AuditLog extends AutoEncoder {
     @field({ decoder: new MapDecoder(StringDecoder, AuditLogReplacement) })
     replacements: Map<string, AuditLogReplacement>;
 
-    @field({ decoder: new MapDecoder(StringDecoder, StringOrNumberDecoder), ...NextVersion })
+    @field({ decoder: new MapDecoder(StringDecoder, StringOrNumberDecoder), version: 357 })
     meta: Map<string, string | number> = new Map();
 
     @field({ decoder: new ArrayDecoder(AuditLogPatchItem) })
