@@ -24,12 +24,12 @@
                         >
                     </STInputBox>
 
-                    <STInputBox v-if="defaultAgeGroups.length" :title="$t('528545c4-028b-4711-9b16-f6fa990c3130')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
+                    <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('528545c4-028b-4711-9b16-f6fa990c3130')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                         <Dropdown v-model="defaultAgeGroupId">
                             <option :value="null">
                                 Geen automatische aansluiting of verzekeringen (!)
                             </option>
-                            <option v-for="ageGroup of defaultAgeGroups" :key="ageGroup.id" :value="ageGroup.id">
+                            <option v-for="ageGroup of defaultAgeGroupsFiltered" :key="ageGroup.id" :value="ageGroup.id">
                                 {{ getAgeGroupSelectionText(ageGroup) }}
                             </option>
                         </Dropdown>
@@ -646,6 +646,11 @@ const availableWaitingLists = computed(() => {
 
 const defaultAgeGroups = computed(() => {
     return platform.value.config.defaultAgeGroups;
+});
+
+const defaultAgeGroupsFiltered = computed(() => {
+    const tags = organization.value?.meta.tags ?? [];
+    return defaultAgeGroups.value.filter(defaultAgeGroup => defaultAgeGroup.isEnabledForTags(tags));
 });
 
 const defaultAgeGroup = computed(() => {
