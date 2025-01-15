@@ -46,6 +46,7 @@ export * from './src/Permissions.js';
 export * from './src/PermissionsByRole.js';
 export * from './src/PermissionsResourceType.js';
 export * from './src/Platform.js';
+export * from './src/PlatformServerConfig.js';
 export * from './src/Policy.js';
 export * from './src/ReceivableBalance.js';
 export * from './src/GenericBalance.js';

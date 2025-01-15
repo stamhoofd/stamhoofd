@@ -1,7 +1,7 @@
 import { column } from '@simonbackx/simple-database';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
-import { PlatformConfig, PlatformPrivateConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { RegistrationPeriod } from './RegistrationPeriod';
 
@@ -29,6 +29,12 @@ export class Platform extends QueryableModel {
 
     @column({ type: 'json', decoder: PlatformPrivateConfig })
     privateConfig: PlatformPrivateConfig = PlatformPrivateConfig.create({});
+
+    /**
+     * Invisible data for the frontend / structs - no matter your auhtorization level
+     */
+    @column({ type: 'json', decoder: PlatformServerConfig })
+    serverConfig: PlatformServerConfig = PlatformServerConfig.create({});
 
     static sharedStruct: PlatformStruct | null = null;
 

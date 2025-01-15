@@ -758,7 +758,10 @@ export class AdminPermissionChecker {
         return this.hasFullAccess(organizationId);
     }
 
-    canManageSSOSettings(organizationId: string) {
+    canManageSSOSettings(organizationId: string | null) {
+        if (!organizationId) {
+            return this.hasPlatformFullAccess();
+        }
         return this.hasFullAccess(organizationId);
     }
 

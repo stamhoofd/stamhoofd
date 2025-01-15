@@ -4,21 +4,18 @@ import { LoginProviderType } from './User.js';
 
 export class OpenIDClientConfiguration extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    issuer: string;
+    issuer = '';
 
     @field({ decoder: StringDecoder })
-    clientId;
+    clientId = '';
 
     @field({ decoder: StringDecoder })
-    clientSecret;
+    clientSecret = '';
 }
 
 export class StartOpenIDFlowStruct extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, nullable: true })
     webshopId: string | null = null;
-
-    @field({ decoder: StringDecoder })
-    organizationId: string;
 
     /**
      * To secure the final redirect (not for the openid connect flow itself)
@@ -32,9 +29,6 @@ export class StartOpenIDFlowStruct extends AutoEncoder {
     @field({ decoder: new EnumDecoder(LoginProviderType) })
     provider = LoginProviderType.SSO;
 
-    /**
-     * sso (= use one configured in organization), google, apple, ... (for now only sso supported)
-     */
     @field({ decoder: StringDecoder, optional: true, nullable: true })
     prompt: string | null = null;
 

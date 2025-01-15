@@ -27,6 +27,10 @@
         <Checkbox :model-value="getFeatureFlag('balance-emails')" @update:model-value="setFeatureFlag('balance-emails', !!$event)">
             Notificaties voor openstaande bedragen
         </Checkbox>
+
+        <Checkbox :model-value="getFeatureFlag('platform-sso')" @update:model-value="setFeatureFlag('platform-sso', !!$event)">
+            Platform SSO
+        </Checkbox>
     </SaveView>
 </template>
 

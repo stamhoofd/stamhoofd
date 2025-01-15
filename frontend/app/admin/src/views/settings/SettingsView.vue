@@ -248,6 +248,23 @@
                     </template>
                 </STListItem>
             </STList>
+
+            <STList v-if="$feature('platform-sso')" class="illustration-list">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/lock.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Single-Sign-On (SSO)
+                    </h2>
+                    <p class="style-description">
+                        Configureer een externe authenticatie server
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
         </main>
     </div>
 </template>
@@ -255,7 +272,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, Toast, usePlatform } from '@stamhoofd/components';
+import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
@@ -284,6 +301,7 @@ enum Routes {
     DataPermissions = 'toestemming-gegevensverzameling',
     Terms = 'voorwaarden',
     Labs = 'experimenten',
+    SingleSignOn = 'sso',
 }
 
 const platform = usePlatform();
@@ -406,6 +424,11 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: EditPremiseTypesView as ComponentOptions,
+    },
+    {
+        url: Routes.SingleSignOn,
+        present: 'popup',
+        component: SSOSettingsView as unknown as ComponentOptions,
     },
 ]);
 const $navigate = useNavigate();

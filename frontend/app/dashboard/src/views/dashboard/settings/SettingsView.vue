@@ -322,7 +322,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, usePlatform, useSalesDisabled } from '@stamhoofd/components';
+import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, usePlatform, useSalesDisabled } from '@stamhoofd/components';
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
@@ -337,7 +337,6 @@ import PremisesView from './PremisesView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
-import SSOSettingsView from './SSOSettingsView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';

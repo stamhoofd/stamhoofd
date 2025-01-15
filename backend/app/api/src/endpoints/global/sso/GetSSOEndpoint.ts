@@ -1,7 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { OpenIDClientConfiguration } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../helpers/Context';
+import { Platform } from '@stamhoofd/models';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -18,7 +19,7 @@ export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/sso', {});
+        const params = Endpoint.parseParameters(request.url, '/sso', {});
 
         if (params) {
             return [true, params as Params];
@@ -27,17 +28,18 @@ export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageSSOSettings(organization.id)) {
+        if (!await Context.auth.canManageSSOSettings(organization?.id ?? null)) {
             throw Context.auth.error();
         }
 
-        return new Response(organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({
-            clientId: '',
-            clientSecret: '',
-            issuer: '',
-        }));
+        if (organization) {
+            return new Response(organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({}));
+        }
+
+        const platform = await Platform.getShared();
+        return new Response(platform.serverConfig.ssoConfiguration ?? OpenIDClientConfiguration.create({}));
     }
 }

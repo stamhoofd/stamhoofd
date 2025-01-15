@@ -381,15 +381,15 @@ export class SessionContext implements RequestMiddleware {
         spaStateInput.value = spaState;
         form.appendChild(spaStateInput);
 
-        // Include organizationId
-        const organizationIdInput = document.createElement('input');
-        organizationIdInput.type = 'hidden';
-        organizationIdInput.name = 'organizationId';
-        organizationIdInput.value = this.organizationId;
-        form.appendChild(organizationIdInput);
-
         // Include webshopId
         if (data.webshopId) {
+            if (!this.organization) {
+                throw new SimpleError({
+                    code: 'invalid_organization',
+                    message: 'Organization required when specifying webshopId',
+                    human: 'Er ging iets mis. Probeer het opnieuw.',
+                });
+            }
             const webshopIdInput = document.createElement('input');
             webshopIdInput.type = 'hidden';
             webshopIdInput.name = 'webshopId';

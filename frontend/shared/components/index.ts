@@ -167,12 +167,7 @@ export { default as GraphView } from './src/views/GraphView.vue';
 export * from './src/views/GraphViewConfiguration';
 
 // Auth
-export { default as ConfirmEmailView } from './src/auth/ConfirmEmailView.vue';
-export { default as ForgotPasswordResetView } from './src/auth/ForgotPasswordResetView.vue';
-export { default as ForgotPasswordView } from './src/auth/ForgotPasswordView.vue';
-export { default as LoginView } from './src/auth/LoginView.vue';
-export { default as NoPermissionsView } from './src/auth/NoPermissionsView.vue';
-export { default as PlatformFooter } from './src/auth/PlatformFooter.vue';
+export * from './src/auth';
 
 // Admin views
 export * from './src/admins';

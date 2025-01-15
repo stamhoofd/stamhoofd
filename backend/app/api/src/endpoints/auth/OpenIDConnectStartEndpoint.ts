@@ -1,11 +1,11 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Webshop } from '@stamhoofd/models';
-import { StartOpenIDFlowStruct } from '@stamhoofd/structures';
+import { Platform, Webshop } from '@stamhoofd/models';
+import { OpenIDClientConfiguration, StartOpenIDFlowStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { OpenIDConnectHelper } from '../../../../helpers/OpenIDConnectHelper';
+import { Context } from '../../helpers/Context';
+import { OpenIDConnectHelper } from '../../helpers/OpenIDConnectHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -30,11 +30,28 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Check webshop and/or organization
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         const webshopId = request.body.webshopId;
-        let redirectUri = 'https://' + organization.getHost();
+        const platform = await Platform.getShared();
+
+        // Host should match correctly
+        let redirectUri = 'https://' + STAMHOOFD.domains.dashboard;
+
+        if (organization) {
+            redirectUri = 'https://' + organization.getHost();
+        }
+
+        // todo: also support the app as redirect uri using app schemes (could be required for mobile apps)
 
         if (webshopId) {
+            if (!organization) {
+                throw new SimpleError({
+                    code: 'invalid_organization',
+                    message: 'Organization required when specifying webshopId',
+                    statusCode: 400,
+                });
+            }
+
             const webshop = await Webshop.getByID(webshopId);
             if (!webshop || webshop.organizationId !== organization.id) {
                 throw new SimpleError({
@@ -68,7 +85,15 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
             });
         }
 
-        const configuration = organization.serverMeta.ssoConfiguration;
+        let configuration: OpenIDClientConfiguration | null;
+
+        if (organization) {
+            configuration = organization.serverMeta.ssoConfiguration;
+        }
+        else {
+            configuration = platform.serverConfig.ssoConfiguration;
+        }
+
         if (!configuration) {
             throw new SimpleError({
                 code: 'invalid_client',
@@ -76,7 +101,6 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
                 statusCode: 400,
             });
         }
-
         const helper = new OpenIDConnectHelper(organization, configuration);
         return await helper.startAuthCodeFlow(redirectUri, request.body.provider, request.body.spaState, request.body.prompt);
     }

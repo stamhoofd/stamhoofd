@@ -30,17 +30,22 @@ type SessionContext = {
 };
 
 export class OpenIDConnectHelper {
-    organization: Organization;
+    organization: Organization | null;
     configuration: OpenIDClientConfiguration;
 
     static sessionStorage = new Map<string, SessionContext>();
 
-    constructor(organization, configuration: OpenIDClientConfiguration) {
+    constructor(organization: Organization | null, configuration: OpenIDClientConfiguration) {
         this.organization = organization;
         this.configuration = configuration;
     }
 
     get redirectUri() {
+        // todo: we might need a special url for the app here
+
+        if (!this.organization) {
+            return 'https://' + STAMHOOFD.domains.api + '/openid/callback';
+        }
         return 'https://' + this.organization.id + '.' + STAMHOOFD.domains.api + '/openid/callback';
     }
 
@@ -209,7 +214,7 @@ export class OpenIDConnectHelper {
             }
 
             // Get user from database
-            let user = await User.getOrganizationLevelUser(this.organization.id, claims.email);
+            let user = await User.getForRegister(this.organization?.id ?? null, claims.email);
             if (!user) {
                 // Create a new user
                 user = await User.registerSSO(this.organization, {
