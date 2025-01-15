@@ -539,6 +539,12 @@ export class GroupSettings extends AutoEncoder {
     requirePlatformMembershipOn: Date | null = null;
 
     /**
+     * The member should have a platform membership on the date of the registration before being able to register
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    requirePlatformMembershipOnRegistrationDate: boolean = false;
+
+    /**
      * The member should have a valid registration (type = GroupType.Membership) for one of these organization ids
      *
      * If empty and requireOrganizationTags empty: new members without registrations can also register

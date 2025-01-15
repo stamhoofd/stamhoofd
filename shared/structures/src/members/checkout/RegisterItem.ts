@@ -2,22 +2,22 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerD
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
+import { compileToInMemoryFilter } from '../../filters/InMemoryFilter.js';
+import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions.js';
+import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { Group } from '../../Group.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
 import { Organization } from '../../Organization.js';
+import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import { PriceBreakdown } from '../../PriceBreakdown.js';
 import { StockReservation } from '../../StockReservation.js';
 import { PlatformMember } from '../PlatformMember.js';
-import { Registration } from '../Registration.js';
-import { RegisterContext } from './RegisterCheckout.js';
-import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
-import { compileToInMemoryFilter } from '../../filters/InMemoryFilter.js';
-import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions.js';
-import { RecordSettings } from '../records/RecordSettings.js';
 import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
-import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
+import { RecordSettings } from '../records/RecordSettings.js';
+import { Registration } from '../Registration.js';
+import { RegisterContext } from './RegisterCheckout.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -628,6 +628,14 @@ export class RegisterItem {
         return true;
     }
 
+    doesMeetRequirePlatformMembershipOnRegistrationDate() {
+        if (this.group.settings.requirePlatformMembershipOnRegistrationDate === true) {
+            const now = new Date();
+            return !!this.member.patchedMember.platformMemberships.find(m => m.isActive(now));
+        }
+        return true;
+    }
+
     isExistingMemberOrFamily() {
         return this.member.isExistingMember(this.group.organizationId) || (this.group.settings.priorityForFamily && !!this.family.members.find(f => f.isExistingMember(this.group.organizationId)));
     }
@@ -1054,6 +1062,14 @@ export class RegisterItem {
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOn',
                     human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel`,
+                });
+            }
+
+            if (!this.doesMeetRequirePlatformMembershipOnRegistrationDate()) {
+                throw new SimpleError({
+                    code: 'not_matching',
+                    message: 'Not matching: requirePlatformMembershipOnRegistrationDate',
+                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel op de datum van de inschrijving`,
                 });
             }
 

@@ -316,6 +316,21 @@ export class Group extends AutoEncoder {
                     },
                 });
             }
+
+            if (this.settings.requirePlatformMembershipOnRegistrationDate !== null) {
+                filter.push({
+                    platformMemberships: {
+                        $elemMatch: {
+                            startDate: {
+                                $lte: { $: '$now' },
+                            },
+                            endDate: {
+                                $gt: { $: '$now' },
+                            },
+                        },
+                    },
+                });
+            }
         }
 
         if (recommendOrganizationId && (!this.settings.requireOrganizationIds.length || this.settings.requireOrganizationIds.includes(recommendOrganizationId))) {

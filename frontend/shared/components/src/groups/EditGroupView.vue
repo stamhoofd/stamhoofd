@@ -265,6 +265,23 @@
                     </STList>
                 </STInputBox>
 
+                <STInputBox title="Aansluiting" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max">
+                    <STList>
+                        <STListItem :selectable="true" element-name="label">
+                            <template #left>
+                                <Checkbox v-model="requirePlatformMembershipOnRegistrationDate" />
+                            </template>
+
+                            <h3 class="style-title-list">
+                                Aansluiting is verplicht
+                            </h3>
+                            <p class="style-description-small">
+                                Een lid moet een aansluiting hebben op de dag van de inschrijving.
+                            </p>
+                        </STListItem>
+                    </STList>
+                </STInputBox>
+
                 <button v-if="requireGroupIds.length === 0" type="button" class="button text only-icon-smartphone" @click="addRequireGroupIds">
                     <span class="icon add" />
                     <span>Verplicht andere inschrijving</span>
@@ -861,6 +878,17 @@ const enableMaxMembers = computed({
                 }),
             });
         }
+    },
+});
+
+const requirePlatformMembershipOnRegistrationDate = computed({
+    get: () => patched.value.settings.requirePlatformMembershipOnRegistrationDate === true,
+    set: (value: boolean) => {
+        addPatch({
+            settings: GroupSettings.patch({
+                requirePlatformMembershipOnRegistrationDate: value,
+            }),
+        });
     },
 });
 
