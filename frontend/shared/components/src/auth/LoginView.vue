@@ -44,6 +44,7 @@
                         </button>
                     </template>
                     <template v-if="hasSSO">
+                        <hr v-if="hasPasswordLogin">
                         <button class="button primary" type="button" tabindex="-1" @click="startSSO">
                             <span v-if="!hasPasswordLogin">Inloggen</span>
                             <span v-else>Inloggen via SSO</span>
@@ -135,7 +136,7 @@ const hasSSO = useLoginMethod(LoginMethod.SSO);
 onMounted(() => {
     // Try to log in on first load
     try {
-        if (!hasSSO.value) {
+        if (!hasSSO.value || hasPasswordLogin.value) {
             return;
         }
         if (AppManager.shared.isNative) {
