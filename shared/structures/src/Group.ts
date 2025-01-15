@@ -318,16 +318,14 @@ export class Group extends AutoEncoder {
             }
 
             if (this.settings.requirePlatformMembershipOnRegistrationDate !== null) {
-                const requirePlatformMembershipOnRegistrationDate = new Date();
-
                 filter.push({
                     platformMemberships: {
                         $elemMatch: {
                             startDate: {
-                                $lte: requirePlatformMembershipOnRegistrationDate,
+                                $lte: { $: '$now' },
                             },
                             endDate: {
-                                $gt: requirePlatformMembershipOnRegistrationDate,
+                                $gt: { $: '$now' },
                             },
                         },
                     },
