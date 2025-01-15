@@ -1,8 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, PasswordToken, sendEmailTemplate, User } from '@stamhoofd/models';
-import { EmailTemplateType, NewUser, Recipient, Replacement, SignupResponse } from '@stamhoofd/structures';
+import { EmailVerificationCode, PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
+import { EmailTemplateType, LoginMethod, NewUser, Recipient, Replacement, SignupResponse } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context';
 
@@ -29,6 +29,18 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setUserOrganizationScope();
+
+        if (STAMHOOFD.userMode === 'platform') {
+            const platform = await Platform.getShared();
+            if (!platform.config.loginMethods.includes(LoginMethod.Password)) {
+                throw new SimpleError({
+                    code: 'not_supported',
+                    message: 'This platform does not support password login',
+                    human: 'Dit platform ondersteunt geen wachtwoord login',
+                    statusCode: 400,
+                });
+            }
+        }
 
         const u = await User.getForRegister(organization?.id ?? null, request.body.email);
 

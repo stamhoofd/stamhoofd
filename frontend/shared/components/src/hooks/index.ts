@@ -28,4 +28,5 @@ export * from './useSalesDisabled';
 export * from './useSetupStepTranslations';
 export * from './useUninheritedPermissions';
 export * from './useUser';
-export * from './useNow'
+export * from './useNow';
+export * from './useLoginMethods';

@@ -294,7 +294,14 @@ export class SessionContext implements RequestMiddleware {
         const oid_rt = search.get('oid_rt');
         const state = search.get('s');
         const error = search.get('error');
+
+        console.log('Checking SSO', oid_rt, state, error);
+
         if (oid_rt && state) {
+            // Delete initial url
+            search.delete('oid_rt');
+            search.delete('s');
+
             // Check valid state
             try {
                 const savedState = await Storage.secure.getItem('oid-state');
@@ -369,7 +376,7 @@ export class SessionContext implements RequestMiddleware {
 
         // Check SSO required?
         // if SSO
-        const url = new URL(this.server.host + '/openid/start');
+        const url = new URL((STAMHOOFD.environment === 'development' ? 'http://localhost:9091' : this.server.host) + '/openid/start');
 
         const form = document.createElement('form');
         form.action = url.href;

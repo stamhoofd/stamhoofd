@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Organization } from './';
 import { QueueHandler } from '@stamhoofd/queues';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 export class User extends QueryableModel {
     static table = 'users';
@@ -410,6 +411,29 @@ export class User extends QueryableModel {
         if (!this.meta) {
             this.meta = UserMeta.create({});
         }
+        const existingSub = this.meta.loginProviderIds.get(type);
+        if (existingSub) {
+            if (existingSub !== sub) {
+                throw new SimpleError({
+                    code: 'duplicate_login_provider',
+                    message: 'This account is already linked to another account',
+                    human: 'Er is een ander extern account gekoppeld aan deze gebruiker. Het is niet mogelijk om in te loggen op dit account. Contacteer de beheerder van de organisatie.',
+                    statusCode: 400,
+                });
+            }
+        }
+        else {
+            if (this.hasPasswordBasedAccount() && STAMHOOFD.environment !== 'development') {
+                // Do not allow this (security reasons - might need to work out a secure flow for this edge case)
+                throw new SimpleError({
+                    code: 'password_based_account',
+                    message: 'This user uses a password to login. Log in with the password and link the external account through the settings.',
+                    human: 'Deze gebruiker maakt gebruik van een wachtwoord om in te loggen. Log in met het wachtwoord en koppel het externe account via de instellingen.',
+                    statusCode: 400,
+                });
+            }
+        }
+
         this.meta.loginProviderIds.set(type, sub);
     }
 
@@ -425,15 +449,18 @@ export class User extends QueryableModel {
         } = data;
 
         if (STAMHOOFD.userMode === 'platform') {
-            throw new Error('SSO is disabled on platforms for now');
+            if (organization) {
+                throw new Error('Unexpected organization');
+            }
         }
-
-        if (!organization) {
-            throw new Error('Missing organization');
+        else {
+            if (!organization) {
+                throw new Error('Missing organization');
+            }
         }
 
         const user = new User();
-        user.organizationId = organization.id;
+        user.organizationId = organization?.id ?? null;
         user.id = id ?? uuidv4();
         user.email = email;
         user.verified = false;
@@ -446,7 +473,7 @@ export class User extends QueryableModel {
         }
         catch (e) {
             // Duplicate key probably
-            if (e.code && e.code == 'ER_DUP_ENTRY') {
+            if (e.code && e.code === 'ER_DUP_ENTRY') {
                 return;
             }
             throw e;

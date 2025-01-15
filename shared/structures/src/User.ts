@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Permissions } from './Permissions.js';
 import { UserPermissions } from './UserPermissions.js';
 
+// Note: also update LoginMethod
 export enum LoginProviderType {
     SSO = 'SSO',
 }

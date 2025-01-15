@@ -13,6 +13,7 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
 export async function getScopedAdminRootFromUrl() {
     const session = new SessionContext(null);
     await session.loadFromStorage();
+    await session.checkSSO();
     await SessionManager.prepareSessionForUsage(session, false);
 
     return await getScopedAdminRoot(session);

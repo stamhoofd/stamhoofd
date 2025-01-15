@@ -41,6 +41,9 @@ export class OpenIDConnectHelper {
     }
 
     get redirectUri() {
+        if (this.configuration.redirectUri) {
+            return this.configuration.redirectUri;
+        }
         // todo: we might need a special url for the app here
 
         if (!this.organization) {
@@ -78,7 +81,7 @@ export class OpenIDConnectHelper {
         // Store
         CookieHelper.setCookie(response, 'oid_session_id', sessionId, {
             httpOnly: true,
-            secure: true,
+            secure: STAMHOOFD.environment !== 'development',
             expires: data.expires,
         });
     }

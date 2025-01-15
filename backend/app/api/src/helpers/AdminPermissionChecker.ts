@@ -556,6 +556,9 @@ export class AdminPermissionChecker {
     }
 
     async canEditUserEmail(user: User) {
+        if (user.meta?.loginProviderIds?.size) {
+            return false;
+        }
         return this.canEditUserName(user);
     }
 

@@ -39,6 +39,7 @@ export async function getScopedRegistrationRootFromUrl() {
 
             session = new SessionContext(organization);
             await session.loadFromStorage();
+            await session.checkSSO();
             await SessionManager.prepareSessionForUsage(session, false);
         }
         catch (e) {
@@ -50,6 +51,7 @@ export async function getScopedRegistrationRootFromUrl() {
         if (STAMHOOFD.userMode === 'platform' && parts[0] === 'leden') {
             session = new SessionContext(null);
             await session.loadFromStorage();
+            await session.checkSSO();
             await SessionManager.prepareSessionForUsage(session, true);
             return await getRootView(session);
         }

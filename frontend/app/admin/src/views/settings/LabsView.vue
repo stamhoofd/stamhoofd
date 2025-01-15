@@ -28,19 +28,23 @@
             Notificaties voor openstaande bedragen
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('platform-sso')" @update:model-value="setFeatureFlag('platform-sso', !!$event)">
-            Platform SSO
-        </Checkbox>
+        <hr>
+        <h2>Login methodes</h2>
+
+        <STList>
+            <CheckboxListItem v-model="passwordLoginMethod" label="Wachtwoord" />
+            <CheckboxListItem v-model="ssoLoginMethod" label="Single-Sign-On (SSO)" />
+        </STList>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, Toast, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, CheckboxListItem, ErrorBox, Toast, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { PlatformConfig } from '@stamhoofd/structures';
-import { ref } from 'vue';
+import { LoginMethod, PlatformConfig } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
@@ -67,6 +71,37 @@ function setFeatureFlag(flag: string, value: boolean) {
         }),
     });
 }
+
+function getLoginMethod(method: LoginMethod) {
+    return patched.value.config.loginMethods.includes(method) ?? false;
+}
+
+function setLoginMethod(method: LoginMethod, value: boolean) {
+    const loginMethods = patched.value.config.loginMethods.filter(f => f !== method) ?? [];
+    if (value) {
+        loginMethods.push(method);
+    }
+
+    addPatch({
+        config: PlatformConfig.patch({
+            loginMethods: loginMethods as any,
+        }),
+    });
+}
+
+const passwordLoginMethod = computed({
+    get: () => getLoginMethod(LoginMethod.Password),
+    set: (value: boolean) => {
+        setLoginMethod(LoginMethod.Password, value);
+    },
+});
+
+const ssoLoginMethod = computed({
+    get: () => getLoginMethod(LoginMethod.SSO),
+    set: (value: boolean) => {
+        setLoginMethod(LoginMethod.SSO, value);
+    },
+});
 
 async function save() {
     if (saving.value) {

@@ -9,38 +9,47 @@
 
                     <STErrorsDefault :error-box="errors.errorBox" />
 
-                    <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
-                    <p v-if="lock" class="style-description-small">
-                        {{ lock }}
-                    </p>
+                    <template v-if="hasPasswordLogin">
+                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+                        <p v-if="lock" class="style-description-small">
+                            {{ lock }}
+                        </p>
 
-                    <STInputBox title="Wachtwoord" class="max">
-                        <template #right>
-                            <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
-                                <span>Vergeten</span>
-                                <span class="icon help" />
+                        <STInputBox title="Wachtwoord" class="max">
+                            <template #right>
+                                <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
+                                    <span>Vergeten</span>
+                                    <span class="icon help" />
+                                </button>
+                            </template>
+                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                        </STInputBox>
+                        <VersionFooter v-if="showVersionFooter" />
+
+                        <LoadingButton v-else :loading="loading" class="block">
+                            <button id="submit" class="button primary full" type="submit">
+                                <span class="lock icon" />
+                                <span>Inloggen</span>
                             </button>
-                        </template>
-                        <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
-                    </STInputBox>
-                    <VersionFooter v-if="showVersionFooter" />
+                        </LoadingButton>
 
-                    <LoadingButton v-else :loading="loading" class="block">
-                        <button id="submit" class="button primary full" type="submit">
-                            <span class="lock icon" />
-                            <span>Inloggen</span>
+                        <hr>
+                        <p class="style-description-small">
+                            Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
+                        </p>
+
+                        <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
+                            <span>Account aanmaken</span>
+                            <span class="icon arrow-right-small" />
                         </button>
-                    </LoadingButton>
-
-                    <hr>
-                    <p class="style-description-small">
-                        Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
-                    </p>
-
-                    <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
-                        <span>Account aanmaken</span>
-                        <span class="icon arrow-right-small" />
-                    </button>
+                    </template>
+                    <template v-if="hasSSO">
+                        <button class="button primary" type="button" tabindex="-1" @click="startSSO">
+                            <span v-if="!hasPasswordLogin">Inloggen</span>
+                            <span v-else>Inloggen via SSO</span>
+                            <span class="icon arrow-right-small" />
+                        </button>
+                    </template>
                 </div>
             </div>
 
@@ -55,10 +64,12 @@ import { ComponentWithProperties, defineRoutes, useDismiss, useNavigate, usePres
 import { AppManager, LoginHelper } from '@stamhoofd/networking';
 import { computed, onMounted, ref } from 'vue';
 
+import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
+import { sleep } from '@stamhoofd/utility';
 import VersionFooter from '../context/VersionFooter.vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { useContext } from '../hooks';
+import { useContext, useLoginMethod, usePlatform } from '../hooks';
 import EmailInput from '../inputs/EmailInput.vue';
 import ConfirmEmailView from './ConfirmEmailView.vue';
 import ForgotPasswordView from './ForgotPasswordView.vue';
@@ -116,9 +127,44 @@ const emailInput = ref<EmailInput | null>(null);
 const showVersionFooter = computed(() => {
     return email.value.toLocaleLowerCase().trim() === 'stamhoofd@dev.dev';
 });
+const context = useContext();
+
+const hasPasswordLogin = useLoginMethod(LoginMethod.Password);
+const hasSSO = useLoginMethod(LoginMethod.SSO);
+
+async function startSSO() {
+    if (loading.value) {
+        return;
+    }
+
+    loading.value = true;
+
+    // This will redirect, so the loading will stay forever
+    await context.value.startSSO({
+        providerType: LoginProviderType.SSO,
+    });
+
+    sleep(5000).then(() => {
+        // In case the redirect failed for some reason
+        loading.value = false;
+        errors.errorBox = new ErrorBox(
+            new SimpleError({
+                code: 'sso_failed',
+                message: 'Het openen van de loginpagina is mislukt. Controleer je internetverbinding en probeer het opnieuw.',
+            }),
+        );
+    }).catch(console.error);
+}
 
 async function submit() {
     if (loading.value) {
+        return;
+    }
+
+    if (!hasPasswordLogin.value) {
+        if (hasSSO.value) {
+            await startSSO();
+        }
         return;
     }
 

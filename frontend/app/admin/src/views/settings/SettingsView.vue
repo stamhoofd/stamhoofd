@@ -264,7 +264,7 @@
                 </STListItem>
             </STList>
 
-            <STList v-if="$feature('platform-sso')" class="illustration-list">
+            <STList v-if="platform.config.loginMethods.includes(LoginMethod.SSO)" class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/lock.svg">
@@ -289,7 +289,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { DataPermissionsSettings, FinancialSupportSettings, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';

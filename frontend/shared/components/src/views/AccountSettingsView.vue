@@ -11,7 +11,7 @@
             <p v-if="isUserModeOrganization && patched.organizationId === null" class="error-box icon privacy">
                 Dit is een platform account
             </p>
-        
+
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form @submit.prevent="save">
@@ -26,7 +26,7 @@
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" />
+                <EmailInput v-model="email" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" :disabled="$user?.meta?.loginProviderIds?.size" />
 
                 <div class="style-button-bar">
                     <LoadingButton :loading="saving">
@@ -40,13 +40,23 @@
             <hr>
 
             <STList>
-                <STListItem :selectable="true" @click.prevent="openChangePassword">
+                <STListItem v-if="hasPasswordLogin" :selectable="true" @click.prevent="openChangePassword">
                     <template #left>
                         <span class="icon key" />
                     </template>
 
                     <h3 class="style-title-list">
                         Wachtwoord wijzigen
+                    </h3>
+                </STListItem>
+
+                <STListItem v-if="hasSSO && $user?.meta?.loginProviderIds?.has(LoginProviderType.SSO)" :selectable="true" @click.prevent="switchAccount">
+                    <template #left>
+                        <span class="icon sync" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Wisselen tussen accounts
                     </h3>
                 </STListItem>
 
@@ -67,7 +77,6 @@
                         </LoadingButton>
                     </template>
 
-
                     <h3 class="style-title-list red">
                         Account verwijderen
                     </h3>
@@ -87,10 +96,11 @@
 
 <script lang="ts" setup>
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, useDismiss, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, usePatch, usePlatform, useUser, useValidation } from "@stamhoofd/components";
+import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
+import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import DeleteView from './DeleteView.vue';
 
@@ -102,44 +112,46 @@ const present = usePresent();
 const dismiss = useDismiss();
 const pop = usePop();
 const $t = useTranslate();
-const {patched, addPatch, hasChanges, patch} = usePatch($user.value!);
+const { patched, addPatch, hasChanges, patch } = usePatch($user.value!);
 
+const hasPasswordLogin = useLoginMethod(LoginMethod.Password);
+const hasSSO = useLoginMethod(LoginMethod.SSO);
 
 const isUserModeOrganization = STAMHOOFD.userMode === 'organization';
 const saving = ref(false);
-const policies = computed(() => $platform.value.config.privacy.policies)
+const policies = computed(() => $platform.value.config.privacy.policies);
 
 onMounted(() => {
-    $context.value.fetchUser(false).catch(console.error)
-})
+    $context.value.fetchUser(false).catch(console.error);
+});
 
 const email = computed({
     get: () => patched.value.email,
     set: (email) => {
-        addPatch({email});
-    }
-})
+        addPatch({ email });
+    },
+});
 
 const firstName = computed({
     get: () => patched.value.firstName,
     set: (firstName) => {
-        addPatch({firstName});
-    }
-})
+        addPatch({ firstName });
+    },
+});
 
 const lastName = computed({
     get: () => patched.value.lastName,
     set: (lastName) => {
-        addPatch({lastName});
-    }
-})
+        addPatch({ lastName });
+    },
+});
 
 useValidation(errors.validator, () => {
     const se = new SimpleErrors();
 
     if (se.errors.length > 0) {
-        errors.errorBox = new ErrorBox(se)
-        return false
+        errors.errorBox = new ErrorBox(se);
+        return false;
     }
 
     errors.errorBox = null;
@@ -151,35 +163,38 @@ async function save() {
         return;
     }
 
-    const isValid = await errors.validator.validate()
+    const isValid = await errors.validator.validate();
 
     if (!isValid) {
         return;
     }
 
-    saving.value = true
+    saving.value = true;
 
     try {
-        const result = await LoginHelper.patchUser($context.value, patch.value)
+        const result = await LoginHelper.patchUser($context.value, patch.value);
 
         if (result.verificationToken) {
-            await present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: patched.value.email }).setDisplayStyle("sheet"))
-        } else {
-            const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
-            toast.show()
+            await present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: patched.value.email }).setDisplayStyle('sheet'));
         }
-        
-        await dismiss({force: true});
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
-    } finally {
-        saving.value = false
+        else {
+            const toast = new Toast('De wijzigingen zijn opgeslagen', 'success green');
+            toast.show();
+        }
+
+        await dismiss({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    finally {
+        saving.value = false;
     }
 }
 
-async function  deleteRequest() {
+async function deleteRequest() {
     const user = $user.value;
-    if(!user) {
+    if (!user) {
         return;
     }
 
@@ -195,37 +210,47 @@ async function  deleteRequest() {
                 confirmationCode,
                 checkboxText: 'Ja, ik ben 100% zeker',
                 onDelete: async () => {
-                    await $context.value.deleteAccount()
+                    await $context.value.deleteAccount();
 
-                    Toast.success("Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.").show()
-                    await pop({force: true})
+                    Toast.success('Je account is verwijderd. Het kan even duren voor jouw aanvraag volledig is verwerkt.').show();
+                    await pop({ force: true });
                     return true;
-                }
-            })
+                },
+            }),
         ],
-        modalDisplayStyle: "sheet"
+        modalDisplayStyle: 'sheet',
     });
 }
 
 async function openChangePassword() {
-    await present(new ComponentWithProperties(ChangePasswordView, {}).setDisplayStyle("sheet"))
+    await present(new ComponentWithProperties(ChangePasswordView, {}).setDisplayStyle('sheet'));
 }
 
 async function logout() {
-    if (await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
-        await $context.value.logout()
-        await pop({force: true})
+    if (await CenteredMessage.confirm('Ben je zeker dat je wilt uitloggen?', 'Uitloggen')) {
+        await $context.value.logout();
+        await pop({ force: true });
     }
+}
+
+async function switchAccount() {
+    await $context.value.logout();
+
+    // Redirect to login
+    $context.value.startSSO({
+        prompt: 'select_account',
+        providerType: LoginProviderType.SSO,
+    }).catch(console.error);
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('2199906b-9125-4838-8ffc-3d88a47681d1'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('2199906b-9125-4838-8ffc-3d88a47681d1'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

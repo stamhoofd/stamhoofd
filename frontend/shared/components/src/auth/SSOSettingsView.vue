@@ -42,13 +42,16 @@
 
         <STInputBox title="Redirect URI" :error-box="errors.errorBox">
             <input
-                :value="redirectUri"
+                v-model="redirectUri"
+                :placeholder="defaultRedirectUri"
                 class="input"
                 type="text"
                 autocomplete=""
-                readonly
             >
         </STInputBox>
+        <p class="style-description-small">
+            De redirect URI behoud je best op de voorgestelde waarde.
+        </p>
     </SaveView>
 </template>
 
@@ -61,8 +64,6 @@ import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { OpenIDClientConfiguration } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
 
-const platformManager = usePlatformManager();
-const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
 const $t = useTranslate();
@@ -96,7 +97,12 @@ const clientSecret = computed({
     set: (value: string) => addPatch({ clientSecret: value }),
 });
 
-const redirectUri = computed(() => {
+const redirectUri = computed({
+    get: () => patched.value.redirectUri ?? '',
+    set: (value: string | null) => addPatch({ redirectUri: value ? value : null }),
+});
+
+const defaultRedirectUri = computed(() => {
     if (organization.value) {
         return 'https://' + organization.value.id + '.' + STAMHOOFD.domains.api + '/openid/callback';
     }

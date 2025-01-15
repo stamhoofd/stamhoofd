@@ -11,6 +11,12 @@ export class OpenIDClientConfiguration extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     clientSecret = '';
+
+    /**
+     * Best to set this to null to use working defaults
+     */
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    redirectUri: string | null = null;
 }
 
 export class StartOpenIDFlowStruct extends AutoEncoder {

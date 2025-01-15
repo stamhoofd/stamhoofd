@@ -109,7 +109,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
-        if (editUser.id == user.id && request.body.password) {
+        if (editUser.id === user.id && request.body.password) {
             // password changes
             await editUser.changePassword(request.body.password);
             await PasswordToken.clearFor(editUser.id);

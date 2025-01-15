@@ -65,6 +65,7 @@ export * from './src/StripeAccount.js';
 export * from './src/Token.js';
 export * from './src/UmbrellaOrganization.js';
 export * from './src/User.js';
+export * from './src/LoginMethod.js';
 
 export * from './src/LoadedPermissions.js';
 

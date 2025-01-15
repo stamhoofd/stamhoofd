@@ -14,6 +14,7 @@ import { PermissionRoleDetailed } from './PermissionRole.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
 import { UserWithMembers } from './UserWithMembers.js';
+import { LoginMethod } from './LoginMethod.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -402,6 +403,9 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: PrivacySettings, version: 327 })
     privacy = PrivacySettings.create({});
+
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(LoginMethod)), ...NextVersion })
+    loginMethods: LoginMethod[] = [LoginMethod.Password];
 
     getEmailReplacements() {
         return [

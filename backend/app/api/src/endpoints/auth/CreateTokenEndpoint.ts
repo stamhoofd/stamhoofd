@@ -1,7 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, PasswordToken, Token, User } from '@stamhoofd/models';
-import { ChallengeGrantStruct, CreateTokenStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
+import { EmailVerificationCode, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
+import { ChallengeGrantStruct, CreateTokenStruct, LoginMethod, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context';
 
@@ -81,8 +81,21 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             case 'password': {
-            // Increase timout for legacy
+                // Increase timout for legacy
                 request.request.request?.setTimeout(30 * 1000);
+
+                if (STAMHOOFD.userMode === 'platform') {
+                    const platform = await Platform.getShared();
+                    if (!platform.config.loginMethods.includes(LoginMethod.Password)) {
+                        throw new SimpleError({
+                            code: 'not_supported',
+                            message: 'This platform does not support password login',
+                            human: 'Dit platform ondersteunt geen wachtwoord login',
+                            statusCode: 400,
+                        });
+                    }
+                }
+
                 const user = await User.login(organization?.id ?? null, request.body.username, request.body.password);
 
                 const errBody = {

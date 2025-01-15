@@ -22,8 +22,7 @@
                         <p v-if="option.userDescription" class="style-description-small style-em">
                             Ingelogd als {{ option.userDescription }}
                         </p>
-                        
-                        
+
                         <template v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')" #right>
                             <span v-if="isCurrent(option)" class="icon success primary floating" />
                             <span v-else-if="option.userDescription" class="icon gray sync" />
@@ -49,7 +48,7 @@
                     <p v-if="option.userDescription" class="style-description-small style-em">
                         Ingelogd als {{ option.userDescription }}
                     </p>
-                    
+
                     <template v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')" #right>
                         <span v-if="isCurrent(option)" class="icon success primary floating" />
                         <span v-else-if="option.userDescription" class="icon gray sync" />
@@ -72,6 +71,7 @@
 import { usePopup } from '@simonbackx/vue-app-navigation';
 import { computed, Ref, shallowRef } from 'vue';
 
+import { SessionManager } from '@stamhoofd/networking';
 import { PromiseComponent } from '../containers/AsyncComponent';
 import { ReplaceRootEventBus } from '../overlays/ModalStackEventBus';
 import { getAppDescription, getAppTitle } from './appContext';
@@ -81,14 +81,14 @@ import { Option, useContextOptions } from './hooks/useContextOptions';
 const options: Ref<Option[]> = shallowRef([]);
 const popup = usePopup();
 
-const {getDefaultOptions, selectOption, isCurrent} = useContextOptions()
+const { getDefaultOptions, selectOption, isCurrent } = useContextOptions();
 
 const currentOptions = computed(() => {
-    const list = options.value.filter(o => o.app !== 'auto')
+    const list = options.value.filter(o => o.app !== 'auto');
     if (list.length > 1) {
         return list;
     }
-    return []
+    return [];
 });
 const otherOptions = computed(() => currentOptions.value.length <= 0 ? options.value : options.value.filter(o => o.app === 'auto'));
 
@@ -97,11 +97,11 @@ getDefaultOptions().then((opts) => {
 }).catch(console.error);
 
 const searchOrganizations = async () => {
-    await ReplaceRootEventBus.sendEvent("replace", PromiseComponent(async () => {
-        const dashboard = await import('@stamhoofd/dashboard')
-        return dashboard.getOrganizationSelectionRoot();
-    }))
-}
+    await ReplaceRootEventBus.sendEvent('replace', PromiseComponent(async () => {
+        const dashboard = await import('@stamhoofd/dashboard');
+        return dashboard.getOrganizationSelectionRoot(await SessionManager.getLastGlobalSession());
+    }));
+};
 
 </script>
 

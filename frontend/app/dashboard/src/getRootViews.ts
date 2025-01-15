@@ -83,12 +83,18 @@ export async function loadSessionFromUrl() {
 
             session = new SessionContext(organization);
             await session.loadFromStorage();
+            await session.checkSSO();
             await SessionManager.prepareSessionForUsage(session, false);
         }
         catch (e) {
             console.error('Failed to load organization from uri', uri);
             session = null;
         }
+    }
+
+    if (!session) {
+        session = await SessionManager.getLastGlobalSession();
+        await session.checkSSO();
     }
 
     return session;
@@ -120,8 +126,7 @@ export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: { 
     return getLoginRoot();
 }
 
-export async function getOrganizationSelectionRoot(optionalSession?: SessionContext | null) {
-    const session = optionalSession ?? new SessionContext(null);
+export async function getOrganizationSelectionRoot(session: SessionContext) {
     const reactiveSession = session;
     await session.loadFromStorage();
     await SessionManager.prepareSessionForUsage(session, false);
@@ -161,7 +166,7 @@ export async function getScopedDashboardRootFromUrl() {
     // UrlHelper.fixedPrefix = "beheerders";
     const session = await loadSessionFromUrl();
 
-    if (!session || !session.organization) {
+    if (!session.organization) {
         return getOrganizationSelectionRoot(session);
     }
 
@@ -169,8 +174,7 @@ export async function getScopedDashboardRootFromUrl() {
 }
 
 export async function getScopedAutoRootFromUrl() {
-    const fromUrl = await loadSessionFromUrl();
-    const session = fromUrl ?? (await SessionManager.getLastGlobalSession());
+    const session = await loadSessionFromUrl();
     await SessionManager.prepareSessionForUsage(session, false);
 
     return await getScopedAutoRoot(session);
