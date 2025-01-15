@@ -1,5 +1,5 @@
 import { AutoEncoder, field } from '@simonbackx/simple-encoding';
-import { OpenIDClientConfiguration } from './OpenID';
+import { OpenIDClientConfiguration } from './OpenID.js';
 
 export class PlatformServerConfig extends AutoEncoder {
     @field({ decoder: OpenIDClientConfiguration, nullable: true })
