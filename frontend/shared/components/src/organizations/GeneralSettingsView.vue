@@ -173,7 +173,7 @@ const website = computed({
 });
 
 const recordCategories = computed(() =>
-    platform.value.config.organizationLvlRecordsConfiguration.recordCategories,
+    platform.value.config.organizationLevelRecordsConfiguration.recordCategories.filter(x => x.isEnabled(patched.value)),
 );
 
 async function addCompany() {
@@ -281,5 +281,4 @@ const shouldNavigateAway = async () => {
 defineExpose({
     shouldNavigateAway,
 });
-
 </script>

@@ -16,12 +16,12 @@
 </template>
 
 <script setup lang="ts">
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { RecordCategory } from '@stamhoofd/structures';
+import { EditRecordCategoryView, RecordEditorSettings } from '..';
 import { useDraggableArray, useEmitPatchArray } from '../../hooks';
 import RecordCategoryRow from './RecordCategoryRow.vue';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditRecordCategoryView, RecordEditorSettings } from '..';
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 
 const props = withDefaults(
     defineProps<{

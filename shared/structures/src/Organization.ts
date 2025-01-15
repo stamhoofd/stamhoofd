@@ -16,7 +16,7 @@ import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodL
 import { UserWithMembers } from './UserWithMembers.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
 
-export class BaseOrganization extends AutoEncoder implements ObjectWithRecords {
+export class BaseOrganization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -75,28 +75,9 @@ export class BaseOrganization extends AutoEncoder implements ObjectWithRecords {
     get dashboardDomain(): string {
         return STAMHOOFD.domains.dashboard;
     }
-
-    isRecordEnabled(_record: RecordSettings): boolean {
-        return true;
-    }
-
-    getRecordAnswers(): Map<string, RecordAnswer> {
-        return this.meta.recordAnswers;
-    }
-
-    doesMatchFilter(filter: StamhoofdFilter): boolean {
-        try {
-            const compiledFilter = compileToInMemoryFilter(filter, organizationItemInMemoryFilterCompilers);
-            return compiledFilter(this);
-        }
-        catch (e) {
-            console.error('Error while compiling filter', e, filter);
-        }
-        return false;
-    }
 }
 
-export class Organization extends BaseOrganization {
+export class Organization extends BaseOrganization implements ObjectWithRecords {
     /**
      * @deprecated
      * Please use period instead now
@@ -226,6 +207,27 @@ export class Organization extends BaseOrganization {
      * Keep admins accessible and in memory
      */
     periods?: RegistrationPeriodList;
+
+    isRecordEnabled(_record: RecordSettings): boolean {
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return this.privateMeta?.recordAnswers ?? new Map();
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter): boolean {
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, organizationItemInMemoryFilterCompilers);
+            const value = compiledFilter(this);
+            console.log('does match filter', filter, this, value);
+            return value;
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
+    }
 }
 
 export class OrganizationWithWebshop extends AutoEncoder {

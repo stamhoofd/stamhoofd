@@ -44,7 +44,7 @@
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr>
-            <EditOrganizationRecordCategoryBox v-bind="$attrs" :organization="organization" :category="category" :mark-reviewed="true" :validator="errors.validator" :add-patch="patchAnswers" :level="2" />
+            <EditOrganizationRecordCategoryBox v-bind="$attrs" :organization="organization" :category="category" :mark-reviewed="false" :validator="errors.validator" :add-patch="patchAnswers" :level="2" />
         </div>
 
         <hr>
@@ -144,7 +144,7 @@ function patchAnswers(patch: PatchAnswers) {
 }
 
 const recordCategories = computed(() =>
-    platform.value.config.organizationLvlRecordsConfiguration.recordCategories,
+    platform.value.config.organizationLevelRecordsConfiguration.getEnabledCategories(patched.value),
 );
 
 const platformTags = computed(() => platform.value.config.tags);

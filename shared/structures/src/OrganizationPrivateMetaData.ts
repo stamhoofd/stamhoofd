@@ -1,8 +1,9 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Premise } from './addresses/Premise.js';
 import { DNSRecord } from './DNSRecord.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
+import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
 import { PayconiqAccount, PrivatePaymentConfiguration } from './PaymentConfiguration.js';
 import { PaymentMethod } from './PaymentMethod.js';
@@ -266,6 +267,12 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Premise), version: 319 })
     premises: Premise[] = [];
+
+    @field({
+        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder),
+        ...NextVersion,
+    })
+    recordAnswers: Map<string, RecordAnswer> = new Map();
 
     getPaymentProviderFor(method: PaymentMethod, stripeAccountMeta?: StripeMetaData | null): PaymentProvider | null {
         if (method === PaymentMethod.Unknown || method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale) {

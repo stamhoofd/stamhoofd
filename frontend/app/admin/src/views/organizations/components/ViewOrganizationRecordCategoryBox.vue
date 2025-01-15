@@ -10,10 +10,10 @@
 
 <script setup lang="ts">
 import { ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { BaseOrganization, RecordCategory } from '@stamhoofd/structures';
+import { Organization, RecordCategory } from '@stamhoofd/structures';
 
 defineProps<{
     category: RecordCategory;
-    organization: BaseOrganization;
+    organization: Organization;
 }>();
 </script>

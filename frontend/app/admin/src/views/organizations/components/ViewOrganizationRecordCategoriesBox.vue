@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { usePlatform } from '@stamhoofd/components';
-import { BaseOrganization } from '@stamhoofd/structures';
+import { Organization } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ViewOrganizationRecordCategoryBox from './ViewOrganizationRecordCategoryBox.vue';
 
@@ -14,14 +14,14 @@ defineOptions({
     inheritAttrs: false,
 });
 
-defineProps<{
-    organization: BaseOrganization;
+const props = defineProps<{
+    organization: Organization;
 }>();
 
 const platform = usePlatform();
 
 const recordCategories = computed(() => {
-    return platform.value.config.organizationLvlRecordsConfiguration.recordCategories;
+    return platform.value.config.organizationLevelRecordsConfiguration.getEnabledCategories(props.organization);
 });
 
 </script>

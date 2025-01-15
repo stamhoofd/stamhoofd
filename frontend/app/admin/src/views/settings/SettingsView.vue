@@ -289,7 +289,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { DataPermissionsSettings, FinancialSupportSettings, OrganizationLvlRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
@@ -448,11 +448,11 @@ defineRoutes([
         component: OrganizationRecordConfigurationView as unknown as ComponentOptions,
         paramsToProps() {
             return {
-                recordsConfiguration: platform.value.config.organizationLvlRecordsConfiguration,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationLvlRecordsConfiguration>) => {
+                recordsConfiguration: platform.value.config.organizationLevelRecordsConfiguration,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationLevelRecordsConfiguration>) => {
                     await platformManager.value.patch(Platform.patch({
                         config: PlatformConfig.patch({
-                            organizationLvlRecordsConfiguration: patch,
+                            organizationLevelRecordsConfiguration: patch,
                         }),
                     }));
 

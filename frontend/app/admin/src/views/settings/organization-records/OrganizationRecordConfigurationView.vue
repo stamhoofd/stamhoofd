@@ -12,22 +12,21 @@
             Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
 
-        <EditOrganizationRecordSettings :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />
+        <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, checkoutUIFilterBuilders, ErrorBox, RecordEditorSettings, RecordEditorType, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, getOrganizationUIFilterBuildersForTags, RecordEditorSettings, RecordEditorType, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Address, BaseOrganization, Country, OrganizationLvlRecordsConfiguration, OrganizationMetaData, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import { Address, Country, Organization, OrganizationLevelRecordsConfiguration, OrganizationPrivateMetaData, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import EditOrganizationRecordSettings from './EditOrganizationRecordSettings.vue';
 
 const props = defineProps<{
-    recordsConfiguration: OrganizationLvlRecordsConfiguration;
-    saveHandler: (patch: AutoEncoderPatchType<OrganizationLvlRecordsConfiguration>) => Promise<void>;
+    recordsConfiguration: OrganizationLevelRecordsConfiguration;
+    saveHandler: (patch: AutoEncoderPatchType<OrganizationLevelRecordsConfiguration>) => Promise<void>;
 }>();
 
 const saving = ref(false);
@@ -36,6 +35,7 @@ const title = 'Gegevens van organisaties';
 const pop = usePop();
 
 const $t = useTranslate();
+const platform = usePlatform();
 
 const { patch: patchRecords, patched, addPatch, hasChanges: hasRecordChanges } = usePatch(props.recordsConfiguration);
 
@@ -50,9 +50,9 @@ const editorSettings = computed(() => {
         dataPermission: false,
         type: RecordEditorType.Organization,
         filterBuilder: (_categories: RecordCategory[]) => {
-            return checkoutUIFilterBuilders[0];
+            return getOrganizationUIFilterBuildersForTags(platform.value)[0];
         },
-        exampleValue: BaseOrganization.create({
+        exampleValue: Organization.create({
             name: 'Voorbeeld',
             address: Address.create({
                 street: 'Voorbeeldstraat',
@@ -62,11 +62,11 @@ const editorSettings = computed(() => {
                 country: Country.Belgium,
             }),
         }),
-        patchExampleValue(value: BaseOrganization, patch: PatchAnswers) {
+        patchExampleValue(value: Organization, patch: PatchAnswers) {
             const cloned = value.clone();
 
-            value.patch(BaseOrganization.patch({
-                meta: OrganizationMetaData.patch({ recordAnswers: patch }),
+            value.patch(Organization.patch({
+                privateMeta: OrganizationPrivateMetaData.patch({ recordAnswers: patch }),
             }));
 
             return cloned;

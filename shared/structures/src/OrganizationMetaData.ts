@@ -9,7 +9,6 @@ import { File } from './files/File.js';
 import { Image } from './files/Image.js';
 import { GroupCategory } from './GroupCategory.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
-import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { OrganizationGenderType } from './OrganizationGenderType.js';
 import { OrganizationType } from './OrganizationType.js';
@@ -347,19 +346,6 @@ export class OrganizationMetaData extends AutoEncoder {
         },
     })
     registrationPaymentConfiguration = PaymentConfiguration.create({ paymentMethods: [PaymentMethod.PointOfSale] });
-
-    @field({
-        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder),
-        upgrade: (old: RecordAnswer[]) => {
-            const map = new Map<string, RecordAnswer>();
-            for (const answer of old) {
-                map.set(answer.settings.id, answer);
-            }
-            return map;
-        },
-        ...NextVersion,
-    })
-    recordAnswers: Map<string, RecordAnswer> = new Map();
 
     /**
      * @deprecated

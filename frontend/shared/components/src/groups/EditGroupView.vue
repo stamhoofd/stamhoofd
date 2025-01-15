@@ -521,7 +521,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, registrationUIFilterBuilders, TimeInput } from '@stamhoofd/components';
+import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, registrationUIFilterBuilders, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, OrganizationRecordsConfiguration, RecordCategory, Registration, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
@@ -1248,6 +1248,7 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
 }
 
 const recordEditorSettings = new RecordEditorSettings({
+    type: RecordEditorType.Registration,
     dataPermission: false,
     toggleDefaultEnabled: false,
     filterBuilder: (categories: RecordCategory[]) => {

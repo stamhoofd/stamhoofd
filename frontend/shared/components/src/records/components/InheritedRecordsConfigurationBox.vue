@@ -73,7 +73,7 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BooleanStatus, MemberDetails, MemberProperty, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
-import { RecordEditorSettings } from '../RecordEditorSettings';
+import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
 
 const props = withDefaults(
     defineProps<{
@@ -104,6 +104,7 @@ const family = new PlatformFamily({
 });
 
 const settings = new RecordEditorSettings({
+    type: RecordEditorType.PlatformMember,
     dataPermission: true,
     toggleDefaultEnabled: !props.inheritedRecordsConfiguration,
     filterBuilder: (categories: RecordCategory[]) => {

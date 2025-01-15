@@ -1026,6 +1026,35 @@ export function useGetOrganizationUIFilterBuilders() {
     return { getOrganizationUIFilterBuilders };
 }
 
+export function getOrganizationUIFilterBuildersForTags(platform: Platform) {
+    const $t = useTranslate();
+
+    const all: UIFilterBuilder[] = [];
+
+    const tagFilter = new MultipleChoiceFilterBuilder({
+        name: $t('tags'),
+        multipleChoiceConfiguration: {
+            isSubjectPlural: true,
+        },
+        options: platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
+        wrapper: {
+            tags: {
+                $in: UIFilterWrapperMarker,
+            },
+        },
+    });
+
+    all.push(tagFilter);
+
+    all.unshift(
+        new GroupUIFilterBuilder({
+            builders: all,
+        }),
+    );
+
+    return all;
+}
+
 // Events
 export function getEventUIFilterBuilders(platform: Platform, organizations: Organization[], app: AppType | 'auto') {
     const all: UIFilterBuilder<UIFilter>[] = [];

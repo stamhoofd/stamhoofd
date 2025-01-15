@@ -33,4 +33,5 @@ export const receivableBalanceObjectContactInMemoryFilterCompilers: InMemoryFilt
 
 export const organizationItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
+    tags: createInMemoryFilterCompiler('meta.tags'),
 };
