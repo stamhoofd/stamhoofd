@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, defineRoutes, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, UrlHelper, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { AppManager, LoginHelper } from '@stamhoofd/networking';
 import { computed, onMounted, ref } from 'vue';
 
@@ -131,6 +131,26 @@ const context = useContext();
 
 const hasPasswordLogin = useLoginMethod(LoginMethod.Password);
 const hasSSO = useLoginMethod(LoginMethod.SSO);
+
+onMounted(() => {
+    // Try to log in on first load
+    try {
+        if (!hasSSO.value) {
+            return;
+        }
+        if (AppManager.shared.isNative) {
+            return;
+        }
+        const search = UrlHelper.initial.getSearchParams();
+        if (!sessionStorage.getItem('triedLogin') && !search.get('error') && !search.get('oid_rt')) {
+            sessionStorage.setItem('triedLogin', 'true');
+            startSSO().catch(console.error);
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+});
 
 async function startSSO() {
     if (loading.value) {

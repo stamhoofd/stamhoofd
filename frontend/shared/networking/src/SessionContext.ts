@@ -329,6 +329,14 @@ export class SessionContext implements RequestMiddleware {
                 refreshToken: oid_rt,
                 accessTokenValidUntil: new Date(0),
             }));
+
+            try {
+                // We successfull logged in, so clear the tried login - will make sure we'll log in automatically next time
+                sessionStorage.removeItem('triedLogin');
+            }
+            catch (e) {
+                console.error(e);
+            }
         }
 
         if (state && error) {
