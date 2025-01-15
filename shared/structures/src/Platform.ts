@@ -404,7 +404,7 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: PrivacySettings, version: 327 })
     privacy = PrivacySettings.create({});
 
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(LoginMethod)), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(LoginMethod)), version: 359 })
     loginMethods: LoginMethod[] = [LoginMethod.Password];
 
     getEmailReplacements() {
