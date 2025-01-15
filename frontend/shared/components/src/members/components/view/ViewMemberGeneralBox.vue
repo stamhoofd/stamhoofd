@@ -75,6 +75,13 @@
                     {{ member.patchedMember.details.nationalRegisterNumber }}
                 </dd>
             </template>
+
+            <template v-if="member.member.createdAt">
+                <dt>Aanmaakdatum</dt>
+                <dd v-copyable>
+                    {{ formatDate(member.member.createdAt, true) }}
+                </dd>
+            </template>
         </dl>
     </div>
 </template>
