@@ -4,37 +4,21 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
-
-        <STList v-model="draggableTypes" :draggable="true">
-            <template #item="{item: type}">
-                <PremiseTypeRow :type="type" @click="editType(type)" />
-            </template>
-        </STList>
-
-        <p>
-            <button class="button text" type="button" @click="addType">
-                <span class="icon add" />
-                <span>{{ $t('8daed6fc-e3dd-4b6b-bd78-c79add8edfb9') }}</span>
-            </button>
-        </p>
+        <PremiseTypesList v-model="draggableTypes" :add-array-patch="addArrayPatch" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { Platform, PlatformConfig, PlatformPremiseType } from '@stamhoofd/structures';
+import { Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import EditBuildingTypeView from './EditPremiseTypeView.vue';
-import PremiseTypeRow from './components/PremiseTypeRow.vue';
+import PremiseTypesList from './PremiseTypesList.vue';
 
 const errors = useErrors();
 const pop = usePop();
-const present = usePresent();
 const $t = useTranslate();
 const platform = usePlatform();
 const platformManager = usePlatformManager();
@@ -46,49 +30,6 @@ const draggableTypes = useDraggableArray(() => types.value, addArrayPatch);
 const saving = ref(false);
 
 const title = $t('5d0062df-e595-4e28-b1e3-d399102dfadf');
-
-async function addType() {
-    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray();
-    const type = PlatformPremiseType.create({});
-    arr.addPut(type);
-
-    await present({
-        modalDisplayStyle: 'popup',
-        components: [
-            new ComponentWithProperties(EditBuildingTypeView, {
-                type,
-                isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<PlatformPremiseType>) => {
-                    patch.id = type.id;
-                    arr.addPatch(patch);
-                    addArrayPatch(arr);
-                },
-            }),
-        ],
-    });
-}
-
-async function editType(type: PlatformPremiseType) {
-    await present({
-        modalDisplayStyle: 'popup',
-        components: [
-            new ComponentWithProperties(EditBuildingTypeView, {
-                type,
-                isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<PlatformPremiseType>) => {
-                    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray();
-                    arr.addPatch(patch);
-                    addArrayPatch(arr);
-                },
-                deleteHandler: () => {
-                    const arr: PatchableArrayAutoEncoder<PlatformPremiseType> = new PatchableArray();
-                    arr.addDelete(type.id);
-                    addArrayPatch(arr);
-                },
-            }),
-        ],
-    });
-}
 
 async function save() {
     if (saving.value) {

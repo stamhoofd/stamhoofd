@@ -63,9 +63,9 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import { RecordEditorSettings } from './RecordEditorSettings';
-import InheritedRecordsConfigurationBox from './components/InheritedRecordsConfigurationBox.vue';
+import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
 import EditRecordCategoriesBox from './components/EditRecordCategoriesBox.vue';
+import InheritedRecordsConfigurationBox from './components/InheritedRecordsConfigurationBox.vue';
 
 type PropertyName = 'emailAddress' | 'phone' | 'gender' | 'birthDay' | 'address' | 'parents' | 'emergencyContacts';
 
@@ -94,6 +94,7 @@ const settings = computed(() => {
         contextOrganization: organization.value,
     });
     const ss = new RecordEditorSettings({
+        type: RecordEditorType.PlatformMember,
         dataPermission: true,
         toggleDefaultEnabled: true,
         inheritedRecordsConfiguration: props.inheritedRecordsConfiguration ? OrganizationRecordsConfiguration.mergeChild(props.inheritedRecordsConfiguration, patched.value) : patched.value,

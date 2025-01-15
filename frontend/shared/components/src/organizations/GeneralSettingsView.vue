@@ -3,7 +3,7 @@
         <h1>
             {{ title }}
         </h1>
-        
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div v-if="isReview" class="container">
@@ -44,7 +44,7 @@
         <p v-if="draggableCompanies.length === 0" class="info-box">
             Geen facturatiegegevens toegevoegd
         </p>
-       
+
         <STList v-else v-model="draggableCompanies" :draggable="true">
             <template #item="{item: company, index}">
                 <STListItem :selectable="true" class="right-stack" @click="editCompany(company)">
@@ -54,7 +54,7 @@
                     <h3 class="style-title-list">
                         {{ company.name || 'Naamloos' }}
                     </h3>
- 
+
                     <p v-if="company.VATNumber" class="style-description-small">
                         {{ company.VATNumber }} (BTW-plichtig)
                     </p>
@@ -93,47 +93,55 @@
                 <span>Toevoegen</span>
             </button>
         </p>
+
+        <div v-for="category of recordCategories" :key="category.id" class="container">
+            <hr>
+            <EditOrganizationRecordCategoryBox v-bind="$attrs" :organization="organizationManager.organization" :category="category" :mark-reviewed="true" :validator="errors.validator" :add-patch="patchAnswers" :level="2" />
+        </div>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch, useReview } from "@stamhoofd/components";
-import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { useOrganizationManager } from "@stamhoofd/networking";
-import { Company, OrganizationMetaData, SetupStepType } from "@stamhoofd/structures";
-import { computed, ref, watch } from "vue";
-import ReviewCheckbox from "../ReviewCheckbox.vue";
-import EditCompanyView from "./components/EditCompanyView.vue";
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch, usePlatform, useReview } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useOrganizationManager } from '@stamhoofd/networking';
+import { Company, OrganizationMetaData, PatchAnswers, SetupStepType } from '@stamhoofd/structures';
+import { computed, ref, watch } from 'vue';
+import ReviewCheckbox from '../ReviewCheckbox.vue';
+import EditCompanyView from './components/EditCompanyView.vue';
+import EditOrganizationRecordCategoryBox from './components/EditOrganizationRecordCategoryBox.vue';
 
-const props = defineProps<{isReview?: boolean}>();
+const props = defineProps<{ isReview?: boolean }>();
 
 const title = computed(() => props.isReview ? $t('31df7737-2a25-4a6c-9766-39acc3ccdbc8') : 'Algemene instellingen');
 const organizationManager = useOrganizationManager();
+const platform = usePlatform();
+
 const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
-const present = usePresent()
-const {patched, hasChanges, addPatch, patch} = usePatch(computed(() => organizationManager.value.organization));
+const present = usePresent();
+const { patched, hasChanges, addPatch, patch } = usePatch(computed(() => organizationManager.value.organization));
 const $t = useTranslate();
 const { $overrideIsDone, $hasChanges: $hasReviewChanges, save: saveReview, $reviewCheckboxData } = useReview(SetupStepType.Companies);
 
 const hasSomeChanges = computed(() => {
-    if(props.isReview) {
+    if (props.isReview) {
         return hasChanges.value || $hasReviewChanges.value;
     }
 
     return hasChanges.value;
-})
+});
 
-const draggableCompanies = useDraggableArray<Company>(() => patched.value.meta.companies, (companies) => addPatch({
+const draggableCompanies = useDraggableArray<Company>(() => patched.value.meta.companies, companies => addPatch({
     meta: OrganizationMetaData.patch({
-        companies
-    })
+        companies,
+    }),
 }));
 
-watch(draggableCompanies, companies => {
+watch(draggableCompanies, (companies) => {
     $overrideIsDone.value = companies.length > 0;
 });
 
@@ -141,33 +149,37 @@ const name = computed({
     get: () => patched.value.name,
     set: (name) => {
         addPatch({
-            name
-        })
-    }
+            name,
+        });
+    },
 });
 
 const address = computed({
     get: () => patched.value.address,
     set: (address) => {
         addPatch({
-            address
-        })
-    }
+            address,
+        });
+    },
 });
 
 const website = computed({
     get: () => patched.value.website,
     set: (website) => {
         addPatch({
-            website
-        })
-    }
+            website,
+        });
+    },
 });
+
+const recordCategories = computed(() =>
+    platform.value.config.organizationLevelRecordsConfiguration.recordCategories.filter(x => x.isEnabled(patched.value)),
+);
 
 async function addCompany() {
     const company = Company.create({
         name: patched.value.name,
-        address: patched.value.address
+        address: patched.value.address,
     });
 
     await present({
@@ -178,17 +190,17 @@ async function addCompany() {
                 saveHandler: (patch: AutoEncoderPatchType<Company>) => {
                     const meta = OrganizationMetaData.patch({});
                     meta.companies.addPut(
-                        company.patch(patch)
+                        company.patch(patch),
                     );
 
                     addPatch({
-                        meta
-                    })
+                        meta,
+                    });
                 },
-            })
+            }),
         ],
         modalDisplayStyle: 'popup',
-    })
+    });
 }
 
 async function editCompany(company: Company) {
@@ -206,23 +218,28 @@ async function editCompany(company: Company) {
                     meta.companies.addPatch(patch);
 
                     addPatch({
-                        meta
-                    })
+                        meta,
+                    });
                 },
                 deleteHandler: () => {
                     const meta = OrganizationMetaData.patch({});
                     meta.companies.addDelete(company.id);
 
                     addPatch({
-                        meta
-                    })
-                }
-            })
+                        meta,
+                    });
+                },
+            }),
         ],
         modalDisplayStyle: 'popup',
-    })
+    });
 }
 
+function patchAnswers(patch: PatchAnswers) {
+    addPatch({
+        meta: OrganizationMetaData.patch({ recordAnswers: patch }),
+    });
+}
 
 async function save() {
     if (saving.value) {
@@ -232,36 +249,36 @@ async function save() {
     saving.value = true;
     try {
         if (hasChanges.value) {
-            errors.errorBox = null
+            errors.errorBox = null;
             if (!await errors.validator.validate()) {
                 saving.value = false;
                 return;
             }
             await organizationManager.value.patch(patch.value);
-        }   
+        }
 
-        if(props.isReview) {
+        if (props.isReview) {
             await saveReview();
         }
-        
-        await pop({force: true})
-    } catch (e) {
+
+        await pop({ force: true });
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
-    } finally {
+    }
+    finally {
         saving.value = false;
     }
 }
-
 
 const shouldNavigateAway = async () => {
     if (!hasSomeChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
-
+    shouldNavigateAway,
+});
 </script>

@@ -48,7 +48,7 @@
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, STErrorsDefault, STList, STListItem, SaveView, checkoutUIFilterBuilders } from '@stamhoofd/components';
+import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, checkoutUIFilterBuilders } from '@stamhoofd/components';
 import { Checkout, PatchAnswers, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';
@@ -84,6 +84,7 @@ const phoneEnabled = computed({
 
 const editorSettings = computed(() => {
     return new RecordEditorSettings({
+        type: RecordEditorType.Webshop,
         dataPermission: false,
         filterBuilder: (_categories: RecordCategory[]) => {
             return checkoutUIFilterBuilders[0];

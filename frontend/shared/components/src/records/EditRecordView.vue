@@ -284,7 +284,7 @@ import { ObjectWithRecords, PermissionLevel, RecordCategory, RecordChoice, Recor
 
 import { computed } from 'vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
-import { RecordEditorSettings } from './RecordEditorSettings';
+import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
 import PreviewRecordView from './components/PreviewRecordView.vue';
 import RecordChoiceRow from './components/RecordChoiceRow.vue';
 
@@ -301,6 +301,7 @@ const props = withDefaults(defineProps<{
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
+const editorType = props.settings.type;
 
 const { patch: patchRecord, patched: patchedRecord, addPatch, hasChanges } = usePatch(props.record);
 
@@ -354,6 +355,10 @@ const availableTypes = [
 ];
 
 const canAddWarning = computed(() => {
+    if (editorType === RecordEditorType.Organization) {
+        return false;
+    }
+
     return patchedRecord.value.type === RecordType.Checkbox || patchedRecord.value.type === RecordType.Text || patchedRecord.value.type === RecordType.Textarea;
 });
 

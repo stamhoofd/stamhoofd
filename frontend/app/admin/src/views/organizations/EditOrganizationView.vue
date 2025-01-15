@@ -42,6 +42,11 @@
             {{ $t('81c91169-db1e-4819-8716-5382ffbaa43b') }}
         </p>
 
+        <div v-for="category of recordCategories" :key="category.id" class="container">
+            <hr>
+            <EditOrganizationRecordCategoryBox v-bind="$attrs" :organization="organization" :category="category" :mark-reviewed="false" :validator="errors.validator" :add-patch="patchAnswers" :level="2" />
+        </div>
+
         <hr>
         <h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}</h2>
         <STList>
@@ -73,14 +78,14 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, CheckboxListItem, ErrorBox, JumpToContainer, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, CheckboxListItem, EditOrganizationRecordCategoryBox, ErrorBox, JumpToContainer, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Organization, OrganizationMetaData, OrganizationTag, TagHelper } from '@stamhoofd/structures';
+import { usePlatformManager } from '@stamhoofd/networking';
+import { Organization, OrganizationMetaData, OrganizationTag, PatchAnswers, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import OrganizationUriInput from './components/OrganizationUriInput.vue';
 import SelectOrganizationTagRow from './tags/components/SelectOrganizationTagRow.vue';
-import { usePlatformManager } from '@stamhoofd/networking';
 
 const platform = usePlatform();
 const errors = useErrors();
@@ -131,6 +136,16 @@ const active = computed({
     get: () => patched.value.active,
     set: value => addPatch({ active: value }),
 });
+
+function patchAnswers(patch: PatchAnswers) {
+    addPatch({
+        meta: OrganizationMetaData.patch({ recordAnswers: patch }),
+    });
+}
+
+const recordCategories = computed(() =>
+    platform.value.config.organizationLevelRecordsConfiguration.getEnabledCategories(patched.value),
+);
 
 const platformTags = computed(() => platform.value.config.tags);
 const rootTags = computed(() => TagHelper.getRootTags(platformTags.value));

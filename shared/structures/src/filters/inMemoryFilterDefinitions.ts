@@ -30,3 +30,8 @@ export const receivableBalanceObjectContactInMemoryFilterCompilers: InMemoryFilt
         responsibilityIds: createInMemoryFilterCompiler('responsibilityIds'),
     }),
 };
+
+export const organizationItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    tags: createInMemoryFilterCompiler('meta.tags'),
+};

@@ -127,6 +127,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/list.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Gegevens van organisaties
+                    </h2>
+                    <p class="style-description">
+                        Kies welke informatie je verzamelt van organisaties
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
             <hr>
@@ -274,7 +289,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
@@ -282,6 +297,7 @@ import EditEventTypesView from './event-types/EditEventTypesView.vue';
 import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
 import LabsView from './LabsView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
+import OrganizationRecordConfigurationView from './organization-records/OrganizationRecordConfigurationView.vue';
 import EditPrivacyView from './privacy/EditPrivacyView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 
@@ -302,6 +318,7 @@ enum Routes {
     Terms = 'voorwaarden',
     Labs = 'experimenten',
     SingleSignOn = 'sso',
+    OrganizationRecordConfiguration = 'organisatie-gegevens',
 }
 
 const platform = usePlatform();
@@ -424,6 +441,25 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: EditPremiseTypesView as ComponentOptions,
+    },
+    {
+        url: Routes.OrganizationRecordConfiguration,
+        present: 'popup',
+        component: OrganizationRecordConfigurationView as unknown as ComponentOptions,
+        paramsToProps() {
+            return {
+                recordsConfiguration: platform.value.config.organizationLevelRecordsConfiguration,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationLevelRecordsConfiguration>) => {
+                    await platformManager.value.patch(Platform.patch({
+                        config: PlatformConfig.patch({
+                            organizationLevelRecordsConfiguration: patch,
+                        }),
+                    }));
+
+                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                },
+            };
+        },
     },
     {
         url: Routes.SingleSignOn,

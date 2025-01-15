@@ -6,4 +6,7 @@ export { default as InheritedRecordsConfigurationBox } from './components/Inheri
 export { default as EditRecordCategoriesBox } from './components/EditRecordCategoriesBox.vue';
 export { default as FinancialSupportSettingsView } from './FinancialSupportSettingsView.vue';
 export { default as DataPermissionSettingsView } from './DataPermissionSettingsView.vue';
+export { default as EditRecordView } from './EditRecordView.vue';
+export { default as RecordRow } from './components/RecordRow.vue';
+export { default as FillRecordCategoryBox } from './components/FillRecordCategoryBox.vue';
 export * from './RecordEditorSettings';

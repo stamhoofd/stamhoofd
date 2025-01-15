@@ -2,8 +2,14 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDe
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from './addresses/Address.js';
+import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
+import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
+import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { Group } from './Group.js';
 import { GroupCategoryTree } from './GroupCategory.js';
+import { ObjectWithRecords } from './members/ObjectWithRecords.js';
+import { RecordAnswer } from './members/records/RecordAnswer.js';
+import { RecordSettings } from './members/records/RecordSettings.js';
 import { OrganizationMetaData } from './OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod.js';
@@ -71,7 +77,7 @@ export class BaseOrganization extends AutoEncoder {
     }
 }
 
-export class Organization extends BaseOrganization {
+export class Organization extends BaseOrganization implements ObjectWithRecords {
     /**
      * @deprecated
      * Please use period instead now
@@ -201,6 +207,27 @@ export class Organization extends BaseOrganization {
      * Keep admins accessible and in memory
      */
     periods?: RegistrationPeriodList;
+
+    isRecordEnabled(_record: RecordSettings): boolean {
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return this.privateMeta?.recordAnswers ?? new Map();
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter): boolean {
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, organizationItemInMemoryFilterCompilers);
+            const value = compiledFilter(this);
+            console.log('does match filter', filter, this, value);
+            return value;
+        }
+        catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
+    }
 }
 
 export class OrganizationWithWebshop extends AutoEncoder {
