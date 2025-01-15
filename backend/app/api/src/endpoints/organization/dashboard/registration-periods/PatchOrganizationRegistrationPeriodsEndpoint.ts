@@ -243,8 +243,22 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
         const platform = await Platform.getSharedStruct();
 
-        if (platform.config.defaultAgeGroups.find(g => g.id === id)) {
-            return id;
+        const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === id);
+
+        if (defaultAgeGroup) {
+            const organization = Context.organization;
+            const tags = organization?.meta.tags ?? [];
+
+            if (defaultAgeGroup.isEnabledForTags(tags)) {
+                return id;
+            }
+
+            throw new SimpleError({
+                code: 'invalid_default_age_group',
+                message: 'Invalid default age group',
+                human: 'De standaard leeftijdsgroep is niet beschikbaar voor deze organisatie',
+                statusCode: 400,
+            });
         }
 
         throw new SimpleError({

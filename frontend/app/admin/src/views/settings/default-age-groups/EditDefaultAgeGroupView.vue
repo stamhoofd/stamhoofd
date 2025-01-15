@@ -79,6 +79,32 @@
             </STInputBox>
         </div>
 
+        <div class="container">
+            <hr>
+
+            <STList v-if="organizationTagIds === null">
+                <STListItem :selectable="true" element-name="button" @click="organizationTagIds = []">
+                    <template #left>
+                        <span class="icon add gray" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Beperk tot bepaalde lokale groepen (tags)
+                    </h3>
+                </STListItem>
+            </STList>
+            <template v-else>
+                <h2 class="style-with-button">
+                    <div>Groepen</div>
+                    <div>
+                        <button type="button" class="button icon trash" @click="organizationTagIds = null" />
+                    </div>
+                </h2>
+                <p>Kies voor welke lokale groepen deze standaard leeftijdsgroep beschikbaar is.</p>
+                <TagIdsInput v-model="organizationTagIds" />
+            </template>
+        </div>
+
         <hr>
         <h2>Gegevensverzameling</h2>
         <p>Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven bij deze standaard leeftijdsgroep. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
@@ -91,7 +117,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AgeInput, CenteredMessage, Dropdown, ErrorBox, InheritedRecordsConfigurationBox, NumberInput, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { AgeInput, CenteredMessage, Dropdown, ErrorBox, InheritedRecordsConfigurationBox, NumberInput, SaveView, TagIdsInput, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { DefaultAgeGroup, OrganizationRecordsConfiguration, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -216,6 +242,13 @@ const inheritedRecordsConfiguration = computed(() => {
     return OrganizationRecordsConfiguration.build({
         platform: platform.value,
     });
+});
+
+const organizationTagIds = computed({
+    get: () => patched.value.organizationTagIds,
+    set: (organizationTagIds: string[] | null) => addPatch({
+        organizationTagIds: organizationTagIds as any,
+    }),
 });
 
 function getName(index: number) {

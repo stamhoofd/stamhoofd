@@ -28,6 +28,12 @@ export class DefaultAgeGroup extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 337 })
     minimumRequiredMembers = 0;
 
+    /**
+     * Limit this default age group to specific organizations
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true, ...NextVersion })
+    organizationTagIds: string[] | null = null;
+
     get name() {
         return Formatter.joinLast(this.names, ', ', ' of ');
     }
@@ -38,4 +44,14 @@ export class DefaultAgeGroup extends AutoEncoder {
         defaultValue: () => OrganizationRecordsConfiguration.create({}),
     })
     recordsConfiguration: OrganizationRecordsConfiguration;
+
+    isEnabledForTags(tags: string[] | null): boolean {
+        const organizationTags = this.organizationTagIds;
+
+        if (organizationTags === null) {
+            return true;
+        }
+
+        return tags?.find(tagId => organizationTags.includes(tagId)) !== undefined;
+    }
 }
