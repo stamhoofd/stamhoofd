@@ -751,7 +751,7 @@ export class SessionContext implements RequestMiddleware {
 
     isLoggingOut = false;
 
-    async logout() {
+    async logout(updateUIForLogout = true) {
         if (this.isLoggingOut) {
             // Prevents loops when refreshing inside the logout endpoint
             return;
@@ -786,7 +786,10 @@ export class SessionContext implements RequestMiddleware {
             this.token = null;
             this.user = null; // force refetch in the future
             await this.deleteFromStorage();
-            await this.onTokenChanged();
+
+            if (updateUIForLogout) {
+                await this.onTokenChanged();
+            }
         }
     }
 

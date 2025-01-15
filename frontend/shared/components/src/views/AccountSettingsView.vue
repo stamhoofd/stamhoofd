@@ -234,7 +234,7 @@ async function logout() {
 }
 
 async function switchAccount() {
-    await $context.value.logout();
+    await $context.value.logout(false);
 
     // Redirect to login
     $context.value.startSSO({
