@@ -31,7 +31,7 @@ export class DefaultAgeGroup extends AutoEncoder {
     /**
      * Limit this default age group to specific organizations
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true, ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true, version: 358 })
     organizationTagIds: string[] | null = null;
 
     get name() {

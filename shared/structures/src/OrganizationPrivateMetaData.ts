@@ -270,7 +270,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
 
     @field({
         decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder),
-        ...NextVersion,
+        version: 358,
     })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 

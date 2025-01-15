@@ -343,7 +343,7 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: OrganizationRecordsConfiguration, version: 253 })
     recordsConfiguration = OrganizationRecordsConfiguration.create({});
     
-    @field({ decoder: OrganizationLevelRecordsConfiguration, ...NextVersion })
+    @field({ decoder: OrganizationLevelRecordsConfiguration, version: 358 })
     organizationLevelRecordsConfiguration = OrganizationLevelRecordsConfiguration.create({});
 
     @field({ decoder: new ArrayDecoder(OrganizationTag), version: 260 })
