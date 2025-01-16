@@ -59,13 +59,24 @@ This is what you need to know:
 Using MacOS or Linux is recommended. Setup using WSL can be very difficult given that Stamhoofd requires you to setup a local DNS server and trust a new local SSL root certificate, which is very hard to setup given that this cannot get automated by the used tools when using WSL.
 
 - Install MySQL8 and create a new local database
-
 ```
-brew install mysql
-brew services start mysql
+brew install mysql@8.4
+brew link mysql@8.4 --force
+echo 'export PATH="/usr/local/opt/mysql@8.4/bin:$PATH"' >> ~/.zshrc
+```
+
+- Add these lines to the mysql configuration (/usr/local/etc/my.cnf, but can be other location)
+```
+mysql_native_password=ON
+sort_buffer_size = 2M
+```
+- Start mysql
+```
+brew services start mysql@8.4
 mysql -u root
 ```
 
+- Run these mysql queries
 ```sql
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
 FLUSH PRIVILEGES;
