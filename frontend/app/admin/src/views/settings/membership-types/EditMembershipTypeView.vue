@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loadingView="loading" :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
+    <SaveView :loading-view="loading" :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: doDelete} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -56,13 +56,43 @@
         </p>
 
         <hr>
-        <h2>Beschikbaarheid</h2>
+        <h2>{{ $t("Beschikbaarheid") }}</h2>
 
         <Checkbox v-model="requiredTagIdsEnabled">
-            Beperk welke verenigingen hun leden kunnen aansluiten met deze aansluiting.
+            {{ $t("Beperk welke verenigingen hun leden kunnen aansluiten met deze aansluiting.") }}
         </Checkbox>
 
-        <TagIdsInput v-if="requiredTagIds !== null" v-model="requiredTagIds" />
+        <Checkbox v-model="requiredDefaultAgeGroupIdsEnabled">
+            {{ $t("Beperk tot leden met een registratie bij deze standaard leeftijdsgroepen.") }}
+        </Checkbox>
+
+        <JumpToContainer :visible="requiredTagIds !== null">
+            <hr>
+
+            <h2 class="style-with-button">
+                <div>{{ $t("Beperk verenigingen") }}</div>
+                <div>
+                    <button type="button" class="button icon trash" @click="() => requiredTagIds = null" />
+                </div>
+            </h2>
+            <p>{{ $t("Beperk welke verenigingen hun leden kunnen aansluiten met deze aansluiting.") }}</p>
+
+            <TagIdsInput v-model="requiredTagIds" />
+        </JumpToContainer>
+
+        <JumpToContainer :visible="requiredDefaultAgeGroupIds !== null">
+            <hr>
+
+            <h2 class="style-with-button">
+                <div>{{ $t("Beperk leeftijdsgroepen") }}</div>
+                <div>
+                    <button type="button" class="button icon trash" @click="() => requiredDefaultAgeGroupIds = null" />
+                </div>
+            </h2>
+            <p>{{ $t("Beperk tot leden met een registratie bij deze standaard leeftijdsgroepen.") }}</p>
+
+            <DefaultAgeGroupIdsInput v-model="requiredDefaultAgeGroupIds" />
+        </JumpToContainer>
     </SaveView>
 </template>
 
@@ -70,7 +100,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, Dropdown, ErrorBox, SaveView, TagIdsInput, Toast, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, DefaultAgeGroupIdsInput, Dropdown, ErrorBox, JumpToContainer, SaveView, TagIdsInput, Toast, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
@@ -196,6 +226,16 @@ const requiredTagIdsEnabled = computed({
 const requiredTagIds = computed({
     get: () => patched.value.requiredTagIds,
     set: requiredTagIds => addPatch({ requiredTagIds: requiredTagIds as any }),
+});
+
+const requiredDefaultAgeGroupIdsEnabled = computed({
+    get: () => patched.value.requiredDefaultAgeGroupIds !== null,
+    set: requiredDefaultAgeGroupIdsEnabled => addPatch({ requiredDefaultAgeGroupIds: requiredDefaultAgeGroupIdsEnabled ? (requiredDefaultAgeGroupIds.value ?? [] as any) : null }),
+});
+
+const requiredDefaultAgeGroupIds = computed({
+    get: () => patched.value.requiredDefaultAgeGroupIds,
+    set: requiredDefaultAgeGroupIds => addPatch({ requiredDefaultAgeGroupIds: requiredDefaultAgeGroupIds as any }),
 });
 
 async function editPeriod(config: PlatformMembershipTypeConfig, period: RegistrationPeriod) {

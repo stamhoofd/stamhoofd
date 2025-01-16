@@ -6,6 +6,7 @@ import { DefaultAgeGroup } from './DefaultAgeGroup.js';
 import { Replacement } from './endpoints/EmailRequest.js';
 import { Image } from './files/Image.js';
 import { ReduceablePrice } from './GroupSettings.js';
+import { LoginMethod } from './LoginMethod.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
@@ -14,7 +15,6 @@ import { PermissionRoleDetailed } from './PermissionRole.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
 import { UserWithMembers } from './UserWithMembers.js';
-import { LoginMethod } from './LoginMethod.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -256,12 +256,40 @@ export class PlatformMembershipType extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
     requiredTagIds: string[] | null = null;
 
+    /**
+     * Only allow groups with these default age groups to use this membership type
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
+    requiredDefaultAgeGroupIds: string[] | null = null;
+
     getPrice(periodId: string, date: Date, tagIds: string[], isReduced: boolean) {
         const period = this.periods.get(periodId);
         if (!period) {
             return null;
         }
         return period.getPrice(date, tagIds, isReduced);
+    }
+
+    isEnabled(tagIds: string[], defaultAgeGroupIds: string[]): boolean {
+        return this.isEnabledForDefaultAgeGroup(defaultAgeGroupIds) && this.isEnabledForTags(tagIds);
+    }
+
+    private isEnabledForDefaultAgeGroup(defaultAgeGroupIds: string[]): boolean {
+        const requiredDefaultAgeGroupIds = this.requiredDefaultAgeGroupIds;
+        if (requiredDefaultAgeGroupIds === null) {
+            return true;
+        }
+
+        return defaultAgeGroupIds.find(id => requiredDefaultAgeGroupIds.includes(id)) !== undefined;
+    }
+
+    private isEnabledForTags(tags: string[]): boolean {
+        const requiredTags = this.requiredTagIds;
+        if (requiredTags === null) {
+            return true;
+        }
+
+        return tags.find(tagId => requiredTags.includes(tagId)) !== undefined;
     }
 }
 
@@ -343,7 +371,7 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: OrganizationRecordsConfiguration, version: 253 })
     recordsConfiguration = OrganizationRecordsConfiguration.create({});
-    
+
     @field({ decoder: OrganizationLevelRecordsConfiguration, version: 358 })
     organizationLevelRecordsConfiguration = OrganizationLevelRecordsConfiguration.create({});
 
@@ -422,6 +450,10 @@ export class PlatformConfig extends AutoEncoder {
                 value: this.name,
             }),
         ];
+    }
+
+    getEnabledPlatformMembershipTypes(tagIds: string[], defaultAgeGroupIds: string[]): PlatformMembershipType[] {
+        return this.membershipTypes.filter(type => type.isEnabled(tagIds, defaultAgeGroupIds));
     }
 }
 
