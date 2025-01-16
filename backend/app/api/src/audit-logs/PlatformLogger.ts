@@ -3,6 +3,7 @@ import { getDefaultGenerator, ModelLogger } from './ModelLogger';
 import { AuditLogType } from '@stamhoofd/structures';
 
 export const PlatformLogger = new ModelLogger(Platform, {
+    skipKeys: ['serverConfig'],
     optionsGenerator: getDefaultGenerator({
         updated: AuditLogType.PlatformSettingsChanged,
     }),

@@ -3,7 +3,7 @@ import { AuditLogType } from '@stamhoofd/structures';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger';
 
 export const OrganizationLogger = new ModelLogger(Organization, {
-    skipKeys: ['searchIndex'],
+    skipKeys: ['searchIndex', 'serverMeta'],
     optionsGenerator: getDefaultGenerator({
         created: AuditLogType.OrganizationAdded,
         updated: AuditLogType.OrganizationEdited,
