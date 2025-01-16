@@ -5,6 +5,6 @@ export class PlatformServerConfig extends AutoEncoder {
     @field({ decoder: OpenIDClientConfiguration, nullable: true })
     ssoConfiguration: OpenIDClientConfiguration | null = null;
 
-    @field({ decoder: OpenIDClientConfiguration, nullable: true, ...NextVersion })
+    @field({ decoder: OpenIDClientConfiguration, nullable: true, version: 360 })
     googleConfiguration: OpenIDClientConfiguration | null = null;
 }

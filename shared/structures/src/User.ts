@@ -75,7 +75,7 @@ export class User extends AutoEncoder {
     /**
      * Readonly
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 360 })
     hasPassword = false;
 
     get name() {
