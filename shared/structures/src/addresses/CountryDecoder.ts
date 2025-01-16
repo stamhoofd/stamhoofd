@@ -14,6 +14,7 @@ export enum Country {
     UnitedStates = 'US',
     Austria = 'AT',
     Portugal = 'PT',
+    Other = 'OTHER',
 }
 
 // We export an instance to prevent creating a new instance every time we need to decode a number
@@ -35,6 +36,7 @@ export class CountryHelper {
             case Country.UnitedStates: return 'Verenigde Staten';
             case Country.Austria: return 'Oostenrijk';
             case Country.Portugal: return 'Portugal';
+            case Country.Other: return 'Ander land';
         }
     }
 
