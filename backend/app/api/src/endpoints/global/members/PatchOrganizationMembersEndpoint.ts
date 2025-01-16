@@ -410,9 +410,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             // Add platform memberships
-            const organizationTags = organization?.meta.tags ?? [];
-            const memberDefaultAgeGroupIds = member.registrations.map(r => r.group.defaultAgeGroupId).filter(id => id !== null) as string[];
-
             for (const { put } of patch.platformMemberships.getPuts()) {
                 if (put.periodId !== platform.periodId) {
                     const period = await RegistrationPeriod.getByID(put.periodId);
@@ -449,6 +446,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw Context.auth.error('Je hebt niet voldoende rechten om deze aansluiting toe te voegen');
                 }
 
+                const putForOrganization = await Context.auth.getOrganization(put.organizationId);
+
                 const membershipType = platform.config.membershipTypes.find(t => t.id === put.membershipTypeId);
 
                 if (!membershipType) {
@@ -458,6 +457,17 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         message: 'Invalid membership type',
                         human: 'Dit aansluitingstype bestaat niet',
                     });
+                }
+
+                const organizationTags = putForOrganization.meta.tags ?? [];
+                const memberDefaultAgeGroupIds: string[] = [];
+
+                for (const r of member.registrations) {
+                    if (r.periodId !== put.periodId || r.deactivatedAt !== null || r.registeredAt === null || r.group.defaultAgeGroupId === null) {
+                        continue;
+                    }
+
+                    memberDefaultAgeGroupIds.push(r.group.defaultAgeGroupId);
                 }
 
                 const isEnabled = membershipType.isEnabled(organizationTags, memberDefaultAgeGroupIds);

@@ -117,11 +117,13 @@ const availableMembershipTypes = computed(() => {
         return [];
     }
     const tags = selectedOrganization.value!.meta.tags;
-    const defaultAgeGroupIds: string[] = props.member.member.registrations
-        .map(r => r.group.defaultAgeGroupId)
+
+    const memberDefaultAgeGroupIds = props.member.filterRegistrations({
+        periodId: props.period.id,
+    }).map(r => r.group.defaultAgeGroupId)
         .filter(id => id !== null);
 
-    return platform.value.config.getEnabledPlatformMembershipTypes(tags, defaultAgeGroupIds);
+    return platform.value.config.getEnabledPlatformMembershipTypes(tags, memberDefaultAgeGroupIds);
 });
 
 const selectedMembershipType = ref(availableMembershipTypes.value[0] ?? null);
