@@ -62,7 +62,6 @@ Using MacOS or Linux is recommended. Setup using WSL can be very difficult given
 ```
 brew install mysql@8.4
 brew link mysql@8.4 --force
-echo 'export PATH="/usr/local/opt/mysql@8.4/bin:$PATH"' >> ~/.zshrc
 ```
 
 - Add these lines to the mysql configuration (/usr/local/etc/my.cnf, but can be other location)
