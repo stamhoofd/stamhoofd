@@ -13,9 +13,9 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
+import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
 import { RegistrationService } from '../../../services/RegistrationService';
-import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -446,12 +446,38 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw Context.auth.error('Je hebt niet voldoende rechten om deze aansluiting toe te voegen');
                 }
 
-                if (!platform.config.membershipTypes.find(t => t.id === put.membershipTypeId)) {
+                const putForOrganization = await Context.auth.getOrganization(put.organizationId);
+
+                const membershipType = platform.config.membershipTypes.find(t => t.id === put.membershipTypeId);
+
+                if (!membershipType) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'membershipTypeId',
                         message: 'Invalid membership type',
                         human: 'Dit aansluitingstype bestaat niet',
+                    });
+                }
+
+                const organizationTags = putForOrganization.meta.tags ?? [];
+                const memberDefaultAgeGroupIds: string[] = [];
+
+                for (const r of member.registrations) {
+                    if (r.periodId !== put.periodId || r.deactivatedAt !== null || r.registeredAt === null || r.group.defaultAgeGroupId === null) {
+                        continue;
+                    }
+
+                    memberDefaultAgeGroupIds.push(r.group.defaultAgeGroupId);
+                }
+
+                const isEnabled = membershipType.isEnabled(organizationTags, memberDefaultAgeGroupIds);
+
+                if (!isEnabled) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'membershipTypeId',
+                        message: 'Invalid membership type',
+                        human: 'Dit aansluitingstype is niet toegestaan voor dit lid',
                     });
                 }
 

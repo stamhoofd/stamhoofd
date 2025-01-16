@@ -113,7 +113,17 @@ const availableOrganizations = computed(() => organization.value ? [organization
 const selectedOrganization = ref(availableOrganizations.value[0] ?? null);
 
 const availableMembershipTypes = computed(() => {
-    return platform.value.config.membershipTypes.filter(t => t.requiredTagIds === null || (selectedOrganization.value && t.requiredTagIds.find(id => selectedOrganization.value!.meta.tags.includes(id))));
+    if (!selectedOrganization.value) {
+        return [];
+    }
+    const tags = selectedOrganization.value!.meta.tags;
+
+    const memberDefaultAgeGroupIds = props.member.filterRegistrations({
+        periodId: props.period.id,
+    }).map(r => r.group.defaultAgeGroupId)
+        .filter(id => id !== null);
+
+    return platform.value.config.getEnabledPlatformMembershipTypes(tags, memberDefaultAgeGroupIds);
 });
 
 const selectedMembershipType = ref(availableMembershipTypes.value[0] ?? null);
