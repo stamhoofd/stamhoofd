@@ -2,7 +2,7 @@ import { DataValidator } from '@stamhoofd/utility';
 import { Country } from '../addresses/CountryDecoder.js';
 import { StamhoofdFilter } from './StamhoofdFilter.js';
 
-export type ParsePhoneNumber = (search: string, country: Country) => { isValid: () => boolean; formatInternational: () => string };
+export type ParsePhoneNumber = (search: string, country: Country.Belgium) => { isValid: () => boolean; formatInternational: () => string };
 
 export class SearchFilterFactory {
     static getIntegerFilter(search: string): StamhoofdFilter | null {

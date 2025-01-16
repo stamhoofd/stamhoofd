@@ -141,7 +141,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (!searchFilter && q.search.match(/^\+?[0-9\s-]+$/)) {
                 // Try to format as phone so we have 1:1 space matches
                 try {
-                    const phoneNumber = parsePhoneNumber(q.search, (Context.i18n.country as Country) || Country.Belgium);
+                    const phoneNumber = parsePhoneNumber(q.search, (Context.i18n.country as unknown) || Country.Belgium);
                     if (phoneNumber && phoneNumber.isValid()) {
                         const formatted = phoneNumber.formatInternational();
                         searchFilter = {
