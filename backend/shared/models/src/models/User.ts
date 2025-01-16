@@ -407,7 +407,7 @@ export class User extends QueryableModel {
         return user;
     }
 
-    linkLoginProvider(type: LoginProviderType, sub: string) {
+    linkLoginProvider(type: LoginProviderType, sub: string, allowAdditional = false) {
         if (!this.meta) {
             this.meta = UserMeta.create({});
         }
@@ -417,18 +417,18 @@ export class User extends QueryableModel {
                 throw new SimpleError({
                     code: 'duplicate_login_provider',
                     message: 'This account is already linked to another account',
-                    human: 'Er is een ander extern account gekoppeld aan deze gebruiker. Het is niet mogelijk om in te loggen op dit account. Contacteer de beheerder van de organisatie.',
+                    human: 'Er is een ander extern account gekoppeld aan deze gebruiker. Het is niet mogelijk om in te loggen op dit account. Ontkoppel eerst je andere account.',
                     statusCode: 400,
                 });
             }
         }
         else {
-            if (this.hasPasswordBasedAccount() && STAMHOOFD.environment !== 'development') {
+            if (this.hasAccount() && !allowAdditional) {
                 // Do not allow this (security reasons - might need to work out a secure flow for this edge case)
                 throw new SimpleError({
                     code: 'password_based_account',
                     message: 'This user uses a password to login. Log in with the password and link the external account through the settings.',
-                    human: 'Deze gebruiker maakt gebruik van een wachtwoord om in te loggen. Log in met het wachtwoord en koppel het externe account via de instellingen.',
+                    human: 'Log eerst in met je bestaande wachtwoord en koppel daarna de nieuwe login methode via je account instellingen.',
                     statusCode: 400,
                 });
             }
@@ -495,6 +495,7 @@ export class User extends QueryableModel {
             verified: this.verified,
             permissions: this.permissions,
             hasAccount: this.hasAccount(),
+            hasPassword: this.hasPasswordBasedAccount(),
             memberId: this.memberId,
             organizationId: this.organizationId,
         });

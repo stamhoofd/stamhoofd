@@ -1,4 +1,4 @@
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, isPatch } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, Member, PasswordToken, Token, User } from '@stamhoofd/models';
@@ -109,11 +109,53 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
+        if (request.body.meta) {
+            if (request.body.meta.loginProviderIds && isPatch(request.body.meta.loginProviderIds)) {
+                // Delete deleted login providers
+                for (const [key, value] of request.body.meta.loginProviderIds) {
+                    if (value !== null) {
+                        // Not allowed
+                        throw Context.auth.error('You are not allowed to change the login provider ids');
+                    }
+
+                    if (editUser.meta?.loginProviderIds.has(key)) {
+                        // Check has remaining method
+                        if (editUser.meta.loginProviderIds.size <= 1 && !editUser.hasPasswordBasedAccount()) {
+                            throw new SimpleError({
+                                code: 'invalid_request',
+                                message: 'You cannot remove the last login provider',
+                                human: 'Stel eerst een wachtwoord in voor jouw account voor je deze loginmethode uitschakelt.',
+                                statusCode: 400,
+                            });
+                        }
+                        editUser.meta.loginProviderIds.delete(key);
+                    }
+                }
+            }
+        }
+
         if (editUser.id === user.id && request.body.password) {
             // password changes
             await editUser.changePassword(request.body.password);
             await PasswordToken.clearFor(editUser.id);
             await Token.clearFor(editUser.id, token.accessToken);
+        }
+
+        if (request.body.hasPassword === false) {
+            if (editUser.hasPasswordBasedAccount()) {
+                // Check other login methods available
+                if (!editUser.meta?.loginProviderIds?.size) {
+                    throw new SimpleError({
+                        code: 'invalid_request',
+                        message: 'You cannot remove the last login provider',
+                        human: 'Je kan jouw wachtwoord niet verwijderen als je geen andere loginmethode hebt.',
+                        statusCode: 400,
+                    });
+                }
+                editUser.password = null;
+                await PasswordToken.clearFor(editUser.id);
+                await Token.clearFor(editUser.id, token.accessToken);
+            }
         }
 
         await editUser.save();

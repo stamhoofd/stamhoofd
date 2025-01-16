@@ -13,20 +13,20 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
-import { usePlatform } from "../hooks";
-import ImageComponent from "../views/ImageComponent.vue";
+import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import { usePlatform } from '../hooks';
+import ImageComponent from '../views/ImageComponent.vue';
 
 const props = defineProps<{
-    root: ComponentWithProperties
+    root: ComponentWithProperties;
 }>();
 
-const platform = usePlatform()
+const platform = usePlatform();
 
 defineExpose({
     shouldNavigateAway: async () => {
-        return await props.root.shouldNavigateAway()
-    }
+        return await props.root.shouldNavigateAway();
+    },
 });
 </script>
 
@@ -74,7 +74,7 @@ defineExpose({
             --vw: 0.4vw;
             --st-horizontal-padding: var(--split-view-detail-horizontal-padding, 40px);
             --navigation-bar-horizontal-padding: 20px;
-            
+
             overflow: clip;
 
             .st-view {
@@ -82,6 +82,10 @@ defineExpose({
                     flex-grow: 1;
                     display: flex;
                     align-items: center;
+
+                    > .container {
+                        width: 100%;
+                    }
                 }
             }
         }

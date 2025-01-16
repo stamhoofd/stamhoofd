@@ -294,6 +294,7 @@ export class SessionContext implements RequestMiddleware {
         const oid_rt = search.get('oid_rt');
         const state = search.get('s');
         const error = search.get('error');
+        const msg = search.get('msg');
 
         console.log('Checking SSO', oid_rt, state, error);
 
@@ -340,6 +341,9 @@ export class SessionContext implements RequestMiddleware {
         }
 
         if (state && error) {
+            search.delete('error');
+            search.delete('s');
+
             // Check valid state
             try {
                 const savedState = await Storage.secure.getItem('oid-state');
@@ -365,8 +369,31 @@ export class SessionContext implements RequestMiddleware {
         }
         else {
             if (error) {
+                search.delete('error');
+
                 // Message not authorized
                 new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show();
+            }
+        }
+
+        if (state && msg) {
+            search.delete('msg');
+            search.delete('s');
+
+            // Check valid state
+            try {
+                const savedState = await Storage.secure.getItem('oid-state');
+                if (savedState !== state) {
+                    console.warn('SSO state didn\'t match');
+                    // Don't show msg
+                    return;
+                }
+                Toast.success(msg).show();
+                Storage.secure.removeItem('oid-state').catch(console.error);
+            }
+            catch (e) {
+                console.error(e);
+                return;
             }
         }
     }
@@ -433,6 +460,45 @@ export class SessionContext implements RequestMiddleware {
         clientInput.name = 'provider';
         clientInput.value = data.providerType;
         form.appendChild(clientInput);
+
+        if (this.hasToken()) {
+            // Check if we have an updated token in storage (other browser tab refreshed the token)
+            await this.loadTokenFromStorage();
+
+            if (!this.token) {
+                // Euhm? The user is not signed in!
+                throw new Error('Could not authenticate request without token');
+            }
+
+            if (this.token.isRefreshing() || this.token.needsRefresh()) {
+                // Already expired.
+                console.log('Request started with expired access token, refreshing before starting request...');
+                try {
+                    await this.token.refresh(this.server, () => false);
+                }
+                catch (e) {
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        if (e.hasCode('invalid_refresh_token')) {
+                            await this.logout();
+                            throw new SimpleError({
+                                code: '',
+                                message: '',
+                                human: 'Je bent niet langer ingelogd. Log opnieuw in om verder te gaan.',
+                            });
+                        }
+                    }
+                    throw e;
+                }
+            }
+
+            // We need to pass the token via the body since we cannot set headers
+            // we require the usage of forms because we need cookies to be used after the redirect (otherwise we'll have CORS issues)
+            const clientInput = document.createElement('input');
+            clientInput.type = 'hidden';
+            clientInput.name = 'header_authorization';
+            clientInput.value = 'Bearer ' + this.token.token.accessToken;
+            form.appendChild(clientInput);
+        }
 
         document.body.appendChild(form);
         form.submit();

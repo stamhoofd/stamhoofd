@@ -1,10 +1,15 @@
-import { DecodedRequest, Response } from '@simonbackx/simple-endpoints';
+import { Response } from '@simonbackx/simple-endpoints';
 import cookie from 'cookie';
+import http from 'http';
 
-type DecodedRequestWithCookies = DecodedRequest<any, any, any> & { cookies?: Record<string, string> };
+export type ObjectWithHeaders = {
+    headers: http.IncomingHttpHeaders;
+};
+
+type DecodedRequestWithCookies = ObjectWithHeaders & { cookies?: Record<string, string> };
 
 export class CookieHelper {
-    static getCookies(request: DecodedRequest<any, any, any>): Record<string, string> {
+    static getCookies(request: ObjectWithHeaders): Record<string, string> {
         const r = request as DecodedRequestWithCookies;
         if (r.cookies) {
             return r.cookies;
@@ -21,7 +26,7 @@ export class CookieHelper {
         return r.cookies;
     }
 
-    static getCookie(request: DecodedRequest<any, any, any>, name: string): string | undefined {
+    static getCookie(request: ObjectWithHeaders, name: string): string | undefined {
         const cookies = this.getCookies(request);
         return cookies[name];
     }

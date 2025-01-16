@@ -1,10 +1,11 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
 import { AsyncLocalStorage } from 'async_hooks';
 
 import { AdminPermissionChecker } from './AdminPermissionChecker';
+import { AutoEncoder, field, Decoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 export const apiUserRateLimiter = new RateLimiter({
     limits: [
@@ -30,6 +31,11 @@ export const apiUserRateLimiter = new RateLimiter({
         },
     ],
 });
+
+export class AuthorizationPostBody extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    header_authorization: string;
+}
 
 export class ContextInstance {
     request: Request;
@@ -150,15 +156,27 @@ export class ContextInstance {
     }
 
     async optionalAuthenticate({ allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {}): Promise<{ user?: User }> {
-        const header = this.request.headers.authorization;
-        if (!header) {
+        try {
+            return await this.authenticate({ allowWithoutAccount });
+        }
+        catch (e) {
             return {};
         }
-        return this.authenticate({ allowWithoutAccount });
     }
 
     async authenticate({ allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {}): Promise<{ user: User; token: Token }> {
-        const header = this.request.headers.authorization;
+        let header = this.request.headers.authorization;
+
+        if (!header && this.request.method === 'POST') {
+            try {
+                const decoded = await DecodedRequest.fromRequest(this.request, undefined, undefined, AuthorizationPostBody as Decoder<AuthorizationPostBody>);
+                header = decoded.body.header_authorization;
+            }
+            catch (e) {
+                // Ignore: failed to read from body
+            }
+        }
+
         if (!header) {
             throw new SimpleError({
                 code: 'not_authenticated',

@@ -262,10 +262,8 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
-            </STList>
 
-            <STList v-if="platform.config.loginMethods.includes(LoginMethod.SSO)" class="illustration-list">
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
+                <STListItem v-if="platform.config.loginMethods.includes(LoginMethod.SSO)" :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn, { properties: {provider: LoginProviderType.SSO} })">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                     </template>
@@ -274,6 +272,21 @@
                     </h2>
                     <p class="style-description">
                         Configureer een externe authenticatie server
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="platform.config.loginMethods.includes(LoginMethod.Google)" :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn, { properties: {provider: LoginProviderType.Google} })">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/partners/google/google-50.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Sign in with Google
+                    </h2>
+                    <p class="style-description">
+                        Configureer login via Google
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -289,7 +302,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
@@ -462,9 +475,36 @@ defineRoutes([
         },
     },
     {
-        url: Routes.SingleSignOn,
+        name: Routes.SingleSignOn,
+        url: 'sso/@provider',
         present: 'popup',
+        params: {
+            provider: String,
+        },
         component: SSOSettingsView as unknown as ComponentOptions,
+
+        async paramsToProps(params: { provider: string }) {
+            const provider = Object.values(LoginProviderType).includes(params.provider as LoginProviderType) ? params.provider as LoginProviderType : null;
+
+            if (!provider) {
+                throw new Error('provider not found');
+            }
+
+            return {
+                provider,
+            };
+        },
+        propsToParams(props) {
+            if (!('provider' in props) || typeof props.provider !== 'string') {
+                throw new Error('Missing provider');
+            }
+
+            return {
+                params: {
+                    provider: props.provider,
+                },
+            };
+        },
     },
 ]);
 const $navigate = useNavigate();

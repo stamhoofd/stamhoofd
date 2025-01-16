@@ -1,6 +1,11 @@
 <template>
     <SaveView class="auto" data-submit-last-field title="Wachtwoord wijzigen" save-icon="lock" @save="submit">
-        <h1>Wachtwoord wijzigen</h1>
+        <h1 v-if="$context.user?.hasPassword">
+            Wachtwoord wijzigen
+        </h1>
+        <h1 v-else>
+            Wachtwoord instellen
+        </h1>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -20,9 +25,9 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { ErrorBox, LoadingButton, PasswordStrength, SaveView, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { ErrorBox, LoadingButton, PasswordStrength, SaveView, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from '@stamhoofd/components';
 import { LoginHelper } from '@stamhoofd/networking';
 
 @Component({
@@ -33,53 +38,54 @@ import { LoginHelper } from '@stamhoofd/networking';
         LoadingButton,
         STErrorsDefault,
         PasswordStrength,
-        SaveView
-    }
+        SaveView,
+    },
 })
-export default class ChangePasswordView extends Mixins(NavigationMixin){
-    loading = false
+export default class ChangePasswordView extends Mixins(NavigationMixin) {
+    loading = false;
 
-    password = ""
-    passwordRepeat = ""
+    password = '';
+    passwordRepeat = '';
 
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+    errorBox: ErrorBox | null = null;
+    validator = new Validator();
 
     get email() {
-        return this.$context.user?.email ?? ""
+        return this.$context.user?.email ?? '';
     }
 
     async submit() {
         if (this.loading) {
-            return
+            return;
         }
 
         // Request the key constants
 
         if (this.password !== this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
-                code: "",
-                message: "De ingevoerde wachtwoorden komen niet overeen"
-            }))
+                code: '',
+                message: 'De ingevoerde wachtwoorden komen niet overeen',
+            }));
             return;
         }
 
         if (this.password.length < 8) {
             this.errorBox = new ErrorBox(new SimpleError({
-                code: "",
-                message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan."
-            }))
+                code: '',
+                message: 'Jouw wachtwoord moet uit minstens 8 karakters bestaan.',
+            }));
             return;
         }
-        this.loading = true
+        this.loading = true;
 
         try {
-            await LoginHelper.changePassword(this.$context, this.password)
+            await LoginHelper.changePassword(this.$context, this.password);
             this.dismiss({ force: true });
-            new Toast('Jouw nieuwe wachtwoord is opgeslagen', "success").show()
-        } catch (e) {
+            new Toast('Jouw nieuwe wachtwoord is opgeslagen', 'success').show();
+        }
+        catch (e) {
             this.loading = false;
-            this.errorBox = new ErrorBox(e)
+            this.errorBox = new ErrorBox(e);
             return;
         }
     }

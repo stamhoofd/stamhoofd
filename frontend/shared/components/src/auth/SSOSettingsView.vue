@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading-view="!ssoConfiguration" :loading="saving" title="Single-Sign-On" :disabled="!hasChanges" :error-box="errors.errorBox" @save="save">
         <h1>
-            Single-Sign-On
+            Single-Sign-On ({{ provider }})
         </h1>
         <p>
             Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Voor Microsoft kan je <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app" target="_blank" class="inline-link">deze</a> handleiding volgen.
@@ -61,8 +61,15 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, Toast, useContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { OpenIDClientConfiguration } from '@stamhoofd/structures';
+import { LoginProviderType, OpenIDClientConfiguration } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
+
+const props = withDefaults(
+    defineProps<{
+        provider: LoginProviderType;
+    }>(), {
+    },
+);
 
 const errors = useErrors();
 const pop = usePop();
@@ -114,6 +121,9 @@ async function loadConfiguration() {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
             path: '/sso',
+            query: {
+                provider: props.provider,
+            },
             decoder: OpenIDClientConfiguration as Decoder<OpenIDClientConfiguration>,
             owner,
             shouldRetry: true,
@@ -140,6 +150,9 @@ async function save() {
         await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/sso',
+            query: {
+                provider: props.provider,
+            },
             decoder: OpenIDClientConfiguration as Decoder<OpenIDClientConfiguration>,
             body: patch.value,
             owner,

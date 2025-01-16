@@ -25,13 +25,29 @@
                             <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
                         </STInputBox>
                         <VersionFooter v-if="showVersionFooter" />
+                        <div v-else class="style-form-buttons ">
+                            <LoadingButton :loading="loading" class="block">
+                                <button id="submit" class="button primary full" type="submit">
+                                    <span class="lock icon" />
+                                    <span>Inloggen</span>
+                                </button>
+                            </LoadingButton>
 
-                        <LoadingButton v-else :loading="loading" class="block">
-                            <button id="submit" class="button primary full" type="submit">
-                                <span class="lock icon" />
-                                <span>Inloggen</span>
-                            </button>
-                        </LoadingButton>
+                            <template v-if="hasSSO">
+                                <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
+                                    <span v-if="!hasPasswordLogin">Inloggen</span>
+                                    <span v-else>Inloggen via SSO</span>
+                                </button>
+                            </template>
+                            <template v-if="hasGoogle">
+                                <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
+                                    <span class="icon">
+                                        <img src="@stamhoofd/assets/images/partners/icons/google.svg">
+                                    </span>
+                                    <span>Inloggen met Google</span>
+                                </button>
+                            </template>
+                        </div>
 
                         <hr>
                         <p class="style-description-small">
@@ -43,13 +59,22 @@
                             <span class="icon arrow-right-small" />
                         </button>
                     </template>
-                    <template v-if="hasSSO">
-                        <hr v-if="hasPasswordLogin">
-                        <button class="button primary" type="button" tabindex="-1" @click="startSSO">
-                            <span v-if="!hasPasswordLogin">Inloggen</span>
-                            <span v-else>Inloggen via SSO</span>
-                            <span class="icon arrow-right-small" />
-                        </button>
+                    <template v-else>
+                        <p class="style-description-block">
+                            Log in via de knop hieronder.
+                        </p>
+
+                        <div class="style-form-buttons">
+                            <button v-if="hasSSO" class="button primary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
+                                <span>Inloggen</span>
+                            </button>
+                            <button v-if="hasGoogle" class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
+                                <span class="icon">
+                                    <img src="@stamhoofd/assets/images/partners/icons/google.svg">
+                                </span>
+                                <span>Inloggen met Google</span>
+                            </button>
+                        </div>
                     </template>
                 </div>
             </div>
@@ -70,7 +95,7 @@ import { sleep } from '@stamhoofd/utility';
 import VersionFooter from '../context/VersionFooter.vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { useContext, useLoginMethod, usePlatform } from '../hooks';
+import { useContext, useLoginMethod } from '../hooks';
 import EmailInput from '../inputs/EmailInput.vue';
 import ConfirmEmailView from './ConfirmEmailView.vue';
 import ForgotPasswordView from './ForgotPasswordView.vue';
@@ -132,11 +157,12 @@ const context = useContext();
 
 const hasPasswordLogin = useLoginMethod(LoginMethod.Password);
 const hasSSO = useLoginMethod(LoginMethod.SSO);
+const hasGoogle = useLoginMethod(LoginMethod.Google);
 
 onMounted(() => {
     // Try to log in on first load
     try {
-        if (!hasSSO.value || hasPasswordLogin.value) {
+        if (!hasSSO.value || hasPasswordLogin.value || hasGoogle.value) {
             return;
         }
         if (AppManager.shared.isNative) {
@@ -145,7 +171,7 @@ onMounted(() => {
         const search = UrlHelper.initial.getSearchParams();
         if (!sessionStorage.getItem('triedLogin') && !search.get('error') && !search.get('oid_rt')) {
             sessionStorage.setItem('triedLogin', 'true');
-            startSSO().catch(console.error);
+            startSSO(LoginProviderType.SSO).catch(console.error);
         }
     }
     catch (e) {
@@ -153,7 +179,7 @@ onMounted(() => {
     }
 });
 
-async function startSSO() {
+async function startSSO(provider: LoginProviderType) {
     if (loading.value) {
         return;
     }
@@ -162,7 +188,7 @@ async function startSSO() {
 
     // This will redirect, so the loading will stay forever
     await context.value.startSSO({
-        providerType: LoginProviderType.SSO,
+        providerType: provider,
     });
 
     sleep(5000).then(() => {
@@ -184,7 +210,12 @@ async function submit() {
 
     if (!hasPasswordLogin.value) {
         if (hasSSO.value) {
-            await startSSO();
+            await startSSO(LoginProviderType.SSO);
+            return;
+        }
+        if (hasGoogle.value) {
+            await startSSO(LoginProviderType.Google);
+            return;
         }
         return;
     }

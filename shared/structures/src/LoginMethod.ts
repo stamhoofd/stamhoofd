@@ -2,4 +2,5 @@
 export enum LoginMethod {
     Password = 'Password',
     SSO = 'SSO',
+    Google = 'Google',
 }

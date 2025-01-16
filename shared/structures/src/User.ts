@@ -7,6 +7,7 @@ import { UserPermissions } from './UserPermissions.js';
 // Note: also update LoginMethod
 export enum LoginProviderType {
     SSO = 'SSO',
+    Google = 'Google',
 }
 
 export class UserMeta extends AutoEncoder {
@@ -70,6 +71,12 @@ export class User extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 162 })
     hasAccount = false;
+
+    /**
+     * Readonly
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    hasPassword = false;
 
     get name() {
         if (!this.lastName) {

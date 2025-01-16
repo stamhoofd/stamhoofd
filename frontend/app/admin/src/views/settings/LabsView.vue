@@ -32,8 +32,9 @@
         <h2>Login methodes</h2>
 
         <STList>
-            <CheckboxListItem v-model="passwordLoginMethod" label="Wachtwoord" />
-            <CheckboxListItem v-model="ssoLoginMethod" label="Single-Sign-On (SSO)" />
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" label="Wachtwoord" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)" />
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" label="Google" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)" />
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" label="Single-Sign-On (SSO)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)" />
         </STList>
     </SaveView>
 </template>
@@ -88,20 +89,6 @@ function setLoginMethod(method: LoginMethod, value: boolean) {
         }),
     });
 }
-
-const passwordLoginMethod = computed({
-    get: () => getLoginMethod(LoginMethod.Password),
-    set: (value: boolean) => {
-        setLoginMethod(LoginMethod.Password, value);
-    },
-});
-
-const ssoLoginMethod = computed({
-    get: () => getLoginMethod(LoginMethod.SSO),
-    set: (value: boolean) => {
-        setLoginMethod(LoginMethod.SSO, value);
-    },
-});
 
 async function save() {
     if (saving.value) {

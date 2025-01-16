@@ -45,12 +45,38 @@
                         <span class="icon key" />
                     </template>
 
-                    <h3 class="style-title-list">
+                    <h3 v-if="usesPassword" class="style-title-list">
                         Wachtwoord wijzigen
+                    </h3>
+                    <h3 v-else class="style-title-list">
+                        Wachtwoord instellen
                     </h3>
                 </STListItem>
 
-                <STListItem v-if="hasSSO && $user?.meta?.loginProviderIds?.has(LoginProviderType.SSO)" :selectable="true" @click.prevent="switchAccount">
+                <STListItem v-if="!usesGoogle && hasGoogle" :selectable="true" @click.prevent="connectProvider(LoginProviderType.Google)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/partners/icons/google.svg" width="24" height="24">
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Google account koppelen
+                    </h3>
+                    <p class="style-description-small">
+                        Je kan dan inloggen via je Google account als alternatieve loginmethode
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="hasSSO && !usesSSO" :selectable="true" @click.prevent="connectProvider(LoginProviderType.SSO)">
+                    <template #left>
+                        <span class="icon lock" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        Single-Sign-On (SSO) activeren
+                    </h3>
+                </STListItem>
+
+                <STListItem v-if="hasSSO && usesSSO" :selectable="true" @click.prevent="switchAccount">
                     <template #left>
                         <span class="icon sync" />
                     </template>
@@ -90,6 +116,81 @@
                     </a>
                 </p>
             </template>
+
+            <div v-if="usesGoogle && hasPasswordLogin" class="container">
+                <hr>
+                <h2>Inloggen met Google</h2>
+                <p>Je gebruikt Google om in te loggen op jouw account. Als je wilt kan je Google ontkoppelen als je die inlogmethode wilt deactiveren voor jouw account.</p>
+
+                <STList>
+                    <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.Google)">
+                        <template #left>
+                            <figure class="style-image-with-icon gray">
+                                <figure>
+                                    <img src="@stamhoofd/assets/images/partners/icons/google.svg">
+                                </figure>
+                                <aside>
+                                    <span class="icon canceled small red stroke" />
+                                </aside>
+                            </figure>
+                        </template>
+
+                        <h3 class="style-title-list">
+                            Google ontkoppelen
+                        </h3>
+                    </STListItem>
+                </STList>
+            </div>
+
+            <div v-if="usesSSO && hasPasswordLogin" class="container">
+                <hr>
+                <h2>Single-Sign-On (SSO)</h2>
+                <p>Je gebruikt Single-Sign-On om in te loggen op jouw account. Als je wilt kan je die inlogmethode deactiveren voor jouw account.</p>
+
+                <STList>
+                    <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.SSO)">
+                        <template #left>
+                            <figure class="style-image-with-icon">
+                                <figure>
+                                    <span class="icon lock" />
+                                </figure>
+                                <aside>
+                                    <span class="icon canceled small red stroke" />
+                                </aside>
+                            </figure>
+                        </template>
+
+                        <h3 class="style-title-list">
+                            SSO deactiveren
+                        </h3>
+                    </STListItem>
+                </STList>
+            </div>
+
+            <div v-if="hasPasswordLogin && usesPassword && (usesGoogle || usesSSO)" class="container">
+                <hr>
+                <h2>Inloggen met wachtwoord</h2>
+                <p>Je kan momenteel ook inloggen met een wachtwoord op je account. Als je wilt kan je jouw wachtwoord verwijderen zodat je enkel via je andere ingestelde loginmethode kan inloggen.</p>
+
+                <STList>
+                    <STListItem :selectable="true" @click.prevent="deletePassword">
+                        <template #left>
+                            <figure class="style-image-with-icon error">
+                                <figure>
+                                    <span class="icon key" />
+                                </figure>
+                                <aside>
+                                    <span class="icon canceled small red stroke" />
+                                </aside>
+                            </figure>
+                        </template>
+
+                        <h3 class="style-title-list">
+                            Wachtwoord verwijderen
+                        </h3>
+                    </STListItem>
+                </STList>
+            </div>
         </main>
     </div>
 </template>
@@ -100,7 +201,7 @@ import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonb
 import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
-import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
+import { LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import DeleteView from './DeleteView.vue';
 
@@ -116,6 +217,17 @@ const { patched, addPatch, hasChanges, patch } = usePatch($user.value!);
 
 const hasPasswordLogin = useLoginMethod(LoginMethod.Password);
 const hasSSO = useLoginMethod(LoginMethod.SSO);
+const hasGoogle = useLoginMethod(LoginMethod.Google);
+
+const usesGoogle = computed(() => {
+    return $user.value?.meta?.loginProviderIds.has(LoginProviderType.Google) ?? false;
+});
+const usesPassword = computed(() => {
+    return $user.value?.hasPassword ?? false;
+});
+const usesSSO = computed(() => {
+    return $user.value?.meta?.loginProviderIds.has(LoginProviderType.SSO) ?? false;
+});
 
 const isUserModeOrganization = STAMHOOFD.userMode === 'organization';
 const saving = ref(false);
@@ -224,6 +336,72 @@ async function deleteRequest() {
 
 async function openChangePassword() {
     await present(new ComponentWithProperties(ChangePasswordView, {}).setDisplayStyle('sheet'));
+}
+
+let disconnecting = false;
+
+async function disconnectProvider(provider: LoginProviderType) {
+    if (disconnecting) {
+        return;
+    }
+    disconnecting = true;
+
+    if (await CenteredMessage.confirm('Ben je zeker dat je deze inlogmethode wilt ontkoppelen?', 'Ja, ontkoppelen')) {
+        const metaPatch = UserMeta.patch({});
+        metaPatch.loginProviderIds.set(provider, null);
+
+        const patch = NewUser.patch({
+            id: $user.value!.id,
+            meta: metaPatch,
+        });
+
+        errors.errorBox = null;
+
+        try {
+            await LoginHelper.patchUser($context.value, patch);
+            Toast.success('De inlogmethode is ontkoppeld').show();
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+        }
+    }
+    disconnecting = false;
+}
+
+async function deletePassword() {
+    if (await CenteredMessage.confirm('Ben je zeker dat je jouw wachtwoord wilt verwijderen?', 'Ja, verwijderen')) {
+        const patch = NewUser.patch({
+            id: $user.value!.id,
+            hasPassword: false,
+        });
+
+        errors.errorBox = null;
+
+        try {
+            await LoginHelper.patchUser($context.value, patch);
+            Toast.success('Je wachtwoord is verwijderd').show();
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+        }
+    }
+}
+
+const connecting = ref(false);
+
+async function connectProvider(provider: LoginProviderType) {
+    if (connecting.value) {
+        return;
+    }
+    connecting.value = true;
+
+    if (await CenteredMessage.confirm('Ben je zeker dat je deze inlogmethode wilt koppelen?', 'Ja, koppelen')) {
+        // This will redirect, so the loading will stay forever
+        await $context.value.startSSO({
+            providerType: provider,
+        });
+    }
+    connecting.value = false;
 }
 
 async function logout() {

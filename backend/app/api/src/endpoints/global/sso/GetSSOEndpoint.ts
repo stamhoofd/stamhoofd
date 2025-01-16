@@ -1,11 +1,17 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { OpenIDClientConfiguration } from '@stamhoofd/structures';
+import { LoginProviderType, OpenIDClientConfiguration } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context';
 import { Platform } from '@stamhoofd/models';
+import { AutoEncoder, Decoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import { SSOService } from '../../../services/SSOService';
 
 type Params = Record<string, never>;
-type Query = undefined;
+export class SSOQuery extends AutoEncoder {
+    @field({ decoder: new EnumDecoder(LoginProviderType) })
+    provider: LoginProviderType;
+}
+type Query = SSOQuery;
 type Body = undefined;
 type ResponseBody = OpenIDClientConfiguration;
 
@@ -14,6 +20,8 @@ type ResponseBody = OpenIDClientConfiguration;
  */
 
 export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    queryDecoder = SSOQuery as Decoder<Query>;
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
@@ -27,19 +35,15 @@ export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
         return [false];
     }
 
-    async handle(_: DecodedRequest<Params, Query, Body>) {
+    async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
+        const service = await SSOService.fromContext(request.query.provider);
 
         if (!await Context.auth.canManageSSOSettings(organization?.id ?? null)) {
             throw Context.auth.error();
         }
 
-        if (organization) {
-            return new Response(organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({}));
-        }
-
-        const platform = await Platform.getShared();
-        return new Response(platform.serverConfig.ssoConfiguration ?? OpenIDClientConfiguration.create({}));
+        return new Response(service.configuration);
     }
 }

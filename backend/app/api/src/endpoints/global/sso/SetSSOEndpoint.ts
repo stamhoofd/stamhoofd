@@ -3,11 +3,11 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { OpenIDClientConfiguration } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context';
-import { OpenIDConnectHelper } from '../../../helpers/OpenIDConnectHelper';
-import { Platform } from '@stamhoofd/models';
+import { SSOService } from '../../../services/SSOService';
+import { SSOQuery } from './GetSSOEndpoint';
 
 type Params = Record<string, never>;
-type Query = undefined;
+type Query = SSOQuery;
 type Body = AutoEncoderPatchType<OpenIDClientConfiguration>;
 type ResponseBody = OpenIDClientConfiguration;
 
@@ -17,6 +17,7 @@ type ResponseBody = OpenIDClientConfiguration;
 
 export class SetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = OpenIDClientConfiguration.patchType() as Decoder<AutoEncoderPatchType<OpenIDClientConfiguration>>;
+    queryDecoder = SSOQuery as Decoder<Query>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
@@ -34,34 +35,14 @@ export class SetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
+        const service = await SSOService.fromContext(request.query.provider);
 
         if (!await Context.auth.canManageSSOSettings(organization?.id ?? null)) {
             throw Context.auth.error();
         }
 
-        let newConfig: OpenIDClientConfiguration;
-
-        if (organization) {
-            newConfig = (organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({})).patch(request.body);
-
-            // Validate configuration
-            const helper = new OpenIDConnectHelper(organization, newConfig);
-            await helper.getClient();
-
-            organization.serverMeta.ssoConfiguration = newConfig;
-            await organization.save();
-        }
-        else {
-            const platform = await Platform.getShared();
-            newConfig = (platform.serverConfig.ssoConfiguration ?? OpenIDClientConfiguration.create({})).patch(request.body);
-
-            // Validate configuration
-            const helper = new OpenIDConnectHelper(null, newConfig);
-            await helper.getClient();
-
-            platform.serverConfig.ssoConfiguration = newConfig;
-            await platform.save();
-        }
+        const newConfig: OpenIDClientConfiguration = service.configuration.patch(request.body);
+        await service.setConfiguration(newConfig);
 
         return new Response(newConfig);
     }
