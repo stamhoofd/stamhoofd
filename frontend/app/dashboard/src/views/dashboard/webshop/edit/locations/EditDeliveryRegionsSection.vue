@@ -6,7 +6,7 @@
 
         <LoadingButton :loading="loadingSearch" class="edit-regions-search-bar block">
             <div class="input-icon-container icon search gray">
-                <input v-model="searchQuery" class="input" placeholder="Toevoegen" @input="searchQuery = $event.target.value">
+                <input v-model="searchQuery" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" class="input" placeholder="Toevoegen" @input="searchQuery = $event.target.value">
             </div>
         </LoadingButton>
     
