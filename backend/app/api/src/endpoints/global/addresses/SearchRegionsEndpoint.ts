@@ -31,7 +31,7 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Escape query
-        const rawQuery = request.query.query.replace(/([-+><()~*"@\s]+)/g, ' ').replace(/[^\w\d]+$/, '');
+        const rawQuery = request.query.query.replace(/([-+><()~*"@\s]+)/g, ' ');
         const words = rawQuery.split(' ').filter(w => w.length > 0);
 
         // Escape words
@@ -40,7 +40,7 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
             // If contains special char (non a-zA-Z) - escape with " character
             if (/^[a-zA-Z0-9]*$/.test(word)) {
                 if (index === words.length - 1) {
-                    cleanedWords.push(word + '*');
+                    cleanedWords.push('+' + word + '*');
                 }
                 else {
                     cleanedWords.push('+' + word);
