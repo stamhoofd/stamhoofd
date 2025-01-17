@@ -2,7 +2,7 @@
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { countries, languages } from '@stamhoofd/locales';
 import { SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Country } from '@stamhoofd/structures';
+import { Country, CountryCode, countryToCode } from '@stamhoofd/structures';
 import { I18n } from './I18n';
 
 export function useTranslate(): typeof I18n.prototype.$t {
@@ -25,10 +25,10 @@ export class I18nController {
 
     namespace = '';
     language = '';
-    country = Country.Belgium;
+    countryCode: CountryCode = Country.Belgium;
 
     // Used for SEO
-    defaultCountry = Country.Belgium;
+    defaultCountryCode: CountryCode = Country.Belgium;
     defaultLanguage = 'nl';
 
     // Allows you to set and remove meta data
@@ -37,16 +37,20 @@ export class I18nController {
     $context: SessionContext | null | undefined;
 
     get locale() {
-        return this.language + '-' + this.country;
+        return this.language + '-' + this.countryCode;
     }
 
     constructor($context: SessionContext | undefined | null, language: string, country: Country, namespace: string) {
         this.$context = $context;
         this.namespace = namespace;
         this.language = language;
-        this.country = country;
+        this.setCountryCode(country);
         this.correctLocale();
         // app.config.globalProperties.$country = this.country
+    }
+
+    private setCountryCode(country: Country) {
+        this.countryCode = countryToCode({ country, defaultCountryCode: this.defaultCountryCode });
     }
 
     static getI18n(): I18n {
@@ -64,10 +68,10 @@ export class I18nController {
         language?: string;
         country?: Country;
     }) {
-        if ((options.country ?? this.country) == this.country && (options.language ?? this.language) == this.language) {
+        if ((options.country ?? this.countryCode) == this.countryCode && (options.language ?? this.language) == this.language) {
             return;
         }
-        this.country = options.country ?? this.country;
+        this.setCountryCode(options.country ?? this.countryCode);
         this.language = options.language ?? this.language;
         this.correctLocale();
 
@@ -118,31 +122,31 @@ export class I18nController {
             [Country.Netherlands]: ['nl', 'en'],
         };
 
-        if (!(this.country in validLocales)) {
+        if (!(this.countryCode in validLocales)) {
             // Find first coutnry with same language
             for (const country of countries) {
                 if (validLocales[country]?.includes(this.language)) {
-                    this.country = country as Country;
+                    this.setCountryCode(country as Country);
                     console.info('[I18n] Corrected country to ' + country);
                     return;
                 }
             }
 
             // Fallback
-            this.country = countries[0] as Country;
-            this.language = validLocales[this.country]![0];
-            console.info('[I18n] Corrected country to ' + this.country + ' and language to ' + this.language);
+            this.setCountryCode(countries[0] as Country);
+            this.language = validLocales[this.countryCode]![0];
+            console.info('[I18n] Corrected country to ' + this.countryCode + ' and language to ' + this.language);
             return;
         }
 
-        if (!validLocales[this.country]?.includes(this.language)) {
-            if (validLocales[this.country]?.includes('en')) {
+        if (!validLocales[this.countryCode]?.includes(this.language)) {
+            if (validLocales[this.countryCode]?.includes('en')) {
                 this.language = 'en';
                 console.info('[I18n] Corrected language to en');
                 return;
             }
 
-            this.language = validLocales[this.country]![0];
+            this.language = validLocales[this.countryCode]![0];
             console.info('[I18n] Corrected language to ' + this.language);
         }
     }
@@ -179,7 +183,7 @@ export class I18nController {
 
     async saveLocaleToStorage() {
         await Storage.keyValue.setItem('language', this.language);
-        await Storage.keyValue.setItem('country', this.country);
+        await Storage.keyValue.setItem('country', this.countryCode);
 
         console.info('[I18n] Saved locale to storage', this.locale);
     }
@@ -274,14 +278,31 @@ export class I18nController {
             const tld = splitted[splitted.length - 1].toLowerCase();
 
             switch (tld) {
-                case 'be': country = Country.Belgium; break;
-                case 'nl': country = Country.Netherlands; break;
-                case 'de': country = Country.Germany; break;
-                case 'lu': country = Country.Luxembourg; break;
-                case 'fr': country = Country.France; break;
-
+                case 'be': {
+                    country = Country.Belgium;
+                    break;
+                }
+                case 'nl': {
+                    country = Country.Netherlands;
+                    break;
+                }
+                case 'de': {
+                    country = Country.Germany;
+                    break;
+                }
+                case 'lu': {
+                    country = Country.Luxembourg;
+                    break;
+                }
+                case 'fr': {
+                    country = Country.France;
+                    break;
+                }
                 // We used .shop before, but were only active in Belgium
-                case 'shop': country = Country.Belgium; break;
+                case 'shop': {
+                    country = Country.Belgium;
+                    break;
+                }
             }
 
             if (country) {
@@ -322,8 +343,14 @@ export class I18nController {
                 const tld = splitted[splitted.length - 1].toLowerCase();
 
                 switch (tld) {
-                    case 'be': language = 'nl'; break;
-                    case 'nl': language = 'nl'; break;
+                    case 'be': {
+                        language = 'nl';
+                        break;
+                    }
+                    case 'nl': {
+                        language = 'nl';
+                        break;
+                    }
                 }
 
                 if (language) {
@@ -357,7 +384,7 @@ export class I18nController {
         }
 
         const def = new I18nController($context, language, country, namespace);
-        def.defaultCountry = defaultCountry ?? def.defaultCountry;
+        def.defaultCountryCode = defaultCountry ? countryToCode({ country: defaultCountry, defaultCountryCode: def.defaultCountryCode }) : def.defaultCountryCode;
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage;
         I18nController.shared = def;
         if (import.meta.hot) {
@@ -399,7 +426,7 @@ export class I18nController {
     }
 
     static getDomain(localizedDomain: LocalizedDomain) {
-        const country = I18nController.shared.country;
+        const country = I18nController.shared.countryCode;
         return localizedDomain[country] ?? localizedDomain[''];
     }
 
@@ -418,7 +445,7 @@ export class I18nController {
      * This builds metadata info only for vue-meta, which is no longer maintained
      */
     get metaInfo(): any {
-        const listCountries = I18nController.fixedCountry ? [this.country] : countries;
+        const listCountries = I18nController.fixedCountry ? [this.countryCode] : countries;
         const url = new UrlHelper();
         const path = url.getPath();
         const hostProtocol = url.getHostWithProtocol();
@@ -432,7 +459,7 @@ export class I18nController {
             hid: 'i18n-og',
             property: 'og:locale',
             // Replace dash with underscore as defined in spec: language_TERRITORY
-            content: this.language + '_' + this.country,
+            content: this.language + '_' + this.countryCode,
         });
 
         // Alternate locations
@@ -447,7 +474,7 @@ export class I18nController {
                 });
 
                 // Add og:locale:alternate
-                if (language !== this.language || country != this.country) {
+                if (language !== this.language || country != this.countryCode) {
                     // Only list if not the same as current
                     meta.push({
                         hid: `i18n-og-alt-${locale}`,
@@ -459,11 +486,11 @@ export class I18nController {
         }
 
         // Add default locale
-        if (this.defaultCountry && this.defaultLanguage) {
+        if (this.defaultCountryCode && this.defaultLanguage) {
             links.push({
                 hid: `i18n-alt-default`,
                 rel: 'alternate',
-                href: hostProtocol + this.transformUrlForLocale(path, this.defaultLanguage, this.defaultCountry, addPrefix),
+                href: hostProtocol + this.transformUrlForLocale(path, this.defaultLanguage, this.defaultCountryCode, addPrefix),
                 hreflang: 'x-default',
             });
         }
@@ -473,7 +500,7 @@ export class I18nController {
         links.push({
             hid: 'i18n-can',
             rel: 'canonical',
-            href: hostProtocol + this.transformUrlForLocale(path, this.language, this.country, addPrefix),
+            href: hostProtocol + this.transformUrlForLocale(path, this.language, this.countryCode, addPrefix),
         });
 
         // If we are in prerender mode, we also want to redirect the crawler if needed
@@ -485,7 +512,7 @@ export class I18nController {
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
         if (isPrerender) {
-            const currentPath = this.transformUrlForLocale(path, this.language, this.country);
+            const currentPath = this.transformUrlForLocale(path, this.language, this.countryCode);
 
             let redirected = false;
             if (currentPath !== UrlHelper.initial.path) {

@@ -6,162 +6,161 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Country } from "@stamhoofd/structures"
-import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Country } from '@stamhoofd/structures';
 
-import {ErrorBox} from "../errors/ErrorBox";
-import {Validator} from "../errors/Validator";
-import STInputBox from "./STInputBox.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import { Validator } from '../errors/Validator';
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
-        STInputBox
+        STInputBox,
     },
-    emits: ["update:modelValue"]
+    emits: ['update:modelValue'],
 })
 export default class PhoneInput extends VueComponent {
-    @Prop({ default: "" }) 
-        title: string;
+    @Prop({ default: '' })
+    title: string;
 
-    @Prop({ default: null }) 
-        validator: Validator | null
+    @Prop({ default: null })
+    validator: Validator | null;
 
-    phoneRaw = "";
+    phoneRaw = '';
     valid = true;
 
     @Prop({ default: null })
-        modelValue!: string | null
+    modelValue!: string | null;
 
     @Prop({ default: true })
-        required!: boolean
+    required!: boolean;
 
     /**
      * Whether the modelValue can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
-        nullable!: boolean
+    nullable!: boolean;
 
-    @Prop({ default: "" })
-        placeholder!: string
+    @Prop({ default: '' })
+    placeholder!: string;
 
-    errorBox: ErrorBox | null = null
+    errorBox: ErrorBox | null = null;
 
     @Watch('modelValue')
     onmodelValueChanged(val: string | null) {
         if (val === null) {
-            this.phoneRaw = ""
-            return
+            this.phoneRaw = '';
+            return;
         }
-        this.phoneRaw = val
+        this.phoneRaw = val;
     }
 
     @Watch('required', { deep: true })
     onChangeRequired() {
         // Revalidate, because the fields might be empty, and required goes false -> send null so any saved address gets cleared
-        this.validate(false, true).catch(console.error)
+        this.validate(false, true).catch(console.error);
     }
 
     onTyping() {
         // Silently send modelValue to parents, but don't show visible errors yet
-        this.validate(false, true).catch(console.error)
+        this.validate(false, true).catch(console.error);
     }
 
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate(true)
-            })
+                return this.validate(true);
+            });
         }
 
-        this.phoneRaw = this.modelValue ?? ""
+        this.phoneRaw = this.modelValue ?? '';
     }
 
     unmounted() {
         if (this.validator) {
-            this.validator.removeValidation(this)
+            this.validator.removeValidation(this);
         }
     }
 
     async validate(final: boolean, silent = false) {
-
         if (this.phoneRaw.length === 0) {
-
             if (!this.required) {
                 if (!silent) {
-                    this.errorBox = null
+                    this.errorBox = null;
                 }
 
                 if (this.modelValue !== null) {
-                    this.$emit('update:modelValue', null)
+                    this.$emit('update:modelValue', null);
                 }
-                return true
+                return true;
             }
 
             if (!final) {
                 if (!silent) {
-                    this.errorBox = null
+                    this.errorBox = null;
                 }
 
                 if (this.nullable && this.modelValue !== null) {
-                    this.$emit('update:modelValue', null)
+                    this.$emit('update:modelValue', null);
                 }
-                return false
+                return false;
             }
         }
         try {
-            const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js/max")
-            const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, I18nController.shared?.country ?? Country.Belgium)
+            const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ 'libphonenumber-js/max');
+            const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, I18nController.shared?.countryCode ?? Country.Belgium);
 
             if (!phoneNumber || !phoneNumber.isValid()) {
                 for (const country of Object.values(Country)) {
-                    const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, country)
+                    const defaultCountry = country === Country.Other ? undefined : country;
+                    const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, defaultCountry);
 
                     if (phoneNumber && phoneNumber.isValid()) {
                         if (!silent) {
                             this.errorBox = new ErrorBox(new SimpleError({
-                                "code": "invalid_field",
-                                "message": this.$t("f7cbe04a-3175-4794-8f74-8261a11fbade").toString(),
-                                "field": "phone"
-                            }))
+                                code: 'invalid_field',
+                                message: this.$t('f7cbe04a-3175-4794-8f74-8261a11fbade').toString(),
+                                field: 'phone',
+                            }));
                         }
-                        return false
+                        return false;
                     }
                 }
                 if (!silent) {
                     this.errorBox = new ErrorBox(new SimpleError({
-                        "code": "invalid_field",
-                        "message": this.$t("ce4a8d4e-a0a2-456e-8fb6-c541c58ef0a1").toString(),
-                        "field": "phone"
-                    }))
+                        code: 'invalid_field',
+                        message: this.$t('ce4a8d4e-a0a2-456e-8fb6-c541c58ef0a1').toString(),
+                        field: 'phone',
+                    }));
                 }
-                return false
-
-            } else {
+                return false;
+            }
+            else {
                 const v = silent ? this.phoneRaw : phoneNumber.formatInternational();
-                this.phoneRaw = v
-        
+                this.phoneRaw = v;
+
                 if (this.modelValue !== v) {
-                    this.$emit('update:modelValue', v)
+                    this.$emit('update:modelValue', v);
                 }
                 if (!silent) {
-                    this.errorBox = null
+                    this.errorBox = null;
                 }
-                return true
+                return true;
             }
-        } catch (e) {
-            console.error(e)
+        }
+        catch (e) {
+            console.error(e);
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
-                    "code": "invalid_field",
-                    "message": this.$t("ce4a8d4e-a0a2-456e-8fb6-c541c58ef0a1").toString(),
-                    "field": "phone"
-                }))
+                    code: 'invalid_field',
+                    message: this.$t('ce4a8d4e-a0a2-456e-8fb6-c541c58ef0a1').toString(),
+                    field: 'phone',
+                }));
             }
-            return false
+            return false;
         }
-        
     }
 }
 </script>

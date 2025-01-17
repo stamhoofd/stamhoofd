@@ -79,7 +79,7 @@ export default class AddressInput extends VueComponent {
     linkCountryToLocale: boolean;
 
     getDefaultCountry() {
-        return I18nController.shared?.country ?? Country.Belgium;
+        return I18nController.shared?.countryCode ?? Country.Belgium;
     }
 
     hasFocus = false;

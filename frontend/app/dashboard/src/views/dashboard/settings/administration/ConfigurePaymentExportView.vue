@@ -245,7 +245,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     }
 
     get country() {
-        return I18nController.shared.country;
+        return I18nController.shared.countryCode;
     }
 
     get hasPayconiq() {

@@ -259,7 +259,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     }
 
     get isBelgium() {
-        return I18nController.shared.country === Country.Belgium && (!this.address || this.address.country === Country.Belgium);
+        return I18nController.shared.countryCode === Country.Belgium && (!this.address || this.address.country === Country.Belgium);
     }
 
     get AcquisitionType() {

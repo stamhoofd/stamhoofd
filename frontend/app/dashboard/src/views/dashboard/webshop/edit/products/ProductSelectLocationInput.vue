@@ -106,7 +106,7 @@ onMounted(() => {
             else {
                 model.value = ProductLocation.create({
                     name: '',
-                    address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium),
+                    address: Address.createDefault(I18nController.shared?.countryCode ?? Country.Belgium),
                 });
             }
         }
@@ -124,7 +124,7 @@ function changeSelected() {
         // Create a new custom one
         a = customLocation.value = ProductLocation.create({
             name: '',
-            address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium),
+            address: Address.createDefault(I18nController.shared?.countryCode ?? Country.Belgium),
         });
     }
     if (a) {

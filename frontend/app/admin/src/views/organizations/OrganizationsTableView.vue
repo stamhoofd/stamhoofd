@@ -21,15 +21,15 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, EmailView, InMemoryTableAction, ModernTableView, RecipientMultipleChoiceOption, TableAction, TableActionSelection, Toast, useAuth, useContext, useGetOrganizationUIFilterBuilders, useGlobalEventListener, useOrganizationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationTag, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
+import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import OrganizationView from './OrganizationView.vue';
 import { useChargeOrganizationsSheet } from './composables/useChargeOrganizationsSheet';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 
 type ObjectType = Organization;
 const $t = useTranslate();
@@ -278,7 +278,7 @@ if (auth.hasPlatformFullAccess()) {
             enabled: true,
             handler: async () => {
                 const organization = Organization.create({
-                    address: Address.createDefault(I18nController.shared.country),
+                    address: Address.createDefault(I18nController.shared.countryCode),
                 });
 
                 const component = new ComponentWithProperties(EditOrganizationView, {

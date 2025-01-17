@@ -3,15 +3,15 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, Platform } from '@stamhoofd/models';
 import { SQL, compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
-import { CountFilteredRequest, Country, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, Country, CountryCode, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { memberFilterCompilers } from '../../../sql-filters/members';
 import { memberSorters } from '../../../sql-sorters/members';
-import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -141,7 +141,9 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (!searchFilter && q.search.match(/^\+?[0-9\s-]+$/)) {
                 // Try to format as phone so we have 1:1 space matches
                 try {
-                    const phoneNumber = parsePhoneNumber(q.search, (Context.i18n.country as unknown) || Country.Belgium);
+                    const country = (Context.i18n.country as CountryCode) || Country.Belgium;
+
+                    const phoneNumber = parsePhoneNumber(q.search, country);
                     if (phoneNumber && phoneNumber.isValid()) {
                         const formatted = phoneNumber.formatInternational();
                         searchFilter = {

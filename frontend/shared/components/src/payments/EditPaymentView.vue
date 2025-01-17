@@ -117,11 +117,13 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { BalanceItem, BalanceItemRelationType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
 
+import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
 import { useOrganization, usePatch } from '../hooks';
+import IconContainer from '../icons/IconContainer.vue';
 import DateSelection from '../inputs/DateSelection.vue';
 import Dropdown from '../inputs/Dropdown.vue';
 import IBANInput from '../inputs/IBANInput.vue';
@@ -131,8 +133,6 @@ import STListItem from '../layout/STListItem.vue';
 import SaveView from '../navigation/SaveView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
-import IconContainer from '../icons/IconContainer.vue';
-import { Formatter } from '@stamhoofd/utility';
 
 const props = withDefaults(
     defineProps<{
@@ -215,7 +215,7 @@ function updateMethod(method: PaymentMethod) {
             }
 
             addPatch({
-                transferDescription: transferSettings.generateDescription('', I18nController.shared.country),
+                transferDescription: transferSettings.generateDescription('', I18nController.shared.countryCode),
                 transferSettings: transferSettings,
             });
         }

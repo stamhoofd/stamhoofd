@@ -30,7 +30,7 @@ export const getAppTitle = (app: AppType | 'auto', organization: Organization | 
 export const getAppDescription = (app: AppType | 'auto', organization: Organization | undefined | null) => {
     if (app === 'auto') {
         if (organization) {
-            return organization.address.anonymousString(I18nController.shared.country);
+            return organization.address.anonymousString(I18nController.shared.countryCode);
         }
         return null;
     }

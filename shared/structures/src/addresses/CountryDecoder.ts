@@ -17,6 +17,16 @@ export enum Country {
     Other = 'OTHER',
 }
 
+export type CountryCode = Exclude<Country, Country.Other>;
+
+export function countryToCode({ country, defaultCountryCode }: { country: Country; defaultCountryCode: CountryCode }): CountryCode {
+    if (country === Country.Other) {
+        return defaultCountryCode;
+    }
+
+    return country;
+}
+
 // We export an instance to prevent creating a new instance every time we need to decode a number
 export const CountryDecoder = new EnumDecoder(Country);
 
