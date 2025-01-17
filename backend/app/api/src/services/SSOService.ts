@@ -290,7 +290,7 @@ export class SSOService {
             await SSOService.storeSession(response, session);
 
             const redirect = client.authorizationUrl({
-                scope: 'openid email profile',
+                scope: 'openid email profile offline_access',
                 code_challenge,
                 code_challenge_method: 'S256',
                 response_mode: 'form_post',
@@ -385,6 +385,13 @@ export class SSOServiceWithSession {
                     console.log('userinfo family_name', userinfo.family_name);
                     lastName = userinfo.family_name;
                 }
+            }
+
+            if (tokenSet.refresh_token) {
+                console.log('OK. Refresh token received!');
+            }
+            else {
+                console.log('No refresh token');
             }
 
             if (!claims.email) {
