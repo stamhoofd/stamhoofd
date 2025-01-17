@@ -171,7 +171,7 @@ onMounted(() => {
         const search = UrlHelper.initial.getSearchParams();
         if (!sessionStorage.getItem('triedLogin') && !search.get('error') && !search.get('oid_rt')) {
             sessionStorage.setItem('triedLogin', 'true');
-            startSSO(LoginProviderType.SSO).catch(console.error);
+            startSSO(LoginProviderType.SSO, true).catch(console.error);
         }
     }
     catch (e) {
@@ -179,7 +179,7 @@ onMounted(() => {
     }
 });
 
-async function startSSO(provider: LoginProviderType) {
+async function startSSO(provider: LoginProviderType, automatic = false) {
     if (loading.value) {
         return;
     }
@@ -189,17 +189,12 @@ async function startSSO(provider: LoginProviderType) {
     // This will redirect, so the loading will stay forever
     await context.value.startSSO({
         providerType: provider,
+        prompt: automatic ? undefined : 'select_account',
     });
 
     sleep(5000).then(() => {
         // In case the redirect failed for some reason
         loading.value = false;
-        errors.errorBox = new ErrorBox(
-            new SimpleError({
-                code: 'sso_failed',
-                message: 'Het openen van de loginpagina is mislukt. Controleer je internetverbinding en probeer het opnieuw.',
-            }),
-        );
     }).catch(console.error);
 }
 
