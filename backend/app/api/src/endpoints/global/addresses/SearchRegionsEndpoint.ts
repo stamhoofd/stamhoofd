@@ -49,7 +49,6 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         }
         const query = cleanedWords.join(" ");
-        console.log("Query", query);
 
         if (query.length == 0) {
             // Do not try searching...
