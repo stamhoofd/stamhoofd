@@ -399,6 +399,14 @@ async function connectProvider(provider: LoginProviderType) {
 
 async function logout() {
     if (await CenteredMessage.confirm('Ben je zeker dat je wilt uitloggen?', 'Uitloggen')) {
+        // Prevent auto sign in via sso
+        try {
+            sessionStorage.setItem('triedLogin', 'true');
+        }
+        catch (e) {
+            // Ignore error
+            console.error(e);
+        }
         await $context.value.logout();
         await pop({ force: true });
     }
