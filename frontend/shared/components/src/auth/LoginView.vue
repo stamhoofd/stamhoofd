@@ -91,7 +91,7 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, defineRoutes, UrlHelper, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, onCheckRoutes, UrlHelper, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { AppManager, LoginHelper } from '@stamhoofd/networking';
 import { computed, onMounted, ref } from 'vue';
 
@@ -164,7 +164,7 @@ const passwordConfig = useLoginMethod(LoginMethod.Password);
 const ssoConfig = useLoginMethod(LoginMethod.SSO);
 const googleConfig = useLoginMethod(LoginMethod.Google);
 
-onMounted(() => {
+onCheckRoutes(() => {
     // Try to log in on first load
     try {
         if (!ssoConfig.value || passwordConfig.value || googleConfig.value) {
