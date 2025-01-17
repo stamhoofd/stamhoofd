@@ -220,13 +220,13 @@ const ssoConfig = useLoginMethod(LoginMethod.SSO);
 const googleConfig = useLoginMethod(LoginMethod.Google);
 
 const usesGoogle = computed(() => {
-    return $user.value?.meta?.loginProviderIds.has(LoginProviderType.Google) ?? false;
+    return googleEnabled.value && ($user.value?.meta?.loginProviderIds.has(LoginProviderType.Google) ?? false);
 });
 const usesPassword = computed(() => {
-    return $user.value?.hasPassword ?? false;
+    return passwordEnabled.value && ($user.value?.hasPassword ?? false);
 });
 const usesSSO = computed(() => {
-    return $user.value?.meta?.loginProviderIds.has(LoginProviderType.SSO) ?? false;
+    return ssoEnabled.value && ($user.value?.meta?.loginProviderIds.has(LoginProviderType.SSO) ?? false);
 });
 
 const isUserModeOrganization = STAMHOOFD.userMode === 'organization';
