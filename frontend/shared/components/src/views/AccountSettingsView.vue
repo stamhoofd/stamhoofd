@@ -110,7 +110,7 @@
             <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled)" class="container">
                 <hr>
                 <h2>{{ googleConfig.fullName || 'Inloggen met Google' }}</h2>
-                <p>Je gebruikt Google om in te loggen op jouw account. Als je wilt kan je Google ontkoppelen als je die inlogmethode wilt deactiveren voor jouw account.</p>
+                <p>Je gebruikt Google om in te loggen op jouw account. Je kan inloggen met Google deactiveren voor jouw account.</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.Google)">
@@ -126,7 +126,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            Google ontkoppelen
+                            Google deactiveren
                         </h3>
                     </STListItem>
                 </STList>
@@ -339,7 +339,7 @@ async function disconnectProvider(provider: LoginProviderType) {
     }
     disconnecting = true;
 
-    if (await CenteredMessage.confirm('Ben je zeker dat je deze inlogmethode wilt ontkoppelen?', 'Ja, ontkoppelen')) {
+    if (await CenteredMessage.confirm('Ben je zeker dat je deze inlogmethode wilt deactiveren?', 'Ja, deactiveren')) {
         const metaPatch = UserMeta.patch({});
         metaPatch.loginProviderIds.set(provider, null);
 
