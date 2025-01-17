@@ -86,11 +86,21 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
                 if (STAMHOOFD.userMode === 'platform') {
                     const platform = await Platform.getShared();
-                    if (!platform.config.loginMethods.includes(LoginMethod.Password)) {
+                    const config = platform.config.loginMethods.get(LoginMethod.Password);
+                    if (!config) {
                         throw new SimpleError({
                             code: 'not_supported',
                             message: 'This platform does not support password login',
                             human: 'Dit platform ondersteunt geen wachtwoord login',
+                            statusCode: 400,
+                        });
+                    }
+
+                    if (!config.isEnabledForEmail(request.body.username)) {
+                        throw new SimpleError({
+                            code: 'not_supported',
+                            message: 'Login method not supported',
+                            human: 'Je kan op dit account niet inloggen met een wachtwoord. Gebruik een andere methode om in te loggen.',
                             statusCode: 400,
                         });
                     }

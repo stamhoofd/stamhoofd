@@ -17,6 +17,10 @@ export class OpenIDClientConfiguration extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true, optional: true })
     redirectUri: string | null = null;
+
+    static get placeholderClientSecret() {
+        return '••••';
+    }
 }
 
 export class StartOpenIDFlowStruct extends AutoEncoder {

@@ -13,37 +13,39 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { SortableEvent, SortableOptions } from "sortablejs";
-import { Sortable } from "sortablejs-vue3";
+import { SortableEvent, SortableOptions } from 'sortablejs';
+import { Sortable } from 'sortablejs-vue3';
 import { computed, nextTick, ref } from 'vue';
 
 const props = withDefaults(
     // props
     defineProps<{
-        draggable?: boolean, 
-        group?: string, 
-        withAnimation?: boolean, 
-        itemKey?: string | ((item: any) => string | number | symbol)
+        draggable?: boolean;
+        group?: string;
+        withAnimation?: boolean;
+        itemKey?: string | ((item: any) => string | number | symbol);
     }>(),
     // default values
     {
-        valueModel: null, 
-        draggable: false, 
-        group: undefined, 
-        withAnimation: false, 
-        itemKey: 'id'
-    }
+        valueModel: null,
+        draggable: false,
+        group: undefined,
+        withAnimation: false,
+        itemKey: 'id',
+    },
 );
 
-const listModel =defineModel<T[] | undefined>({default: undefined});
+const listModel = defineModel<T[] | undefined>({ default: undefined });
 
-const options = computed<SortableOptions>(() => { return {
-    animation: 200,
-    group: props.group,
-    handle: '.drag',
-    ghostClass: 'is-dragging',
-    forceFallback: true,
-}});
+const options = computed<SortableOptions>(() => {
+    return {
+        animation: 200,
+        group: props.group,
+        handle: '.drag',
+        ghostClass: 'is-dragging',
+        forceFallback: true,
+    };
+});
 
 const isDrag = ref(false);
 
@@ -51,7 +53,7 @@ const onStart = () => {
     isDrag.value = true;
 };
 
-const onUpdate = async ({from, to, oldIndex, newIndex, ...event}: SortableEvent) => {
+const onUpdate = async ({ from, to, oldIndex, newIndex, ...event }: SortableEvent) => {
     if (from !== to) {
         console.warn('Dragged between lists, not supported', from, to, event);
 
@@ -60,12 +62,12 @@ const onUpdate = async ({from, to, oldIndex, newIndex, ...event}: SortableEvent)
 
         setTimeout(() => {
             isDrag.value = false;
-        }, 100)
+        }, 100);
         return;
     }
 
-    if(listModel.value !== undefined) {
-        if(oldIndex !== undefined && newIndex !== undefined) {
+    if (listModel.value !== undefined) {
+        if (oldIndex !== undefined && newIndex !== undefined) {
             listModel.value = await moveItemInArray(listModel.value, oldIndex, newIndex);
         }
     }
@@ -75,16 +77,17 @@ const onUpdate = async ({from, to, oldIndex, newIndex, ...event}: SortableEvent)
 
     setTimeout(() => {
         isDrag.value = false;
-    }, 100)
+    }, 100);
 };
 
 const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
     const copy = [...array];
     const item = copy.splice(from, 1)[0];
-    
+
     return await nextTick(() => {
         copy.splice(to, 0, item);
-        return copy});
+        return copy;
+    });
 };
 </script>
 
@@ -101,7 +104,7 @@ const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
         margin: 0;
     }
 
-    > .st-list-item {        
+    > .st-list-item {
         &.list-move {
             transition: transform 0.2s, opacity 0.2s !important;
         }
@@ -133,7 +136,6 @@ const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
         }
     }
 
-
     +.style-button-bar {
         margin-top: 15px;
     }
@@ -146,13 +148,11 @@ const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
         }
     }
 
-
     &.is-dragging {
         * {
             cursor: grabbing !important;
         }
     }
-   
 
 }
 </style>

@@ -71,6 +71,7 @@ export { default as STListItemGridRow } from './src/layout/STListItemGridRow.vue
 export * from './src/context';
 export * from './src/composables';
 export * from './src/helpers';
+export * from './src/inputs';
 
 export { default as GroupAvatar } from './src/GroupAvatar.vue';
 export { default as Spinner } from './src/Spinner.vue';
@@ -86,50 +87,6 @@ export { default as GroupIconWithWaitingList } from './src/members/components/gr
 export { default as IconContainer } from './src/icons/IconContainer.vue';
 export { default as ProgressIcon } from './src/icons/ProgressIcon.vue';
 export { default as ProgressRing } from './src/icons/ProgressRing.vue';
-
-// Inputs (last, because they use other components from this library)
-export { default as AddressInput } from './src/inputs/AddressInput.vue';
-export { default as NRNInput } from './src/inputs/NRNInput.vue';
-export { default as AgeInput } from './src/inputs/AgeInput.vue';
-export { default as BirthDayInput } from './src/inputs/BirthDayInput.vue';
-export { default as Checkbox } from './src/inputs/Checkbox.vue';
-export { default as CheckboxListItem } from './src/inputs/CheckboxListItem.vue';
-export { default as CodeInput } from './src/inputs/CodeInput.vue';
-export { default as ColorInput } from './src/inputs/ColorInput.vue';
-export { default as CompanyNumberInput } from './src/inputs/CompanyNumberInput.vue';
-export { default as DateSelection } from './src/inputs/DateSelection.vue';
-export { default as Dropdown } from './src/inputs/Dropdown.vue';
-export { default as EmailInput } from './src/inputs/EmailInput.vue';
-export { default as FileInput } from './src/inputs/FileInput.vue';
-export { default as IBANInput } from './src/inputs/IBANInput.vue';
-export { default as ImageInput } from './src/inputs/ImageInput.vue';
-export { default as MultiSelectInput } from './src/inputs/MultiSelectInput.vue';
-export { default as NumberInput } from './src/inputs/NumberInput.vue';
-export { default as PasswordStrength } from './src/inputs/PasswordStrength.vue';
-export { default as PermyriadInput } from './src/inputs/PermyriadInput.vue';
-export { default as PhoneInput } from './src/inputs/PhoneInput.vue';
-export { default as PrefixInput } from './src/inputs/PrefixInput.vue';
-export { default as PriceInput } from './src/inputs/PriceInput.vue';
-export { default as Radio } from './src/inputs/Radio.vue';
-export { default as RadioGroup } from './src/inputs/RadioGroup.vue';
-export { default as RecordAnswerInput } from './src/inputs/RecordAnswerInput.vue';
-export { default as ScrollableSegmentedControl } from './src/inputs/ScrollableSegmentedControl.vue';
-export { default as SegmentedControl } from './src/inputs/SegmentedControl.vue';
-export { default as SelectionAddressInput } from './src/inputs/SelectionAddressInput.vue';
-export { default as Slider } from './src/inputs/Slider.vue';
-export { default as StepperInput } from './src/inputs/StepperInput.vue';
-export { default as STInputBox } from './src/inputs/STInputBox.vue';
-export { default as TimeInput } from './src/inputs/TimeInput.vue';
-export { default as TimeMinutesInput } from './src/inputs/TimeMinutesInput.vue';
-export { default as UploadButton } from './src/inputs/UploadButton.vue';
-export { default as UploadFileButton } from './src/inputs/UploadFileButton.vue';
-export { default as UrlInput } from './src/inputs/UrlInput.vue';
-export { default as VATNumberInput } from './src/inputs/VATNumberInput.vue';
-export { default as WYSIWYGTextInput } from './src/inputs/WYSIWYGTextInput.vue';
-export { default as TagIdsInput } from './src/inputs/TagIdsInput.vue';
-export { default as DefaultAgeGroupIdsInput } from './src/inputs/DefaultAgeGroupIdsInput.vue';
-export { default as GroupsInput } from './src/inputs/GroupsInput.vue';
-export { default as GroupIdsInput } from './src/inputs/GroupIdsInput.vue';
 
 // Shared views should be last
 export { default as AccountSettingsView } from './src/views/AccountSettingsView.vue';

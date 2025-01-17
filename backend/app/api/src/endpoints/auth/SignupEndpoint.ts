@@ -32,7 +32,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
         if (STAMHOOFD.userMode === 'platform') {
             const platform = await Platform.getShared();
-            if (!platform.config.loginMethods.includes(LoginMethod.Password)) {
+            if (!platform.config.loginMethods.has(LoginMethod.Password)) {
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'This platform does not support password login',

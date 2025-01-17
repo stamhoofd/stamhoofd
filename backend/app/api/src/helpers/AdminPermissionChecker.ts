@@ -538,6 +538,10 @@ export class AdminPermissionChecker {
     }
 
     async canEditUserName(user: User) {
+        if (user.hasAccount() && !user.hasPasswordBasedAccount()) {
+            return false;
+        }
+
         if (user.id === this.user.id) {
             return true;
         }
@@ -556,9 +560,6 @@ export class AdminPermissionChecker {
     }
 
     async canEditUserEmail(user: User) {
-        if (user.meta?.loginProviderIds?.size) {
-            return false;
-        }
         return this.canEditUserName(user);
     }
 

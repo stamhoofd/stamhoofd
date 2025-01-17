@@ -41,6 +41,10 @@ export class SetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
             throw Context.auth.error();
         }
 
+        if (request.body.clientSecret === OpenIDClientConfiguration.placeholderClientSecret) {
+            delete request.body.clientSecret;
+        }
+
         const newConfig: OpenIDClientConfiguration = service.configuration.patch(request.body);
         await service.setConfiguration(newConfig);
 

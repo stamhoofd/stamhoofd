@@ -1,8 +1,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { PasswordToken, sendEmailTemplate, User } from '@stamhoofd/models';
-import { EmailTemplateType, ForgotPasswordRequest, Recipient, Replacement } from '@stamhoofd/structures';
+import { PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
+import { EmailTemplateType, ForgotPasswordRequest, LoginMethod, Recipient, Replacement } from '@stamhoofd/structures';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../helpers/Context';
 
 type Params = Record<string, never>;
@@ -28,6 +29,29 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
+
+        if (STAMHOOFD.userMode === 'platform') {
+            const platform = await Platform.getShared();
+            const config = platform.config.loginMethods.get(LoginMethod.Password);
+            if (!config) {
+                throw new SimpleError({
+                    code: 'not_supported',
+                    message: 'This platform does not support password login',
+                    human: 'Dit platform ondersteunt geen wachtwoord login',
+                    statusCode: 400,
+                });
+            }
+
+            if (!config.isEnabledForEmail(request.body.email)) {
+                throw new SimpleError({
+                    code: 'not_supported',
+                    message: 'Login method not supported',
+                    human: 'Je kan op dit account geen wachtwoord gebruiken om in te loggen.',
+                    statusCode: 400,
+                });
+            }
+        }
+
         const user = await User.getForAuthentication(organization?.id ?? null, request.body.email, { allowWithoutAccount: true });
 
         if (!user) {

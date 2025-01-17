@@ -12,6 +12,10 @@
         </p>
 
         <slot />
+
+        <template #right>
+            <slot name="right" />
+        </template>
     </STListItem>
 </template>
 

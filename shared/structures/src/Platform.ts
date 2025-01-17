@@ -6,7 +6,7 @@ import { DefaultAgeGroup } from './DefaultAgeGroup.js';
 import { Replacement } from './endpoints/EmailRequest.js';
 import { Image } from './files/Image.js';
 import { ReduceablePrice } from './GroupSettings.js';
-import { LoginMethod } from './LoginMethod.js';
+import { LoginMethod, LoginMethodConfig } from './LoginMethod.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
@@ -433,7 +433,14 @@ export class PlatformConfig extends AutoEncoder {
     privacy = PrivacySettings.create({});
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(LoginMethod)), version: 359 })
-    loginMethods: LoginMethod[] = [LoginMethod.Password];
+    @field({ decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig), version: 361, upgrade: (old: LoginMethod[]) => {
+        const map = new Map<LoginMethod, LoginMethodConfig>();
+        for (const key of old) {
+            map.set(key, LoginMethodConfig.create({}));
+        }
+        return map;
+    } })
+    loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([[LoginMethod.Password, LoginMethodConfig.create({})]]);
 
     getEmailReplacements() {
         return [

@@ -22,6 +22,7 @@ export * from './useOrganization';
 export * from './usePatch';
 export * from './usePatchableArray';
 export * from './usePatchArray';
+export * from './usePatchMap';
 export * from './usePatchMoveUpDown';
 export * from './usePlatform';
 export * from './useSalesDisabled';

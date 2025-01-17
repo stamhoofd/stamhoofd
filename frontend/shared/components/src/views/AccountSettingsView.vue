@@ -15,20 +15,20 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form @submit.prevent="save">
-                <STInputBox title="Mijn naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
+                <STInputBox v-if="firstName || lastName || usesPassword" title="Mijn naam" error-fields="firstName,lastName" :error-box="errors.errorBox">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name" :disabled="!usesPassword">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name" :disabled="!usesPassword">
                         </div>
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" :disabled="$user?.meta?.loginProviderIds?.size" />
+                <EmailInput v-model="email" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" :disabled="!usesPassword" />
 
-                <div class="style-button-bar">
+                <div v-if="usesPassword" class="style-button-bar">
                     <LoadingButton :loading="saving">
                         <button id="submit" class="button primary" type="submit" :disabled="!hasChanges">
                             <span>Opslaan</span>
@@ -40,7 +40,7 @@
             <hr>
 
             <STList>
-                <STListItem v-if="hasPasswordLogin" :selectable="true" @click.prevent="openChangePassword">
+                <STListItem v-if="passwordEnabled" :selectable="true" @click.prevent="openChangePassword">
                     <template #left>
                         <span class="icon key" />
                     </template>
@@ -53,7 +53,7 @@
                     </h3>
                 </STListItem>
 
-                <STListItem v-if="!usesGoogle && hasGoogle" :selectable="true" @click.prevent="connectProvider(LoginProviderType.Google)">
+                <STListItem v-if="!usesGoogle && googleEnabled" :selectable="true" @click.prevent="connectProvider(LoginProviderType.Google)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/partners/icons/google.svg" width="24" height="24">
                     </template>
@@ -66,23 +66,13 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="hasSSO && !usesSSO" :selectable="true" @click.prevent="connectProvider(LoginProviderType.SSO)">
+                <STListItem v-if="ssoEnabled && !usesSSO" :selectable="true" @click.prevent="connectProvider(LoginProviderType.SSO)">
                     <template #left>
                         <span class="icon lock" />
                     </template>
 
                     <h3 class="style-title-list">
-                        Single-Sign-On (SSO) activeren
-                    </h3>
-                </STListItem>
-
-                <STListItem v-if="hasSSO && usesSSO" :selectable="true" @click.prevent="switchAccount">
-                    <template #left>
-                        <span class="icon sync" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        Wisselen tussen accounts
+                        {{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }} activeren
                     </h3>
                 </STListItem>
 
@@ -117,9 +107,9 @@
                 </p>
             </template>
 
-            <div v-if="usesGoogle && hasPasswordLogin" class="container">
+            <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled)" class="container">
                 <hr>
-                <h2>Inloggen met Google</h2>
+                <h2>{{ googleConfig.fullName || 'Inloggen met Google' }}</h2>
                 <p>Je gebruikt Google om in te loggen op jouw account. Als je wilt kan je Google ontkoppelen als je die inlogmethode wilt deactiveren voor jouw account.</p>
 
                 <STList>
@@ -142,10 +132,10 @@
                 </STList>
             </div>
 
-            <div v-if="usesSSO && hasPasswordLogin" class="container">
+            <div v-if="ssoConfig && ssoEnabled && usesSSO && (passwordEnabled || googleEnabled)" class="container">
                 <hr>
-                <h2>Single-Sign-On (SSO)</h2>
-                <p>Je gebruikt Single-Sign-On om in te loggen op jouw account. Als je wilt kan je die inlogmethode deactiveren voor jouw account.</p>
+                <h2>{{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }}</h2>
+                <p>Je gebruikt {{ ssoConfig.shortName || 'SSO' }} om in te loggen op jouw account. Als je wilt kan je die inlogmethode deactiveren voor jouw account.</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.SSO)">
@@ -161,13 +151,13 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            SSO deactiveren
+                            {{ ssoConfig.shortName || 'SSO' }} deactiveren
                         </h3>
                     </STListItem>
                 </STList>
             </div>
 
-            <div v-if="hasPasswordLogin && usesPassword && (usesGoogle || usesSSO)" class="container">
+            <div v-if="passwordEnabled && usesPassword && (usesGoogle || usesSSO)" class="container">
                 <hr>
                 <h2>Inloggen met wachtwoord</h2>
                 <p>Je kan momenteel ook inloggen met een wachtwoord op je account. Als je wilt kan je jouw wachtwoord verwijderen zodat je enkel via je andere ingestelde loginmethode kan inloggen.</p>
@@ -198,7 +188,7 @@
 <script lang="ts" setup>
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
+import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, useLoginMethodEnabled, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
 import { LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';
@@ -215,9 +205,19 @@ const pop = usePop();
 const $t = useTranslate();
 const { patched, addPatch, hasChanges, patch } = usePatch($user.value!);
 
-const hasPasswordLogin = useLoginMethod(LoginMethod.Password);
-const hasSSO = useLoginMethod(LoginMethod.SSO);
-const hasGoogle = useLoginMethod(LoginMethod.Google);
+const email = computed({
+    get: () => patched.value.email,
+    set: (email) => {
+        addPatch({ email });
+    },
+});
+
+const passwordEnabled = useLoginMethodEnabled(email, LoginMethod.Password);
+const ssoEnabled = useLoginMethodEnabled(email, LoginMethod.SSO);
+const googleEnabled = useLoginMethodEnabled(email, LoginMethod.Google);
+
+const ssoConfig = useLoginMethod(LoginMethod.SSO);
+const googleConfig = useLoginMethod(LoginMethod.Google);
 
 const usesGoogle = computed(() => {
     return $user.value?.meta?.loginProviderIds.has(LoginProviderType.Google) ?? false;
@@ -235,13 +235,6 @@ const policies = computed(() => $platform.value.config.privacy.policies);
 
 onMounted(() => {
     $context.value.fetchUser(false).catch(console.error);
-});
-
-const email = computed({
-    get: () => patched.value.email,
-    set: (email) => {
-        addPatch({ email });
-    },
 });
 
 const firstName = computed({

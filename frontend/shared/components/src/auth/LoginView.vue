@@ -9,7 +9,7 @@
 
                     <STErrorsDefault :error-box="errors.errorBox" />
 
-                    <template v-if="hasPasswordLogin">
+                    <template v-if="passwordConfig">
                         <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
                         <p v-if="lock" class="style-description-small">
                             {{ lock }}
@@ -33,18 +33,21 @@
                                 </button>
                             </LoadingButton>
 
-                            <template v-if="hasSSO">
-                                <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
-                                    <span v-if="!hasPasswordLogin">Inloggen</span>
-                                    <span v-else>Inloggen via SSO</span>
-                                </button>
-                            </template>
-                            <template v-if="hasGoogle">
+                            <template v-if="googleConfig">
                                 <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
                                     <span class="icon">
                                         <img src="@stamhoofd/assets/images/partners/icons/google.svg">
                                     </span>
-                                    <span>Inloggen met Google</span>
+                                    <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
+                                    <span v-else>Inloggen met Google</span>
+                                </button>
+                            </template>
+
+                            <template v-if="ssoConfig">
+                                <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
+                                    <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
+                                    <span v-else-if="!passwordConfig">Inloggen</span>
+                                    <span v-else>Inloggen via SSO</span>
                                 </button>
                             </template>
                         </div>
@@ -65,14 +68,16 @@
                         </p>
 
                         <div class="style-form-buttons">
-                            <button v-if="hasSSO" class="button primary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
-                                <span>Inloggen</span>
+                            <button v-if="ssoConfig" class="button primary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
+                                <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
+                                <span v-else>Inloggen</span>
                             </button>
-                            <button v-if="hasGoogle" class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
+                            <button v-if="googleConfig" class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
                                 <span class="icon">
                                     <img src="@stamhoofd/assets/images/partners/icons/google.svg">
                                 </span>
-                                <span>Inloggen met Google</span>
+                                <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
+                                <span v-else>Inloggen met Google</span>
                             </button>
                         </div>
                     </template>
@@ -155,14 +160,14 @@ const showVersionFooter = computed(() => {
 });
 const context = useContext();
 
-const hasPasswordLogin = useLoginMethod(LoginMethod.Password);
-const hasSSO = useLoginMethod(LoginMethod.SSO);
-const hasGoogle = useLoginMethod(LoginMethod.Google);
+const passwordConfig = useLoginMethod(LoginMethod.Password);
+const ssoConfig = useLoginMethod(LoginMethod.SSO);
+const googleConfig = useLoginMethod(LoginMethod.Google);
 
 onMounted(() => {
     // Try to log in on first load
     try {
-        if (!hasSSO.value || hasPasswordLogin.value || hasGoogle.value) {
+        if (!ssoConfig.value || passwordConfig.value || googleConfig.value) {
             return;
         }
         if (AppManager.shared.isNative) {
@@ -203,12 +208,12 @@ async function submit() {
         return;
     }
 
-    if (!hasPasswordLogin.value) {
-        if (hasSSO.value) {
+    if (!passwordConfig.value) {
+        if (ssoConfig.value) {
             await startSSO(LoginProviderType.SSO);
             return;
         }
-        if (hasGoogle.value) {
+        if (googleConfig.value) {
             await startSSO(LoginProviderType.Google);
             return;
         }

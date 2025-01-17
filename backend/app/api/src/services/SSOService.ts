@@ -1,7 +1,7 @@
 import { DecodedRequest, Response } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models';
-import { LoginProviderType, OpenIDClientConfiguration, StartOpenIDFlowStruct, Token as TokenStruct } from '@stamhoofd/structures';
+import { LoginMethod, LoginProviderType, OpenIDClientConfiguration, StartOpenIDFlowStruct, Token as TokenStruct } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { generators, Issuer } from 'openid-client';
 import { Context } from '../helpers/Context';
@@ -81,8 +81,8 @@ export class SSOService {
         const platform = await Platform.getShared();
 
         const service = new SSOService({ provider, platform, organization, user: Context.user });
-        // Validate configuration
-        const _ = service.configuration;
+        service.validate();
+
         return service;
     }
 
@@ -115,6 +115,51 @@ export class SSOService {
             });
         }
         return configuration;
+    }
+
+    get loginConfiguration() {
+        if (this.organization) {
+            throw new SimpleError({
+                code: 'invalid_client',
+                message: 'Login configuration not yet supported for organization users',
+                statusCode: 400,
+            });
+        }
+
+        const loginConfiguration = this.platform.config.loginMethods.get(this.provider as unknown as LoginMethod);
+        if (!loginConfiguration) {
+            throw new SimpleError({
+                code: 'invalid_client',
+                message: 'SSO not configured (correctly)',
+                statusCode: 400,
+            });
+        }
+
+        return loginConfiguration;
+    }
+
+    validate() {
+        // Validate configuration exists
+        const _ = this.configuration;
+        const __ = this.loginConfiguration;
+
+        if (this.user) {
+            this.validateEmail(this.user.email);
+        }
+    }
+
+    validateEmail(email: string) {
+        // Validate configuration
+        const loginConfiguration = this.loginConfiguration;
+
+        if (!loginConfiguration.isEnabledForEmail(email)) {
+            throw new SimpleError({
+                code: 'invalid_user',
+                message: 'User not allowed to use this login method',
+                human: 'Je kan deze inlogmethode niet gebruiken',
+                statusCode: 400,
+            });
+        }
     }
 
     async setConfiguration(configuration: OpenIDClientConfiguration) {
@@ -289,8 +334,15 @@ export class SSOService {
             const client = await this.getClient();
             await SSOService.storeSession(response, session);
 
+            const scopes = ['openid', 'email', 'profile'];
+
+            if (this.provider === LoginProviderType.SSO) {
+                // Google doesn't support this scope
+                scopes.push('offline_access');
+            }
+
             const redirect = client.authorizationUrl({
-                scope: 'openid email profile offline_access',
+                scope: scopes.join(' '),
                 code_challenge,
                 code_challenge_method: 'S256',
                 response_mode: 'form_post',
@@ -300,6 +352,9 @@ export class SSOService {
                 prompt: prompt ?? undefined,
                 login_hint: this.user?.email ?? undefined,
                 redirect_uri: this.externalRedirectUri,
+
+                // Google has this instead of the offline_access scope
+                access_type: this.provider === LoginProviderType.Google ? 'offline' : undefined,
             });
 
             response.headers['location'] = redirect;
@@ -409,6 +464,8 @@ export class SSOServiceWithSession {
                     statusCode: 400,
                 });
             }
+
+            this.service.validateEmail(claims.email);
 
             // Get user from database
             let user = await User.getForRegister(this.service.organization?.id ?? null, claims.email);

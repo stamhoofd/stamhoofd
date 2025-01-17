@@ -1,8 +1,8 @@
 import { AutoEncoderPatchType, Decoder, isPatch } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, Member, PasswordToken, Token, User } from '@stamhoofd/models';
-import { NewUser, PermissionLevel, SignupResponse, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { EmailVerificationCode, Member, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
+import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context';
 import { MemberUserSyncer } from '../../helpers/MemberUserSyncer';
@@ -135,6 +135,28 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         if (editUser.id === user.id && request.body.password) {
+            if (STAMHOOFD.userMode === 'platform') {
+                const platform = await Platform.getShared();
+                const config = platform.config.loginMethods.get(LoginMethod.Password);
+                if (!config) {
+                    throw new SimpleError({
+                        code: 'not_supported',
+                        message: 'This platform does not support password login',
+                        human: 'Dit platform ondersteunt geen wachtwoord login',
+                        statusCode: 400,
+                    });
+                }
+
+                if (!config.isEnabledForEmail(editUser.email)) {
+                    throw new SimpleError({
+                        code: 'not_supported',
+                        message: 'Login method not supported',
+                        human: 'Je kan op dit account geen wachtwoord gebruiken om in te loggen.',
+                        statusCode: 400,
+                    });
+                }
+            }
+
             // password changes
             await editUser.changePassword(request.body.password);
             await PasswordToken.clearFor(editUser.id);

@@ -44,6 +44,13 @@ export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
             throw Context.auth.error();
         }
 
-        return new Response(service.configuration);
+        const configuration = service.configuration.clone();
+
+        // Remove secret by placeholder asterisks
+        if (configuration.clientSecret.length > 0) {
+            configuration.clientSecret = OpenIDClientConfiguration.placeholderClientSecret;
+        }
+
+        return new Response(configuration);
     }
 }

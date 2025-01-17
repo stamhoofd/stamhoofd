@@ -263,7 +263,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="platform.config.loginMethods.includes(LoginMethod.SSO)" :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn, { properties: {provider: LoginProviderType.SSO} })">
+                <STListItem v-if="platform.config.loginMethods.has(LoginMethod.SSO)" :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn, { properties: {provider: LoginProviderType.SSO} })">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                     </template>
@@ -278,7 +278,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="platform.config.loginMethods.includes(LoginMethod.Google)" :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn, { properties: {provider: LoginProviderType.Google} })">
+                <STListItem v-if="platform.config.loginMethods.has(LoginMethod.Google)" :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn, { properties: {provider: LoginProviderType.Google} })">
                     <template #left>
                         <img src="@stamhoofd/assets/images/partners/google/google-50.svg">
                     </template>

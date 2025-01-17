@@ -32,26 +32,40 @@
         <h2>Login methodes</h2>
 
         <STList>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" label="Wachtwoord" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)" />
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" label="Google" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)" />
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" label="Single-Sign-On (SSO)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)" />
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" label="Wachtwoord" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
+                <template #right>
+                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Password)" />
+                </template>
+            </CheckboxListItem>
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" label="Google" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)">
+                <template #right>
+                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Google)" />
+                </template>
+            </CheckboxListItem>
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" label="Single-Sign-On (SSO)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)">
+                <template #right>
+                    <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.SSO)" />
+                </template>
+            </CheckboxListItem>
         </STList>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, CheckboxListItem, ErrorBox, Toast, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, CheckboxListItem, ErrorBox, LoginMethodConfigView, Toast, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { LoginMethod, PlatformConfig } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { LoginMethod, LoginMethodConfig, PlatformConfig } from '@stamhoofd/structures';
+import { ref } from 'vue';
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
 const $t = useTranslate();
+const present = usePresent();
 
 const { patched, patch, hasChanges, addPatch } = usePatch(platform);
 const saving = ref(false);
@@ -74,19 +88,47 @@ function setFeatureFlag(flag: string, value: boolean) {
 }
 
 function getLoginMethod(method: LoginMethod) {
-    return patched.value.config.loginMethods.includes(method) ?? false;
+    return patched.value.config.loginMethods.has(method) ?? false;
 }
 
 function setLoginMethod(method: LoginMethod, value: boolean) {
-    const loginMethods = patched.value.config.loginMethods.filter(f => f !== method) ?? [];
+    if (getLoginMethod(method) === value) {
+        return;
+    }
+
+    const originalValue = platform.value.config.loginMethods.get(method);
+
+    const p = PlatformConfig.patch({
+    });
+
     if (value) {
-        loginMethods.push(method);
+        p.loginMethods.set(method, originalValue ?? LoginMethodConfig.create({}));
+    }
+    else {
+        p.loginMethods.set(method, null);
     }
 
     addPatch({
-        config: PlatformConfig.patch({
-            loginMethods: loginMethods as any,
-        }),
+        config: p,
+    });
+}
+
+async function editLoginMethodConfig(loginMethod: LoginMethod) {
+    await present({
+        components: [
+            new ComponentWithProperties(LoginMethodConfigView, {
+                loginMethod,
+                configs: patched.value.config.loginMethods,
+                saveHandler: (patchMap: ConvertArrayToPatchableArray<Map<LoginMethod, LoginMethodConfig>>) => {
+                    addPatch({
+                        config: PlatformConfig.patch({
+                            loginMethods: patchMap,
+                        }),
+                    });
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
     });
 }
 
