@@ -94,9 +94,11 @@
             </button>
         </p>
 
-        <div v-for="category of recordCategories" :key="category.id" class="container">
-            <hr>
-            <EditOrganizationRecordCategoryBox :organization="organizationManager.organization" :category="category" :validator="errors.validator" :level="2" @patch="patchAnswers" />
+        <div v-if="!isReview">
+            <div v-for="category of recordCategories" :key="category.id" class="container">
+                <hr>
+                <EditOrganizationRecordCategoryBox :organization="organizationManager.organization" :category="category" :validator="errors.validator" :level="2" @patch="patchAnswers" />
+            </div>
         </div>
     </SaveView>
 </template>
