@@ -129,38 +129,37 @@
             Laat hier eventueel extra instructies achter onder het tekstveld, als het aankruisvakje is aangevinkt.
         </p>
 
-        <hr>
-        <h2>Zichtbaarheid voor leden</h2>
-        <p>Beperk de zichtbaarheid van deze vraag voor leden. De toegangsrechten voor beheerders worden hier onafhankelijk van geregeld via de instellingen van functies en beheerdersrollen.</p>
-
-        <STList>
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Radio v-model="externalPermissionLevel" :value="PermissionLevel.None" name="righstForNonAdmins" />
-                </template>
-                <h3 class="style-title-list">
-                    Niet zichtbaar
-                </h3>
-            </STListItem>
-
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Read" name="righstForNonAdmins" />
-                </template>
-                <h3 class="style-title-list">
-                    Enkel lezen
-                </h3>
-            </STListItem>
-
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Write" name="righstForNonAdmins" />
-                </template>
-                <h3 class="style-title-list">
-                    Bewerken
-                </h3>
-            </STListItem>
-        </STList>
+        <template v-if="showExternalPermissionLevel">
+            <hr>
+            <h2>Zichtbaarheid voor leden</h2>
+            <p>Beperk de zichtbaarheid van deze vraag voor leden. De toegangsrechten voor beheerders worden hier onafhankelijk van geregeld via de instellingen van functies en beheerdersrollen.</p>
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="externalPermissionLevel" :value="PermissionLevel.None" name="righstForNonAdmins" />
+                    </template>
+                    <h3 class="style-title-list">
+                        Niet zichtbaar
+                    </h3>
+                </STListItem>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Read" name="righstForNonAdmins" />
+                    </template>
+                    <h3 class="style-title-list">
+                        Enkel lezen
+                    </h3>
+                </STListItem>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Write" name="righstForNonAdmins" />
+                    </template>
+                    <h3 class="style-title-list">
+                        Bewerken
+                    </h3>
+                </STListItem>
+            </STList>
+        </template>
 
         <template v-if="canAddWarning">
             <hr>
@@ -301,9 +300,10 @@ const props = withDefaults(defineProps<{
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
-const editorType = props.settings.type;
+const editorType = computed(() => props.settings.type);
 
 const { patch: patchRecord, patched: patchedRecord, addPatch, hasChanges } = usePatch(props.record);
+const showExternalPermissionLevel = computed(() => editorType.value === RecordEditorType.PlatformMember);
 
 const availableTypes = [
     {
@@ -355,7 +355,7 @@ const availableTypes = [
 ];
 
 const canAddWarning = computed(() => {
-    if (editorType === RecordEditorType.Organization) {
+    if (editorType.value === RecordEditorType.Organization) {
         return false;
     }
 
