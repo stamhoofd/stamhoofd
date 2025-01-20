@@ -44,7 +44,7 @@
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr>
-            <EditOrganizationRecordCategoryBox :organization="patched" :category="category" :validator="errors.validator" :level="2" @patch="patchAnswers" />
+            <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="false" @patch="patchAnswers" />
         </div>
 
         <hr>
@@ -78,7 +78,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, CheckboxListItem, EditOrganizationRecordCategoryBox, ErrorBox, JumpToContainer, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, CheckboxListItem, ErrorBox, FillRecordCategoryBox, JumpToContainer, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTag, PatchAnswers, TagHelper } from '@stamhoofd/structures';

@@ -97,7 +97,7 @@
         <div v-if="!isReview">
             <div v-for="category of recordCategories" :key="category.id" class="container">
                 <hr>
-                <EditOrganizationRecordCategoryBox :organization="organizationManager.organization" :category="category" :validator="errors.validator" :level="2" @patch="patchAnswers" />
+                <FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
             </div>
         </div>
     </SaveView>
@@ -106,14 +106,13 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch, usePlatform, useReview } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, ErrorBox, FillRecordCategoryBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch, usePlatform, useReview } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { Company, OrganizationMetaData, OrganizationPrivateMetaData, PatchAnswers, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
 import EditCompanyView from './components/EditCompanyView.vue';
-import EditOrganizationRecordCategoryBox from './components/EditOrganizationRecordCategoryBox.vue';
 
 const props = defineProps<{ isReview?: boolean }>();
 
