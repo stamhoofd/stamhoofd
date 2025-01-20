@@ -96,7 +96,7 @@
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr>
-            <EditOrganizationRecordCategoryBox v-bind="$attrs" :organization="organizationManager.organization" :category="category" :mark-reviewed="true" :validator="errors.validator" :add-patch="patchAnswers" :level="2" />
+            <EditOrganizationRecordCategoryBox :organization="organizationManager.organization" :category="category" :validator="errors.validator" :level="2" @patch="patchAnswers" />
         </div>
     </SaveView>
 </template>
@@ -107,7 +107,7 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch, usePlatform, useReview } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
-import { Company, OrganizationMetaData, PatchAnswers, SetupStepType } from '@stamhoofd/structures';
+import { Company, OrganizationMetaData, OrganizationPrivateMetaData, PatchAnswers, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
 import EditCompanyView from './components/EditCompanyView.vue';
@@ -237,7 +237,7 @@ async function editCompany(company: Company) {
 
 function patchAnswers(patch: PatchAnswers) {
     addPatch({
-        meta: OrganizationMetaData.patch({ recordAnswers: patch }),
+        privateMeta: OrganizationPrivateMetaData.patch({ recordAnswers: patch }),
     });
 }
 

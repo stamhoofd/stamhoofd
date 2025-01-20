@@ -8,9 +8,9 @@ import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
 import { Context } from '../../../../helpers/Context';
+import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
 import { TagHelper } from '../../../../helpers/TagHelper';
 import { ViesHelper } from '../../../../helpers/ViesHelper';
-import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -126,6 +126,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey;
                 organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
                 organization.privateMeta.balanceNotificationSettings = patchObject(organization.privateMeta.balanceNotificationSettings, request.body.privateMeta.balanceNotificationSettings);
+                organization.privateMeta.recordAnswers = request.body.privateMeta.recordAnswers.applyTo(organization.privateMeta.recordAnswers);
 
                 if (request.body.privateMeta.mollieProfile !== undefined) {
                     organization.privateMeta.mollieProfile = patchObject(organization.privateMeta.mollieProfile, request.body.privateMeta.mollieProfile);

@@ -44,7 +44,7 @@
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr>
-            <EditOrganizationRecordCategoryBox v-bind="$attrs" :organization="organization" :category="category" :mark-reviewed="false" :validator="errors.validator" :add-patch="patchAnswers" :level="2" />
+            <EditOrganizationRecordCategoryBox :organization="patched" :category="category" :validator="errors.validator" :level="2" @patch="patchAnswers" />
         </div>
 
         <hr>
@@ -81,7 +81,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { AddressInput, CenteredMessage, CheckboxListItem, EditOrganizationRecordCategoryBox, ErrorBox, JumpToContainer, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { Organization, OrganizationMetaData, OrganizationTag, PatchAnswers, TagHelper } from '@stamhoofd/structures';
+import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTag, PatchAnswers, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import OrganizationUriInput from './components/OrganizationUriInput.vue';
@@ -138,8 +138,9 @@ const active = computed({
 });
 
 function patchAnswers(patch: PatchAnswers) {
+    console.error('patch answers 1 - todo remove');
     addPatch({
-        meta: OrganizationMetaData.patch({ recordAnswers: patch }),
+        privateMeta: OrganizationPrivateMetaData.patch({ recordAnswers: patch }),
     });
 }
 

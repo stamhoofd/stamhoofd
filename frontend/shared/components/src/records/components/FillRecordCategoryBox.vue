@@ -19,14 +19,14 @@
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         </div>
 
-        <p v-if="!markReviewed && lastReviewed" class="style-description-small">
+        <p v-if="!hideReviewed &&!markReviewed && lastReviewed" class="style-description-small">
             Laatst nagekeken op {{ formatDate(lastReviewed) }}<template v-if="isLastReviewIncomplete">
                 (onvolledig)
             </template>. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
                 Markeer als nagekeken
             </button>
         </p>
-        <p v-if="!markReviewed && !lastReviewed" class="style-description-small">
+        <p v-if="!hideReviewed && !markReviewed && !lastReviewed" class="style-description-small">
             Nog nooit nagekeken. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
                 Markeer als nagekeken
             </button>
@@ -56,17 +56,19 @@ const props = withDefaults(
         allOptional?: boolean;
         titleSuffix?: string;
         forceMarkReviewed?: boolean | null;
+        hideReviewed?: boolean;
     }>(), {
         level: 1,
         allOptional: false,
         titleSuffix: '',
         forceMarkReviewed: null,
+        hideReviewed: false,
     },
 );
 const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
-const markReviewed = props.forceMarkReviewed ?? (app !== 'dashboard' && app !== 'admin');
+const markReviewed = props.forceMarkReviewed ?? props.hideReviewed ? false : (app !== 'dashboard' && app !== 'admin');
 const filterOptions = isAdmin
     ? undefined
     : {

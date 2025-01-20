@@ -1,5 +1,5 @@
 <template>
-    <FillRecordCategoryBox :category="category" :value="organization" :validator="validator" :level="level" :all-optional="app === 'admin'" @patch="addPatch" />
+    <FillRecordCategoryBox :category="category" :value="organization" :validator="validator" :level="level" :all-optional="app === 'admin'" :hide-reviewed="true" @patch="($event) => emits('patch', $event)" />
 </template>
 
 <script setup lang="ts">
@@ -14,12 +14,15 @@ defineProps<{
     category: RecordCategory;
     parentErrorBox?: ErrorBox | null;
     level?: number;
-    addPatch(patch: PatchAnswers): void;
 }>();
 
 defineOptions({
     inheritAttrs: false,
 });
+
+const emits = defineEmits<{
+    patch: [patch: PatchAnswers];
+}>();
 
 const app = useAppContext();
 </script>
