@@ -20,7 +20,7 @@
                                     <figure>
                                         <span class="icon membership" />
                                     </figure>
-                                    <aside>
+                                    <aside v-if="membership.endDate > now">
                                         <span v-if="membership.startDate > now" class="icon small clock" />
                                         <span v-else-if="membership.expireDate && membership.expireDate < now" class="icon small warning" />
                                         <span v-else-if="membership.isTrial" class="icon trial stroke small secundary" />
@@ -130,8 +130,7 @@ function isRegisteredAt(periodId: string, organizationId: string) {
 }
 
 const memberships = computed(() => {
-    return props.member.member.platformMemberships
-        .filter(m => m.endDate >= now)
+    return [...props.member.member.platformMemberships]
         .sort((a, b) => Sorter.stack(
             Sorter.byDateValue(b.startDate, a.startDate),
             Sorter.byDateValue(b.createdAt, a.createdAt),
