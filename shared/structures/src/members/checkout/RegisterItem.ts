@@ -202,15 +202,27 @@ export class RegisterItem {
                     break;
                 }
 
-                if (!added && options.length > 0) {
-                    // Add the first (this one is sold out, but still required for correct error handling)
-                    this.options.push(
-                        RegisterItemOption.create({
-                            option: options[0],
-                            optionMenu: optionMenu,
-                            amount: 1,
-                        }),
-                    );
+                if (!added) {
+                    if (options.length > 0) {
+                        // Add the first (this one is sold out, but still required for correct error handling)
+                        this.options.push(
+                            RegisterItemOption.create({
+                                option: options[0],
+                                optionMenu: optionMenu,
+                                amount: 1,
+                            }),
+                        );
+                    }
+                    else if (optionMenu.hidden) {
+                        // Add the default option if the option menu is hidden
+                        this.options.push(
+                            RegisterItemOption.create({
+                                option: optionMenu.getDefaultOption(),
+                                optionMenu,
+                                amount: 1,
+                            }),
+                        );
+                    }
                 }
             }
         }

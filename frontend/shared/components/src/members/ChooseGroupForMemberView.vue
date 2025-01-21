@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, useNavigationActions, useOrganization, useUninheritedPermissions } from '@stamhoofd/components';
-import { Group, GroupCategoryTree, GroupType, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { Group, GroupCategoryTree, GroupType, Organization, PlatformMember } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';

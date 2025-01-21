@@ -219,6 +219,10 @@ export class GroupOptionMenu extends AutoEncoder {
         GroupOption.create({}),
     ];
 
+    get hidden() {
+        return this.options.length > 0 && this.options.every(o => o.hidden);
+    }
+
     getFilteredOptions(options?: { admin?: boolean }) {
         return this.options.filter((p) => {
             if (p.hidden && !options?.admin) {
@@ -226,6 +230,14 @@ export class GroupOptionMenu extends AutoEncoder {
             }
             return true;
         });
+    }
+
+    getDefaultOption(options?: { admin?: boolean }) {
+        if (options?.admin || this.hidden) {
+            return this.options[0];
+        }
+
+        return this.options.filter(o => !o.hidden)[0];
     }
 }
 
