@@ -1,22 +1,6 @@
 
 export { };
 
-declare enum Country {
-    Belgium = "BE",
-    Netherlands = "NL",
-    Luxembourg = "LU",
-    France = "FR",
-    Germany = "DE",
-    Sweden = "SE",
-    UnitedKingdom = "GB",
-    Switzerland = "CH",
-    Afghanistan = "AF",
-    CzechRepublic = "CZ",
-    UnitedStates = "US",
-    Austria = "AT",
-    Portugal = "PT"
-}
-
 /**
  * Stamhoofd uses a global variable to store some configurations. We don't use process.env because we can only store 
  * strings into those files. And we need objects for our localized domains (different domains for each locale). 
@@ -35,6 +19,22 @@ declare global {
     };
 
     type LocalizedDomain = Localized<string>;
+    enum Country {
+        Belgium = 'BE',
+        Netherlands = 'NL',
+        Luxembourg = 'LU',
+        France = 'FR',
+        Germany = 'DE',
+        Sweden = 'SE',
+        UnitedKingdom = 'GB',
+        Switzerland = 'CH',
+        Afghanistan = 'AF',
+        CzechRepublic = 'CZ',
+        UnitedStates = 'US',
+        Austria = 'AT',
+        Portugal = 'PT',
+        Other = 'OTHER',
+    }
 
     type StamhoofdDomains = {
         dashboard: string,                      // requires both www + non-www DNS record

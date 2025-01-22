@@ -1,21 +1,8 @@
 import { EnumDecoder } from '@simonbackx/simple-encoding';
 
-export enum Country {
-    Belgium = 'BE',
-    Netherlands = 'NL',
-    Luxembourg = 'LU',
-    France = 'FR',
-    Germany = 'DE',
-    Sweden = 'SE',
-    UnitedKingdom = 'GB',
-    Switzerland = 'CH',
-    Afghanistan = 'AF',
-    CzechRepublic = 'CZ',
-    UnitedStates = 'US',
-    Austria = 'AT',
-    Portugal = 'PT',
-    Other = 'OTHER',
-}
+// The Country enum is defined in environment.d.ts
+// But we reexport it so we can explicitly import it as a dependency and give it a different name
+export { Country as Country };
 
 export type CountryCode = Exclude<Country, Country.Other>;
 
