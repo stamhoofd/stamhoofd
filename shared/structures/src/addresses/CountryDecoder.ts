@@ -1,8 +1,27 @@
 import { EnumDecoder } from '@simonbackx/simple-encoding';
 
-// The Country enum is defined in environment.d.ts
-// But we reexport it so we can explicitly import it as a dependency and give it a different name
-export { Country as Country };
+// The Country enum is also defined in environment.d.ts - they should remain in sync to avoid compilation errors
+export enum Country {
+    Belgium = 'BE',
+    Netherlands = 'NL',
+    Luxembourg = 'LU',
+    France = 'FR',
+    Germany = 'DE',
+    Sweden = 'SE',
+    UnitedKingdom = 'GB',
+    Switzerland = 'CH',
+    Afghanistan = 'AF',
+    CzechRepublic = 'CZ',
+    UnitedStates = 'US',
+    Austria = 'AT',
+    Portugal = 'PT',
+    Other = 'OTHER',
+}
+
+// If this throws a type error - then GlobalCountry and Country are not in sync. Update both in environment.d.ts and above.
+type ValidateExtends<T, E extends T> = true;
+type CountryExtendsGlobalCountry = ValidateExtends<GlobalCountry, Country>;
+type GlobalCountryExtendsCountry = ValidateExtends<Country, GlobalCountry>;
 
 export type CountryCode = Exclude<Country, Country.Other>;
 
