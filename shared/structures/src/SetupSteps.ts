@@ -1,7 +1,7 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, field } from '@simonbackx/simple-encoding';
-import { SetupStepType } from './SetupStepType.js';
-import { SetupStepReview } from './SetupStepReview.js';
 import { Formatter } from '@stamhoofd/utility';
+import { SetupStepReview } from './SetupStepReview.js';
+import { SetupStepType } from './SetupStepType.js';
 
 export const minimumRegistrationCount: number = 1;
 
@@ -197,5 +197,9 @@ export class SetupSteps extends AutoEncoder {
                 this.steps.set(stepType, SetupStep.create({ finishedSteps, totalSteps }));
             }
         }
+    }
+
+    remove(stepType: SetupStepType): boolean {
+        return this.steps.delete(stepType);
     }
 }

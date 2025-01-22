@@ -8,9 +8,9 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
 import { PeriodHelper } from '../../../helpers/PeriodHelper';
+import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { TagHelper } from '../../../helpers/TagHelper';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
-import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -265,6 +265,16 @@ export class PatchPlatformEndpoint extends Endpoint<
         newPremiseTypes: PlatformPremiseType[],
         oldPremiseTypes: PlatformPremiseType[],
     ) {
+        // should be updated because the step will be removed
+        if (newPremiseTypes.length === 0 && oldPremiseTypes.length !== 0) {
+            return true;
+        }
+
+        // should be updated because the step will be added
+        if (newPremiseTypes.length !== 0 && oldPremiseTypes.length === 0) {
+            return true;
+        }
+
         for (const premiseType of newPremiseTypes) {
             const id = premiseType.id;
             const oldVersion = oldPremiseTypes.find(x => x.id === id);

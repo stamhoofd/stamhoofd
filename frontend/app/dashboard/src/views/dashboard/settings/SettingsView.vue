@@ -93,7 +93,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
+                <STListItem v-if="isShowPremises" :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
@@ -330,6 +330,7 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
+import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
 import LabsView from './LabsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -340,7 +341,6 @@ import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.v
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
 
 enum Routes {
     General = 'algemeen',
@@ -497,6 +497,14 @@ const $t = useTranslate();
 const salesDisabled = useSalesDisabled();
 const membersPackage = useMembersPackage();
 loadStripeAccounts(null).catch(console.error);
+
+const isShowPremises = computed(() => {
+    if (platform.value.config.premiseTypes.length > 0) {
+        return true;
+    }
+    const premises = $organizationManager.value.organization.privateMeta?.premises;
+    return premises && premises.length > 0;
+});
 
 async function loadStripeAccounts(recheckStripeAccount: string | null) {
     try {

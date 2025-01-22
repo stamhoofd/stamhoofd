@@ -283,10 +283,16 @@ export class SetupStepUpdater {
             finishedSteps++;
         }
 
-        setupSteps.update(SetupStepType.Premises, {
-            totalSteps,
-            finishedSteps,
-        });
+        if (premiseTypes.length > 0) {
+            setupSteps.update(SetupStepType.Premises, {
+                totalSteps,
+                finishedSteps,
+            });
+        }
+        else {
+            // if no premise types, remove step
+            setupSteps.remove(SetupStepType.Premises);
+        }
     }
 
     private static updateStepGroups(
