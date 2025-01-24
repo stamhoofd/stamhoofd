@@ -256,6 +256,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                                 } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
                                 } else if ((cancel || this.shouldTryToCancel(payment.status, payment)) && mollieData.isCancelable) {
+                                    console.log('Cancelling Mollie payment on request', payment.id)
                                     mollieData = await mollieClient.payments.cancel(molliePayment.mollieId);
 
                                     if (mollieData.status === "paid") {
