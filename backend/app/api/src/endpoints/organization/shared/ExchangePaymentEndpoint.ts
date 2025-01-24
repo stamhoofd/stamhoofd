@@ -231,7 +231,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         if (token) {
                             try {
                                 const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                                const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
+                                let mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
                                     testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production',
                                 })
 
@@ -255,11 +255,25 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded)
                                 } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                                } else if ((cancel || this.shouldTryToCancel(payment.status, payment)) && mollieData.isCancelable) {
+                                    mollieData = await mollieClient.payments.cancel(molliePayment.mollieId);
+
+                                    if (mollieData.status === "paid") {
+                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded)
+                                    } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
+                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                                    } else if (this.isManualExpired(payment.status, payment)) {
+                                        // Mollie still returning pending after 1 day: mark as failed
+                                        console.error('Manually marking Mollie payment as expired', payment.id)
+                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                                    }
                                 } else if (this.isManualExpired(payment.status, payment)) {
                                     // Mollie still returning pending after 1 day: mark as failed
                                     console.error('Manually marking Mollie payment as expired', payment.id)
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
                                 }
+
+                                
                             } catch (e) {
                                 console.error('Payment check failed Mollie', payment.id, e);
                                 if (this.isManualExpired(payment.status, payment)) {
