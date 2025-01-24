@@ -71,7 +71,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, getAppDescription, getAppTitle, Option, PlatformFooter, Spinner, LoadingViewTransition, STGradientBackground, Toast, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
+import { ContextLogo, LoadingViewTransition, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useAppData, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
@@ -90,6 +90,7 @@ const visibleOptions = computed(() => query.value.length === 0 ? defaultOptions.
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const instance = getCurrentInstance();
 const platform = usePlatform();
+const { getAppTitle, getAppDescription } = useAppData();
 
 onMounted(() => {
     console.info('Mounted OrganizationSelectionView', instance);

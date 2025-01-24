@@ -164,9 +164,10 @@ const urlHelpers = useUrl();
 const present = usePresent();
 
 defineRoutes(flatTabs.value.map((tab) => {
+    const name = unref(tab.name);
     return {
-        name: tab.name,
-        url: Formatter.slug(tab.name),
+        name,
+        url: Formatter.slug(name),
         isDefault: {
             properties: {},
         },
@@ -248,7 +249,7 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
     const old = selectedItem.value;
 
     // Set url namespace of the tab
-    const tabUrl = Formatter.slug(item.name);
+    const tabUrl = Formatter.slug(unref(item.name));
     item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl));
 
     if (appendHistory) {
@@ -338,7 +339,7 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem | TabBarItemGroup) =
 };
 
 const selectTabByName = async (name: string) => {
-    const item = flatTabs.value.find(tab => Formatter.slug(tab.name) === Formatter.slug(name));
+    const item = flatTabs.value.find(tab => Formatter.slug(unref(tab.name)) === Formatter.slug(name));
     if (item) {
         await selectItem(item);
     }

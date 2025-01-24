@@ -1,5 +1,6 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, Toast, useOrganization, usePlatform } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
@@ -12,6 +13,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
     const owner = useRequestOwner();
     const platform = usePlatform();
     const present = usePresent();
+    const $t = useTranslate();
 
     async function switchPeriod(event: MouseEvent) {
         const button = event.currentTarget as HTMLElement;
@@ -36,7 +38,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
                             }
 
                             if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 62 && STAMHOOFD.environment !== 'development') {
-                                new CenteredMessage('Niet beschikbaar', 'Je kan pas 2 maand voor de start van het nieuwe werkjaar overschakelen.').addCloseButton().show();
+                                new CenteredMessage('Niet beschikbaar', $t('275f674b-bf05-4d34-a1ff-105a1563fbcc')).addCloseButton().show();
                                 return false;
                             }
 

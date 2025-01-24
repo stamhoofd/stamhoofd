@@ -38,8 +38,8 @@
         </STInputBox>
 
         <hr>
-        <h2>Instellingen per werkjaar</h2>
-        <p>Per werkjaar kan je een prijs bepalen voor deze aansluiting, inclusief de start- en einddata.</p>
+        <h2>{{ $t('3754b38e-3938-4589-801a-450ba0844990') }}</h2>
+        <p>{{ $t('8004af94-7b57-4ce2-aa9b-a6658684116d') }}</p>
 
         <p v-if="sortedPeriods.length === 0" class="info-box">
             Je hebt nog geen instellingen toegevoegd.
@@ -56,26 +56,26 @@
         </p>
 
         <hr>
-        <h2>{{ $t("Beschikbaarheid") }}</h2>
+        <h2>{{ $t("db085652-c3d0-4d2c-aa4b-53ef4234d480") }}</h2>
 
         <Checkbox v-model="requiredTagIdsEnabled">
-            {{ $t("Beperk welke verenigingen hun leden kunnen aansluiten met deze aansluiting.") }}
+            {{ $t("5fe7a400-8c6a-42ba-b920-c8518e60e091") }}
         </Checkbox>
 
         <Checkbox v-model="requiredDefaultAgeGroupIdsEnabled">
-            {{ $t("Beperk tot leden met een registratie bij deze standaard leeftijdsgroepen.") }}
+            {{ $t("37d201fd-287d-4957-b559-b882744ea886") }}
         </Checkbox>
 
         <JumpToContainer :visible="requiredTagIds !== null">
             <hr>
 
             <h2 class="style-with-button">
-                <div>{{ $t("Beperk verenigingen") }}</div>
+                <div>{{ $t("02017e6d-47b0-4867-b590-be85a9b72008") }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="() => requiredTagIds = null" />
                 </div>
             </h2>
-            <p>{{ $t("Beperk welke verenigingen hun leden kunnen aansluiten met deze aansluiting.") }}</p>
+            <p>{{ $t("5fe7a400-8c6a-42ba-b920-c8518e60e091") }}</p>
 
             <TagIdsInput v-model="requiredTagIds" />
         </JumpToContainer>
@@ -84,12 +84,12 @@
             <hr>
 
             <h2 class="style-with-button">
-                <div>{{ $t("Beperk leeftijdsgroepen") }}</div>
+                <div>{{ $t("3a75616e-f4ef-4dbd-8e35-8fe74571e442") }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="() => requiredDefaultAgeGroupIds = null" />
                 </div>
             </h2>
-            <p>{{ $t("Beperk tot leden met een registratie bij deze standaard leeftijdsgroepen.") }}</p>
+            <p>{{ $t("37d201fd-287d-4957-b559-b882744ea886") }}</p>
 
             <DefaultAgeGroupIdsInput v-model="requiredDefaultAgeGroupIds" />
         </JumpToContainer>

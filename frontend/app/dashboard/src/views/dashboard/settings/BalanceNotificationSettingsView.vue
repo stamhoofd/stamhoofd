@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading="saving" title="Notificaties" :disabled="!hasChanges" @save="save">
         <h1>
-            {{ $t('Notificaties voor openstaande bedragen') }}
+            {{ $t('ac0594f0-af79-465b-84d5-568da90af8b6') }}
         </h1>
 
         <p>Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na een bepaalde periode nog steeds open staat, ontvangen ze ook telkens een herinneringsemail. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.</p>

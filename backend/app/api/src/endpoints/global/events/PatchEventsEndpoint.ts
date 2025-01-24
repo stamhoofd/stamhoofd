@@ -1,15 +1,15 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Event, Group, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { Event as EventStruct, GroupType, NamedObject, Group as GroupStruct, AuditLogType, AuditLogSource } from '@stamhoofd/structures';
+import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
-import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
 import { AuditLogService } from '../../../services/AuditLogService';
+import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
 
 type Params = { id: string };
 type Query = undefined;
@@ -85,7 +85,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_period',
                         message: 'No period found for this start date',
-                        human: 'Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit werkjaar is nog niet aangemaakt in het systeem.',
+                        human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
                         field: 'startDate',
                     });
                 }
@@ -210,7 +210,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         throw new SimpleError({
                             code: 'invalid_period',
                             message: 'No period found for this start date',
-                            human: 'Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit werkjaar is nog niet aangemaakt in het systeem.',
+                            human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
                             field: 'startDate',
                         });
                     }

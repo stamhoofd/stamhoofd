@@ -15,45 +15,46 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 
 import { useOrganization } from '../hooks';
 import { usePositionableSheet } from '../tables';
-import { getAppDescription, getAppTitle, useAppContext } from './appContext';
+import { useAppContext, useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
 import OrganizationAppSelector from './OrganizationAppSelector.vue';
 import PlatformLogo from './PlatformLogo.vue';
 
 const organization = useOrganization();
 const app = useAppContext();
-const {presentPositionableSheet} = usePositionableSheet();
+const { presentPositionableSheet } = usePositionableSheet();
+const { getAppTitle, getAppDescription } = useAppData();
 
 withDefaults(
     defineProps<{
-        small?: boolean
+        small?: boolean;
     }>(),
     {
-        small: false
-    }
-)
+        small: false,
+    },
+);
 
 const open = async (event: MouseEvent) => {
     if (app === 'auto') {
         return;
     }
-    
+
     await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(OrganizationAppSelector, {})
+                root: new ComponentWithProperties(OrganizationAppSelector, {}),
             }, {
                 provide: {
-                    reactive_navigation_disable_url: true
-                }
-            })
-        ]
-    }, {padding: 25})
-}
+                    reactive_navigation_disable_url: true,
+                },
+            }),
+        ],
+    }, { padding: 25 });
+};
 </script>
 
 <style lang="scss">
@@ -82,7 +83,7 @@ const open = async (event: MouseEvent) => {
 
     &.small {
         --block-width: 30px;
-        
+
         > div h1 {
             font-size: 16px;
         }

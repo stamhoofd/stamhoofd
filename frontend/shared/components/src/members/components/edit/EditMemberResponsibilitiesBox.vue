@@ -32,14 +32,12 @@
                         {{ selectedOrganization.period.period.nameShort }}
                     </p>
                     <p v-else-if="group" class="style-description-small">
-                        Onbekend werkjaar
+                        {{ $t('9685e11f-a4d0-4709-9f5e-875957ad269b') }}
                     </p>
 
                     <p class="style-description-small">
                         Rechten: {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
                     </p>
-
-                    
 
                     <p v-if="getResponsibilityEnabledDescription(responsibility, group?.id)" class="style-description-small">
                         {{ getResponsibilityEnabledDescription(responsibility, group?.id) }}
@@ -58,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { Group, LoadedPermissions, MemberResponsibility, MemberResponsibilityRecord, Organization, PlatformMember, PermissionLevel } from '@stamhoofd/structures';
+import { Group, LoadedPermissions, MemberResponsibility, MemberResponsibilityRecord, Organization, PlatformMember } from '@stamhoofd/structures';
 
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
@@ -69,64 +67,64 @@ import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
-import Title from './Title.vue';
 import ResponsibilityIcon from '../ResponsibilityIcon.vue';
+import Title from './Title.vue';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 const props = defineProps<{
-    member: PlatformMember,
-    validator: Validator,
-    parentErrorBox?: ErrorBox | null
-}>()
+    member: PlatformMember;
+    validator: Validator;
+    parentErrorBox?: ErrorBox | null;
+}>();
 
-const errors = useErrors({validator: props.validator});
+const errors = useErrors({ validator: props.validator });
 const platform = usePlatform();
 const organization = useOrganization();
 
 const items = computed(() => {
     if (organization.value) {
-        return [organization.value]
+        return [organization.value];
     }
     // Only show organization that have an active registration in the organization active period
-    return [...props.member.filterOrganizations({currentPeriod: true}), null]
+    return [...props.member.filterOrganizations({ currentPeriod: true }), null];
 });
 
 const platformResponsibilities = computed(() => {
     if (selectedOrganization.value === null) {
-        return platform.value.config.responsibilities.filter(r => !r.organizationBased)
+        return platform.value.config.responsibilities.filter(r => !r.organizationBased);
     }
-    const org = selectedOrganization.value
-    return platform.value.config.responsibilities.filter(r => r.organizationBased && (r.organizationTagIds === null || org.meta.matchTags(r.organizationTagIds)))
-})
+    const org = selectedOrganization.value;
+    return platform.value.config.responsibilities.filter(r => r.organizationBased && (r.organizationTagIds === null || org.meta.matchTags(r.organizationTagIds)));
+});
 
-const selectedOrganization = ref((items.value[0] ?? null) as any) as Ref<Organization|null>;
+const selectedOrganization = ref((items.value[0] ?? null) as any) as Ref<Organization | null>;
 
 const organizationResponsibilities = computed(() => {
-    return selectedOrganization.value?.privateMeta?.responsibilities ?? []
-})
+    return selectedOrganization.value?.privateMeta?.responsibilities ?? [];
+});
 
 const groupedResponsibilites = computed(() => {
-    const groupedPlatformResponsibilities: {responsibility: MemberResponsibility, group: Group|null}[] = []
-    const groupedOrganizationResponsibilities: {responsibility: MemberResponsibility, group: Group|null}[] = []
-    const organizationGroups = selectedOrganization.value?.period.adminCategoryTree.getAllGroups() ?? []
+    const groupedPlatformResponsibilities: { responsibility: MemberResponsibility; group: Group | null }[] = [];
+    const groupedOrganizationResponsibilities: { responsibility: MemberResponsibility; group: Group | null }[] = [];
+    const organizationGroups = selectedOrganization.value?.period.adminCategoryTree.getAllGroups() ?? [];
 
     for (const responsibility of platformResponsibilities.value) {
         if (responsibility.defaultAgeGroupIds === null) {
             groupedPlatformResponsibilities.push({
                 responsibility: responsibility,
-                group: null
-            })
+                group: null,
+            });
         }
 
         for (const group of organizationGroups) {
             if (group.defaultAgeGroupId && responsibility.defaultAgeGroupIds !== null && responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)) {
                 groupedPlatformResponsibilities.push({
                     responsibility: responsibility,
-                    group: group
-                })
+                    group: group,
+                });
             }
         }
     }
@@ -135,89 +133,88 @@ const groupedResponsibilites = computed(() => {
         if (responsibility.defaultAgeGroupIds === null) {
             groupedOrganizationResponsibilities.push({
                 responsibility: responsibility,
-                group: null
-            })
+                group: null,
+            });
             continue;
         }
     }
-    
+
     // Merge non-empty groups
-    const groups: {title: string, responsibilities: {responsibility: MemberResponsibility, group: Group|null}[]}[] = []
+    const groups: { title: string; responsibilities: { responsibility: MemberResponsibility; group: Group | null }[] }[] = [];
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
             title: selectedOrganization.value === null ? '' : 'Standaardfuncties',
-            responsibilities: groupedPlatformResponsibilities
-        })
+            responsibilities: groupedPlatformResponsibilities,
+        });
     }
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
             title: 'Groepseigenfuncties',
-            responsibilities: groupedOrganizationResponsibilities
-        })
+            responsibilities: groupedOrganizationResponsibilities,
+        });
     }
 
     return groups;
-})
+});
 
 const labels = computed(() => {
-    return items.value.map(o => o === null ? 'Nationaal niveau' : o.name)
+    return items.value.map(o => o === null ? 'Nationaal niveau' : o.name);
 });
 
 const title = computed(() => {
-    return "Functies van " + props.member.patchedMember.firstName
-})
-
-useValidation(errors.validator, () => {
-    const se = new SimpleErrors()
-
-    if (se.errors.length > 0) {
-        errors.errorBox = new ErrorBox(se)
-        return false
-    }
-    errors.errorBox = null
-
-    return true
+    return 'Functies van ' + props.member.patchedMember.firstName;
 });
 
+useValidation(errors.validator, () => {
+    const se = new SimpleErrors();
 
-function isResponsibilityEnabled(responsibility: MemberResponsibility, groupId?: string|null) {
-    return !!props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null))
+    if (se.errors.length > 0) {
+        errors.errorBox = new ErrorBox(se);
+        return false;
+    }
+    errors.errorBox = null;
+
+    return true;
+});
+
+function isResponsibilityEnabled(responsibility: MemberResponsibility, groupId?: string | null) {
+    return !!props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null));
 }
 
-function getResponsibilityEnabledDescription(responsibility: MemberResponsibility, groupId?: string|null) {
-    const rr = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null))
+function getResponsibilityEnabledDescription(responsibility: MemberResponsibility, groupId?: string | null) {
+    const rr = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null));
 
     if (rr) {
         if (!rr.endDate) {
-            return 'Van ' + Formatter.date(rr.startDate, true) + ' tot nu'
+            return 'Van ' + Formatter.date(rr.startDate, true) + ' tot nu';
         }
-        return 'Van ' + Formatter.date(rr.startDate, true) + ' tot ' + Formatter.date(rr.endDate, true)
+        return 'Van ' + Formatter.date(rr.startDate, true) + ' tot ' + Formatter.date(rr.endDate, true);
     }
 
     return null;
 }
 
-function setResponsibilityEnabled(responsibility: MemberResponsibility, groupId: string|null|undefined, enabled: boolean) {
+function setResponsibilityEnabled(responsibility: MemberResponsibility, groupId: string | null | undefined, enabled: boolean) {
     if (enabled === isResponsibilityEnabled(responsibility, groupId)) {
         return;
     }
 
     if (enabled) {
-        const originalEnabled = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null))
+        const originalEnabled = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null));
 
         if (originalEnabled) {
             // Restore original state
-            const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray()
+            const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray();
             patch.addPatch(MemberResponsibilityRecord.patch({
                 id: originalEnabled.id,
-                endDate: null
-            }))
+                endDate: null,
+            }));
 
             props.member.addPatch({
-                responsibilities: patch
-            })
+                responsibilities: patch,
+            });
             return;
         }
 
@@ -228,47 +225,47 @@ function setResponsibilityEnabled(responsibility: MemberResponsibility, groupId:
             startDate: new Date(),
             endDate: null,
             organizationId: selectedOrganization?.value?.id ?? null,
-            groupId: groupId ?? null
-        })
+            groupId: groupId ?? null,
+        });
 
-        const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray()
-        patch.addPut(record)
+        const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray();
+        patch.addPut(record);
 
         props.member.addPatch({
-            responsibilities: patch
-        })
+            responsibilities: patch,
+        });
         return;
     }
 
-    const current = props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null))
+    const current = props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null));
     if (!current) {
         return;
     }
-    const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray()
+    const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray();
 
     // Did we already have this?
-    const originalEnabled = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null))
+    const originalEnabled = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === (groupId ?? null));
     if (originalEnabled && originalEnabled.id === current.id) {
         patch.addPatch(MemberResponsibilityRecord.patch({
             id: current.id,
-            endDate: new Date()
-        }))
-    } else {
-        patch.addDelete(current.id)
+            endDate: new Date(),
+        }));
+    }
+    else {
+        patch.addDelete(current.id);
     }
 
     props.member.addPatch({
-        responsibilities: patch
-    })
-
+        responsibilities: patch,
+    });
 }
 
-function getResponsibilityMergedRole(responsibility: MemberResponsibility, groupId: string|null|undefined) {
+function getResponsibilityMergedRole(responsibility: MemberResponsibility, groupId: string | null | undefined) {
     return LoadedPermissions.buildRoleForResponsibility(groupId ?? null, responsibility, selectedOrganization.value?.privateMeta?.inheritedResponsibilityRoles ?? []);
 }
 
-function getResponsibilityMergedRoleDescription(responsibility: MemberResponsibility, groupId: string|null|undefined) {
-    return getResponsibilityMergedRole(responsibility, groupId).getDescription()
+function getResponsibilityMergedRoleDescription(responsibility: MemberResponsibility, groupId: string | null | undefined) {
+    return getResponsibilityMergedRole(responsibility, groupId).getDescription();
 }
 
 </script>

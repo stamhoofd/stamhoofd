@@ -11,7 +11,7 @@
                 </span>
             </h1>
             <p v-if="isLocked" class="warning-box">
-                Dit werkjaar is vergrendeld. Je kan geen wijzigingen meer aanbrengen aan inschrijvingen.
+                {{ $t('7dd9a44e-8a47-4b74-9d57-d20b1efb706f') }}
             </p>
             <p v-if="!isPublic" class="info-box">
                 Deze groep staat in een categorie die enkel zichtbaar is voor beheerders of leden met een functie

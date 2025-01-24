@@ -11,7 +11,7 @@
             <p>
                 <a :href="$domains.getDocs('stappenplan-opstart-werkjaar')" target="_blank" class="button text selected">
                     <span class="icon book" />
-                    <span>Stappenplan opstart werkjaar</span>
+                    <span>{{ $t('57491b1b-a306-479e-9bc0-f0d4839a7f5c') }}</span>
                 </a>
             </p>
 

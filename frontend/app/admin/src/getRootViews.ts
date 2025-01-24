@@ -1,6 +1,7 @@
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent, AuditLogsView, AuthenticatedView, ManageEventsView, manualFeatureFlag, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
 import { computed } from 'vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
@@ -10,13 +11,13 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
 }
 
-export async function getScopedAdminRootFromUrl() {
+export async function getScopedAdminRootFromUrl({ $t }: { $t: ReturnType<typeof useTranslate> }) {
     const session = new SessionContext(null);
     await session.loadFromStorage();
     await session.checkSSO();
     await SessionManager.prepareSessionForUsage(session, false);
 
-    return await getScopedAdminRoot(session);
+    return await getScopedAdminRoot(session, $t);
 }
 
 export function getNoPermissionsView() {
@@ -33,7 +34,7 @@ export function getNoPermissionsView() {
     }));
 }
 
-export async function getScopedAdminRoot(reactiveSession: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
+export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: ReturnType<typeof useTranslate>, options: { initialPresents?: PushOptions[] } = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     const startView = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('./views/start/StartView.vue'), {}),
@@ -67,7 +68,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, option
 
     const groupsTab = new TabBarItem({
         icon: 'location',
-        name: 'Groepen',
+        name: computed(() => $t('6e884f27-427f-4f85-914c-d5c2780253b0')),
         component: organizationsTableView,
     });
 

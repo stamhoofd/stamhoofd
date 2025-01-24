@@ -12,26 +12,26 @@
 
         <div v-else class="split-inputs">
             <div>
-                <STInputBox title="Naam van je vereniging (kort)" error-fields="name" :error-box="errors.errorBox">
+                <STInputBox :title="$t('840ac72d-d4b3-40ea-afb4-b0109e88c640')" error-fields="name" :error-box="errors.errorBox">
                     <input
                         id="organization-name"
                         ref="firstInput"
                         v-model="name"
                         class="input"
                         type="text"
-                        placeholder="De naam van je vereniging"
+                        :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')"
                         autocomplete="organization"
                     >
                 </STInputBox>
 
-                <AddressInput v-model="address" title="Adres van je vereniging" :validator="errors.validator" :link-country-to-locale="true" />
+                <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="errors.validator" :link-country-to-locale="true" />
             </div>
 
             <div>
                 <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false" />
 
                 <p class="style-description-small">
-                    De link naar de website van jouw vereniging.
+                    {{ $t('ffdbd596-e9c8-4c67-bfdf-41a5199de133') }}
                 </p>
             </div>
         </div>

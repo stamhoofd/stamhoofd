@@ -146,7 +146,7 @@ async function save() {
         if (!periodConfig) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Dit aansluitingstype is (nog) niet beschikbaar voor dit werkjaar',
+                message: $t('b19c1fb0-f1a7-4435-9150-01bb2bb0799c'),
             });
         }
 

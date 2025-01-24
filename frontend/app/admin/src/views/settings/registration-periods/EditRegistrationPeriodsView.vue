@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" :loadingView="loading">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" :loading-view="loading" @save="save">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
@@ -9,14 +9,14 @@
         <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id">
             <hr>
             <h2>Overschakelen naar {{ sortedPeriods[0].nameShort }}</h2>
-            <p>Je kan het huidig werkjaar hier wijzigen. Zorg dat je voor dit werkjaar alle aansluitingen hebt ingesteld. Ga daarvoor naar 'aansluitingen en verzekeringen' en voeg het werkjaar toe en stel de nieuwe prijzen en periodes correct in. </p>
+            <p>{{ $t("Je kan het huidig werkjaar hier wijzigen. Zorg dat je voor dit werkjaar alle aansluitingen hebt ingesteld. Ga daarvoor naar 'aansluitingen en verzekeringen' en voeg het werkjaar toe en stel de nieuwe prijzen en periodes correct in.") }}</p>
 
             <ul class="style-list">
-                <li>Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.</li>
-                <li>De categorieën en leeftijdsgroepen van de groepen worden gedupliceerd naar het nieuwe werkjaar.</li>
-                <li>De leden moeten zich opnieuw inschrijven voor het nieuwe werkjaar.</li>
-                <li>Alle functies van leden (behalve die met hoofdbeheerder rechten en nationale functies) worden beëindigd</li>
-                <li>Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)</li>
+                <li>{{ ('Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.') }}</li>
+                <li>{{ $t('b78d9c9e-9099-4fb6-93e1-6bf58e39165f') }}</li>
+                <li>{{ $t('c95eb07d-15e3-45da-b2c2-7754c134ae65') }}</li>
+                <li>{{ $t('865bfcae-44c2-49a5-a887-c70725d53d8b') }}</li>
+                <li>{{ $t('9de0900d-9daa-48e5-ab82-496c61dfc5db') }}</li>
             </ul>
 
             <p class="style-button-bar">
@@ -27,7 +27,7 @@
             </p>
 
             <hr>
-            <h2>Werkjaren</h2>
+            <h2>{{ $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb') }}</h2>
         </template>
 
         <STList>
@@ -78,7 +78,7 @@ const sortedPeriods = computed(() => {
     return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime());
 });
 
-const title = 'Werkjaren';
+const title = computed(() => $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb'));
 
 async function addPeriod() {
     const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
@@ -177,7 +177,7 @@ async function save() {
         new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
 
         if (changedPeriod) {
-            new Toast('Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.', 'info').setHide(20 * 1000).show();
+            new Toast($t('671147bd-cf0e-42fc-b456-18ce7d75b867'), 'info').setHide(20 * 1000).show();
         }
 
         await pop({ force: true });

@@ -1,6 +1,6 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, ReceivableBalanceType, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -283,7 +283,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     name: $t('11007b85-a7ac-48d8-9480-669831cef564'),
                     options: [
                         new MultipleChoiceUIFilterOption($t('6d4c31c6-c70b-4cf2-8890-b2d4507913c7'), 'Active'),
-                        new MultipleChoiceUIFilterOption($t('Proefperiode'), 'Trial'),
+                        new MultipleChoiceUIFilterOption($t('cb1953f4-7e4f-498d-b8d8-54a885753e23'), 'Trial'),
                         new MultipleChoiceUIFilterOption($t('cc528c3f-aed3-4eb6-9db1-70aae5261a28'), 'Expiring'),
                         new MultipleChoiceUIFilterOption($t('33906077-a1d8-4daa-9914-ce129538f68c'), 'Inactive'),
                     ],
@@ -677,7 +677,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                 all.push(
                     new GroupUIFilterBuilder({
                         name: 'historische inschrijving',
-                        description: 'Filter op leden die een inschrijving (zowel huidig werkjaar of in een afgelopen werkjaar) heeft die aan deze voorwaarden voldoet.',
+                        description: $t('1316502a-5502-49ec-96fe-93e60cb94268'),
                         builders: registrationFilters.value,
                         wrapper: {
                             registrations: {
@@ -1032,7 +1032,7 @@ export function getOrganizationUIFilterBuildersForTags(platform: Platform) {
     const all: UIFilterBuilder[] = [];
 
     const tagFilter = new MultipleChoiceFilterBuilder({
-        name: $t('tags'),
+        name: $t('ceba695c-105b-49c9-aaa4-bf716c4aec6b'),
         multipleChoiceConfiguration: {
             isSubjectPlural: true,
         },

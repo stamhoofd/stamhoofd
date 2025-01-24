@@ -72,7 +72,9 @@
             <STInputBox :title="$t('Aantal dagen op proef' + '*')" error-fields="trialDays" :error-box="errors.errorBox">
                 <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
             </STInputBox>
-            <p class="style-description-small">* Enkel voor nieuwe leden</p>
+            <p class="style-description-small">
+                * Enkel voor nieuwe leden
+            </p>
         </template>
     </SaveView>
 </template>
@@ -126,7 +128,7 @@ const save = async () => {
         if (!startDateInPeriod || !endDateInPeriod) {
             throw new SimpleError({
                 code: 'invalid_date_range',
-                message: 'De aansluitingsperiode moet binnen de periode van het gekozen werkjaar liggen',
+                message: $t('e821b318-928b-4eee-9bca-d00366554792'),
                 field: 'startDate',
             });
         }

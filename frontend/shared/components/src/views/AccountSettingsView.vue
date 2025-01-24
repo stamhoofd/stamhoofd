@@ -1,10 +1,10 @@
 <template>
     <div id="account-view" class="st-view">
-        <STNavigationBar title="Mijn account" />
+        <STNavigationBar :title="$t('a48e6035-5e61-4fc7-9ac4-89016e7174fe')" />
 
         <main class="center">
             <h1>
-                Mijn account
+                {{ $t("a48e6035-5e61-4fc7-9ac4-89016e7174fe") }}
             </h1>
             <p>Met een account kan je één of meerdere leden beheren.</p>
 

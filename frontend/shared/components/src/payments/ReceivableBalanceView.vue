@@ -63,7 +63,7 @@
 
                 <STListItem v-if="item.amountOpen > 0 && $feature('balance-emails')">
                     <h3 class="style-definition-label">
-                        {{ $t('Laatste automatische herinneringsmail') }}
+                        {{ $t('a8bf2d7d-3208-4c18-bac3-2cc97b629ad1') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : 'Nog niet verstuurd' }}

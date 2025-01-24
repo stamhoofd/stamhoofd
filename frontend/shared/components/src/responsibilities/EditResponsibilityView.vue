@@ -76,7 +76,7 @@
 
             <h2>Automatische rechten voor gekoppelde leeftijdsgroep</h2>
 
-            <p>Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.</p>
+            <p>{{ $t('022aad3d-6250-4000-9336-4ae7e8e75c23') }}</p>
 
             <STList>
                 <STListItem element-name="label" :selectable="true">
@@ -183,7 +183,6 @@
     </SaveView>
 </template>
 
-
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -202,14 +201,14 @@ const present = usePresent();
 const props = defineProps<{
     responsibility: MemberResponsibility;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<MemberResponsibility>) => Promise<void>,
-    deleteHandler: (() => Promise<void>)|null
+    saveHandler: (p: AutoEncoderPatchType<MemberResponsibility>) => Promise<void>;
+    deleteHandler: (() => Promise<void>) | null;
 }>();
 const title = computed(() => props.isNew ? $t('7540c9f1-2164-4865-a6c5-ad72e0abd4e5') : $t('2e9f8eb3-806a-4037-bd01-f381a725956b'));
 const pop = usePop();
 const app = useAppContext();
 
-const {patched, addPatch, hasChanges, patch} = usePatch(props.responsibility);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.responsibility);
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -219,16 +218,17 @@ const save = async () => {
     try {
         if (name.value.length < 2) {
             throw new SimpleError({
-                code: "invalid_field",
+                code: 'invalid_field',
                 message: $t('9aa8ff59-33ae-4ac4-93b6-97e071b13012'),
-                field: "name"
-            })
+                field: 'name',
+            });
         }
 
-        await props.saveHandler(patch.value)
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.saveHandler(patch.value);
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
 };
@@ -243,15 +243,16 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm($t('8f155af7-52ce-441f-bd3c-669bda1450eb'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('78085d8c-9987-4eda-a747-7f7847d86dc4'))) {
-        return
+        return;
     }
-        
+
     deleting.value = true;
     try {
-        await props.deleteHandler()
-        await pop({ force: true }) 
-    } catch (e) {
-        errors.errorBox = new ErrorBox(e)
+        await props.deleteHandler();
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
     }
 
     deleting.value = false;
@@ -259,69 +260,69 @@ const doDelete = async () => {
 
 const name = computed({
     get: () => patched.value.name,
-    set: (name) => addPatch({name}),
+    set: name => addPatch({ name }),
 });
 
 const description = computed({
     get: () => patched.value.description,
-    set: (description) => addPatch({description}),
+    set: description => addPatch({ description }),
 });
 
 const minimumMembers = computed({
     get: () => patched.value.minimumMembers,
-    set: (minimumMembers) => addPatch({minimumMembers}),
+    set: minimumMembers => addPatch({ minimumMembers }),
 });
 
 const maximumMembers = computed({
     get: () => patched.value.maximumMembers,
-    set: (maximumMembers) => addPatch({maximumMembers}),
+    set: maximumMembers => addPatch({ maximumMembers }),
 });
 
 const organizationTagIds = computed({
     get: () => patched.value.organizationTagIds,
-    set: (organizationTagIds) => addPatch({
-        organizationTagIds: organizationTagIds as any
+    set: organizationTagIds => addPatch({
+        organizationTagIds: organizationTagIds as any,
     }),
 });
 
 const defaultAgeGroupIds = computed({
     get: () => patched.value.defaultAgeGroupIds,
-    set: (defaultAgeGroupIds) => addPatch({
-        defaultAgeGroupIds: defaultAgeGroupIds as any
+    set: defaultAgeGroupIds => addPatch({
+        defaultAgeGroupIds: defaultAgeGroupIds as any,
     }),
 });
 
 const groupPermissionLevel = computed({
     get: () => patched.value.groupPermissionLevel,
-    set: (groupPermissionLevel) => addPatch({groupPermissionLevel}),
+    set: groupPermissionLevel => addPatch({ groupPermissionLevel }),
 });
 
 const permissions = computed({
     get: () => patched.value.permissions,
-    set: (permissions) => addPatch({permissions}),
+    set: permissions => addPatch({ permissions }),
 });
 
 const organizationBased = computed({
     get: () => patched.value.organizationBased,
-    set: (organizationBased) => addPatch({organizationBased}),
+    set: organizationBased => addPatch({ organizationBased }),
 });
 
 const notOrganizationBased = computed({
     get: () => !organizationBased.value,
-    set: (notOrganizationBased) => organizationBased.value = !notOrganizationBased,
+    set: notOrganizationBased => organizationBased.value = !notOrganizationBased,
 });
 
 async function editPermissions() {
-    let isNew = false
-    let role = permissions.value
+    let isNew = false;
+    let role = permissions.value;
 
     if (!role) {
         role = PermissionRoleForResponsibility.create({
             name: name.value,
             responsibilityId: props.responsibility.id,
             responsibilityGroupId: null,
-        })
-        isNew = true
+        });
+        isNew = true;
     }
 
     await present({
@@ -334,31 +335,34 @@ async function editPermissions() {
                 saveHandler: (patch: AutoEncoderPatchType<PermissionRoleForResponsibility>) => {
                     if (isNew) {
                         addPatch({
-                            permissions: role.patch(patch)
-                        })
-                    } else {
+                            permissions: role.patch(patch),
+                        });
+                    }
+                    else {
                         addPatch({
-                            permissions: patch
-                        })
+                            permissions: patch,
+                        });
                     }
                 },
-                deleteHandler: isNew ? null : (() => {
-                    permissions.value = null
-                })
-            })
-        ]
-    })
+                deleteHandler: isNew
+                    ? null
+                    : () => {
+                            permissions.value = null;
+                        },
+            }),
+        ],
+    });
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
-}
+
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
+    shouldNavigateAway,
+});
 </script>

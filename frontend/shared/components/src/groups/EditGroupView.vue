@@ -376,7 +376,7 @@
                 <p>Zorg ervoor dat bestaande leden voorrang krijgen op inschrijvingen (vooral als je met wachtlijsten werkt).</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
-                    Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig werkjaar van gelijk welke inschrijvingsgroep.
+                    {{ $t('e2130593-e64d-4f3a-bb16-75ba4ed7604e') }}
                 </p>
 
                 <STList>

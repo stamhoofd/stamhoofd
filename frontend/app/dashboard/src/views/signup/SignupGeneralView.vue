@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <form v-if="!loadingRegisterCode"  id="signup-general-view" class="st-view" @submit.prevent="goNext">
+        <form v-if="!loadingRegisterCode" id="signup-general-view" class="st-view" @submit.prevent="goNext">
             <STNavigationBar title="Nieuwe vereniging" />
 
             <main>
@@ -31,19 +31,19 @@
                 <STErrorsDefault :error-box="errorBox" />
                 <div class="split-inputs">
                     <div>
-                        <STInputBox title="Naam van jouw vereniging" error-fields="name" :error-box="errorBox">
+                        <STInputBox :title="$t('d185d3ca-e20f-43a2-a79f-f77404b8f33a')" error-fields="name" :error-box="errorBox">
                             <input
                                 id="organization-name"
                                 ref="firstInput"
                                 v-model="name"
                                 class="input"
                                 type="text"
-                                placeholder="De naam van je vereniging"
+                                :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')"
                                 autocomplete="organization"
                             >
                         </STInputBox>
 
-                        <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
+                        <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="validator" :link-country-to-locale="true" />
                         <p class="style-description-small">
                             Geen adres? Vul dan een adres in dat in de buurt ligt
                         </p>

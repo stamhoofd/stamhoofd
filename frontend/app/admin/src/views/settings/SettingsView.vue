@@ -133,10 +133,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/list.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Gegevens van organisaties
+                        {{ $t('e6405d38-2bd8-4e24-8e35-24f4daea2a37') }}
                     </h2>
                     <p class="style-description">
-                        Kies welke informatie je verzamelt van organisaties
+                        {{ $t('f5bf8b84-52d2-49a3-b4b4-73573b320739') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />

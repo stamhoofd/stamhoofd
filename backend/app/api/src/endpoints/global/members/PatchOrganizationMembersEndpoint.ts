@@ -315,7 +315,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: 'Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar',
+                        human: Context.i18n.$t('d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840'),
                     });
                 }
 

@@ -7,13 +7,13 @@
         </STNavigationBar>
 
         <main>
-            <h1>Groepen</h1>
+            <h1>{{ $t("6e884f27-427f-4f85-914c-d5c2780253b0") }}</h1>
 
             <div class="container">
                 <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.All) }" @click="navigate(Routes.All)">
                     <span class="icon group" />
                     <span>
-                        Alle groepen
+                        {{ $t("cd0975fc-75c4-4c1e-b80a-f611f0992caa") }}
                     </span>
                 </button>
             </div>

@@ -74,7 +74,7 @@ import { computed, Ref, shallowRef } from 'vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { PromiseComponent } from '../containers/AsyncComponent';
 import { ReplaceRootEventBus } from '../overlays/ModalStackEventBus';
-import { getAppDescription, getAppTitle } from './appContext';
+import { useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
 import { Option, useContextOptions } from './hooks/useContextOptions';
 
@@ -82,6 +82,7 @@ const options: Ref<Option[]> = shallowRef([]);
 const popup = usePopup();
 
 const { getDefaultOptions, selectOption, isCurrent } = useContextOptions();
+const { getAppTitle, getAppDescription } = useAppData();
 
 const currentOptions = computed(() => {
     const list = options.value.filter(o => o.app !== 'auto');

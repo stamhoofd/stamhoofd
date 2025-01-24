@@ -26,7 +26,7 @@
                     Vergrendel inschrijvingen
                 </h3>
                 <p v-if="locked" class="style-description-small">
-                    Er kunnen geen wijzigingen meer aangebracht worden aan inschrijvingen in dit werkjaar.
+                    {{ $t('cc48e00f-2c6b-4f4d-9bae-65a889364ea3') }}
                 </p>
             </STListItem>
         </STList>

@@ -16,7 +16,7 @@
                 </button>
                 <button v-else-if="canSetDefaultPeriod" type="button" class="menu-button button cta" @click="setDefaultPeriod">
                     <span class="icon flag" />
-                    <span>Instellen als huidig werkjaar</span>
+                    <span>{{ $t('410f13a0-286d-4f7a-b6f6-aef22327056b') }}</span>
                 </button>
 
                 <hr v-if="canUpgradePeriod || canSetDefaultPeriod">

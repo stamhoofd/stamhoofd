@@ -4,12 +4,12 @@
 
         <main>
             <h1>{{ period.name }}</h1>
-            <p>Hoera! Tijd voor een nieuw werkjaar. </p>
+            <p>{{ $t('b5f857ee-6c3b-43df-866c-99e7e0954eb1') }} </p>
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <ul class="style-list">
                 <li>De structuur van jouw leeftijdsgroepen blijft behouden, maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.</li>
-                <li>Alle leden moeten opnieuw inschrijven voor het nieuwe werkjaar, of schrijf je zelf opnieuw in</li>
+                <li>{{ $t('c5d21881-b70a-489e-bce9-5bb3d24b6f76') }}</li>
                 <li>Je kan nog steeds aan de gegevens van vorig jaar</li>
                 <li>Alle leiding en leden verliezen hun functies en moet je opnieuw instellen</li>
             </ul>
@@ -28,13 +28,12 @@
 </template>
 
 <script setup lang="ts">
-import { ErrorBox, Toast, useErrors, useOrganization } from '@stamhoofd/components';
-import { Group, Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
-import { ref } from 'vue';
-import { v4 as uuidv4 } from 'uuid';
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { useOrganizationManager } from '@stamhoofd/networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, Toast, useErrors, useOrganization } from '@stamhoofd/components';
+import { useOrganizationManager } from '@stamhoofd/networking';
+import { Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
+import { ref } from 'vue';
 
 const props = defineProps<{
     period: RegistrationPeriod;

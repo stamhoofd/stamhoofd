@@ -53,7 +53,7 @@ const root = new ComponentWithProperties(PromiseView, {
                 component = (await getScopedDashboardRootFromUrl());
             }
             else if (app === 'admin') {
-                component = (await getScopedAdminRootFromUrl());
+                component = (await getScopedAdminRootFromUrl({ $t }));
             }
             else {
                 component = (await getScopedRegistrationRootFromUrl());
@@ -115,7 +115,7 @@ async function checkGlobalRoutes() {
         }
     }
 }
-const manualPresent = useManualPresent()
+const manualPresent = useManualPresent();
 
 onMounted(async () => {
     if (!modalStack.value) {
@@ -141,13 +141,13 @@ onMounted(async () => {
     CenteredMessage.addListener(this, async (centeredMessage) => {
         await manualPresent(stack.present, {
             components: [
-                new ComponentWithProperties(CenteredMessageView, { 
-                    centeredMessage
+                new ComponentWithProperties(CenteredMessageView, {
+                    centeredMessage,
                 }, {
-                    forceCanHaveFocus: true
+                    forceCanHaveFocus: true,
                 }),
             ],
-            modalDisplayStyle: 'overlay'
+            modalDisplayStyle: 'overlay',
         });
     });
 

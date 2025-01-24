@@ -1,4 +1,4 @@
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { Organization } from '@stamhoofd/structures';
 import { inject } from 'vue';
 
@@ -8,26 +8,36 @@ export function useAppContext(): AppType | 'auto' {
     return inject('stamhoofd_app', 'dashboard') as AppType | 'auto';
 }
 
-export const getAppName = (app: AppType) => {
+export const getAppName = (app: AppType, $t: ReturnType<typeof useTranslate>) => {
     switch (app) {
         case 'dashboard': return 'Mijn groep';
-        case 'registration': return 'Mijn account';
+        case 'registration': return $t('f02ad9a5-f0b4-483e-961c-491ddf7d6f6a');
         case 'admin': return 'Administratieportaal';
         case 'webshop': return 'Webshop';
     }
 };
 
-export const getAppTitle = (app: AppType | 'auto', organization: Organization | undefined | null) => {
+export function useAppData() {
+    const $t = useTranslate();
+
+    return {
+        getAppTitle: (app: AppType | 'auto', organization: Organization | undefined | null) => getAppTitle(app, organization, $t),
+        getAppDescription: (app: AppType | 'auto', organization: Organization | undefined | null) => getAppDescription(app, organization, $t),
+        getAppName: (app: AppType) => getAppName(app, $t),
+    };
+}
+
+export const getAppTitle = (app: AppType | 'auto', organization: Organization | undefined | null, $t: ReturnType<typeof useTranslate>) => {
     if (app === 'auto' || app === 'dashboard') {
         if (!organization) {
             return 'Onbekend';
         }
         return organization.name;
     }
-    return getAppName(app);
+    return getAppName(app, $t);
 };
 
-export const getAppDescription = (app: AppType | 'auto', organization: Organization | undefined | null) => {
+export const getAppDescription = (app: AppType | 'auto', organization: Organization | undefined | null, $t: ReturnType<typeof useTranslate>) => {
     if (app === 'auto') {
         if (organization) {
             return organization.address.anonymousString(I18nController.shared.countryCode);
@@ -36,7 +46,7 @@ export const getAppDescription = (app: AppType | 'auto', organization: Organizat
     }
 
     if (app === 'dashboard') {
-        return getAppName(app);
+        return getAppName(app, $t);
     }
 
     if (!organization) {

@@ -12,7 +12,6 @@
                 </div>
             </h2>
 
-
             <STList v-if="nullable || groups.length > 0">
                 <STListItem v-if="nullable" :selectable="true" element-name="label">
                     <template #left>
@@ -39,7 +38,7 @@
             </STList>
 
             <p v-if="groups.length === 0" class="info-box">
-                Geen groepen beschikbaar in dit werkjaar
+                {{ $t('fd52fa36-16e6-4106-807c-c387bc0acc0e') }}
             </p>
         </div>
     </LoadingBoxTransition>
@@ -54,25 +53,25 @@ import { computed, Ref, ref, watchEffect } from 'vue';
 
 const props = withDefaults(
     defineProps<{
-        nullable?: boolean,
-        defaultPeriodId?: string|null,
-        title?: string
+        nullable?: boolean;
+        defaultPeriodId?: string | null;
+        title?: string;
     }>(), {
         nullable: false,
         defaultPeriodId: null,
-        title: 'Groepen'
-    }
-)
+        title: 'Groepen',
+    },
+);
 
-const model = defineModel<string[]|null>({required: true})
+const model = defineModel<string[] | null>({ required: true });
 const organization = useOrganization();
-const organizationManager = useOrganizationManager()
-const owner = useRequestOwner()
-const platform = usePlatform()
-const defaultPeriod = organization.value?.period?.period ?? platform.value.period
+const organizationManager = useOrganizationManager();
+const owner = useRequestOwner();
+const platform = usePlatform();
+const defaultPeriod = organization.value?.period?.period ?? platform.value.period;
 const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
 
-const lastCachedValue = ref<string[]|null>(null);
+const lastCachedValue = ref<string[] | null>(null);
 const periods = ref(RegistrationPeriodList.create({}) as any) as Ref<RegistrationPeriodList>;
 const loading = ref(true);
 const organizationPeriod = computed(() => periods.value.organizationPeriods.find(p => p.period.id === period.value.id));
@@ -85,8 +84,8 @@ const groups = computed(() => {
     return p.adminCategoryTree.getAllGroups().filter(g => g.type === GroupType.Membership).map(group => NamedObject.create({
         id: group.id,
         name: group.settings.name,
-        description: p.period.nameShort
-    }))
+        description: p.period.nameShort,
+    }));
 });
 
 organizationManager.value.loadPeriods(false, true, owner).then((p) => {
@@ -96,16 +95,16 @@ organizationManager.value.loadPeriods(false, true, owner).then((p) => {
         const pp = periods.value.periods.find(p => p.id === props.defaultPeriodId);
 
         if (pp) {
-            period.value = pp
+            period.value = pp;
         }
     }
 
     loading.value = false;
-}).catch(console.error)
+}).catch(console.error);
 
 function switchCycle(event: MouseEvent) {
     const menu = new ContextMenu([
-        (periods.value.organizationPeriods ?? []).map(p => {
+        (periods.value.organizationPeriods ?? []).map((p) => {
             const c = p.adminCategoryTree.getAllGroups().map(g => g.id).reduce((a, b) => a + (model.value?.includes(b) ? 1 : 0), 0);
 
             return new ContextMenuItem({
@@ -113,32 +112,32 @@ function switchCycle(event: MouseEvent) {
                 selected: p.period.id === period.value.id,
                 rightText: c > 0 ? Formatter.integer(c) : '',
                 action: () => {
-                    period.value = p.period
+                    period.value = p.period;
                     return true;
-                }
+                },
             });
-        })
-    ])
-    menu.show({ button: event.currentTarget as HTMLElement, yOffset: -10 }).catch(console.error)
+        }),
+    ]);
+    menu.show({ button: event.currentTarget as HTMLElement, yOffset: -10 }).catch(console.error);
 }
-
 
 watchEffect(() => {
     if (model.value !== null) {
         lastCachedValue.value = model.value;
     }
-})
+});
 
 const allGroups = computed({
     get: () => model.value === null,
     set: (allGroups) => {
         if (allGroups) {
             model.value = null;
-        } else {
-            model.value = (lastCachedValue.value ?? []).slice()
         }
-    }
-})
+        else {
+            model.value = (lastCachedValue.value ?? []).slice();
+        }
+    },
+});
 
 function getGroupValue(group: NamedObject) {
     return !!model.value?.find(id => id === group.id);
@@ -150,7 +149,8 @@ function setGroupValue(group: NamedObject, value: boolean) {
     }
     if (value) {
         model.value = [...model.value.filter(id => id !== group.id), group.id];
-    } else {
+    }
+    else {
         model.value = model.value.filter(id => id !== group.id);
     }
 }
