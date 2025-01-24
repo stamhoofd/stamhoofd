@@ -161,7 +161,7 @@ export const PaymentService = {
                             if (token) {
                                 try {
                                     const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                                    const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
+                                    let mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
                                         testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
                                     });
 
@@ -186,6 +186,22 @@ export const PaymentService = {
                                     }
                                     else if (mollieData.status === MolliePaymentStatus.failed || mollieData.status === MolliePaymentStatus.expired || mollieData.status === MolliePaymentStatus.canceled) {
                                         await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                    }
+                                    else if ((cancel || this.shouldTryToCancel(payment.status, payment)) && mollieData.isCancelable) {
+                                        console.log('Cancelling Mollie payment on request', payment.id);
+                                        mollieData = await mollieClient.payments.cancel(molliePayment.mollieId);
+
+                                        if (mollieData.status === MolliePaymentStatus.paid) {
+                                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
+                                        }
+                                        else if (mollieData.status === MolliePaymentStatus.failed || mollieData.status === MolliePaymentStatus.expired || mollieData.status === MolliePaymentStatus.canceled) {
+                                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                        }
+                                        else if (this.isManualExpired(payment.status, payment)) {
+                                            // Mollie still returning pending after 1 day: mark as failed
+                                            console.error('Manually marking Mollie payment as expired', payment.id);
+                                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                        }
                                     }
                                     else if (this.isManualExpired(payment.status, payment)) {
                                         // Mollie still returning pending after 1 day: mark as failed
