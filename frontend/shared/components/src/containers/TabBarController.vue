@@ -41,13 +41,13 @@
 <script lang="ts">
 import { inject, shallowRef } from 'vue';
 
+import { GlobalEventBus } from '../EventBus';
 import { useDeviceWidth } from '../hooks';
 import TabBarController from './TabBarController.vue';
 import TabBarDropdownView from './TabBarDropdownView.vue';
-import { GlobalEventBus } from '../EventBus';
 
 export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
-    const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController>|Ref<InstanceType<typeof TabBarController>>;
+    const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController> | Ref<InstanceType<typeof TabBarController>>;
     return shallowRef(c);
 }
 
@@ -86,12 +86,12 @@ import InheritComponent from './InheritComponent.vue';
 import { TabBarItem, TabBarItemGroup } from './TabBarItem';
 
 const props = defineProps<{
-    tabs: ((TabBarItem|TabBarItemGroup)[])|Ref<(TabBarItem|TabBarItemGroup)[]>
-}>()
+    tabs: ((TabBarItem | TabBarItemGroup)[]) | Ref<(TabBarItem | TabBarItemGroup)[]>;
+}>();
 
 defineOptions({
-    name: 'TabBarController'
-})
+    name: 'TabBarController',
+});
 
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;
 const tabs = computed(() => {
@@ -99,7 +99,7 @@ const tabs = computed(() => {
 
     if (!showTopBar.value) {
         // Replace groups with tabs
-        return base.flatMap(t => {
+        return base.flatMap((t) => {
             if (t instanceof TabBarItemGroup) {
                 return [
                     new TabBarItem({
@@ -108,39 +108,39 @@ const tabs = computed(() => {
                             root: new ComponentWithProperties(TabBarDropdownView, {
                                 group: t,
                                 selectedItem: selectedItem,
-                                selectItem: selectItem
-                            })
-                        })
-                    })
+                                selectItem: selectItem,
+                            }),
+                        }),
+                    }),
                 ];
             }
-            return [t]
+            return [t];
         });
     }
 
     return base;
-})
+});
 
-const flatTabs = computed<TabBarItemWithComponent[]>(() => unref(props.tabs).flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
-const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties>|undefined> | undefined;
-const deviceWidth = useDeviceWidth()
+const flatTabs = computed<TabBarItemWithComponent[]>(() => unref(props.tabs).flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component));
+const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties> | undefined> | undefined;
+const deviceWidth = useDeviceWidth();
 const showTopBar = computed(() => deviceWidth.value > 1100);
 const showBottomBar = computed(() => !showTopBar.value && tabs.value.length > 1);
 
 const hieBottomBarRequesters = ref(new Set());
 const shouldHideBottomBar = computed(() => {
     return hieBottomBarRequesters.value.size > 0;
-})
+});
 
 provide('reactive_hide_tab_bar', {
     register: (reference: any) => {
-        console.log('register')
+        console.log('register');
         hieBottomBarRequesters.value.add(reference);
     },
     unregister: (reference: any) => {
-        console.log('unregister')
+        console.log('unregister');
         hieBottomBarRequesters.value.delete(reference);
-    }
+    },
 });
 
 provide('reactive_components', computed(() => {
@@ -150,42 +150,41 @@ provide('reactive_components', computed(() => {
     // All displayed
     return {
         ...(unref(injectedComponents) ?? {}),
-        'tabbar-replacement': null
+        'tabbar-replacement': null,
     };
 }));
 
-
-const selectedItem: Ref<TabBarItem|null> = ref(null) as any as Ref<TabBarItem|null> // TypeScript is unpacking the TabBarItem to {...} for some reason
+const selectedItem: Ref<TabBarItem | null> = ref(null) as any as Ref<TabBarItem | null>; // TypeScript is unpacking the TabBarItem to {...} for some reason
 
 // Root is stored separately because we can also navigate to non-tabs
-const root: Ref<ComponentWithProperties|null> = ref(null) as any as Ref<ComponentWithProperties|null>
+const root: Ref<ComponentWithProperties | null> = ref(null) as any as Ref<ComponentWithProperties | null>;
 
-const mainElement = ref<HTMLElement|null>(null)
-const urlHelpers = useUrl()
-const present = usePresent()
+const mainElement = ref<HTMLElement | null>(null);
+const urlHelpers = useUrl();
+const present = usePresent();
 
-defineRoutes(flatTabs.value.map(tab => {
+defineRoutes(flatTabs.value.map((tab) => {
     return {
         name: tab.name,
         url: Formatter.slug(tab.name),
         isDefault: {
-            properties: {}
+            properties: {},
         },
         handler: async (options) => {
             if (options.checkRoutes) {
-                tab.component.setCheckRoutes()
+                tab.component.setCheckRoutes();
             }
-            await selectItem(tab, options.adjustHistory)
-        }
-    }
-}))
+            await selectItem(tab, options.adjustHistory);
+        },
+    };
+}));
 
-const instance = getCurrentInstance()
+const instance = getCurrentInstance();
 provide('reactive_tabBarController', instance?.proxy); // Sadly the proxy does not include exposed properties - ComponentWithProperties has a workaround at getExposeProxy
 
 const getInternalScrollElements = () => {
-    return (mainElement.value?.querySelectorAll(".st-view > main") ?? []) as NodeListOf<HTMLElement>
-}
+    return (mainElement.value?.querySelectorAll('.st-view > main') ?? []) as NodeListOf<HTMLElement>;
+};
 
 const saveCurrentItemState = () => {
     const old = selectedItem.value;
@@ -195,78 +194,82 @@ const saveCurrentItemState = () => {
 
         // Save scroll position
         const scrollElements = getInternalScrollElements();
-        
+
         // Clear already saved items
-        old.savedScrollPositions = new WeakMap()
+        old.savedScrollPositions = new WeakMap();
 
         for (const element of scrollElements) {
-            old.savedScrollPositions.set(element, element.scrollTop)
+            old.savedScrollPositions.set(element, element.scrollTop);
         }
     }
-}
+};
 
 const shouldNavigateAway = async () => {
-    const old = root.value
+    const old = root.value;
     if (old) {
-        return await old.shouldNavigateAway()
+        return await old.shouldNavigateAway();
     }
     return true;
-}
+};
 
-async function selectItem (item: TabBarItem, appendHistory: boolean = true) {
+async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
     if (item === selectedItem.value) {
         // Try to scroll this item to the top
         if (mainElement.value) {
-            const scrollElement = mainElement.value.querySelector(".st-view > main");
+            const scrollElement = mainElement.value.querySelector('.st-view > main');
             if (scrollElement) {
                 if (scrollElement.scrollTop !== 0) {
                     // Scroll to top animated
                     scrollElement.scrollTo({
                         top: 0,
-                        behavior: 'smooth'
-                    })
-                } else {
+                        behavior: 'smooth',
+                    });
+                }
+                else {
                     // todo: try to pop
                 }
             }
         }
-        return
+        return;
     }
 
     if (!await shouldNavigateAway()) {
-        return
+        return;
     }
 
     if (!item.component) {
         if (item.action) {
-            await item.action.call(instance!.proxy as ComponentPublicInstance)
+            await item.action.call(instance!.proxy as ComponentPublicInstance);
         }
         return;
     }
 
-    saveCurrentItemState()
+    saveCurrentItemState();
     const old = selectedItem.value;
 
     // Set url namespace of the tab
-    const tabUrl = Formatter.slug(item.name)
-    item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl))
+    const tabUrl = Formatter.slug(item.name);
+    item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl));
 
     if (appendHistory) {
-        HistoryManager.pushState(undefined, old ? (async () => {
-            await selectItem(old, false)
-        }) : null, {adjustHistory: true});
+        HistoryManager.pushState(undefined, old
+            ? async () => {
+                await selectItem(old, false);
+            }
+            : null, { adjustHistory: true });
 
-        item.component.assignHistoryIndex()
-    } else {
-        item.component.returnToHistoryIndex()
+        item.component.assignHistoryIndex();
     }
-        
+    else {
+        item.component.returnToHistoryIndex();
+    }
+
     // Switch
-    selectedItem.value = item
-    root.value = item.component
-    
-    const positions = item.savedScrollPositions
-    await nextTick()
+    selectedItem.value = item;
+    root.value = item.component;
+
+    const positions = item.savedScrollPositions;
+    await nextTick();
 
     const newScrollElements = getInternalScrollElements();
 
@@ -274,15 +277,15 @@ async function selectItem (item: TabBarItem, appendHistory: boolean = true) {
     // Let the OS rerender once so all the positions are okay after dom insertion
 
     for (const element of newScrollElements) {
-        const position = positions.get(element)
+        const position = positions.get(element);
         if (!position) {
-            continue
+            continue;
         }
-        element.scrollTop = position
+        element.scrollTop = position;
     }
 }
 
-const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => {
+const selectTab = async (event: MouseEvent, tab: TabBarItem | TabBarItemGroup) => {
     if (tab instanceof TabBarItem) {
         return selectItem(tab);
     }
@@ -294,12 +297,12 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => 
 
     const padding = 15;
     let width = 400;
-    const button = event.currentTarget as HTMLElement
-    const bounds = button.getBoundingClientRect()
+    const button = event.currentTarget as HTMLElement;
+    const bounds = button.getBoundingClientRect();
     const win = window,
         doc = document,
         docElem = doc.documentElement,
-        body = doc.getElementsByTagName("body")[0],
+        body = doc.getElementsByTagName('body')[0],
         clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
 
     let left = bounds.left - padding;
@@ -320,91 +323,93 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => 
                 root: new ComponentWithProperties(TabBarDropdownView, {
                     group: tab,
                     selectedItem: selectedItem,
-                    selectItem: selectItem
-                })
+                    selectItem: selectItem,
+                }),
             }, {
                 provide: {
-                    reactive_navigation_disable_url: true
-                }
-            })
+                    reactive_navigation_disable_url: true,
+                },
+            }),
         ],
         modalDisplayStyle: 'popup',
         modalClass: 'positionable-sheet',
-        modalCssStyle: '--sheet-position-left: '+left.toFixed(1)+'px; --sheet-position-top: 65px; --sheet-vertical-padding: 15px; --st-popup-width: ' + width.toFixed(1) + 'px; ',
-    })
+        modalCssStyle: '--sheet-position-left: ' + left.toFixed(1) + 'px; --sheet-position-top: 65px; --sheet-vertical-padding: 15px; --st-popup-width: ' + width.toFixed(1) + 'px; ',
+    });
 };
 
 const selectTabByName = async (name: string) => {
     const item = flatTabs.value.find(tab => Formatter.slug(tab.name) === Formatter.slug(name));
     if (item) {
-        await selectItem(item)
+        await selectItem(item);
     }
-}
+};
 
 const show = async (options: PushOptions) => {
     if (options.components.length > 1) {
-        throw new Error('Impossible to show more than 1 component from a direct child of the TabBarController')
+        throw new Error('Impossible to show more than 1 component from a direct child of the TabBarController');
     }
     if (!await shouldNavigateAway()) {
-        return
+        return;
     }
     const component = options.components[0];
 
     const foundItem = flatTabs.value.find(tab => tab.component === component);
     if (foundItem) {
-        return selectItem(foundItem)
+        return selectItem(foundItem);
     }
 
     if (!component || component === root.value) {
-        return
+        return;
     }
 
-    saveCurrentItemState()
+    saveCurrentItemState();
 
-    const old = selectedItem.value
-    HistoryManager.pushState(undefined, old ? (async () => {
-        await selectItem(old, false)
-    }) : null, {
+    const old = selectedItem.value;
+    HistoryManager.pushState(undefined, old
+        ? async () => {
+            await selectItem(old, false);
+        }
+        : null, {
         adjustHistory: options?.adjustHistory ?? true,
         invalid: options?.invalidHistory ?? false,
     });
-    component.assignHistoryIndex()
-        
+    component.assignHistoryIndex();
+
     // Switch
-    selectedItem.value = null
-    root.value = component
-    
+    selectedItem.value = null;
+    root.value = component;
+
     // Wait for mount
-    await nextTick()
-}
-provide('reactive_navigation_show', show)
+    await nextTick();
+};
+provide('reactive_navigation_show', show);
 
 onMounted(() => {
-    GlobalEventBus.addListener(this, 'selectTabByName', selectTabByName)
-})
+    GlobalEventBus.addListener(this, 'selectTabByName', selectTabByName);
+});
 
 onBeforeUnmount(() => {
-    GlobalEventBus.removeListener(this)
+    GlobalEventBus.removeListener(this);
 
     // Prevent memory issues by removing all references and destroying kept alive components
-    for (const {component} of flatTabs.value) {
+    for (const { component } of flatTabs.value) {
         // Destroy them one by one
         if (component.isKeptAlive && component.vnode) {
             component.destroy(component.vnode);
         }
     }
-})
+});
 
 const returnToHistoryIndex = () => {
     return root.value?.returnToHistoryIndex();
-}
+};
 
 defineExpose({
     returnToHistoryIndex,
     show,
     shouldNavigateAway,
-    selectTabByName
-})
+    selectTabByName,
+});
 
 </script>
 
@@ -478,19 +483,18 @@ defineExpose({
 
         &.showBottomBar {
             --st-safe-area-bottom: calc(var(--saved-st-safe-area-bottom) + var(--tab-bar-header-height)); // Handled by footer
-            
+
             &.shouldHideBottomBar {
                 --st-safe-area-bottom: var(--saved-st-safe-area-bottom);
             }
         }
-    
+
         height: calc(var(--vh, 1vh) * 100);
 
         // No scrolling here allowed. Child components should manage this
         overflow: hidden;
         overflow: clip; // More modern + disables scrolling
     }
-
 
     > footer {
         height: var(--tab-bar-header-height);
@@ -510,10 +514,10 @@ defineExpose({
         right: 0;
         bottom: 0;
         z-index: 1000;
-        
+
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-            
+
         > button {
             min-width: 0;
             overflow: hidden;

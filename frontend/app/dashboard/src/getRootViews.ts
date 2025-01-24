@@ -7,11 +7,11 @@ import { AccessRight, Country, Organization, PermissionLevel, Webshop } from '@s
 import { computed, markRaw, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
+import { CheckoutManager } from '../../webshop/src/classes/CheckoutManager';
+import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { useGlobalRoutes } from './useGlobalRoutes';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
-import { CheckoutManager } from '../../webshop/src/classes/CheckoutManager';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -402,7 +402,9 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             moreTab.items.unshift(financesTab);
                         }
 
-                        tabs.push(moreTab);
+                        if (moreTab.items.length > 0) {
+                            tabs.push(moreTab);
+                        }
 
                         return tabs;
                     }),
