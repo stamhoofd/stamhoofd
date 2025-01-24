@@ -273,6 +273,14 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
+    get actualTestPayments(): boolean {
+        if (this.useTestPayments !== null) {
+            return this.useTestPayments;
+        }
+
+        return STAMHOOFD.environment !== 'production';
+    }
+
     getPaymentProviderFor(method: PaymentMethod, stripeAccountMeta?: StripeMetaData | null): PaymentProvider | null {
         if (method === PaymentMethod.Unknown || method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale) {
             return null;
@@ -295,7 +303,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
             }
         }
 
-        if ((this.mollieOnboarding && (this.mollieOnboarding?.canReceivePayments || this.useTestPayments)) && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
+        if ((this.mollieOnboarding && (this.mollieOnboarding?.canReceivePayments || this.actualTestPayments)) && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
             return PaymentProvider.Mollie;
         }
 
