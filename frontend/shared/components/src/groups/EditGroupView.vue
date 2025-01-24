@@ -288,42 +288,39 @@
                 </button>
             </div>
 
-            <hr>
-            <h2>Beschikbaarheid</h2>
-
-            <STList>
-                <STListItem v-if="isMultiOrganization || allowRegistrationsByOrganization" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="allowRegistrationsByOrganization" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        Groepinschrijvingen
-                    </h3>
-                    <p class="style-description-small">
-                        Een hoofdbeheerder van een groep kan meerdere leden inschrijven en schiet de betaling voor. De leden betalen vervolgens via een openstaand bedrag het geld terug aan hun groep.
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="enableMaxMembers || type !== GroupType.WaitingList" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="enableMaxMembers" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        Limiteer maximum aantal inschrijvingen (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
-                    </h3>
-
-                    <div v-if="enableMaxMembers" class="option" @click.stop.prevent>
-                        <STInputBox title="" error-fields="maxMembers" :error-box="errors.errorBox">
-                            <NumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid" />
-                        </STInputBox>
+            <div v-if="showAllowRegistrationsByOrganization || showEnableMaxMembers" class="container">
+                <hr>
+                <h2>Beschikbaarheid</h2>
+                <STList>
+                    <STListItem v-if="showAllowRegistrationsByOrganization" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="allowRegistrationsByOrganization" />
+                        </template>
+                        <h3 class="style-title-list">
+                            Groepinschrijvingen
+                        </h3>
                         <p class="style-description-small">
-                            Als er een wachtlijst is ingesteld kunnen de leden op de wachtlijst inschrijven als de groep volzet is.
+                            Een hoofdbeheerder van een groep kan meerdere leden inschrijven en schiet de betaling voor. De leden betalen vervolgens via een openstaand bedrag het geld terug aan hun groep.
                         </p>
-                    </div>
-                </STListItem>
-            </STList>
+                    </STListItem>
+                    <STListItem v-if="showEnableMaxMembers" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="enableMaxMembers" />
+                        </template>
+                        <h3 class="style-title-list">
+                            Limiteer maximum aantal inschrijvingen (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
+                        </h3>
+                        <div v-if="enableMaxMembers" class="option" @click.stop.prevent>
+                            <STInputBox title="" error-fields="maxMembers" :error-box="errors.errorBox">
+                                <NumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid" />
+                            </STInputBox>
+                            <p class="style-description-small">
+                                Als er een wachtlijst is ingesteld kunnen de leden op de wachtlijst inschrijven als de groep volzet is.
+                            </p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </div>
 
             <div v-if="patched.waitingList || enableMaxMembers" class="container">
                 <hr>
@@ -814,6 +811,8 @@ const requireGroupIds = computed({
     }),
 });
 
+const showAllowRegistrationsByOrganization = computed(() => props.isMultiOrganization || allowRegistrationsByOrganization.value);
+
 const allowRegistrationsByOrganization = computed({
     get: () => patched.value.settings.allowRegistrationsByOrganization,
     set: allowRegistrationsByOrganization => addPatch({
@@ -865,6 +864,8 @@ const maxMembers = computed({
         }),
     }),
 });
+
+const showEnableMaxMembers = computed(() => enableMaxMembers.value || type.value !== GroupType.WaitingList);
 
 const enableMaxMembers = computed({
     get: () => patched.value.settings.maxMembers !== null,
