@@ -20,7 +20,7 @@
 
             <hr>
 
-            <div v-for="(tag, index) in tagsToShow" :key="tag.id" class="container">
+            <div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
                 <div class="grouped">
                     <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag}}) }" @click="navigateToTag(tag)">
                         <span v-if="tag.type === OrganizationTagType.Tag" class="icon label" />
@@ -46,7 +46,7 @@
                             <span class="count">{{ formatInteger(childTag.organizationCount) }}</span>
                         </button>
 
-                        <hr v-if="index < tagsToShow.length - 1 && tag.childTags.length">
+                        <hr v-if="index < rootTags.length - 1 && tag.childTags.length">
                     </div>
                 </div>
             </div>
@@ -169,10 +169,6 @@ const tags = computed(() => {
 });
 
 const rootTags = computed(() => TagHelper.getRootTags(tags.value));
-
-const rootTagsWithChildren = computed(() => rootTags.value.filter(tag => tag.childTags.length > 0));
-const otherRootTags = computed(() => rootTags.value.filter(tag => tag.childTags.length === 0));
-const tagsToShow = computed(() => rootTagsWithChildren.value.concat(...otherRootTags.value));
 
 function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
     return tagIds.map(id => getTagById(id));
