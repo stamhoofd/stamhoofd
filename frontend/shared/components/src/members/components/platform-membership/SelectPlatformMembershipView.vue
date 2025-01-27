@@ -5,6 +5,10 @@
         <p v-if="availableOrganizations.length === 0" class="warning-box">
             {{ $t('ec0c482e-0528-499f-82fa-b081bf708ded') }}
         </p>
+        <p v-if="availableMembershipTypes.length === 0" class="warning-box">
+            {{ $t('Er zijn geen aansluitingen beschikbaar voor deze gebruiker.') }}
+        </p>
+
         <template v-else>
             <ScrollableSegmentedControl v-if="availableOrganizations.length > 1" v-model="selectedOrganization" :items="availableOrganizations" :labels="availableOrganizations.map(o => o.name)" />
 
