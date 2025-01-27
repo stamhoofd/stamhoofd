@@ -399,7 +399,7 @@ export class AuthenticatedStructures {
         const platformMemberships = members.length > 0 ? await MemberPlatformMembership.where({ deletedAt: null, memberId: { sign: 'IN', value: members.map(m => m.id) } }) : [];
 
         // Load missing organizations
-        const organizationIds = Formatter.uniqueArray(responsibilities.map(r => r.organizationId).filter(id => id !== null));
+        const organizationIds = Formatter.uniqueArray(responsibilities.map(r => r.organizationId).concat(platformMemberships.map(r => r.organizationId)).filter(id => id !== null));
         for (const id of organizationIds) {
             if (includeContextOrganization || id !== Context.auth.organization?.id) {
                 const found = organizations.get(id);
