@@ -166,6 +166,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             patch = await Context.auth.filterMemberPatch(member, patch);
             const originalDetails = member.details.clone();
 
+            let shouldCheckDuplicate = false;
+
             if (patch.details) {
                 if (patch.details.isPut()) {
                     throw new SimpleError({
@@ -174,6 +176,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         human: 'Er ging iets mis bij het aanpassen van de gegevens van dit lid. Probeer het later opnieuw en neem contact op als het probleem zich blijft voordoen.',
                         field: 'details',
                     });
+                }
+
+                if (originalDetails.firstName !== patch.details.firstName || originalDetails.birthDay?.getTime() !== patch.details.birthDay?.getTime()) {
+                    shouldCheckDuplicate = true;
                 }
 
                 const wasReduced = member.details.shouldApplyReducedPrice;
@@ -185,17 +191,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
             }
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
-            if (duplicate) {
-                // Remove the member from the list
-                const iii = members.findIndex(m => m.id === member.id);
-                if (iii !== -1) {
-                    members.splice(iii, 1);
-                }
+            if (shouldCheckDuplicate) {
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
 
-                // Add new
-                members.push(duplicate);
-                continue;
+                if (duplicate) {
+                    // Remove the member from the list
+                    const iii = members.findIndex(m => m.id === member.id);
+                    if (iii !== -1) {
+                        members.splice(iii, 1);
+                    }
+
+                    // Add new
+                    members.push(duplicate);
+                    continue;
+                }
             }
 
             await member.save();
