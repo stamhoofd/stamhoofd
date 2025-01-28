@@ -28,7 +28,7 @@ export class GetOrganizationsCountEndpoint extends Endpoint<Params, Query, Body,
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.authenticate();
-        const query = GetOrganizationsEndpoint.buildQuery(request.query);
+        const query = await GetOrganizationsEndpoint.buildQuery(request.query);
 
         const count = await query
             .count();

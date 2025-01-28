@@ -7,21 +7,21 @@ import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote, scalar
 import { SQLSelect } from '../SQLSelect';
 import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from '../SQLWhere';
 
-export type SQLFilterCompiler = (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => SQLWhere | null;
+export type SQLFilterCompiler = (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => Promise<SQLWhere | null> | SQLWhere | null;
 export type SQLFilterDefinitions = Record<string, SQLFilterCompiler>;
 
-export function andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLWhere {
-    const runners = compileSQLFilter(filter, filters);
+export async function andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
+    const runners = await compileSQLFilter(filter, filters);
     return new SQLWhereAnd(runners);
 }
 
-export function orSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLWhere {
-    const runners = compileSQLFilter(filter, filters);
+export async function orSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
+    const runners = await compileSQLFilter(filter, filters);
     return new SQLWhereOr(runners);
 }
 
-export function notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLWhere {
-    const andRunner = andSQLFilterCompiler(filter, filters);
+export async function notSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
+    const andRunner = await andSQLFilterCompiler(filter, filters);
     return new SQLWhereNot(andRunner);
 }
 
@@ -101,11 +101,11 @@ function doNormalizeValue(val: StamhoofdCompareValue, options?: SQLExpressionFil
 }
 
 export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLFilterDefinitions): SQLFilterCompiler {
-    return (filter: StamhoofdFilter) => {
+    return async (filter: StamhoofdFilter) => {
         const f = filter as any;
 
         if ('$elemMatch' in f) {
-            const w = compileToSQLFilter(f['$elemMatch'], definitions);
+            const w = await compileToSQLFilter(f['$elemMatch'], definitions);
             const q = baseSelect.clone().where(w);
             return new SQLWhereExists(q);
         }
@@ -136,10 +136,12 @@ type SQLExpressionFilterOptions = {
      * Type of this column, use to normalize values received from filters
      */
     type?: SQLValueType;
+    checkPermission?: () => Promise<void>;
 };
 
 export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, options: SQLExpressionFilterOptions = {}): SQLFilterCompiler {
-    let { normalizeValue, isJSONObject = false, isJSONValue = false, nullable = false } = options;
+    const { isJSONObject = false, isJSONValue = false, nullable = false } = options;
+    let normalizeValue = options.normalizeValue;
     normalizeValue = normalizeValue ?? (v => v);
     const norm = (val: any) => {
         const n = doNormalizeValue(guardFilterCompareValue(val), options);
@@ -167,7 +169,12 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
 
     const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression;
 
-    return (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => {
+    return async (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => {
+        if (options.checkPermission) {
+            // throws error if no permissions
+            await options.checkPermission();
+        }
+
         if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined || filter instanceof Date) {
             filter = {
                 $eq: filter,
@@ -423,7 +430,7 @@ function objectToArray(f: StamhoofdFilter & object): StamhoofdFilter[] {
     return splitted;
 }
 
-function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterDefinitions): SQLWhere[] {
+async function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterDefinitions): Promise<SQLWhere[]> {
     if (filter === undefined) {
         return [];
     }
@@ -440,13 +447,13 @@ function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterDefinit
 
         if (Object.keys(f).length > 1) {
             // Multiple keys in the same object should always be combined with AND
-            runners.push(andSQLFilterCompiler(objectToArray(f), definitions));
+            runners.push(await andSQLFilterCompiler(objectToArray(f), definitions));
             continue;
         }
 
         if (Array.isArray(f)) {
             // Arrays in filters not direclty underneath $and or $or should be combined with AND
-            runners.push(andSQLFilterCompiler(f, definitions));
+            runners.push(await andSQLFilterCompiler(f, definitions));
             continue;
         }
 
@@ -456,7 +463,7 @@ function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterDefinit
                 throw new Error('Unsupported filter ' + key);
             }
 
-            const s = ff(f[key] as StamhoofdFilter, definitions);
+            const s = await ff(f[key] as StamhoofdFilter, definitions);
             if (s === undefined || s === null) {
                 throw new Error('Unsupported filter value for ' + key);
             }

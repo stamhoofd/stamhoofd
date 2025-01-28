@@ -34,7 +34,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         return [false];
     }
 
-    static buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         const organization = Context.organization!;
 
         const ticketsTable: string = Ticket.table;
@@ -42,12 +42,12 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         const query = SQL
             .select(SQL.wildcard(ticketsTable))
             .from(SQL.table(ticketsTable))
-            .where(compileToSQLFilter({
+            .where(await Promise.resolve(compileToSQLFilter({
                 organizationId: organization.id,
-            }, filterCompilers));
+            }, filterCompilers)));
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
         }
 
         // currently no search supported, probably not needed?
@@ -56,7 +56,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
@@ -68,7 +68,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
-        const query = this.buildQuery(requestQuery);
+        const query = await this.buildQuery(requestQuery);
         const data = await query.fetch();
 
         const tickets: Ticket[] = Ticket.fromRows(data, Ticket.table);

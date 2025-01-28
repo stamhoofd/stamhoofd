@@ -38,7 +38,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
         return [false];
     }
 
-    static buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         const organization = Context.organization!;
 
         const documentTable: string = Document.table;
@@ -46,25 +46,25 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
         const query = SQL
             .select(SQL.wildcard(documentTable))
             .from(SQL.table(documentTable))
-            .where(compileToSQLFilter({
+            .where(await Promise.resolve(compileToSQLFilter({
                 organizationId: organization.id,
-            }, filterCompilers));
+            }, filterCompilers)));
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
         }
 
         if (q.search) {
             const searchFilter: StamhoofdFilter | null = getDocumentSearchFilter(q.search);
 
             if (searchFilter) {
-                query.where(compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(searchFilter, filterCompilers)));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
@@ -76,7 +76,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
-        const query = this.buildQuery(requestQuery);
+        const query = await this.buildQuery(requestQuery);
         const data = await query.fetch();
 
         const documents: Document[] = Document.fromRows(data, Document.table);

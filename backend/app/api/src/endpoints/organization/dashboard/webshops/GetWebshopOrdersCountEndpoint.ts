@@ -35,7 +35,7 @@ export class GetWebshopOrdersCountEndpoint extends Endpoint<Params, Query, Body,
             throw Context.auth.error();
         }
 
-        const query = GetWebshopOrdersEndpoint.buildQuery(request.query);
+        const query = await GetWebshopOrdersEndpoint.buildQuery(request.query);
 
         const count = await query
             .count();

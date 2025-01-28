@@ -54,7 +54,7 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
                 $neq: null,
             },
         }]);
-        const q = GetWebshopOrdersEndpoint.buildQuery(query);
+        const q = await GetWebshopOrdersEndpoint.buildQuery(query);
         return await q.count();
     },
 });

@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { CachedBalance } from '@stamhoofd/models';
 import { compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
-import { ReceivableBalance as ReceivableBalanceStruct, CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter, ReceivableBalanceType } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, ReceivableBalance as ReceivableBalanceStruct, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -54,11 +54,11 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             .select();
 
         if (scopeFilter) {
-            query.where(compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(scopeFilter, filterCompilers)));
         }
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
         }
 
         if (q.search) {
@@ -70,7 +70,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

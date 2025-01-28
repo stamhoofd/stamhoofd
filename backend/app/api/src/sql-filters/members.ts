@@ -1,5 +1,8 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLScalar, SQLValueType, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
+import { AccessRight } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { Context } from '../helpers/Context';
 import { organizationFilterCompilers } from './organizations';
 import { registrationFilterCompilers } from './registrations';
 
@@ -44,7 +47,23 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
 
     'details.requiresFinancialSupport': createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.requiresFinancialSupport.value'),
-        { isJSONValue: true, type: SQLValueType.JSONBoolean },
+        { isJSONValue: true, type: SQLValueType.JSONBoolean, checkPermission: async () => {
+            const organization = Context.organization;
+            if (!organization) {
+                return;
+            }
+
+            const permissions = await Context.auth.getOrganizationPermissions(organization);
+
+            if (!permissions || !permissions.hasAccessRight(AccessRight.MemberReadFinancialData)) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'No permissions for financial support filter (organization scope).',
+                    human: 'Je hebt geen toegangsrechten om deze filter te gebruiken.',
+                    statusCode: 400,
+                });
+            }
+        } },
     ),
 
     'email': createSQLExpressionFilterCompiler(

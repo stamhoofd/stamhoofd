@@ -35,7 +35,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         return [false];
     }
 
-    static buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         // todo: filter userId???
         const organization = Context.organization!;
 
@@ -44,28 +44,28 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         const query = SQL
             .select(SQL.wildcard(ordersTable))
             .from(SQL.table(ordersTable))
-            .where(compileToSQLFilter({
+            .where(await Promise.resolve(compileToSQLFilter({
                 organizationId: organization.id,
                 number: {
                     $neq: null,
                 },
-            }, filterCompilers));
+            }, filterCompilers)));
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
         }
 
         if (q.search) {
             const searchFilter: StamhoofdFilter | null = getOrderSearchFilter(q.search, parsePhoneNumber);
 
             if (searchFilter) {
-                query.where(compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(searchFilter, filterCompilers)));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
@@ -77,7 +77,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
-        const query = this.buildQuery(requestQuery);
+        const query = await this.buildQuery(requestQuery);
         const data = await query.fetch();
 
         const orders: Order[] = Order.fromRows(data, Order.table);

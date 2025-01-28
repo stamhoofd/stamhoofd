@@ -5,11 +5,11 @@ import { Organization } from '@stamhoofd/models';
 import { SQL, compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
 import { CountFilteredRequest, LimitedFilteredRequest, Organization as OrganizationStruct, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { organizationFilterCompilers } from '../../../sql-filters/organizations';
 import { organizationSorters } from '../../../sql-sorters/organizations';
-import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -35,7 +35,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
         return [false];
     }
 
-    static buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         const tags = Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
         if (tags !== 'all' && tags.length === 0) {
             throw Context.auth.error();
@@ -62,11 +62,11 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             );
 
         if (scopeFilter) {
-            query.where(compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(scopeFilter, filterCompilers)));
         }
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
         }
 
         if (q.search) {
@@ -80,13 +80,13 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             };
 
             if (searchFilter) {
-                query.where(compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(searchFilter, filterCompilers)));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
@@ -116,7 +116,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             });
         }
 
-        const query = GetOrganizationsEndpoint.buildQuery(requestQuery);
+        const query = await GetOrganizationsEndpoint.buildQuery(requestQuery);
         let data: SQLResultNamespacedRow[];
 
         try {

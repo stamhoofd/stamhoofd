@@ -5,11 +5,11 @@ import { Payment } from '@stamhoofd/models';
 import { SQL, compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
 import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, TransferSettings, assertSort, getSortFilter } from '@stamhoofd/structures';
 
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { paymentFilterCompilers } from '../../../../sql-filters/payments';
 import { paymentSorters } from '../../../../sql-sorters/payments';
-import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -59,11 +59,11 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             );
 
         if (scopeFilter) {
-            query.where(compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(scopeFilter, filterCompilers)));
         }
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
         }
 
         if (q.search) {
@@ -142,13 +142,13 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             if (searchFilter) {
-                query.where(compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(searchFilter, filterCompilers)));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

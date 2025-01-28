@@ -35,7 +35,7 @@ export class GetDocumentsCountEndpoint extends Endpoint<Params, Query, Body, Res
             throw Context.auth.error();
         }
 
-        const query = GetDocumentsEndpoint.buildQuery(request.query);
+        const query = await GetDocumentsEndpoint.buildQuery(request.query);
 
         const count = await query
             .count();

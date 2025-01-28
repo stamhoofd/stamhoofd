@@ -34,7 +34,7 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         return [false];
     }
 
-    static buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         const organization = Context.organization;
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
@@ -60,11 +60,11 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             );
 
         if (scopeFilter) {
-            query.where(compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(scopeFilter, filterCompilers)));
         }
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
         }
 
         if (q.search) {
@@ -78,13 +78,13 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             };
 
             if (searchFilter) {
-                query.where(compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(searchFilter, filterCompilers)));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
@@ -96,7 +96,7 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
-        const query = GetEventsEndpoint.buildQuery(requestQuery);
+        const query = await GetEventsEndpoint.buildQuery(requestQuery);
         const data = await query.fetch();
 
         const events = Event.fromRows(data, Event.table);

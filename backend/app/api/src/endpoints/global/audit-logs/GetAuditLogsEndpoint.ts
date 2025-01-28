@@ -61,11 +61,11 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
             );
 
         if (scopeFilter) {
-            query.where(compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(scopeFilter, filterCompilers)));
         }
 
         if (q.filter) {
-            query.where(compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
         }
 
         if (q.search) {
@@ -78,7 +78,7 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
