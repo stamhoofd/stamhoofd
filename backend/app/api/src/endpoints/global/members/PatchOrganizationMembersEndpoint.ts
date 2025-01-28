@@ -178,7 +178,24 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                if (originalDetails.firstName !== patch.details.firstName || originalDetails.birthDay?.getTime() !== patch.details.birthDay?.getTime()) {
+                if (
+                    // has long name
+                    (
+                        // has long first name
+                        ((patch.details.firstName !== undefined && patch.details.firstName.length > 3) || (patch.details.firstName === undefined && originalDetails.firstName.length > 3))
+                        // or has long last name
+                        || ((patch.details.lastName !== undefined && patch.details.lastName.length > 3) || (patch.details.lastName === undefined && originalDetails.lastName.length > 3))
+                    )
+                    // has name change or birthday change
+                    && (
+                        // has first name change
+                        (patch.details.firstName !== undefined && patch.details.firstName !== originalDetails.firstName)
+                        // has last name change
+                        || (patch.details.lastName !== undefined && patch.details.lastName !== originalDetails.lastName)
+                        // has birth day change
+                        || (patch.details.birthDay !== undefined && patch.details.birthDay?.getTime() !== originalDetails.birthDay?.getTime())
+                    )
+                ) {
                     shouldCheckDuplicate = true;
                 }
 
