@@ -1,12 +1,12 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
 import { AppType } from '../context';
 import { useFinancialSupportSettings } from '../groups';
-import { useAuth, usePlatform, useUser } from '../hooks';
+import { useAuth, useOrganization, usePlatform, useUser } from '../hooks';
 import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
@@ -215,6 +215,21 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const financialSupportSettings = useFinancialSupportSettings();
     const auth = useAuth();
+    const organization = useOrganization();
+
+    const filterResponsibilities = (responsibilities: MemberResponsibility[]) => {
+        return responsibilities.filter((r) => {
+            if (organization.value === null) {
+                return true;
+            }
+
+            if (r.organizationTagIds !== null) {
+                return organization.value.meta.matchTags(r.organizationTagIds);
+            }
+
+            return true;
+        });
+    };
 
     return {
         loading,
@@ -233,7 +248,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                         multipleChoiceConfiguration: {
                             isSubjectPlural: true,
                         },
-                        options: platform.config.responsibilities.map((responsibility) => {
+                        options: filterResponsibilities(platform.config.responsibilities).map((responsibility) => {
                             return new MultipleChoiceUIFilterOption(responsibility.name, responsibility.id);
                         }),
                         wrapper: {
@@ -249,7 +264,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     }),
                 );
 
-                for (const responsibility of platform.config.responsibilities) {
+                for (const responsibility of filterResponsibilities(platform.config.responsibilities)) {
                     if (!responsibility.organizationBased || responsibility.defaultAgeGroupIds === null) {
                         continue;
                     }
