@@ -2,13 +2,13 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
-import { AuditLogType, MemberDetails, MembersBlob, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { MemberDetails, MembersBlob, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
-import { AuditLogService } from '../../../services/AuditLogService';
+import { shouldCheckIfMemberIsDuplicateForPatch, shouldCheckIfMemberIsDuplicateForPut } from '../members/shouldCheckIfMemberIsDuplicate';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
@@ -61,10 +61,12 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             this.throwIfInvalidDetails(member.details);
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
-            if (duplicate) {
-                addedMembers.push(duplicate);
-                continue;
+            if (shouldCheckIfMemberIsDuplicateForPut(struct)) {
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
+                if (duplicate) {
+                    addedMembers.push(duplicate);
+                    continue;
+                }
             }
 
             await member.save();
@@ -86,6 +88,8 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             const securityCode = struct.details?.securityCode; // will get cleared after the filter
             struct = await Context.auth.filterMemberPatch(member, struct);
 
+            let shouldCheckDuplicate = false;
+
             if (struct.details) {
                 if (struct.details.isPut()) {
                     throw new SimpleError({
@@ -95,6 +99,8 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                         field: 'details',
                     });
                 }
+
+                shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(struct, member.details);
 
                 member.details.patchOrPut(struct.details);
                 member.details.cleanData();
@@ -110,14 +116,16 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 });
             }
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
-            if (duplicate) {
+            if (shouldCheckDuplicate) {
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode);
+                if (duplicate) {
                 // Remove the member from the list
-                members.splice(members.findIndex(m => m.id === member.id), 1);
+                    members.splice(members.findIndex(m => m.id === member.id), 1);
 
-                // Add new
-                addedMembers.push(duplicate);
-                continue;
+                    // Add new
+                    addedMembers.push(duplicate);
+                    continue;
+                }
             }
 
             await member.save();

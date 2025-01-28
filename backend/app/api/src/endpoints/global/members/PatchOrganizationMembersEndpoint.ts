@@ -16,6 +16,7 @@ import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
 import { RegistrationService } from '../../../services/RegistrationService';
+import { shouldCheckIfMemberIsDuplicateForPatch, shouldCheckIfMemberIsDuplicateForPut } from './shouldCheckIfMemberIsDuplicate';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -107,10 +108,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             struct.details.cleanData();
             member.details = struct.details;
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
-            if (duplicate) {
+            if (shouldCheckIfMemberIsDuplicateForPut(struct)) {
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode);
+                if (duplicate) {
                 // Merge data
-                member = duplicate;
+                    member = duplicate;
+                }
             }
 
             // We risk creating a new member without being able to access it manually afterwards
@@ -178,26 +181,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                if (
-                    // has long name
-                    (
-                        // has long first name
-                        ((patch.details.firstName !== undefined && patch.details.firstName.length > 3) || (patch.details.firstName === undefined && originalDetails.firstName.length > 3))
-                        // or has long last name
-                        || ((patch.details.lastName !== undefined && patch.details.lastName.length > 3) || (patch.details.lastName === undefined && originalDetails.lastName.length > 3))
-                    )
-                    // has name change or birthday change
-                    && (
-                        // has first name change
-                        (patch.details.firstName !== undefined && patch.details.firstName !== originalDetails.firstName)
-                        // has last name change
-                        || (patch.details.lastName !== undefined && patch.details.lastName !== originalDetails.lastName)
-                        // has birth day change
-                        || (patch.details.birthDay !== undefined && patch.details.birthDay?.getTime() !== originalDetails.birthDay?.getTime())
-                    )
-                ) {
-                    shouldCheckDuplicate = true;
-                }
+                shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(patch, originalDetails);
 
                 const wasReduced = member.details.shouldApplyReducedPrice;
                 member.details.patchOrPut(patch.details);
