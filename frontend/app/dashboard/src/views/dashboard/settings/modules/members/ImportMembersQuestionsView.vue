@@ -464,10 +464,22 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
                     if (member.equal) {
                         if (registration !== null) {
+                            let suffix = '';
+                            if (registration.pricePaid) {
+                                suffix += ' (€' + registration.pricePaid + ' betaald)'
+                            }
+                            if (registration.pricePaid != registration.price) {
+                                if (registration.price === 0) {
+                                    suffix += ' (gratis)'
+                                } else {
+                                    suffix += ' (€' + registration.pricePaid + ' totaal te betalen)'
+                                }
+                            }
+
                             if (registration.waitingList) {
-                                description.push('Wachtlijst plaatsen voor ' + groupName)
+                                description.push('Wachtlijst plaatsen voor ' + groupName + suffix)
                             } else {
-                                description.push('Inschrijven voor ' + groupName)
+                                description.push('Inschrijven voor ' + groupName + suffix)
                             }
 
                             // Delete conflicting registrations (based on categories too!)
@@ -614,7 +626,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         }
         
 
-        const price = member.registration.price ?? group.settings.prices.find(p => p.startDate === null)?.getPriceFor(false) ?? 0
+        let price = member.registration.price ?? group.settings.prices.find(p => p.startDate === null)?.getPriceFor(false) ?? 0
         
         let paidPrice = (member.registration.paid ?? this.paid ?? false) ? price : 0
 
@@ -622,16 +634,9 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             paidPrice = member.registration.paidPrice
         }
 
-        /*const payment = Payment.create({
-            method: member.registration.paymentMethod ?? PaymentMethod.Unknown,
-            status: paid ? PaymentStatus.Succeeded : PaymentStatus.Created,
-            price: price,
-            paidAt: paid ? new Date() : null,
-
-            // Placeholders:
-            createdAt: new Date(),
-            updatedAt: new Date()
-        })*/
+        if (paidPrice && paidPrice > price) {
+            price = paidPrice
+        }
 
         return Registration.create({
             groupId: group.id,
