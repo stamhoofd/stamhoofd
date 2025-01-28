@@ -62,11 +62,11 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             );
 
         if (scopeFilter) {
-            query.where(await Promise.resolve(compileToSQLFilter(scopeFilter, filterCompilers)));
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -80,13 +80,13 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             };
 
             if (searchFilter) {
-                query.where(await Promise.resolve(compileToSQLFilter(searchFilter, filterCompilers)));
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

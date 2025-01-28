@@ -44,28 +44,28 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         const query = SQL
             .select(SQL.wildcard(ordersTable))
             .from(SQL.table(ordersTable))
-            .where(await Promise.resolve(compileToSQLFilter({
+            .where(await compileToSQLFilter({
                 organizationId: organization.id,
                 number: {
                     $neq: null,
                 },
-            }, filterCompilers)));
+            }, filterCompilers));
 
         if (q.filter) {
-            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
             const searchFilter: StamhoofdFilter | null = getOrderSearchFilter(q.search, parsePhoneNumber);
 
             if (searchFilter) {
-                query.where(await Promise.resolve(compileToSQLFilter(searchFilter, filterCompilers)));
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
