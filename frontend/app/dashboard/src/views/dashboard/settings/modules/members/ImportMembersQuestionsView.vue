@@ -469,13 +469,13 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                         if (registration !== null) {
                             let suffix = '';
                             if (registration.pricePaid) {
-                                suffix += ' (€' + registration.pricePaid + ' betaald)'
+                                suffix += ' (' + Formatter.price(registration.pricePaid) + ' betaald)'
                             }
                             if (registration.pricePaid != registration.price) {
                                 if (registration.price === 0) {
                                     suffix += ' (gratis)'
                                 } else {
-                                    suffix += ' (€' + registration.pricePaid + ' totaal te betalen)'
+                                    suffix += ' (' + Formatter.price(registration.pricePaid) + ' totaal te betalen)'
                                 }
                             }
 
