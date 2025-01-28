@@ -9,7 +9,7 @@
 
             <template v-if="!saving">
                 <p v-if="existingCount > 0 && existingCount === members.length" class="warning-box">
-                    Alle leden uit jouw bestand zitten al in het systeem. Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand. Let goed op, je kan dit niet ongedaan maken.
+                    Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Stamhoofd overschrijven. <template v-if="membersWithNewRegistrations.length">Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd. </template>Let goed op, je kan dit niet ongedaan maken.
                 </p>
                 <p v-else-if="existingCount > 0" class="warning-box">
                     {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem ({{ members.length }} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.
@@ -19,7 +19,7 @@
                     Stamhoofd zal {{ deletedRegistrationsCount }} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.
                 </p>
                 <p v-if="membersWithoutNewRegistrations.length" class="success-box">
-                    {{ membersWithoutNewRegistrations.length }} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.
+                    {{ membersWithoutNewRegistrations.length }} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.
                 </p>
 
                 <template v-if="membersWithNewRegistrations.length">
@@ -66,6 +66,9 @@
                                 </Radio>
                             </RadioGroup>
                         </STInputBox>
+                        <p v-if="!needsPaidStatus && somePaid" class="success-box">
+                            De betaalstatus uit jouw Excel-bestand zal worden gebruikt om de inschrijvingen met het juiste bedrag aan te maken.
+                        </p>
 
                         <p v-if="needsPaidStatus && somePaid" class="warning-box">
                             Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
