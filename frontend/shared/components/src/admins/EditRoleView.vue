@@ -268,7 +268,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useErrors, useFeatureFlag, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useAuth, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
 import { AccessRight, Group, GroupCategory, maximumPermissionlevel, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
@@ -276,6 +276,7 @@ import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
 
 const errors = useErrors();
+const auth = useAuth();
 const saving = ref(false);
 const deleting = ref(false);
 
@@ -322,7 +323,7 @@ const platform = usePlatform();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
 const groups: Ref<Group[]> = computed(() => organization.value?.adminAvailableGroups ?? []);
 const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? []);
-const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree().categories ?? []);
+const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree({ permissions: auth.permissions }).categories ?? []);
 const tags = computed(() => platform.value.config.tags);
 const recordCategories = computed(() => {
     const base = organization.value?.meta.recordsConfiguration.recordCategories?.slice() ?? [];
