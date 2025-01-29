@@ -52,6 +52,35 @@
                 </STListItem>
             </STList>
         </div>
+
+        <div v-if="deletedMemberResponsibilityRecords.length > 0" class="container">
+            <hr>
+            <h2>{{ $t('Verwijderde functies') }}</h2>
+            <STList>
+                <STListItem v-for="record of deletedMemberResponsibilityRecords" :key="record.id" element-name="label" :selectable="true">
+                    <template #left>
+                        <Checkbox :model-value="isMemberResponsibilityRecordEnabled(record)" @update:model-value="setMemberResponsibilityRecordEnabled(record, $event)" />
+                    </template>
+
+                    <h2>{{ record.getName(member) }}</h2>
+
+                    <p v-if="record.group && selectedOrganization && record.group.periodId === selectedOrganization?.period.period.id" class="style-description-small">
+                        {{ selectedOrganization.period.period.nameShort }}
+                    </p>
+                    <p v-else-if="record.group" class="style-description-small">
+                        {{ $t('9685e11f-a4d0-4709-9f5e-875957ad269b') }}
+                    </p>
+
+                    <p class="style-description-small">
+                        Rechten: {{ getResponsibilityRecordMergedRoleDescription(record) }}
+                    </p>
+
+                    <p v-if="getResponsibilityRecordEnabledDescription(record)" class="style-description-small">
+                        {{ getResponsibilityRecordEnabledDescription(record) }}
+                    </p>
+                </STListItem>
+            </STList>
+        </div>
     </div>
 </template>
 
@@ -61,6 +90,7 @@ import { Group, LoadedPermissions, MemberResponsibility, MemberResponsibilityRec
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ScrollableSegmentedControl, useOrganization, usePlatform } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Formatter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -83,6 +113,7 @@ const props = defineProps<{
 const errors = useErrors({ validator: props.validator });
 const platform = usePlatform();
 const organization = useOrganization();
+const $t = useTranslate();
 
 const items = computed(() => {
     if (organization.value) {
@@ -159,6 +190,22 @@ const groupedResponsibilites = computed(() => {
     return groups;
 });
 
+const disabledMemberResponsibilityRecords = ref([]) as Ref<MemberResponsibilityRecord[]>;
+
+const deletedMemberResponsibilityRecords = computed(() => {
+    const result: MemberResponsibilityRecord[] = [];
+
+    for (const responsibilityRecord of props.member.patchedMember.responsibilities.filter(r => (r.endDate === null || disabledMemberResponsibilityRecords.value.find(x => x.id === r.id)) && r.organizationId === (selectedOrganization.value?.id ?? null))) {
+        const isDeleted = groupedResponsibilites.value.find(x => x.responsibilities.find(r => r.responsibility.id === responsibilityRecord.responsibilityId && (r.group?.id ?? null) === responsibilityRecord.groupId)) === undefined;
+
+        if (isDeleted) {
+            result.push(responsibilityRecord);
+        }
+    }
+
+    return result;
+});
+
 const labels = computed(() => {
     return items.value.map(o => o === null ? 'Nationaal niveau' : o.name);
 });
@@ -191,6 +238,17 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
             return 'Van ' + Formatter.date(rr.startDate, true) + ' tot nu';
         }
         return 'Van ' + Formatter.date(rr.startDate, true) + ' tot ' + Formatter.date(rr.endDate, true);
+    }
+
+    return null;
+}
+
+function getResponsibilityRecordEnabledDescription(record: MemberResponsibilityRecord | undefined) {
+    if (record) {
+        if (!record.endDate) {
+            return 'Van ' + Formatter.date(record.startDate, true) + ' tot nu';
+        }
+        return 'Van ' + Formatter.date(record.startDate, true) + ' tot ' + Formatter.date(record.endDate, true);
     }
 
     return null;
@@ -260,6 +318,46 @@ function setResponsibilityEnabled(responsibility: MemberResponsibility, groupId:
     });
 }
 
+function isMemberResponsibilityRecordEnabled(record: MemberResponsibilityRecord) {
+    return (disabledMemberResponsibilityRecords.value).find(r => r.id === record.id) === undefined;
+}
+
+function setMemberResponsibilityRecordEnabled(record: MemberResponsibilityRecord, enabled: boolean) {
+    if (enabled === isMemberResponsibilityRecordEnabled(record)) {
+        return;
+    }
+
+    if (enabled) {
+        const index = disabledMemberResponsibilityRecords.value.findIndex(r => r.id === record.id);
+        disabledMemberResponsibilityRecords.value.splice(index, 1);
+
+        // Restore original state
+        const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray();
+        patch.addPatch(MemberResponsibilityRecord.patch({
+            id: record.id,
+            endDate: null,
+        }));
+
+        props.member.addPatch({
+            responsibilities: patch,
+        });
+        return;
+    }
+
+    disabledMemberResponsibilityRecords.value.push(record);
+
+    const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray();
+
+    patch.addPatch(MemberResponsibilityRecord.patch({
+        id: record.id,
+        endDate: new Date(),
+    }));
+
+    props.member.addPatch({
+        responsibilities: patch,
+    });
+}
+
 function getResponsibilityMergedRole(responsibility: MemberResponsibility, groupId: string | null | undefined) {
     return LoadedPermissions.buildRoleForResponsibility(groupId ?? null, responsibility, selectedOrganization.value?.privateMeta?.inheritedResponsibilityRoles ?? []);
 }
@@ -268,4 +366,29 @@ function getResponsibilityMergedRoleDescription(responsibility: MemberResponsibi
     return getResponsibilityMergedRole(responsibility, groupId).getDescription();
 }
 
+function getResponsibilityFromRecord(record: MemberResponsibilityRecord): {
+    responsibility: MemberResponsibility;groupId: string | null; } | null {
+    for (const groupData of groupedResponsibilites.value) {
+        const responsibility = groupData.responsibilities.find(r => r.responsibility.id === record.responsibilityId);
+
+        if (responsibility) {
+            return {
+                responsibility: responsibility.responsibility,
+                groupId: responsibility.group?.id ?? null,
+            };
+        }
+    }
+
+    return null;
+}
+
+function getResponsibilityRecordMergedRoleDescription(record: MemberResponsibilityRecord) {
+    const result = getResponsibilityFromRecord(record);
+
+    if (result) {
+        return getResponsibilityMergedRole(result.responsibility, result.groupId).getDescription();
+    }
+
+    return $t('geen rechten');
+}
 </script>
