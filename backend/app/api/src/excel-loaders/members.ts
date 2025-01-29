@@ -204,6 +204,14 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
                 };
             },
         },
+        {
+            id: 'nationalRegisterNumber',
+            name: 'Rijksregisternummer',
+            width: 30,
+            getValue: ({ patchedMember: object }: PlatformMember) => ({
+                value: object.details.nationalRegisterNumber?.toString() ?? '',
+            }),
+        },
 
         ...XlsxTransformerColumnHelper.creatColumnsForParents(),
 

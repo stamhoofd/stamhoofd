@@ -90,6 +90,14 @@ export class XlsxTransformerColumnHelper {
                     value: getParent(member)?.email ?? '',
                 }),
             },
+            {
+                id: getId('nationalRegisterNumber'),
+                name: getName('Rijksregisternummer'),
+                width: 20,
+                getValue: (member: PlatformMember) => ({
+                    value: getParent(member)?.nationalRegisterNumber?.toString() ?? '',
+                }),
+            },
             XlsxTransformerColumnHelper.createAddressColumns<PlatformMember>({
                 matchId: getId('address'),
                 getAddress: member => getParent(member)?.address,

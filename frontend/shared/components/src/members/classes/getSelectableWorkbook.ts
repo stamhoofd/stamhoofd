@@ -151,6 +151,11 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         enabled: false,
                     }),
 
+                    new SelectableColumn({
+                        id: 'nationalRegisterNumber',
+                        name: 'Rijksregisternummer',
+                    }),
+
                     ...groupColumns,
 
                     ...(!organization
@@ -223,6 +228,12 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                             new SelectableColumn({
                                 id: getId('address'),
                                 name: 'Adres ' + category,
+                                category,
+                                enabled,
+                            }),
+                            new SelectableColumn({
+                                id: getId('nationalRegisterNumber'),
+                                name: 'Rijksregisternummer ' + category,
                                 category,
                                 enabled,
                             }),
