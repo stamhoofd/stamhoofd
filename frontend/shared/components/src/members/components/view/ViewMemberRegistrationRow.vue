@@ -53,11 +53,11 @@
 
 <script lang="ts" setup>
 import { PlatformMember, Registration } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, getCurrentInstance } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useNow, useOrganization, usePlatform } from '../../../hooks';
 import GroupIconWithWaitingList from '../group/GroupIconWithWaitingList.vue';
-import { Formatter } from '@stamhoofd/utility';
 
 const props = defineProps<{
     registration: Registration;
@@ -70,7 +70,11 @@ const instance = getCurrentInstance();
 const organization = useOrganization();
 const platform = usePlatform();
 const app = useAppContext();
+const isDeactivated = computed(() => props.registration.deactivatedAt !== null);
 const isEditable = computed(() => {
+    if (isDeactivated.value) {
+        return false;
+    }
     return !!instance?.vnode.props?.onEdit;
 });
 const group = computed(() => {
@@ -88,6 +92,9 @@ const defaultAgeGroup = computed(() => {
 });
 
 function editRegistration(event: any) {
+    if (isDeactivated.value) {
+        return;
+    }
     emit('edit', event);
 }
 </script>
