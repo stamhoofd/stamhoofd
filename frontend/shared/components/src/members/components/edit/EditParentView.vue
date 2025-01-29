@@ -275,10 +275,11 @@ async function save() {
                 }
             }
 
-            if (otherParents.find(p => p.nationalRegisterNumber === nationalRegisterNumber.value)) {
+            const parent = otherParents.find(p => p.nationalRegisterNumber === nationalRegisterNumber.value);
+            if (parent) {
                 se.addError(new SimpleError({
                     code: 'invalid_field',
-                    message: 'Dit rijksregisternummer is al in gebruik door een andere ouder. Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.',
+                    message: `Dit rijksregisternummer is al in gebruik door een andere ouder (${parent.name}). Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.`,
                     field: 'nationalRegisterNumber',
                 }));
             }
