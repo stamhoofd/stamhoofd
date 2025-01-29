@@ -22,7 +22,8 @@ import { SetupStepType } from '@stamhoofd/structures';
 export const organizationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLExpressionFilterCompiler(SQL.column('organizations', 'id')),
-    uri: createSQLExpressionFilterCompiler(SQL.lpad(SQL.column('organizations', 'uri'), 100, '0')),
+    uriPadded: createSQLExpressionFilterCompiler(SQL.lpad(SQL.column('organizations', 'uri'), 100, '0')),
+    uri: createSQLExpressionFilterCompiler(SQL.column('organizations', 'uri')),
     name: createSQLExpressionFilterCompiler(
         SQL.column('organizations', 'name'),
     ),

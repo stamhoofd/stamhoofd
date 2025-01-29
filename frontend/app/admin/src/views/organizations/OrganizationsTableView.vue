@@ -109,7 +109,7 @@ const tableObjectFetcher = useTableObjectFetcher<Organization>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, Organization>({
-        id: 'uri',
+        id: 'uriPadded',
         name: '#',
         getValue: organization => organization,
         format: organization => organization.uri,
