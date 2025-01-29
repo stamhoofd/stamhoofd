@@ -170,3 +170,27 @@ export class SQLJsonOverlaps extends SQLWhere {
         ]);
     }
 }
+
+export class SQLLpad implements SQLExpression {
+    target: SQLExpression;
+    length: SQLExpression;
+    value: SQLExpression;
+
+    constructor(target: SQLExpression, length: SQLExpression, value: SQLExpression) {
+        this.target = target;
+        this.length = length;
+        this.value = value;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'LPAD(',
+            this.target.getSQL(options),
+            ',',
+            this.length.getSQL(options),
+            ',',
+            this.value.getSQL(options),
+            ')',
+        ]);
+    }
+}

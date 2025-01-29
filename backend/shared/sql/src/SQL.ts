@@ -2,12 +2,12 @@ import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete';
 import { isSQLExpression, SQLExpression } from './SQLExpression';
 import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
-import { SQLJoin, SQLJoinType } from './SQLJoin';
-import { SQLJsonExtract, SQLJsonLength, SQLJsonUnquote } from './SQLJsonExpressions';
-import { parseTable, SQLSelect } from './SQLSelect';
-import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from './SQLWhere';
 import { SQLInsert } from './SQLInsert';
+import { SQLJoin, SQLJoinType } from './SQLJoin';
+import { SQLJsonExtract, SQLJsonLength, SQLJsonUnquote, SQLLpad } from './SQLJsonExpressions';
+import { parseTable, SQLSelect } from './SQLSelect';
 import { SQLUpdate } from './SQLUpdate';
+import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from './SQLWhere';
 
 class StaticSQL {
     wildcard(namespace?: string) {
@@ -20,6 +20,10 @@ class StaticSQL {
 
     jsonValue(column: SQLExpression, path: string): SQLJsonExtract {
         return new SQLJsonExtract(column, new SQLSafeValue(path));
+    }
+
+    lpad(column: SQLExpression, length: number, value: string): SQLLpad {
+        return new SQLLpad(column, new SQLSafeValue(length), new SQLSafeValue(value));
     }
 
     jsonUnquotedValue(column: SQLExpression, path: string): SQLJsonUnquote {

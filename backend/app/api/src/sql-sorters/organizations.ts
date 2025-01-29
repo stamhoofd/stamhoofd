@@ -34,11 +34,11 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
     },
     uri: {
         getValue(a) {
-            return a.uri;
+            return a.uri.padStart(100, '0');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.column('uri'),
+                column: SQL.lpad(SQL.column('uri'), 100, '0'),
                 direction,
             });
         },
