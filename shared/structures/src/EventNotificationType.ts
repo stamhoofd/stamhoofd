@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { NamedObject } from './Event';
-import { RecordCategory } from './members/records/RecordCategory';
-import { RecordAnswerDecoder, RecordAnswer } from './members/records/RecordAnswer';
-import { ObjectWithRecords } from './members/ObjectWithRecords';
 import { StamhoofdFilter } from './filters/StamhoofdFilter';
+import { ObjectWithRecords } from './members/ObjectWithRecords';
+import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer';
+import { RecordCategory } from './members/records/RecordCategory';
 import { RecordSettings } from './members/records/RecordSettings';
 
 export enum EventNotificationStatus {
@@ -57,6 +57,9 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
 }
 
 export class EventNotificationDeadline extends AutoEncoder {
+    @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })
+    id: string;
+
     /**
      * Events within this start and end date will need to be accepted before the deadline.
      */

@@ -38,16 +38,33 @@
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addPatch({recordCategories: $event})" />
+
+        <hr>
+        <h2>Deadlines</h2>
+        <p>Via deadlines kan je instellen wanneer de leiding een kampmelding moet invullen.</p>
+
+        <STList v-if="patched.deadlines.length">
+            <EventNotificationDeadlineRow v-for="deadline in patched.deadlines" :key="deadline.id" :deadline="deadline" @click="editDeadline(deadline)" />
+        </STList>
+
+        <p>
+            <button class="button text" type="button" @click="addDeadline">
+                <span class="icon add" />
+                <span>{{ $t('Nieuwe deadline') }}</span>
+            </button>
+        </p>
     </SaveView>
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, getEventNotificationUIFilterBuilders, RecordEditorSettings, RecordEditorType, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { EventNotification, EventNotificationType, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import { EventNotification, EventNotificationDeadline, EventNotificationType, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
+import EventNotificationDeadlineRow from './components/EventNotificationDeadlineRow.vue';
+import EditEventNotificationDeadlineView from './EditEventNotificationDeadlineView.vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -63,6 +80,7 @@ const props = defineProps<{
 const viewTitle = computed(() => props.isNew ? $t('Nieuwe soort kampmelding') : $t('Wijzig instellingen'));
 const pop = usePop();
 const platform = usePlatform();
+const present = usePresent();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.type);
 
@@ -148,6 +166,49 @@ const editorSettings = computed(() => {
         },
     });
 });
+
+async function addDeadline() {
+    const arr: PatchableArrayAutoEncoder<EventNotificationDeadline> = new PatchableArray();
+    const deadline = EventNotificationDeadline.create({});
+    arr.addPut(deadline);
+
+    await present({
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(EditEventNotificationDeadlineView, {
+                deadline,
+                isNew: true,
+                saveHandler: (patch: AutoEncoderPatchType<EventNotificationDeadline>) => {
+                    patch.id = deadline.id;
+                    arr.addPatch(patch);
+                    addPatch({ deadlines: arr });
+                },
+            }),
+        ],
+    });
+}
+
+async function editDeadline(deadline: EventNotificationDeadline) {
+    await present({
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(EditEventNotificationDeadlineView, {
+                deadline,
+                isNew: false,
+                saveHandler: (patch: AutoEncoderPatchType<EventNotificationDeadline>) => {
+                    const arr: PatchableArrayAutoEncoder<EventNotificationDeadline> = new PatchableArray();
+                    arr.addPatch(patch);
+                    addPatch({ deadlines: arr });
+                },
+                deleteHandler: () => {
+                    const arr: PatchableArrayAutoEncoder<EventNotificationDeadline> = new PatchableArray();
+                    arr.addDelete(deadline.id);
+                    addPatch({ deadlines: arr });
+                },
+            }),
+        ],
+    });
+}
 
 defineExpose({
     shouldNavigateAway,
