@@ -11,12 +11,12 @@ import { GroupCategory } from './GroupCategory.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { OrganizationGenderType } from './OrganizationGenderType.js';
+import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 import { OrganizationType } from './OrganizationType.js';
 import { PaymentConfiguration } from './PaymentConfiguration.js';
 import { PaymentMethod } from './PaymentMethod.js';
 import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
-import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 
 export class OrganizationPackages extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })
@@ -452,7 +452,7 @@ export class OrganizationMetaData extends AutoEncoder {
 
         ];
 
-        const fromAddress = organization.privateMeta?.emails?.find(e => e.default)?.email || organization.privateMeta?.emails[0].email;
+        const fromAddress = organization.privateMeta?.emails?.find(e => e.default)?.email || organization.privateMeta?.emails[0]?.email;
 
         if (fromAddress) {
             base.push(
