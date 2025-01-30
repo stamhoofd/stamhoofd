@@ -402,7 +402,12 @@ export abstract class UIFilter {
     abstract getComponent(): ComponentWithProperties;
 
     get description(): string {
-        return this.styledDescription.map(s => s.text).join('');
+        return this.styledDescription.map((s) => {
+            if ('choices' in s && s.choices) {
+                return s.choices.find(c => c.isSelected())?.text ?? '';
+            }
+            return s.text;
+        }).join(' ');
     }
 
     abstract get styledDescription(): StyledDescription;
