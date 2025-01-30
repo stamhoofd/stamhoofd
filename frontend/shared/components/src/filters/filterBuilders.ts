@@ -1339,3 +1339,65 @@ export function getDocumentsUIFilterBuilders() {
 
     return [groupFilter, ...builders];
 }
+
+// Events
+export function getEventNotificationUIFilterBuilders(platform: Platform) {
+    const all: UIFilterBuilder<UIFilter>[] = [];
+
+    const tagsFilter = new MultipleChoiceFilterBuilder({
+        name: 'Regio',
+        options: [
+            new MultipleChoiceUIFilterOption('Alles', null),
+            ...platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
+        ],
+        wrapper: {
+            event: {
+                organizationTagIds: {
+                    $in: UIFilterWrapperMarker,
+                },
+            },
+        },
+    });
+
+    all.push(tagsFilter);
+
+    const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
+        name: 'Standaard leeftijdsgroep',
+        options: [
+            new MultipleChoiceUIFilterOption('Iedereen', null),
+            ...platform.config.defaultAgeGroups.map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
+        ],
+        wrapper: {
+            event: {
+                defaultAgeGroupIds: {
+                    $in: UIFilterWrapperMarker,
+                },
+            },
+        },
+    });
+    all.push(defaultAgeGroupFilter);
+
+    const typeFilter = new MultipleChoiceFilterBuilder({
+        name: 'Type',
+        options: [
+            ...platform.config.eventTypes.map(type => new MultipleChoiceUIFilterOption(type.name, type.id)),
+        ],
+        wrapper: {
+            event: {
+                typeId: {
+                    $in: UIFilterWrapperMarker,
+                },
+            },
+        },
+    });
+
+    all.push(typeFilter);
+
+    all.unshift(
+        new GroupUIFilterBuilder({
+            builders: all,
+        }),
+    );
+
+    return all;
+}

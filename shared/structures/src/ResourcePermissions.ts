@@ -78,4 +78,8 @@ export class ResourcePermissions extends AutoEncoder {
         }
         return p;
     }
+
+    removeAccessRights(rights: AccessRight[]) {
+        this.accessRights = this.accessRights.filter(r => !rights.includes(r));
+    }
 }

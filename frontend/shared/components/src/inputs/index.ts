@@ -42,3 +42,5 @@ export { default as DefaultAgeGroupIdsInput } from './DefaultAgeGroupIdsInput.vu
 export { default as GroupsInput } from './GroupsInput.vue';
 export { default as GroupIdsInput } from './GroupIdsInput.vue';
 export { default as ArrayInput } from './ArrayInput.vue';
+export { default as EventTypeIdsInput } from './EventTypeIdsInput.vue';
+export { default as MultipleChoiceInput } from './MultipleChoiceInput.vue';

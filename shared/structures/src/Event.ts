@@ -130,7 +130,3 @@ export class Event extends AutoEncoder {
         return queue;
     }
 }
-
-export class EventWithRegistrations extends Event {
-    // Include information about own members that are registered
-}

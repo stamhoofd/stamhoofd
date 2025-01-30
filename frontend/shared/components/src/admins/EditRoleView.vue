@@ -71,20 +71,11 @@
                         :role="patched"
                         :inherited-roles="inheritedRoles"
                         :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }"
-                        :configurable-access-rights="[AccessRight.EventWrite]"
+                        :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationEventNotificationReviewer]"
                         type="resource"
                         @patch:role="addPatch"
                     />
                 </STList>
-            </template>
-
-            <template v-if="app === 'admin' && (scope === null || scope === 'admin')">
-                <hr>
-                <h2>
-                    Administratietools
-                </h2>
-
-                <p>Hier kan je in de toekomst toegang regelen tot tools zoals de facturatie.</p>
             </template>
 
             <template v-if="enableActivities && categories.length">

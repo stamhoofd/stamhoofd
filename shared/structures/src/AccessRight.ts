@@ -15,6 +15,9 @@ export enum AccessRight {
     OrganizationManagePayments = 'OrganizationManagePayments',
     OrganizationFinanceDirector = 'OrganizationFinanceDirector',
     OrganizationCreateGroups = 'OrganizationCreateGroups',
+    EventWrite = 'EventWrite',
+    /** defines that this person can review event notification for this organization. You can limit which events by restricing the organizations the user has access to. */
+    OrganizationEventNotificationReviewer = 'OrganizationEventNotificationReviewer',
 
     // Member data access rights
     // Note: in order to read or write any data at all, a user first needs to have normal resource access to a group, category or organization
@@ -29,8 +32,6 @@ export enum AccessRight {
 
     // Webshop level permissions
     WebshopScanTickets = 'WebshopScanTickets',
-
-    EventWrite = 'EventWrite',
 }
 
 export class AccessRightHelper {
@@ -43,6 +44,7 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateGroups: return 'Groepen maken';
             case AccessRight.WebshopScanTickets: return 'Tickets scannen';
             case AccessRight.EventWrite: return 'Activiteiten beheren';
+            case AccessRight.OrganizationEventNotificationReviewer: return 'Kampmeldingen goedkeuren';
 
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Bekijk rekening leden';
@@ -50,6 +52,10 @@ export class AccessRightHelper {
 
             case AccessRight.MemberManageNRN: return 'Rijksregisternummers';
         }
+    }
+
+    static prohibitedOrganizationLevelAccessRights(): AccessRight[] {
+        return Object.values(AccessRight).filter(right => AccessRightHelper.autoGrantRightForLevel(right) === null);
     }
 
     static getNameShort(right: AccessRight): string {
@@ -61,6 +67,7 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateGroups: return 'Maken';
             case AccessRight.WebshopScanTickets: return 'Scannen';
             case AccessRight.EventWrite: return 'Activiteiten';
+            case AccessRight.OrganizationEventNotificationReviewer: return 'Kampmeldingen';
 
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Lidgeld bekijken';
@@ -78,6 +85,7 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateGroups: return 'groepen maken';
             case AccessRight.WebshopScanTickets: return 'scannen van tickets';
             case AccessRight.EventWrite: return 'activiteiten beheren';
+            case AccessRight.OrganizationEventNotificationReviewer: return 'kampmeldingen goedkeuren';
 
             // Member data
             case AccessRight.MemberReadFinancialData: return 'Openstaande bedragen bekijken';
@@ -108,6 +116,7 @@ export class AccessRightHelper {
     static autoGrantRightForLevel(right: AccessRight): PermissionLevel | null {
         switch (right) {
             case AccessRight.WebshopScanTickets: return PermissionLevel.Write;
+            case AccessRight.OrganizationEventNotificationReviewer: return null; // Never granted to full-admins, unless given by the platform
         }
         return PermissionLevel.Full;
     }

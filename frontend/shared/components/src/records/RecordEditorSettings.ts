@@ -2,11 +2,12 @@ import { UIFilterBuilder } from '@stamhoofd/components';
 import { ObjectWithRecords, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 
 export enum RecordEditorType {
-    PlatformMember,
-    Organization,
-    Registration,
-    Webshop,
-    Document,
+    PlatformMember = 'PlatformMember',
+    Organization = 'Organization',
+    Registration = 'Registration',
+    Webshop = 'Webshop',
+    Document = 'Document',
+    EventNotification = 'EventNotification',
 }
 
 export class RecordEditorSettings<T extends ObjectWithRecords> {

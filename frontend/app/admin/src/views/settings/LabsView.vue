@@ -28,6 +28,10 @@
             Notificaties voor openstaande bedragen
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('event-notifications')" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
+            Kampmeldingen
+        </Checkbox>
+
         <hr>
         <h2>Login methodes</h2>
 

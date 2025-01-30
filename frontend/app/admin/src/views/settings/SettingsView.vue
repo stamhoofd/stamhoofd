@@ -113,6 +113,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem v-if="$feature('event-notifications')" :selectable="true" class="left-center" @click="$navigate(Routes.EventNotificationTypes)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Kampmeldingen') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Stel in welke extra gegevens eenheden nog moeten indienen en tegen wanneer.') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
@@ -306,6 +321,7 @@ import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginPr
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
+import EditEventNotificationTypesView from './event-notification-types/EditEventNotificationTypesView.vue';
 import EditEventTypesView from './event-types/EditEventTypesView.vue';
 import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
 import LabsView from './LabsView.vue';
@@ -324,6 +340,7 @@ enum Routes {
     EmailTemplates = 'email-templates',
     EmailSettings = 'emailadressen',
     EventTypes = 'soorten-activiteiten',
+    EventNotificationTypes = 'kampmeldingen',
     CorporateIdentity = 'huisstijl',
     Premises = 'lokalen',
     FinancialSupport = 'financiele-ondersteuning',
@@ -449,6 +466,11 @@ defineRoutes([
         url: Routes.EventTypes,
         present: 'popup',
         component: EditEventTypesView as ComponentOptions,
+    },
+    {
+        url: Routes.EventNotificationTypes,
+        present: 'popup',
+        component: EditEventNotificationTypesView as ComponentOptions,
     },
     {
         url: Routes.Premises,

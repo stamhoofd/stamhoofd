@@ -289,6 +289,17 @@ export class LoadedPermissions {
         return p;
     }
 
+    removeAccessRights(rights: AccessRight[]) {
+        for (const role of this.roles) {
+            role.removeAccessRights(rights);
+        }
+        for (const resource of this.resources.values()) {
+            for (const r of resource.values()) {
+                r.removeAccessRights(rights);
+            }
+        }
+    }
+
     get isEmpty() {
         return this.level === PermissionLevel.None && (this.roles.length === 0 || this.roles.every(r => r.isEmpty)) && this.resources.size === 0;
     }

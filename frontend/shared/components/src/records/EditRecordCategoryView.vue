@@ -110,6 +110,25 @@
             </STList>
         </div>
 
+        <div v-if="draggableCategories.length > 1" class="container">
+            <hr>
+            <h2>Categorie volgorde</h2>
+            <p>
+                Je kan de volgorde van de categorieën aanpassen door ze te slepen.
+            </p>
+
+            <STList v-model="draggableCategories" :draggable="true">
+                <template #item="{item}">
+                    <STListItem :key="item.id" element-name="label">
+                        <template #left>
+                            <span class="icon drag" />
+                        </template>
+                        <h3 class="style-title-list" v-text="item.name" />
+                    </STListItem>
+                </template>
+            </STList>
+        </div>
+
         <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
             <hr>
             <h2>Slim in- en uitschakelen</h2>
@@ -215,6 +234,15 @@ const hasFilters = computed(() => {
 const title = computed(() => props.isNew ? 'Nieuwe vragenlijst' : patchedCategory.value.name);
 const records = computed(() => patchedCategory.value.records);
 const categories = computed(() => patchedCategory.value.childCategories);
+const draggableCategories = useDraggableArray(() => patchedCategory.value.childCategories, (categoriesPatch) => {
+    addPatch(
+        RecordCategory.patch({
+            id: patchedCategory.value.id,
+            childCategories: categoriesPatch,
+        }),
+    );
+});
+
 const name = computed({
     get: () => patchedCategory.value.name,
     set: (v: string) => {

@@ -8,6 +8,7 @@ import { Permissions } from './Permissions.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { Platform } from './Platform.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
+import { AccessRight, AccessRightHelper } from './AccessRight.js';
 
 export type OrganizationForPermissionCalculation = {
     id: string;
@@ -55,18 +56,25 @@ export class UserPermissions extends AutoEncoder {
             const platformPermissions = this.forPlatform(platform);
 
             if (platformPermissions) {
+                if (platformPermissions.hasFullAccess()) {
+                    // Special case: if you have full access to the platform, you'll also get all access rights that aren't automatically granted for full level access
+                    // this isn't automatically granted if you give full access to a tag
+                    const pp = Permissions.create({
+                        level: PermissionLevel.Full,
+                        roles: [PermissionRoleDetailed.create({
+                            id: 'platform-admin',
+                            name: 'Platform hoofdbeheerder',
+                            accessRights: [...AccessRightHelper.prohibitedOrganizationLevelAccessRights()],
+                        })],
+                    });
+                    return LoadedPermissions.from(pp, [], [], []);
+                }
+
                 const tags = organization.meta.tags.length === 0 ? [''] : organization.meta.tags;
 
                 for (const tag of tags) {
                     const rp = platformPermissions.getMergedResourcePermissions(PermissionsResourceType.OrganizationTags, tag);
                     if (rp) {
-                        if (rp.hasAccess(PermissionLevel.Full)) {
-                            const pp = Permissions.create({
-                                level: rp.level,
-                            });
-                            return LoadedPermissions.from(pp, [], [], []);
-                        }
-
                         base = base ? base.merge(rp) : rp;
                     }
                 }
@@ -110,7 +118,14 @@ export class UserPermissions extends AutoEncoder {
         const organizationRoles = organization?.privateMeta?.roles ?? [];
         const inheritedResponsibilityRoles = organization?.privateMeta?.inheritedResponsibilityRoles ?? [];
         const allResponsibilities = [...Platform.shared.config.responsibilities, ...(organization?.privateMeta?.responsibilities ?? [])];
-        return LoadedPermissions.from(permissions, organizationRoles, inheritedResponsibilityRoles, allResponsibilities);
+        const result = LoadedPermissions.from(permissions, organizationRoles, inheritedResponsibilityRoles, allResponsibilities);
+
+        // Some access rights are not allowed to be used directly in the organization permissions
+        // they can only be passed from the platform permissions towards the organization permissions as access rights for tags (e.g. review event notifications)
+        // So these access rights need to be filtered out here
+        result.removeAccessRights(AccessRightHelper.prohibitedOrganizationLevelAccessRights());
+
+        return result;
     }
 
     convertPlatformPatch(patch: AutoEncoderPatchType<Permissions> | null): AutoEncoderPatchType<UserPermissions> {

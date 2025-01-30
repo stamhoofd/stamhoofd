@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { DefaultAgeGroup } from './DefaultAgeGroup.js';
 import { Replacement } from './endpoints/EmailRequest.js';
+import { EventNotificationType } from './EventNotificationType.js';
 import { Image } from './files/Image.js';
 import { ReduceablePrice } from './GroupSettings.js';
 import { LoginMethod, LoginMethodConfig } from './LoginMethod.js';
@@ -392,6 +393,9 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(PlatformEventType), version: 287 })
     eventTypes: PlatformEventType[] = [];
+
+    @field({ decoder: new ArrayDecoder(EventNotificationType), ...NextVersion })
+    eventNotificationTypes: EventNotificationType[] = [];
 
     @field({ decoder: Image, nullable: true, version: 310 })
     coverPhoto: Image | null = null;
