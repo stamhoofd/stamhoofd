@@ -54,7 +54,7 @@
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            Alle leden
+                            Alle leden in deze categorie
                         </h2>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>

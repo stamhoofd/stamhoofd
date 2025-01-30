@@ -26,6 +26,14 @@
                 Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.
             </p>
 
+            <div v-if="tree.categories.length > 1" class="container">
+                <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.All) }" @click="$navigate(Routes.All)">
+                    <span class="icon ul" />
+                    <span>Alle leden</span>
+                </button>
+            </div>
+            <hr v-if="tree.categories.length > 1">
+
             <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                 <div class="grouped">
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category, period}}) }" @click="$navigate('category', {properties: {category, period}})">
@@ -81,7 +89,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController, useUrl } from '@simonbackx/vue-app-navigation';
-import { GroupAvatar, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
+import { GroupAvatar, MembersTableView, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -167,11 +175,31 @@ const isCategoryDeactivated = (category: GroupCategoryTree) => {
 };
 
 enum Routes {
+    All = 'all',
     Category = 'category',
     Group = 'group',
     GroupWithPeriod = 'groupWithPeriod',
 }
 defineRoutes([
+    {
+        url: 'allemaal',
+        name: Routes.All,
+        show: 'detail',
+        component: MembersTableView as unknown as ComponentOptions,
+        paramsToProps: () => {
+            return {
+                category: tree.value,
+                periodId: period.value.id,
+            };
+        },
+        propsToParams() {
+            return {
+                params: {
+                    slug: Formatter.slug(tree.value.settings.name),
+                },
+            };
+        },
+    },
     {
         url: 'categorie/@slug',
         name: Routes.Category,
