@@ -77,7 +77,7 @@
             </h2>
             <p>{{ $t("5fe7a400-8c6a-42ba-b920-c8518e60e091") }}</p>
 
-            <TagIdsInput v-model="requiredTagIds" />
+            <TagIdsInput v-model="requiredTagIds" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="requiredDefaultAgeGroupIds !== null">
@@ -91,7 +91,7 @@
             </h2>
             <p>{{ $t("37d201fd-287d-4957-b559-b882744ea886") }}</p>
 
-            <DefaultAgeGroupIdsInput v-model="requiredDefaultAgeGroupIds" />
+            <DefaultAgeGroupIdsInput v-model="requiredDefaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true" />
         </JumpToContainer>
     </SaveView>
 </template>

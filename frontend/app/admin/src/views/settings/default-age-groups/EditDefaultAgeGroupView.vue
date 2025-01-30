@@ -101,7 +101,7 @@
                     </div>
                 </h2>
                 <p>Kies voor welke lokale groepen deze standaard leeftijdsgroep beschikbaar is.</p>
-                <TagIdsInput v-model="organizationTagIds" />
+                <TagIdsInput v-model="organizationTagIds" :validator="errors.validator" />
             </template>
         </div>
 

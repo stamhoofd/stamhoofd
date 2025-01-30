@@ -67,6 +67,22 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
 
+            if (event.meta.defaultAgeGroupIds && event.meta.defaultAgeGroupIds.length === 0) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Empty default age groups',
+                    human: 'Kies minstens één standaard leeftijdsgroep',
+                });
+            }
+
+            if (event.meta.organizationTagIds && event.meta.organizationTagIds.length === 0) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Empty organization tag ids',
+                    human: 'Kies minstens één tag',
+                });
+            }
+
             const eventOrganization = await this.checkEventAccess(event);
             event.id = put.id;
             event.name = put.name;
@@ -151,6 +167,22 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     code: 'invalid_field',
                     message: 'Empty groups',
                     human: 'Kies minstens één leeftijdsgroep',
+                });
+            }
+
+            if (event.meta.defaultAgeGroupIds && event.meta.defaultAgeGroupIds.length === 0) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Empty default age groups',
+                    human: 'Kies minstens één standaard leeftijdsgroep',
+                });
+            }
+
+            if (event.meta.organizationTagIds && event.meta.organizationTagIds.length === 0) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Empty organization tag ids',
+                    human: 'Kies minstens één tag',
                 });
             }
 

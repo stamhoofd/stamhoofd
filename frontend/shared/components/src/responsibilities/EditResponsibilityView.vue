@@ -55,7 +55,7 @@
             </h2>
             <p>Kies voor welke lokale groepen deze functie beschikbaar is.</p>
 
-            <TagIdsInput v-model="organizationTagIds" />
+            <TagIdsInput v-model="organizationTagIds" :validator="errors.validator"/>
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
@@ -70,7 +70,7 @@
 
             <p>Deze functie moet gekoppeld worden aan een specifieke inschrijvingsgroep van een lokale groep. Hier kan je die lokale leeftijdsgroepen beperken tot een aantal standaard leeftijdsgroepen.</p>
 
-            <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" />
+            <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true" />
 
             <hr>
 

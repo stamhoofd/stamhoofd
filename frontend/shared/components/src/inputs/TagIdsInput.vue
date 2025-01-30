@@ -1,29 +1,34 @@
 <template>
-    <STList>
-        <STListItem v-if="nullable" :selectable="true" element-name="label">
-            <template #left>
-                <Checkbox v-model="allTags" />
-            </template>
-            <h3 class="style-title-list">
-                {{ $t('4835dfd4-10b0-4e91-b581-d1b3eefa73f7') }}
-            </h3>
-        </STListItem>
+    <div class="container">
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <template v-if="model !== null">
-            <STListItem v-for="option of options" :key="option.tag.id" :selectable="option.isEnabled && !option.isLocked" element-name="label">
+        <STList>
+            <STListItem v-if="nullable" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox :model-value="getTagValue(option.tag.id)" :disabled="!option.isEnabled || option.isLocked" @update:model-value="setTagValue(option.tag.id, $event)" />
+                    <Checkbox v-model="allTags" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ option.tag.name }}
+                    {{ $t('4835dfd4-10b0-4e91-b581-d1b3eefa73f7') }}
                 </h3>
             </STListItem>
-        </template>
-    </STList>
+            <template v-if="model !== null">
+                <STListItem v-for="option of options" :key="option.tag.id" :selectable="option.isEnabled && !option.isLocked" element-name="label">
+                    <template #left>
+                        <Checkbox :model-value="getTagValue(option.tag.id)" :disabled="!option.isEnabled || option.isLocked" @update:model-value="setTagValue(option.tag.id, $event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ option.tag.name }}
+                    </h3>
+                </STListItem>
+            </template>
+        </STList>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { usePlatform } from '@stamhoofd/components';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ErrorBox, useErrors, usePlatform, useValidation, Validator } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { OrganizationTag } from '@stamhoofd/structures';
 import { computed, ref, watch, watchEffect } from 'vue';
 
@@ -31,14 +36,19 @@ const props = withDefaults(
     defineProps<{
         nullable?: boolean;
         isTagEnabledPredicate?: (tag: OrganizationTag) => boolean;
+        validator: Validator;
+        shouldSelectAtLeastOne?: boolean;
     }>(), {
         nullable: false,
         isTagEnabledPredicate: undefined,
+        shouldSelectAtLeastOne: true,
     },
 );
 
 const model = defineModel<string[] | null>({ required: true });
 const platform = usePlatform();
+const errors = useErrors({ validator: props.validator });
+const $t = useTranslate();
 
 const tags = computed(() => platform.value.config.tags);
 const lastCachedValue = ref<string[] | null>(null);
@@ -69,6 +79,26 @@ const options = computed(() => {
     }
 
     return result;
+});
+
+useValidation(errors.validator, () => {
+    const se = new SimpleErrors();
+    if (props.shouldSelectAtLeastOne) {
+        if (model.value !== null && model.value.length === 0) {
+            se.addError(new SimpleError({
+                code: 'invalid_field',
+                message: $t('Selecteer minstens één optie'),
+                field: 'tags',
+            }));
+        }
+    }
+
+    if (se.errors.length > 0) {
+        errors.errorBox = new ErrorBox(se);
+        return false;
+    }
+
+    return true;
 });
 
 const enabledOptions = computed(() => options.value.filter(t => t.isEnabled).map(t => t.tag.id));

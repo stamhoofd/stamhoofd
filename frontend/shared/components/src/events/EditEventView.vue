@@ -136,7 +136,7 @@
             </h2>
             <p>Kies voor welke groepen deze activiteit zichtbaar is.</p>
 
-            <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-predicate="isTagEnabledPredicate" />
+            <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-predicate="isTagEnabledPredicate" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
@@ -151,7 +151,7 @@
 
             <p>{{ $t('712c3597-d7c9-459c-9e92-ff32de445642') }}</p>
 
-            <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" />
+            <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="groups !== null">
