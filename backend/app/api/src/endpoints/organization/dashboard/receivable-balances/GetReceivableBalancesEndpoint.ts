@@ -62,10 +62,26 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
         }
 
         if (q.search) {
-            throw new SimpleError({
-                code: 'not_implemented',
-                message: 'Zoeken in openstaande bedragen is voorlopig nog niet mogelijk',
-            });
+            let searchFilter: StamhoofdFilter | null = null;
+
+            searchFilter = {
+                $or: [
+                    {
+                        organizations: {
+                            $elemMatch: { name: { $contains: q.search } },
+                        },
+                    },
+                    {
+                        members: {
+                            $elemMatch: { name: { $contains: q.search } },
+                        },
+                    },
+                ],
+            };
+
+            if (searchFilter) {
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+            }
         }
 
         if (q instanceof LimitedFilteredRequest) {
