@@ -4,8 +4,6 @@
     "verenigingen": "eenheden",
     "Vereniging": "Eenheid",
     "vereniging": "eenheid",
-    "Groepen": "Eenheden",
-    " groepen": " eenheden",
     "werkjaar": "scoutsjaar",
     "Werkjaar": "Scoutsjaar",
     "Werkjaren": "Scoutsjaren",
@@ -15,5 +13,13 @@
   "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": "Eenheidsnummer",
   "b4307772-62dd-48a4-bae3-9d46df314727": "Welkom op Keeo. Zoek hieronder jouw eenheid om je in te schrijven of om jouw gegevens te beheren.",
   "369440db-a9e0-4530-a06b-3ea05cc6a2b0": "Welkom op het ledenplatform van FOS Open Scouting, hier kan je jouw gegevens beheren en je inschrijven bij een eenheid of voor een activiteit.",
-  "f02ad9a5-f0b4-483e-961c-491ddf7d6f6a": "Ledenportaal"
+  "f02ad9a5-f0b4-483e-961c-491ddf7d6f6a": "Ledenportaal",
+  "76b00f58-a587-431f-9c28-1b86d394fc26": "Stel in welke soorten lokalen eenheden kunnen toevoegen",
+  "88119ffc-b692-4222-8217-75a9fa64f675": "Reken een bedrag aan aan de {count} geselecteerde eenheden.",
+  "b789017f-58d2-438b-b73a-2a4d075e3c5b": "Unieke eenheden",
+  "cd0975fc-75c4-4c1e-b80a-f611f0992caa": "Alle eenheden",
+  "b78d9c9e-9099-4fb6-93e1-6bf58e39165f": "De categorieën en leeftijdsgroepen van de eenheden worden gedupliceerd naar het nieuwe werkjaar.",
+  "671147bd-cf0e-42fc-b456-18ce7d75b867": "Alle eenheden worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
+  "fd52fa36-16e6-4106-807c-c387bc0acc0e": "Geen eenheden beschikbaar in dit werkjaar",
+  "6e884f27-427f-4f85-914c-d5c2780253b0": "Eenheden"
 }
