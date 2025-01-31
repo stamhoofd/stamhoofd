@@ -1,12 +1,12 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
 import { AppType } from '../context';
 import { useFinancialSupportSettings } from '../groups';
-import { useAuth, useOrganization, usePlatform, useUser } from '../hooks';
+import { useAuth, useContext, useOrganization, usePlatform, useUser } from '../hooks';
 import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
@@ -1071,7 +1071,13 @@ export function getOrganizationUIFilterBuildersForTags(platform: Platform) {
 }
 
 // Events
-export function getEventUIFilterBuilders(platform: Platform, organizations: Organization[], app: AppType | 'auto') {
+export function useEventUIFilterBuilders({ platform, organizations, app }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto' }) {
+    const context = useContext();
+
+    return computed(() => getEventUIFilterBuilders({ platform, organizations, app, permissions: context.value.auth.permissions }));
+}
+
+function getEventUIFilterBuilders({ platform, organizations, app, permissions }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto'; permissions: LoadedPermissions | null | undefined }) {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     const groupFilter = new MultipleChoiceFilterBuilder({
@@ -1107,6 +1113,7 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
         name: 'Standaard leeftijdsgroep',
         options: [
             new MultipleChoiceUIFilterOption('Iedereen', null),
+            // todo: filter away hidden default age groups?
             ...platform.config.defaultAgeGroups.map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
         ],
         wrapper: {
@@ -1123,8 +1130,9 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
             options: [
                 new MultipleChoiceUIFilterOption('Iedereen', null),
                 ...organizations
-                    .flatMap(g => g.period.publicCategoryTree.getAllGroups().map((gg) => { return { organization: g, group: gg }; }))
-                    .map(g => new MultipleChoiceUIFilterOption((organizations.length > 1 ? (g.organization.name + ' - ') : '') + g.group.settings.name, g.group.id)),
+                    .flatMap(organization => organization.period.getCategoryTree({ permissions }).getAllGroups().map((g) => {
+                        return new MultipleChoiceUIFilterOption((organizations.length > 1 ? (organization.name + ' - ') : '') + g.settings.name, g.id);
+                    })),
             ],
             wrapper: {
                 groupIds: {

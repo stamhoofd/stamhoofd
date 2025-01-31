@@ -117,6 +117,7 @@ const tree = computed(() => {
         organization: $organization.value!,
     });
 });
+
 const { period, switchPeriod } = useSwitchablePeriod({
     onSwitch: async () => {
         // Make sure we open the first group again
@@ -130,9 +131,11 @@ const { period, switchPeriod } = useSwitchablePeriod({
         }
     },
 });
+
 const newestPeriod = computed(() => {
     return platform.value.period;
 });
+
 const canUpgradePeriod = computed(() => {
     return $organization.value?.period.period.id !== platform.value.period.id && $organization.value!.period.period.startDate < platform.value.period.startDate;
 });
@@ -180,6 +183,7 @@ enum Routes {
     Group = 'group',
     GroupWithPeriod = 'groupWithPeriod',
 }
+
 defineRoutes([
     {
         url: 'allemaal',
@@ -267,6 +271,7 @@ defineRoutes([
             : undefined,
     },
 ]);
+
 const checkRoute = useCheckRoute();
 
 async function setDefaultPeriod() {

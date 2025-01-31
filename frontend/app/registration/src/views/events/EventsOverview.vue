@@ -7,7 +7,6 @@
                 Activiteiten
             </h1>
 
-
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
@@ -22,7 +21,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div v-for="group of groupedEvents" :key="group.title" class="container">
                 <hr>
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
@@ -39,85 +38,85 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { EventRow, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useEventUIFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { useMemberManager } from '@stamhoofd/networking';
 import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, ref, Ref, watchEffect } from 'vue';
-import { useMemberManager } from '@stamhoofd/networking';
 import EventView from './EventView.vue';
 
 type ObjectType = Event;
 
 const searchQuery = ref('');
 const organization = useOrganization();
-const platform = usePlatform()
+const platform = usePlatform();
 const $navigate = useNavigate();
-const {presentPositionableSheet} = usePositionableSheet()
-const memberManager = useMemberManager()
+const { presentPositionableSheet } = usePositionableSheet();
+const memberManager = useMemberManager();
 
-const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : (memberManager.family.organizations ?? []), useAppContext())
+const filterBuilders = useEventUIFilterBuilders({ platform: platform.value, organizations: organization.value ? [organization.value] : (memberManager.family.organizations ?? []), app: useAppContext() });
 
-let recommendedFilter = filterBuilders[0].fromFilter(memberManager.family.getRecommendedEventsFilter())
-const selectedUIFilter = ref(recommendedFilter) as Ref<null|UIFilter>;
+let recommendedFilter = filterBuilders.value[0].fromFilter(memberManager.family.getRecommendedEventsFilter());
+const selectedUIFilter = ref(recommendedFilter) as Ref<null | UIFilter>;
 
 function updateRecommendedFilter() {
-    const oldRecommendedFilter = recommendedFilter?.build() ?? null
-    
-    recommendedFilter = filterBuilders[0].fromFilter(memberManager.family.getRecommendedEventsFilter())
-    
-    const currentFilter = selectedUIFilter.value?.build() ?? null
+    const oldRecommendedFilter = recommendedFilter?.build() ?? null;
+
+    recommendedFilter = filterBuilders.value[0].fromFilter(memberManager.family.getRecommendedEventsFilter());
+
+    const currentFilter = selectedUIFilter.value?.build() ?? null;
 
     if (isEqualFilter(currentFilter, oldRecommendedFilter)) {
-        selectedUIFilter.value = recommendedFilter
+        selectedUIFilter.value = recommendedFilter;
     }
 }
 
 onActivated(() => {
-    updateRecommendedFilter()
-})
+    updateRecommendedFilter();
+});
 
 useVisibilityChange(() => {
-    updateRecommendedFilter()
-})
+    updateRecommendedFilter();
+});
 
 enum Routes {
-    Event = "activiteit"
+    Event = 'activiteit',
 }
 
 defineRoutes([
     {
         name: Routes.Event,
-        url: "@year/@slug/@id",
+        url: '@year/@slug/@id',
         component: EventView as ComponentOptions,
         params: {
             year: Number,
             slug: String,
-            id: String
+            id: String,
         },
-        paramsToProps: async (params: {year: number, slug: string, id: string}) => {
+        paramsToProps: async (params: { year: number; slug: string; id: string }) => {
             // Fetch event
             const events = await fetcher.objectFetcher.fetch(
                 new LimitedFilteredRequest({
                     filter: {
-                        id: params.id
+                        id: params.id,
                     },
                     limit: 1,
-                    sort: []
-                })
-            )
+                    sort: [],
+                }),
+            );
 
             if (events.results.length === 1) {
                 return {
-                    event: events.results[0]
-                }
+                    event: events.results[0],
+                };
             }
-            Toast.error('Activiteit niet gevonden').show()
-            throw new Error('Event not found')
+            Toast.error('Activiteit niet gevonden').show();
+            throw new Error('Event not found');
         },
 
         propsToParams(props) {
-            if (!("event" in props) || typeof props.event !== 'object' || props.event === null || !(props.event instanceof Event)) {
-                throw new Error('Missing event')
+            if (!('event' in props) || typeof props.event !== 'object' || props.event === null || !(props.event instanceof Event)) {
+                throw new Error('Missing event');
             }
             const event = props.event;
 
@@ -125,41 +124,40 @@ defineRoutes([
                 params: {
                     year: event.startDate.getFullYear(),
                     slug: Formatter.slug(event.name),
-                    id: event.id
-                }
-            }
-        }
-    }
-])
+                    id: event.id,
+                },
+            };
+        },
+    },
+]);
 
 const objectFetcher = useEventsObjectFetcher({
     get requiredFilter() {
-        return getRequiredFilter()
-    }
-})
+        return getRequiredFilter();
+    },
+});
 
-const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher)
+const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
 
 const groupedEvents = computed(() => {
-    return Event.group(fetcher.objects)
+    return Event.group(fetcher.objects);
 });
 
 watchEffect(() => {
-    fetcher.setSearchQuery(searchQuery.value)
+    fetcher.setSearchQuery(searchQuery.value);
     const filter = selectedUIFilter.value ? selectedUIFilter.value.build() : null;
-    fetcher.setFilter(filter)
-})
+    fetcher.setFilter(filter);
+});
 
 function blurFocus() {
-    (document.activeElement as HTMLElement)?.blur()
+    (document.activeElement as HTMLElement)?.blur();
 }
-
 
 async function editFilter(event: MouseEvent) {
     if (!filterBuilders) {
-        return
+        return;
     }
-    const filter = selectedUIFilter.value ?? filterBuilders[0].create()
+    const filter = selectedUIFilter.value ?? filterBuilders.value[0].create();
     if (!selectedUIFilter.value) {
         selectedUIFilter.value = filter;
     }
@@ -168,20 +166,20 @@ async function editFilter(event: MouseEvent) {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(UIFilterEditor, {
-                    filter
-                })
-            })
-        ]
-    })
+                    filter,
+                }),
+            }),
+        ],
+    });
 }
 
-function getRequiredFilter(): StamhoofdFilter|null  {
+function getRequiredFilter(): StamhoofdFilter | null {
     return {
-        startDate: {
-            $gt: new Date()
+        'startDate': {
+            $gt: new Date(),
         },
-        'meta.visible': true
-    }
+        'meta.visible': true,
+    };
 }
 
 </script>

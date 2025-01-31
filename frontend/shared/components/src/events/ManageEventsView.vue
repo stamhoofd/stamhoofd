@@ -58,8 +58,9 @@ import { ComponentWithProperties, defineRoutes, NavigationController, useNavigat
 import { Event, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
+import { useAppContext } from '../context';
 import { useEventsObjectFetcher } from '../fetchers';
-import { getEventUIFilterBuilders } from '../filters/filterBuilders';
+import { useEventUIFilterBuilders } from '../filters/filterBuilders';
 import { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { useAuth, useGlobalEventListener, useOrganization, usePlatform, useUser } from '../hooks';
@@ -70,7 +71,6 @@ import EventRow from './components/EventRow.vue';
 import { useEventPermissions } from './composables/useEventPermissions';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
-import { useAppContext } from '../context';
 
 type ObjectType = Event;
 
@@ -90,7 +90,7 @@ const { presentPositionableSheet } = usePositionableSheet();
 const auth = useAuth();
 const eventPermissions = useEventPermissions();
 
-const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [], useAppContext());
+const filterBuilders = useEventUIFilterBuilders({ platform: platform.value, organizations: organization.value ? [organization.value] : [], app: useAppContext() });
 const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
 
 const yearLabels = computed(() => {
@@ -288,7 +288,7 @@ async function editFilter(event: MouseEvent) {
     if (!filterBuilders) {
         return;
     }
-    const filter = selectedUIFilter.value ?? filterBuilders[0].create();
+    const filter = selectedUIFilter.value ?? filterBuilders.value[0].create();
     if (!selectedUIFilter.value) {
         selectedUIFilter.value = filter;
     }
@@ -363,7 +363,7 @@ function getDefaultStamhoofdFilter(): StamhoofdFilter {
         }
     }
 
-    if(groupIds === undefined && organizationTagIds === undefined) {
+    if (groupIds === undefined && organizationTagIds === undefined) {
         return null;
     }
 
@@ -381,12 +381,12 @@ function getDefaultStamhoofdFilter(): StamhoofdFilter {
         };
     }
 
-    return filter
+    return filter;
 }
 
 function createDefaultUIFilter(): UIFilter | null {
     const filter = getDefaultStamhoofdFilter();
-    return filterBuilders[0].fromFilter(filter);
+    return filterBuilders.value[0].fromFilter(filter);
 }
 
 useGlobalEventListener('event-deleted', async () => {

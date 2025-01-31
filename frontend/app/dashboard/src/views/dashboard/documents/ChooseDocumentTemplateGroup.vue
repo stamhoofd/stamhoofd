@@ -92,7 +92,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { EventRow, getEventUIFilterBuilders, GroupAvatar, InfiniteObjectFetcherEnd, NavigationActions, SegmentedControl, Spinner, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useInfiniteObjectFetcher, useNavigationActions, useOrganization, usePlatform, usePositionableSheet } from '@stamhoofd/components';
+import { EventRow, GroupAvatar, InfiniteObjectFetcherEnd, NavigationActions, SegmentedControl, Spinner, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useEventUIFilterBuilders, useInfiniteObjectFetcher, useNavigationActions, useOrganization, usePlatform, usePositionableSheet } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { DocumentTemplateGroup, Event, Group, GroupType, isEmptyFilter, NamedObject, RecordCategory, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -115,7 +115,7 @@ const requestOwner = useRequestOwner();
 const navigationActions = useNavigationActions();
 const organization = useOrganization();
 const platform = usePlatform();
-const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [], useAppContext());
+const filterBuilders = useEventUIFilterBuilders({ platform: platform.value, organizations: organization.value ? [organization.value] : [], app: useAppContext() });
 const selectedUIFilter = ref(null) as Ref<null | UIFilter>;
 const { presentPositionableSheet } = usePositionableSheet();
 const objectFetcher = useEventsObjectFetcher({
@@ -211,10 +211,10 @@ function getRequiredFilter(): StamhoofdFilter | null {
 }
 
 async function editFilter(event: MouseEvent) {
-    if (!filterBuilders) {
+    if (!filterBuilders.value) {
         return;
     }
-    const filter = selectedUIFilter.value ?? filterBuilders[0].create();
+    const filter = selectedUIFilter.value ?? filterBuilders.value[0].create();
     if (!selectedUIFilter.value) {
         selectedUIFilter.value = filter;
     }
