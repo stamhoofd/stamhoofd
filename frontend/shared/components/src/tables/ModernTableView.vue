@@ -208,7 +208,7 @@ const props = withDefaults(
         title: string;
         backHint?: string | null;
         actions?: TableAction<Value>[];
-        estimatedRows?: number;
+        estimatedRows?: number | null;
         tableObjectFetcher: TableObjectFetcher<Value>;
         filterBuilders?: UIFilterBuilders | null;
         columnConfigurationId: string;
@@ -226,7 +226,7 @@ const props = withDefaults(
         } | null;
     }>(), {
         backHint: null,
-        estimatedRows: 30,
+        estimatedRows: null,
         filterBuilders: null,
         prefixColumn: null,
         defaultSortColumn: null,
@@ -658,7 +658,7 @@ const totalFilteredCount = computed(() => {
     if (errorMessage.value) {
         return 0;
     }
-    return props.tableObjectFetcher.totalFilteredCount ?? lastFilteredCount.value ?? Math.max(1, props.estimatedRows ?? 0);
+    return props.tableObjectFetcher.totalFilteredCount ?? lastFilteredCount.value ?? Math.max(1, props.estimatedRows ?? 30);
 });
 const totalItemsCount = computed(() => props.tableObjectFetcher.totalCount);
 
