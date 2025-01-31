@@ -1109,12 +1109,13 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
 
     all.push(tagsFilter);
 
+    const allTags = organizations.flatMap(organization => organization.meta.tags);
+
     const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
         name: 'Standaard leeftijdsgroep',
         options: [
             new MultipleChoiceUIFilterOption('Iedereen', null),
-            // todo: filter away hidden default age groups?
-            ...platform.config.defaultAgeGroups.map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
+            ...platform.config.defaultAgeGroups.filter(defaultAgeGroup => defaultAgeGroup.isEnabledForTags(allTags)).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
         ],
         wrapper: {
             defaultAgeGroupIds: {
