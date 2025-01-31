@@ -247,7 +247,7 @@ function getPropertiesForRoute(object: Value) {
         [props.Route!.objectKey]: object,
         getNext,
         getPrevious,
-    }
+    };
 }
 
 if (props.Route) {
@@ -751,7 +751,7 @@ async function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
 
     if (props.Route && row.value) {
         await $navigate(Routes.Object, {
-            properties: getPropertiesForRoute(row.value)
+            properties: getPropertiesForRoute(row.value),
         });
         return;
     }
@@ -1015,19 +1015,35 @@ onMounted(() => {
     if (!canLeaveSelectionMode.value) {
         showSelection.value = true;
     }
+
+    addListeners();
 });
 
-//
-onActivated(() => {
+let listenersAdded = false;
+function addListeners() {
+    if (listenersAdded) {
+        return;
+    }
+    listenersAdded = true;
     if (!wrapColumns.value) {
         window.addEventListener('resize', onResize, { passive: true });
         onResize();
     }
+}
+
+function removeListeners() {
+    listenersAdded = false;
+    // Better to remove event resize listener, because on resize, we don't need to rerender the table
+    window.removeEventListener('resize', onResize);
+}
+
+//
+onActivated(() => {
+    addListeners();
 });
 
 onDeactivated(() => {
-    // Better to remove event resize listener, because on resize, we don't need to rerender the table
-    window.removeEventListener('resize', onResize);
+    removeListeners();
 });
 
 useVisibilityChange(() => {
@@ -1040,7 +1056,7 @@ onBeforeUnmount(() => {
         getScrollElement(tableElement.value)?.removeEventListener('scroll', onScroll);
     }
 
-    window.removeEventListener('resize', onResize);
+    removeListeners();
     props.tableObjectFetcher.destroy();
 });
 
@@ -1063,17 +1079,18 @@ function onScroll() {
 }
 
 function onResize() {
+    console.log('Resize');
     // Force padding update
     updatePadding();
 
-    if (canCollapse.value) {
+    /* if (canCollapse.value) {
         // Keep existing width
         updateCanCollapse();
     }
-    else {
-        // shrink or grow width
-        updateColumnWidth();
-    }
+    else { */
+    // shrink or grow width
+    updateColumnWidth();
+    // }
     updateVisibleRows();
 }
 
@@ -1445,7 +1462,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
 }
 
 function updateCanCollapse() {
-    updatePaddingIfNeeded();
+    /* updatePaddingIfNeeded();
 
     if (wrapColumns.value) {
         return;
@@ -1458,7 +1475,7 @@ function updateCanCollapse() {
 
     if (n !== canCollapse.value) {
         saveColumnConfiguration();
-    }
+    } */
 }
 
 function collapse() {
