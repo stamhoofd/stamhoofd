@@ -24,7 +24,7 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
@@ -347,6 +347,71 @@ if (props.group) {
             );
         }
     }
+}
+
+if (groups.length) {
+    allColumns.push(
+        new Column<ObjectType, string[]>({
+            id: 'missing-record-categories',
+            allowSorting: false,
+            name: $t('Onvolledige persoonsgegevens'),
+            getValue: (member) => {
+                const base: string[] = [];
+                const scope = {
+                    scopeGroups: groups,
+                    checkPermissions: {
+                        user: auth.user!,
+                        level: PermissionLevel.Read,
+                    },
+                };
+
+                // Check missing information
+                if (!member.patchedMember.details.phone && member.isPropertyRequired('phone', scope)) {
+                    base.push('telefoonnummer');
+                }
+
+                if (!member.patchedMember.details.email && member.isPropertyRequired('emailAddress', scope)) {
+                    base.push('e-mailadres');
+                }
+
+                if (!member.patchedMember.details.address && member.isPropertyRequired('address', scope)) {
+                    base.push('adres');
+                }
+
+                if (!member.patchedMember.details.birthDay && member.isPropertyRequired('birthDay', scope)) {
+                    base.push('geboortedatum');
+                }
+
+                if (!member.patchedMember.details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
+                    base.push('rijksregisternummer');
+                }
+                else {
+                    if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
+                        base.push('rijksregisternummer ouders');
+                    }
+                }
+
+                if (member.isPropertyRequired('parents', scope)) {
+                    if (member.patchedMember.details.parents.length === 0) {
+                        base.push('ouders');
+                    }
+                }
+
+                if (member.patchedMember.details.emergencyContacts.length === 0 && member.isPropertyRequired('emergencyContacts', scope)) {
+                    base.push('noodcontactpersonen');
+                }
+
+                const enabledCategories = member.getEnabledRecordCategories(scope);
+
+                const incomplete = enabledCategories.filter(c => !c.isComplete(member));
+                return [...base, ...incomplete.map(c => c.name)];
+            },
+            format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' en ') || $t('e41660ea-180a-45ef-987c-e780319c4331')),
+            getStyle: prices => prices.length === 0 ? 'gray' : '',
+            minimumWidth: 100,
+            recommendedWidth: 300,
+        }),
+    );
 }
 
 if (app === 'admin' || (props.group && props.group.settings.requireOrganizationIds.length !== 1 && props.group.type === GroupType.EventRegistration)) {

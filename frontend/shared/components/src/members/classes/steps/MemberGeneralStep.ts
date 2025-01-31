@@ -5,6 +5,7 @@ import { MemberStepManager } from '../MemberStepManager';
 import { EditMemberStep } from '../MemberStepManager';
 import { markRaw } from 'vue';
 import { MemberSharedStepOptions } from './MemberSharedStepOptions';
+import { PermissionLevel } from '@stamhoofd/structures';
 
 export class MemberGeneralStep implements EditMemberStep {
     options: MemberSharedStepOptions;
@@ -38,7 +39,14 @@ export class MemberGeneralStep implements EditMemberStep {
             return true;
         }
 
-        if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber')) {
+        if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', {
+            checkPermissions: manager.context.user
+                ? {
+                        level: PermissionLevel.Write,
+                        user: manager.context.user,
+                    }
+                : undefined,
+        })) {
             return true;
         }
 

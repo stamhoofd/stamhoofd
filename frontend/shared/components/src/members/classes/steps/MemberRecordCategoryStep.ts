@@ -29,41 +29,14 @@ export class MemberRecordCategoryStep implements EditMemberStep {
             scopeGroup: this.item?.group,
         });
 
-        const enabled = !!enabledCategories.find(c => c.id == this.recordCategory.id);
+        const enabled = !!enabledCategories.find(c => c.id === this.recordCategory.id);
 
         if (!enabled) {
             return false;
         }
 
         // check if everything has been answered already + check out of date
-        const records = this.recordCategory.getAllFilteredRecords(member);
-
-        // Check all the properties in this category and check their last review times
-        for (const record of records) {
-            const answer = member.patchedMember.details.recordAnswers.get(record.id);
-            if (!answer) {
-                // This was never answered
-                return true;
-            }
-
-            if (this.options.outdatedTime) {
-                if (answer.isOutdated(this.options.outdatedTime)) {
-                    // This answer is outdated
-                    return true;
-                }
-            }
-
-            try {
-                answer.validate();
-            }
-            catch (e) {
-                // This answer is not valid anymore
-                return true;
-            }
-        }
-
-        // We got all the answers, and they are all very recent
-        return false;
+        return !this.recordCategory.isComplete(member, this.options.outdatedTime);
     }
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {

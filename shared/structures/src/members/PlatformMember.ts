@@ -534,7 +534,7 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isEnabled(this);
     }
 
-    isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } }) {
+    isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
         if (property === 'parents.nationalRegisterNumber') {
             if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
                 return false;
@@ -551,7 +551,7 @@ export class PlatformMember implements ObjectWithRecords {
             if (!isUserManager) {
                 // Need permission to view financial support
                 let foundPermissions = false;
-                for (const organization of this.filterOrganizations({ currentPeriod: true })) {
+                for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
                     if (options.checkPermissions.user.permissions?.forOrganization(organization, Platform.shared)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
                         foundPermissions = true;
                         break;
@@ -568,7 +568,7 @@ export class PlatformMember implements ObjectWithRecords {
             if (!isUserManager) {
                 // Need permission to view financial support
                 let foundPermissions = false;
-                for (const organization of this.filterOrganizations({ currentPeriod: true })) {
+                for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
                     if (options.checkPermissions.user.permissions?.forOrganization(organization, Platform.shared)?.hasAccessRight(AccessRight.MemberManageNRN)) {
                         foundPermissions = true;
                         break;
@@ -584,7 +584,7 @@ export class PlatformMember implements ObjectWithRecords {
             return true;
         }
 
-        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: true });
+        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups });
 
         for (const recordsConfiguration of recordsConfigurations) {
             if (property === 'dataPermission' || property === 'financialSupport') {
@@ -636,8 +636,8 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isRequired(this);
     }
 
-    isPropertyRequired(property: MemberProperty) {
-        if (!this.isPropertyEnabled(property)) {
+    isPropertyRequired(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
+        if (!this.isPropertyEnabled(property, options)) {
             return false;
         }
 
@@ -650,7 +650,7 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: true });
+        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups });
 
         for (const recordsConfiguration of recordsConfigurations) {
             const def = recordsConfiguration[property];
@@ -917,6 +917,7 @@ export class PlatformMember implements ObjectWithRecords {
     getEnabledRecordCategories(options: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } | null;
         scopeOrganization?: Organization | null;
         scopeGroup?: Group | null;
+        scopeGroups?: Group[] | null;
     }): RecordCategory[] {
         const checkPermissions = options.checkPermissions;
         const isUserManager = options.checkPermissions?.user.members.members.some(m => m.id === this.id) ?? false;
@@ -927,7 +928,11 @@ export class PlatformMember implements ObjectWithRecords {
         // From organization
         const categories: RecordCategory[] = [];
         const scopedOrganizations = options.scopeOrganization ? [options.scopeOrganization] : this.filterOrganizations({ currentPeriod: true });
-        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: true, groups: options.scopeGroup ? [options.scopeGroup] : null, organizationId: options.scopeOrganization?.id ?? undefined });
+        const recordsConfigurations = this.filterRecordsConfigurations({
+            currentPeriod: (options.scopeGroups || options.scopeGroup) ? undefined : true,
+            groups: options.scopeGroups ? options.scopeGroups : (options.scopeGroup ? [options.scopeGroup] : null),
+            organizationId: options.scopeOrganization?.id ?? undefined,
+        });
 
         for (const recordsConfiguration of recordsConfigurations) {
             for (const recordCategory of recordsConfiguration.recordCategories) {

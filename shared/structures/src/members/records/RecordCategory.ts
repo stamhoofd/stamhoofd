@@ -73,6 +73,36 @@ export class RecordCategory extends AutoEncoder {
         return this.records.filter(r => filterValue.isRecordEnabled(r));
     }
 
+    isComplete<T extends ObjectWithRecords>(value: T, outdatedTime: number | null = null) {
+        // check if everything has been answered already + check out of date
+        const records = this.getAllFilteredRecords(value);
+
+        // Check all the properties in this category and check their last review times
+        for (const record of records) {
+            const answer = value.getRecordAnswers().get(record.id);
+            if (!answer) {
+                // This was never answered
+                return false;
+            }
+
+            if (outdatedTime !== null) {
+                if (answer.isOutdated(outdatedTime)) {
+                    // This answer is outdated
+                    return false;
+                }
+            }
+
+            try {
+                answer.validate();
+            }
+            catch (e) {
+                // This answer is not valid anymore
+                return false;
+            }
+        }
+        return true;
+    }
+
     isEnabled<T extends ObjectWithRecords>(filterValue: T, ignoreFilter = false) {
         if (!ignoreFilter) {
             if (!this.defaultEnabled) {
