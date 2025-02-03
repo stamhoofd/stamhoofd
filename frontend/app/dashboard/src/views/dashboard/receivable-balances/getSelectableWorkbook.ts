@@ -137,7 +137,7 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, options?: { cate
             }),
             new SelectableColumn({
                 id: 'uri',
-                name: $t('Groepsnummer'),
+                name: $t('cd798189-d5c8-4b79-98f7-a68786ab288c'),
                 ...options,
             }),
             new SelectableColumn({

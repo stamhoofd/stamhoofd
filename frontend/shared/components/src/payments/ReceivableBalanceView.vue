@@ -33,7 +33,7 @@
 
                 <STListItem v-if="item.object.uri">
                     <h3 class="style-definition-label">
-                        {{ $t('Groepsnummer') }}
+                        {{ $t('cd798189-d5c8-4b79-98f7-a68786ab288c') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ item.object.uri }}
