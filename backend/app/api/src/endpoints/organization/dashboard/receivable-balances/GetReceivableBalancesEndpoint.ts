@@ -68,11 +68,21 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
                 $or: [
                     {
                         organizations: {
-                            $elemMatch: { name: { $contains: q.search } },
+                            $elemMatch: {
+                                $or: [
+                                    { name: { $contains: q.search } },
+                                    { uri: q.search },
+                                ],
+                            },
                         },
                     },
                     {
                         members: {
+                            $elemMatch: { name: { $contains: q.search } },
+                        },
+                    },
+                    {
+                        users: {
                             $elemMatch: { name: { $contains: q.search } },
                         },
                     },

@@ -1,4 +1,4 @@
-import { SQL, SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
+import { SQL, SQLConcat, SQLFilterDefinitions, SQLScalar, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members';
 import { organizationFilterCompilers } from './organizations';
 import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers';
@@ -51,6 +51,28 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('cached_outstanding_balances', 'objectType'),
                 'member'),
         memberFilterCompilers,
+    ),
+    users: createSQLRelationFilterCompiler(
+        SQL.select()
+            .from(SQL.table('users'))
+            .where(
+                SQL.column(
+                    'users',
+                    'id',
+                ),
+                SQL.column('cached_outstanding_balances', 'objectId'),
+            ).where(
+                SQL.column('cached_outstanding_balances', 'objectType'),
+                'user'),
+        {
+            name: createSQLExpressionFilterCompiler(
+                new SQLConcat(
+                    SQL.column('firstName'),
+                    new SQLScalar(' '),
+                    SQL.column('lastName'),
+                ),
+            ),
+        },
     ),
 
     // Allowed to filter by recent emails
