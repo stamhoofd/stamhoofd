@@ -217,7 +217,6 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
 
         {
             match: (id) => {
-                console.error('id test: ', id);
                 if (id.startsWith('relations.')) {
                     const type = id.split('.')[1] as BalanceItemRelationType;
                     if (Object.values(BalanceItemRelationType).includes(type)) {
