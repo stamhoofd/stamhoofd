@@ -436,15 +436,11 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: PrivacySettings, version: 327 })
     privacy = PrivacySettings.create({});
 
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(LoginMethod)), version: 359 })
-    @field({ decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig), version: 361, upgrade: (old: LoginMethod[]) => {
-        const map = new Map<LoginMethod, LoginMethodConfig>();
-        for (const key of old) {
-            map.set(key, LoginMethodConfig.create({}));
-        }
-        return map;
-    } })
-    loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([[LoginMethod.Password, LoginMethodConfig.create({})]]);
+    @field({ decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig), version: 361 })
+    loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([[
+        LoginMethod.Password,
+        LoginMethodConfig.create({}),
+    ]]);
 
     getEmailReplacements() {
         return [
