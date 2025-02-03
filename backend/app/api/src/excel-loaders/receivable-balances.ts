@@ -34,33 +34,15 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.ReceivableBalances, {
                 ...getBalanceItemColumns(),
 
                 // Repeating columns need to de-transform again
-                ...getGeneralColumns().map((c) => {
-                    if ('match' in c) {
+                ...getGeneralColumns()
+                    .map((c) => {
                         return {
                             ...c,
-                            match: (id: string) => {
-                                const result = c.match(id);
-                                if (!result) {
-                                    return result;
-                                }
-
-                                return result.map(cc => ({
-                                    ...cc,
-                                    getValue: (object: ReceivableBalanceWithItem) => {
-                                        return cc.getValue(object.receivableBalance);
-                                    },
-                                }));
+                            getValue: (object: ReceivableBalanceWithItem) => {
+                                return c.getValue(object.receivableBalance);
                             },
                         };
-                    }
-
-                    return {
-                        ...c,
-                        getValue: (object: ReceivableBalanceWithItem) => {
-                            return c.getValue(object.receivableBalance);
-                        },
-                    };
-                }),
+                    }),
             ],
         },
     ],
