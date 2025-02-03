@@ -1,11 +1,11 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { NamedObject } from './Event';
-import { StamhoofdFilter } from './filters/StamhoofdFilter';
-import { ObjectWithRecords } from './members/ObjectWithRecords';
-import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer';
-import { RecordCategory } from './members/records/RecordCategory';
-import { RecordSettings } from './members/records/RecordSettings';
+import { NamedObject } from './Event.js';
+import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import { ObjectWithRecords } from './members/ObjectWithRecords.js';
+import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
+import { RecordCategory } from './members/records/RecordCategory.js';
+import { RecordSettings } from './members/records/RecordSettings.js';
 
 export enum EventNotificationStatus {
     Draft = 'Draft',
