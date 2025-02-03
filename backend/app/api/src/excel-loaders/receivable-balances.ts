@@ -77,7 +77,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             }),
         },
         {
-            id: 'balanceItem.type',
+            id: 'type',
             name: 'Type',
             width: 30,
             getValue: (object: ReceivableBalanceWithItem) => ({
@@ -85,7 +85,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             }),
         },
         {
-            id: 'balanceItem.category',
+            id: 'category',
             name: 'Categorie',
             width: 30,
             getValue: (object: ReceivableBalanceWithItem) => {
@@ -95,7 +95,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             },
         },
         {
-            id: 'balanceItem.description',
+            id: 'description',
             name: 'Beschrijving',
             width: 40,
             getValue: (object: ReceivableBalanceWithItem) => ({
@@ -168,6 +168,19 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             }),
         },
         {
+            id: 'priceOpen',
+            name: 'Openstaand bedrag',
+            width: 20,
+            getValue: (object: ReceivableBalanceWithItem) => ({
+                value: object.balanceItem.priceOpen / 100,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                    },
+                },
+            }),
+        },
+        {
             id: 'createdAt',
             name: 'Aangemaakt op',
             width: 20,
@@ -204,12 +217,13 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
 
         {
             match: (id) => {
-                if (id.startsWith('balanceItem.relations.')) {
-                    const type = id.split('.')[2] as BalanceItemRelationType;
+                console.error('id test: ', id);
+                if (id.startsWith('relations.')) {
+                    const type = id.split('.')[1] as BalanceItemRelationType;
                     if (Object.values(BalanceItemRelationType).includes(type)) {
                         return [
                             {
-                                id: `balanceItem.relations.${type}`,
+                                id: `relations.${type}`,
                                 name: getBalanceItemRelationTypeName(type),
                                 width: 35,
                                 getValue: (object: ReceivableBalanceWithItem) => ({
@@ -237,6 +251,14 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
                         bold: true,
                     },
                 },
+            }),
+        },
+        {
+            id: 'name',
+            name: 'Naam',
+            width: 10,
+            getValue: (object: ReceivableBalance) => ({
+                value: object.object.name,
             }),
         },
         {

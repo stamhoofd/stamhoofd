@@ -25,8 +25,24 @@ export function getSelectableWorkbook() {
                         name: 'ID',
                         description: 'Unieke identificatie van het openstaand bedrag',
                     }),
-
                     ...getGeneralColumns(),
+                    new SelectableColumn({
+                        id: 'amountPaid',
+                        name: 'Betaald bedrag',
+                    }),
+                    new SelectableColumn({
+                        id: 'amountOpen',
+                        name: 'Openstaand bedrag',
+                    }),
+                    new SelectableColumn({
+                        id: 'amountPending',
+                        name: 'In verwerking',
+                    }),
+
+                    new SelectableColumn({
+                        id: 'createdAt',
+                        name: 'Aangemaakt op',
+                    }),
                 ],
             }),
             new SelectableSheet({
@@ -47,24 +63,24 @@ export function getSelectableWorkbook() {
                     }),
 
                     new SelectableColumn({
-                        id: 'balanceItem.type',
+                        id: 'type',
                         name: 'Type',
                         description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' en '),
                     }),
 
                     new SelectableColumn({
-                        id: 'balanceItem.category',
+                        id: 'category',
                         name: 'Categorie',
                         description: 'Extra kolom om lijnen makkelijker te groeperen. Dit bevat de naam van de activiteit/groep, de naam van de webshop of de beschrijving bij andere aanrekeningen.',
                     }),
 
                     new SelectableColumn({
-                        id: 'balanceItem.description',
+                        id: 'description',
                         name: 'Beschrijving',
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
-                        id: `balanceItem.relations.${relationType}`,
+                        id: `relations.${relationType}`,
                         name: getBalanceItemRelationTypeName(relationType),
                         description: getBalanceItemRelationTypeDescription(relationType),
                     })),
@@ -95,6 +111,11 @@ export function getSelectableWorkbook() {
                     }),
 
                     new SelectableColumn({
+                        id: 'priceOpen',
+                        name: 'Openstaand bedrag',
+                    }),
+
+                    new SelectableColumn({
                         id: 'createdAt',
                         name: 'Aangemaakt op',
                     }),
@@ -108,8 +129,7 @@ export function getSelectableWorkbook() {
                         id: 'status',
                         name: 'status',
                     }),
-
-                    ...getGeneralColumns({ category: 'Te ontvangen bedragen (herhaling)' }),
+                    ...getGeneralColumns({ category: 'Te ontvangen bedrag (herhaling)' }),
                 ],
             }),
         ],
@@ -120,32 +140,13 @@ function getGeneralColumns(options?: { category?: string | null }) {
     {
         return [
             new SelectableColumn({
-                id: 'amountPaid',
-                name: 'Betaald bedrag',
+                id: 'name',
+                name: 'Naam',
                 ...options,
             }),
-
-            new SelectableColumn({
-                id: 'amountOpen',
-                name: 'Openstaand bedrag',
-                ...options,
-            }),
-
-            new SelectableColumn({
-                id: 'amountPending',
-                name: 'In verwerking',
-                ...options,
-            }),
-
             new SelectableColumn({
                 id: 'objectType',
                 name: 'type',
-                ...options,
-            }),
-
-            new SelectableColumn({
-                id: 'createdAt',
-                name: 'Aangemaakt op',
                 ...options,
             }),
         ];
