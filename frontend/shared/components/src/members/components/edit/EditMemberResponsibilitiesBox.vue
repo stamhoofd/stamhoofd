@@ -55,7 +55,7 @@
 
         <div v-if="deletedMemberResponsibilityRecords.length > 0" class="container">
             <hr>
-            <h2>{{ $t('Verwijderde functies') }}</h2>
+            <h2>{{ $t('e81e0bdb-c15f-4b9a-abca-172a8d379993') }}</h2>
             <STList>
                 <STListItem v-for="record of deletedMemberResponsibilityRecords" :key="record.id" element-name="label" :selectable="true">
                     <template #left>
@@ -389,6 +389,6 @@ function getResponsibilityRecordMergedRoleDescription(record: MemberResponsibili
         return getResponsibilityMergedRole(result.responsibility, result.groupId).getDescription();
     }
 
-    return $t('geen rechten');
+    return $t('02ef437e-2166-49be-b5ae-73e5452546a0');
 }
 </script>

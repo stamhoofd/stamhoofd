@@ -118,10 +118,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Kampmeldingen') }}
+                        {{ $t('5e2a299f-a166-46a8-9975-cf1b1ce334a6') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Stel in welke extra gegevens eenheden nog moeten indienen en tegen wanneer.') }}
+                        {{ $t('9e53d8ca-d01f-4d64-8707-3877435f28fc') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />

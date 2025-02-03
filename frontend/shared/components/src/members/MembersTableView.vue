@@ -354,7 +354,7 @@ if (groups.length) {
         new Column<ObjectType, string[]>({
             id: 'missing-record-categories',
             allowSorting: false,
-            name: $t('Onvolledige persoonsgegevens'),
+            name: $t('2011b902-ec2f-4c5a-a98a-6e50a1351fae'),
             getValue: (member) => {
                 const base: string[] = [];
                 const scope = {
@@ -448,7 +448,7 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             new Column<ObjectType, string | null>({
                 id: 'groupRegistration',
                 allowSorting: false,
-                name: $t('Groepsinschrijving'),
+                name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
                 getValue: (member) => {
                     const registrations = member.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
                     if (registrations.find(r => r.payingOrganizationId)) {

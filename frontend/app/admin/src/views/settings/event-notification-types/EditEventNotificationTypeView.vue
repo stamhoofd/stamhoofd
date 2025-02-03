@@ -22,17 +22,17 @@
                 v-model="description"
                 class="input"
                 type="text"
-                :placeholder="$t('Beschrijving van dit type kampmelding. Deze tekst is zichtbaar voor de leiding.')"
+                :placeholder="$t('68bd7b1d-9492-40ca-89f5-917143932218')"
                 autocomplete=""
             />
         </STInputBox>
 
-        <STInputBox :title="$t('Soorten activiteiten')" error-fields="eventTypeIds" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('51850490-5d94-4e0b-a415-9b84e07d86f2')" error-fields="eventTypeIds" :error-box="errors.errorBox" class="max">
             <EventTypeIdsInput v-model="eventTypeIds" />
         </STInputBox>
 
         <hr>
-        <h2>{{ $t('Vragenlijsten') }}</h2>
+        <h2>{{ $t('1a559b46-1863-4782-8cb5-ee6517a2e91d') }}</h2>
         <p>
             Lees <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
@@ -50,7 +50,7 @@
         <p>
             <button class="button text" type="button" @click="addDeadline">
                 <span class="icon add" />
-                <span>{{ $t('Nieuwe deadline') }}</span>
+                <span>{{ $t('59eba98e-b382-4075-af33-f8bf30b1042c') }}</span>
             </button>
         </p>
     </SaveView>
@@ -77,7 +77,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<EventNotificationType>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const viewTitle = computed(() => props.isNew ? $t('Nieuwe soort kampmelding') : $t('Wijzig instellingen'));
+const viewTitle = computed(() => props.isNew ? $t('4f83e88b-bf47-43fe-96ca-b24d136deaa8') : $t('d76e80a1-b717-4002-b40c-1e890e87bf1c'));
 const pop = usePop();
 const platform = usePlatform();
 const present = usePresent();

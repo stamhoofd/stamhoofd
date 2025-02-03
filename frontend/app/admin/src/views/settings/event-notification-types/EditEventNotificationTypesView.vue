@@ -18,7 +18,7 @@
         <p>
             <button class="button text" type="button" @click="addType">
                 <span class="icon add" />
-                <span>{{ $t('Nieuw soort kampmelding') }}</span>
+                <span>{{ $t('97887ee6-2da2-4120-8baa-609441d6091c') }}</span>
             </button>
         </p>
     </SaveView>
@@ -48,8 +48,8 @@ const draggableTypes = useDraggableArray(() => types.value, addArrayPatch);
 
 const saving = ref(false);
 
-const title = $t('Soorten kampmeldingen');
-const description = $t('Hier kan je verschillende soorten kampmeldingen aanpassen en toevoegen.');
+const title = $t('92c63ee2-f416-4690-99bc-dbda65399ce6');
+const description = $t('a1609316-b6dd-47b8-88ec-0ad383bf0aac');
 
 async function addType() {
     const arr: PatchableArrayAutoEncoder<EventNotificationType> = new PatchableArray();

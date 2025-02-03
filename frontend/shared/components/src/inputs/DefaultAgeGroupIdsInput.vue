@@ -38,7 +38,7 @@ useValidation(errors.validator, () => {
         if (model.value !== null && model.value.length === 0) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('Kies minstens één standaard leeftijdsgroep'),
+                message: $t('54a24516-1a43-4bc7-ac7a-c3fafa74ee22'),
                 field: 'agegroups',
             }));
         }

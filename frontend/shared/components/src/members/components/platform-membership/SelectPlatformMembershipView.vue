@@ -6,7 +6,7 @@
             {{ $t('ec0c482e-0528-499f-82fa-b081bf708ded') }}
         </p>
         <p v-if="availableMembershipTypes.length === 0" class="warning-box">
-            {{ $t('Er zijn geen aansluitingen beschikbaar voor deze gebruiker.') }}
+            {{ $t('d3a424d0-f851-48f2-8837-340e8b60374e') }}
         </p>
 
         <template v-else>

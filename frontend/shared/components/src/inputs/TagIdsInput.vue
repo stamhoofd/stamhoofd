@@ -87,7 +87,7 @@ useValidation(errors.validator, () => {
         if (model.value !== null && model.value.length === 0) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('Selecteer minstens één optie'),
+                message: $t('074933d6-e0da-4542-8ec0-efb759645826'),
                 field: 'tags',
             }));
         }

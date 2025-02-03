@@ -47,7 +47,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<EventNotificationDeadline>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const viewTitle = computed(() => props.isNew ? $t('Nieuwe deadline') : $t('Wijzig deadline'));
+const viewTitle = computed(() => props.isNew ? $t('59eba98e-b382-4075-af33-f8bf30b1042c') : $t('592f224e-5190-433c-a301-3fd2a11db105'));
 const pop = usePop();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.deadline);
@@ -76,7 +76,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze deadline wilt verwijderen?'), $t('Ja, verwijderen'))) {
+    if (!await CenteredMessage.confirm($t('67494091-03bf-4700-a003-84f53dcea922'), $t('ba246326-994d-4133-9f85-5f693cdd2007'))) {
         return;
     }
 

@@ -43,11 +43,11 @@
 
         <div v-if="isOnlyDeleting && hasPaidRegistrationDelete" class="container">
             <hr>
-            <h2>{{ $t('Annuleringskost') }}</h2>
+            <h2>{{ $t('d37f0355-379d-4128-aafa-fefb201188bc') }}</h2>
             <p>{{ $t('Stamhoofd verwijdert automatisch het reeds aangerekende bedrag van het openstaande bedrag van alle leden die je uitschrijft. Als je wilt kan je wel een annuleringskost in rekening brengen, bv. als je het bedrag niet zal terugbetalen stel je dit in op 100%. Als je geen annuleringskost in rekening brengt, zal het openstaande bedrag van een lid dat al betaald had negatief worden en kan je dit terugbetalen via het tabblad "Rekening" van een lid.') }}</p>
 
             <p v-if="hadPaidByOrganization" class="info-box">
-                {{ $t('Sommige inschrijvingen werden door een vereniging betaald. In dat geval zal de annuleringskost aangerekend worden aan de betalende vereniging (van organisator naar betalende vereniging) én het lid (van de betalende vereniging naar lid).') }}
+                {{ $t('b263fa75-5a47-43a6-94a5-95eeac94567f') }}
             </p>
 
             <STInputBox title="Percentage">
