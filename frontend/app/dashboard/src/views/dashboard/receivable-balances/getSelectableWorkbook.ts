@@ -44,7 +44,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>) {
                         description: 'Unieke identificatie van de lijn',
                     }),
 
-                    ...getGeneralColumns($t, { category: 'Te ontvangen bedrag (herhaling)' }).map((c) => {
+                    ...getGeneralColumns($t, { category: 'Schuldenaar (herhaling)' }).map((c) => {
                         c.id = `receivableBalance.${c.id}`;
                         return c;
                     }),
