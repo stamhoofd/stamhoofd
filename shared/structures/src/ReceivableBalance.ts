@@ -102,9 +102,6 @@ export class ReceivableBalance extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, version: 355 })
     reminderEmailCount = 0;
-
-    @field({ decoder: DateDecoder, version: 362 })
-    createdAt: Date;
 }
 
 export class DetailedReceivableBalance extends ReceivableBalance {
