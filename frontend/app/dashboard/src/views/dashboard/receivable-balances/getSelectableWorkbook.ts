@@ -27,21 +27,12 @@ export function getSelectableWorkbook() {
                     }),
                     ...getGeneralColumns(),
                     new SelectableColumn({
-                        id: 'amountPaid',
-                        name: 'Betaald bedrag',
-                    }),
-                    new SelectableColumn({
                         id: 'amountOpen',
                         name: 'Openstaand bedrag',
                     }),
                     new SelectableColumn({
                         id: 'amountPending',
                         name: 'In verwerking',
-                    }),
-
-                    new SelectableColumn({
-                        id: 'createdAt',
-                        name: 'Aangemaakt op',
                     }),
                 ],
             }),
@@ -122,12 +113,12 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'dueAt',
-                        name: 'Vervaldatum',
+                        name: 'Verschuldigd vanaf',
                     }),
 
                     new SelectableColumn({
                         id: 'status',
-                        name: 'status',
+                        name: 'Status',
                     }),
                     ...getGeneralColumns({ category: 'Te ontvangen bedrag (herhaling)' }),
                 ],
@@ -146,7 +137,7 @@ function getGeneralColumns(options?: { category?: string | null }) {
             }),
             new SelectableColumn({
                 id: 'objectType',
-                name: 'type',
+                name: 'Type',
                 ...options,
             }),
         ];

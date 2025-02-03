@@ -195,7 +195,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'dueAt',
-            name: 'Vervaldatum',
+            name: 'Verschuldigd vanaf',
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.dueAt,
@@ -261,19 +261,6 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
             }),
         },
         {
-            id: 'amountPaid',
-            name: 'Betaald bedrag',
-            width: 10,
-            getValue: (object: ReceivableBalance) => ({
-                value: object.amountPaid / 100,
-                style: {
-                    numberFormat: {
-                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
-                    },
-                },
-            }),
-        },
-        {
             id: 'amountOpen',
             name: 'Openstaand bedrag',
             width: 10,
@@ -305,19 +292,6 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
             width: 10,
             getValue: (object: ReceivableBalance) => ({
                 value: getReceivableBalanceTypeNameNotTranslated(object.objectType),
-            }),
-        },
-        {
-            id: 'createdAt',
-            name: 'Aangemaakt op',
-            width: 20,
-            getValue: (object: ReceivableBalance) => ({
-                value: object.createdAt,
-                style: {
-                    numberFormat: {
-                        id: XlsxBuiltInNumberFormat.DateSlash,
-                    },
-                },
             }),
         },
     ];

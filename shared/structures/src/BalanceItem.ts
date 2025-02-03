@@ -42,7 +42,7 @@ export enum BalanceItemType {
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
     switch (type) {
         case BalanceItemStatus.Hidden: return 'Verborgen';
-        case BalanceItemStatus.Due: return 'Vervallen';
+        case BalanceItemStatus.Due: return 'Verschuldigd';
         case BalanceItemStatus.Canceled: return 'Geannuleerd';
     }
 }
