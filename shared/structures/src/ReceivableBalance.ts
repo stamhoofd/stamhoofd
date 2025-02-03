@@ -57,7 +57,7 @@ export class ReceivableBalanceObject extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = '';
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 362 })
     uri: string | null = null;
 
     // E-mail addresses to reach out to this entity
@@ -103,7 +103,7 @@ export class ReceivableBalance extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 355 })
     reminderEmailCount = 0;
 
-    @field({ decoder: DateDecoder, ...NextVersion })
+    @field({ decoder: DateDecoder, version: 362 })
     createdAt: Date;
 }
 

@@ -30,7 +30,7 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     freeContribution = 0;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 362 })
     cancellationFeePercentage = 0;
 
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })

@@ -394,7 +394,7 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PlatformEventType), version: 287 })
     eventTypes: PlatformEventType[] = [];
 
-    @field({ decoder: new ArrayDecoder(EventNotificationType), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(EventNotificationType), version: 362 })
     eventNotificationTypes: EventNotificationType[] = [];
 
     @field({ decoder: Image, nullable: true, version: 310 })
