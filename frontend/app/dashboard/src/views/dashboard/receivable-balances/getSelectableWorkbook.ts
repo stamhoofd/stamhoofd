@@ -23,7 +23,7 @@ export function getSelectableWorkbook() {
                     new SelectableColumn({
                         id: 'id',
                         name: 'ID',
-                        description: 'Unieke identificatie van de betaling',
+                        description: 'Unieke identificatie van het openstaand bedrag',
                     }),
 
                     ...getGeneralColumns(),
@@ -38,6 +38,12 @@ export function getSelectableWorkbook() {
                         id: 'id',
                         name: 'ID',
                         description: 'Unieke identificatie van de lijn',
+                    }),
+
+                    new SelectableColumn({
+                        id: 'receivableBalanceId',
+                        name: 'ID openstaand bedrag',
+                        description: 'Unieke identificatie van het openstaand bedrag',
                     }),
 
                     new SelectableColumn({

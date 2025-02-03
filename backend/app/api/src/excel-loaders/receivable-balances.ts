@@ -73,6 +73,19 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             name: 'ID',
             width: 40,
             getValue: (object: ReceivableBalanceWithItem) => ({
+                value: object.balanceItem.id,
+                style: {
+                    font: {
+                        bold: true,
+                    },
+                },
+            }),
+        },
+        {
+            id: 'receivableBalanceId',
+            name: 'ID openstaand bedrag',
+            width: 40,
+            getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.receivableBalance.id,
                 style: {
                     font: {
