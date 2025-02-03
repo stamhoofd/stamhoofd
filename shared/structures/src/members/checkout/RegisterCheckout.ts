@@ -30,6 +30,9 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     freeContribution = 0;
 
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    cancellationFeePercentage = 0;
+
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
     paymentMethod: PaymentMethod | null = null;
 
@@ -70,6 +73,7 @@ export class IDRegisterCheckout extends AutoEncoder {
         checkout.paymentMethod = this.paymentMethod;
         checkout.asOrganizationId = this.asOrganizationId;
         checkout.customer = this.customer;
+        checkout.cancellationFeePercentage = this.cancellationFeePercentage;
 
         if (context.organizations[0] && !checkout.cart.isEmpty && checkout.defaultOrganization === null) {
             const preferredId = checkout.singleOrganizationId;
@@ -104,6 +108,8 @@ export class RegisterCheckout {
     // Default hint for empty carts to know the organization to use
     defaultOrganization: Organization | null = null;
 
+    cancellationFeePercentage = 0; // per ten thousand
+
     convert(): IDRegisterCheckout {
         return IDRegisterCheckout.create({
             cart: this.cart.convert(),
@@ -111,6 +117,7 @@ export class RegisterCheckout {
             freeContribution: this.freeContribution,
             paymentMethod: this.paymentMethod,
             totalPrice: this.totalPrice,
+            cancellationFeePercentage: this.cancellationFeePercentage,
             asOrganizationId: this.asOrganizationId,
             customer: this.customer,
         });

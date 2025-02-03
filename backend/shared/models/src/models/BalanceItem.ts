@@ -163,7 +163,12 @@ export class BalanceItem extends QueryableModel {
         return this.priceUnpaid <= 0;
     }
 
-    static async deleteItems(items: BalanceItem[]) {
+    /**
+     * Options.cancellationFeePercentage: 0-10000 (0-100%)
+     * By default 0% will be charged
+     * Will create a new cancellation fee if the cancellation fee percentage is not 0%
+     */
+    static async deleteItems(items: BalanceItem[], options?: { cancellationFeePercentage?: number }) {
         // Find depending items
         const dependingItemIds = Formatter.uniqueArray(items.filter(i => !!i.dependingBalanceItemId).map(i => i.dependingBalanceItemId!)).filter(id => !items.some(item => item.id === id));
 
@@ -173,9 +178,7 @@ export class BalanceItem extends QueryableModel {
             items = [...items, ...dependingItems];
         }
 
-        // todo: in the future we could automatically delete payments that are not needed anymore and weren't paid yet -> to prevent leaving ghost payments
-        // for now, an admin can manually cancel those payments
-        let needsUpdate = false;
+        const deletedItems: BalanceItem[] = [];
 
         // Set other items to zero (the balance item payments keep the real price)
         for (const item of items) {
@@ -183,14 +186,51 @@ export class BalanceItem extends QueryableModel {
                 continue;
             }
 
-            needsUpdate = true;
+            deletedItems.push(item);
             item.status = BalanceItemStatus.Canceled;
             await item.save();
+
+            if (options && options.cancellationFeePercentage !== undefined && options.cancellationFeePercentage !== 0) {
+                if (options.cancellationFeePercentage < 0 || options.cancellationFeePercentage > 100 * 100) {
+                    throw new Error('Invalid cancellation fee percentage. Range 0-10000 expected, received ' + options.cancellationFeePercentage);
+                }
+
+                // Refund the user
+                const cancellationFee = Math.round(item.price * options.cancellationFeePercentage / 10000);
+                if (cancellationFee > 0) {
+                    // Create a new item
+                    const cancellationItem = await item.createCancellationItem(cancellationFee);
+                    deletedItems.push(cancellationItem);
+                }
+            }
         }
 
-        if (needsUpdate) {
-            await this.updateOutstanding(items);
+        if (deletedItems.length) {
+            await this.updateOutstanding(deletedItems);
         }
+
+        return deletedItems;
+    }
+
+    async createCancellationItem(fee: number) {
+        const item = new BalanceItem();
+        item.organizationId = this.organizationId;
+        item.memberId = this.memberId;
+        item.userId = this.userId;
+        item.payingOrganizationId = this.payingOrganizationId;
+
+        item.type = BalanceItemType.CancellationFee;
+        item.relations = this.relations;
+        item.description = this.description;
+        item.amount = 1;
+        item.unitPrice = fee;
+
+        item.status = BalanceItemStatus.Due;
+        item.dueAt = null;
+
+        await item.save();
+
+        return item;
     }
 
     static async reactivateItems(items: BalanceItem[]) {
@@ -216,22 +256,22 @@ export class BalanceItem extends QueryableModel {
         await this.reactivateItems(items);
     }
 
-    static async deleteForDeletedOrders(orderIds: string[]) {
+    static async deleteForDeletedOrders(orderIds: string[], options?: { cancellationFeePercentage?: number }) {
         if (orderIds.length === 0) {
             return;
         }
         const items = await BalanceItem.where({ orderId: { sign: 'IN', value: orderIds } });
-        await this.deleteItems(items);
+        return await this.deleteItems(items, options);
     }
 
-    static async deleteForDeletedMember(memberId: string) {
+    static async deleteForDeletedMember(memberId: string, options?: { cancellationFeePercentage?: number }) {
         const items = await BalanceItem.where({ memberId });
-        await this.deleteItems(items);
+        return await this.deleteItems(items, options);
     }
 
-    static async deleteForDeletedRegistration(registrationId: string) {
+    static async deleteForDeletedRegistration(registrationId: string, options?: { cancellationFeePercentage?: number }) {
         const items = await BalanceItem.where({ registrationId });
-        await this.deleteItems(items);
+        return await this.deleteItems(items, options);
     }
 
     static async getForRegistration(registrationId: string, organizationId?: string) {

@@ -359,10 +359,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         const createdBalanceItems: BalanceItem[] = [];
         const unrelatedCreatedBalanceItems: BalanceItem[] = [];
+        const deletedBalanceItems: BalanceItem[] = [];
         const shouldMarkValid = whoWillPayNow === 'nobody' || checkout.paymentMethod === PaymentMethod.Transfer || checkout.paymentMethod === PaymentMethod.PointOfSale || checkout.paymentMethod === PaymentMethod.Unknown;
 
         // Create negative balance items
-        for (const registrationStruct of [...checkout.cart.deleteRegistrations, ...checkout.cart.items.flatMap(i => i.replaceRegistrations)]) {
+        for (const { registration: registrationStruct, deleted } of [
+            ...checkout.cart.deleteRegistrations.map(r => ({ registration: r, deleted: true })),
+            ...checkout.cart.items.flatMap(i => i.replaceRegistrations).map(r => ({ registration: r, deleted: false })),
+        ]) {
             if (whoWillPayNow !== 'nobody') {
                 // this also fixes the issue that we cannot delete the registration right away if we would need to wait for a payment
                 throw new SimpleError({
@@ -398,7 +402,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
             // Find all balance items of this registration and set them to zero
-            await BalanceItem.deleteForDeletedRegistration(existingRegistration.id);
+            deletedBalanceItems.push(...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
+                cancellationFeePercentage: deleted ? checkout.cancellationFeePercentage : 0,
+            })));
+
+            // todo: add cancelation fee
 
             // Clear the registration
             let group = groups.find(g => g.id === existingRegistration.groupId);
@@ -695,7 +703,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         // Reallocate
-        await BalanceItemService.reallocate([...createdBalanceItems, ...unrelatedCreatedBalanceItems], organization.id);
+        await BalanceItemService.reallocate([...createdBalanceItems, ...unrelatedCreatedBalanceItems, ...deletedBalanceItems], organization.id);
 
         // Update occupancy
         for (const group of groups) {

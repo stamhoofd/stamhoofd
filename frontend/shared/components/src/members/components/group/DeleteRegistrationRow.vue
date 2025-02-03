@@ -11,23 +11,21 @@
         <p class="style-description-small">
             Uitschrijven voor {{ registration.group.settings.name }}
         </p>
-        
-        <footer v-if="registration.price">
-            <p class="style-price">
-                Openstaand bedrag daalt met {{ formatPrice(registration.price) }}
-            </p>
-        </footer>
 
         <template #right>
+            <p v-if="balance" class="style-price">
+                {{ formatPrice(balance.amountOpen + balance.amountPaid + balance.amountPending) }}
+            </p>
+
             <button class="button icon trash gray" type="button" @click.stop="deleteMe()" />
         </template>
     </STListItem>
 </template>
 
-
 <script setup lang="ts">
 import { RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
 import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
+import { computed } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -35,11 +33,15 @@ const props = withDefaults(
         checkout: RegisterCheckout;
     }>(),
     {
-    }
+    },
 );
 
 async function deleteMe() {
-    props.checkout.unremoveRegistration(props.registration)
+    props.checkout.unremoveRegistration(props.registration);
 }
+
+const balance = computed(() => {
+    return props.registration.balances.find(b => b.organizationId === props.registration.organizationId);
+});
 
 </script>

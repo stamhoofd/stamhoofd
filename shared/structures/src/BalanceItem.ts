@@ -36,6 +36,7 @@ export enum BalanceItemType {
     Order = 'Order',
     Other = 'Other',
     PlatformMembership = 'PlatformMembership',
+    CancellationFee = 'CancellationFee',
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
@@ -54,6 +55,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.Order: return 'Webshopbestelling';
         case BalanceItemType.Other: return 'Andere';
         case BalanceItemType.PlatformMembership: return 'Aansluiting';
+        case BalanceItemType.CancellationFee: return 'Annuleringskosten';
     }
 }
 
@@ -65,6 +67,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.Order: return 'basket';
         case BalanceItemType.Other: return 'box';
         case BalanceItemType.PlatformMembership: return 'membership-filled';
+        case BalanceItemType.CancellationFee: return 'canceled';
     }
 }
 
@@ -322,6 +325,19 @@ export class BalanceItem extends AutoEncoder {
 
                 return 'inschrijving voor ' + group;
             }
+            case BalanceItemType.CancellationFee: {
+                const option = this.relations.get(BalanceItemRelationType.GroupOption);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name;
+
+                if (group) {
+                    if (option) {
+                        return 'annuleringskost voor keuzeoptie bij ' + group;
+                    }
+
+                    return 'annuleringskost voor inschrijving bij ' + group;
+                }
+                return 'annuleringskost';
+            }
             case BalanceItemType.AdministrationFee: return 'administratiekosten';
             case BalanceItemType.FreeContribution: return 'vrije bijdrage';
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || 'onbekende webshop';
@@ -338,6 +354,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Registration: {
                 return this.relations.get(BalanceItemRelationType.Group)?.name ?? 'onbekende inschrijvingsgroep';
             }
+            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name ?? this.relations.get(BalanceItemRelationType.Webshop)?.name ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name ?? 'annuleringskosten';
             case BalanceItemType.AdministrationFee: return 'administratiekosten';
             case BalanceItemType.FreeContribution: return 'vrije bijdrage';
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name ?? 'onbekende webshop';
@@ -358,6 +375,17 @@ export class BalanceItem extends AutoEncoder {
                     const group = this.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
                     return 'Keuzeoptie ' + group;
                 }
+                break;
+            }
+            case BalanceItemType.CancellationFee: {
+                const list: string[] = [];
+                // List all relations
+                for (const [key, value] of this.relations.entries()) {
+                    if (shouldAggregateOnRelationType(key, this.relations)) {
+                        list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name);
+                    }
+                }
+                return list.join('\n');
             }
         }
         return null;
@@ -428,6 +456,7 @@ export class BalanceItem extends AutoEncoder {
                 const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name;
                 return 'Inschrijving voor ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
             }
+            case BalanceItemType.CancellationFee: return 'Annuleringskosten';
             case BalanceItemType.AdministrationFee: return 'Administratiekosten';
             case BalanceItemType.FreeContribution: return 'Vrije bijdrage';
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name || 'Onbekende webshop';
@@ -459,6 +488,15 @@ export class BalanceItem extends AutoEncoder {
                 if (member) {
                     return member.name;
                 }
+                break;
+            }
+            case BalanceItemType.CancellationFee: {
+                const list: string[] = [];
+                // List all relations
+                for (const [key, value] of this.relations.entries()) {
+                    list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name);
+                }
+                return list.join('\n');
             }
         }
         return null;

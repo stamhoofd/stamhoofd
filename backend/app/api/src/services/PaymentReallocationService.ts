@@ -40,13 +40,13 @@ export const PaymentReallocationService = {
                 continue;
             }
 
-            const similarDueItems = balanceItems.filter(b => b.id !== balanceItem.id && b.status === BalanceItemStatus.Due && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
+            const similarDueItems = balanceItems.filter(b => b.id !== balanceItem.id && b.type === balanceItem.type && b.status === BalanceItemStatus.Due && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
 
             if (similarDueItems.length) {
                 // Not possible to merge into one: there are 2 due items
                 continue;
             }
-            const similarCanceledItems = balanceItems.filter(b => b.id !== balanceItem.id && b.status !== BalanceItemStatus.Due && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
+            const similarCanceledItems = balanceItems.filter(b => b.id !== balanceItem.id && b.type === balanceItem.type && b.status !== BalanceItemStatus.Due && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
 
             if (similarCanceledItems.length) {
                 await this.mergeBalanceItems(balanceItem, similarCanceledItems);
@@ -190,6 +190,7 @@ export const PaymentReallocationService = {
             payment.type = PaymentType.Reallocation;
             payment.method = PaymentMethod.Unknown;
             payment.status = PaymentStatus.Succeeded;
+            payment.paidAt = new Date();
             await payment.save();
 
             // Create balance item payments

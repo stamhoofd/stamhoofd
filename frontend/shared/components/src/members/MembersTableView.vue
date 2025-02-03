@@ -441,168 +441,192 @@ if (app === 'admin' || (props.group && props.group.settings.requireOrganizationI
             enabled: false,
         }),
     );
-}
-else {
-    if (groups.find(g => g.settings.trialDays)) {
+
+    // Who has paid?
+    if (props.group && props.group.settings.allowRegistrationsByOrganization) {
         allColumns.push(
-            new Column<ObjectType, Date | null>({
-                name: 'Proefperiode',
+            new Column<ObjectType, string | null>({
+                id: 'groupRegistration',
                 allowSorting: false,
-                getValue: (v) => {
-                    const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
-
-                    if (registrations.length === 0) {
-                        return null;
+                name: $t('Groepsinschrijving'),
+                getValue: (member) => {
+                    const registrations = member.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+                    if (registrations.find(r => r.payingOrganizationId)) {
+                        const organization = member.organizations.find(o => o.id === registrations[0].payingOrganizationId);
+                        return organization ? organization.name : 'Onbekend';
                     }
-
-                    const now = new Date();
-                    const filtered = registrations.filter(r => r.trialUntil && r.trialUntil > now).map(r => r.trialUntil!.getTime());
-
-                    if (filtered.length === 0) {
-                        return null;
-                    }
-                    return new Date(Math.min(...filtered));
+                    return null;
                 },
-                format: (v, width) => {
-                    if (!v) {
-                        return 'Geen';
-                    }
-                    return 'Tot ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
-                },
-                getStyle: v => v === null ? 'gray' : 'secundary',
-                minimumWidth: 80,
-                recommendedWidth: 160,
-            }),
-        );
-    }
-
-    allColumns.push(
-        new Column<ObjectType, Date | null>({
-            name: 'Startdatum',
-            allowSorting: false,
-            getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
-
-                if (registrations.length === 0) {
-                    return null;
-                }
-
-                const filtered = registrations.filter(r => r.startDate).map(r => r.startDate!.getTime());
-
-                if (filtered.length === 0) {
-                    return null;
-                }
-                return new Date(Math.min(...filtered));
-            },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
-            getStyle: v => v === null ? 'gray' : '',
-            minimumWidth: 80,
-            recommendedWidth: 200,
-        }),
-    );
-
-    allColumns.push(
-        new Column<ObjectType, Date | null>({
-            name: waitingList.value ? 'Sinds' : 'Inschrijvingsdatum',
-            allowSorting: false,
-            getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
-
-                if (registrations.length === 0) {
-                    return null;
-                }
-
-                const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime());
-
-                if (filtered.length === 0) {
-                    return null;
-                }
-                return new Date(Math.min(...filtered));
-            },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
-            getStyle: v => v === null ? 'gray' : '',
-            minimumWidth: 80,
-            recommendedWidth: 200,
-        }),
-    );
-
-    if (!waitingList.value && financialRead.value && organization.value && !groups.find(g => g.organizationId !== organization.value!.id)) {
-        allColumns.push(
-            new Column<ObjectType, number>({
-                name: 'Prijs',
-                allowSorting: false,
-                getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0),
-                format: (outstandingBalance) => {
-                    if (outstandingBalance < 0) {
-                        return Formatter.price(outstandingBalance);
-                    }
-                    if (outstandingBalance <= 0) {
-                        return 'Gratis';
-                    }
-                    return Formatter.price(outstandingBalance);
-                },
-                getStyle: v => v <= 0 ? 'gray' : '',
-                minimumWidth: 70,
-                recommendedWidth: 80,
+                format: organizations => organizations || 'Nee',
+                getStyle: organizations => organizations === null ? 'gray' : '',
+                minimumWidth: 100,
+                recommendedWidth: 300,
                 enabled: false,
             }),
         );
-
-        allColumns.push(
-            new Column<ObjectType, number>({
-                name: 'Te betalen',
-                allowSorting: false,
-                getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen), 0),
-                format: (outstandingBalance) => {
-                    if (outstandingBalance < 0) {
-                        return Formatter.price(outstandingBalance);
-                    }
-                    if (outstandingBalance <= 0) {
-                        return 'Betaald';
-                    }
-                    return Formatter.price(outstandingBalance);
-                },
-                getStyle: v => v <= 0 ? 'gray' : '',
-                minimumWidth: 70,
-                recommendedWidth: 80,
-            }),
-        );
     }
+}
 
-    if (props.category) {
-        allColumns.push(
-            new Column<ObjectType, Group[]>({
-                id: 'category',
-                allowSorting: false,
-                name: waitingList.value ? 'Wachtlijst' : (props.category.settings.name || 'Groep'),
-                getValue: (member) => {
-                    if (!props.category) {
+if (groups.find(g => g.settings.trialDays)) {
+    allColumns.push(
+        new Column<ObjectType, Date | null>({
+            name: 'Proefperiode',
+            allowSorting: false,
+            getValue: (v) => {
+                const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+
+                if (registrations.length === 0) {
+                    return null;
+                }
+
+                const now = new Date();
+                const filtered = registrations.filter(r => r.trialUntil && r.trialUntil > now).map(r => r.trialUntil!.getTime());
+
+                if (filtered.length === 0) {
+                    return null;
+                }
+                return new Date(Math.min(...filtered));
+            },
+            format: (v, width) => {
+                if (!v) {
+                    return 'Geen';
+                }
+                return 'Tot ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
+            },
+            getStyle: v => v === null ? 'gray' : 'secundary',
+            minimumWidth: 80,
+            recommendedWidth: 160,
+        }),
+    );
+}
+
+allColumns.push(
+    new Column<ObjectType, Date | null>({
+        name: 'Startdatum',
+        allowSorting: false,
+        getValue: (v) => {
+            const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+
+            if (registrations.length === 0) {
+                return null;
+            }
+
+            const filtered = registrations.filter(r => r.startDate).map(r => r.startDate!.getTime());
+
+            if (filtered.length === 0) {
+                return null;
+            }
+            return new Date(Math.min(...filtered));
+        },
+        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
+        getStyle: v => v === null ? 'gray' : '',
+        minimumWidth: 80,
+        recommendedWidth: 200,
+        enabled: false,
+    }),
+);
+
+allColumns.push(
+    new Column<ObjectType, Date | null>({
+        name: waitingList.value ? 'Sinds' : 'Inschrijvingsdatum',
+        allowSorting: false,
+        getValue: (v) => {
+            const registrations = v.filterRegistrations({ groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+
+            if (registrations.length === 0) {
+                return null;
+            }
+
+            const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime());
+
+            if (filtered.length === 0) {
+                return null;
+            }
+            return new Date(Math.min(...filtered));
+        },
+        format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : 'Onbekend',
+        getStyle: v => v === null ? 'gray' : '',
+        minimumWidth: 80,
+        recommendedWidth: 200,
+    }),
+);
+
+if (!waitingList.value && financialRead.value && organization.value && !groups.find(g => g.organizationId !== organization.value!.id)) {
+    allColumns.push(
+        new Column<ObjectType, number>({
+            name: 'Prijs',
+            allowSorting: false,
+            getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0),
+            format: (outstandingBalance) => {
+                if (outstandingBalance < 0) {
+                    return Formatter.price(outstandingBalance);
+                }
+                if (outstandingBalance <= 0) {
+                    return 'Gratis';
+                }
+                return Formatter.price(outstandingBalance);
+            },
+            getStyle: v => v <= 0 ? 'gray' : '',
+            minimumWidth: 70,
+            recommendedWidth: 80,
+            enabled: false,
+        }),
+    );
+
+    allColumns.push(
+        new Column<ObjectType, number>({
+            name: 'Te betalen',
+            allowSorting: false,
+            getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen), 0),
+            format: (outstandingBalance) => {
+                if (outstandingBalance < 0) {
+                    return Formatter.price(outstandingBalance);
+                }
+                if (outstandingBalance <= 0) {
+                    return 'Betaald';
+                }
+                return Formatter.price(outstandingBalance);
+            },
+            getStyle: v => v <= 0 ? 'gray' : '',
+            minimumWidth: 70,
+            recommendedWidth: 80,
+        }),
+    );
+}
+
+if (props.category) {
+    allColumns.push(
+        new Column<ObjectType, Group[]>({
+            id: 'category',
+            allowSorting: false,
+            name: waitingList.value ? 'Wachtlijst' : (props.category.settings.name || 'Groep'),
+            getValue: (member) => {
+                if (!props.category) {
+                    return [];
+                }
+                const groups = props.category.getAllGroups();
+                const registrations = member.filterRegistrations({ groups: groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
+                const memberGroups = registrations.flatMap((r) => {
+                    const group = groups.find(g => g.id === r.groupId);
+                    if (!group) {
                         return [];
                     }
-                    const groups = props.category.getAllGroups();
-                    const registrations = member.filterRegistrations({ groups: groups, periodId: props.periodId ?? props.group?.periodId ?? '' });
-                    const memberGroups = registrations.flatMap((r) => {
-                        const group = groups.find(g => g.id === r.groupId);
-                        if (!group) {
-                            return [];
-                        }
-                        return [group];
-                    });
-                    const getIndex = g => groups.findIndex(_g => _g.id === g.id);
-                    return memberGroups.sort((a, b) => Sorter.byNumberValue(getIndex(b), getIndex(a)));
-                },
-                format: (groups) => {
-                    if (groups.length === 0) {
-                        return 'Geen';
-                    }
-                    return groups.map(g => g.settings.name).join(', ');
-                },
-                getStyle: groups => groups.length === 0 ? 'gray' : '',
-                minimumWidth: 100,
-                recommendedWidth: 150,
-            }),
-        );
-    }
+                    return [group];
+                });
+                const getIndex = g => groups.findIndex(_g => _g.id === g.id);
+                return memberGroups.sort((a, b) => Sorter.byNumberValue(getIndex(b), getIndex(a)));
+            },
+            format: (groups) => {
+                if (groups.length === 0) {
+                    return 'Geen';
+                }
+                return groups.map(g => g.settings.name).join(', ');
+            },
+            getStyle: groups => groups.length === 0 ? 'gray' : '',
+            minimumWidth: 100,
+            recommendedWidth: 150,
+        }),
+    );
 }
 
 const Route = {
