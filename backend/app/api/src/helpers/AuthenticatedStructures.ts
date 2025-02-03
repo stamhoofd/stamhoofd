@@ -768,7 +768,7 @@ export class AuthenticatedStructures {
         const results: DetailedReceivableBalance[] = [];
 
         for (const { balance, object } of items) {
-            const balanceItems = await CachedBalance.balanceForObjects(organizationId, [object.id], balance.objectType);
+            const balanceItems = await CachedBalance.balanceForObjects(organizationId, [balance.objectId], balance.objectType, true);
             const balanceItemsWithPayments = await BalanceItem.getStructureWithPayments(balanceItems);
 
             const result = DetailedReceivableBalance.create({
