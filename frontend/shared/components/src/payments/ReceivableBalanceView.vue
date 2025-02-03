@@ -31,6 +31,15 @@
                     </p>
                 </STListItem>
 
+                <STListItem v-if="item.object.uri">
+                    <h3 class="style-definition-label">
+                        {{ $t('Groepsnummer') }}
+                    </h3>
+                    <p v-copyable class="style-definition-text style-copyable">
+                        {{ item.object.uri }}
+                    </p>
+                </STListItem>
+
                 <STListItem v-if="item.amountOpen >= 0">
                     <h3 class="style-definition-label">
                         {{ $t('28c2bc66-231f-44f3-9249-c1981b871a1f') }}

@@ -38,6 +38,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.ReceivableBalances, {
                     .map((c) => {
                         return {
                             ...c,
+                            id: `receivableBalance.${c.id}`,
                             getValue: (object: ReceivableBalanceWithItem) => {
                                 return c.getValue(object.receivableBalance);
                             },
@@ -56,19 +57,6 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             width: 40,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.id,
-                style: {
-                    font: {
-                        bold: true,
-                    },
-                },
-            }),
-        },
-        {
-            id: 'receivableBalanceId',
-            name: 'ID openstaand bedrag',
-            width: 40,
-            getValue: (object: ReceivableBalanceWithItem) => ({
-                value: object.receivableBalance.id,
                 style: {
                     font: {
                         bold: true,
@@ -241,7 +229,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
     return [
         {
             id: 'id',
-            name: 'ID',
+            name: 'ID schuldenaar',
             width: 40,
             getValue: (object: ReceivableBalance) => ({
                 value: object.id,
@@ -254,10 +242,18 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'name',
-            name: 'Naam',
-            width: 10,
+            name: 'Schuldenaar',
+            width: 40,
             getValue: (object: ReceivableBalance) => ({
                 value: object.object.name,
+            }),
+        },
+        {
+            id: 'uri',
+            name: 'Groepsnummer',
+            width: 16,
+            getValue: (object: ReceivableBalance) => ({
+                value: object.object.uri,
             }),
         },
         {

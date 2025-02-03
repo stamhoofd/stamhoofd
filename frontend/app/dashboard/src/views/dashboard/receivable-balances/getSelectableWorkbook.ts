@@ -1,4 +1,5 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -7,12 +8,13 @@ import { Formatter } from '@stamhoofd/utility';
  * -> a hook is better suited for this
  */
 export function useSelectableWorkbook() {
+    const $t = useTranslate();
     return {
-        getSelectableWorkbook: () => getSelectableWorkbook(),
+        getSelectableWorkbook: () => getSelectableWorkbook($t),
     };
 }
 
-export function getSelectableWorkbook() {
+export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>) {
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
@@ -20,12 +22,7 @@ export function getSelectableWorkbook() {
                 name: 'Te ontvangen bedragen',
                 description: 'Dit werkblad bevat één rij per te ontvangen bedrag, maar een te ontvangen bedrag zelf kan wel voor meerdere items zijn. Voor meer detailinformatie heb je het tabblad Betaallijnen nodig.',
                 columns: [
-                    new SelectableColumn({
-                        id: 'id',
-                        name: 'ID',
-                        description: 'Unieke identificatie van het openstaand bedrag',
-                    }),
-                    ...getGeneralColumns(),
+                    ...getGeneralColumns($t),
                     new SelectableColumn({
                         id: 'amountOpen',
                         name: 'Openstaand bedrag',
@@ -47,10 +44,9 @@ export function getSelectableWorkbook() {
                         description: 'Unieke identificatie van de lijn',
                     }),
 
-                    new SelectableColumn({
-                        id: 'receivableBalanceId',
-                        name: 'ID openstaand bedrag',
-                        description: 'Unieke identificatie van het openstaand bedrag',
+                    ...getGeneralColumns($t, { category: 'Te ontvangen bedrag (herhaling)' }).map((c) => {
+                        c.id = `receivableBalance.${c.id}`;
+                        return c;
                     }),
 
                     new SelectableColumn({
@@ -120,24 +116,33 @@ export function getSelectableWorkbook() {
                         id: 'status',
                         name: 'Status',
                     }),
-                    ...getGeneralColumns({ category: 'Te ontvangen bedrag (herhaling)' }),
                 ],
             }),
         ],
     });
 }
 
-function getGeneralColumns(options?: { category?: string | null }) {
+function getGeneralColumns($t: ReturnType<typeof useTranslate>, options?: { category?: string | null }) {
     {
         return [
             new SelectableColumn({
+                id: 'id',
+                name: 'ID schuldenaar',
+                description: 'Unieke identificatie van het openstaand bedrag',
+            }),
+            new SelectableColumn({
                 id: 'name',
-                name: 'Naam',
+                name: 'Schuldenaar',
+                ...options,
+            }),
+            new SelectableColumn({
+                id: 'uri',
+                name: $t('Groepsnummer'),
                 ...options,
             }),
             new SelectableColumn({
                 id: 'objectType',
-                name: 'Type',
+                name: 'Type schuldenaar',
                 ...options,
             }),
         ];

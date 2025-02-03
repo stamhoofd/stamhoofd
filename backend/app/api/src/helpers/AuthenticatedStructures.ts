@@ -637,6 +637,7 @@ export class AuthenticatedStructures {
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: organization.name,
+                        uri: organization.uri,
                         contacts: thisMembers.map(({ member, responsibilities }) => ReceivableBalanceObjectContact.create({
                             firstName: member.firstName ?? '',
                             lastName: member.lastName ?? '',

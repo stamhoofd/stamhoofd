@@ -86,15 +86,25 @@ const objectFetcher = useReceivableBalancesObjectFetcher({
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
-    new Column<ObjectType, string>({
-        id: 'name',
-        name: 'Naam',
-        getValue: object => object.object.name,
+    new Column<ObjectType, string | null>({
+        id: 'uri',
+        name: '#',
+        getValue: object => object.object.uri,
+        format: value => value || 'Geen',
+        getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 200,
         allowSorting: false,
     }),
 
+    new Column<ObjectType, string>({
+        id: 'name',
+        name: 'Schuldenaar',
+        getValue: object => object.object.name,
+        minimumWidth: 100,
+        recommendedWidth: 200,
+        allowSorting: false,
+    }),
     new Column<ObjectType, number>({
         id: 'amountOpen',
         name: 'Openstaand bedrag',

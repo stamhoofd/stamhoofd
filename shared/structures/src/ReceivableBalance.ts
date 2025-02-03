@@ -57,6 +57,9 @@ export class ReceivableBalanceObject extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = '';
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    uri: string | null = null;
+
     // E-mail addresses to reach out to this entity
     @field({ decoder: new ArrayDecoder(ReceivableBalanceObjectContact) })
     contacts: ReceivableBalanceObjectContact[] = [];
