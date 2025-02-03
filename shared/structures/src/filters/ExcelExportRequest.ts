@@ -5,6 +5,7 @@ export enum ExcelExportType {
     Payments = 'payments',
     Members = 'members',
     Organizations = 'organizations',
+    ReceivableBalances = 'receivable-balances',
 }
 
 export class ExcelSheetColumnFilter extends AutoEncoder {

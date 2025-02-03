@@ -20,6 +20,19 @@ export function getReceivableBalanceTypeName(type: ReceivableBalanceType, $t: Tr
     }
 }
 
+/**
+ * @deprecated
+ * @param type
+ * @returns
+ */
+export function getReceivableBalanceTypeNameNotTranslated(type: ReceivableBalanceType): string {
+    switch (type) {
+        case ReceivableBalanceType.organization: return 'vereniging';
+        case ReceivableBalanceType.member: return 'lid';
+        case ReceivableBalanceType.user: return 'account';
+        case ReceivableBalanceType.registration: return 'inschriving';
+    }
+}
 export class ReceivableBalanceObjectContact extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     firstName: string | null = null;
@@ -86,6 +99,9 @@ export class ReceivableBalance extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, version: 355 })
     reminderEmailCount = 0;
+
+    @field({ decoder: DateDecoder, ...NextVersion })
+    createdAt: Date;
 }
 
 export class DetailedReceivableBalance extends ReceivableBalance {

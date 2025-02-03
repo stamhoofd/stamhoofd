@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Payment, PrivatePayment } from './members/Payment.js';
 import { PriceBreakdown } from './PriceBreakdown.js';
-import { Formatter, Sorter } from '@stamhoofd/utility';
 
 export enum BalanceItemStatusV352 {
     Hidden = 'Hidden',
@@ -38,6 +38,14 @@ export enum BalanceItemType {
     PlatformMembership = 'PlatformMembership',
 }
 
+export function getBalanceItemStatusName(type: BalanceItemStatus): string {
+    switch (type) {
+        case BalanceItemStatus.Hidden: return 'Verborgen';
+        case BalanceItemStatus.Due: return 'Vervallen';
+        case BalanceItemStatus.Canceled: return 'Geannuleerd';
+    }
+}
+
 export function getBalanceItemTypeName(type: BalanceItemType): string {
     switch (type) {
         case BalanceItemType.Registration: return 'Inschrijving';
@@ -58,7 +66,6 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.Other: return 'box';
         case BalanceItemType.PlatformMembership: return 'membership-filled';
     }
-    return null;
 }
 
 export enum BalanceItemRelationType {

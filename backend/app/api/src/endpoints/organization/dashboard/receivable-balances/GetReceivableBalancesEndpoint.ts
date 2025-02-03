@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { CachedBalance } from '@stamhoofd/models';
 import { compileToSQLFilter, compileToSQLSorter } from '@stamhoofd/sql';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, ReceivableBalance as ReceivableBalanceStruct, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, DetailedReceivableBalance, getSortFilter, LimitedFilteredRequest, PaginatedResponse, ReceivableBalance as ReceivableBalanceStruct, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -97,7 +97,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
         return query;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest) {
+    static async buildDataHelper(requestQuery: LimitedFilteredRequest) {
         const query = await GetReceivableBalancesEndpoint.buildQuery(requestQuery);
         const data = await query.fetch();
 
@@ -123,8 +123,24 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             }
         }
 
+        return { data, next };
+    }
+
+    static async buildData(requestQuery: LimitedFilteredRequest) {
+        const { data, next } = await GetReceivableBalancesEndpoint.buildDataHelper(requestQuery);
+
         return new PaginatedResponse<ReceivableBalanceStruct[], LimitedFilteredRequest>({
             results: await AuthenticatedStructures.receivableBalances(data),
+            next,
+        });
+    }
+
+    static async buildDetailedData(requestQuery: LimitedFilteredRequest) {
+        const organization = Context.organization ?? await Context.setOrganizationScope();
+        const { data, next } = await GetReceivableBalancesEndpoint.buildDataHelper(requestQuery);
+
+        return new PaginatedResponse<DetailedReceivableBalance[], LimitedFilteredRequest>({
+            results: await AuthenticatedStructures.detailedReceivableBalances(organization.id, data),
             next,
         });
     }

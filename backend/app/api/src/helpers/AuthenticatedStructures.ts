@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, Document as DocumentStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context';
@@ -575,6 +575,10 @@ export class AuthenticatedStructures {
     }
 
     static async receivableBalances(balances: CachedBalance[]): Promise<ReceivableBalanceStruct[]> {
+        return (await this.receivableBalancesHelper(balances)).map(({ balance, object }) => ReceivableBalanceStruct.create({ ...balance, object }));
+    }
+
+    private static async receivableBalancesHelper(balances: CachedBalance[]): Promise< { balance: CachedBalance; object: ReceivableBalanceObject }[]> {
         if (balances.length === 0) {
             return [];
         }
@@ -608,7 +612,8 @@ export class AuthenticatedStructures {
         ]);
         const users = userIds.length > 0 ? await User.getByIDs(...userIds) : [];
 
-        const result: ReceivableBalanceStruct[] = [];
+        const result: { balance: CachedBalance; object: ReceivableBalanceObject }[] = [];
+
         for (const balance of balances) {
             let object = ReceivableBalanceObject.create({
                 id: balance.objectId,
@@ -749,15 +754,35 @@ export class AuthenticatedStructures {
                 }
             }
 
-            const struct = ReceivableBalanceStruct.create({
-                ...balance,
+            result.push({
+                balance,
                 object,
             });
-
-            result.push(struct);
         }
 
         return result;
+    }
+
+    static async detailedReceivableBalances(organizationId: string, balances: CachedBalance[]): Promise<DetailedReceivableBalance[]> {
+        const items = await this.receivableBalancesHelper(balances);
+        const results: DetailedReceivableBalance[] = [];
+
+        for (const { balance, object } of items) {
+            const balanceItems = await CachedBalance.balanceForObjects(organizationId, [object.id], balance.objectType);
+            const balanceItemsWithPayments = await BalanceItem.getStructureWithPayments(balanceItems);
+
+            const result = DetailedReceivableBalance.create({
+                ...balance,
+                object,
+                balanceItems: balanceItemsWithPayments,
+                // todo!!!
+                payments: [],
+            });
+
+            results.push(result);
+        }
+
+        return results;
     }
 
     static async auditLogs(logs: AuditLog[]): Promise<AuditLogStruct[]> {

@@ -12,7 +12,7 @@ export { default as PayableBalanceTable } from './PayableBalanceTable.vue';
 export { default as PaymentView } from './PaymentView.vue';
 export { default as ReceivableBalanceBox } from './ReceivableBalanceBox.vue';
 export { default as ReceivableBalanceList } from './ReceivableBalanceList.vue';
-export { default as ReceivableBalancesTableView } from './ReceivableBalancesTableView.vue';
+export { default as ReceivableBalancesTableView } from '@stamhoofd/dashboard/src/views/dashboard/receivable-balances/ReceivableBalancesTableView.vue';
 export { default as ReceivableBalanceView } from './ReceivableBalanceView.vue';
 export { default as SelectBalanceItemsView } from './SelectBalanceItemsView.vue';
 export { default as BalanceItemTitleBox } from './BalanceItemTitleBox.vue';

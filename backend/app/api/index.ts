@@ -97,6 +97,7 @@ const start = async () => {
     await import('./src/excel-loaders/members');
     await import('./src/excel-loaders/payments');
     await import('./src/excel-loaders/organizations');
+    await import('./src/excel-loaders/receivable-balances');
 
     // Register Email Recipient loaders
     await import('./src/email-recipient-loaders/members');

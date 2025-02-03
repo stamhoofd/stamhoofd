@@ -22,13 +22,14 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, EmailView, GlobalEventBus, ModernTableView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, EmailView, GlobalEventBus, ModernTableView, ReceivableBalanceView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
-import ReceivableBalanceView from './ReceivableBalanceView.vue';
+import { useSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = ReceivableBalance;
 const $t = useTranslate();
@@ -118,7 +119,33 @@ const allColumns: Column<ObjectType, any>[] = [
 
 ];
 
-const actions: TableAction<ObjectType>[] = [];
+const { getSelectableWorkbook } = useSelectableWorkbook();
+
+const actions: TableAction<ObjectType>[] = [
+    new AsyncTableAction({
+        name: 'Exporteer naar Excel',
+        icon: 'download',
+        priority: 11,
+        groupIndex: 3,
+        needsSelection: true,
+        allowAutoSelectAll: true,
+        handler: async (selection) => {
+            await present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(ExcelExportView, {
+                            type: ExcelExportType.ReceivableBalances,
+                            filter: selection.filter,
+                            workbook: getSelectableWorkbook(),
+                            configurationId: configurationId.value,
+                        }),
+                    }),
+                ],
+                modalDisplayStyle: 'popup',
+            });
+        },
+    }),
+];
 
 const Route = {
     Component: ReceivableBalanceView,
