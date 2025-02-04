@@ -168,24 +168,24 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const memberOptions: RecipientChooseOneOption = {
         type: 'ChooseOne',
-        name: 'Schuden van leden',
+        name: $t('Schuden van accounts'),
         options: [
             {
-                id: 'members',
-                name: 'Alle leden',
+                id: 'accounts',
+                name: 'Alle accounts',
                 value: [
                     EmailRecipientSubfilter.create({
                         type: EmailRecipientFilterType.ReceivableBalances,
                         filter: mergeFilters([filter, {
-                            objectType: ReceivableBalanceType.member,
+                            objectType: ReceivableBalanceType.user,
                         }]),
                         search,
                     }),
                 ],
             },
             {
-                id: 'no-members',
-                name: 'Geen leden',
+                id: 'no-accounts',
+                name: 'Geen accounts',
                 value: [],
             },
         ],
@@ -193,7 +193,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const organizationOption: RecipientMultipleChoiceOption = {
         type: 'MultipleChoice',
-        name: 'Schulden van groepen',
+        name: $t('Schulden van verenigingen'),
         options: [],
         build: (selectedIds: string[]) => {
             if (selectedIds.length === 0) {
