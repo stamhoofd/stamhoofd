@@ -1,8 +1,8 @@
-import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User, UserWithMembers } from '@stamhoofd/structures';
 import { Ref, unref } from 'vue';
 
 export class ContextPermissions {
-    reactiveUser: UserWithMembers | null | Ref<UserWithMembers | null>;
+    reactiveUser: UserWithMembers | User | null | Ref<User | UserWithMembers | null>;
     reactiveOrganization: Organization | null | Ref<Organization | null>;
     reactivePlatform: Platform | Ref<Platform>;
 
@@ -13,7 +13,7 @@ export class ContextPermissions {
     allowInheritingPermissions = true;
 
     constructor(
-        user: UserWithMembers | null | undefined | Ref<UserWithMembers | null>,
+        user: User | UserWithMembers | null | undefined | Ref<User | UserWithMembers | null>,
         organization: Organization | null | undefined | Ref<Organization | null>,
         platform: Platform | Ref<Platform>,
         options?: { allowInheritingPermissions?: boolean },
@@ -116,7 +116,7 @@ export class ContextPermissions {
             return true;
         }
 
-        if (this.user && this.user.members.members.some(m => m.id === member.id)) {
+        if (this.user && 'members' in this.user && this.user.members.members.some(m => m.id === member.id)) {
             return true;
         }
 

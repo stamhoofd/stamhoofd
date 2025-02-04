@@ -39,7 +39,7 @@ export function useAdmins() {
         return platformManager.value.$platform.admins ?? [];
     });
 
-    const getPermissions = (user: UserWithMembers) => {
+    const getPermissions = (user: User) => {
         return new ContextPermissions(user, organization, platformManager.value.$platform, { allowInheritingPermissions: false }).permissions;
     };
 
@@ -65,6 +65,8 @@ export function useAdmins() {
                 Sorter.byStringValue(a.firstName + ' ' + a.lastName, b.firstName + ' ' + b.lastName),
             ));
     });
+    const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false;
+    const memberHasFullAccess = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasFullAccess(u));
 
     const sortedMembers = computed(() => {
         const members = new Map<string, PlatformMember>();
@@ -81,7 +83,10 @@ export function useAdmins() {
             }
         }
 
-        return [...members.values()];
+        return [...members.values()].sort((a, b) => Sorter.stack(
+            Sorter.byBooleanValue(memberHasFullAccess(a), memberHasFullAccess(b)),
+            Sorter.byStringValue(a.patchedMember.name, b.patchedMember.name),
+        ));
     });
 
     // Sorted members todo
