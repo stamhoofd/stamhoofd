@@ -118,7 +118,9 @@ export class UserPermissions extends AutoEncoder {
         const organizationRoles = organization?.privateMeta?.roles ?? [];
         const inheritedResponsibilityRoles = organization?.privateMeta?.inheritedResponsibilityRoles ?? [];
         const allResponsibilities = [...Platform.shared.config.responsibilities, ...(organization?.privateMeta?.responsibilities ?? [])];
-        const result = LoadedPermissions.from(permissions, organizationRoles, inheritedResponsibilityRoles, allResponsibilities);
+
+        // Clone all external data to avoid mutating them because of the removeAccessRights call
+        const result = LoadedPermissions.from(permissions.clone(), organizationRoles.map(r => r.clone()), inheritedResponsibilityRoles.map(r => r.clone()), allResponsibilities.map(r => r.clone()));
 
         // Some access rights are not allowed to be used directly in the organization permissions
         // they can only be passed from the platform permissions towards the organization permissions as access rights for tags (e.g. review event notifications)
