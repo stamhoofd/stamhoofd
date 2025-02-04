@@ -3,12 +3,11 @@
         <div v-if="!loading" class="st-view background">
             <STNavigationBar title="Beheerders" />
 
-        
             <main class="center">
                 <h1>Beheerders</h1>
                 <p>{{ $t('ac3b2a14-e029-404c-9fe1-2aab4279a3ac') }}</p>
 
-                <STList class="illustration-list">    
+                <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
@@ -30,7 +29,7 @@
                 <p>Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.</p>
 
                 <p v-if="sortedMembers.length === 0" class="info-box">
-                    Deze groep heeft nog geen interne beheerders. 
+                    Deze groep heeft nog geen interne beheerders.
                 </p>
                 <STList v-else>
                     <STListItem v-for="member in sortedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
@@ -79,13 +78,12 @@
                     Opgelet, deze beheerders zijn ook niet aangesloten bij de koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.
                 </p>
 
-
                 <p v-if="sortedAdmins.length === 0" class="info-box">
                     Deze groep heeft nog geen externe beheerders. Nodig iemand uit om beheerder te worden.
                 </p>
 
                 <STList v-else>
-                    <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
+                    <STListItem v-for="admin of sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
                         <template #left>
                             <span v-if="hasFullAccess(admin)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
                                 <span class="icon user-admin-layer-1" />
@@ -134,14 +132,14 @@ import RolesView from './RolesView.vue';
 import { useAdmins } from './hooks/useAdmins';
 
 const me = useUser();
-const organization = useOrganization()
-const { sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions } = useAdmins()
+const organization = useOrganization();
+const { sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions } = useAdmins();
 
 enum Routes {
     Roles = 'rollen',
     Responsibilities = 'functies',
     CreateAdmin = 'createAdmin',
-    EditAdmin = 'editAdmin'
+    EditAdmin = 'editAdmin',
 }
 
 defineRoutes([
@@ -149,7 +147,7 @@ defineRoutes([
         url: Routes.Roles,
         name: 'roles',
         component: RolesView as ComponentOptions,
-        present: 'popup'
+        present: 'popup',
     },
     {
         url: Routes.Responsibilities,
@@ -162,24 +160,25 @@ defineRoutes([
         component: EditAdminView as ComponentOptions,
         present: 'popup',
         paramsToProps: () => {
-            const p = UserPermissions.create({})
+            const p = UserPermissions.create({});
             if (!organization.value) {
-                p.globalPermissions = Permissions.create({level: PermissionLevel.None})
-            } else {
-                p.organizationPermissions.set(organization.value.id, Permissions.create({level: PermissionLevel.None}))
+                p.globalPermissions = Permissions.create({ level: PermissionLevel.None });
             }
-            
+            else {
+                p.organizationPermissions.set(organization.value.id, Permissions.create({ level: PermissionLevel.None }));
+            }
+
             const user = UserWithMembers.create({
                 email: '',
                 organizationId: organization.value?.id ?? null,
-                permissions: p
-            })
+                permissions: p,
+            });
 
             return {
                 user,
-                isNew: true
-            }
-        }
+                isNew: true,
+            };
+        },
     },
     {
         url: '@userId',
@@ -187,72 +186,72 @@ defineRoutes([
         component: EditAdminView as ComponentOptions,
         present: 'popup',
         params: {
-            userId: String
+            userId: String,
         },
-        paramsToProps: async (params: {userId: string}) => {
+        paramsToProps: async (params: { userId: string }) => {
             await reloadPromise();
-            const user = sortedAdmins.value.find(u => u.id === params.userId)
+            const user = sortedAdmins.value.find(u => u.id === params.userId);
             if (!user) {
-                throw new Error('User not found')
+                throw new Error('User not found');
             }
             return {
                 user,
-                isNew: false
-            }
+                isNew: false,
+            };
         },
         propsToParams(props) {
-            if (!("user" in props)) {
-                throw new Error('Missing user')
+            if (!('user' in props)) {
+                throw new Error('Missing user');
             }
             return {
                 params: {
-                    userId: (props.user as User).id
-                }
-            }
-        }
-    }
+                    userId: (props.user as User).id,
+                },
+            };
+        },
+    },
 ]);
 
 const $navigate = useNavigate();
 
 const createAdmin = async () => {
-    await $navigate(Routes.CreateAdmin)
-}
+    await $navigate(Routes.CreateAdmin);
+};
 
 const editAdmin = async (user: User) => {
-    await $navigate(Routes.EditAdmin, { properties: {user} })
-}
+    await $navigate(Routes.EditAdmin, { properties: { user } });
+};
 
-const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false
-const memberHasFullAccess = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasFullAccess(u))
+const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false;
+const memberHasFullAccess = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasFullAccess(u));
 
-const hasNoRoles = (user: User) => (getPermissions(user)?.roles.length ?? 0) === 0
-const memberHasNoRoles = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasNoRoles(u))
+const hasNoRoles = (user: User) => (getPermissions(user)?.roles.length ?? 0) === 0;
+const memberHasNoRoles = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasNoRoles(u));
 
 const permissionList = (user: User) => {
-    const list: string[] = []
-    const permissions = getPermissions(user)
+    const list: string[] = [];
+    const permissions = getPermissions(user);
     if (!permissions) {
-        return 'Geen toegangsrechten'
+        return 'Geen toegangsrechten';
     }
 
     if (permissions.hasFullAccess()) {
-        list.push("Hoofdbeheerders")
+        list.push('Hoofdbeheerders');
     }
 
     for (const role of permissions.roles) {
-        list.push(role.name)
+        list.push(role.name);
     }
 
     if (list.length === 0) {
-        return 'Geen toegangsrechten'
+        return 'Geen toegangsrechten';
     }
-    return list.join(", ")
-}
+    return list.join(', ');
+};
 
-const actionBuilder = useMemberActions()
+const actionBuilder = useMemberActions();
 
 async function editMember(member: PlatformMember) {
-    await actionBuilder().showMember(member)
+    await actionBuilder().showMember(member);
 }
 </script>
