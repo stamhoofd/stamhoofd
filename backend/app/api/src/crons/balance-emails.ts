@@ -18,7 +18,7 @@ async function balanceEmails() {
         return;
     }
 
-    if (lastFullRun.getTime() > new Date().getTime() - 1000 * 60 * 60 * 12 && STAMHOOFD.environment !== 'development') {
+    if (lastFullRun.getTime() > new Date().getTime() - 1000 * 60 * 60 * 12) {
         console.log('Already ran today, skipping.');
         return;
     }

@@ -47,15 +47,19 @@
                 <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
             <p class="style-description-small">
-                *Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.
+                {{ $t('*Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.') }}
             </p>
         </template>
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
-        <template v-if="family && family.members.length > 1 && member && isNew">
+        <template v-if="family && family.members.length >= (originalMemberId ? 2 : 1)">
             <hr>
             <h2>Lid</h2>
-            <p>Selecteer wie het bedrag verschuldigd is.</p>
+            <p>Selecteer welk lid het bedrag verschuldigd is.</p>
+
+            <p v-if="!memberId" class="warning-box">
+                Je koppelt een verschuldigd bedrag best aan een lid en niet aan een account. Dan kan iedereen binnen het gezin het openstaande bedrag betalen.
+            </p>
 
             <STList>
                 <STListItem v-for="m in family.members" :key="m.id" :selectable="true" element-name="label">
@@ -66,6 +70,19 @@
                     <h3 class="style-title-list">
                         {{ m.patchedMember.name }}
                     </h3>
+                </STListItem>
+
+                <STListItem v-if="user" :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="memberId" :value="null" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ user.name }} ({{ user.email }})
+                    </h3>
+                    <p class="style-description-small">
+                        Enkel koppelen aan account, niet aan lid
+                    </p>
                 </STListItem>
             </STList>
         </template>
@@ -107,10 +124,11 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PaymentStatus, PlatformFamily } from '@stamhoofd/structures';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useContext, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PlatformFamily, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import PaymentRow from './components/PaymentRow.vue';
@@ -129,9 +147,12 @@ const platform = usePlatform();
 const loading = ref(false);
 const errors = useErrors();
 const pop = usePop();
+const context = useContext();
+const owner = useRequestOwner();
 
 // Load mmeber on load
 loadMember().catch(console.error);
+loadFamilyFromUser().catch(console.error);
 
 const title = computed(() => {
     if (patchedBalanceItem.value.price < 0) {
@@ -177,12 +198,11 @@ const memberId = computed({
     set: value => addPatch({ memberId: value }),
 });
 
-const member = computed(() => {
-    if (!family.value || !memberId.value) {
-        return null;
-    }
-    return family.value.members.find(m => m.id === memberId.value);
-});
+const originalMemberId = computed(
+    () => props.balanceItem.memberId,
+);
+
+const user = ref(null) as Ref<UserWithMembers | null>;
 
 const outstanding = computed(() => {
     const paid = patchedBalanceItem.value.pricePaid;
@@ -266,7 +286,30 @@ async function loadMember() {
     }
 }
 
-function useRequestOwner() {
-    throw new Error('Function not implemented.');
+async function loadFamilyFromUser() {
+    if (!props.balanceItem.userId) {
+        return;
+    }
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/user/' + props.balanceItem.userId,
+            decoder: UserWithMembers as Decoder<UserWithMembers>,
+            owner,
+        });
+
+        const blob = response.data.members;
+        blob.markReceivedFromBackend();
+
+        user.value = response.data;
+        family.value = PlatformFamily.create(blob, {
+            contextOrganization: organization.value,
+            platform: platform.value,
+        });
+    }
+    catch (e) {
+        console.error(e);
+        return;
+    }
 }
 </script>

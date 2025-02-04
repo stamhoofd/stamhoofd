@@ -296,7 +296,7 @@ export class BalanceItem extends QueryableModel {
      * Update how many every object in the system owes or needs to be reimbursed
      * and also updates the pricePaid/pricePending cached values in Balance items and members
      */
-    static async updateOutstanding(items: BalanceItem[]) {
+    static async updateOutstanding(items: BalanceItem[], additionalItems: { memberId: string; organizationId: string }[] = []) {
         console.log('Update outstanding balance for', items.length, 'items');
 
         await BalanceItem.updatePricePaid(items.map(i => i.id));
@@ -304,8 +304,15 @@ export class BalanceItem extends QueryableModel {
         const organizationIds = Formatter.uniqueArray(items.map(p => p.organizationId));
         for (const organizationId of organizationIds) {
             const filteredItems = items.filter(i => i.organizationId === organizationId);
+            const filteredAdditionalItems = additionalItems.filter(i => i.organizationId === organizationId);
 
-            const memberIds = Formatter.uniqueArray(filteredItems.map(p => p.memberId).filter(id => id !== null));
+            const memberIds = Formatter.uniqueArray(
+                [
+                    ...filteredItems.map(p => p.memberId).filter(id => id !== null),
+                    ...filteredAdditionalItems.map(i => i.memberId),
+                ],
+            );
+
             await CachedBalance.updateForMembers(organizationId, memberIds);
 
             let userIds = filteredItems.filter(p => p.userId !== null).map(p => p.userId!);

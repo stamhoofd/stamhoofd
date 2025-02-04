@@ -128,7 +128,7 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, options?: { cate
             new SelectableColumn({
                 id: 'id',
                 name: 'ID schuldenaar',
-                description: 'Unieke identificatie van het openstaand bedrag',
+                description: 'Unieke identificatie van de schuldenaar',
             }),
             new SelectableColumn({
                 id: 'name',

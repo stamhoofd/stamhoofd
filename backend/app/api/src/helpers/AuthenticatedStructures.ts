@@ -283,6 +283,12 @@ export class AuthenticatedStructures {
 
     static async userWithMembers(user: User): Promise<UserWithMembers> {
         const members = await Member.getMembersWithRegistrationForUser(user);
+        const filtered: MemberWithRegistrations[] = [];
+        for (const member of members) {
+            if (await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
+                filtered.push(member);
+            }
+        }
 
         return UserWithMembers.create({
             ...user,
@@ -290,7 +296,7 @@ export class AuthenticatedStructures {
             hasPassword: user.hasPasswordBasedAccount(),
 
             // Always include the current context organization - because it is possible we switch organization and we don't want to refetch every time
-            members: await this.membersBlob(members, true, user),
+            members: await this.membersBlob(filtered, true, user),
         });
     }
 

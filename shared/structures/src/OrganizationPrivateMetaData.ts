@@ -104,7 +104,8 @@ export class BuckarooSettings extends AutoEncoder {
 
 export class BalanceNotificationSettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
-    enabled = true;
+    @field({ decoder: BooleanDecoder, ...NextVersion, upgrade: () => (false) }) // Force reset to false
+    enabled = false;
 
     @field({ decoder: StringDecoder, nullable: true })
     emailId: string | null = null;

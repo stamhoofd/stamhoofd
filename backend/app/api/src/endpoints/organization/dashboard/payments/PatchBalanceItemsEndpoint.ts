@@ -44,6 +44,9 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         const returnedModels: BalanceItem[] = [];
         const updateOutstandingBalance: BalanceItem[] = [];
 
+        // Tracking changes
+        const additionalItems: { memberId: string; organizationId: string }[] = [];
+
         await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
             for (const { put } of request.body.getPuts()) {
                 // Create a new balance item
@@ -141,8 +144,29 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     model.payingOrganizationId = patch.payingOrganizationId;
                 }
 
-                if (patch.memberId) {
-                    model.memberId = (await this.validateMemberId(patch.memberId)).id;
+                if (patch.userId) {
+                    model.userId = (await this.validateUserId(model, patch.userId)).id;
+                }
+
+                if (patch.memberId !== undefined) {
+                    if (model.memberId) {
+                        // Also update old member id outstanding balances
+                        additionalItems.push({ memberId: model.memberId, organizationId: model.organizationId });
+                    }
+                    if (patch.memberId === null) {
+                        if (model.userId === null) {
+                            throw new SimpleError({
+                                code: 'invalid_field',
+                                message: 'No user or member provided',
+                                human: 'Een verschuild moet altijd aan een lid of gebruiker gelinkt zijn',
+                                field: 'memberId',
+                            });
+                        }
+                        model.memberId = null;
+                    }
+                    else {
+                        model.memberId = (await this.validateMemberId(patch.memberId)).id;
+                    }
                 }
 
                 if (patch.createdAt) {
@@ -201,13 +225,13 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 await model.save();
                 returnedModels.push(model);
 
-                if (patch.unitPrice || patch.amount || patch.status || patch.dueAt !== undefined) {
+                if (patch.unitPrice || patch.amount || patch.status || patch.dueAt !== undefined || patch.memberId || patch.userId) {
                     updateOutstandingBalance.push(model);
                 }
             }
         });
 
-        await BalanceItem.updateOutstanding(updateOutstandingBalance);
+        await BalanceItem.updateOutstanding(updateOutstandingBalance, additionalItems);
 
         // Reallocate
         await BalanceItemService.reallocate(updateOutstandingBalance, organization.id);
