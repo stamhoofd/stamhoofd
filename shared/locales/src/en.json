@@ -525,5 +525,14 @@
   "02ef437e-2166-49be-b5ae-73e5452546a0": "geen rechten",
   "d3a424d0-f851-48f2-8837-340e8b60374e": "Er zijn geen aansluitingen beschikbaar voor deze gebruiker.",
   "11ffdf3a-dd66-49ec-b092-c7f3063e19f3": "Stamhoofd verwijdert automatisch het reeds aangerekende bedrag van het openstaande bedrag van alle leden die je uitschrijft. Als je wilt kan je wel een annuleringskost in rekening brengen, bv. als je het bedrag niet zal terugbetalen stel je dit in op 100%. Als je geen annuleringskost in rekening brengt, zal het openstaande bedrag van een lid dat al betaald had negatief worden en kan je dit terugbetalen via het tabblad ‘Rekening’ van een lid.",
-  "cd798189-d5c8-4b79-98f7-a68786ab288c": "Groepsnummer"
+  "cd798189-d5c8-4b79-98f7-a68786ab288c": "Groepsnummer",
+  "b05b58d8-09b6-4e4a-9786-a4777f8e1ac4": "Schulden van accounts",
+  "3c584bf6-7e0a-4348-a5e9-2bc0bcb00bde": "Schulden van verenigingen",
+  "ed98b821-ac81-47ab-8149-10cb71119bbb": "Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na een bepaalde periode nog steeds open staat, ontvangen ze ook telkens een herinneringsemail. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.",
+  "a7585599-1c67-4de7-b552-f5b78c7385db": "Schakel dit in om leden en verenigingen automatisch te verwittigen als hun openstaand bedrag stijgt.",
+  "d75c09fb-24f4-44a0-9e8b-cb7cf1c96dd8": "Schakel dit in om leden automatisch te verwittigen als hun openstaand bedrag stijgt.",
+  "18cbfdea-798d-4efc-aad8-f6897c9efb2c": "Kies hoeveel dagen er minimaal tussen elke e-mail moet zitten, en hoeveel e-mails je maximaal wilt versturen ter herinnering voor een openstaand bedrag. E-mails die je zelf verstuurt tellen niet mee.",
+  "6b39d554-a4a7-489c-84b5-3f430457dd50": "Contactpersonen voor schulden van andere verenigingen",
+  "0998a455-9ffc-4222-8432-ef7681908ad7": "Als een andere vereniging schulden aan jouw vereniging heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.",
+  "15b6f0c8-6287-4b4d-bf34-4da2f4a0e575": "*Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht."
 }

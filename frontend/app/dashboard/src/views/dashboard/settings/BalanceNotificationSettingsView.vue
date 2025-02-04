@@ -4,7 +4,7 @@
             {{ $t('ac0594f0-af79-465b-84d5-568da90af8b6') }}
         </h1>
 
-        <p>{{ $t('Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na een bepaalde periode nog steeds open staat, ontvangen ze ook telkens een herinneringsemail. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.') }}</p>
+        <p>{{ $t('ed98b821-ac81-47ab-8149-10cb71119bbb') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -19,7 +19,7 @@
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $feature('organization-receivable-balances') ? $t('Schakel dit in om leden en verenigingen automatisch te verwittigen als hun openstaand bedrag stijgt.') : $t('Schakel dit in om leden automatisch te verwittigen als hun openstaand bedrag stijgt.') }}
+                    {{ $feature('organization-receivable-balances') ? $t('a7585599-1c67-4de7-b552-f5b78c7385db') : $t('d75c09fb-24f4-44a0-9e8b-cb7cf1c96dd8') }}
                 </p>
             </STListItem>
         </STList>
@@ -59,7 +59,7 @@
             <div class="container">
                 <hr>
                 <h2>Geavanceerd</h2>
-                <p>{{ $t('Kies hoeveel dagen er minimaal tussen elke e-mail moet zitten, en hoeveel e-mails je maximaal wilt versturen ter herinnering voor een openstaand bedrag. E-mails die je zelf verstuurt tellen niet mee.') }}</p>
+                <p>{{ $t('18cbfdea-798d-4efc-aad8-f6897c9efb2c') }}</p>
 
                 <STInputBox title="Minimum dagen tussen herinneringmails" error-fields="price" :error-box="errors.errorBox">
                     <NumberInput
@@ -84,8 +84,8 @@
 
             <div v-if="$feature('organization-receivable-balances')" class="container">
                 <hr>
-                <h2>{{ $t('Contactpersonen voor schulden van andere verenigingen') }}</h2>
-                <p>{{ $t('Als een andere vereniging schulden aan jouw vereniging heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.') }}</p>
+                <h2>{{ $t('6b39d554-a4a7-489c-84b5-3f430457dd50') }}</h2>
+                <p>{{ $t('0998a455-9ffc-4222-8432-ef7681908ad7') }}</p>
 
                 <MultipleChoiceInput v-model="selectedResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
             </div>

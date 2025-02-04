@@ -47,7 +47,7 @@
                 <DateSelection v-model="dueAt" :required="false" placeholder="Onmiddelijk" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('*Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.') }}
+                {{ $t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575') }}
             </p>
         </template>
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />

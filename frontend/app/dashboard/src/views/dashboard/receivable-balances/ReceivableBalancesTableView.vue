@@ -174,7 +174,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const memberOptions: RecipientChooseOneOption = {
         type: 'ChooseOne',
-        name: $t('Schulden van accounts'),
+        name: $t('b05b58d8-09b6-4e4a-9786-a4777f8e1ac4'),
         options: [
             {
                 id: 'accounts',
@@ -194,7 +194,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const organizationOption: RecipientMultipleChoiceOption = {
         type: 'MultipleChoice',
-        name: $t('Schulden van verenigingen'),
+        name: $t('3c584bf6-7e0a-4348-a5e9-2bc0bcb00bde'),
         options: [],
         defaultSelection: organization.value?.privateMeta?.balanceNotificationSettings.getOrganizationContactsFilterResponsibilityIds() ?? [],
         build: (selectedIds: string[]) => {
