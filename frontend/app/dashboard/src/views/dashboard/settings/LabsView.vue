@@ -121,6 +121,10 @@
                 Webshop auth
             </Checkbox>
 
+            <Checkbox :model-value="getFeatureFlag('organization-receivable-balances')" @update:model-value="setFeatureFlag('organization-receivable-balances', !!$event)">
+                Openstaande bedragen tussen verenigingen
+            </Checkbox>
+
             <hr>
 
             <button class="button text" type="button" @click="applyDiscountCode">

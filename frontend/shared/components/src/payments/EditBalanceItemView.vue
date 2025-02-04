@@ -70,6 +70,9 @@
                     <h3 class="style-title-list">
                         {{ m.patchedMember.name }}
                     </h3>
+                    <p class="style-description-small" v-if="!memberId">
+                        Lid
+                    </p>
                 </STListItem>
 
                 <STListItem v-if="user" :selectable="true" element-name="label">
@@ -81,7 +84,7 @@
                         {{ user.name }} ({{ user.email }})
                     </h3>
                     <p class="style-description-small">
-                        Enkel koppelen aan account, niet aan lid
+                        Account
                     </p>
                 </STListItem>
             </STList>

@@ -2,6 +2,8 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDe
 
 import { Premise } from './addresses/Premise.js';
 import { DNSRecord } from './DNSRecord.js';
+import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
+import { FilterWrapperMarker, unwrapFilter } from './filters/StamhoofdFilter.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
@@ -118,6 +120,27 @@ export class BalanceNotificationSettings extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder, version: 355 })
     minimumDaysBetween = 5;
+
+    /**
+     * Which contacts to use for balances from other organizations
+     */
+    @field({ decoder: StamhoofdFilterDecoder, ...NextVersion, nullable: true })
+    organizationContactsFilter = {};
+
+    getOrganizationContactsFilterResponsibilityIds(): string[] {
+        const f = this.organizationContactsFilter ?? {};
+        const unwrapped = unwrapFilter(f, {
+            meta: {
+                responsibilityIds: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        });
+        if (Array.isArray(unwrapped.markerValue) && unwrapped.markerValue.length && unwrapped.markerValue.every(v => typeof v === 'string')) {
+            return unwrapped.markerValue;
+        }
+        return [];
+    }
 }
 
 export class OrganizationPrivateMetaData extends AutoEncoder {

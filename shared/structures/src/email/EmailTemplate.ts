@@ -368,8 +368,12 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.TicketsConfirmationTransfer: return true;
             case EmailTemplateType.TicketsConfirmationPOS: return true;
             case EmailTemplateType.TicketsReceivedTransfer: return true;
+
             case EmailTemplateType.UserBalanceIncreaseNotification: return true;
             case EmailTemplateType.UserBalanceReminder: return true;
+
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return true;
+            case EmailTemplateType.OrganizationBalanceReminder: return true;
         }
 
         return false;

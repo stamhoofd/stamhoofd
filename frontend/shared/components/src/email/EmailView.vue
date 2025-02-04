@@ -128,6 +128,7 @@ export type RecipientChooseOneOption = {
         name: string;
         value: EmailRecipientSubfilter[];
     }[];
+    defaultSelection?: string;
 };
 
 export type RecipientMultipleChoiceOption = {
@@ -137,6 +138,7 @@ export type RecipientMultipleChoiceOption = {
         name: string;
         id: string;
     }[];
+    defaultSelection?: string[];
     build: (selectedIds: string[]) => EmailRecipientSubfilter[];
 };
 
@@ -173,7 +175,15 @@ const email = ref(null) as Ref<EmailPreview | null>;
 const context = useContext();
 const owner = useRequestOwner();
 
-const selectedRecipientOptions = ref(props.recipientFilterOptions.map(o => [o.options[0].id]));
+const selectedRecipientOptions = ref(props.recipientFilterOptions.map((o) => {
+    if (o.defaultSelection) {
+        if (o.type === 'ChooseOne') {
+            return [o.defaultSelection];
+        }
+        return o.defaultSelection;
+    }
+    return [o.options[0].id];
+}));
 
 const groupByEmail = ref(false);
 const editorView = ref(null) as Ref<typeof EditorView | null>;

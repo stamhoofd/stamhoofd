@@ -136,6 +136,15 @@ export class ContextInstance {
         }
     }
 
+    async checkFeatureFlag(flag: string): Promise<boolean> {
+        const platform = await Platform.getSharedStruct();
+        if (platform.config.featureFlags.includes(flag)) {
+            return true;
+        }
+        const organization = this.organization;
+        return organization?.privateMeta?.featureFlags.includes(flag) ?? false;
+    }
+
     /**
      * Require organization scope if userMode is not platform
      */

@@ -163,4 +163,6 @@ export default {
     'emailVerified': 'e-mailadres geverifieerd',
     'linkedMember': 'gekoppeld lid',
     'permissions.organizationPermissions': 'groepsrechten',
+    'balanceNotificationSettings': 'betaalherinneringen',
+    'balanceNotificationSettings.organizationContactsFilter.meta.responsibilityIds.$in': 'Betaalherinnering naar verenigingen: functies',
 };

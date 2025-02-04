@@ -1,3 +1,4 @@
+import { useFeatureFlag } from '@stamhoofd/components';
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
@@ -9,12 +10,14 @@ import { Formatter } from '@stamhoofd/utility';
  */
 export function useSelectableWorkbook() {
     const $t = useTranslate();
+    const $feature = useFeatureFlag();
+
     return {
-        getSelectableWorkbook: () => getSelectableWorkbook($t),
+        getSelectableWorkbook: () => getSelectableWorkbook($t, $feature),
     };
 }
 
-export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>) {
+export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feature: ReturnType<typeof useFeatureFlag>) {
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
@@ -22,7 +25,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>) {
                 name: 'Te ontvangen bedragen',
                 description: 'Dit werkblad bevat één rij per te ontvangen bedrag, maar een te ontvangen bedrag zelf kan wel voor meerdere items zijn. Voor meer detailinformatie heb je het tabblad Betaallijnen nodig.',
                 columns: [
-                    ...getGeneralColumns($t),
+                    ...getGeneralColumns($t, $feature),
                     new SelectableColumn({
                         id: 'amountOpen',
                         name: 'Openstaand bedrag',
@@ -44,7 +47,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>) {
                         description: 'Unieke identificatie van de lijn',
                     }),
 
-                    ...getGeneralColumns($t, { category: 'Schuldenaar (herhaling)' }).map((c) => {
+                    ...getGeneralColumns($t, $feature, { category: 'Schuldenaar (herhaling)' }).map((c) => {
                         c.id = `receivableBalance.${c.id}`;
                         return c;
                     }),
@@ -122,7 +125,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>) {
     });
 }
 
-function getGeneralColumns($t: ReturnType<typeof useTranslate>, options?: { category?: string | null }) {
+function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: ReturnType<typeof useFeatureFlag>, options?: { category?: string | null }) {
     {
         return [
             new SelectableColumn({
@@ -135,11 +138,15 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, options?: { cate
                 name: 'Schuldenaar',
                 ...options,
             }),
-            new SelectableColumn({
-                id: 'uri',
-                name: $t('cd798189-d5c8-4b79-98f7-a68786ab288c'),
-                ...options,
-            }),
+            ...($feature('organization-receivable-balances')
+                ? [
+                        new SelectableColumn({
+                            id: 'uri',
+                            name: $t('cd798189-d5c8-4b79-98f7-a68786ab288c'),
+                            ...options,
+                        }),
+                    ]
+                : []),
             new SelectableColumn({
                 id: 'objectType',
                 name: 'Type schuldenaar',

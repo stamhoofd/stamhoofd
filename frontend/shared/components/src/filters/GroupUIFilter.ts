@@ -1,10 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { StamhoofdFilter } from '@stamhoofd/structures';
+import { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 
-import GroupUIFilterView from './GroupUIFilterView.vue';
-import { StyledDescription, UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from './UIFilter';
-import { UnknownFilterBuilder } from './UnknownUIFilter';
 import { markRaw } from 'vue';
+import GroupUIFilterView from './GroupUIFilterView.vue';
+import { StyledDescription, UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder } from './UIFilter';
+import { UnknownFilterBuilder } from './UnknownUIFilter';
 
 export enum GroupUIFilterMode {
     Or = 'Or',

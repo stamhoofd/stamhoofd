@@ -405,6 +405,12 @@ defineRoutes([
                         return false;
                     }
 
+                    // Do not show balance reminder email templates for organizations if disabled
+                    if (!$organizationManager.value.organization.privateMeta?.featureFlags.includes('organization-receivable-balances')
+                        && [EmailTemplateType.OrganizationBalanceIncreaseNotification, EmailTemplateType.OrganizationBalanceReminder].includes(t)) {
+                        return false;
+                    }
+
                     return EmailTemplate.allowOrganizationLevel(t);
                 }),
             };

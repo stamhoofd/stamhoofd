@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, EmailView, GlobalEventBus, ModernTableView, ReceivableBalanceView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, cachedOutstandingBalanceUIFilterBuilders, Column, ComponentExposed, EmailView, GlobalEventBus, ModernTableView, ReceivableBalanceView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, useFeatureFlag, useOrganization, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
@@ -36,6 +36,8 @@ const $t = useTranslate();
 const present = usePresent();
 const owner = useRequestOwner();
 const platform = usePlatform();
+const $feature = useFeatureFlag();
+const organization = useOrganization();
 const props = withDefaults(
     defineProps<{
         objectType?: ReceivableBalanceType | null;
@@ -59,7 +61,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
     if (!props.objectType) {
         return {
             objectType: {
-                $in: [ReceivableBalanceType.user, ReceivableBalanceType.organization],
+                $in: $feature('organization-receivable-balances') ? [ReceivableBalanceType.user, ReceivableBalanceType.organization] : [ReceivableBalanceType.user],
             },
             $or: {
                 amountOpen: { $neq: 0 },
@@ -86,16 +88,20 @@ const objectFetcher = useReceivableBalancesObjectFetcher({
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
-    new Column<ObjectType, string | null>({
-        id: 'uri',
-        name: '#',
-        getValue: object => object.object.uri,
-        format: value => value || 'Geen',
-        getStyle: value => !value ? 'gray' : '',
-        minimumWidth: 100,
-        recommendedWidth: 200,
-        allowSorting: false,
-    }),
+    ...($feature('organization-receivable-balances')
+        ? [
+                new Column<ObjectType, string | null>({
+                    id: 'uri',
+                    name: '#',
+                    getValue: object => object.object.uri,
+                    format: value => value || 'Geen',
+                    getStyle: value => !value ? 'gray' : '',
+                    minimumWidth: 100,
+                    recommendedWidth: 200,
+                    allowSorting: false,
+                }),
+            ]
+        : []),
 
     new Column<ObjectType, string>({
         id: 'name',
@@ -168,7 +174,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const memberOptions: RecipientChooseOneOption = {
         type: 'ChooseOne',
-        name: $t('Schuden van accounts'),
+        name: $t('Schulden van accounts'),
         options: [
             {
                 id: 'accounts',
@@ -183,11 +189,6 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
                     }),
                 ],
             },
-            {
-                id: 'no-accounts',
-                name: 'Geen accounts',
-                value: [],
-            },
         ],
     };
 
@@ -195,6 +196,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
         type: 'MultipleChoice',
         name: $t('Schulden van verenigingen'),
         options: [],
+        defaultSelection: organization.value?.privateMeta?.balanceNotificationSettings.getOrganizationContactsFilterResponsibilityIds() ?? [],
         build: (selectedIds: string[]) => {
             if (selectedIds.length === 0) {
                 return [];
@@ -235,7 +237,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const displayedComponent = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(EmailView, {
-            recipientFilterOptions: [memberOptions, organizationOption],
+            recipientFilterOptions: $feature('organization-receivable-balances') ? [memberOptions, organizationOption] : [memberOptions],
         }),
     });
     await present({

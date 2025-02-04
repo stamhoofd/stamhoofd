@@ -1,6 +1,6 @@
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
+import { FilterWrapperMarker, unwrapFilter, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, getAuditLogTypeName, LoadedPermissions, MemberResponsibility, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, SetupStepType, StamhoofdCompareValue, StamhoofdFilter, User, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -12,7 +12,7 @@ import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
-import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from './UIFilter';
+import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
@@ -22,7 +22,7 @@ export const paymentsUIFilterBuilders: UIFilterBuilders = [
         }),
         wrapper: {
             method: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     }),
@@ -34,7 +34,7 @@ export const paymentsUIFilterBuilders: UIFilterBuilders = [
         }),
         wrapper: {
             status: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     }),
@@ -66,7 +66,7 @@ export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [
         ],
         wrapper: {
             gender: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     }),
@@ -118,7 +118,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                     name: $t('2f2899e5-4c62-4452-97d2-97f4fd670e86'),
                     key: 'organizationId',
                     allowCreation: false,
-                    wrapper: UIFilterWrapperMarker,
+                    wrapper: FilterWrapperMarker,
                 }),
             );
 
@@ -130,11 +130,11 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                     }),
                     allowCreation: hasPlatformPermissions,
                     wrapper: {
-                        periodId: { $in: UIFilterWrapperMarker },
+                        periodId: { $in: FilterWrapperMarker },
                     },
                     additionalUnwrappers: [
                         {
-                            periodId: UIFilterWrapperMarker,
+                            periodId: FilterWrapperMarker,
                         },
                     ],
                 }),
@@ -146,7 +146,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                     key: 'uri',
                     allowCreation: hasPlatformPermissions,
                     wrapper: {
-                        organization: UIFilterWrapperMarker,
+                        organization: FilterWrapperMarker,
                     },
                 }),
             );
@@ -164,7 +164,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                     wrapper: {
                         organization: {
                             tags: {
-                                $in: UIFilterWrapperMarker,
+                                $in: FilterWrapperMarker,
                             },
                         },
                     },
@@ -180,7 +180,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                     wrapper: {
                         group: {
                             defaultAgeGroupId: {
-                                $in: UIFilterWrapperMarker,
+                                $in: FilterWrapperMarker,
                             },
                         },
                     },
@@ -192,7 +192,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                     name: $t('446b88a9-50f5-4c2b-a9e8-742f12034863'),
                     key: 'name',
                     wrapper: {
-                        group: UIFilterWrapperMarker,
+                        group: FilterWrapperMarker,
                     },
                 }),
             );
@@ -255,7 +255,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                             responsibilities: {
                                 $elemMatch: {
                                     responsibilityId: {
-                                        $in: UIFilterWrapperMarker,
+                                        $in: FilterWrapperMarker,
                                     },
                                     endDate: null,
                                 },
@@ -282,7 +282,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                                         endDate: null,
                                         group: {
                                             defaultAgeGroupId: {
-                                                $in: UIFilterWrapperMarker,
+                                                $in: FilterWrapperMarker,
                                             },
                                         },
                                     },
@@ -513,7 +513,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                         platformMemberships: {
                             $elemMatch: {
                                 membershipTypeId: {
-                                    $in: UIFilterWrapperMarker,
+                                    $in: FilterWrapperMarker,
                                 },
                                 startDate: {
                                     $lte: { $: '$now' },
@@ -544,10 +544,10 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     wrapper: {
                         $or: [
                             {
-                                'details.parents[0]': UIFilterWrapperMarker,
+                                'details.parents[0]': FilterWrapperMarker,
                             },
                             {
-                                'details.parents[1]': UIFilterWrapperMarker,
+                                'details.parents[1]': FilterWrapperMarker,
                             },
                         ],
                     },
@@ -589,10 +589,10 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     wrapper: {
                         $or: [
                             {
-                                'details.address': UIFilterWrapperMarker,
+                                'details.address': FilterWrapperMarker,
                             },
                             {
-                                'details.parents[*].address': UIFilterWrapperMarker,
+                                'details.parents[*].address': FilterWrapperMarker,
                             },
                         ],
                     },
@@ -606,10 +606,10 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     wrapper: {
                         $or: [
                             {
-                                'details.address': UIFilterWrapperMarker,
+                                'details.address': FilterWrapperMarker,
                             },
                             {
-                                'details.parents[*].address': UIFilterWrapperMarker,
+                                'details.parents[*].address': FilterWrapperMarker,
                             },
                         ],
                     },
@@ -623,10 +623,10 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     wrapper: {
                         $or: [
                             {
-                                'details.address': UIFilterWrapperMarker,
+                                'details.address': FilterWrapperMarker,
                             },
                             {
-                                'details.parents[*].address': UIFilterWrapperMarker,
+                                'details.parents[*].address': FilterWrapperMarker,
                             },
                         ],
                     },
@@ -640,10 +640,10 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                     wrapper: {
                         $or: [
                             {
-                                'details.address': UIFilterWrapperMarker,
+                                'details.address': FilterWrapperMarker,
                             },
                             {
-                                'details.parents[*].address': UIFilterWrapperMarker,
+                                'details.parents[*].address': FilterWrapperMarker,
                             },
                         ],
                     },
@@ -661,7 +661,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                         ],
                         wrapper: {
                             'details.requiresFinancialSupport': {
-                                $in: UIFilterWrapperMarker,
+                                $in: FilterWrapperMarker,
                             },
                         },
                     }),
@@ -677,7 +677,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                         registrations: {
                             $elemMatch: {
                                 $and: [
-                                    UIFilterWrapperMarker,
+                                    FilterWrapperMarker,
                                     {
                                         periodId: platform.period.id,
                                     },
@@ -696,7 +696,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                         builders: registrationFilters.value,
                         wrapper: {
                             registrations: {
-                                $elemMatch: UIFilterWrapperMarker,
+                                $elemMatch: FilterWrapperMarker,
                             },
                         },
                     }),
@@ -717,7 +717,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                         }),
                         wrapper: {
                             responsibilityId: {
-                                $in: UIFilterWrapperMarker,
+                                $in: FilterWrapperMarker,
                             },
                         },
                     }),
@@ -738,7 +738,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                                 responsibilityId: responsibility.id,
                                 group: {
                                     defaultAgeGroupId: {
-                                        $in: UIFilterWrapperMarker,
+                                        $in: FilterWrapperMarker,
                                     },
                                 },
                             },
@@ -773,7 +773,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
                         builders: responsibilitiesFilters,
                         wrapper: {
                             responsibilities: {
-                                $elemMatch: UIFilterWrapperMarker,
+                                $elemMatch: FilterWrapperMarker,
                             },
                         },
                     }),
@@ -829,7 +829,7 @@ export const cachedOutstandingBalanceUIFilterBuilders: UIFilterBuilders = [
         ],
         wrapper: {
             objectType: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     }), */
@@ -906,7 +906,7 @@ export function useGetOrganizationUIFilterBuilders() {
                 builders: organizationMemberUIFilterBuilders,
                 wrapper: {
                     members: {
-                        $elemMatch: UIFilterWrapperMarker,
+                        $elemMatch: FilterWrapperMarker,
                     },
                 },
             }),
@@ -918,7 +918,7 @@ export function useGetOrganizationUIFilterBuilders() {
                 ],
                 wrapper: {
                     active: {
-                        $in: UIFilterWrapperMarker,
+                        $in: FilterWrapperMarker,
                     },
                 },
             })];
@@ -935,7 +935,7 @@ export function useGetOrganizationUIFilterBuilders() {
                     }),
                     wrapper: {
                         tags: {
-                            $in: UIFilterWrapperMarker,
+                            $in: FilterWrapperMarker,
                         },
                     },
                 }),
@@ -1054,7 +1054,7 @@ export function getOrganizationUIFilterBuildersForTags(platform: Platform) {
         options: platform.config.tags.map(tag => new MultipleChoiceUIFilterOption(tag.name, tag.id)),
         wrapper: {
             tags: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     });
@@ -1088,7 +1088,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
         ],
         wrapper: {
             organizationId: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     });
@@ -1102,7 +1102,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
         ],
         wrapper: {
             organizationTagIds: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     });
@@ -1119,7 +1119,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
         ],
         wrapper: {
             defaultAgeGroupIds: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     });
@@ -1137,7 +1137,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
             ],
             wrapper: {
                 groupIds: {
-                    $in: UIFilterWrapperMarker,
+                    $in: FilterWrapperMarker,
                 },
             },
         });
@@ -1152,7 +1152,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
             ],
             wrapper: {
                 typeId: {
-                    $in: UIFilterWrapperMarker,
+                    $in: FilterWrapperMarker,
                 },
             },
         });
@@ -1180,7 +1180,7 @@ export function useAuditLogUIFilterBuilders() {
         ],
         wrapper: {
             type: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     });
@@ -1211,7 +1211,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
                 }),
             wrapper: {
                 status: {
-                    $in: UIFilterWrapperMarker,
+                    $in: FilterWrapperMarker,
                 },
             },
         }),
@@ -1239,7 +1239,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
         }),
         wrapper: {
             paymentMethod: {
-                $in: UIFilterWrapperMarker,
+                $in: FilterWrapperMarker,
             },
         },
     }));
@@ -1254,7 +1254,7 @@ export function getWebshopOrderUIFilterBuilders(preview: WebshopPreview) {
             }),
             wrapper: {
                 checkoutMethod: {
-                    $in: UIFilterWrapperMarker,
+                    $in: FilterWrapperMarker,
                 },
             },
         }));
@@ -1339,7 +1339,7 @@ export function getDocumentsUIFilterBuilders() {
             }),
             wrapper: {
                 status: {
-                    $in: UIFilterWrapperMarker,
+                    $in: FilterWrapperMarker,
                 },
             },
         }),
@@ -1362,7 +1362,7 @@ export function getEventNotificationUIFilterBuilders(platform: Platform) {
         wrapper: {
             event: {
                 organizationTagIds: {
-                    $in: UIFilterWrapperMarker,
+                    $in: FilterWrapperMarker,
                 },
             },
         },
@@ -1379,7 +1379,7 @@ export function getEventNotificationUIFilterBuilders(platform: Platform) {
         wrapper: {
             event: {
                 defaultAgeGroupIds: {
-                    $in: UIFilterWrapperMarker,
+                    $in: FilterWrapperMarker,
                 },
             },
         },
@@ -1394,7 +1394,7 @@ export function getEventNotificationUIFilterBuilders(platform: Platform) {
         wrapper: {
             event: {
                 typeId: {
-                    $in: UIFilterWrapperMarker,
+                    $in: FilterWrapperMarker,
                 },
             },
         },

@@ -4,7 +4,7 @@
             {{ $t('ac0594f0-af79-465b-84d5-568da90af8b6') }}
         </h1>
 
-        <p>Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na een bepaalde periode nog steeds open staat, ontvangen ze ook telkens een herinneringsemail. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.</p>
+        <p>{{ $t('Je kan leden automatisch een e-mail sturen als hun openstaand bedrag stijgt. Dit gebeurt altijd in de ochtend, dus leden krijgen maximaal één e-mail per dag. Als het bedrag na een bepaalde periode nog steeds open staat, ontvangen ze ook telkens een herinneringsemail. Je kan de inhoud van de e-mails wijzigen via de instellingen voor e-mailsjablonen.') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -19,78 +19,88 @@
                 </h3>
 
                 <p class="style-description-small">
-                    Schakel dit in om leden automatisch te verwittigen als hun openstaand bedrag stijgt.
+                    {{ $feature('organization-receivable-balances') ? $t('Schakel dit in om leden en verenigingen automatisch te verwittigen als hun openstaand bedrag stijgt.') : $t('Schakel dit in om leden automatisch te verwittigen als hun openstaand bedrag stijgt.') }}
                 </p>
             </STListItem>
         </STList>
 
-        <div v-if="enabled && (patched.privateMeta?.emails ?? []).length" class="container">
-            <hr>
-            <h2>E-mailadres</h2>
-            <p>Kies een e-mailadres vanwaar je de e-mails wilt versturen. Je kan extra e-mailadressen toevoegen via de instellingen van e-mailadressen.</p>
+        <template v-if="enabled">
+            <div v-if="(patched.privateMeta?.emails ?? []).length" class="container">
+                <hr>
+                <h2>E-mailadres</h2>
+                <p>Kies een e-mailadres vanwaar je de e-mails wilt versturen. Je kan extra e-mailadressen toevoegen via de instellingen van e-mailadressen.</p>
 
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="emailId" :value="null" />
-                    </template>
+                <STList>
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="emailId" :value="null" />
+                        </template>
 
-                    <h3 class="style-title-list">
-                        Standaard e-mailadres
-                    </h3>
-                </STListItem>
-                <STListItem v-for="email in patched.privateMeta?.emails ?? []" :key="email.id" :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="emailId" :value="email.id" />
-                    </template>
+                        <h3 class="style-title-list">
+                            Standaard e-mailadres
+                        </h3>
+                    </STListItem>
+                    <STListItem v-for="email in patched.privateMeta?.emails ?? []" :key="email.id" :selectable="true" element-name="label">
+                        <template #left>
+                            <Radio v-model="emailId" :value="email.id" />
+                        </template>
 
-                    <h3 class="style-title-list">
-                        {{ email.email }}
-                    </h3>
+                        <h3 class="style-title-list">
+                            {{ email.email }}
+                        </h3>
 
-                    <p class="style-description-small">
-                        {{ email.name }}
-                    </p>
-                </STListItem>
-            </STList>
-        </div>
+                        <p class="style-description-small">
+                            {{ email.name }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </div>
 
-        <div v-if="enabled" class="container">
-            <hr>
-            <h2>Geavanceerd</h2>
-            <p>Kies hoeveel dagen er minimaal tussen elke e-mail moet zitten, en hoeveel e-mails je maximaal wilt versturen ter herinnering voor een openstaand bedrag. E-mails die je zelf verstuurt tellen niet mee.</p>
+            <div class="container">
+                <hr>
+                <h2>Geavanceerd</h2>
+                <p>{{ $t('Kies hoeveel dagen er minimaal tussen elke e-mail moet zitten, en hoeveel e-mails je maximaal wilt versturen ter herinnering voor een openstaand bedrag. E-mails die je zelf verstuurt tellen niet mee.') }}</p>
 
-            <STInputBox title="Minimum dagen tussen herinneringmails" error-fields="price" :error-box="errors.errorBox">
-                <NumberInput
-                    v-model="minimumDaysBetween" placeholder=""
-                    suffix="dagen"
-                    suffix-singular="dag"
-                    :min="1"
-                    :stepper="true"
-                />
-            </STInputBox>
+                <STInputBox title="Minimum dagen tussen herinneringmails" error-fields="price" :error-box="errors.errorBox">
+                    <NumberInput
+                        v-model="minimumDaysBetween" placeholder=""
+                        suffix="dagen"
+                        suffix-singular="dag"
+                        :min="1"
+                        :stepper="true"
+                    />
+                </STInputBox>
 
-            <STInputBox title="Maximum e-mails" error-fields="price" :error-box="errors.errorBox">
-                <NumberInput
-                    v-model="maximumReminderEmails" placeholder=""
-                    suffix="e-mails"
-                    suffix-singular="e-mail"
-                    :min="1"
-                    :stepper="true"
-                />
-            </STInputBox>
-        </div>
+                <STInputBox title="Maximum e-mails" error-fields="price" :error-box="errors.errorBox">
+                    <NumberInput
+                        v-model="maximumReminderEmails" placeholder=""
+                        suffix="e-mails"
+                        suffix-singular="e-mail"
+                        :min="1"
+                        :stepper="true"
+                    />
+                </STInputBox>
+            </div>
+
+            <div v-if="$feature('organization-receivable-balances')" class="container">
+                <hr>
+                <h2>{{ $t('Contactpersonen voor schulden van andere verenigingen') }}</h2>
+                <p>{{ $t('Als een andere vereniging schulden aan jouw vereniging heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.') }}</p>
+
+                <MultipleChoiceInput v-model="selectedResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
+            </div>
+        </template>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { NumberInput, CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, useErrors, usePatch } from '@stamhoofd/components';
-import { BalanceNotificationSettings, OrganizationPrivateMetaData } from '@stamhoofd/structures';
+import { CenteredMessage, Checkbox, ErrorBox, MultipleChoiceInput, NumberInput, SaveView, STErrorsDefault, STList, STListItem, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { BalanceNotificationSettings, FilterWrapperMarker, OrganizationPrivateMetaData, unwrapFilter } from '@stamhoofd/structures';
 
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { computed, ref } from 'vue';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 
 const organizationManager = useOrganizationManager();
 
@@ -100,6 +110,41 @@ const errors = useErrors();
 const $t = useTranslate();
 const owner = useRequestOwner();
 const pop = usePop();
+const platform = usePlatform();
+const responsibilities = computed(() => {
+    return platform.value.config.responsibilities.filter(r => r.organizationBased);
+});
+const selectedResponsibilityIds = computed({
+    get: () => {
+        const f = patched.value.privateMeta?.balanceNotificationSettings?.organizationContactsFilter ?? {};
+        const unwrapped = unwrapFilter(f, {
+            meta: {
+                responsibilityIds: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        });
+        if (Array.isArray(unwrapped.markerValue) && unwrapped.markerValue.length && unwrapped.markerValue.every(v => typeof v === 'string')) {
+            return unwrapped.markerValue;
+        }
+        return [];
+    },
+    set(values: string[]) {
+        addPatch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                balanceNotificationSettings: BalanceNotificationSettings.patch({
+                    organizationContactsFilter: {
+                        meta: {
+                            responsibilityIds: {
+                                $in: values,
+                            },
+                        },
+                    },
+                }),
+            }),
+        });
+    },
+});
 
 const enabled = computed({
     get: () => patched.value.privateMeta?.balanceNotificationSettings?.enabled ?? false,
