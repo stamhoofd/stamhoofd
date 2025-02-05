@@ -538,11 +538,11 @@ export class ReservedSeat extends AutoEncoder {
 
     getNameString(webshop: Webshop|WebshopPreview, product: Product) {
         if (!product.seatingPlanId) {
-            return []
+            return ''
         }
         const seatingPlan = webshop.meta.seatingPlans.find(p => p.id === product.seatingPlanId)
         if (!seatingPlan) {
-            return []
+            return ''
         }
 
         const section = seatingPlan.sections.find(s => s.id === this.section)
@@ -564,8 +564,43 @@ export class ReservedSeat extends AutoEncoder {
         return this.getName(webshop, product).map(p => p.title+': '+p.value).join(', ')
     }
 
+    getShortName(product: Product) {
+        if (!product.seatingPlanId) {
+            return ''
+        }
+
+        if (isNumeric(this.row) !== isNumeric(this.seat)) {
+            // Clean string
+            return this.row + this.seat
+        }
+
+        return 'R'+this.row+'Z'+this.seat
+    }
+
     equals(reservedSeat: ReservedSeat) {
         return this.section === reservedSeat.section && this.row === reservedSeat.row && this.seat === reservedSeat.seat
+    }
+
+    static sort(a: ReservedSeat, b: ReservedSeat) {
+        if (a.section < b.section) {
+            return -1
+        }
+        if (a.section > b.section) {
+            return 1
+        }
+        if (a.row.padStart(10, '0') < b.row.padStart(10, '0')) {
+            return -1
+        }
+        if (a.row.padStart(10, '0') > b.row.padStart(10, '0')) {
+            return 1
+        }
+        if (a.seat.padStart(10, '0') < b.seat.padStart(10, '0')) {
+            return -1
+        }
+        if (a.seat.padStart(10, '0') > b.seat.padStart(10, '0')) {
+            return 1
+        }
+        return 0
     }
 }
 

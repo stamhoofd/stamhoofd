@@ -274,7 +274,7 @@ export class OrderActionBuilder {
         }
         const d = await import(/* webpackChunkName: "OrdersExcelExport" */ "../../../../classes/OrdersExcelExport");
         const OrdersExcelExport = d.OrdersExcelExport
-        OrdersExcelExport.export(orders);
+        OrdersExcelExport.export(this.webshopManager.preview, orders);
     }
 
     async markAs(orders: PrivateOrder[], status: OrderStatus) {
