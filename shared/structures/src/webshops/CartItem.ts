@@ -3,7 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { CartReservedSeat } from '../SeatingPlan.js';
+import { CartReservedSeat, ReservedSeat } from '../SeatingPlan.js';
 import { Cart } from './Cart.js';
 import { CartStockHelper, StockDefinition } from './CartStockHelper.js';
 import { ProductDiscountSettings } from './Discount.js';
@@ -480,6 +480,13 @@ export class CartItem extends AutoEncoder {
 
         if ((this.product.type === ProductType.Ticket || this.product.type === ProductType.Voucher) && this.product.dateRange) {
             descriptions.unshift(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()));
+        }
+
+        if (this.seats.length) {
+            descriptions.push(
+                (this.seats.length === 1 ? 'Plaats' : 'Plaatsen') + ': '
+                + this.seats.slice().sort(ReservedSeat.sort).map(s => s.getShortName(this.product)).join(', '),
+            );
         }
         return descriptions.filter(d => !!d).join('\n');
     }

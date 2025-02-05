@@ -72,6 +72,12 @@ export class ExcelHelper {
             else if (column.toLowerCase().includes('uitbetaling')) {
                 ws['!cols'].push({ width: 25 });
             }
+            else if (column.toLowerCase().includes('plaatsen')) {
+                ws['!cols'].push({ width: 40 });
+            }
+            else if (column.toLowerCase().includes('betaalmethode')) {
+                ws['!cols'].push({ width: 40 });
+            }
             else {
                 ws['!cols'].push({ width: options?.defaultColumnWidth ?? 13 });
             }

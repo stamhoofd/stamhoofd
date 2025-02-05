@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivateOrder, ProductType } from '@stamhoofd/structures';
+import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivateOrder, ProductType, ReservedSeat, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 
@@ -23,7 +23,7 @@ export class OrdersExcelExport {
     /**
      * List of all products for every order
      */
-    static createOrderLines(orders: PrivateOrder[]): XLSX.WorkSheet {
+    static createOrderLines(webshop: WebshopPreview, orders: PrivateOrder[]): XLSX.WorkSheet {
         /// Should we repeat all the duplicate fields for multiple lines in an order?
         const repeat = true;
 
@@ -116,6 +116,7 @@ export class OrdersExcelExport {
                 'Prijs',
                 'Artikel',
                 ...optionNames,
+                'Plaatsen',
 
                 // Duplicates
                 'Afhaalmethode',
@@ -255,6 +256,7 @@ export class OrdersExcelExport {
                     },
                     item.product.name,
                     ...options,
+                    item.seats.slice().sort(ReservedSeat.sort).map(s => s.getNameString(webshop, item.product)).join(', '),
                     checkoutType,
                     address,
                     order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : '/',
@@ -560,13 +562,13 @@ export class OrdersExcelExport {
         });
     }
 
-    static export(orders: PrivateOrder[]) {
+    static export(webshop: WebshopPreview, orders: PrivateOrder[]) {
         const wb = XLSX.utils.book_new();
 
         const shouldIncludeSettements = false;
 
         /* Add the worksheet to the workbook */
-        XLSX.utils.book_append_sheet(wb, this.createOrderLines(orders), 'Artikel per lijn');
+        XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), 'Artikel per lijn');
         XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), 'Bestelling per lijn');
         XLSX.utils.book_append_sheet(wb, this.createProducts(orders), 'Totalen');
 
