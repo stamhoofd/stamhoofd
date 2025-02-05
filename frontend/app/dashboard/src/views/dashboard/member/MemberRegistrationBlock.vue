@@ -26,6 +26,9 @@
         <p v-if="registration.waitingList && registration.canRegister" class="style-description-small">
             Toegelaten om in te schrijven
         </p>
+        <p v-if="!registration.waitingList" class="style-description-small">
+            Prijs: {{ registration.price ? formatPrice(registration.price) : 'Gratis' }}
+        </p>
 
         <span v-if="isEditable" slot="right" class="icon arrow-down-small gray" />
     </STListItem>
@@ -48,12 +51,12 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
         LongPress: LongPressDirective
     },
     filters: {
-        dateTime: Formatter.dateTime.bind(Formatter)
+        dateTime: Formatter.date.bind(Formatter)
     },
 })
 export default class MemberRegistrationBlock extends Mixins(NavigationMixin) {
     @Prop()
-    registration!: Registration;
+        registration!: Registration;
 
     getGroup(groupId: string) {
         return OrganizationManager.organization.groups.find(g => g.id === groupId)
@@ -61,6 +64,10 @@ export default class MemberRegistrationBlock extends Mixins(NavigationMixin) {
 
     get isEditable() {
         return this.$listeners.edit !== undefined
+    }
+
+    formatPrice(price: number) {
+        return Formatter.price(price)
     }
 
     editRegistration(event) {
